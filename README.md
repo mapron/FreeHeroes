@@ -14,7 +14,7 @@ FreeHeroes is an executable file, which could run without original Heroes III da
 To read more about project goals; "why not contributing to VCMI"; road map; "how you interact with HotA" - [read this article](docs/en/ProjectGoals.md)
 
 # How to run
-1. download 7z archive
+1. download 7z archive  from releases page: https://github.com/mapron/FreeHeroes/releases  (take last available FreeHeroes_Win64_*.7z  file )
 2. extract it ([7 zip extractor is required](https://www.7-zip.org/))
 3. run LegacyConverter.exe, press "convert!" button
 4. after conversion is finished, you could start BattleEmulator and press "start battle" button.  
@@ -25,6 +25,13 @@ For more documentation how to use battle emulation, [read this article](docs/en/
 ![Battle emulator main window](docs/en/images/battle_emulator.png "Battle emulator main window")
 ![Hero dialog](docs/en/images/hero_dialog.png "Hero dialog")
 ![Battle progress](docs/en/images/battle_widget.png "Battle in progress")
+
+# If something goes wrong
+... you are useng pre-alpha version! Jokes away, you can create and issue here https://github.com/mapron/FreeHeroes/issues  
+It is important not only to describe the problem, but also attach logs and replay if available.  
+Logs are stored at %USER%\AppData\Local\FreeHeroes\Logs  (for example, C:\Users\mapron\AppData\Local\FreeHeroes\Logs for me) on Windows.  
+Replays in adjacent folder, %USER%\AppData\Local\FreeHeroes\Replays.  
+Attaching a replay file very handy when describing some battle logic bug (especially AI bug).  
 
 # How to build from the source
 Prerequisites:
