@@ -58,12 +58,21 @@ struct BattlePosition {
         return {pseudoX, y * decartMultiplier};
     }
 
-    // @todo: this is acual inaccurate. fix someday.
+
     constexpr int hexDistance(const BattlePosition & to) const noexcept {
-        const int yDistance = to.y > y ? to.y - y : y - to.y;
-        const int xDistance = to.x > x ? to.x - x : x - to.x;
-        const int yDistancePreference = (yDistance) / 2; // distance that allow to cut distance for x.
-        return yDistance  + xDistance - (xDistance > yDistancePreference ? yDistancePreference : 0);
+        const int x1 = x;
+        const int x2 = to.x;
+        const int y1 = y;
+        const int y2 = to.y;
+
+        const int  du = (y2 / 2 + x2) - (y1 / 2 + x1 );
+        const int  dv = y2 - y1;
+        const int adu = du < 0 ? -du : du;
+        const int adv = dv < 0 ? -dv : dv;
+
+         // if du and dv have the same sign: max(|du|, |dv|), by using the diagonals
+         // if du and dv have different signs: |du| + |dv|, because the diagonals are unproductive
+        return ((du >= 0 && dv >= 0) || (du < 0 && dv < 0)) ? std::max(adu, adv) : (adu + adv);
     }
 
     constexpr int decartDistanceSqr(const BattlePosition & to) const noexcept {

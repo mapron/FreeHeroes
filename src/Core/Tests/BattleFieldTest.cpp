@@ -132,6 +132,7 @@ TEST_F(PathFindTest, FloodFill)
     };
     ASSERT_EQ(result2, resultCheck2);
 }
+
 TEST_F(PathFindTest, ClosestPos)
 {
     /*
@@ -140,20 +141,17 @@ TEST_F(PathFindTest, ClosestPos)
        ___  ___  ___  3,2
      ___  ___  ___  3,3
     */
-    if (0)
-    {
-        std::set<BattlePosition> result = geometry.closestTo({1, 1}, std::set<BattlePosition>{
-             {0,1}, {2,1} , {3,2}, {3,3}
-        });
-        std::set<BattlePosition> resultCheck {
-            {0,1},  {2,1}
-        };
-        ASSERT_EQ(result, resultCheck);
-    }
+    std::set<BattlePosition> result = geometry.closestTo({1, 1}, std::set<BattlePosition>{
+         {0,1}, {2,1} , {3,2}, {3,3}
+    });
+    std::set<BattlePosition> resultCheck {
+        {0,1},  {2,1}
+    };
+    ASSERT_EQ(result, resultCheck);
 
-   // int hex1 = BattlePosition{1,2}.hexDistance(BattlePosition{3,1});
-    int hex2 = BattlePosition{1,2}.hexDistance(BattlePosition{3,2});
-   // ASSERT_EQ(hex1, 2);
+    const int hex1 = BattlePosition{1,2}.hexDistance(BattlePosition{3,1});
+    const int hex2 = BattlePosition{1,2}.hexDistance(BattlePosition{3,2});
+    ASSERT_EQ(hex1, 2);
     ASSERT_EQ(hex2, 2);
 
     int decart2 = BattlePosition{1,2}.decartDistanceSqr({3,2});
@@ -175,4 +173,43 @@ TEST_F(PathFindTest, ClosestPos)
         };
         ASSERT_EQ(result, resultCheck);
     }
+
 }
+using DistanceTestParams  = std::pair<BattlePosition, BattlePosition>;
+class DistanceTest : public PathFindTest,
+                public testing::WithParamInterface<DistanceTestParams> {
+
+};
+
+TEST_P(DistanceTest, EqualToFlood) {
+    BattlePosition from = GetParam().first;
+    BattlePosition to = GetParam().second;
+
+    finder.setObstacles({});
+    int hexDistance = from.hexDistance(to);
+    finder.floodFill(from);
+    int floodDistance = finder.distanceTo(to);
+
+    ASSERT_EQ(hexDistance, floodDistance);
+}
+
+const std::vector<DistanceTestParams> testParams = []() -> std::vector<DistanceTestParams> {
+    std::vector<DistanceTestParams> result;
+    int  d = 4;
+    for (int x1 = 0; x1 < d; ++x1) {
+        for (int y1 = 0; y1 < d; ++y1) {
+            for (int x2 = 0; x2 < d; ++x2) {
+                for (int y2 = 0; y2 < d; ++y2) {
+                    BattlePosition from{x1, y1};
+                    BattlePosition to  {x2, y2};
+                    result.push_back({from, to});
+                }
+            }
+        }
+    }
+    return  result;
+}();
+
+INSTANTIATE_TEST_SUITE_P(InstantiationName,
+                         DistanceTest,
+                         testing::ValuesIn(testParams));

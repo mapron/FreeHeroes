@@ -15,13 +15,13 @@ namespace FreeHeroes::Core {
 static_assert (BattlePosition{0,0}.hexDistance(BattlePosition{0,0}) == 0);
 static_assert (BattlePosition{0,0}.hexDistance(BattlePosition{1,0}) == 1);
 static_assert (BattlePosition{0,0}.hexDistance(BattlePosition{0,1}) == 1);
-static_assert (BattlePosition{0,0}.hexDistance(BattlePosition{1,1}) == 2);
-static_assert (BattlePosition{0,0}.hexDistance(BattlePosition{2,1}) == 3);
-static_assert (BattlePosition{2,1}.hexDistance(BattlePosition{0,0}) == 3);
+static_assert (BattlePosition{0,0}.hexDistance(BattlePosition{1,1}) == 1);
+static_assert (BattlePosition{0,0}.hexDistance(BattlePosition{2,1}) == 2);
+static_assert (BattlePosition{2,1}.hexDistance(BattlePosition{0,0}) == 2);
 static_assert (BattlePosition{0,0}.hexDistance(BattlePosition{2,2}) == 3);
 static_assert (BattlePosition{0,0}.hexDistance(BattlePosition{2,0}) == 2);
-static_assert (BattlePosition{0,0}.hexDistance(BattlePosition{4,3}) == 6);
-//static_assert (BattlePosition{1,2}.hexDistance(BattlePosition{3,1}) == 2);
+static_assert (BattlePosition{0,0}.hexDistance(BattlePosition{4,3}) == 5);
+static_assert (BattlePosition{1,2}.hexDistance(BattlePosition{3,1}) == 2);
 static_assert (BattlePosition{1,2}.hexDistance(BattlePosition{3,2}) == 2);
 
 
