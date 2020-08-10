@@ -1,5 +1,7 @@
+**Этот же документ - [версия на русском языке, идти сюда!](README_RU.md)**
+
 # FreeHeroes
-FreeHeroes is free engine for Heroes of Might and Magic 3, similar to [VCMI project](https://vcmi.eu).  
+FreeHeroes is free (both "as free beer" and "as free speech") engine for Heroes of Might and Magic 3, similar to [VCMI project](https://vcmi.eu).  
 Project goals are:  
 1. Develop a free engine which could provide HotA + HD Mod functionality
 2. Go even further and provide moder cybersport features: replays, observer mod, cheater-proof online server, etc
