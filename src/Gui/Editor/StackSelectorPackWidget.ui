@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>StackSelectorPackWidget</class>
+ <widget class="QWidget" name="StackSelectorPackWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>341</width>
+    <height>189</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string/>
+  </property>
+  <layout class="QFormLayout" name="formLayout">
+   <property name="formAlignment">
+    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+   </property>
+   <property name="verticalSpacing">
+    <number>3</number>
+   </property>
+   <item row="0" column="0">
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>Slot 1:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="FreeHeroes::Gui::StackSelectorWidget" name="stackEditor1" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>20</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="label_4">
+     <property name="text">
+      <string>Slot 2:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="FreeHeroes::Gui::StackSelectorWidget" name="stackEditor2" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>20</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="label_9">
+     <property name="text">
+      <string>Slot 3:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="FreeHeroes::Gui::StackSelectorWidget" name="stackEditor3" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>20</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QLabel" name="label_10">
+     <property name="text">
+      <string>Slot 4:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="FreeHeroes::Gui::StackSelectorWidget" name="stackEditor4" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>20</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QLabel" name="label_11">
+     <property name="text">
+      <string>Slot 5:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1">
+    <widget class="FreeHeroes::Gui::StackSelectorWidget" name="stackEditor5" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>20</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0">
+    <widget class="QLabel" name="label_12">
+     <property name="text">
+      <string>Slot 6:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1">
+    <widget class="FreeHeroes::Gui::StackSelectorWidget" name="stackEditor6" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>20</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0">
+    <widget class="QLabel" name="label_13">
+     <property name="text">
+      <string>Slot 7:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="1">
+    <widget class="FreeHeroes::Gui::StackSelectorWidget" name="stackEditor7" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>20</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>FreeHeroes::Gui::StackSelectorWidget</class>
+   <extends>QWidget</extends>
+   <header>StackSelectorWidget.hpp</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

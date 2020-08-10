@@ -1,0 +1,636 @@
+[{
+"scope": "spells",
+
+"records" : {
+
+    "sod.spell.shield" : {
+        "calc": [
+            "bonus =  15",
+            "if level >= 2 then bonus = 30 end",
+            "if isSpec then bonus = bonus + math.ceil(bonus * heroLevel * 3 / 100) end ",
+            "u.meleeDefense:set(bonus, 100)"
+        ],
+        "rangeByLevel": ["single","single","single","all"],
+        "filter" : [
+            "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
+        ]
+    },
+    "sod.spell.airShield" : {
+        "calc": [
+            "bonus =  25",
+            "if level >= 2 then bonus = 50 end",
+            "if isSpec then bonus = bonus + math.ceil(bonus * heroLevel * 3 / 100) end ",
+            "u.rangedDefense:set(bonus, 100)"
+        ],
+        "rangeByLevel": ["single","single","single","all"],
+        "filter" : [
+            "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
+        ]
+    },
+    "sod.spell.bless" : {
+        "calc": [
+            "if level >= 2 then u.primary.dmg.max = u.primary.dmg.max + 1  end  ",
+            "u.primary.dmg.min = u.primary.dmg.max ",
+            "specBonus = 0",
+            "if isSpec then specBonus = heroLevel * 3 / unitLevel end ",
+            "if isSpec then u.rangedAttack:set(specBonus, 100); u.meleeAttack:set(specBonus, 100) end  "
+        ],
+        "rangeByLevel": ["single","single","single","all"],
+        "filter" : [
+            "if type ~= CType.Living and type ~= CType.NonLiving then result=false end",
+            "if nonLivingType == NLType.Undead then result=false end"
+        ]
+    },
+    "sod.spell.curse" : {
+        "calc": [
+            "if level >= 2 and u.primary.dmg.min > 1 then u.primary.dmg.min = u.primary.dmg.min - 1  end  ",
+            "u.primary.dmg.max = u.primary.dmg.min "
+        ],
+        "rangeByLevel": ["single","single","single","all"],
+        "filter" : [
+            "if type ~= CType.Living and type ~= CType.NonLiving then result=false end",
+            "if nonLivingType == NLType.Undead then result=false end"
+        ]
+    },
+    "sod.spell.bloodLust" : {
+        "calc": [
+            "bonus=3",
+            "specBonus=3",
+            "if level >= 2 then bonus = 6 end  ",
+            "if unitLevel > 2 then specBonus = 2 end  ",
+            "if unitLevel > 4 then specBonus = 1 end  ",
+            "if unitLevel > 6 then specBonus = 0 end  ",
+            "if isSpec then bonus = bonus + specBonus end  ",
+            "u.adMelee:incAtt(bonus)"
+        ],
+        "rangeByLevel": ["single","single","single","all"],
+        "filter" : [
+            "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
+        ]
+    },
+    "sod.spell.precision" : {
+        "calc": [
+            "bonus=3",
+            "specBonus=3",
+            "if level >= 2 then bonus = 6 end  ",
+            "if unitLevel > 2 then specBonus = 2 end  ",
+            "if unitLevel > 4 then specBonus = 1 end  ",
+            "if unitLevel > 6 then specBonus = 0 end  ",
+            "if isSpec then bonus = bonus + specBonus end  ",
+            "u.adRanged:incAtt(bonus)"
+        ],
+        "rangeByLevel": ["single","single","single","all"],
+        "filter" : [
+            "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
+        ]
+    },
+    "sod.spell.weakness" : {
+        "calc": [
+            "bonus=3",
+            "specBonus=3",
+            "if level >= 2 then bonus = 6 end  ",
+            "if unitLevel > 2 then specBonus = 2 end  ",
+            "if unitLevel > 4 then specBonus = 1 end  ",
+            "if unitLevel > 6 then specBonus = 0 end  ",
+            "if isSpec then bonus = bonus + specBonus end  ",
+            "u.primary.ad:incDef(-bonus) "
+        ],
+        "rangeByLevel": ["single","single","single","all"],
+        "filter" : [
+            "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
+        ]
+    },
+    "sod.spell.stoneSkin" : {
+        "calc": [
+            "bonus=3",
+            "specBonus=3",
+            "if level >= 2 then bonus = 6 end  ",
+            "if unitLevel > 2 then specBonus = 2 end  ",
+            "if unitLevel > 4 then specBonus = 1 end  ",
+            "if unitLevel > 6 then specBonus = 0 end  ",
+            "if isSpec then bonus = bonus + specBonus end  ",
+            "u.primary.ad:incDef(bonus) "
+        ],
+        "rangeByLevel": ["single","single","single","all"],
+        "filter" : [
+            "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
+        ]
+    },
+    "sod.spell.prayer" : {
+        "calc": [
+            "bonus=2",
+            "specBonus=3",
+            "if level >= 2 then bonus = 4 end  ",
+            "if unitLevel > 2 then specBonus = 2 end  ",
+            "if unitLevel > 4 then specBonus = 1 end  ",
+            "if unitLevel > 6 then specBonus = 0 end  ",
+            "if isSpec then bonus = bonus + specBonus end  ",
+            "u.primary.ad:incAll(bonus) ",
+            "u.primary.speed = u.primary.speed + bonus "
+        ],
+        "rangeByLevel": ["single","single","single","all"],
+        "filter" : [
+            "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
+        ]
+    },
+    "sod.spell.mirth" : {
+        "calc": [
+            "bonus = 1",
+            "if level >= 2 then bonus = 2 end  ",
+            "if isSpec then bonus = 3 end  ",
+            "u.rng:incMorale(bonus) "
+        ],
+        "rangeByLevel": ["single","single","single","all"],
+        "filter" : [
+            "result=false",
+            "if type == CType.Living then result=true end",
+            "if nonLivingType == NLType.Gargoyle then result=true end"
+        ],
+        "tags": ["mind"]
+    },
+    "sod.spell.sorrow" : {
+        "calc": [
+            "bonus = -1",
+            "if level >= 2 then bonus = -2 end  ",
+            "if isSpec then bonus = -3 end  ",
+            "u.rng:incMorale(bonus) "
+        ],
+        "rangeByLevel": ["single","single","single","all"],
+        "filter" : [
+            "result=false",
+            "if type == CType.Living then result=true end",
+            "if nonLivingType == NLType.Gargoyle then result=true end"
+        ],
+        "tags": ["mind"]
+    },
+    "sod.spell.fortune" : {
+        "calc": [
+            "bonus = 1",
+            "if level >= 2 then bonus = 2 end  ",
+            "if isSpec then bonus = 3 end  ",
+            "u.rng:incLuck(bonus) "
+        ],
+        "rangeByLevel": ["single","single","single","all"],
+        "filter" : [
+            "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
+        ]
+    },
+    "sod.spell.misfortune" : {
+        "calc": [
+            "bonus = 1",
+            "if level >= 2 then bonus = 2 end  ",
+            "if isSpec then bonus = 3 end  ",
+            "u.rng:incLuck(-bonus) "
+        ],
+        "rangeByLevel": ["single","single","single","all"],
+        "filter" : [
+            "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
+        ]
+    },
+    "sod.spell.haste" : {
+        "calc": [
+            "bonus=3",
+            "specBonus=3",
+            "if level >= 2 then bonus = 5 end  ",
+            "if unitLevel > 2 then specBonus = 2 end  ",
+            "if unitLevel > 4 then specBonus = 1 end  ",
+            "if unitLevel > 6 then specBonus = 0 end  ",
+            "if isSpec then bonus = bonus + specBonus end  ",
+            "u.primary.speed = u.primary.speed + bonus"
+        ],
+        "rangeByLevel": ["single","single","single","all"],
+        "filter" : [
+            "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
+        ]
+    },
+    "sod.spell.slow" : {
+        "calc": [
+            "if level >= 2 then u.primary.speed = math.floor(u.primary.speed/2) + 1 end  ",
+            "if level <= 1 then u.primary.speed = math.floor(u.primary.speed * 3 / 4) end "
+        ],
+        "rangeByLevel": ["single","single","single","all"],
+        "filter" : [
+            "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
+        ]
+    },
+    "sod.spell.disruptingRay" : {
+
+    },
+    "sod.spell.slayer" : {
+
+    },
+    "sod.spell.frenzy" : {
+
+        "tags": ["mind"]
+    },
+    "sod.spell.counterstrike" : {
+        "calc": [
+            "bonus = 1 ",
+            "if level >= 2 then bonus = 2 end ",
+            "if u.maxRetaliations < 0 then bonus = 0 end ",
+            "u.maxRetaliations = u.maxRetaliations + bonus "
+        ],
+        "rangeByLevel": ["single","single","single","all"],
+        "filter" : [
+            "if type ~= CType.Living and type ~= CType.NonLiving then result=false end",
+            "if type == NLType.BattleMachine then result=false end"
+        ]
+    },
+    "sod.spell.berserk" : {
+        "tags": ["mind"]
+    },
+    "sod.spell.hypnotize" : {
+        "tags": ["mind"]
+    },
+    "sod.spell.forgetfulness" : {
+        "calc": [
+            "u.canAttackRanged = false"
+        ],
+        "rangeByLevel": ["single","single","single","all"],
+        "filter" : [
+            "if type ~= CType.Living then result=false end"
+        ],
+        "tags": ["mind"]
+    },
+    "sod.spell.blind" : {
+        "calc": [
+            "u.canCast         = false",
+            "u.canMove         = false",
+            "u.canAttackMelee  = false",
+            "u.canAttackRanged = false"
+        ],
+        "rangeByLevel": ["single","single","single","single"],
+        "filter" : [
+            "if type ~= CType.Living then result=false end"
+        ],
+        "tags": ["mind", "vision"]
+    },
+
+
+    "sod.spell.fireShield" : {
+    },
+    "sod.spell.protectFromAir" : {
+        "calc": [
+            "bonus = 50 ",
+            "if level >= 2 then bonus = 25 end ",
+            "u.magicReduce.air:mult(bonus, 100) "
+        ],
+        "rangeByLevel": ["single","single","single","all"],
+        "filter" : [
+            "if type ~= CType.Living and type ~= CType.NonLiving then result=false end",
+            "if type == NLType.BattleMachine then result=false end"
+        ]
+    },
+    "sod.spell.protectFromFire" : {
+        "calc": [
+            "bonus = 50 ",
+            "if level >= 2 then bonus = 25 end ",
+            "u.magicReduce.fire:mult(bonus, 100) "
+        ],
+        "rangeByLevel": ["single","single","single","all"],
+        "filter" : [
+            "if type ~= CType.Living and type ~= CType.NonLiving then result=false end",
+            "if type == NLType.BattleMachine then result=false end"
+        ]
+    },
+    "sod.spell.protectFromWater" : {
+        "calc": [
+            "bonus = 50 ",
+            "if level >= 2 then bonus = 25 end ",
+            "u.magicReduce.water:mult(bonus, 100) "
+        ],
+        "rangeByLevel": ["single","single","single","all"],
+        "filter" : [
+            "if type ~= CType.Living and type ~= CType.NonLiving then result=false end",
+            "if type == NLType.BattleMachine then result=false end"
+        ]
+    },
+    "sod.spell.protectFromEarth" : {
+        "calc": [
+            "bonus = 50 ",
+            "if level >= 2 then bonus = 25 end ",
+            "u.magicReduce.earth:mult(bonus, 100) "
+        ],
+        "rangeByLevel": ["single","single","single","all"],
+        "filter" : [
+            "if type ~= CType.Living and type ~= CType.NonLiving then result=false end",
+            "if type == NLType.BattleMachine then result=false end"
+        ]
+    },
+    "sod.spell.antiMagic" : {
+    },
+    "sod.spell.magicMirror" : {
+
+    },
+
+
+
+
+    "sod.spell.magicArrow" : {
+        "calc": [
+            "damage = spellPower * 10 + 10 ",
+            "if level >= 2 then damage = damage + 10 end ",
+            "if level == 3 then damage = damage + 10 end ",
+            "if isSpec then damage = damage + damage / 2 end "
+        ],
+        "rangeByLevel": ["single","single","single","single"],
+        "filter" : [
+            "if type ~= CType.Living and type ~= CType.NonLiving then result=false end",
+            "if type == NLType.BattleMachine then result=false end"
+        ]
+    },
+    "sod.spell.iceBolt" : {
+        "calc": [
+            "damage = spellPower * 20 + 10 ",
+            "if level >= 2 then damage = damage + 10 end ",
+            "if level == 3 then damage = damage + 30 end ",
+            "if isSpec then damage = damage + math.ceil(damage * heroLevel * 3 / (unitLevel * 100)) end "
+        ],
+        "rangeByLevel": ["single","single","single","single"],
+        "filter" : [
+            "if type ~= CType.Living and type ~= CType.NonLiving then result=false end",
+            "if type == NLType.BattleMachine then result=false end"
+        ],
+        "tags": ["ice"]
+    },
+    "sod.spell.lightningBolt" : {
+        "calc": [
+            "damage = spellPower * 25 + 10 ",
+            "if level >= 2 then damage = damage + 10 end ",
+            "if level == 3 then damage = damage + 30 end "
+        ],
+        "rangeByLevel": ["single","single","single","single"],
+        "filter" : [
+            "if type ~= CType.Living and type ~= CType.NonLiving then result=false end",
+            "if type == NLType.BattleMachine then result=false end"
+        ],
+        "tags": ["lightning"]
+    },
+    "sod.spell.implosion" : {
+        "calc": [
+            "damage = spellPower * 75 + 100 ",
+            "if level >= 2 then damage = damage + 100 end ",
+            "if level == 3 then damage = damage + 100 end "
+        ],
+        "rangeByLevel": ["single","single","single","single"],
+        "filter" : [
+            "if type ~= CType.Living and type ~= CType.NonLiving then result=false end",
+            "if type == NLType.BattleMachine then result=false end"
+        ]
+    },
+    "sod.spell.chainLightning" : {
+        "indistinctive": true,
+        "calc": [
+            "damage = spellPower * 40 + 25 ",
+            "if level >= 2 then damage = damage + 25 end ",
+            "if level == 3 then damage = damage + 50 end ",
+            "if isSpec then damage = damage + math.ceil(damage * heroLevel * 3 / (unitLevel * 100)) end ",
+            "if index == 1 then damage = damage / 2 end",
+            "if index == 2 then damage = damage / 4 end",
+            "if index == 3 then damage = damage / 8 end",
+            "if index == 4 then damage = damage / 16 end"
+        ],
+
+        "rangeByLevel": ["chain4","chain4","chain5","chain5"],
+        "filter" : [
+            "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
+        ],
+        "tags": ["lightning"]
+    },
+    "sod.spell.frostRing" : {
+        "indistinctive": true,
+        "calc": [
+            "damage = spellPower * 10 + 15 ",
+            "if level >= 2 then damage = damage + 15 end ",
+            "if level == 3 then damage = damage + 30 end ",
+            "if isSpec then damage = damage + math.ceil(damage * heroLevel * 3 / (unitLevel * 100)) end "
+        ],
+        "rangeByLevel": ["r1NoCenter","r1NoCenter","r1NoCenter","r1NoCenter"],
+        "filter" : [
+            "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
+        ],
+        "tags": ["ice"]
+    },
+    "sod.spell.fireball" : {
+        "indistinctive": true,
+        "calc": [
+            "damage = spellPower * 10 + 15 ",
+            "if level >= 2 then damage = damage + 15 end ",
+            "if level == 3 then damage = damage + 30 end ",
+            "if isSpec then damage = damage + math.ceil(damage * heroLevel * 3 / (unitLevel * 100)) end "
+        ],
+        "rangeByLevel": ["r1","r1","r1","r1"],
+        "filter" : [
+            "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
+        ]
+    },
+    "sod.spell.inferno" : {
+        "indistinctive": true,
+        "calc": [
+            "damage = spellPower * 10 + 20 ",
+            "if level >= 2 then damage = damage + 20 end ",
+            "if level == 3 then damage = damage + 40 end ",
+            "if isSpec then damage = damage + math.ceil(damage * heroLevel * 3 / (unitLevel * 100)) end "
+        ],
+        "rangeByLevel": ["r2","r2","r2","r2"],
+        "filter" : [
+            "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
+        ]
+    },
+    "sod.spell.meteorShower" : {
+        "indistinctive": true,
+        "calc": [
+            "damage = spellPower * 25 + 25 ",
+            "if level >= 2 then damage = damage + 25 end ",
+            "if level == 3 then damage = damage + 50 end ",
+            "if isSpec then damage = damage + math.ceil(damage * heroLevel * 3 / (unitLevel * 100)) end "
+        ],
+        "rangeByLevel": ["r1","r1","r1","r1"],
+        "filter" : [
+            "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
+        ]
+    },
+    "sod.spell.deathRipple" : {
+        "indistinctive": true,
+        "calc": [
+            "damage = spellPower * 5 + 10 ",
+            "if level >= 2 then damage = damage + 10 end ",
+            "if level == 3 then damage = damage + 10 end ",
+            "if isSpec then damage = damage + math.ceil(damage * heroLevel * 3 / (unitLevel * 100)) end "
+        ],
+        "rangeByLevel": ["all","all","all","all"],
+        "filter" : [
+            "if type ~= CType.Living then result=false end"
+        ]
+    },
+    "sod.spell.destroyUndead" : {
+        "indistinctive": true,
+        "calc": [
+            "damage = spellPower * 5 + 10 ",
+            "if level >= 2 then damage = damage + 10 end ",
+            "if level == 3 then damage = damage + 10 end "
+        ],
+        "rangeByLevel": ["all","all","all","all"],
+        "filter" : [
+            "if type ~= CType.NonLiving then result=false end",
+            "if type ~= NLType.Undead then result=false end"
+        ]
+    },
+    "sod.spell.armageddon" : {
+        "indistinctive": true,
+        "calc": [
+            "damage = spellPower * 40 + 30 ",
+            "if level >= 2 then damage = damage + 30 end ",
+            "if level == 3 then damage = damage + 60 end "
+        ],
+        "rangeByLevel": ["all","all","all","all"],
+        "filter" : [
+            "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
+        ]
+    },
+    "sod.spell.titanBolt" : {
+        "calc": [
+            "damage = 600 "
+        ],
+        "rangeByLevel": ["single","single","single","single"],
+        "filter" : [
+            "if type ~= CType.Living and type ~= CType.NonLiving then result=false end",
+            "if type == NLType.BattleMachine then result=false end"
+        ],
+        "tags": ["lightning"]
+    },
+
+
+
+
+
+    "sod.spell.quicksand" : {
+
+    },
+    "sod.spell.landMine" : {
+
+    },
+    "sod.spell.forceField" : {
+
+    },
+    "sod.spell.fireWall" : {
+
+    },
+    "sod.spell.earthquake" : {
+
+    },
+
+    "sod.spell.dispel" : {
+
+    },
+    "sod.spell.cure" : {
+
+    },
+    "sod.spell.resurrection" : {
+
+    },
+    "sod.spell.animateDead" : {
+
+    },
+    "sod.spell.sacrifice" : {
+
+    },
+    "sod.spell.teleport" : {
+
+    },
+    "sod.spell.removeObstacle" : {
+
+    },
+    "sod.spell.clone" : {
+
+    },
+    "sod.spell.fireElemental" : {
+
+    },
+    "sod.spell.earthElemental" : {
+
+    },
+    "sod.spell.waterElemental" : {
+
+    },
+    "sod.spell.airElemental" : {
+
+    },
+
+
+
+
+    "sod.spell.stoneGaze" : {
+
+    },
+    "sod.spell.poison" : {
+
+    },
+    "sod.spell.bind" : {
+
+    },
+    "sod.spell.disease" : {
+
+    },
+    "sod.spell.paralyze" : {
+
+    },
+    "sod.spell.age" : {
+
+    },
+    "sod.spell.deathCloud" : {
+
+    },
+    "sod.spell.thunderbolt" : {
+
+    },
+    "sod.spell.dispelHelpful" : {
+
+    },
+    "sod.spell.deathStare" : {
+
+    },
+    "sod.spell.acidBreath" : {
+
+    },
+    "sod.spell.acidBreathDamage" : {
+
+    },
+
+
+
+
+    "sod.spell.summonBoat" : {
+
+    },
+    "sod.spell.scuttleBoat" : {
+
+    },
+    "sod.spell.visions" : {
+
+    },
+    "sod.spell.viewEarth" : {
+
+    },
+    "sod.spell.disguise" : {
+
+    },
+    "sod.spell.viewAir" : {
+
+    },
+    "sod.spell.fly" : {
+
+    },
+    "sod.spell.waterWalk" : {
+
+    },
+    "sod.spell.dimensionDoor" : {
+
+    },
+    "sod.spell.townPortal" : {
+
+    }
+
+}
+
+}]

@@ -1,0 +1,17 @@
+[{
+"scope": "resources",
+
+"records": {
+
+"wood"     : {"untranslatedName":"Wood"},
+"mercury"  : {"untranslatedName":"Mercury"},
+"ore"      : {"untranslatedName":"Wood"},
+
+"sulfur"   : {"untranslatedName":"Sulfur"},
+"crystal"  : {"untranslatedName":"Crystal"},
+"gems"     : {"untranslatedName":"Gems"},
+
+"gold"     : {"untranslatedName":"Gold"}
+}
+
+}]

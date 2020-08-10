@@ -1,0 +1,17 @@
+[{
+"scope": "resources",
+"uiOnly": true,
+"records": {
+
+"wood"     : { "pres": {"orderKingdom":1, "orderCommon":1,"icon":"resource:0", "iconLarge":"resour82:0", "iconTrade":"bores:0" } },
+"mercury"  : { "pres": {"orderKingdom":2, "orderCommon":3,"icon":"resource:1", "iconLarge":"resour82:1", "iconTrade":"bores:1" } },
+"ore"      : { "pres": {"orderKingdom":3, "orderCommon":2,"icon":"resource:2", "iconLarge":"resour82:2", "iconTrade":"bores:2" } },
+
+"sulfur"   : { "pres": {"orderKingdom":4, "orderCommon":4,"icon":"resource:3", "iconLarge":"resour82:3", "iconTrade":"bores:3" } },
+"crystal"  : { "pres": {"orderKingdom":5, "orderCommon":5,"icon":"resource:4", "iconLarge":"resour82:4", "iconTrade":"bores:4" } },
+"gems"     : { "pres": {"orderKingdom":6, "orderCommon":6,"icon":"resource:5", "iconLarge":"resour82:5", "iconTrade":"bores:5" } },
+
+"gold"     : { "pres": {"orderKingdom":7, "orderCommon":0,"icon":"resource:6", "iconLarge":"resour82:6", "iconTrade":"bores:6" } }
+}
+
+}]

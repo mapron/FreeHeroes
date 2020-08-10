@@ -1,0 +1,25 @@
+hota	soft	
+$
+translation	ru_RU	units
+	hota.unit.nimph	+	Нимфы	Нимф	Нимфу
+	hota.unit.oceanid	+	Океаниды	Океанид	Океаниду
+	hota.unit.crewMate	+	Матроса	Матросов	Матроса
+	hota.unit.seaMan	+	Головореза	Головорезов	Головореза
+	hota.unit.pirate	+	Пирата	Пиратов	Пирата
+	hota.unit.corsair	+	Корсара	Корсаров	Корсара
+	hota.unit.seawolf	+	Морских Волка	Морских Волков	Морского Волка
+	hota.unit.stormbird	+	Духов Океана	Духов Океана	Духа Океана
+	hota.unit.assid	+	Ассиды	Ассид	Ассиду
+	hota.unit.seaWitch	+	Жрицы Морей	Жриц Морей	Жрицу Морей
+	hota.unit.sorceress	+	Заклинательницы	Заклинательниц	Заклинательницу
+	hota.unit.nix	+	Никса	Никсов	Никса
+	hota.unit.nixWarrior	+	Никса-Воина	Никсов-Воинов	Никса-Воина
+	hota.unit.seaSerpent	+	Морских Змея	Морских Змеев	Морского Змея
+	hota.unit.haspid	+	Аспида	Аспидов	Аспида
+	hota.unit.leprechaun	+	Лепрекона	Лепреконов	Лепрекона
+	hota.unit.satyr	+	Сатира	Сатиров	Сатира
+	hota.unit.fangarm	+	Фангарма	Фангармов	Фангарма
+	hota.unit.steelGolem	+	Стальных Голема	Стальных Големов	Стального Голема
+	hota.unit.cannon	+	Пушки	Пушек	Пушку
+sprites
+	resource	replacement/	resource.fh.json

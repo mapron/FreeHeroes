@@ -1,0 +1,74 @@
+{
+    "groups": {
+        "0": {
+            "boundarySizeHeight": 112,
+            "boundarySizeWidth": 77,
+            "extra": null,
+            "frames": [
+                {
+                    "dup": false,
+                    "h": 111,
+                    "id": 0,
+                    "padLeft": 14,
+                    "padTop": 0,
+                    "w": 60
+                }
+            ],
+            "pixHeightOffset": 0
+        },
+        "1": {
+            "boundarySizeHeight": 112,
+            "boundarySizeWidth": 77,
+            "extra": null,
+            "frames": [
+                {
+                    "dup": true,
+                    "id": 0,
+                    "padLeft": 14,
+                    "padTop": 0
+                }
+            ]
+        },
+        "2": {
+            "boundarySizeHeight": 112,
+            "boundarySizeWidth": 77,
+            "extra": null,
+            "frames": [
+                {
+                    "dup": true,
+                    "id": 0,
+                    "padLeft": 14,
+                    "padTop": 0
+                }
+            ]
+        },
+        "3": {
+            "boundarySizeHeight": 112,
+            "boundarySizeWidth": 77,
+            "extra": null,
+            "frames": [
+                {
+                    "dup": true,
+                    "id": 0,
+                    "padLeft": 14,
+                    "padTop": 0
+                }
+            ]
+        },
+        "4": {
+            "boundarySizeHeight": 112,
+            "boundarySizeWidth": 77,
+            "extra": null,
+            "frames": [
+                {
+                    "dup": true,
+                    "id": 0,
+                    "padLeft": 14,
+                    "padTop": 0
+                }
+            ]
+        }
+    },
+    "splitToFolder": false,
+    "version": "1.0"
+}

@@ -1,0 +1,321 @@
+{
+    "groups": {
+        "0": {
+            "boundarySizeHeight": 400,
+            "boundarySizeWidth": 450,
+            "extra": {
+                "animationCycleDuration": 600
+            },
+            "frames": [
+                {
+                    "dup": false,
+                    "h": 84,
+                    "id": 0,
+                    "padLeft": 205,
+                    "padTop": 177,
+                    "w": 39
+                }
+            ],
+            "pixHeightOffset": 0
+        },
+        "1": {
+            "boundarySizeHeight": 400,
+            "boundarySizeWidth": 450,
+            "extra": {
+                "animationCycleDuration": 950
+            },
+            "frames": [
+                {
+                    "dup": true,
+                    "id": 0,
+                    "padLeft": 205,
+                    "padTop": 177
+                }
+            ]
+        },
+        "10": {
+            "boundarySizeHeight": 400,
+            "boundarySizeWidth": 450,
+            "extra": null,
+            "frames": [
+                {
+                    "dup": true,
+                    "id": 0,
+                    "padLeft": 205,
+                    "padTop": 177
+                }
+            ]
+        },
+        "11": {
+            "boundarySizeHeight": 400,
+            "boundarySizeWidth": 450,
+            "extra": {
+                "animationCycleDuration": 500
+            },
+            "frames": [
+                {
+                    "dup": true,
+                    "id": 0,
+                    "padLeft": 205,
+                    "padTop": 177
+                }
+            ]
+        },
+        "12": {
+            "boundarySizeHeight": 400,
+            "boundarySizeWidth": 450,
+            "extra": {
+                "animationCycleDuration": 500
+            },
+            "frames": [
+                {
+                    "dup": true,
+                    "id": 0,
+                    "padLeft": 205,
+                    "padTop": 177
+                }
+            ]
+        },
+        "13": {
+            "boundarySizeHeight": 400,
+            "boundarySizeWidth": 450,
+            "extra": {
+                "animationCycleDuration": 500
+            },
+            "frames": [
+                {
+                    "dup": true,
+                    "id": 0,
+                    "padLeft": 205,
+                    "padTop": 177
+                }
+            ]
+        },
+		"14": {
+            "boundarySizeHeight": 400,
+            "boundarySizeWidth": 450,
+            "extra": {
+                "animationCycleDuration": 500
+            },
+            "frames": [
+                {
+                    "dup": true,
+                    "id": 0,
+                    "padLeft": 205,
+                    "padTop": 177
+                }
+            ]
+        },
+		"15": {
+            "boundarySizeHeight": 400,
+            "boundarySizeWidth": 450,
+            "extra": {
+                "animationCycleDuration": 500
+            },
+            "frames": [
+                {
+                    "dup": true,
+                    "id": 0,
+                    "padLeft": 205,
+                    "padTop": 177
+                }
+            ]
+        },
+		"16": {
+            "boundarySizeHeight": 400,
+            "boundarySizeWidth": 450,
+            "extra": {
+                "animationCycleDuration": 500
+            },
+            "frames": [
+                {
+                    "dup": true,
+                    "id": 0,
+                    "padLeft": 205,
+                    "padTop": 177
+                }
+            ]
+        },
+		"17": {
+            "boundarySizeHeight": 400,
+            "boundarySizeWidth": 450,
+            "extra": {
+                "animationCycleDuration": 500
+            },
+            "frames": [
+                {
+                    "dup": true,
+                    "id": 0,
+                    "padLeft": 205,
+                    "padTop": 177
+                }
+            ]
+        },
+		"18": {
+            "boundarySizeHeight": 400,
+            "boundarySizeWidth": 450,
+            "extra": {
+                "animationCycleDuration": 500
+            },
+            "frames": [
+                {
+                    "dup": true,
+                    "id": 0,
+                    "padLeft": 205,
+                    "padTop": 177
+                }
+            ]
+        },
+		"19": {
+            "boundarySizeHeight": 400,
+            "boundarySizeWidth": 450,
+            "extra": {
+                "animationCycleDuration": 500
+            },
+            "frames": [
+                {
+                    "dup": true,
+                    "id": 0,
+                    "padLeft": 205,
+                    "padTop": 177
+                }
+            ]
+        },
+        "2": {
+            "boundarySizeHeight": 400,
+            "boundarySizeWidth": 450,
+            "extra": {
+                "animationCycleDuration": 1600
+            },
+            "frames": [
+                {
+                    "dup": true,
+                    "id": 0,
+                    "padLeft": 205,
+                    "padTop": 177
+                }
+            ]
+        },
+        "20": {
+            "boundarySizeHeight": 400,
+            "boundarySizeWidth": 450,
+            "extra": {
+                "animationCycleDuration": 120
+            },
+            "frames": [
+                {
+                    "dup": true,
+                    "id": 0,
+                    "padLeft": 205,
+                    "padTop": 177
+                }
+            ]
+        },
+        "21": {
+            "boundarySizeHeight": 400,
+            "boundarySizeWidth": 450,
+            "extra": {
+                "animationCycleDuration": 120
+            },
+            "frames": [
+                {
+                    "dup": true,
+                    "id": 0,
+                    "padLeft": 205,
+                    "padTop": 177
+                }
+            ]
+        },
+        "3": {
+            "boundarySizeHeight": 400,
+            "boundarySizeWidth": 450,
+            "extra": {
+                "animationCycleDuration": 400
+            },
+            "frames": [
+                {
+                    "dup": true,
+                    "id": 0,
+                    "padLeft": 205,
+                    "padTop": 177
+                }
+            ]
+        },
+        "4": {
+            "boundarySizeHeight": 400,
+            "boundarySizeWidth": 450,
+            "extra": {
+                "animationCycleDuration": 400
+            },
+            "frames": [
+                {
+                    "dup": true,
+                    "id": 0,
+                    "padLeft": 205,
+                    "padTop": 177
+                }
+            ]
+        },
+        "5": {
+            "boundarySizeHeight": 400,
+            "boundarySizeWidth": 450,
+            "extra": {
+                "animationCycleDuration": 600
+            },
+            "frames": [
+                {
+                    "dup": false,
+                    "h": 84,
+                    "id": 1,
+                    "padLeft": 205,
+                    "padTop": 177,
+                    "w": 39
+                }
+            ],
+			"pixHeightOffset" : 84
+        },
+        "7": {
+            "boundarySizeHeight": 400,
+            "boundarySizeWidth": 450,
+            "extra": {
+                "animationCycleDuration": 300
+            },
+            "frames": [
+                {
+                    "dup": true,
+                    "id": 0,
+                    "padLeft": 205,
+                    "padTop": 177
+                }
+            ]
+        },
+        "8": {
+            "boundarySizeHeight": 400,
+            "boundarySizeWidth": 450,
+            "extra": null,
+            "frames": [
+                {
+                    "dup": true,
+                    "id": 0,
+                    "padLeft": 205,
+                    "padTop": 177
+                }
+            ]
+        },
+        "9": {
+            "boundarySizeHeight": 400,
+            "boundarySizeWidth": 450,
+            "extra": null,
+            "frames": [
+                {
+                    "dup": true,
+                    "id": 0,
+                    "padLeft": 205,
+                    "padTop": 177
+                }
+            ]
+        }
+    },
+    "splitToFolder": false,
+    "version": "1.0"
+}

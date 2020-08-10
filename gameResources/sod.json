@@ -1,0 +1,236 @@
+[
+{
+"scope": "artifacts",
+"records" : {
+
+"hota.artifact.battleMachine.cannon"       : null,
+
+"hota.artifact.sword.att7"            : null,
+"hota.artifact.shield.def7"           : null,
+"hota.artifact.helm.int6"             : null,
+"hota.artifact.torso.spl6"            : null,
+
+"hota.artifact.misc.unluck1a"         : null,
+"hota.artifact.misc.unluck1b"         : null,
+"hota.artifact.misc.unluck2"          : null,
+"hota.artifact.misc.unmorale1"        : null,
+"hota.artifact.ring.unmorale1"        : null,
+"hota.artifact.neck.unmorale2"        : null,
+
+"hota.artifact.misc.interfere"        : null,
+"hota.artifact.ring.interfere"        : null,
+"hota.artifact.torso.interfere"       : null,
+
+"hota.artifact.boots.pathfind"        : null,
+
+"hota.artifact.cape.noMagic12"        : null,
+"hota.artifact.ring.noResurrect"      : null,
+
+"hota.artifact.misc.summon"           : null,
+"hota.artifact.complex.diplomacy"     : null,
+
+"hota.artifact.complex.resist"        : null,
+"hota.artifact.complex.buff"          : null,
+"hota.artifact.complex.gold"          : null
+
+}
+
+},
+{
+"scope": "factions",
+
+"records" : {
+
+"sod.faction.rampart"             : {
+    "fighterClass": {
+    "skills" :{
+        "hota.skill.interfere": null
+    }
+    }
+
+},
+
+"sod.faction.inferno"             : {
+    "fighterClass": {
+    "skills" :{
+        "hota.skill.interfere": null
+    }
+    }
+},
+
+
+"sod.faction.dungeon"             : {
+    "fighterClass": {
+    "skills" :{
+        "hota.skill.interfere": null
+    }
+    }
+
+
+},
+
+"sod.faction.stronghold"             : {
+    "fighterClass": {
+    "skills" :{
+        "hota.skill.interfere": null
+    }
+    },
+    "mageClass": {
+    "skills" :{
+        "hota.skill.interfere": null
+    }
+    }
+},
+
+
+"sod.faction.conflux"             : {
+    "nativeTerrain": "sod.terrain.grass",
+    "fighterClass": {
+    "skills" :{
+        "hota.skill.interfere": null
+    }
+    }
+},
+"hota.faction.cove" : null
+
+}
+},
+
+{
+"scope": "heroes",
+"records": {
+
+"hota.hero.cove.plp01"             : null,
+"hota.hero.cove.plp02"             : null,
+"hota.hero.cove.plp03"             : null,
+"hota.hero.cove.plp05"             : null,
+"hota.hero.cove.plp17"             : null,
+"hota.hero.cove.plp06"             : null,
+"hota.hero.cove.plp13"             : null,
+"hota.hero.cove.plp15"             : null,
+"hota.hero.cove.plp16"             : null,
+"hota.hero.cove.plp04"             : null,
+"hota.hero.cove.plp07"             : null,
+"hota.hero.cove.plp08"             : null,
+"hota.hero.cove.plp09"             : null,
+"hota.hero.cove.plp10"             : null,
+"hota.hero.cove.plp11"             : null,
+"hota.hero.cove.plp12"             : null,
+"hota.hero.cove.plp14"             : null,
+"hota.hero.campaign.cvc01"         : null,
+"hota.hero.campaign.cvc02"         : null,
+
+
+"sod.hero.rampart.rn017"           : { "secondarySkills": [{"skillId": "sod.skill.luck"           , "level": 0 }, {"skillId": "sod.skill.resistance"       , "level": 0 }]},
+"sod.hero.rampart.rx020"           : { "secondarySkills": [{"skillId": "sod.skill.resistance"     , "level": 1 }                                                         ], "specId": "sod.speciality.skill.resistance"},
+"sod.hero.rampart.rn022"           : { "secondarySkills": [{"skillId": "sod.skill.resistance"     , "level": 0 }, {"skillId": "sod.skill.pathfind"         , "level": 0 }]},
+"sod.hero.tower.al037"             : { "secondarySkills": [{"skillId": "sod.skill.scholar"        , "level": 0 }, {"skillId": "sod.skill.resistance"       , "level": 0 }]},
+"sod.hero.inferno.dm059"           : { "secondarySkills": [{"skillId": "sod.skill.resistance"     , "level": 0 }, {"skillId": "sod.skill.tactics"          , "level": 0 }]},
+"sod.hero.necropolis.dk064"        : { "secondarySkills": [{"skillId": "sod.skill.necromancy"     , "level": 0 }, {"skillId": "sod.skill.resistance"       , "level": 0 }]},
+"sod.hero.dungeon.ov083"           : { "secondarySkills": [{"skillId": "sod.skill.leadership"     , "level": 0 }, {"skillId": "sod.skill.resistance"       , "level": 0 }]},
+"sod.hero.stronghold.br101"        : { "secondarySkills": [{"skillId": "sod.skill.offense"        , "level": 0 }, {"skillId": "sod.skill.resistance"       , "level": 0 }]},
+"sod.hero.stronghold.bm111"        : { "secondarySkills": [{"skillId": "sod.skill.wisdom"         , "level": 0 }, {"skillId": "sod.skill.resistance"       , "level": 0 }]},
+"sod.hero.fortress.bs112"          : { "secondarySkills": [{"skillId": "sod.skill.armourer"       , "level": 0 }, {"skillId": "sod.skill.resistance"       , "level": 0 }]}
+
+
+}
+
+},
+
+
+{
+"scope": "mapObjects",
+"records" : {
+
+"hota.map.blackTower"          : null,
+"hota.map.mansion"             : null,
+"hota.map.beholderSanctuary"   : null,
+"hota.map.templeSea"           : null,
+"hota.map.churchyard"          : null,
+"hota.map.experimentalShop"    : null,
+"hota.map.wolfRaiderPicket"    : null,
+"hota.map.vermilionTower"      : null,
+"hota.map.pirateCave"          : null,
+"hota.map.ivoryTower"          : null,
+"hota.map.spit"                : null,
+"hota.map.ruins"               : null
+
+}
+
+},
+
+{
+"scope": "skills",
+"records" : {
+
+"hota.skill.interfere" : null
+
+}
+
+},
+
+{
+"scope": "specialities",
+"records" : {
+"hota.speciality.skill.interfere"            : null,
+"hota.speciality.cannon"                     : null,
+"hota.speciality.skill.interfere"            : null,
+"hota.speciality.unit.stormbird"             : null,
+"hota.speciality.unit.crewMate"              : null,
+"hota.speciality.unit.pirate"                : null,
+"hota.speciality.unit.nimph"                 : null,
+"hota.speciality.unit.sorceress"             : null,
+"hota.speciality.unit.nix"                   : null,
+"hota.speciality.unitUpgrade.seawolf"        : null
+}
+
+},
+
+{
+"scope": "terrains",
+"records" : {
+
+"hota.terrain.highland"    : null,
+"hota.terrain.wasteland"   : null,
+"hota.terrain.crackedIce"  : null,
+"hota.terrain.dunes"       : null,
+"hota.terrain.gloryFields" : null
+
+}
+
+},
+
+{
+"scope": "units",
+"records": {
+
+
+"hota.unit.nimph"              : null,
+"hota.unit.oceanid"            : null,
+"hota.unit.crewMate"           : null,
+"hota.unit.seaMan"             : null,
+"hota.unit.pirate"             : null,
+"hota.unit.corsair"            : null,
+"hota.unit.seawolf"            : null,
+"hota.unit.stormbird"          : null,
+"hota.unit.assid"              : null,
+"hota.unit.seaWitch"           : null,
+"hota.unit.sorceress"          : null,
+"hota.unit.nix"                : null,
+"hota.unit.nixWarrior"         : null,
+"hota.unit.seaSerpent"         : null,
+"hota.unit.haspid"             : null,
+
+"hota.unit.leprechaun"         : null,
+"hota.unit.satyr"              : null,
+"hota.unit.fangarm"            : null,
+"hota.unit.steelGolem"         : null,
+
+"hota.unit.cannon"             : null
+
+}
+
+
+}
+
+]

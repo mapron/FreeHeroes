@@ -1,0 +1,158 @@
+[{
+"scope": "skills",
+"uiOnly": true,
+"records" : {
+"sod.skill.offense"         : { "pres": { "order":  1, "levels":[
+    {"iconSmall": "secsk32:67", "iconMedium": "secskill:67",  "iconLarge": "secsk82:67"},
+    {"iconSmall": "secsk32:68", "iconMedium": "secskill:68",  "iconLarge": "secsk82:68"},
+    {"iconSmall": "secsk32:69", "iconMedium": "secskill:69",  "iconLarge": "secsk82:69"}
+]}},
+"sod.skill.armourer"        : { "pres": { "order":  2, "levels":[
+    {"iconSmall": "secsk32:70", "iconMedium": "secskill:70",  "iconLarge": "secsk82:70"},
+    {"iconSmall": "secsk32:71", "iconMedium": "secskill:71",  "iconLarge": "secsk82:71"},
+    {"iconSmall": "secsk32:72", "iconMedium": "secskill:72",  "iconLarge": "secsk82:72"}
+]}},
+"sod.skill.archery"          : { "pres": { "order":  3,"levels":[
+    {"iconSmall": "secsk32:4", "iconMedium": "secskill:4",  "iconLarge": "secsk82:4"},
+    {"iconSmall": "secsk32:5", "iconMedium": "secskill:5",  "iconLarge": "secsk82:5"},
+    {"iconSmall": "secsk32:6", "iconMedium": "secskill:6",  "iconLarge": "secsk82:6"}
+]}},
+
+"sod.skill.leadership"        : { "pres": { "order":  5, "levels":[
+    {"iconSmall": "secsk32:19", "iconMedium": "secskill:19",  "iconLarge": "secsk82:19"},
+    {"iconSmall": "secsk32:20", "iconMedium": "secskill:20",  "iconLarge": "secsk82:20"},
+    {"iconSmall": "secsk32:21", "iconMedium": "secskill:21",  "iconLarge": "secsk82:21"}
+]}},
+"sod.skill.luck"               : { "pres": { "order":  6, "levels":[
+    {"iconSmall": "secsk32:28", "iconMedium": "secskill:28",  "iconLarge": "secsk82:28"},
+    {"iconSmall": "secsk32:29", "iconMedium": "secskill:29",  "iconLarge": "secsk82:29"},
+    {"iconSmall": "secsk32:30", "iconMedium": "secskill:30",  "iconLarge": "secsk82:30"}
+]}},
+"sod.skill.intelligence"      : { "pres": { "order":  30, "levels":[
+    {"iconSmall": "secsk32:73", "iconMedium": "secskill:73",  "iconLarge": "secsk82:73"},
+    {"iconSmall": "secsk32:74", "iconMedium": "secskill:74",  "iconLarge": "secsk82:74"},
+    {"iconSmall": "secsk32:75", "iconMedium": "secskill:75",  "iconLarge": "secsk82:75"}
+]}},
+
+"sod.skill.magicAir"         : { "pres": { "order":  20, "levels":[
+    {"iconSmall": "secsk32:46", "iconMedium": "secskill:46",  "iconLarge": "secsk82:46"},
+    {"iconSmall": "secsk32:47", "iconMedium": "secskill:47",  "iconLarge": "secsk82:47"},
+    {"iconSmall": "secsk32:48", "iconMedium": "secskill:48",  "iconLarge": "secsk82:48"}
+]}},
+"sod.skill.magicEarth"        : { "pres": { "order":  21, "levels":[
+    {"iconSmall": "secsk32:52", "iconMedium": "secskill:52",  "iconLarge": "secsk82:52"},
+    {"iconSmall": "secsk32:53", "iconMedium": "secskill:53",  "iconLarge": "secsk82:53"},
+    {"iconSmall": "secsk32:54", "iconMedium": "secskill:54",  "iconLarge": "secsk82:54"}
+]}},
+"sod.skill.magicFire"        : { "pres": { "order":  22, "levels":[
+    {"iconSmall": "secsk32:43", "iconMedium": "secskill:43",  "iconLarge": "secsk82:43"},
+    {"iconSmall": "secsk32:44", "iconMedium": "secskill:44",  "iconLarge": "secsk82:44"},
+    {"iconSmall": "secsk32:45", "iconMedium": "secskill:45",  "iconLarge": "secsk82:45"}
+]}},
+
+"sod.skill.magicWater"        : { "pres": { "order":  23, "levels":[
+    {"iconSmall": "secsk32:49", "iconMedium": "secskill:49",  "iconLarge": "secsk82:49"},
+    {"iconSmall": "secsk32:50", "iconMedium": "secskill:50",  "iconLarge": "secsk82:50"},
+    {"iconSmall": "secsk32:51", "iconMedium": "secskill:51",  "iconLarge": "secsk82:51"}
+]}},
+
+"sod.skill.pathfind"          : { "pres": { "order":  42, "levels":[
+    {"iconSmall": "secsk32:1", "iconMedium": "secskill:1",  "iconLarge": "secsk82:1"},
+    {"iconSmall": "secsk32:2", "iconMedium": "secskill:2",  "iconLarge": "secsk82:2"},
+    {"iconSmall": "secsk32:3", "iconMedium": "secskill:3",  "iconLarge": "secsk82:3"}
+]}},
+"sod.skill.logistics"         : { "pres": { "order":  40, "levels":[
+    {"iconSmall": "secsk32:7", "iconMedium": "secskill:7",  "iconLarge": "secsk82:7"},
+    {"iconSmall": "secsk32:8", "iconMedium": "secskill:8",  "iconLarge": "secsk82:8"},
+    {"iconSmall": "secsk32:9", "iconMedium": "secskill:9",  "iconLarge": "secsk82:9"}
+]}},
+"sod.skill.navigation"          : { "pres": { "order":  44, "levels":[
+    {"iconSmall": "secsk32:16", "iconMedium": "secskill:16",  "iconLarge": "secsk82:16"},
+    {"iconSmall": "secsk32:17", "iconMedium": "secskill:17",  "iconLarge": "secsk82:17"},
+    {"iconSmall": "secsk32:18", "iconMedium": "secskill:18",  "iconLarge": "secsk82:18"}
+]}},
+"sod.skill.scouting"           : { "pres": { "order":  41, "levels":[
+    {"iconSmall": "secsk32:10", "iconMedium": "secskill:10",  "iconLarge": "secsk82:10"},
+    {"iconSmall": "secsk32:11", "iconMedium": "secskill:11",  "iconLarge": "secsk82:11"},
+    {"iconSmall": "secsk32:12", "iconMedium": "secskill:12",  "iconLarge": "secsk82:12"}
+]}},
+"sod.skill.diplomacy"          : { "pres": { "order":  43, "levels":[
+    {"iconSmall": "secsk32:13", "iconMedium": "secskill:13",  "iconLarge": "secsk82:13"},
+    {"iconSmall": "secsk32:14", "iconMedium": "secskill:14",  "iconLarge": "secsk82:14"},
+    {"iconSmall": "secsk32:15", "iconMedium": "secskill:15",  "iconLarge": "secsk82:15"}
+]}},
+"sod.skill.wisdom"            : { "pres": { "order":  24, "levels":[
+    {"iconSmall": "secsk32:22", "iconMedium": "secskill:22",  "iconLarge": "secsk82:22"},
+    {"iconSmall": "secsk32:23", "iconMedium": "secskill:23",  "iconLarge": "secsk82:23"},
+    {"iconSmall": "secsk32:24", "iconMedium": "secskill:24",  "iconLarge": "secsk82:24"}
+]}},
+"sod.skill.mysticism"          : { "pres": { "order":  25, "levels":[
+    {"iconSmall": "secsk32:25", "iconMedium": "secskill:25",  "iconLarge": "secsk82:25"},
+    {"iconSmall": "secsk32:26", "iconMedium": "secskill:26",  "iconLarge": "secsk82:26"},
+    {"iconSmall": "secsk32:27", "iconMedium": "secskill:27",  "iconLarge": "secsk82:27"}
+]}},
+
+"sod.skill.ballistics"        : { "pres": { "order":  7, "levels":[
+    {"iconSmall": "secsk32:31", "iconMedium": "secskill:31",  "iconLarge": "secsk82:31"},
+    {"iconSmall": "secsk32:32", "iconMedium": "secskill:32",  "iconLarge": "secsk82:32"},
+    {"iconSmall": "secsk32:33", "iconMedium": "secskill:33",  "iconLarge": "secsk82:33"}
+]}},
+"sod.skill.eagleEye"          : { "pres": { "order":  27, "levels":[
+    {"iconSmall": "secsk32:34", "iconMedium": "secskill:34",  "iconLarge": "secsk82:34"},
+    {"iconSmall": "secsk32:35", "iconMedium": "secskill:35",  "iconLarge": "secsk82:35"},
+    {"iconSmall": "secsk32:36", "iconMedium": "secskill:36",  "iconLarge": "secsk82:36"}
+]}},
+"sod.skill.necromancy"        : { "pres": { "order":  28, "levels":[
+    {"iconSmall": "secsk32:37", "iconMedium": "secskill:37",  "iconLarge": "secsk82:37"},
+    {"iconSmall": "secsk32:38", "iconMedium": "secskill:38",  "iconLarge": "secsk82:38"},
+    {"iconSmall": "secsk32:39", "iconMedium": "secskill:39",  "iconLarge": "secsk82:39"}
+]}},
+"sod.skill.estates"           : { "pres": { "order":  45, "levels":[
+    {"iconSmall": "secsk32:40", "iconMedium": "secskill:40",  "iconLarge": "secsk82:40"},
+    {"iconSmall": "secsk32:41", "iconMedium": "secskill:41",  "iconLarge": "secsk82:41"},
+    {"iconSmall": "secsk32:42", "iconMedium": "secskill:42",  "iconLarge": "secsk82:42"}
+]}},
+"sod.skill.scholar"           : { "pres": { "order":  26, "levels":[
+    {"iconSmall": "secsk32:55", "iconMedium": "secskill:55",  "iconLarge": "secsk82:55"},
+    {"iconSmall": "secsk32:56", "iconMedium": "secskill:56",  "iconLarge": "secsk82:56"},
+    {"iconSmall": "secsk32:57", "iconMedium": "secskill:57",  "iconLarge": "secsk82:57"}
+]}},
+"sod.skill.tactics"           : { "pres": { "order":  4, "levels":[
+    {"iconSmall": "secsk32:58", "iconMedium": "secskill:58",  "iconLarge": "secsk82:58"},
+    {"iconSmall": "secsk32:59", "iconMedium": "secskill:59",  "iconLarge": "secsk82:59"},
+    {"iconSmall": "secsk32:60", "iconMedium": "secskill:60",  "iconLarge": "secsk82:60"}
+]}},
+"sod.skill.artillery"        : { "pres": { "order":  8, "levels":[
+    {"iconSmall": "secsk32:61", "iconMedium": "secskill:61",  "iconLarge": "secsk82:61"},
+    {"iconSmall": "secsk32:62", "iconMedium": "secskill:62",  "iconLarge": "secsk82:62"},
+    {"iconSmall": "secsk32:63", "iconMedium": "secskill:63",  "iconLarge": "secsk82:63"}
+]}},
+"sod.skill.learning"         : { "pres": { "order":  46, "levels":[
+    {"iconSmall": "secsk32:64", "iconMedium": "secskill:64",  "iconLarge": "secsk82:64"},
+    {"iconSmall": "secsk32:65", "iconMedium": "secskill:65",  "iconLarge": "secsk82:65"},
+    {"iconSmall": "secsk32:66", "iconMedium": "secskill:66",  "iconLarge": "secsk82:66"}
+]}},
+"sod.skill.sorcery"           : { "pres": { "order":  29, "levels":[
+    {"iconSmall": "secsk32:76", "iconMedium": "secskill:76",  "iconLarge": "secsk82:76"},
+    {"iconSmall": "secsk32:77", "iconMedium": "secskill:77",  "iconLarge": "secsk82:77"},
+    {"iconSmall": "secsk32:78", "iconMedium": "secskill:78",  "iconLarge": "secsk82:78"}
+]}},
+"sod.skill.resistance"        : { "pres": { "order":  32, "levels":[
+    {"iconSmall": "secsk32:79", "iconMedium": "secskill:79",  "iconLarge": "secsk82:79"},
+    {"iconSmall": "secsk32:80", "iconMedium": "secskill:80",  "iconLarge": "secsk82:80"},
+    {"iconSmall": "secsk32:81", "iconMedium": "secskill:81",  "iconLarge": "secsk82:81"}
+]}},
+"sod.skill.firstAid"        : { "pres": { "order":  9, "levels":[
+    {"iconSmall": "secsk32:82", "iconMedium": "secskill:82",  "iconLarge": "secsk82:82"},
+    {"iconSmall": "secsk32:83", "iconMedium": "secskill:83",  "iconLarge": "secsk82:83"},
+    {"iconSmall": "secsk32:84", "iconMedium": "secskill:84",  "iconLarge": "secsk82:84"}
+]}},
+"hota.skill.interfere"        : { "pres": { "order":  31, "levels":[
+    {"iconSmall": "secsk32:85", "iconMedium": "secskill:85",  "iconLarge": "secsk82:85"},
+    {"iconSmall": "secsk32:86", "iconMedium": "secskill:86",  "iconLarge": "secsk82:86"},
+    {"iconSmall": "secsk32:87", "iconMedium": "secskill:87",  "iconLarge": "secsk82:87"}
+]}}
+
+}
+
+}]

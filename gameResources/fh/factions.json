@@ -1,0 +1,686 @@
+[{
+"scope": "factions",
+"records" : {
+
+"sod.faction.castle"             : {
+    "untranslatedName" : "Castle",
+    "alignment":"good",
+    "nativeTerrain": "sod.terrain.grass",
+    "fighterClass": {
+    "id": "sod.class.castleF",
+    "untranslatedName": "Knight",
+    "startParams": {"ad":{"attack":2, "defense":2}, "magic":{"sp":1, "int":1}},
+    "lowLevelIncrease" : {"attack":35, "defense":45, "sp":10, "int":10},
+    "highLevelIncrease": {"attack":30, "defense":30, "sp":20, "int":20},
+    "skills" :{
+        "sod.skill.artillery": -1,
+        "sod.skill.ballistics": 1,
+        "sod.skill.sorcery": -1,
+        "sod.skill.diplomacy": 1,
+        "sod.skill.armourer": -1,
+        "sod.skill.estates": 3,
+        "sod.skill.intelligence": -1,
+        "sod.skill.leadership": 5,
+        "sod.skill.logistics": -2,
+        "sod.skill.magicWater": 2,
+        "sod.skill.magicAir": 1,
+        "sod.skill.magicEarth": -1,
+        "sod.skill.magicFire": -1,
+        "sod.skill.mysticism": -1,
+        "sod.skill.navigation": 3,
+        "sod.skill.offense": -1,
+        "sod.skill.pathfind": -2,
+        "sod.skill.scouting": -1,
+        "sod.skill.archery": -2,
+        "sod.skill.tactics": 1,
+        "sod.skill.luck": 1
+
+    }
+
+    },
+
+    "mageClass": {
+    "id": "sod.class.castleM",
+    "untranslatedName": "Cleric",
+    "startParams": {"ad":{"attack":1, "defense":0}, "magic":{"sp":2, "int":2}},
+    "lowLevelIncrease" : {"attack":20, "defense":15, "sp":30, "int":35},
+    "highLevelIncrease": {"attack":20, "defense":20, "sp":30, "int":30},
+    "skills" :{
+        "sod.skill.artillery": 1,
+        "sod.skill.ballistics": -1,
+        "sod.skill.sorcery": -1,
+        "sod.skill.scholar": -1,
+        "sod.skill.diplomacy": 3,
+        "sod.skill.eagleEye": -1,
+        "sod.skill.intelligence": -1,
+        "sod.skill.logistics": 1,
+        "sod.skill.magicWater": 1,
+        "sod.skill.magicAir": 1,
+        "sod.skill.magicEarth": -1,
+        "sod.skill.magicFire": -1,
+        "sod.skill.mysticism": -3,
+        "sod.skill.wisdom": -1,
+        "sod.skill.navigation": 1,
+        "sod.skill.offense": 1,
+        "sod.skill.firstAid": 4,
+        "sod.skill.pathfind": -1,
+        "sod.skill.scouting": 1,
+        "sod.skill.resistance": 1,
+        "sod.skill.luck": 2
+
+    }
+    }
+
+},
+
+
+"sod.faction.rampart"             : {
+    "untranslatedName" : "Rampart",
+    "alignment":"good",
+    "nativeTerrain": "sod.terrain.grass",
+    "fighterClass": {
+    "id": "sod.class.rampartF",
+    "untranslatedName": "Ranger",
+    "startParams": {"ad":{"attack":1, "defense":3}, "magic":{"sp":1, "int":1}},
+    "lowLevelIncrease" : {"attack":35, "defense":45, "sp":10, "int":10},
+    "highLevelIncrease": {"attack":30, "defense":30, "sp":20, "int":20},
+    "skills" :{
+        "sod.skill.ballistics": -3,
+        "sod.skill.diplomacy": 1,
+        "sod.skill.armourer": 2,
+        "sod.skill.estates": -1,
+        "sod.skill.leadership": 1,
+        "sod.skill.logistics": -2,
+        "sod.skill.magicWater": 1,
+        "sod.skill.magicAir": -1,
+        "sod.skill.magicFire": -2,
+        "sod.skill.navigation": -2,
+        "sod.skill.offense": -3,
+        "sod.skill.firstAid": 1,
+        "sod.skill.pathfind": 1,
+        "sod.skill.scouting": 2,
+        "sod.skill.resistance": 4,
+        "hota.skill.interfere": 4,
+        "sod.skill.archery": 1,
+        "sod.skill.tactics": -1,
+        "sod.skill.luck": 4
+
+    }
+    },
+    "mageClass": {
+    "id": "sod.class.rampartM",
+    "untranslatedName": "Druid",
+    "startParams": {"ad":{"attack":0, "defense":2}, "magic":{"sp":1, "int":2}},
+    "lowLevelIncrease" : {"attack":10, "defense":20, "sp":35, "int":35},
+    "highLevelIncrease": {"attack":20, "defense":20, "sp":30, "int":30},
+    "skills" :{
+        "sod.skill.ballistics": -1,
+        "sod.skill.scholar": 1,
+        "sod.skill.logistics": 2,
+        "sod.skill.magicWater": 1,
+        "sod.skill.magicAir": -1,
+        "sod.skill.magicFire": -2,
+        "sod.skill.mysticism": -1,
+        "sod.skill.navigation": -2,
+        "sod.skill.offense": -2,
+        "sod.skill.firstAid": 1,
+        "sod.skill.pathfind": 2,
+        "sod.skill.archery": 2,
+        "sod.skill.tactics": -1,
+        "sod.skill.luck": 6
+
+    }
+    }
+
+},
+
+
+"sod.faction.tower"             : {
+    "untranslatedName" : "Tower",
+    "alignment":"good",
+    "nativeTerrain": "sod.terrain.snow",
+    "fighterClass": {
+    "id": "sod.class.towerF",
+    "untranslatedName": "Alchemist",
+    "startParams": {"ad":{"attack":1, "defense":1}, "magic":{"sp":2, "int":2}},
+    "lowLevelIncrease" : {"attack":30, "defense":30, "sp":20, "int":20},
+    "highLevelIncrease": {"attack":30, "defense":30, "sp":20, "int":20},
+    "skills" :{
+        "sod.skill.artillery": -2,
+        "sod.skill.ballistics": -1,
+        "sod.skill.sorcery": 1,
+        "sod.skill.scholar": 2,
+        "sod.skill.armourer": 2,
+        "sod.skill.eagleEye": 1,
+        "sod.skill.estates": 1,
+        "sod.skill.intelligence": 2,
+        "sod.skill.leadership": -2,
+        "sod.skill.logistics": -1,
+        "sod.skill.magicAir": 2,
+        "sod.skill.magicFire": -1,
+        "sod.skill.mysticism": 1,
+        "sod.skill.wisdom": 3,
+        "sod.skill.navigation": -2,
+        "sod.skill.offense": -2,
+        "sod.skill.learning": 6,
+        "sod.skill.pathfind": -2,
+        "sod.skill.scouting": -1,
+        "sod.skill.archery": -2,
+        "sod.skill.tactics": -2
+
+    }
+    },
+    "mageClass": {
+    "id": "sod.class.towerM",
+    "untranslatedName": "Wizard",
+    "startParams": {"ad":{"attack":0, "defense":0}, "magic":{"sp":2, "int":3}},
+    "lowLevelIncrease" : {"attack":10, "defense":10, "sp":40, "int":40},
+    "highLevelIncrease": {"attack":30, "defense":20, "sp":20, "int":30},
+    "skills" :{
+        "sod.skill.ballistics": -1,
+        "sod.skill.sorcery": 2,
+        "sod.skill.scholar": 2,
+        "sod.skill.armourer": -2,
+        "sod.skill.eagleEye": 1,
+        "sod.skill.estates": 2,
+        "sod.skill.intelligence": 3,
+        "sod.skill.leadership": 2,
+        "sod.skill.logistics": -1,
+        "sod.skill.magicAir": 3,
+        "sod.skill.magicEarth": -1,
+        "sod.skill.magicFire": -1,
+        "sod.skill.mysticism": 1,
+        "sod.skill.wisdom": 2,
+        "sod.skill.navigation": -3,
+        "sod.skill.offense": -2,
+        "sod.skill.firstAid": 1,
+        "sod.skill.pathfind": -1,
+        "sod.skill.resistance": -1,
+        "sod.skill.archery": -1,
+        "sod.skill.tactics": -1,
+        "sod.skill.luck": 1
+
+    }
+    }
+},
+
+"sod.faction.inferno"             : {
+    "untranslatedName" : "Inferno",
+    "alignment":"evil",
+    "nativeTerrain": "sod.terrain.lava",
+    "fighterClass": {
+    "id": "sod.class.infernoF",
+    "untranslatedName": "Demoniac",
+    "startParams": {"ad":{"attack":2, "defense":2}, "magic":{"sp":1, "int":1}},
+    "lowLevelIncrease" : {"attack":35, "defense":35, "sp":15, "int":15},
+    "highLevelIncrease": {"attack":30, "defense":30, "sp":20, "int":20},
+    "skills" :{
+        "sod.skill.artillery": -1,
+        "sod.skill.sorcery": 1,
+        "sod.skill.scholar": 1,
+        "sod.skill.diplomacy": 1,
+        "sod.skill.armourer": 1,
+        "sod.skill.eagleEye": 1,
+        "sod.skill.leadership": -2,
+        "sod.skill.logistics": 3,
+        "sod.skill.magicWater": -1,
+        "sod.skill.magicFire": 2,
+        "sod.skill.mysticism": -1,
+        "sod.skill.wisdom": 1,
+        "sod.skill.navigation": -1,
+        "sod.skill.pathfind": -2,
+        "sod.skill.resistance": 1,
+        "hota.skill.interfere": 1,
+        "sod.skill.archery": -1
+
+    }
+    },
+    "mageClass": {
+    "id": "sod.class.infernoM",
+    "untranslatedName": "Heretic",
+    "startParams": {"ad":{"attack":1, "defense":1}, "magic":{"sp":2, "int":1}},
+    "lowLevelIncrease" : {"attack":15, "defense":15, "sp":35, "int":35},
+    "highLevelIncrease": {"attack":20, "defense":20, "sp":30, "int":30},
+    "skills" :{
+        "sod.skill.artillery": 3,
+        "sod.skill.ballistics": 1,
+        "sod.skill.scholar": -2,
+        "sod.skill.diplomacy": -1,
+        "sod.skill.armourer": 1,
+        "sod.skill.eagleEye": -3,
+        "sod.skill.estates": -1,
+        "sod.skill.intelligence": -1,
+        "sod.skill.magicWater": -1,
+        "sod.skill.magicFire": 2,
+        "sod.skill.mysticism": 3,
+        "sod.skill.navigation": -2,
+        "sod.skill.offense": 1,
+        "sod.skill.firstAid": -1,
+        "sod.skill.pathfind": 1,
+        "sod.skill.scouting": 1,
+        "sod.skill.resistance": 2,
+        "sod.skill.archery": 1,
+        "sod.skill.tactics": 2,
+        "sod.skill.luck": -1
+
+    }
+    }
+},
+
+"sod.faction.necropolis"             : {
+    "untranslatedName" : "Necropolis",
+    "alignment":"evil",
+    "nativeTerrain": "sod.terrain.dirt",
+    "fighterClass": {
+    "id": "sod.class.necropolisF",
+    "untranslatedName": "DeathKnight",
+    "startParams": {"ad":{"attack":1, "defense":2}, "magic":{"sp":2, "int":1}},
+    "lowLevelIncrease" : {"attack":30, "defense":25, "sp":20, "int":25},
+    "highLevelIncrease": {"attack":25, "defense":25, "sp":25, "int":25},
+    "skills" :{
+        "sod.skill.artillery": -1,
+        "sod.skill.sorcery": 2,
+        "sod.skill.scholar": 1,
+        "sod.skill.diplomacy": -1,
+        "sod.skill.armourer": -1,
+        "sod.skill.eagleEye": 2,
+        "sod.skill.estates": -3,
+        "sod.skill.intelligence": 3,
+        "sod.skill.leadership": -5,
+        "sod.skill.logistics": -2,
+        "sod.skill.magicWater": 1,
+        "sod.skill.magicEarth": 1,
+        "sod.skill.magicFire": -1,
+        "sod.skill.mysticism": 1,
+        "sod.skill.wisdom": 3,
+        "sod.skill.navigation": 3,
+        "sod.skill.offense": -1,
+        "sod.skill.firstAid": -2,
+        "sod.skill.pathfind": -2,
+        "sod.skill.scouting": -1,
+        "sod.skill.archery": -2,
+        "sod.skill.tactics": -1,
+        "sod.skill.luck": -1,
+        "sod.skill.necromancy": 10
+
+    }
+    },
+    "mageClass": {
+    "id": "sod.class.necropolisM",
+    "untranslatedName": "Necromancer",
+    "startParams": {"ad":{"attack":1, "defense":0}, "magic":{"sp":2, "int":2}},
+    "lowLevelIncrease" : {"attack":15, "defense":15, "sp":35, "int":35},
+    "highLevelIncrease": {"attack":25, "defense":25, "sp":25, "int":25},
+    "skills" :{
+        "sod.skill.artillery": 2,
+        "sod.skill.scholar": -1,
+        "sod.skill.armourer": -1,
+        "sod.skill.intelligence": -1,
+        "sod.skill.leadership": -2,
+        "sod.skill.logistics": 1,
+        "sod.skill.magicEarth": 4,
+        "sod.skill.magicFire": -1,
+        "sod.skill.mysticism": -1,
+        "sod.skill.navigation": 1,
+        "sod.skill.firstAid": -6,
+        "sod.skill.pathfind": 3,
+        "sod.skill.archery": -1,
+        "sod.skill.luck": -2,
+        "sod.skill.necromancy": 10
+
+    }
+    }
+
+},
+
+"sod.faction.dungeon"             : {
+    "untranslatedName" : "Dungeon",
+    "alignment":"evil",
+    "nativeTerrain": "sod.terrain.subterra",
+    "fighterClass": {
+    "id": "sod.class.dungeonF",
+    "untranslatedName": "Overlord",
+    "startParams": {"ad":{"attack":2, "defense":2}, "magic":{"sp":1, "int":1}},
+    "lowLevelIncrease" : {"attack":35, "defense":35, "sp":15, "int":15},
+    "highLevelIncrease": {"attack":30, "defense":30, "sp":20, "int":20},
+    "skills" :{
+        "sod.skill.artillery": 2,
+        "sod.skill.estates": 1,
+        "sod.skill.intelligence": -1,
+        "sod.skill.leadership": 3,
+        "sod.skill.logistics": 1,
+        "sod.skill.magicWater": -2,
+        "sod.skill.magicAir": -1,
+        "sod.skill.navigation": -1,
+        "sod.skill.firstAid": -1,
+        "sod.skill.pathfind": -1,
+        "sod.skill.resistance": 1,
+        "hota.skill.interfere": 1,
+        "sod.skill.archery": -1,
+        "sod.skill.tactics": 4,
+        "sod.skill.luck": -1
+
+    }
+    },
+    "mageClass": {
+    "id": "sod.class.dungeonM",
+    "untranslatedName": "Warlock",
+    "startParams": {"ad":{"attack":0, "defense":0}, "magic":{"sp":3, "int":2}},
+    "lowLevelIncrease" : {"attack":10, "defense":10, "sp":50, "int":30},
+    "highLevelIncrease": {"attack":20, "defense":20, "sp":30, "int":30},
+    "skills" :{
+        "sod.skill.ballistics": 1,
+        "sod.skill.sorcery": 4,
+        "sod.skill.scholar": 1,
+        "sod.skill.armourer": -2,
+        "sod.skill.eagleEye": 1,
+        "sod.skill.estates": 2,
+        "sod.skill.intelligence": 1,
+        "sod.skill.leadership": 1,
+        "sod.skill.logistics": -1,
+        "sod.skill.magicWater": -1,
+        "sod.skill.magicAir": -1,
+        "sod.skill.magicEarth": 1,
+        "sod.skill.magicFire": 2,
+        "sod.skill.mysticism": 1,
+        "sod.skill.wisdom": 2,
+        "sod.skill.offense": -2,
+        "sod.skill.pathfind": -1,
+        "sod.skill.resistance": -1,
+        "sod.skill.archery": -1,
+        "sod.skill.tactics": -1,
+        "sod.skill.luck": -1
+
+    }
+    }
+
+
+},
+
+"sod.faction.stronghold"             : {
+    "untranslatedName" : "Stronghold",
+    "nativeTerrain": "sod.terrain.rough",
+    "fighterClass": {
+    "id": "sod.class.strongholdF",
+    "untranslatedName": "Barbarian",
+    "startParams": {"ad":{"attack":4, "defense":0}, "magic":{"sp":1, "int":1}},
+    "lowLevelIncrease" : {"attack":55, "defense":35, "sp":5 , "int":5},
+    "highLevelIncrease": {"attack":30, "defense":30, "sp":20, "int":20},
+    "skills" :{
+        "sod.skill.artillery": 2,
+        "sod.skill.ballistics": 1,
+        "sod.skill.sorcery": -1,
+        "sod.skill.diplomacy": -2,
+        "sod.skill.estates": -1,
+        "sod.skill.intelligence": -1,
+        "sod.skill.magicWater": -2,
+        "sod.skill.magicAir": 1,
+        "sod.skill.wisdom": -1,
+        "sod.skill.navigation": -3,
+        "sod.skill.offense": 2,
+        "sod.skill.firstAid": -1,
+        "sod.skill.pathfind": 2,
+        "sod.skill.scouting": 3,
+        "sod.skill.resistance": 1,
+        "hota.skill.interfere": 1,
+        "sod.skill.tactics": 2,
+        "sod.skill.luck": 1
+
+    }
+    },
+    "mageClass": {
+    "id": "sod.class.strongholdM",
+    "untranslatedName": "BattleMage",
+    "startParams": {"ad":{"attack":2, "defense":1}, "magic":{"sp":1, "int":1}},
+    "lowLevelIncrease" : {"attack":30, "defense":20, "sp":25, "int":25},
+    "highLevelIncrease": {"attack":25, "defense":25, "sp":25, "int":25},
+    "skills" :{
+        "sod.skill.artillery": 3,
+        "sod.skill.ballistics": 1,
+        "sod.skill.scholar": -3,
+        "sod.skill.diplomacy": -1,
+        "sod.skill.armourer": 1,
+        "sod.skill.eagleEye": -2,
+        "sod.skill.estates": -2,
+        "sod.skill.intelligence": -2,
+        "sod.skill.leadership": 2,
+        "sod.skill.logistics": 6,
+        "sod.skill.magicEarth": -1,
+        "sod.skill.mysticism": -3,
+        "sod.skill.wisdom": -2,
+        "sod.skill.navigation": -4,
+        "sod.skill.offense": 5,
+        "sod.skill.firstAid": -2,
+        "sod.skill.pathfind": 1,
+        "sod.skill.scouting": 2,
+        "sod.skill.resistance": 3,
+        "hota.skill.interfere": 1,
+        "sod.skill.archery": 1,
+        "sod.skill.tactics": 3,
+        "sod.skill.luck": -1
+
+    }
+    }
+
+
+},
+
+"sod.faction.fortress"             : {
+    "untranslatedName" : "Fortress",
+    "nativeTerrain": "sod.terrain.swamp",
+    "fighterClass": {
+    "id": "sod.class.fortressF",
+    "untranslatedName": "Beastmaster",
+    "startParams": {"ad":{"attack":0, "defense":4}, "magic":{"sp":1, "int":1}},
+    "lowLevelIncrease" : {"attack":30, "defense":50, "sp":10, "int":10},
+    "highLevelIncrease": {"attack":30, "defense":30, "sp":20, "int":20},
+    "skills" :{
+        "sod.skill.artillery": 2,
+        "sod.skill.sorcery": -1,
+        "sod.skill.diplomacy": -2,
+        "sod.skill.armourer": 4,
+        "sod.skill.eagleEye": -1,
+        "sod.skill.estates": -2,
+        "sod.skill.intelligence": -1,
+        "sod.skill.logistics": 1,
+        "sod.skill.magicAir": -1,
+        "sod.skill.magicFire": -2,
+        "sod.skill.mysticism": -1,
+        "sod.skill.wisdom": -1,
+        "sod.skill.navigation": 3,
+        "sod.skill.offense": -3,
+        "sod.skill.firstAid": 4,
+        "sod.skill.pathfind": 2,
+        "sod.skill.scouting": 2
+
+    }
+    },
+    "mageClass": {
+    "id": "sod.class.fortressM",
+    "untranslatedName": "Witch",
+    "startParams": {"ad":{"attack":0, "defense":1}, "magic":{"sp":2, "int":2}},
+    "lowLevelIncrease" : {"attack":5 , "defense":15, "sp":40, "int":40},
+    "highLevelIncrease": {"attack":20, "defense":20, "sp":30, "int":30},
+    "skills" :{
+        "sod.skill.ballistics": 3,
+        "sod.skill.sorcery": 2,
+        "sod.skill.diplomacy": -2,
+        "sod.skill.armourer": 1,
+        "sod.skill.eagleEye": 3,
+        "sod.skill.estates": -2,
+        "sod.skill.leadership": -1,
+        "sod.skill.magicEarth": -1,
+        "sod.skill.mysticism": 1,
+        "sod.skill.navigation": 2,
+        "sod.skill.offense": -1,
+        "sod.skill.firstAid": 2,
+        "sod.skill.pathfind": -1,
+        "sod.skill.resistance": -1,
+        "sod.skill.tactics": -1,
+        "sod.skill.luck": 1
+
+    }
+    }
+
+
+},
+
+"sod.faction.conflux"             : {
+    "untranslatedName" : "Conflux",
+    "nativeTerrain": "hota.terrain.highland",
+    "fighterClass": {
+    "id": "sod.class.confluxF",
+    "untranslatedName": "Planeswalker",
+    "startParams": {"ad":{"attack":3, "defense":1}, "magic":{"sp":1, "int":1}},
+    "lowLevelIncrease" : {"attack":45, "defense":25, "sp":15, "int":15},
+    "highLevelIncrease": {"attack":30, "defense":30, "sp":20, "int":20},
+    "skills" :{
+        "sod.skill.artillery": 2,
+        "sod.skill.ballistics": 1,
+        "sod.skill.sorcery": -1,
+        "sod.skill.diplomacy": -1,
+        "sod.skill.armourer": -1,
+        "sod.skill.intelligence": -1,
+        "sod.skill.leadership": -2,
+        "sod.skill.logistics": 1,
+        "sod.skill.magicFire": 1,
+        "sod.skill.wisdom": -1,
+        "sod.skill.offense": 1,
+        "sod.skill.learning": 4,
+        "sod.skill.firstAid": -1,
+        "sod.skill.scouting": 1,
+        "sod.skill.resistance": -3,
+        "hota.skill.interfere": -3,
+        "sod.skill.archery": 1,
+        "sod.skill.tactics": 2
+
+    }
+    },
+    "mageClass": {
+    "id": "sod.class.confluxM",
+    "untranslatedName": "Elementalist",
+    "startParams": {"ad":{"attack":0, "defense":0}, "magic":{"sp":3, "int":3}},
+    "lowLevelIncrease" : {"attack":15, "defense":15, "sp":35, "int":35},
+    "highLevelIncrease": {"attack":25, "defense":25, "sp":25, "int":25},
+    "skills" :{
+        "sod.skill.ballistics": -1,
+        "sod.skill.sorcery": 2,
+        "sod.skill.scholar": 1,
+        "sod.skill.armourer": -2,
+        "sod.skill.eagleEye": 1,
+        "sod.skill.intelligence": 1,
+        "sod.skill.leadership": 1,
+        "sod.skill.logistics": -1,
+        "sod.skill.magicWater": 3,
+        "sod.skill.magicAir": 3,
+        "sod.skill.magicEarth": 2,
+        "sod.skill.magicFire": 3,
+        "sod.skill.mysticism": 1,
+        "sod.skill.offense": -2,
+        "sod.skill.firstAid": -2,
+        "sod.skill.pathfind": -1,
+        "sod.skill.resistance": -1,
+        "sod.skill.archery": -1,
+        "sod.skill.tactics": -1,
+        "sod.skill.luck": -1
+
+    }
+    }
+
+},
+
+"hota.faction.cove"             : {
+    "untranslatedName" : "Cove",
+    "nativeTerrain": "sod.terrain.swamp",
+    "fighterClass": {
+    "id": "hota.class.coveF",
+    "untranslatedName": "Captain",
+    "startParams": {"ad":{"attack":3, "defense":0}, "magic":{"sp":2, "int":1}},
+    "lowLevelIncrease" : {"attack":45, "defense":25, "sp":20, "int":10},
+    "highLevelIncrease": {"attack":30, "defense":30, "sp":20, "int":20},
+    "skills" :{
+        "sod.skill.artillery": -1,
+        "sod.skill.ballistics": -2,
+        "sod.skill.diplomacy": 2,
+        "sod.skill.armourer": -4,
+        "sod.skill.eagleEye": 2,
+        "sod.skill.estates": 1,
+        "sod.skill.intelligence": 1,
+        "sod.skill.leadership": 1,
+        "sod.skill.logistics": -1,
+        "sod.skill.magicAir": 1,
+        "sod.skill.magicEarth": 1,
+        "sod.skill.mysticism": -2,
+        "sod.skill.wisdom": -2,
+        "sod.skill.navigation": 1,
+        "sod.skill.offense": 1,
+        "sod.skill.learning": -2,
+        "sod.skill.pathfind": 2,
+        "sod.skill.scouting": -1,
+        "sod.skill.resistance": -2,
+        "hota.skill.interfere": -2,
+        "sod.skill.archery": 2,
+        "sod.skill.luck": 5
+
+    }
+    },
+    "mageClass": {
+    "id": "hota.class.coveM",
+    "untranslatedName": "Navigator",
+    "startParams": {"ad":{"attack":2, "defense":0}, "magic":{"sp":1, "int":2}},
+    "lowLevelIncrease" : {"attack":15, "defense":10, "sp":40, "int":35},
+    "highLevelIncrease": {"attack":30, "defense":20, "sp":20, "int":30},
+    "skills" :{
+        "sod.skill.ballistics": -3,
+        "sod.skill.scholar": -2,
+        "sod.skill.diplomacy": -2,
+        "sod.skill.armourer": -2,
+        "sod.skill.eagleEye": -5,
+        "sod.skill.estates": -1,
+        "sod.skill.intelligence": 1,
+        "sod.skill.magicWater": 6,
+        "sod.skill.magicAir": 3,
+        "sod.skill.magicEarth": 1,
+        "sod.skill.magicFire": -1,
+        "sod.skill.mysticism": -4,
+        "sod.skill.navigation": 2,
+        "sod.skill.offense": 1,
+        "sod.skill.firstAid": -2,
+        "sod.skill.pathfind": 3,
+        "sod.skill.resistance": 4,
+        "hota.skill.interfere": 1,
+        "sod.skill.archery": 3,
+        "sod.skill.tactics": 2,
+        "sod.skill.luck": 1
+
+    }
+    }
+},
+
+"sod.faction.neutral" : {
+    "untranslatedName" : "Neutral",
+    "alignment":"independent",
+    "fighterClass": {
+    "id": "sod.class.neutralF",
+    "startParams": {"ad":{"attack":0, "defense":0}, "magic":{"sp":1, "int":1}},
+    "lowLevelIncrease" : {"attack":25, "defense":25, "sp":25, "int":25},
+    "highLevelIncrease": {"attack":25, "defense":25, "sp":25, "int":25},
+    "skills" :{}
+    },
+    "mageClass": {
+    "id": "sod.class.neutralM",
+    "startParams": {"ad":{"attack":0, "defense":0}, "magic":{"sp":1, "int":1}},
+    "lowLevelIncrease" : {"attack":25, "defense":25, "sp":25, "int":25},
+    "highLevelIncrease": {"attack":25, "defense":25, "sp":25, "int":25},
+    "skills" :{}
+    }
+},
+"sod.faction.special" : {
+    "untranslatedName" : "Special Objects",
+    "alignment":"special"
+}
+
+
+}
+
+}]

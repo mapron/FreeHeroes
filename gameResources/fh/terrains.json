@@ -1,0 +1,140 @@
+[{
+"scope": "terrains",
+
+"records" : {
+
+"sod.terrain.dirt":
+{
+    "untranslatedName": "Dirt",
+    "moveCost" : 100
+},
+"sod.terrain.sand" :
+{
+    "untranslatedName": "Sand",
+    "moveCost" : 150
+},
+"sod.terrain.grass" :
+{
+    "untranslatedName": "Grass",
+    "moveCost" : 100
+},
+"sod.terrain.snow" :
+{
+    "untranslatedName": "Snow",
+    "moveCost" : 150
+},
+"sod.terrain.swamp" :
+{
+    "untranslatedName": "Swamp",
+    "moveCost" : 175
+},
+"sod.terrain.rough" :
+{
+    "untranslatedName": "Rough",
+    "moveCost" : 125
+},
+"sod.terrain.subterra" :
+{
+    "untranslatedName": "Subterra",
+    "moveCost" : 100
+},
+"sod.terrain.lava" :
+{
+    "untranslatedName": "Lava",
+    "moveCost" : 100
+},
+"sod.terrain.water" :
+{
+    "untranslatedName": "Water",
+    "moveCost" : 100
+},
+"sod.terrain.rock" :
+{
+    "untranslatedName": "Rock",
+    "isObstacle": true,
+    "moveCost" : -1
+},
+
+"hota.terrain.highland" :
+{
+    "untranslatedName": "Highland",
+    "moveCost" : 100
+},
+
+"hota.terrain.wasteland" :
+{
+    "untranslatedName": "Wasteland",
+    "moveCost" : 100
+},
+
+"sod.terrain.magicPlains" :
+{
+    "untranslatedName": "Magic plains",
+    "extraLayer": true
+},
+
+"sod.terrain.fieryFields" :
+{
+    "untranslatedName": "Fiery fields",
+    "extraLayer": true
+},
+"sod.terrain.magicClouds" :
+{
+    "untranslatedName": "Magic clouds",
+    "extraLayer": true
+},
+"sod.terrain.rockyGround" :
+{
+    "untranslatedName": "Rockland",
+    "extraLayer": true
+},
+"sod.terrain.lucidPools" :
+{
+    "untranslatedName": "Lucid pools",
+    "extraLayer": true
+},
+
+"sod.terrain.favorableWinds" :
+{
+    "untranslatedName": "Favorable winds",
+    "extraLayer": true
+},
+"sod.terrain.holyGround" :
+{
+    "untranslatedName": "Holy ground",
+    "extraLayer": true
+},
+"sod.terrain.cloverField" :
+{
+    "untranslatedName": "Clover field",
+    "extraLayer": true
+},
+"sod.terrain.evilFog" :
+{
+    "untranslatedName": "Evil fog",
+    "extraLayer": true
+},
+"sod.terrain.cursedGround" :
+{
+    "untranslatedName": "Cursed ground",
+    "extraLayer": true
+},
+"hota.terrain.crackedIce" :
+{
+    "untranslatedName": "Cracked ice",
+    "extraLayer": true
+},
+"hota.terrain.dunes" :
+{
+    "untranslatedName": "Dunes",
+    "extraLayer": true
+},
+"hota.terrain.gloryFields" :
+{
+    "untranslatedName": "Fields of Glory",
+    "extraLayer": true
+}
+
+}
+
+}]

@@ -1,0 +1,214 @@
+[{
+"scope": "artifacts",
+"uiOnly": true,
+"records" : {
+
+"sod.artifact.special.spellbook"            : { "pres": { "orderGroup":0,              "iconStash":"sod.sprites.artifactsInventory:0" , "iconBonus":"sod.sprites.artifactsBonus:0"} },
+"sod.artifact.special.scroll"               : { "pres": { "orderGroup":0,              "iconStash":"sod.sprites.artifactsInventory:1" , "iconBonus":"sod.sprites.artifactsBonus:1"} },
+"sod.artifact.special.grail"                : { "pres": { "orderGroup":0,              "iconStash":"sod.sprites.artifactsInventory:2" , "iconBonus":"sod.sprites.artifactsBonus:2"} },
+
+"sod.artifact.battleMachine.catapult"       : { "pres": { "orderGroup":0,              "iconStash":"sod.sprites.artifactsInventory:3"   , "iconBonus":"sod.sprites.artifactsBonus:3"   } },
+"sod.artifact.battleMachine.ballista"       : { "pres": { "orderGroup":0,              "iconStash":"sod.sprites.artifactsInventory:4"   , "iconBonus":"sod.sprites.artifactsBonus:4"   } },
+"sod.artifact.battleMachine.ammoCart"       : { "pres": { "orderGroup":0,              "iconStash":"sod.sprites.artifactsInventory:5"   , "iconBonus":"sod.sprites.artifactsBonus:5"   } },
+"sod.artifact.battleMachine.firstAidTent"   : { "pres": { "orderGroup":0,              "iconStash":"sod.sprites.artifactsInventory:6"   , "iconBonus":"sod.sprites.artifactsBonus:6"   } },
+"hota.artifact.battleMachine.cannon"        : { "pres": { "orderGroup":0,              "iconStash":"sod.sprites.artifactsInventory:146" , "iconBonus":"sod.sprites.artifactsBonus:145" } },
+
+
+"sod.artifact.sword.att2"                   : { "pres": { "orderGroup":201,            "iconStash":"sod.sprites.artifactsInventory:7"  , "iconBonus":"sod.sprites.artifactsBonus:7"   } },
+"sod.artifact.sword.att3"                   : { "pres": { "orderGroup":201,            "iconStash":"sod.sprites.artifactsInventory:8"  , "iconBonus":"sod.sprites.artifactsBonus:8"   } },
+"sod.artifact.sword.att4"                   : { "pres": { "orderGroup":201,            "iconStash":"sod.sprites.artifactsInventory:9"  , "iconBonus":"sod.sprites.artifactsBonus:9"   } },
+"sod.artifact.sword.att5"                   : { "pres": { "orderGroup":201,            "iconStash":"sod.sprites.artifactsInventory:10" , "iconBonus":"sod.sprites.artifactsBonus:10"  } },
+"sod.artifact.sword.att6"                   : { "pres": { "orderGroup":201,            "iconStash":"sod.sprites.artifactsInventory:11" , "iconBonus":"sod.sprites.artifactsBonus:11"  } },
+"hota.artifact.sword.att7"                  : { "pres": { "orderGroup":201,            "iconStash":"sod.sprites.artifactsInventory:147", "iconBonus":"sod.sprites.artifactsBonus:146" } },
+"sod.artifact.sword.att12"                  : { "pres": { "orderGroup":201,            "iconStash":"sod.sprites.artifactsInventory:12" , "iconBonus":"sod.sprites.artifactsBonus:12"  } },
+
+"sod.artifact.shield.def2"                  : { "pres": { "orderGroup":202,            "iconStash":"sod.sprites.artifactsInventory:13" , "iconBonus":"sod.sprites.artifactsBonus:13"  } },
+"sod.artifact.shield.def3"                  : { "pres": { "orderGroup":202,            "iconStash":"sod.sprites.artifactsInventory:14" , "iconBonus":"sod.sprites.artifactsBonus:14"  } },
+"sod.artifact.shield.def4"                  : { "pres": { "orderGroup":202,            "iconStash":"sod.sprites.artifactsInventory:15" , "iconBonus":"sod.sprites.artifactsBonus:15"  } },
+"sod.artifact.shield.def5"                  : { "pres": { "orderGroup":202,            "iconStash":"sod.sprites.artifactsInventory:16" , "iconBonus":"sod.sprites.artifactsBonus:16"  } },
+"sod.artifact.shield.def6"                  : { "pres": { "orderGroup":202,            "iconStash":"sod.sprites.artifactsInventory:17" , "iconBonus":"sod.sprites.artifactsBonus:17"  } },
+"hota.artifact.shield.def7"                 : { "pres": { "orderGroup":202,            "iconStash":"sod.sprites.artifactsInventory:148", "iconBonus":"sod.sprites.artifactsBonus:147" } },
+"sod.artifact.shield.def12"                 : { "pres": { "orderGroup":202,            "iconStash":"sod.sprites.artifactsInventory:18", "iconBonus":"sod.sprites.artifactsBonus:18"   } },
+
+
+"sod.artifact.helm.int1"                    : { "pres": { "orderGroup":203,            "iconStash":"sod.sprites.artifactsInventory:19" , "iconBonus":"sod.sprites.artifactsBonus:19"  } },
+"sod.artifact.helm.int2"                    : { "pres": { "orderGroup":203,            "iconStash":"sod.sprites.artifactsInventory:20" , "iconBonus":"sod.sprites.artifactsBonus:20"  } },
+"sod.artifact.helm.int3"                    : { "pres": { "orderGroup":203,            "iconStash":"sod.sprites.artifactsInventory:21" , "iconBonus":"sod.sprites.artifactsBonus:21"  } },
+"sod.artifact.helm.int4"                    : { "pres": { "orderGroup":203,            "iconStash":"sod.sprites.artifactsInventory:22" , "iconBonus":"sod.sprites.artifactsBonus:22"  } },
+"sod.artifact.helm.int5"                    : { "pres": { "orderGroup":203,            "iconStash":"sod.sprites.artifactsInventory:23" , "iconBonus":"sod.sprites.artifactsBonus:23"  } },
+"hota.artifact.helm.int6"                   : { "pres": { "orderGroup":203,            "iconStash":"sod.sprites.artifactsInventory:150", "iconBonus":"sod.sprites.artifactsBonus:149" } },
+"sod.artifact.helm.int10"                   : { "pres": { "orderGroup":203,            "iconStash":"sod.sprites.artifactsInventory:24" , "iconBonus":"sod.sprites.artifactsBonus:24"  } },
+
+"sod.artifact.torso.spl1"                   : { "pres": { "orderGroup":204,            "iconStash":"sod.sprites.artifactsInventory:25" , "iconBonus":"sod.sprites.artifactsBonus:25"  } },
+"sod.artifact.torso.spl2"                   : { "pres": { "orderGroup":204,            "iconStash":"sod.sprites.artifactsInventory:26" , "iconBonus":"sod.sprites.artifactsBonus:26"  } },
+"sod.artifact.torso.spl3"                   : { "pres": { "orderGroup":204,            "iconStash":"sod.sprites.artifactsInventory:27" , "iconBonus":"sod.sprites.artifactsBonus:27"  } },
+"sod.artifact.torso.spl4"                   : { "pres": { "orderGroup":204,            "iconStash":"sod.sprites.artifactsInventory:28" , "iconBonus":"sod.sprites.artifactsBonus:28"  } },
+"sod.artifact.torso.spl5"                   : { "pres": { "orderGroup":204,            "iconStash":"sod.sprites.artifactsInventory:29" , "iconBonus":"sod.sprites.artifactsBonus:29"  } },
+"hota.artifact.torso.spl6"                  : { "pres": { "orderGroup":204,            "iconStash":"sod.sprites.artifactsInventory:149", "iconBonus":"sod.sprites.artifactsBonus:148" } },
+"sod.artifact.torso.spl10"                  : { "pres": { "orderGroup":204,            "iconStash":"sod.sprites.artifactsInventory:30" , "iconBonus":"sod.sprites.artifactsBonus:30"  } },
+
+"sod.artifact.torso.all1"                   : { "pres": { "orderGroup":204,            "iconStash":"sod.sprites.artifactsInventory:31" , "iconBonus":"sod.sprites.artifactsBonus:31"  } },
+"sod.artifact.boots.all2"                   : { "pres": { "orderGroup":205,            "iconStash":"sod.sprites.artifactsInventory:32" , "iconBonus":"sod.sprites.artifactsBonus:32"  } },
+"sod.artifact.neck.all3"                    : { "pres": { "orderGroup":205,            "iconStash":"sod.sprites.artifactsInventory:33" , "iconBonus":"sod.sprites.artifactsBonus:33"  } },
+"sod.artifact.shield.all4"                  : { "pres": { "orderGroup":202,            "iconStash":"sod.sprites.artifactsInventory:34" , "iconBonus":"sod.sprites.artifactsBonus:34"  } },
+"sod.artifact.sword.all5"                   : { "pres": { "orderGroup":201,            "iconStash":"sod.sprites.artifactsInventory:35" , "iconBonus":"sod.sprites.artifactsBonus:35"  } },
+"sod.artifact.helm.all6"                    : { "pres": { "orderGroup":203,            "iconStash":"sod.sprites.artifactsInventory:36" , "iconBonus":"sod.sprites.artifactsBonus:36"  } },
+
+
+"sod.artifact.ring.attDef1"                 : { "pres": { "orderGroup":206,            "iconStash":"sod.sprites.artifactsInventory:37" , "iconBonus":"sod.sprites.artifactsBonus:37"  } },
+"sod.artifact.sword.attDef2"                : { "pres": { "orderGroup":201,            "iconStash":"sod.sprites.artifactsInventory:38" , "iconBonus":"sod.sprites.artifactsBonus:38"  } },
+"sod.artifact.shield.attDef3"               : { "pres": { "orderGroup":202,            "iconStash":"sod.sprites.artifactsInventory:39" , "iconBonus":"sod.sprites.artifactsBonus:39"  } },
+"sod.artifact.torso.attDef4"                : { "pres": { "orderGroup":204,            "iconStash":"sod.sprites.artifactsInventory:40" , "iconBonus":"sod.sprites.artifactsBonus:40"  } },
+"sod.artifact.boots.intSpl1"                : { "pres": { "orderGroup":206,            "iconStash":"sod.sprites.artifactsInventory:41" , "iconBonus":"sod.sprites.artifactsBonus:41"  } },
+"sod.artifact.cape.intSpl2"                 : { "pres": { "orderGroup":206,            "iconStash":"sod.sprites.artifactsInventory:42" , "iconBonus":"sod.sprites.artifactsBonus:42"  } },
+"sod.artifact.neck.intSpl3"                 : { "pres": { "orderGroup":206,            "iconStash":"sod.sprites.artifactsInventory:43" , "iconBonus":"sod.sprites.artifactsBonus:43"  } },
+"sod.artifact.helm.intSpl4"                 : { "pres": { "orderGroup":203,            "iconStash":"sod.sprites.artifactsInventory:44" , "iconBonus":"sod.sprites.artifactsBonus:44"  } },
+"sod.artifact.ring.luckMorale1"             : { "pres": { "orderGroup":210,            "iconStash":"sod.sprites.artifactsInventory:45" , "iconBonus":"sod.sprites.artifactsBonus:45"  } },
+
+
+"sod.artifact.misc.luck1a"                  : { "pres": { "orderGroup":210, "order":1, "iconStash":"sod.sprites.artifactsInventory:46" , "iconBonus":"sod.sprites.artifactsBonus:46"  } },
+"sod.artifact.misc.luck1b"                  : { "pres": { "orderGroup":210, "order":2, "iconStash":"sod.sprites.artifactsInventory:47" , "iconBonus":"sod.sprites.artifactsBonus:47"  } },
+"sod.artifact.misc.luck1c"                  : { "pres": { "orderGroup":210, "order":3, "iconStash":"sod.sprites.artifactsInventory:48" , "iconBonus":"sod.sprites.artifactsBonus:48"  } },
+"sod.artifact.misc.morale1a"                : { "pres": { "orderGroup":210, "order":4, "iconStash":"sod.sprites.artifactsInventory:49" , "iconBonus":"sod.sprites.artifactsBonus:49"  } },
+"sod.artifact.misc.morale1b"                : { "pres": { "orderGroup":210, "order":5, "iconStash":"sod.sprites.artifactsInventory:50" , "iconBonus":"sod.sprites.artifactsBonus:50"  } },
+"sod.artifact.misc.morale1c"                : { "pres": { "orderGroup":210, "order":6, "iconStash":"sod.sprites.artifactsInventory:51" , "iconBonus":"sod.sprites.artifactsBonus:51"  } },
+"sod.artifact.neck.luckMorale3"             : { "pres": { "orderGroup":210, "order":7, "iconStash":"sod.sprites.artifactsInventory:108", "iconBonus":"sod.sprites.artifactsBonus:108" } },
+
+
+"hota.artifact.misc.unluck1a"               : { "pres": { "orderGroup":211, "order":1, "iconStash":"sod.sprites.artifactsInventory:152" , "iconBonus":"sod.sprites.artifactsBonus:151" } },
+"hota.artifact.misc.unluck1b"               : { "pres": { "orderGroup":211, "order":2, "iconStash":"sod.sprites.artifactsInventory:153" , "iconBonus":"sod.sprites.artifactsBonus:152" } },
+"hota.artifact.misc.unluck2"                : { "pres": { "orderGroup":211, "order":3, "iconStash":"sod.sprites.artifactsInventory:154" , "iconBonus":"sod.sprites.artifactsBonus:153" } },
+"hota.artifact.misc.unmorale1"              : { "pres": { "orderGroup":211, "order":1, "iconStash":"sod.sprites.artifactsInventory:155" , "iconBonus":"sod.sprites.artifactsBonus:154" } },
+"hota.artifact.ring.unmorale1"              : { "pres": { "orderGroup":211, "order":2, "iconStash":"sod.sprites.artifactsInventory:156" , "iconBonus":"sod.sprites.artifactsBonus:155" } },
+"hota.artifact.neck.unmorale2"              : { "pres": { "orderGroup":211, "order":3, "iconStash":"sod.sprites.artifactsInventory:157" , "iconBonus":"sod.sprites.artifactsBonus:156" } },
+
+"sod.artifact.misc.neutralizeMorale"        : { "pres": { "orderGroup":212, "order":1, "iconStash":"sod.sprites.artifactsInventory:84" , "iconBonus":"sod.sprites.artifactsBonus:84"   } },
+"sod.artifact.misc.neutralizeLuck"          : { "pres": { "orderGroup":212, "order":2, "iconStash":"sod.sprites.artifactsInventory:85" , "iconBonus":"sod.sprites.artifactsBonus:85"   } },
+
+
+"sod.artifact.ring.mp1"                     : { "pres": { "orderGroup":220,            "iconStash":"sod.sprites.artifactsInventory:70" , "iconBonus":"sod.sprites.artifactsBonus:70"   } },
+"sod.artifact.boots.mp1"                    : { "pres": { "orderGroup":220,            "iconStash":"sod.sprites.artifactsInventory:98" , "iconBonus":"sod.sprites.artifactsBonus:98"   } },
+"sod.artifact.neck.mp1"                     : { "pres": { "orderGroup":220,            "iconStash":"sod.sprites.artifactsInventory:71" , "iconBonus":"sod.sprites.artifactsBonus:71"   } },
+
+"sod.artifact.misc.mana1"                   : { "pres": { "orderGroup":230,            "iconStash":"sod.sprites.artifactsInventory:73" , "iconBonus":"sod.sprites.artifactsBonus:73" } },
+"sod.artifact.misc.mana2"                   : { "pres": { "orderGroup":230,            "iconStash":"sod.sprites.artifactsInventory:74" , "iconBonus":"sod.sprites.artifactsBonus:74" } },
+"sod.artifact.misc.mana3"                   : { "pres": { "orderGroup":230,            "iconStash":"sod.sprites.artifactsInventory:75" , "iconBonus":"sod.sprites.artifactsBonus:75" } },
+
+"sod.artifact.neck.rounds1"                 : { "pres": { "orderGroup":231,            "iconStash":"sod.sprites.artifactsInventory:76" , "iconBonus":"sod.sprites.artifactsBonus:76" } },
+"sod.artifact.ring.rounds2"                 : { "pres": { "orderGroup":231,            "iconStash":"sod.sprites.artifactsInventory:77" , "iconBonus":"sod.sprites.artifactsBonus:77" } },
+"sod.artifact.cape.rounds3"                 : { "pres": { "orderGroup":231,            "iconStash":"sod.sprites.artifactsInventory:78" , "iconBonus":"sod.sprites.artifactsBonus:78" } },
+
+"sod.artifact.ring.life1a"                  : { "pres": { "orderGroup":240, "order":1, "iconStash":"sod.sprites.artifactsInventory:94" , "iconBonus":"sod.sprites.artifactsBonus:94" } },
+"sod.artifact.ring.life1b"                  : { "pres": { "orderGroup":240, "order":2, "iconStash":"sod.sprites.artifactsInventory:95" , "iconBonus":"sod.sprites.artifactsBonus:95" } },
+"sod.artifact.misc.life2"                   : { "pres": { "orderGroup":240, "order":3, "iconStash":"sod.sprites.artifactsInventory:96" , "iconBonus":"sod.sprites.artifactsBonus:96" } },
+
+"sod.artifact.neck.speed1"                  : { "pres": { "orderGroup":241, "order":1, "iconStash":"sod.sprites.artifactsInventory:97" , "iconBonus":"sod.sprites.artifactsBonus:97" } },
+"sod.artifact.ring.speed1"                  : { "pres": { "orderGroup":241, "order":2, "iconStash":"sod.sprites.artifactsInventory:69" , "iconBonus":"sod.sprites.artifactsBonus:69" } },
+"sod.artifact.cape.speed2"                  : { "pres": { "orderGroup":241, "order":3, "iconStash":"sod.sprites.artifactsInventory:99" , "iconBonus":"sod.sprites.artifactsBonus:99" } },
+
+"sod.artifact.misc.scoutRadius1a"           : { "pres": { "orderGroup":301, "order":1, "iconStash":"sod.sprites.artifactsInventory:52" , "iconBonus":"sod.sprites.artifactsBonus:52" } },
+"sod.artifact.misc.scoutRadius1b"           : { "pres": { "orderGroup":301, "order":2, "iconStash":"sod.sprites.artifactsInventory:53" , "iconBonus":"sod.sprites.artifactsBonus:53" } },
+
+"sod.artifact.neck.necr1"                   : { "pres": { "orderGroup":302,            "iconStash":"sod.sprites.artifactsInventory:54" , "iconBonus":"sod.sprites.artifactsBonus:54" } },
+"sod.artifact.cape.necr1"                   : { "pres": { "orderGroup":302,            "iconStash":"sod.sprites.artifactsInventory:55" , "iconBonus":"sod.sprites.artifactsBonus:55" } },
+"sod.artifact.boots.necr1"                  : { "pres": { "orderGroup":302,            "iconStash":"sod.sprites.artifactsInventory:56" , "iconBonus":"sod.sprites.artifactsBonus:56" } },
+
+"sod.artifact.neck.resist1"                 : { "pres": { "orderGroup":303,            "iconStash":"sod.sprites.artifactsInventory:57" , "iconBonus":"sod.sprites.artifactsBonus:57" } },
+"sod.artifact.cape.resist1"                 : { "pres": { "orderGroup":303,            "iconStash":"sod.sprites.artifactsInventory:58" , "iconBonus":"sod.sprites.artifactsBonus:58" } },
+"sod.artifact.boots.resist1"                : { "pres": { "orderGroup":303,            "iconStash":"sod.sprites.artifactsInventory:59" , "iconBonus":"sod.sprites.artifactsBonus:59" } },
+
+"sod.artifact.misc.archery1"                : { "pres": { "orderGroup":304,            "iconStash":"sod.sprites.artifactsInventory:60" , "iconBonus":"sod.sprites.artifactsBonus:60" } },
+"sod.artifact.misc.archery2"                : { "pres": { "orderGroup":304,            "iconStash":"sod.sprites.artifactsInventory:61" , "iconBonus":"sod.sprites.artifactsBonus:61" } },
+"sod.artifact.misc.archery3"                : { "pres": { "orderGroup":304,            "iconStash":"sod.sprites.artifactsInventory:62" , "iconBonus":"sod.sprites.artifactsBonus:62" } },
+
+"sod.artifact.misc.eagle1"                  : { "pres": { "orderGroup":305,            "iconStash":"sod.sprites.artifactsInventory:63" , "iconBonus":"sod.sprites.artifactsBonus:63" } },
+"sod.artifact.misc.eagle2"                  : { "pres": { "orderGroup":305,            "iconStash":"sod.sprites.artifactsInventory:64" , "iconBonus":"sod.sprites.artifactsBonus:64" } },
+"sod.artifact.misc.eagle3"                  : { "pres": { "orderGroup":305,            "iconStash":"sod.sprites.artifactsInventory:65" , "iconBonus":"sod.sprites.artifactsBonus:65" } },
+
+"sod.artifact.neck.diplomacy1"              : { "pres": { "orderGroup":306, "order":1, "iconStash":"sod.sprites.artifactsInventory:66" , "iconBonus":"sod.sprites.artifactsBonus:66" } },
+"sod.artifact.ring.diplomacy2"              : { "pres": { "orderGroup":306, "order":2, "iconStash":"sod.sprites.artifactsInventory:67" , "iconBonus":"sod.sprites.artifactsBonus:67" } },
+"sod.artifact.cape.diplomacy3"              : { "pres": { "orderGroup":306, "order":3, "iconStash":"sod.sprites.artifactsInventory:68" , "iconBonus":"sod.sprites.artifactsBonus:68" } },
+
+"hota.artifact.misc.interfere"              : { "pres": { "orderGroup":307, "order":1, "iconStash":"sod.sprites.artifactsInventory:162" , "iconBonus":"sod.sprites.artifactsBonus:161" } },
+"hota.artifact.ring.interfere"              : { "pres": { "orderGroup":307, "order":2, "iconStash":"sod.sprites.artifactsInventory:163" , "iconBonus":"sod.sprites.artifactsBonus:162" } },
+"hota.artifact.torso.interfere"             : { "pres": { "orderGroup":307, "order":3, "iconStash":"sod.sprites.artifactsInventory:164" , "iconBonus":"sod.sprites.artifactsBonus:163" } },
+
+"hota.artifact.boots.pathfind"              : { "pres": { "orderGroup":310, "order":1, "iconStash":"sod.sprites.artifactsInventory:151" , "iconBonus":"sod.sprites.artifactsBonus:150" } },
+
+"sod.artifact.misc.bookAir"                 : { "pres": { "orderGroup":401, "order":1, "iconStash":"sod.sprites.artifactsInventory:87" , "iconBonus":"sod.sprites.artifactsBonus:87" } },
+"sod.artifact.misc.bookEarth"               : { "pres": { "orderGroup":401, "order":2, "iconStash":"sod.sprites.artifactsInventory:89" , "iconBonus":"sod.sprites.artifactsBonus:89" } },
+"sod.artifact.misc.bookFire"                : { "pres": { "orderGroup":401, "order":3, "iconStash":"sod.sprites.artifactsInventory:86" , "iconBonus":"sod.sprites.artifactsBonus:86" } },
+"sod.artifact.misc.bookWater"               : { "pres": { "orderGroup":401, "order":4, "iconStash":"sod.sprites.artifactsInventory:88" , "iconBonus":"sod.sprites.artifactsBonus:88" } },
+
+"sod.artifact.helm.spells5"                 : { "pres": { "orderGroup":402, "order":1, "iconStash":"sod.sprites.artifactsInventory:124" , "iconBonus":"sod.sprites.artifactsBonus:124" } },
+
+"sod.artifact.misc.sphereAir"               : { "pres": { "orderGroup":403, "order":1, "iconStash":"sod.sprites.artifactsInventory:79" , "iconBonus":"sod.sprites.artifactsBonus:79"   } },
+"sod.artifact.misc.sphereEarth"             : { "pres": { "orderGroup":403, "order":2, "iconStash":"sod.sprites.artifactsInventory:80" , "iconBonus":"sod.sprites.artifactsBonus:80"   } },
+"sod.artifact.misc.sphereFire"              : { "pres": { "orderGroup":403, "order":3, "iconStash":"sod.sprites.artifactsInventory:81" , "iconBonus":"sod.sprites.artifactsBonus:81"   } },
+"sod.artifact.misc.sphereWater"             : { "pres": { "orderGroup":403, "order":4, "iconStash":"sod.sprites.artifactsInventory:82" , "iconBonus":"sod.sprites.artifactsBonus:82"   } },
+
+"hota.artifact.cape.noMagic12"              : { "pres": { "orderGroup":410,            "iconStash":"sod.sprites.artifactsInventory:159" , "iconBonus":"sod.sprites.artifactsBonus:158" } },
+"sod.artifact.cape.noMagic3plus"            : { "pres": { "orderGroup":410,            "iconStash":"sod.sprites.artifactsInventory:83"  , "iconBonus":"sod.sprites.artifactsBonus:83"  } },
+"sod.artifact.misc.noMagic"                 : { "pres": { "orderGroup":410,            "iconStash":"sod.sprites.artifactsInventory:126" , "iconBonus":"sod.sprites.artifactsBonus:126" } },
+
+"sod.artifact.misc.noDispell"               : { "pres": { "orderGroup":411,            "iconStash":"sod.sprites.artifactsInventory:92"   , "iconBonus":"sod.sprites.artifactsBonus:92"  } },
+"sod.artifact.misc.noImmune"                : { "pres": { "orderGroup":412,            "iconStash":"sod.sprites.artifactsInventory:93"   , "iconBonus":"sod.sprites.artifactsBonus:93"  } },
+"hota.artifact.ring.noResurrect"            : { "pres": { "orderGroup":413,            "iconStash":"sod.sprites.artifactsInventory:158" , "iconBonus":"sod.sprites.artifactsBonus:157"  } },
+
+"sod.artifact.neck.protectSpellBers"        : { "pres": { "orderGroup":450, "order":1 ,"iconStash":"sod.sprites.artifactsInventory:100" , "iconBonus":"sod.sprites.artifactsBonus:100" } },
+"sod.artifact.neck.protectSpellBlind"       : { "pres": { "orderGroup":450, "order":11,"iconStash":"sod.sprites.artifactsInventory:101" , "iconBonus":"sod.sprites.artifactsBonus:101" } },
+"sod.artifact.neck.protectSpellCurse"       : { "pres": { "orderGroup":450, "order":3 ,"iconStash":"sod.sprites.artifactsInventory:102" , "iconBonus":"sod.sprites.artifactsBonus:102" } },
+"sod.artifact.neck.protectSpellDeathWave"   : { "pres": { "orderGroup":450, "order":4 ,"iconStash":"sod.sprites.artifactsInventory:103" , "iconBonus":"sod.sprites.artifactsBonus:103" } },
+"sod.artifact.neck.protectSpellKillUndead"  : { "pres": { "orderGroup":450, "order":5 ,"iconStash":"sod.sprites.artifactsInventory:104" , "iconBonus":"sod.sprites.artifactsBonus:104" } },
+"sod.artifact.neck.protectSpellHypnosis"    : { "pres": { "orderGroup":450, "order":6 ,"iconStash":"sod.sprites.artifactsInventory:105" , "iconBonus":"sod.sprites.artifactsBonus:105" } },
+"sod.artifact.neck.protectSpellLightning"   : { "pres": { "orderGroup":450, "order":12,"iconStash":"sod.sprites.artifactsInventory:106" , "iconBonus":"sod.sprites.artifactsBonus:106" } },
+"sod.artifact.neck.protectSpellForget"      : { "pres": { "orderGroup":450, "order":8 ,"iconStash":"sod.sprites.artifactsInventory:107" , "iconBonus":"sod.sprites.artifactsBonus:107" } },
+
+"sod.artifact.cape.resourceCrystal"         : { "pres": { "orderGroup":501, "order":1, "iconStash":"sod.sprites.artifactsInventory:109" , "iconBonus":"sod.sprites.artifactsBonus:109" } },
+"sod.artifact.ring.resourceGems"            : { "pres": { "orderGroup":501, "order":2, "iconStash":"sod.sprites.artifactsInventory:110" , "iconBonus":"sod.sprites.artifactsBonus:110" } },
+"sod.artifact.misc.resourceCrystal"         : { "pres": { "orderGroup":501, "order":3, "iconStash":"sod.sprites.artifactsInventory:111" , "iconBonus":"sod.sprites.artifactsBonus:111" } },
+"sod.artifact.misc.resourceOre"             : { "pres": { "orderGroup":501, "order":4, "iconStash":"sod.sprites.artifactsInventory:112" , "iconBonus":"sod.sprites.artifactsBonus:112" } },
+"sod.artifact.ring.resourceSulfur"          : { "pres": { "orderGroup":501, "order":5, "iconStash":"sod.sprites.artifactsInventory:113" , "iconBonus":"sod.sprites.artifactsBonus:113" } },
+"sod.artifact.misc.resourceWood"            : { "pres": { "orderGroup":501, "order":6, "iconStash":"sod.sprites.artifactsInventory:114" , "iconBonus":"sod.sprites.artifactsBonus:114" } },
+"sod.artifact.misc.gold1"                   : { "pres": { "orderGroup":501, "order":7, "iconStash":"sod.sprites.artifactsInventory:115" , "iconBonus":"sod.sprites.artifactsBonus:115" } },
+"sod.artifact.misc.gold2"                   : { "pres": { "orderGroup":501, "order":8, "iconStash":"sod.sprites.artifactsInventory:116" , "iconBonus":"sod.sprites.artifactsBonus:116" } },
+"sod.artifact.misc.gold3"                   : { "pres": { "orderGroup":501, "order":9, "iconStash":"sod.sprites.artifactsInventory:117" , "iconBonus":"sod.sprites.artifactsBonus:117" } },
+
+"sod.artifact.misc.growth2"                 : { "pres": { "orderGroup":502, "order":1, "iconStash":"sod.sprites.artifactsInventory:118" , "iconBonus":"sod.sprites.artifactsBonus:118" } },
+"sod.artifact.misc.growth3"                 : { "pres": { "orderGroup":502, "order":2, "iconStash":"sod.sprites.artifactsInventory:119" , "iconBonus":"sod.sprites.artifactsBonus:119" } },
+"sod.artifact.misc.growth4"                 : { "pres": { "orderGroup":502, "order":3, "iconStash":"sod.sprites.artifactsInventory:120" , "iconBonus":"sod.sprites.artifactsBonus:120" } },
+"sod.artifact.misc.growth5"                 : { "pres": { "orderGroup":502, "order":4, "iconStash":"sod.sprites.artifactsInventory:121" , "iconBonus":"sod.sprites.artifactsBonus:121" } },
+"sod.artifact.misc.growth6"                 : { "pres": { "orderGroup":502, "order":5, "iconStash":"sod.sprites.artifactsInventory:122" , "iconBonus":"sod.sprites.artifactsBonus:122" } },
+
+"sod.artifact.sword.armag"                  : { "pres": { "orderGroup":600, "order":3, "iconStash":"sod.sprites.artifactsInventory:128" , "iconBonus":"sod.sprites.artifactsBonus:128"  } },
+
+"sod.artifact.cape.spellFly"                : { "pres": { "orderGroup":600, "order":1, "iconStash":"sod.sprites.artifactsInventory:72"  , "iconBonus":"sod.sprites.artifactsBonus:72"  } },
+"hota.artifact.misc.summon"                 : { "pres": { "orderGroup":600, "order":2, "iconStash":"sod.sprites.artifactsInventory:161" , "iconBonus":"sod.sprites.artifactsBonus:160" } },
+"sod.artifact.boots.spellWalkWater"         : { "pres": { "orderGroup":600, "order":4, "iconStash":"sod.sprites.artifactsInventory:90"  , "iconBonus":"sod.sprites.artifactsBonus:90"  } },
+"sod.artifact.misc.archeryNoDistance"       : { "pres": { "orderGroup":600, "order":5, "iconStash":"sod.sprites.artifactsInventory:91"  , "iconBonus":"sod.sprites.artifactsBonus:91"  } },
+"sod.artifact.misc.dragonStuff"             : { "pres": { "orderGroup":600, "order":6, "iconStash":"sod.sprites.artifactsInventory:127" , "iconBonus":"sod.sprites.artifactsBonus:127" } },
+"sod.artifact.misc.noSurrender"             : { "pres": { "orderGroup":600, "order":7, "iconStash":"sod.sprites.artifactsInventory:125" , "iconBonus":"sod.sprites.artifactsBonus:125" } },
+"sod.artifact.helm.boat"                    : { "pres": { "orderGroup":600, "order":8, "iconStash":"sod.sprites.artifactsInventory:123" , "iconBonus":"sod.sprites.artifactsBonus:123" } },
+
+"sod.artifact.complex.allStat"              : { "pres": { "orderGroup":700, "order": 1, "iconStash":"sod.sprites.artifactsInventory:129" , "iconBonus":"sod.sprites.artifactsBonus:129" } },
+"sod.artifact.complex.necro"                : { "pres": { "orderGroup":700, "order": 2, "iconStash":"sod.sprites.artifactsInventory:130" , "iconBonus":"sod.sprites.artifactsBonus:130" } },
+"sod.artifact.complex.life"                 : { "pres": { "orderGroup":700, "order": 3, "iconStash":"sod.sprites.artifactsInventory:131" , "iconBonus":"sod.sprites.artifactsBonus:131" } },
+"sod.artifact.complex.debuff"               : { "pres": { "orderGroup":700, "order": 4, "iconStash":"sod.sprites.artifactsInventory:132" , "iconBonus":"sod.sprites.artifactsBonus:132" } },
+"sod.artifact.complex.growth"               : { "pres": { "orderGroup":700, "order": 5, "iconStash":"sod.sprites.artifactsInventory:133" , "iconBonus":"sod.sprites.artifactsBonus:133" } },
+"sod.artifact.complex.immune"               : { "pres": { "orderGroup":700, "order": 6, "iconStash":"sod.sprites.artifactsInventory:134" , "iconBonus":"sod.sprites.artifactsBonus:134" } },
+"sod.artifact.complex.freeBolt"             : { "pres": { "orderGroup":700, "order": 7, "iconStash":"sod.sprites.artifactsInventory:135" , "iconBonus":"sod.sprites.artifactsBonus:135" } },
+"sod.artifact.complex.fastOnboard"          : { "pres": { "orderGroup":700, "order": 8, "iconStash":"sod.sprites.artifactsInventory:136" , "iconBonus":"sod.sprites.artifactsBonus:136" } },
+"sod.artifact.complex.noBowPenalty"         : { "pres": { "orderGroup":700, "order": 9, "iconStash":"sod.sprites.artifactsInventory:137" , "iconBonus":"sod.sprites.artifactsBonus:137" } },
+"sod.artifact.complex.manaRegen"            : { "pres": { "orderGroup":700, "order": 10,"iconStash":"sod.sprites.artifactsInventory:138" , "iconBonus":"sod.sprites.artifactsBonus:138" } },
+"sod.artifact.complex.spellRounds"          : { "pres": { "orderGroup":700, "order": 11,"iconStash":"sod.sprites.artifactsInventory:139" , "iconBonus":"sod.sprites.artifactsBonus:139" } },
+
+
+"hota.artifact.complex.resources"           : { "pres": { "orderGroup":700, "order":12, "iconStash":"sod.sprites.artifactsInventory:140" , "iconBonus":"sod.sprites.artifactsBonus:140" } },
+"hota.artifact.complex.diplomacy"           : { "pres": { "orderGroup":700, "order":13, "iconStash":"sod.sprites.artifactsInventory:141" , "iconBonus":"sod.sprites.artifactsBonus:141" } },
+"hota.artifact.complex.resist"              : { "pres": { "orderGroup":700, "order":14, "iconStash":"sod.sprites.artifactsInventory:142" , "iconBonus":"sod.sprites.artifactsBonus:142" } },
+"hota.artifact.complex.buff"                : { "pres": { "orderGroup":700, "order":15, "iconStash":"sod.sprites.artifactsInventory:143" , "iconBonus":"sod.sprites.artifactsBonus:143" } },
+"hota.artifact.complex.gold"                : { "pres": { "orderGroup":700, "order":16, "iconStash":"sod.sprites.artifactsInventory:160" , "iconBonus":"sod.sprites.artifactsBonus:159" } }
+
+}
+
+}]

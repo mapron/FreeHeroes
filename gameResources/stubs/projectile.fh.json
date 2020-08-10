@@ -1,0 +1,22 @@
+{
+    "groups": {
+        "0": {
+            "boundarySizeHeight": 32,
+            "boundarySizeWidth": 32,
+            "extra": null,
+            "frames": [
+                {
+                    "dup": false,
+                    "h": 8,
+                    "id": 0,
+                    "padLeft": 12,
+                    "padTop": 11,
+                    "w": 8
+                }
+            ],
+            "pixHeightOffset": 0
+        }
+    },
+    "splitToFolder": false,
+    "version": "1.0"
+}

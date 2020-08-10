@@ -1,0 +1,153 @@
+sod	soft	
+$
+translation	ru_RU	artifacts	
+	sod.artifact.special.scroll	Свиток
+translation	en_US	artifacts	
+	sod.artifact.special.scroll	Scroll
+translation	ru_RU	units
+	sod.unit.pikeman	+	Копейщика	Копейщиков	Копейщика
+	sod.unit.halberdier	+	Алебардщика	Алебардщиков	Алебардщика
+	sod.unit.archer	+	Арбалетчика	Арбалетчиков	Арбалетчика
+	sod.unit.marksman	+	Искусных Арбалетчика	Искусных Арбалетчиков	Искусного Арбалетчика
+	sod.unit.griffin	+	Грифона	Грифонов	Грифона
+	sod.unit.royalGriffin	+	Королевских Грифона	Королевских Грифонов	Королевского Грифона
+	sod.unit.swordsman	+	Мечника	Мечников	Мечника
+	sod.unit.crusader	+	Крестоносца	Крестоносцев	Крестоносца
+	sod.unit.monk	+	Монаха	Монахов	Монаха
+	sod.unit.zealot	+	Фанатика	Фанатиков	Фанатика
+	sod.unit.cavalier	+	Кавалериста	Кавалеристов	Кавалериста
+	sod.unit.champion	+	Чемпиона	Чемпионов	Чемпиона
+	sod.unit.angel	+	Ангела	Ангелов	Ангела
+	sod.unit.archangel	+	Архангела	Архангелов	Архангела
+	sod.unit.centaur	+	Кентавра	Кентавров	Кентавра
+	sod.unit.centaurCaptain	+	Капитана Кентавров	Капитанов Кентавров	Капитана Кентавров
+	sod.unit.dwarf	+	Гнома	Гномов	Гнома
+	sod.unit.battleDwarf	+	Боевых Гнома	Боевых Гномов	Боевого Гнома
+	sod.unit.woodElf	+	Эльфа	Эльфов	Эльфа
+	sod.unit.grandElf	+	Благородных Эльфа	Благородных Эльфов	Благородного Эльфа
+	sod.unit.pegasus	+	Пегаса	Пегасов	Пегаса
+	sod.unit.silverPegasus	+	Серебряных Пегаса	Серебряных Пегасов	Серебряного Пегаса
+	sod.unit.dendroidGuard	+	Дендроида	Дендроидов	Дендроида
+	sod.unit.dendroidSoldier	+	Дендроида-Солдата	Дендроидов-Солдатов	Дендроида-Солдата
+	sod.unit.unicorn	+	Единорога	Единорогов	Единорога
+	sod.unit.warUnicorn	+	Боевых Единорога	Боевых Единорогов	Боевого Единорога
+	sod.unit.greenDragon	+	Зелёных Дракона	Зелёных Драконов	Зелёного Дракона
+	sod.unit.goldDragon	+	Золотых Дракона	Золотых Драконов	Золотого Дракона
+	sod.unit.gremlin	+	Гремлина	Гремлинов	Гремлина
+	sod.unit.masterGremlin	+	Гремлина-Мастера	Гремлинов-Мастеров	Гремлина-Мастера
+	sod.unit.stoneGargoyle	+	Каменных Горгульи	Каменных Горгулей	Каменную Горгулью
+	sod.unit.obsidianGargoyle	+	Обсидиановых Горгульи	Обсидиановых Горгулей	Обсидиановую Горгулью
+	sod.unit.stoneGolem	+	Каменных Голема	Каменных Големов	Каменного Голема
+	sod.unit.ironGolem	+	Железных Голема	Железных Големов	Железного Голема
+	sod.unit.mage	+	Мага	Магов	Мага
+	sod.unit.archMage	+	Архимага	Архимагов	Архимага
+	sod.unit.genie	+	Джинна	Джиннов	Джинна
+	sod.unit.masterGenie	+	Верховных Джинна	Верховных Джиннов	Верховного Джинна
+	sod.unit.naga	+	Нага	Наг	Нагу
+	sod.unit.nagaQueen	+	Королевы Наг	Королев Наг	Королеву Наг
+	sod.unit.giant	+	Гиганта	Гигантов	Гиганта
+	sod.unit.titan	+	Титана	Титанов	Титана
+	sod.unit.skeleton	+	Скелета	Скелетов	Скелета
+	sod.unit.skeletonWarrior	+	Скелета-Воина	Скелетов-Воинов	Скелета-Воина
+	sod.unit.walkingDead	+	Ходячих Мертвеца	Ходячих Мертвецев	Ходячего Мертвеца
+	sod.unit.zombieLord	+	Зомби	Зомби	Зомби
+	sod.unit.wight	+	Духа	Духов	Духа
+	sod.unit.wraith	+	Привидения	Привидений	Привидение
+	sod.unit.vampire	+	Вампира	Вампиров	Вампира
+	sod.unit.vampireLord	+	Вампира-Лорда	Лордов Вампиров	Вампира-Лорда
+	sod.unit.lich	+	Лича	Личей	Лича
+	sod.unit.powerLich	+	Могущественных Лича	Могущественных Личей	Могущественного Лича
+	sod.unit.blackKnight	+	Чёрных Рыцаря	Чёрных Рыцарей	Чёрного Рыцаря
+	sod.unit.dreadKnight	+	Рыцарей Ужаса	Рыцарей Ужаса	Рыцаря Ужаса
+	sod.unit.boneDragon	+	Костяных Дракона	Костяных Драконов	Костяного Дракона
+	sod.unit.ghostDragon	+	Призрачных Дракона	Призрачных Драконов	Призрачного Дракона
+	sod.unit.troglodyte	+	Троглодита	Троглодитов	Троглодита
+	sod.unit.infernalTroglodyte	+	Троглодита-Охотника	Троглодитов-Охотников	Троглодита-Охотника
+	sod.unit.harpy	+	Гарпии	Гарпий	Гарпию
+	sod.unit.harpyHag	+	Гарпии-Ведьмы	Гарпий-Ведьм	Гарпию-Ведьму
+	sod.unit.beholder	+	Бехолдера	Бехолдеров	Бехолдера
+	sod.unit.evilEye	+	Зловещих Глаза	Зловещих Глаз	Зловещего Глаза
+	sod.unit.medusa	+	Медузы	Медуз	Медузу
+	sod.unit.medusaQueen	+	Королевы Медуз	Королев Медуз	Королеву Медуз
+	sod.unit.minotaur	+	Минотавра	Минотавров	Минотавра
+	sod.unit.minotaurKing	+	Короля Минотавров	Королей Минотавров	Короля Минотавров
+	sod.unit.manticore	+	Мантикоры	Мантикор	Мантикору
+	sod.unit.scorpicore	+	Скорпикоры	Скорпикор	Скорпикору
+	sod.unit.redDragon	+	Красных Дракона	Красных Драконов	Красного Дракона
+	sod.unit.blackDragon	+	Чёрных Дракона	Чёрных Драконов	Чёрного Дракона
+	sod.unit.imp	+	Беса	Бесов	Беса
+	sod.unit.familiar	+	Чёрта	Чертей	Чёрта
+	sod.unit.gog	+	Гога	Гогов	Гога
+	sod.unit.magog	+	Магога	Магогов	Магога
+	sod.unit.hellHound	+	Адских Гончих	Адских Гончих	Адскую Гончую
+	sod.unit.cerberus	+	Цербера	Церберов	Цербера
+	sod.unit.demon	+	Демона	Демонов	Демона
+	sod.unit.hornedDemon	+	Рогатых Демона	Рогатых Демонов	Рогатого Демона
+	sod.unit.pitFiend	+	Отродия Пропасти	Отродий Пропасти	Отродие Пропасти
+	sod.unit.pitLord	+	Властителя Пропасти	Властителей Пропасти	Властителя Пропасти
+	sod.unit.efreet	+	Ифрита	Ифритов	Ифрита
+	sod.unit.efreetSultan	+	Султана Ифритов	Султанов Ифритов	Султана Ифритов
+	sod.unit.devil	+	Дьявола	Дьяволов	Дьявола
+	sod.unit.archDevil	+	Архидьявола	Архидьяволов	Архидьявола
+	sod.unit.gnoll	+	Гнолла	Гноллов	Гнолла
+	sod.unit.gnollMarauder	+	Гнолла-Мародёра	Гноллов-Мародёров	Гнолла-Мародёра
+	sod.unit.lizardman	+	Ящера	Ящеров	Ящера
+	sod.unit.lizardWarrior	+	Ящера-Воина	Ящеров-Воинов	Ящера-Воина
+	sod.unit.serpentFly	+	Змия	Змиев	Змия
+	sod.unit.dragonFly	+	Ядовитых Змия	Ядовитых Змиев	Ядовитого Змия
+	sod.unit.basilisk	+	Василиска	Василисков	Василиска
+	sod.unit.greaterBasilisk	+	Великих Василиска	Великих Василисков	Великого Василиска
+	sod.unit.gorgon	+	Горгоны	Горгон	Горгону
+	sod.unit.mightyGorgon	+	Могучие Горгоны	Могучих Горгон	Могучую Горгону
+	sod.unit.wyvern	+	Виверны	Виверн	Виверну
+	sod.unit.wyvernMonarch	+	Виверны-Монарха	Виверн-Монархов	Виверну-Монарха
+	sod.unit.hydra	+	Гидра	Гидр	Гидру
+	sod.unit.chaosHydra	+	Гидры Хаоса	Гидр Хаоса	Гидру Хаоса
+	sod.unit.goblin	+	Гоблина	Гоблинов	Гоблина
+	sod.unit.hobgoblin	+	Хобгоблина	Хобгоблинов	Хобгоблина
+	sod.unit.wolfRider	+	Наездника на Волках	Наездников на Волках	Наездника на Волках
+	sod.unit.wolfHoboRider	+	Налётчика	Налётчиков	Налётчика
+	sod.unit.orc	+	Орка	Орков	Орка
+	sod.unit.orcChieftain	+	Вождя Орков	Вождей Орков	Вождя Орков
+	sod.unit.ogre	+	Огра	Огров	Огра
+	sod.unit.ogreMage	+	Огра-Мага	Огров-Магов	Огра-Мага
+	sod.unit.roc	+	Птицы Рух	Птиц Рух	Птицу Рух
+	sod.unit.thunderbird	+	Птицы Грома	Птиц Грома	Птицу Грома
+	sod.unit.cyclop	+	Циклопа	Циклопов	Циклопа
+	sod.unit.cyclopKing	+	Короля Циклопов	Королей Циклопов	Короля Циклопов
+	sod.unit.behemoth	+	Чудища	Чудищ	Чудище
+	sod.unit.ancientBehemoth	+	Древних Чудища	Древних Чудищ	Древнее Чудище
+	sod.unit.pixie	+	Пикси	Пиксей	Пикси
+	sod.unit.sprite	+	Феи	Фей	Фею
+	sod.unit.airElemental	+	Воздушных Элементаля	Воздушных Элементалей	Воздушного Элементаля
+	sod.unit.stormElemental	+	Элементаля Шторма	Элементалей Шторма	Элементаля Шторма
+	sod.unit.waterElemental	+	Водных Элементаля	Водных Элементалей	Водного Элементаля
+	sod.unit.iceElemental	+	Элементаля Льда	Элементалей Льда	Элементаля Льда
+	sod.unit.fireElemental	+	Огненных Элементаля	Огненных Элементалей	Огненного Элементаля
+	sod.unit.energyElemental	+	Элементаля Энергии	Элементалей Энергии	Элементаля Энергии
+	sod.unit.earthElemental	+	Земляных Элементаля	Земляных Элементалей	Земляного Элементаля
+	sod.unit.magmaElemental	+	Элементаля Магмы	Элементалей Магмы	Элементаля Магмы
+	sod.unit.psychicElemental	+	Психических Элементаля	Психических Элементалей	Психического Элементаля
+	sod.unit.magicElemental	+	Элементаля Магии	Элементалей Магии	Элементаля Магии
+	sod.unit.firebird	+	Огненных Птицы	Огненных Птиц	Огненную Птицу
+	sod.unit.phoenix	+	Феникса	Фениксов	Феникса
+	sod.unit.peasant	+	Крестьянина	Крестьян	Крестьянина
+	sod.unit.halfling	+	Полурослика	Полуросликов	Полурослика
+	sod.unit.boar	+	Наездника на Кабанах	Наездников на Кабанах	Наездника на Кабане
+	sod.unit.rogue	+	Вора	Воров	Вора
+	sod.unit.nomad	+	Кочевника	Кочевников	Кочевника
+	sod.unit.mummy	+	Мумии	Мумий	Мумию
+	sod.unit.sharpshooter	+	Снайпера	Снайперов	Снайпера
+	sod.unit.goldGolem	+	Золотых Голема	Золотых Големов	Золотого Голема
+	sod.unit.troll	+	Тролля	Троллей	Тролля
+	sod.unit.diamondGolem	+	Алмазных Голема	Алмазных Големов	Алмазного Голема
+	sod.unit.enchanter	+	Чародея	Чародеев	Чародея
+	sod.unit.fairieDragon	+	Сказочных Дракона	Сказочных Драконов	Сказочного Дракона
+	sod.unit.rustDragon	+	Ржавых Дракона	Ржавых Драконов	Ржавого Дракона
+	sod.unit.crystalDragon	+	Кристальных Дракона	Кристальных Драконов	Кристального Дракона
+	sod.unit.azureDragon	+	Лазурных Дракона	Лазурных Драконов	Лазурного Дракона
+	sod.unit.ammoCart	+	Подводы с Боеприпасами	Подвод с Боеприпасами	Подводу с Боеприпасами
+	sod.unit.firstAidTent	+	Палатки Первой Помощи	Палаток Первой Помощи	Палатку Первой Помощи
+	sod.unit.ballista	+	Баллисты	Баллист	Баллисту
+	sod.unit.catapult	+	Катапульты	Катапульт	Катапульту
+	sod.unit.arrowTower	+	Стрелковых Башни	Стрелковых Башен	Стрелковую Башню

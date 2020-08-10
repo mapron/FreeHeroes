@@ -1,0 +1,171 @@
+[{
+"scope": "factions",
+"uiOnly": true,
+"records" : {
+
+"sod.faction.castle"             : {
+    "fighterClass": { "pres": {
+        "battleSpriteMale": "ch00",
+        "battleSpriteFemale": "ch00b"
+        }
+    },
+
+    "mageClass": { "pres": {
+        "battleSpriteMale": "ch01b",
+        "battleSpriteFemale": "ch01"
+        }
+    },
+    "pres": {"unitBackground": "crbkgcas"}
+},
+
+"sod.faction.rampart"             : {
+
+    "fighterClass": { "pres": {
+        "battleSpriteMale": "ch02",
+        "battleSpriteFemale": "ch02b"
+        }
+    },
+    "mageClass": { "pres": {
+        "battleSpriteMale": "ch03b",
+        "battleSpriteFemale": "ch03"
+        }
+    },
+    "pres": { "unitBackground": "crbkgram",
+        "goesAfterId":"sod.faction.castle"}
+
+},
+
+"sod.faction.tower"             : {
+    "fighterClass": { "pres": {
+        "battleSpriteMale": "ch04b",
+        "battleSpriteFemale": "ch04"
+        }
+    },
+    "mageClass": { "pres": {
+        "battleSpriteMale": "ch05",
+        "battleSpriteFemale": "ch05b"
+        }
+    },
+    "pres": {"unitBackground":"crbkgtow",
+        "goesAfterId":"sod.faction.rampart"}
+},
+
+"sod.faction.inferno"             : {
+    "fighterClass": { "pres": {
+        "battleSpriteMale": "ch06",
+        "battleSpriteFemale": "ch06b"
+        }
+    },
+    "mageClass": { "pres": {
+        "battleSpriteMale": "ch07b",
+        "battleSpriteFemale": "ch07"
+        }
+    },
+    "pres": { "unitBackground":"crbkginf"}
+},
+
+"sod.faction.necropolis"             : {
+    "fighterClass": {"pres": {
+        "battleSpriteMale": "ch08",
+        "battleSpriteFemale": "ch08b"
+        }
+    },
+    "mageClass": { "pres": {
+        "battleSpriteMale": "ch09b",
+        "battleSpriteFemale": "ch09"
+        }
+    },
+    "pres": {"unitBackground":"crbkgnec" ,
+        "goesAfterId":"sod.faction.inferno"}
+
+},
+
+"sod.faction.dungeon"             : {
+    "fighterClass": { "pres": {
+        "battleSpriteMale": "ch010",
+        "battleSpriteFemale": "ch010b"
+        }
+    },
+    "mageClass": { "pres": {
+        "battleSpriteMale": "ch011b",
+        "battleSpriteFemale": "ch11"
+        }
+    },
+    "pres": {"unitBackground":"crbkgdun",
+        "goesAfterId":"sod.faction.necropolis"}
+},
+
+"sod.faction.stronghold"             : {
+    "fighterClass": { "pres": {
+        "battleSpriteMale": "ch013",
+        "battleSpriteFemale": "ch012"
+        }
+    },
+    "mageClass": { "pres": {
+        "battleSpriteMale": "ch013b",
+        "battleSpriteFemale": "ch012b"
+        }
+    },
+    "pres": { "unitBackground":"crbkgstr"}
+},
+
+"sod.faction.fortress"             : {
+    "untranslatedName" : "Fortress",
+    "nativeTerrain": "sod.terrain.swamp",
+    "goesAfterId":"sod.faction.stronghold",
+    "fighterClass": { "pres": {
+        "battleSpriteMale": "ch014",
+        "battleSpriteFemale": "ch014"
+        }
+    },
+    "mageClass": { "pres": {
+        "battleSpriteMale": "ch015",
+        "battleSpriteFemale": "ch015"
+        }
+    },
+    "pres": { "unitBackground":"crbkgfor",
+        "goesAfterId":"sod.faction.stronghold"}
+},
+
+"sod.faction.conflux"             : {
+    "fighterClass": { "pres": {
+        "battleSpriteMale": "ch16",
+        "battleSpriteFemale": "ch16b"
+        }
+    },
+    "mageClass": { "pres": {
+        "battleSpriteMale": "ch17",
+        "battleSpriteFemale": "ch17b"
+        }
+    },
+    "pres": { "unitBackground":"crbkgele",
+        "goesAfterId":"sod.faction.fortress"}
+
+},
+
+"hota.faction.cove"             : {
+    "fighterClass": { "pres": {
+        "battleSpriteMale": "ch18b",
+        "battleSpriteFemale": "ch18"
+        }
+    },
+    "mageClass": { "pres": {
+        "battleSpriteMale": "ch19",
+        "battleSpriteFemale": "ch19b"
+        }
+    },
+    "pres": { "unitBackground":"crbkgcov",
+        "goesAfterId":"sod.faction.conflux" }
+},
+
+"sod.faction.neutral" : {
+    "pres": { "unitBackground":"crbkgneu" }
+},
+"sod.faction.special" : {
+    "untranslatedName" : "Special Objects",
+    "alignment":"special"
+}
+
+
+}
+}]

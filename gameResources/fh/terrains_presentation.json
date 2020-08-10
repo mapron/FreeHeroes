@@ -1,0 +1,177 @@
+[{
+"scope": "terrains",
+"uiOnly": true,
+
+"records" : {
+
+"sod.terrain.dirt": { "pres":
+{
+    "order": 1,
+    "minimapUnblocked" : [ 82, 56, 8 ],
+    "minimapBlocked"   : [ 57, 40, 8 ],
+    "music" : "dirt",
+    "backgroundsBattle" : ["cmbkdrmt", "cmbkdrtr", "cmbkdrdd"]
+}},
+"sod.terrain.sand" : { "pres":
+{
+    "order": 2,
+    "minimapUnblocked" : [ 222, 207, 140 ],
+    "minimapBlocked"   : [ 165, 158, 107 ],
+    "music" : "sand",
+    "backgroundsBattle" : ["cmbkbch", "cmbkdes" ]
+}},
+"sod.terrain.grass" : { "pres":
+{
+    "order": 3,
+    "minimapUnblocked" : [ 0, 65, 0 ],
+    "minimapBlocked"   : [ 0, 48, 0 ],
+    "music" : "grass",
+    "backgroundsBattle" : ["cmbkgrmt", "cmbkgrtr"]
+}},
+"sod.terrain.snow" : { "pres":
+{
+    "order": 3,
+    "minimapUnblocked" : [ 181, 199, 198 ],
+    "minimapBlocked"   : [ 140, 158, 156 ],
+    "music" : "snow",
+    "backgroundsBattle" : ["cmbksntr", "cmbksnmt"]
+}},
+"sod.terrain.swamp" : { "pres":
+{
+    "order": 5,
+    "minimapUnblocked" : [ 74, 134, 107 ],
+    "minimapBlocked"   : [ 33,  89,  66 ],
+    "music" : "swamp",
+    "backgroundsBattle": ["cmbkswmp", "cmbkswdv", "cmbkswhl"]
+}},
+"sod.terrain.rough" : { "pres":
+{
+    "order": 6,
+    "minimapUnblocked" : [ 132, 113, 49 ],
+    "minimapBlocked"   : [  99,  81, 33 ],
+    "music" : "rough",
+    "backgroundsBattle" : ["cmbkrgh"]
+}},
+"sod.terrain.subterra" : { "pres":
+{
+    "order": 7,
+    "minimapUnblocked" : [ 132, 48, 0 ],
+    "minimapBlocked"   : [  90,  8, 0 ],
+    "music" : "underground",
+    "backgroundsBattle" : ["cmbksub" ]
+}},
+"sod.terrain.lava" : { "pres":
+{
+    "order": 8,
+    "minimapUnblocked" : [ 74, 73, 74 ],
+    "minimapBlocked"   : [ 41, 40, 41 ],
+    "music" : "lava",
+    "backgroundsBattle" : ["cmbklava" , "cmbklvst"]
+}},
+"sod.terrain.water" : { "pres":
+{
+    "order": 9,
+    "minimapUnblocked" : [ 8, 81, 148 ],
+    "minimapBlocked"   : [ 8, 81, 148 ],
+    "music" : "water",
+    "backgroundsBattle" : ["cmbkboat","cmbkdeck" ]
+}},
+"sod.terrain.rock" : { "pres":
+{
+    "order": 10,
+    "isObstacle": true,
+    "minimapUnblocked" : [ 0, 0, 0 ],
+    "minimapBlocked"   : [ 0, 0, 0 ],
+    "music" : "underground",
+    "backgroundsBattle" : []
+}},
+
+"hota.terrain.highland" : { "pres":
+{
+    "order": 20,
+    "minimapUnblocked" : [ 0, 65, 0 ],
+    "minimapBlocked"   : [ 0, 48, 0 ],
+    "music" : "highlands",
+    "backgroundsBattle" : ["cmbkhlmt"]
+}},
+
+"hota.terrain.wasteland" : { "pres":
+{
+    "order": 21,
+    "minimapUnblocked" : [ 0, 65, 0 ],
+    "minimapBlocked"   : [ 0, 48, 0 ],
+    "music" : "wasteland",
+    "backgroundsBattle" : ["cmbkwstp"]
+}},
+
+"sod.terrain.magicPlains" : { "pres":
+{
+    "order": 30,
+    "backgroundsBattle" : ["cmbkmag"]
+}},
+
+"sod.terrain.fieryFields" : { "pres":
+{
+    "order": 31,
+    "backgroundsBattle" : ["cmbkff"]
+}},
+"sod.terrain.magicClouds" : { "pres":
+{
+    "order": 32,
+    "backgroundsBattle" : ["cmbkmc"]
+}},
+"sod.terrain.rockyGround" : { "pres":
+{
+    "order": 33,
+    "backgroundsBattle" : ["cmbkrk"]
+}},
+"sod.terrain.lucidPools" : { "pres":
+{
+    "order": 34,
+    "backgroundsBattle" : ["cmbklp"]
+}},
+
+"sod.terrain.favorableWinds" : { "pres":
+{
+    "order": 35,
+    "backgroundsBattle" : ["cmbkboat","cmbkdeck"]
+}},
+"sod.terrain.holyGround" : { "pres":
+{
+    "order": 36,
+    "backgroundsBattle" : ["cmbkhg"]
+}},
+"sod.terrain.cloverField" : { "pres":
+{
+    "order": 37,
+    "backgroundsBattle" : ["cmbkcf"]
+}},
+"sod.terrain.evilFog" : { "pres":
+{
+    "order": 38,
+    "backgroundsBattle" : ["cmbkef"]
+}},
+"sod.terrain.cursedGround" : { "pres":
+{
+    "order": 39,
+    "backgroundsBattle" : ["cmbkcur"]
+}},
+"hota.terrain.crackedIce" : { "pres":
+{
+    "order": 50,
+    "backgroundsBattle" : ["cmbkice"]
+}},
+"hota.terrain.dunes" : { "pres":
+{
+    "order": 51,
+    "backgroundsBattle" : ["cmbkdun"]
+}},
+"hota.terrain.gloryFields" : { "pres":
+{
+    "order": 52,
+    "backgroundsBattle" : ["cmbkflgl"]
+}}
+
+}
+
+}]
