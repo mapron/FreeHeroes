@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Smirnov Valdimir / mapron1@gmail.com
+ * Copyright (C) 2020 Smirnov Vladimir / mapron1@gmail.com
  * SPDX-License-Identifier: MIT
  * See LICENSE file for details.
  */
@@ -78,9 +78,9 @@ void AdventureEstimation::bindTypes(sol::state& lua)
 
         "rngMax"                , &AdventureHero::EstimatedParams::rngMax,
 
-        "unitSpeedAbs"      , &AdventureHero::EstimatedParams::unitBattleSpeedAbs,
-        "unitLifeAbs"       , &AdventureHero::EstimatedParams::unitLifeAbs,
-        "unitLife"          , &AdventureHero::EstimatedParams::unitLife,
+        "unitSpeedAbs"          , &AdventureHero::EstimatedParams::unitBattleSpeedAbs,
+        "unitLifeAbs"           , &AdventureHero::EstimatedParams::unitLifeAbs,
+        "unitLife"              , &AdventureHero::EstimatedParams::unitLife,
 
         "extraMP"               , &AdventureHero::EstimatedParams::extraMovePoints,
         "extraMPWater"          , &AdventureHero::EstimatedParams::extraMovePointsWater,
@@ -93,7 +93,7 @@ void AdventureEstimation::bindTypes(sol::state& lua)
 
         "schoolLevels"          , &AdventureHero::EstimatedParams::schoolLevels,
         "extraRounds"           , &AdventureHero::EstimatedParams::extraRounds,
-        "dayIncome"            , &AdventureHero::EstimatedParams::dayIncome,
+        "dayIncome"             , &AdventureHero::EstimatedParams::dayIncome,
 
         "factionsAlliance"      , &AdventureHero::EstimatedParams::factionsAllianceSpecial
     );

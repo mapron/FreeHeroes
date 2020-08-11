@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Smirnov Valdimir / mapron1@gmail.com
+ * Copyright (C) 2020 Smirnov Vladimir / mapron1@gmail.com
  * SPDX-License-Identifier: MIT
  * See LICENSE file for details.
  */
@@ -216,8 +216,9 @@ void BattleFieldItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* o
     Q_UNUSED(option);
     Q_UNUSED(widget);
     const QBrush shadowAvailable = QColor(0, 0, 0, 90);
-    const QBrush shadowMoveTarget = QColor(0, 0, 0, 120);
-    const QBrush hightlightFocus = QColor(200, 200, 200, 30);
+    const QBrush shadowMoveTarget = QColor(0, 0, 0, 170);
+    const QBrush hightlightFocus = QColor(200, 200, 200, 40);
+    const QBrush hightlightAttackFocus = QColor(50, 0, 0, 130);
     const auto mainGrid = QColor(192, 192, 0, 80);
     const auto hintGrid = QColor(0, 0, 0, 100);
     const auto pathTrace = QColor(0, 150, 0, 150);
@@ -246,7 +247,7 @@ void BattleFieldItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* o
         return result;
     };
 
-
+    const bool validMove  = m_controlPlan.m_planMove.isValid();
     const bool makingCast = m_controlPlan.m_planCastParams.isActive();
     const int checkAvaiDx = m_controlPlan.m_selectedStack && m_controlPlan.m_selectedStack->library->traits.large ? (m_controlPlan.m_selectedStack->side == BattleStack::Side::Attacker ? -1 : +1) : 0;
     const auto currentAvailableCells = makingCast ? getAvailableCastArea() : getAvailableMovement(m_controlPlan.m_selectedStack);
@@ -260,14 +261,17 @@ void BattleFieldItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* o
         for (int w = 0, totalW = m_battleGeometry.width; w < totalW; ++w) {
             const BattlePosition pos{w, h};
             const bool isHovered = m_hovered == pos;
+            const bool isHoveredOnAttack = isHovered && m_controlPlan.m_hoveredStack && validMove;
             const bool isAvai = currentAvailableCells.contains(pos);
-            const bool isMoveTo = m_controlPlan.m_planMove.isValid() && m_controlPlan.m_planMove.m_moveTo.contains(pos);
+            const bool isMoveTo = validMove && m_controlPlan.m_planMove.m_moveTo.contains(pos);
             const bool isObstacle = obstacles.contains(pos);
             QBrush brush = QBrush(Qt::NoBrush);
             if (isMoveTo)
                 brush = shadowMoveTarget;
             else if (isObstacle)
                 brush = obstacleColor;
+            else if (isHoveredOnAttack && !makingCast)
+                brush = hightlightAttackFocus;
             else if (isHovered && !makingCast)
                 brush = hightlightFocus;
             else if (isAvai)

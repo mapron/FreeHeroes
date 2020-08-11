@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Smirnov Valdimir / mapron1@gmail.com
+ * Copyright (C) 2020 Smirnov Vladimir / mapron1@gmail.com
  * SPDX-License-Identifier: MIT
  * See LICENSE file for details.
  */
@@ -270,7 +270,7 @@ void ConverterDialog::run()
 
     statusUpdate(tr("Extracting files..."));
 
-    KnownResources knownResources(QString2stdPath(QApplication::applicationDirPath()) / "Resources" / "knownResources.txt");
+    KnownResources knownResources(QString2stdPath(QApplication::applicationDirPath()) / "gameResources" / "knownResources.txt");
     auto lastUpd = std::chrono::milliseconds{0};
     int doneExtract = 0;
     ArchiveParser parser(knownResources,

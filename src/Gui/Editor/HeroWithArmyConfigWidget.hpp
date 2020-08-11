@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Smirnov Valdimir / mapron1@gmail.com
+ * Copyright (C) 2020 Smirnov Vladimir / mapron1@gmail.com
  * SPDX-License-Identifier: MIT
  * See LICENSE file for details.
  */
@@ -18,13 +18,12 @@ namespace Ui
 class HeroWithArmyConfigWidget;
 }
 
-namespace FreeHeroes {
-namespace Core {
+namespace FreeHeroes::Core {
 class IRandomGenerator;
 }
 
-namespace Gui {
-class ArtifactsFilterModel;
+namespace FreeHeroes::Gui {
+
 class LibraryModelsProvider;
 class GuiAdventureArmy;
 class GuiAdventureHero;
@@ -50,7 +49,6 @@ private:
     void expEdited();
     void levelEdited();
     void heroIndexChanged();
-
 
     void displayHeroSummary();
     void displayHeroPrimary();
@@ -79,5 +77,4 @@ private:
     LibraryModelsProvider * m_modelProvider = nullptr;
 };
 
-}
 }

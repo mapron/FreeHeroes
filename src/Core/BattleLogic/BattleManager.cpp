@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Smirnov Valdimir / mapron1@gmail.com
+ * Copyright (C) 2020 Smirnov Vladimir / mapron1@gmail.com
  * SPDX-License-Identifier: MIT
  * See LICENSE file for details.
  */
@@ -1080,7 +1080,8 @@ void BattleManager::beforeFirstTurn(BattleStack::Side side)
     if (!army.battleHero.isValid())
         return;
     for (auto & castBeforeStart : army.battleHero.adventure->estimated.castsBeforeStart) {
-        const auto effect = BattleStack::Effect(castBeforeStart);
+        int rounds = castBeforeStart.spellPower;
+        const auto effect = BattleStack::Effect(castBeforeStart, rounds);
         IBattleNotify::Affected affected;
         for (auto targetStack : m_alive) {
             if (castBeforeStart.spell->qualify == LibrarySpell::Qualify::Good && targetStack->side != side)
@@ -1123,13 +1124,12 @@ bool BattleManager::checkRngEffect(int bonusValue)
     if (bonusValue < 0) {
         bonusValue = -bonusValue * 2;
     }
-    auto roll = m_randomGenerator->genSmall(23);
+    auto roll = m_randomGenerator->genSmall(23); // @todo: we can actually have increased luck chance.
     return (roll < bonusValue);
 }
 
 bool BattleManager::checkResist(BonusRatio successChance)
 {
-    //return true;
     int percent = (successChance * 100).roundDownInt();
     if (percent <= 0) percent = 1;
     auto roll = m_randomGenerator->genSmall(99);
@@ -1141,8 +1141,10 @@ BattleManager::LuckRoll BattleManager::makeLuckRoll(BattleStackConstPtr attacker
     int luckLevel = attacker->current.rngParams.luck;
     if (!luckLevel)
         return LuckRoll::None;
+
     if (!checkRngEffect(luckLevel))
         return LuckRoll::None;
+
     if (luckLevel > 0) {
         m_notifiers->onStackUnderEffect(attacker, IBattleNotify::Effect::GoodLuck);
         return LuckRoll::Luck;

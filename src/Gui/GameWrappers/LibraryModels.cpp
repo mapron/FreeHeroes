@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Smirnov Valdimir / mapron1@gmail.com
+ * Copyright (C) 2020 Smirnov Vladimir / mapron1@gmail.com
  * SPDX-License-Identifier: MIT
  * See LICENSE file for details.
  */
@@ -147,9 +147,12 @@ bool ArtifactsFilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& so
         if (rec->treasureClass == Core::LibraryArtifact::TreasureClass::Special || rec->treasureClass == Core::LibraryArtifact::TreasureClass::BattleMachine)
             return false;
     }
-
-    if (m_filter >= 0 && static_cast<int>(rec->slot) != m_filter)
-        return false;
+    if (m_filter >= 0) {
+        if (static_cast<int>(rec->slot) != m_filter)
+            return false;
+        if (rec->treasureClass == Core::LibraryArtifact::TreasureClass::Special)
+            return false;
+    }
 
     return true;
 }

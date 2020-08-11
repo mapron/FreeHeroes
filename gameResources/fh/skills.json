@@ -82,7 +82,12 @@
 "sod.skill.ballistics"        : { "untranslatedName":"Ballistics", "frequencyFighter": 7 , "frequencyMage": 5 },
 "sod.skill.eagleEye"          : { "untranslatedName":"Eagle Eye", "frequencyFighter": 2 , "frequencyMage": 7 },
 "sod.skill.necromancy"        : { "untranslatedName":"Necromancy", "frequencyFighter": 0 , "frequencyMage": 0 },
-"sod.skill.estates"           : { "untranslatedName":"Estates", "frequencyFighter": 3 , "frequencyMage": 3, "handler":"stat", "calc":[]},
+"sod.skill.estates"           : { "untranslatedName":"Estates", "frequencyFighter": 3 , "frequencyMage": 3, "handler":"stat", "calc":[
+    "values = { 250, 500, 1000 } ",
+    "bonus = values[skillLevel + 1] ",
+    "if isSpec then bonus = bonus + math.ceil(bonus * heroLevel / 20) end ",
+    "h.dayIncome.gold = h.dayIncome.gold + bonus"
+]},
 "sod.skill.scholar"           : { "untranslatedName":"Scholar", "frequencyFighter": 1 , "frequencyMage": 7, "handler":"stat", "calc":[
     "h.maxTeachingSpell = skillLevel + 2"
 ]},

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Smirnov Valdimir / mapron1@gmail.com
+ * Copyright (C) 2020 Smirnov Vladimir / mapron1@gmail.com
  * SPDX-License-Identifier: MIT
  * See LICENSE file for details.
  */
@@ -40,8 +40,7 @@ void AdventureControl::heroStackAction(StackAction action)
             stackTo  ->setCount(0);
         }
     } else if (action.type == StackActionType::EqualSplit) {
-        if (fromCount < 2)
-            return;
+
         int currentGroupCount = 0;
         int freeIndex = -1;
         int totalCount = 0;
@@ -55,8 +54,13 @@ void AdventureControl::heroStackAction(StackAction action)
         }
         if (freeIndex == -1)
             return;
-        const int newExistingCount = totalCount / (currentGroupCount + 1);
+        if (totalCount == currentGroupCount)
+            return;
+        const int newGroupCount = currentGroupCount + 1;// 3
+        const int newBaseCount = totalCount / newGroupCount; // 13 / 3 => 4
+        const int newExistingCount = totalCount % newBaseCount == 0 ? newBaseCount : newBaseCount + 1; // 5
         const int remainCount = totalCount - newExistingCount * currentGroupCount;
+
         for (size_t i =0; i < guiSquad->getCount(); ++i) {
             if (guiSquad->getStackUnitLibrary(i) == fromLibrary) {
                 guiSquad->getStack(i)->setCount(newExistingCount);
@@ -77,7 +81,7 @@ void AdventureControl::heroStackAction(StackAction action)
         for (size_t i = 0; i < guiSquad->getCount(); ++i) {
             if ((int)i == action.from->armyParams.indexInArmy)
                 continue;
-            auto stackTo = guiSquad->getStack(action.from->armyParams.indexInArmy);
+            auto stackTo = guiSquad->getStack(i);
 
             if (stackTo->getSource()->count > 0 && stackTo->getSource()->library == fromLibrary) {
                 fromCount += stackTo->getSource()->count;

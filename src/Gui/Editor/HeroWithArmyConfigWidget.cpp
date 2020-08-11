@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Smirnov Valdimir / mapron1@gmail.com
+ * Copyright (C) 2020 Smirnov Vladimir / mapron1@gmail.com
  * SPDX-License-Identifier: MIT
  * See LICENSE file for details.
  */
@@ -115,10 +115,7 @@ HeroWithArmyConfigWidget::~HeroWithArmyConfigWidget() = default;
 
 void HeroWithArmyConfigWidget::refresh()
 {
-    // @todo: only estimated params re-display!
-
     if (m_hero->getSource()->isValid()) {
-
         displayHeroSummary();
         displayHeroAppearence();
         displayHeroArtifacts();
@@ -127,8 +124,6 @@ void HeroWithArmyConfigWidget::refresh()
         displayHeroPrimary();
         m_ui->currentStatsWidget->refresh();
     }
-
-    //m_ui->stackEditorPack->refresh();
 }
 
 void HeroWithArmyConfigWidget::setModels(LibraryModelsProvider& modelProvider, Core::IRandomGenerator * randomGenerator)
@@ -151,6 +146,7 @@ void HeroWithArmyConfigWidget::setSource(GuiAdventureArmy* adventureArmy)
 {
     m_adventureArmy = adventureArmy;
     m_hero = adventureArmy->getHero();
+    m_ui->currentStatsWidget->setSource(m_hero->getSource());
 
     m_ui->stackEditorPack->setSource(adventureArmy->getSquad());
 
@@ -287,23 +283,11 @@ void HeroWithArmyConfigWidget::displayHeroArtifacts()
 void HeroWithArmyConfigWidget::displayHeroSkills()
 {
     m_hero->refreshSkillsModels();
-//    for (int row = 0; row <  m_ui->tableWidgetSecondarySkills->rowCount(); ++row) {
-//        QTableWidgetItem *levelItem = m_ui->tableWidgetSecondarySkills->item(row, 1);
-//        auto skill = levelItem->data(Qt::UserRole).value<LibrarySecondarySkillConstPtr>();
-//        int skillLevel = m_hero->getSkillLevel(skill);
-//        levelItem->setData(Qt::EditRole, skillLevel);
-//    }
 }
 
 void HeroWithArmyConfigWidget::displayHeroSpells()
 {
     m_hero->refreshSpellsModels();
-//    for (int row = 0; row <  m_ui->listWidgetSpells->count(); ++row) {
-//        QListWidgetItem *spellItem = m_ui->listWidgetSpells->item(row);
-//        auto spell = spellItem->data(Qt::UserRole).value<LibrarySpellConstPtr>();
-//        bool hasSpell = m_hero->spellbook.count(spell) > 0;
-//        spellItem->setCheckState(hasSpell ? Qt::Checked : Qt::Unchecked);
-//    }
 }
 
 void HeroWithArmyConfigWidget::useHeroDefaultArmy()
