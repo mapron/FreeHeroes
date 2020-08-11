@@ -337,7 +337,7 @@ bool GameDatabase::load(const std::vector<std_path>& files)
         }
 
     }
-    for (auto unit : m_impl->m_units.m_unsorted) {
+    for ([[maybe_unused]] auto unit : m_impl->m_units.m_unsorted) {
         assert(unit->faction); // actually missing faction is error
         assert(!unit->faction->id.empty());
     }
@@ -346,10 +346,10 @@ bool GameDatabase::load(const std::vector<std_path>& files)
         assert(hero->faction);
         assert(hero->spec);
 
-        for (auto & subSkill : hero->secondarySkills) {
+        for ([[maybe_unused]] auto & subSkill : hero->secondarySkills) {
             assert(subSkill.skill);
         }
-        for (auto & unit : hero->startStacks) {
+        for ([[maybe_unused]] auto & unit : hero->startStacks) {
             assert(unit.unit);
         }
     }
@@ -534,7 +534,7 @@ bool GameDatabase::load(const std::vector<std_path>& files)
 
         for (auto & variant : obj->variants) {
 
-            for (auto & guard : variant.guards) {
+            for ([[maybe_unused]] auto & guard : variant.guards) {
                 assert(guard.unit);
             }
         }

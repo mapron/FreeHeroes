@@ -329,7 +329,7 @@ void AdventureEstimation::applyLevelUpChoice(AdventureHero& hero, LibrarySeconda
 {
     if (!skill)
         return;
-    bool result = hero.setSkillLevel(skill, hero.getSkillLevel(skill) + 1, 8);
+    [[maybe_unused]] bool result = hero.setSkillLevel(skill, hero.getSkillLevel(skill) + 1, 8);
     assert(result);
 }
 
