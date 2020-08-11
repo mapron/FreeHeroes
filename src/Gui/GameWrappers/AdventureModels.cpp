@@ -279,11 +279,9 @@ Qt::ItemFlags HeroSkillsEditModel::flags(const QModelIndex& index) const
 {
     Qt::ItemFlags f = Qt::ItemIsEnabled;
     int r = index.row();
-    int level = -1;
     LibrarySecondarySkillConstPtr skill = nullptr;
     if (r < (int)m_source->secondarySkills.size()) {
         skill = m_source->secondarySkills[r].skill;
-        level = m_source->secondarySkills[r].level;
     }
     if (index.column() == 0 || (index.column() == 1 && skill))
        f |= Qt::ItemIsEditable;

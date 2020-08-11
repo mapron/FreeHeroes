@@ -39,14 +39,13 @@ struct BattlePosition {
     int x = invalid;
     int y = invalid;
 
-    // can use this. but IDE is crazy... lol.
-    // constexpr auto operator <=> (const BattlePosition & other) const noexcept = default;
-
     constexpr auto asTuple() const noexcept { return std::tie(x, y); }
 
-    constexpr bool operator ==(const BattlePosition& rh) const noexcept { return asTuple() == rh.asTuple(); }
-    constexpr bool operator !=(const BattlePosition& rh) const noexcept { return asTuple() != rh.asTuple(); }
-    constexpr bool operator <(const BattlePosition& rh) const noexcept { return asTuple() < rh.asTuple(); }
+    // that line is not working for clang, but gcc is ok.
+    // friend constexpr auto operator <=>(const T& lh, const T& rh) noexcept { return lh.asTuple() <=> rh.asTuple(); }
+    friend constexpr bool operator ==(const BattlePosition& lh, const BattlePosition& rh) noexcept { return lh.asTuple() == rh.asTuple(); }
+    friend constexpr bool operator !=(const BattlePosition& lh, const BattlePosition& rh) noexcept { return lh.asTuple() != rh.asTuple(); }
+    friend constexpr bool operator < (const BattlePosition& lh, const BattlePosition& rh) noexcept { return lh.asTuple() <  rh.asTuple(); }
 
     constexpr BattlePosition operator +(const BattlePosition& rh) const noexcept { return {x + rh.x, y + rh.y}; }
 

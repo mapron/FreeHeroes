@@ -67,7 +67,7 @@ endif()
 # QtNetwork is only for QtMultimedia
 set(QT_MODULE_LIST Core Gui Widgets Multimedia Network)
 find_package(Qt5 COMPONENTS ${QT_MODULE_LIST} LinguistTools REQUIRED)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/MocWrapper.cmake.in ${CMAKE_BINARY_DIR}/MocWrapper.cmake @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/mocWrapper.cmake.in ${CMAKE_BINARY_DIR}/mocWrapper.cmake @ONLY)
 
 # Zlib
 

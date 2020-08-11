@@ -22,7 +22,11 @@ struct SkillHeroItem {
     SkillHeroItem() = default;
     SkillHeroItem(LibrarySecondarySkillConstPtr skillPtr, int level): skill(skillPtr), level(level) {}
 
-    auto operator <=> (const SkillHeroItem & other) const noexcept = default;
+    constexpr auto asTuple() const noexcept { return std::tie(skill, level);}
+    constexpr auto asTuple() noexcept       { return std::tie(skill, level);}
+
+    friend constexpr bool operator ==(const SkillHeroItem& lh, const SkillHeroItem& rh) noexcept { return lh.asTuple() == rh.asTuple(); }
+    friend constexpr bool operator !=(const SkillHeroItem& lh, const SkillHeroItem& rh) noexcept { return !(lh == rh); }
 };
 using HeroSkillsList = std::vector<SkillHeroItem>;
 

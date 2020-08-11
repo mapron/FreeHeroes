@@ -43,8 +43,10 @@ namespace internal
         constexpr const T & self() const { return static_cast<const T&>(*this);}
         constexpr       T & self()       { return static_cast<T&>(*this);}
 
-        constexpr bool operator ==(const T& rh) const noexcept { return self().asTuple() == rh.asTuple(); }
-        constexpr bool operator !=(const T& rh) const noexcept { return !(*this == rh); }
+        // that line is not working for clang, but gcc is ok.
+        // friend constexpr auto operator <=>(const T& lh, const T& rh) noexcept { return lh.asTuple() <=> rh.asTuple(); }
+        friend constexpr bool operator ==(const T& lh, const T& rh) noexcept { return lh.asTuple() == rh.asTuple(); }
+        friend constexpr bool operator !=(const T& lh, const T& rh) noexcept { return !(lh == rh); }
 
         constexpr T operator + (const T& rh) const noexcept {
             T result = self();
