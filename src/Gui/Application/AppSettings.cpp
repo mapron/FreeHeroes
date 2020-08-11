@@ -82,6 +82,8 @@ AppSettings::AppSettings(QString filename)
             {"displayPath"        , m_all.battle.displayPath},
             {"logMoves"           , m_all.battle.logMoves},
             {"retaliationHint"    , m_all.battle.retaliationHint},
+            {"massDamageHint"     , m_all.battle.massDamageHint},
+            {"counterDamageHint"  , m_all.battle.counterDamageHint},
         }
     });
     m_allWrappers.push_back({

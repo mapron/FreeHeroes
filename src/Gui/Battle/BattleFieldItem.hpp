@@ -76,11 +76,11 @@ public:
 
  // IBattleNotifiers
     void beforeMove(BattleStackConstPtr stack, const Core::BattlePositionPath & path) override;
-    void beforeAttackMelee(BattleStackConstPtr stack, BattleStackConstPtr target, DamageResult damage, bool isRetaliation) override;
-    void beforeAttackRanged(BattleStackConstPtr stack, BattleStackConstPtr target, DamageResult damage) override;
+    void beforeAttackMelee (BattleStackConstPtr stack, const AffectedPhysical & affected, bool isRetaliation) override;
+    void beforeAttackRanged(BattleStackConstPtr stack, const AffectedPhysical & affected) override;
 
     void onStackUnderEffect(BattleStackConstPtr stack, Effect effect) override;
-    void onCast(const Caster & caster, const Affected & affected, LibrarySpellConstPtr spell) override;
+    void onCast(const Caster & caster, const AffectedMagic & affected, LibrarySpellConstPtr spell) override;
 
     void onPositionReset(BattleStackConstPtr stack) override;
     void onControlAvailableChanged(bool controlAvailable) override;
@@ -92,7 +92,7 @@ public:
          bool useSpecialSound = false;
          const GuiSpell * spell = nullptr;
     };
-    void onCastInternal(const Caster & caster, const Affected & affected, const CastPresentation & pres);
+    void onCastInternal(const Caster & caster, const AffectedMagic & affected, const CastPresentation & pres);
 
 signals:
     void showInfo(BattleStackConstPtr stack, QPoint pos);

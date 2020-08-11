@@ -39,7 +39,7 @@ protected:
     std::vector<BattleStackConstPtr> getAllStacks(bool m_alive) const override;
     std::vector<BattlePosition> getObstacles() const override;
 
-    BattleStackConstPtr     findStack(const BattlePosition pos, bool onlyAlive = false) const override;
+    BattleStackConstPtr        findStack(const BattlePosition pos, bool onlyAlive = false) const override;
     BattlePositionSet          findAvailable(BattleStackConstPtr stack) const override;
     BattlePositionDistanceMap  findDistances(BattleStackConstPtr stack, int limit) const override;
     BattlePlanMove             findPlanMove(const BattlePlanMoveParams & moveParams, const BattlePlanAttackParams & attackParams) const override;
@@ -53,8 +53,6 @@ protected:
 
     void addNotify(IBattleNotify * handler) override;
     void removeNotify(IBattleNotify * handler) override;
-
-    //void triggerCurrentStatus() override;
 
     bool isFinished() const override;
 
@@ -76,8 +74,8 @@ private:
     BattleHeroMutablePtr currentHero();
     BattleHeroMutablePtr getHeroMutable(BattleStack::Side side);
 
-    void makeMelee(BattleStackMutablePtr attacker, BattleStackMutablePtr defender, bool isRetaliation);
-    void makeRanged(BattleStackMutablePtr attacker, BattleStackMutablePtr defender);
+    void makeMelee (BattleStackMutablePtr attacker, BattleStackMutablePtr defender, const std::vector<BattleStackConstPtr> & sideTargets, bool isRetaliation);
+    void makeRanged(BattleStackMutablePtr attacker, BattlePosition target, BattleStackMutablePtr defender, const std::vector<BattleStackConstPtr> & sideTargets, int64_t rangeDenom);
 
     BattleStackMutablePtr findStackNonConst(const BattlePosition pos, bool onlyAlive = false);
     BattleStackMutablePtr findStackNonConst(BattleStackConstPtr stack);
@@ -86,14 +84,17 @@ private:
 
     DamageEstimate estimateDamage(BattleStackConstPtr attacker,
                                   BattleStackConstPtr defender,
-                                  BattlePlanMove::Attack mode) const;
+                                  BattlePlanMove::Attack mode,
+                                  int64_t rangedDenom) const;
     DamageEstimate estimateRetaliationDamage(BattleStackConstPtr attacker,
                                              BattleStackConstPtr defender,
                                              BattlePlanMove::Attack mode,
                                              const DamageEstimate & mainEstimate) const;
     bool canRetaliate(BattleStackConstPtr attacker, BattleStackConstPtr defender) const;
 
-    BonusRatio rangedAttackFactor(BattleStackConstPtr attacker, BattleStackConstPtr defender) const;
+    int64_t rangedDenom(BattleStackConstPtr attacker, BattleStackConstPtr defender) const;
+    int64_t rangedDenom(BattleStackConstPtr attacker, BattlePosition target) const;
+    int64_t rangedDenom(BattleStackConstPtr attacker, int distance, bool wallOnTheWay) const;
     BonusRatio meleeAttackFactor(BattleStackConstPtr attacker, BattleStackConstPtr defender) const;
 
     enum class LuckRoll { None, Luck, Unluck };
@@ -102,11 +103,15 @@ private:
                             BattleStackConstPtr defender,
                             GeneralEstimation::DamageRollMode mode,
                             bool melee,
+                            int64_t rangedDenom,
                             LuckRoll luckFactor = LuckRoll::None) const;
     DamageResult::Loss damageLoss(BattleStackConstPtr defender, int damage) const;
 
     BattleFieldPathFinder setupFinder(BattleStackConstPtr stack) const;
-    std::set<BattlePosition> getSpellArea(BattlePosition pos, LibrarySpell::Range range) const;
+    BattlePositionSet getSpellArea(BattlePosition pos, LibrarySpell::Range range) const;
+    BattlePositionSet getSplashExtraTargets(LibraryUnit::Abilities::SplashAttack splash,
+                                            BattlePositionExtended from,
+                                            BattleAttackDirection direction) const;
 
     // Setup
 private:

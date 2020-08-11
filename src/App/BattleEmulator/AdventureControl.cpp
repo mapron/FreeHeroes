@@ -131,7 +131,7 @@ bool AdventureControl::heroArtifactPutOn(ArtifactPutOn putOnParams)
     }
     bag--;
     m_army.getHero()->refreshArtifactsModels();
-    m_army.getHero()->refreshExternalChange();
+    m_army.getHero()->emitChanges();
     return true;
 }
 
@@ -143,7 +143,7 @@ void AdventureControl::heroArtifactTakeOff(ArtifactTakeOff takeOffParams)
     hero->artifactsBag[from]++;
     from = nullptr;
     m_army.getHero()->refreshArtifactsModels();
-    m_army.getHero()->refreshExternalChange();
+    m_army.getHero()->emitChanges();
 }
 
 void AdventureControl::heroArtifactSwap( ArtifactSwap swapParams)
@@ -156,7 +156,7 @@ void AdventureControl::heroArtifactSwap( ArtifactSwap swapParams)
     std::swap(from, to);
 
     m_army.getHero()->refreshArtifactsModels();
-    m_army.getHero()->refreshExternalChange();
+    m_army.getHero()->emitChanges();
 }
 
 void AdventureControl::heroArtifactAssembleSet(ArtifactAssembleSet assembleSetParams)
@@ -188,7 +188,7 @@ void AdventureControl::heroArtifactAssembleSet(ArtifactAssembleSet assembleSetPa
     }
     hero->artifactsOn[assemblyOnSlot] = setArt;
     m_army.getHero()->refreshArtifactsModels();
-    m_army.getHero()->refreshExternalChange();
+    m_army.getHero()->emitChanges();
 }
 
 void AdventureControl::heroArtifactDisassembleSet(ArtifactAssembleSet assembleSetParams)
@@ -222,7 +222,7 @@ void AdventureControl::heroArtifactDisassembleSet(ArtifactAssembleSet assembleSe
     }
 
     m_army.getHero()->refreshArtifactsModels();
-    m_army.getHero()->refreshExternalChange();
+    m_army.getHero()->emitChanges();
 }
 
 

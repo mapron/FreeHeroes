@@ -182,47 +182,47 @@ adventure mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="175"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="176"/>
         <source>Renaming replay</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="175"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="176"/>
         <source>Enter new name:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="192"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="193"/>
         <source>Battle emulator</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="419"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="425"/>
         <source> and </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="422"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="428"/>
         <source>%1 is no problem anymore, and %2 now in your hands.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="520"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="526"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="520"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="526"/>
         <source>AI reached step limit: that probably an error.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="577"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="583"/>
         <source>Glorious victory!&lt;br&gt;For the valor in the battle, %1 recieves %2 experience</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="578"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="584"/>
         <source>Your forces have suffered a crushing defeat, and %1 now leaves you</source>
         <translation type="unfinished"></translation>
     </message>

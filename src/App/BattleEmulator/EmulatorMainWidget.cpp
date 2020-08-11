@@ -157,8 +157,9 @@ EmulatorMainWidget::EmulatorMainWidget(IGraphicsLibrary & graphicsLibrary,
                                                 tr("Spit")
                                             });
 
-    connect(m_ui->armyConfigAtt, &ArmyConfigWidget::dataChanged, this, [this]{onAttDataChanged(); });
-    connect(m_ui->armyConfigDef, &ArmyConfigWidget::dataChanged, this, [this]{onDefDataChanged(); });
+
+    connect(m_guiAdventureArmyAtt.get(), &GuiAdventureArmy::dataChanged, this, [this]{onAttDataChanged(); });
+    connect(m_guiAdventureArmyDef.get(), &GuiAdventureArmy::dataChanged, this, [this]{onDefDataChanged(); });
 
     connect(m_ui->armyConfigAtt, &ArmyConfigWidget::checkForHeroLevelUps, this, [this]{checkForHeroLevelUps(); });
     connect(m_ui->armyConfigDef, &ArmyConfigWidget::checkForHeroLevelUps, this, [this]{checkForHeroLevelUps(); });
@@ -350,8 +351,13 @@ void EmulatorMainWidget::loadAdventureData()
     replayData.load(replayRec.battleReplay, m_gameDatabase);
     *m_adventureState = replayData.m_adv;
     m_adventureStatePrev.reset();
-    onAttDataChanged(true);
-    onDefDataChanged(true);
+    m_guiAdventureArmyAtt->updateGuiState();
+    m_guiAdventureArmyDef->updateGuiState();
+
+    m_guiAdventureArmyAtt->emitChanges();
+    m_guiAdventureArmyDef->emitChanges();
+
+    m_ui->comboBoxPositionsPreset->setCurrentIndex(static_cast<int>(replayData.m_adv.m_field.layout));
 }
 
 void EmulatorMainWidget::applyCurrentObjectRewards(QString defenderName)
@@ -587,10 +593,11 @@ int EmulatorMainWidget::execBattle(bool isReplay, bool isQuick)
                 def.updateAdventure(m_adventureState->m_def, attLoss, defenderWin);
                 checkForHeroLevelUps(false);
                 m_adventureStatePrev.reset();
-                m_guiAdventureArmyAtt->getSquad()->refreshExternalChange();
-                m_guiAdventureArmyDef->getSquad()->refreshExternalChange();
-                m_guiAdventureArmyAtt->getHero()->refreshExternalChange();
-                m_guiAdventureArmyDef->getHero()->refreshExternalChange();
+                m_guiAdventureArmyAtt->updateGuiState();
+                m_guiAdventureArmyDef->updateGuiState();
+
+                m_guiAdventureArmyAtt->emitChanges();
+                m_guiAdventureArmyDef->emitChanges();
 
                 if (m_adventureState->m_mapObject && m_adventureState->m_mapObject->rewards.size() && resultInfo.goodResult ) {
                     applyCurrentObjectRewards(resultInfo.sides[1].name);

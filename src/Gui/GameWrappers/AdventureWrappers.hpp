@@ -31,7 +31,8 @@ public:
     void setParams(Core::LibraryUnitConstPtr unit, int count);
 
     bool isValid() const;
-    void refreshExternalChange();
+    void updateGuiState();
+    void emitChanges();
 
     GuiUnitConstPtr getGuiUnit() const;
 
@@ -59,14 +60,15 @@ public:
     Core::LibraryUnitConstPtr getStackUnitLibrary(size_t index) const;
 
     void clearAll();
-    void refreshExternalChange();
+    void updateGuiState();
+    void emitChanges();
+    void externalChange();
 
     size_t getCount() const;
 
     void setFormation(bool compact);
 
-    Core::AdventureSquadConstPtr getSource() const { return m_source;}
-    Core::AdventureSquadMutablePtr getSource() { return m_source;}
+    Core::AdventureSquadConstPtr   getSource() const { return m_source;}
 
 signals:
     void dataChanged();
@@ -105,8 +107,8 @@ public:
     QString getName() const;
     QString getClassName() const;
 
-    Core::AdventureHeroConstPtr getSource() const { return m_source;}
-    Core::AdventureHeroMutablePtr getSource() { return m_source;}
+    Core::AdventureHeroConstPtr   getSource() const { return m_source;}
+    Core::AdventureHeroMutablePtr getSource()       { return m_source;}
 
     GuiHeroConstPtr getGuiHero() const;
 
@@ -115,19 +117,21 @@ public:
     QAbstractItemModel * getSpellbookEditModel() const;
     QAbstractItemModel * getSkillsEditModel() const;
 
-    void refreshExternalChange();
+    void updateGuiState();
+    void emitChanges();
+    void externalChange();
 
 signals:
     void dataChanged();
 
 private:
-    GuiHeroProvider & m_heroProvider;
+    GuiHeroProvider             & m_heroProvider;
     Core::AdventureHeroMutablePtr m_source = nullptr;
-    GuiHeroConstPtr m_guiHero;
-    HeroBagEditModel * m_bagEditModel = nullptr;
-    HeroWearingEditModel * m_wearingEditModel = nullptr;
-    HeroSpellbookEditModel * m_spellbookEditModel = nullptr;
-    HeroSkillsEditModel * m_skillsEditModel = nullptr;
+    GuiHeroConstPtr               m_guiHero;
+    HeroBagEditModel            * m_bagEditModel = nullptr;
+    HeroWearingEditModel        * m_wearingEditModel = nullptr;
+    HeroSpellbookEditModel      * m_spellbookEditModel = nullptr;
+    HeroSkillsEditModel         * m_skillsEditModel = nullptr;
 };
 
 class GUIGAMEWRAPPERS_EXPORT GuiAdventureArmy : public QObject {
@@ -138,13 +142,17 @@ public:
                      Core::AdventureArmyMutablePtr source);
 
     const GuiAdventureSquad * getSquad() const { return &m_squad; }
-    GuiAdventureSquad * getSquad() { return &m_squad; }
+          GuiAdventureSquad * getSquad()       { return &m_squad; }
 
     const GuiAdventureHero * getHero() const { return &m_hero; }
-    GuiAdventureHero * getHero() { return &m_hero; }
+          GuiAdventureHero * getHero()       { return &m_hero; }
 
-    Core::AdventureArmyConstPtr getSource() const { return m_source;}
-    Core::AdventureArmyMutablePtr getSource() { return m_source;}
+    Core::AdventureArmyConstPtr   getSource() const { return m_source;}
+    Core::AdventureArmyMutablePtr getSource()       { return m_source;}
+
+    void updateGuiState();
+    void emitChanges();
+    void externalChange();
 
 signals:
     void dataChanged();

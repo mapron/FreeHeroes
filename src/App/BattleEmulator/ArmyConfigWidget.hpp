@@ -45,7 +45,6 @@ public:
     void initFromMapObject(Core::LibraryMapObjectConstPtr mapObject, int variant);
 
 signals:
-    void dataChanged();
     void checkForHeroLevelUps();
 
 public:

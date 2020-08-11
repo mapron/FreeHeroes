@@ -55,15 +55,15 @@ public:
 
 // IBattleNotifiers
    void beforeMove(BattleStackConstPtr stack, const Core::BattlePositionPath & path) override;
-   void beforeAttackMelee(BattleStackConstPtr stack, BattleStackConstPtr target, DamageResult damage, bool isRetaliation) override;
-   void beforeAttackRanged(BattleStackConstPtr stack, BattleStackConstPtr target, DamageResult damage) override;
+   void beforeAttackMelee (BattleStackConstPtr stack, const AffectedPhysical & affected, bool isRetaliation) override;
+   void beforeAttackRanged(BattleStackConstPtr stack, const AffectedPhysical & affected) override;
    void beforeWait(BattleStackConstPtr stack) override;
    void beforeGuard(BattleStackConstPtr stack, int bonus) override;
 
    void onStateChanged() override;
    void onStartRound(int round) override;
    void onStackUnderEffect(BattleStackConstPtr stack, Effect effect) override;
-   void onCast(const Caster & caster, const Affected & affected, LibrarySpellConstPtr spell) override;
+   void onCast(const Caster & caster, const AffectedMagic & affected, LibrarySpellConstPtr spell) override;
    void onControlAvailableChanged(bool controlAvailable) override;
    void onBattleFinished(Core::BattleResult ) override;
 

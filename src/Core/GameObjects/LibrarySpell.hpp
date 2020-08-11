@@ -137,6 +137,13 @@ struct SpellFilter {
         return result;
     }
 
+    bool contains(MagicSchool school) const {
+        if (levels == std::vector{1,2,3,4,5})
+            return true;
+
+        return std::find(schools.cbegin(), schools.cend(), school) != schools.cend();
+    }
+
     void fillFilterCache(const std::vector<LibrarySpell*> & allPossibleSpells) {
         if (isDefault())
             return;

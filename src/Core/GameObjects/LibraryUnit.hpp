@@ -38,8 +38,11 @@ struct LibraryUnit {
         [[nodiscard]] bool hasPenalty(DamagePenalty penalty) const noexcept{  return std::find(disabledPenalties.cbegin(), disabledPenalties.cend(), penalty) == disabledPenalties.cend(); }
 
         SplashAttack splashType = SplashAttack::None;
+        bool splashFriendlyFire = false;
         std::string splashButtons;
-        std::string splashAnimation;
+        LibrarySpellConstPtr splashSpell = nullptr;
+        AttackWithElement splashElement = AttackWithElement::None;
+        [[nodiscard]] bool hasMeleeSplash() const noexcept{ return splashType == SplashAttack::Dragon || splashType == SplashAttack::Sides || splashType == SplashAttack::Neighbours; }
 
         int maxRetaliations = 1;
         bool chargeAttack  = false;

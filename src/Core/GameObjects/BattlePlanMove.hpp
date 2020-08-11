@@ -23,21 +23,21 @@ struct BattlePlanMoveParams {
 
 struct BattlePlanAttackParams {
     enum class Alteration { None, ForceMelee, FreeAttack };
-    BattlePositionExtended m_attackTargetPos;
-    BattlePositionExtended::Side m_attackSide = BattlePositionExtended::Side::Right;
+    BattlePosition m_attackTarget;
     BattleAttackDirection m_attackDirection = BattleAttackDirection::None;
     Alteration m_alteration = Alteration::None;
 
-    void clear() noexcept { m_attackTargetPos = {}; }
-    bool isActive() const noexcept { return !m_attackTargetPos.isEmpty(); }
+    void clear() noexcept { m_attackTarget = {}; }
+    bool isActive() const noexcept { return !m_attackTarget.isEmpty(); }
 };
 
 struct BattlePlanMove {
     enum class Attack { No, Melee, Ranged };
 
     bool m_isValid = false;
+    bool m_freeAttack = false;
     Attack m_attackMode = Attack::No;
-    BattlePositionExtended m_attackTarget;
+    BattlePosition m_attackTarget;
     BattlePositionExtended m_moveFrom;
     BattlePositionExtended m_moveTo;
     BattlePositionPath m_walkPath;
@@ -51,10 +51,13 @@ struct BattlePlanMove {
     DamageEstimate m_retaliationDamage;
 
     struct Target{
-        BattleStackConstPtr unit = nullptr;
+        BattleStackConstPtr stack = nullptr;
         DamageEstimate damage;
     };
     std::vector<Target> m_extraAffectedTargets;
+    std::vector<Target> m_extraRetaliationAffectedTargets;
+    BattlePositionSet m_splashPositions;
+    BattlePositionSet m_splashRetaliationPositions;
 
     void clear() { *this = BattlePlanMove{}; }
     bool isValid() const noexcept { return m_isValid; }

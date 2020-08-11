@@ -23,7 +23,7 @@ struct BattlePlanCast {
 
     std::set<BattlePosition> m_affectedArea;
     struct Target{
-        BattleStackConstPtr unit = nullptr;
+        BattleStackConstPtr stack = nullptr;
         DamageResult::Loss loss;
         BonusRatio magicSuccessChance {1,1};
         BonusRatio totalFactor{1,1};

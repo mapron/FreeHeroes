@@ -104,7 +104,7 @@ HeroWithArmyConfigWidget::HeroWithArmyConfigWidget(QWidget* parent)
     connect(m_ui->checkBoxHasSpellbook, &QCheckBox::clicked, this, [this](){
         const bool state = m_ui->checkBoxHasSpellbook->isChecked();
         m_hero->getSource()->hasSpellBook = state;
-        m_hero->refreshExternalChange();
+        m_hero->emitChanges();
     });
 
     connect(m_ui->comboBoxHeroIdentity, qOverload<int>(&QComboBox::currentIndexChanged),
@@ -203,7 +203,7 @@ void HeroWithArmyConfigWidget::primaryStatEdited()
     hero->currentBasePrimary.magic.intelligence   = m_ui->spinBoxInt->value();
 
     if (old != hero->currentBasePrimary)
-        m_hero->refreshExternalChange();
+        m_hero->emitChanges();
 }
 
 void HeroWithArmyConfigWidget::expEdited()
@@ -215,7 +215,7 @@ void HeroWithArmyConfigWidget::expEdited()
 
     hero->experience = m_ui->spinBoxExp->value();
     hero->editorParams.levelIsDirty = true;
-    m_hero->refreshExternalChange();
+    m_hero->emitChanges();
 }
 
 void HeroWithArmyConfigWidget::levelEdited()
@@ -227,7 +227,7 @@ void HeroWithArmyConfigWidget::levelEdited()
 
     hero->level = m_ui->spinBoxLevel->value();
     hero->editorParams.expIsDirty = true;
-    m_hero->refreshExternalChange();
+    m_hero->emitChanges();
 }
 
 void HeroWithArmyConfigWidget::heroIndexChanged()
@@ -273,6 +273,16 @@ void HeroWithArmyConfigWidget::displayHeroAppearence()
     m_ui->labelSpecialityIcon->setPixmap(m_hero->getGuiHero()->getSpecIcon());
 
     m_ui->labelSpecialityText->setText(m_hero->getGuiHero()->getSpecName());
+
+    for (int i = 0; i< m_ui->comboBoxHeroIdentity->count(); ++i) {
+        if (m_ui->comboBoxHeroIdentity->itemData(i, HeroesModel::GuiObject).value<HeroesModel::WrapperTypePtr>() == m_hero->getGuiHero()) {
+            m_ui->comboBoxHeroIdentity->blockSignals(true);
+            m_ui->comboBoxHeroIdentity->setCurrentIndex(i);
+            m_ui->comboBoxHeroIdentity->blockSignals(false);
+            break;
+        }
+    }
+
 }
 
 void HeroWithArmyConfigWidget::displayHeroArtifacts()
@@ -321,6 +331,7 @@ void HeroWithArmyConfigWidget::useHeroDefaultArmy()
             guiStack->setParams(unit.unit, from + m_randomGenerator->genSmall(spread));
         }
     }
+    m_adventureArmy->emitChanges();
 }
 
 void HeroWithArmyConfigWidget::makeAllSpells()
@@ -333,13 +344,13 @@ void HeroWithArmyConfigWidget::makeAllSpells()
         auto * spell = spellModel->index(row, 0).data(SpellsModel::SourceObject).value<LibrarySpellConstPtr>();
         m_hero->getSource()->spellbook.insert(spell);
     }
-    m_hero->refreshExternalChange();
+    m_hero->emitChanges();
 }
 
 void HeroWithArmyConfigWidget::makeNoSpells()
 {
     m_hero->getSource()->spellbook.clear();
-    m_hero->refreshExternalChange();
+    m_hero->emitChanges();
 }
 
 void HeroWithArmyConfigWidget::makeAllArtifacts()
@@ -350,14 +361,14 @@ void HeroWithArmyConfigWidget::makeAllArtifacts()
         m_hero->getSource()->artifactsBag[art] = 1;
     }
     m_hero->refreshArtifactsModels();
-    m_hero->refreshExternalChange();
+    m_hero->emitChanges();
 }
 
 void HeroWithArmyConfigWidget::makeNoArtifacts()
 {
     m_hero->getSource()->artifactsBag.clear();
     m_hero->refreshArtifactsModels();
-    m_hero->refreshExternalChange();
+    m_hero->emitChanges();
 }
 
 }

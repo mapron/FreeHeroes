@@ -97,8 +97,7 @@ RTTR_REGISTRATION
         );
     registration::class_<BattlePlanAttackParams>("BattlePlanAttackParams")
         .constructor<>()
-        .property("target"    , &BattlePlanAttackParams::m_attackTargetPos)(ref)
-        .property("side"      , &BattlePlanAttackParams::m_attackSide)
+        .property("target"    , &BattlePlanAttackParams::m_attackTarget)(ref)
         .property("dir"       , &BattlePlanAttackParams::m_attackDirection)
         .property("alt"       , &BattlePlanAttackParams::m_alteration)
         ;

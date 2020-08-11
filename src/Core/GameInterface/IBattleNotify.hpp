@@ -21,8 +21,25 @@ public:
     virtual ~IBattleNotify() = default;
 
     virtual void beforeMove(BattleStackConstPtr stack, const BattlePositionPath & path) = 0;
-    virtual void beforeAttackMelee(BattleStackConstPtr stack, BattleStackConstPtr target, DamageResult damage, bool isRetaliation) = 0;
-    virtual void beforeAttackRanged(BattleStackConstPtr stack, BattleStackConstPtr target, DamageResult damage) = 0;
+    struct AffectedPhysical {
+        struct Target {
+            BattleStackConstPtr stack;
+            DamageResult damage;
+        };
+        BattlePositionExtended mainTargetPos;
+        Target main;
+        std::vector<Target> extra;
+
+        std::vector<Target> getAll() const {
+            std::vector<Target> result = extra;
+            if (main.stack)
+                result.push_back(main);
+            return result;
+        }
+    };
+
+    virtual void beforeAttackMelee(BattleStackConstPtr stack, const AffectedPhysical & affected, bool isRetaliation) = 0;
+    virtual void beforeAttackRanged(BattleStackConstPtr stack, const AffectedPhysical & affected) = 0;
     virtual void beforeWait(BattleStackConstPtr stack) = 0;
     virtual void beforeGuard(BattleStackConstPtr stack, int defBonus) = 0;
 
@@ -33,7 +50,7 @@ public:
         BattleStackConstPtr unit = nullptr;
         LibraryArtifactConstPtr artifact = nullptr;
     };
-    struct Affected {
+    struct AffectedMagic {
         BattlePosition mainPosition;
         std::vector<BattlePosition> area;
         struct Target {
@@ -44,7 +61,7 @@ public:
         std::vector<Target> targets;
     };
 
-    virtual void onCast(const Caster & caster, const Affected & affected, LibrarySpellConstPtr spell) = 0;
+    virtual void onCast(const Caster & caster, const AffectedMagic & affected, LibrarySpellConstPtr spell) = 0;
 
     virtual void onPositionReset(BattleStackConstPtr stack) = 0;
     virtual void onStartRound(int round) = 0;
@@ -56,13 +73,13 @@ public:
 class BattleNotifyEmpty : public IBattleNotify {
 public:
     void beforeMove(BattleStackConstPtr , const BattlePositionPath & ) override {}
-    void beforeAttackMelee(BattleStackConstPtr, BattleStackConstPtr, DamageResult, bool) override {}
-    void beforeAttackRanged(BattleStackConstPtr, BattleStackConstPtr, DamageResult) override {}
+    void beforeAttackMelee(BattleStackConstPtr, const AffectedPhysical &, bool) override {}
+    void beforeAttackRanged(BattleStackConstPtr, const AffectedPhysical &) override {}
     void beforeWait(BattleStackConstPtr) override {}
     void beforeGuard(BattleStackConstPtr, int) override {}
 
     void onStackUnderEffect(BattleStackConstPtr, Effect ) override {}
-    void onCast(const Caster &, const Affected &, LibrarySpellConstPtr ) override {}
+    void onCast(const Caster &, const AffectedMagic &, LibrarySpellConstPtr ) override {}
 
     void onPositionReset(BattleStackConstPtr) override {}
     void onStartRound(int) override {}

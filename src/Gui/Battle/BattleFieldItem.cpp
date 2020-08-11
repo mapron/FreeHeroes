@@ -218,7 +218,7 @@ void BattleFieldItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* o
     const QBrush shadowAvailable = QColor(0, 0, 0, 90);
     const QBrush shadowMoveTarget = QColor(0, 0, 0, 170);
     const QBrush hightlightFocus = QColor(200, 200, 200, 40);
-    const QBrush hightlightAttackFocus = QColor(50, 0, 0, 130);
+    const QBrush hightlightAttackFocus = QColor(50, 0, 0, 150);
     const auto mainGrid = QColor(192, 192, 0, 80);
     const auto hintGrid = QColor(0, 0, 0, 100);
     const auto pathTrace = QColor(0, 150, 0, 150);
@@ -261,7 +261,7 @@ void BattleFieldItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* o
         for (int w = 0, totalW = m_battleGeometry.width; w < totalW; ++w) {
             const BattlePosition pos{w, h};
             const bool isHovered = m_hovered == pos;
-            const bool isHoveredOnAttack = isHovered && m_controlPlan.m_hoveredStack && validMove;
+            const bool isHoveredOnAttack = validMove &&  ((isHovered && m_controlPlan.m_hoveredStack) || m_controlPlan.m_planMove.m_splashPositions.contains(pos));
             const bool isAvai = currentAvailableCells.contains(pos);
             const bool isMoveTo = validMove && m_controlPlan.m_planMove.m_moveTo.contains(pos);
             const bool isObstacle = obstacles.contains(pos);
@@ -395,16 +395,16 @@ void BattleFieldItem::hoverCell(BattlePosition battlePos, const QPointF posInCel
     }
     m_controlPlan.m_planMoveParams.m_moveFrom = m_controlPlan.m_selectedStack->pos;
     const bool currentStackIsWide = m_controlPlan.m_selectedStack->pos.isLarge();
-    if (m_controlPlan.m_hoveredStack) {
-        m_controlPlan.m_planAttackParams.m_alteration = m_controlPlan.getAlt();
+    m_controlPlan.m_planAttackParams.m_alteration = m_controlPlan.getAlt();
+    if (m_controlPlan.m_hoveredStack || m_controlPlan.m_planAttackParams.m_alteration == BattlePlanAttackParams::Alteration::FreeAttack) {
         m_controlPlan.m_planAttackParams.m_attackDirection = defaultGeometry.attackDirectionFromRelativePoint(posInCell, currentStackIsWide);
-        m_controlPlan.m_planAttackParams.m_attackTargetPos = m_controlPlan.m_hoveredStack->pos;
-        const bool isTargetRight =  m_controlPlan.m_hoveredStack->pos.rightPos() == battlePos;
-        m_controlPlan.m_planAttackParams.m_attackSide = isTargetRight ? BattlePositionExtended::Side::Right : BattlePositionExtended::Side::Left;
-        m_controlPlan.m_planMoveParams.m_movePos = m_battleGeometry.suggestPositionForAttack(m_controlPlan.m_selectedStack->pos,
-                                                                                         m_controlPlan.m_hoveredStack->pos,
-                                                                                         m_controlPlan.m_hoveredStack->pos.getPosSub(m_controlPlan.m_planAttackParams.m_attackSide),
-                                                                                         m_controlPlan.m_planAttackParams.m_attackDirection);
+        m_controlPlan.m_planAttackParams.m_attackTarget = battlePos;
+        m_controlPlan.m_planMoveParams.m_movePos = m_controlPlan.m_selectedStack->pos;
+        if (m_controlPlan.m_planAttackParams.m_alteration != BattlePlanAttackParams::Alteration::FreeAttack)
+            m_controlPlan.m_planMoveParams.m_movePos = m_battleGeometry.suggestPositionForAttack(m_controlPlan.m_selectedStack->pos,
+                                                                                                 m_controlPlan.m_hoveredStack->pos,
+                                                                                                 m_controlPlan.m_hoveredStack->pos.mainPos() == battlePos ? BattlePositionExtended::Sub::Main :  BattlePositionExtended::Sub::Secondary,
+                                                                                                 m_controlPlan.m_planAttackParams.m_attackDirection);
         m_controlPlan.m_planMove = m_battleView.findPlanMove(m_controlPlan.m_planMoveParams, m_controlPlan.m_planAttackParams);
         if (m_controlPlan.m_planMove.isValid()) {
             //assert(m_battleGeometry.isValid(m_controlPlan.m_planMoveParams.m_movePos.mainPos()));
@@ -533,18 +533,20 @@ void BattleFieldItem::beforeMove(BattleStackConstPtr stack, const BattlePosition
     refreshCounters();
 }
 
-void BattleFieldItem::beforeAttackMelee(BattleStackConstPtr stack, BattleStackConstPtr target, DamageResult damage, bool isRetaliation)
+void BattleFieldItem::beforeAttackMelee(BattleStackConstPtr stack, const AffectedPhysical & affected, bool isRetaliation)
 {
     (void)isRetaliation;
+    auto target = affected.main.stack;
+    //auto damage = affected.main.damage;
     BattleStackSpriteItem * itemAttacker =  m_unitGraphics[stack].spriteItem;
-    BattleStackSpriteItem * itemDefender =  m_unitGraphics[target].spriteItem;
+
 
     Q_ASSERT(stack->isAlive());
-    //Q_ASSERT(target->isAlive());
+    Q_ASSERT(target->isAlive());
 
     auto sequencer = makeSequencer();
     auto * attHandle = sequencer->addHandle(itemAttacker, stack);
-    auto * defHandle = sequencer->addHandle(itemDefender, target);
+
 
     sequencer->beginParallel();
 
@@ -569,11 +571,21 @@ void BattleFieldItem::beforeAttackMelee(BattleStackConstPtr stack, BattleStackCo
             attHandle->queueChangeAnim(BattleAnimation::StandStill, 1);
         sequencer->endGroup(); // sequental
     }
-
+    BattleStackSpriteItem * mainDefender =  m_unitGraphics[target].spriteItem;
+    auto * defMainHandle = sequencer->addHandle(mainDefender, target);
+    for (const auto & affectedTarget : affected.getAll())
     {
+        BattleStackSpriteItem * itemDefender =  m_unitGraphics[affectedTarget.stack].spriteItem;
+        auto damage = affectedTarget.damage;
+        auto * defHandle = (affectedTarget.stack == target) ? defMainHandle : sequencer->addHandle(itemDefender, affectedTarget.stack);
         const auto defAnim = damage.isKilled() ? BattleAnimation::Death : BattleAnimation::PainMelee;
+
         sequencer->beginSequental();
-            defHandle->addOptionalTurningOrPause(isTurningForAttack ? target->pos.inverseSightDirection() : target->pos.sightDirection(), true);
+        {
+            if (affectedTarget.stack == target)
+                defHandle->addOptionalTurningOrPause(isTurningForAttack ? target->pos.inverseSightDirection() : target->pos.sightDirection(), true);
+            else
+                sequencer->pause(defMainHandle->getAnimDuration(BattleAnimation::Turning));
             defHandle->queueChangeAnim(BattleAnimation::StandStill, 1);
             sequencer->pause(attackStartDuration);
             sequencer->beginParallel();
@@ -585,7 +597,7 @@ void BattleFieldItem::beforeAttackMelee(BattleStackConstPtr stack, BattleStackCo
             } else {
                 defHandle->addPropertyAnimation(1, "zValue", 1.);
             }
-
+        }
         sequencer->endGroup(); // sequental
     }
 
@@ -596,21 +608,27 @@ void BattleFieldItem::beforeAttackMelee(BattleStackConstPtr stack, BattleStackCo
     refreshCounters();
 }
 
-void BattleFieldItem::beforeAttackRanged(BattleStackConstPtr stack, BattleStackConstPtr target, DamageResult damage)
+void BattleFieldItem::beforeAttackRanged(BattleStackConstPtr stack,  const AffectedPhysical & affected)
 {
+
     BattleStackSpriteItem * itemAttacker =  m_unitGraphics[stack].spriteItem;
-    BattleStackSpriteItem * itemDefender =  m_unitGraphics[target].spriteItem;
+
 
     SpritePtr projectileSprite = m_unitGraphics[stack].projectileSprite;
 
     auto sequencer = makeSequencer();
     auto * attHandle = sequencer->addHandle(itemAttacker, stack);
-    auto * defHandle = sequencer->addHandle(itemDefender, target);
+
+    const GuiSpell * splashSpell = nullptr;
+    if (stack->library->abilities.splashSpell)
+        splashSpell =  m_modelsProvider.spells()->find(stack->library->abilities.splashSpell);
+
 
     SpriteItemObj * splashItem = nullptr;
-    if (!stack->library->abilities.splashAnimation.empty())
+
+    if (splashSpell)
     {
-        auto sprite = m_modelsProvider.units()->find(stack->library)->getSplashSprite();
+        auto sprite = splashSpell->getAnimation();
         splashItem = new SpriteItemObj(this);
         splashItem->hide();
         m_stackEffects << splashItem;
@@ -620,7 +638,7 @@ void BattleFieldItem::beforeAttackRanged(BattleStackConstPtr stack, BattleStackC
 
     sequencer->beginParallel();
 
-    const auto nearest = stack->pos.shortestDecartDistanceSqr(target->pos);
+    const auto nearest = stack->pos.shortestDecartDistanceSqr(affected.mainTargetPos);
     const int approxDecartDistance = static_cast<int>(std::sqrt(static_cast<double>(nearest.first)) / BattlePosition::decartMultiplier);
     const BattlePosition startPos  = nearest.second.first;
     const BattlePosition targetPos = nearest.second.second;
@@ -661,34 +679,46 @@ void BattleFieldItem::beforeAttackRanged(BattleStackConstPtr stack, BattleStackC
 
 
     {
-        const auto animationDef = damage.isKilled() ? BattleAnimation::Death : BattleAnimation::PainRanged;
-        const auto defDuration = defHandle->getAnimDuration(animationDef);
-        //const QString audioId = QString::fromStdString(target->library->pres.soundId) + (damage.isKilled() ? "kill" : "wnce");
-        sequencer->beginSequental();
-            sequencer->pause(turningAnimationDuration + beforeClimaxDuration + climaxFrameRepeatDuration);
-            sequencer->beginParallel();
-                defHandle->queueChangeAnim(animationDef);
-                defHandle->queuePlayEffect(animationDef, defDuration, 1); // ?????
-            sequencer->endGroup(); // parallel
-            if (!damage.isKilled()) {
-                defHandle->queueChangeAnim(BattleAnimation::StandStill, 1);
-            } else {
-                defHandle->addPropertyAnimation(1, "zValue", 1.);
-            }
+        int maxDefDuration = 1;
+        for (const auto & affectedTarget : affected.getAll())
+        {
+            BattleStackSpriteItem * itemDefender =  m_unitGraphics[affectedTarget.stack].spriteItem;
+            auto * defHandle = sequencer->addHandle(itemDefender, affectedTarget.stack);
+            const auto animationDef = affectedTarget.damage.isKilled() ? BattleAnimation::Death : BattleAnimation::PainRanged;
+            const auto defDuration = defHandle->getAnimDuration(animationDef);
+            maxDefDuration = std::max(maxDefDuration, defDuration);
 
-        sequencer->endGroup();// sequental
+            sequencer->beginSequental();
+            {
+                sequencer->pause(turningAnimationDuration + beforeClimaxDuration + climaxFrameRepeatDuration);
+                sequencer->beginParallel();
+                    defHandle->queueChangeAnim(animationDef);
+                    defHandle->queuePlayEffect(animationDef, defDuration, 1);
+                sequencer->endGroup(); // parallel
+                if (!affectedTarget.damage.isKilled()) {
+                    defHandle->queueChangeAnim(BattleAnimation::StandStill, 1);
+                } else {
+                    defHandle->addPropertyAnimation(1, "zValue", 1.);
+                }
+            }
+            sequencer->endGroup();// sequental
+        }
 
         if (splashItem)
         {
-            splashItem->setAnimGroup(SpriteItem::AnimGroupSettings{0, defDuration}.setLoopOver(false));
-            auto posGlobal = defaultGeometry.hexCenterFromCoord(target->pos.mainPos());
+            auto soundEffect = splashSpell->getSound();
+            splashItem->setAnimGroup(SpriteItem::AnimGroupSettings{0, maxDefDuration}.setLoopOver(false));
+            auto posGlobal = defaultGeometry.hexCenterFromCoord(targetPos);
             splashItem->setPos(posGlobal - QPoint(0, 0));
             sequencer->beginSequental();
                 sequencer->pause(turningAnimationDuration + beforeClimaxDuration + climaxFrameRepeatDuration);
+                sequencer->addCallback([soundEffect, maxDefDuration](){
+                    soundEffect->playFor(maxDefDuration + 500);
+                 }, 1);
                 sequencer->addCallback([this](){
                     for (auto * effect : m_stackEffects)
                         effect->show();
-                }, defDuration);
+                }, maxDefDuration);
                 sequencer->addCallback([this](){
                     for (auto * effect : m_stackEffects) {
                         effect->hide();
@@ -726,7 +756,6 @@ void BattleFieldItem::beforeAttackRanged(BattleStackConstPtr stack, BattleStackC
                 m_projectileItem->show();
             }, 1);
 
-            //sequencer->pause(climaxFrameRepeatDuration);
             sequencer->addPropertyAnimation(m_projectileItem, climaxFrameRepeatDuration, "pos", projectilePosEnd);
             sequencer->addCallback([this](){
                 m_projectileItem->hide();
@@ -752,7 +781,7 @@ void BattleFieldItem::onStackUnderEffect(BattleStackConstPtr stack, Effect effec
     };
     const QList<int> durations {1800, 2300, 3500, 2600, 1800};
     const int index = static_cast<int>(effect);
-    Affected affected;
+    AffectedMagic affected;
     affected.targets.push_back({stack, {}});
     affected.area.push_back(stack->pos.mainPos());
     CastPresentation pres;
@@ -761,12 +790,10 @@ void BattleFieldItem::onStackUnderEffect(BattleStackConstPtr stack, Effect effec
     pres.spell = m_modelsProvider.spells()->find(res[index]);
     pres.soundDuration = durations.value(index);
 
-
     onCastInternal({}, affected, pres);
-
 }
 
-void BattleFieldItem::onCast(const Caster & caster, const Affected & affected, BattleFieldItem::LibrarySpellConstPtr spell)
+void BattleFieldItem::onCast(const Caster & caster, const AffectedMagic & affected, BattleFieldItem::LibrarySpellConstPtr spell)
 {
     const int soundDuration = 1500; // @todo: ?
     CastPresentation pres;
@@ -810,7 +837,7 @@ void BattleFieldItem::onSelectSpell(LibrarySpellConstPtr spell)
     m_controlPlan.m_planCastParams.m_spell = spell;
 }
 
-void BattleFieldItem::onCastInternal(const Caster & caster, const Affected & affected, const CastPresentation & pres)
+void BattleFieldItem::onCastInternal(const Caster & caster, const AffectedMagic & affected, const CastPresentation & pres)
 {
     auto sequencer = makeSequencer();
     (void)caster;
@@ -888,9 +915,12 @@ void BattleFieldItem::onCastInternal(const Caster & caster, const Affected & aff
             stackEffect->setAnimGroup(SpriteItem::AnimGroupSettings{0, animationDuration}.setLoopOver(false));
         }
     }
-    auto soundId = pres.useSpecialSound ? pres.spell->getSource()->presentationParams.soundSpecial : pres.spell->getSource()->presentationParams.sound;
+
+    auto soundHandle = pres.useSpecialSound ? pres.spell->getSoundAlt() : pres.spell->getSound();
     sequencer->beginParallel();
-        sequencer->queuePlayEffect(soundId, soundDurationMax, animationDuration);
+        sequencer->addCallback([soundHandle, soundDurationMax](){
+            soundHandle->playFor(soundDurationMax);
+        }, 1);
 
         if (!extraBottom.isEmpty()) {
             sequencer->beginSequental();
@@ -954,7 +984,6 @@ void BattleFieldItem::onCastInternal(const Caster & caster, const Affected & aff
 
 void BattleFieldItem::planUpdate()
 {
-    //refreshHoveringState();
 }
 
 void BattleFieldItem::altUpdate()
@@ -1048,16 +1077,23 @@ void BattleFieldItem::updateUnitHighlights()
 {
     std::map<BattleStackConstPtr, int> hovered;
     hovered[m_controlPlan.m_hoveredStack] = 0;
-    int nonZeroCount = 0;
+
     if (m_controlPlan.m_planCastParams.isActive()) {
         hovered.clear();
-        for (auto & target : m_controlPlan.m_planCast.m_targeted)
-            if (target.unit) {
+        for (auto & target : m_controlPlan.m_planCast.m_targeted) {
+            if (target.stack) {
                 int kills = target.loss.deaths;
-                hovered[target.unit] = kills;
-                if (kills > 0)
-                    nonZeroCount++;
+                hovered[target.stack] = kills;
             }
+        }
+    }
+    if (m_controlPlan.m_planMove.isValid()) {
+        for (auto & target : m_controlPlan.m_planMove.m_extraAffectedTargets) {
+            if (target.stack) {
+                int kills = target.damage.avgRoll.loss.deaths;
+                hovered[target.stack] = kills;
+            }
+        }
     }
     for (auto stack : m_unitGraphics.keys()) {
         UnitGraphics & graphics = m_unitGraphics[stack];
@@ -1065,7 +1101,8 @@ void BattleFieldItem::updateUnitHighlights()
         const bool newHovered = hovered.count(stack) > 0;
         graphics.spriteItem->setHighlight(BattleStackSpriteItem::Highlight::Selected,  (stack == m_controlPlan.m_selectedStack));
         graphics.spriteItem->setHighlight(BattleStackSpriteItem::Highlight::Hovered, newHovered);
-        graphics.spriteItem->setCounterExtra(-hovered[stack]);
+        if (m_appSettings.battle().counterDamageHint)
+            graphics.spriteItem->setCounterExtra(-hovered[stack]);
 
         graphics.sporadic.cfg.enabled = stack->isAlive() && m_controlAvailable; // @todo: not alive, but can move maybe.
         if (newHovered && !oldHovered && m_controlAvailable)

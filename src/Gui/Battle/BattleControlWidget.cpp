@@ -32,7 +32,7 @@ namespace {
 QString posToStr(const BattlePosition& pos) {
     return QString("(%1,%2)").arg(pos.x).arg(pos.y);
 }
-QString wrapKills (int kills){ return QString("<k>%1</k>").arg(kills) ;}
+QString wrapDeaths(int deaths){ return QString("<k>%1</k>").arg(deaths) ;}
 QString wrapDmg   (int dmg)    { return QString("<d>%1</d>").arg(dmg) ;}
 QString wrapInfo  (QString info)  { return QString("<i>%1</i>").arg(info) ;}
 QString wrapInfo  (int info)  { return QString("<i>%1</i>").arg(info) ;}
@@ -215,35 +215,59 @@ void BattleControlWidget::beforeMove(BattleStackConstPtr stack, const BattlePosi
            .arg(posToStr(path.back())));
 }
 
-void BattleControlWidget::beforeAttackMelee(BattleStackConstPtr stack, BattleStackConstPtr target, DamageResult damage, bool isRetaliation)
+void BattleControlWidget::beforeAttackMelee(BattleStackConstPtr stack, const AffectedPhysical & affected, bool isRetaliation)
 {
     const QString damageStr = tr("%1 %2 total damage (N * %3 * %4)")
           .arg(tr("dealing", "", stack->count))
-          .arg(wrapDmg(damage.loss.damageTotal))
-          .arg(wrapInfo(qreal(damage.damageBaseRoll)/stack->count))
-          .arg(wrapInfo(QString::number(damage.damagePercent) + "%"));
+          .arg(wrapDmg(affected.main.damage.loss.damageTotal))
+          .arg(wrapInfo(qreal(affected.main.damage.damageBaseRoll)/stack->count))
+          .arg(wrapInfo(QString::number(affected.main.damage.damagePercent) + "%"));
 
-    const QString killsStr =
-            (damage.isKilled())  ? tr(", killing all %1 creatures")
-                                   .arg(wrapKills(damage.loss.deaths)) :
-            (damage.loss.deaths > 0)  ? tr(", killing %1 with %2 remain")
-                                        .arg(wrapKills(damage.loss.deaths))
-                                        .arg(wrapInfo(damage.loss.remainCount)) : "";
+    const QString deathsStr =
+            (affected.main.damage.isKilled())  ? tr(", killing all %1 creatures")
+                                   .arg(wrapDeaths(affected.main.damage.loss.deaths)) :
+            (affected.main.damage.loss.deaths > 0)  ? tr(", deaths %1 (remain %2)")
+                                        .arg(wrapDeaths(affected.main.damage.loss.deaths))
+                                        .arg(wrapInfo(affected.main.damage.loss.remainCount)) : "";
 
     const QString attackDescrStr = (isRetaliation ? tr("retaliate on", "", stack->count)  : tr("attack", "", stack->count));
 
-    QString msg = tr("%1 %2 %3, %4 %5").arg(localizedNameWithCount(stack))
+    QString msg;
+    if (affected.main.stack)
+        msg = tr("%1 %2 %3, %4 %5").arg(localizedNameWithCount(stack))
                   .arg(attackDescrStr)
-                  .arg(localizedNameWithCount(target, true))
+                  .arg(localizedNameWithCount(affected.main.stack, true))
                   .arg(damageStr)
-                  .arg(killsStr);
+                  .arg(deathsStr);
+    else
+        msg = tr("%1 %2").arg(localizedNameWithCount(stack))
+                  .arg(attackDescrStr);
+
+    if (!affected.extra.empty())
+        msg += tr(", splash has done damage to: ");
+
+    for (size_t i=0; i< affected.extra.size(); i++)
+    {
+       auto loss = affected.extra[i].damage.loss;
+       auto stack = affected.extra[i].stack;
+       auto name = m_modelsProvider.units()->find(stack->library)->getName();
+       if (i > 0)
+           msg += ", ";
+       if (loss.remainCount && loss.deaths)
+           msg += tr("%1 - dmg. %2, deaths %3 (remain %4) ")
+                  .arg(name).arg(wrapDmg(loss.damageTotal)).arg(wrapDeaths(loss.deaths)).arg(wrapInfo(loss.remainCount));
+       else if (!loss.deaths)
+           msg += tr("%1 - dmg. %2").arg(name).arg(wrapDmg(loss.damageTotal));
+       else
+           msg += tr("%1 - dmg. %2, killing all %3").arg(name).arg(wrapDmg(loss.damageTotal)).arg(wrapDeaths(loss.deaths));
+    }
 
     addLog(msg);
 }
 
-void BattleControlWidget::beforeAttackRanged(BattleStackConstPtr stack, BattleStackConstPtr target, DamageResult damage)
+void BattleControlWidget::beforeAttackRanged(BattleStackConstPtr stack, const AffectedPhysical & affected)
 {
-    beforeAttackMelee(stack, target, damage, false);
+    beforeAttackMelee(stack, affected, false);
 }
 
 void BattleControlWidget::beforeWait(BattleStackConstPtr stack)
@@ -316,7 +340,7 @@ void BattleControlWidget::onStackUnderEffect(BattleStackConstPtr stack, Effect e
     addLog(fmt.arg(localizedNameWithCount(stack)), true);
 }
 
-void BattleControlWidget::onCast(const Caster & caster, const Affected & affected , LibrarySpellConstPtr spell)
+void BattleControlWidget::onCast(const Caster & caster, const AffectedMagic & affected , LibrarySpellConstPtr spell)
 {
     QString casterName;
     if (caster.hero)
@@ -339,12 +363,12 @@ void BattleControlWidget::onCast(const Caster & caster, const Affected & affecte
            if (i > 0)
                msg += ", ";
            if (loss.remainCount && loss.deaths)
-               msg += tr("%1 - dmg. %2, killed %3 with %4 remain")
-                      .arg(name).arg(wrapDmg(loss.damageTotal)).arg(wrapKills(loss.deaths)).arg(wrapInfo(loss.remainCount));
+               msg += tr("%1 - dmg. %2, deaths %3 (remain %4)")
+                      .arg(name).arg(wrapDmg(loss.damageTotal)).arg(wrapDeaths(loss.deaths)).arg(wrapInfo(loss.remainCount));
            else if (!loss.deaths)
                msg += tr("%1 - dmg. %2").arg(name).arg(wrapDmg(loss.damageTotal));
            else
-               msg += tr("%1 - dmg. %2, all %3 are killed").arg(name).arg(wrapDmg(loss.damageTotal)).arg(wrapKills(loss.deaths));
+               msg += tr("%1 - dmg. %2, killing all %3").arg(name).arg(wrapDmg(loss.damageTotal)).arg(wrapDeaths(loss.deaths));
         }
     }
 
@@ -382,9 +406,9 @@ void BattleControlWidget::planUpdate()
 {
     QString hint;
 
-    auto formatDamageRoll = [](int low, int high, int avg, bool kills) -> QString {
+    auto formatDamageRoll = [](int low, int high, int avg, bool deaths) -> QString {
         const bool showAverage = true; // @todo: some sort of settings
-        QString hightlightTag = kills? "k" : "d";
+        QString hightlightTag = deaths ? "k" : "d";
         if (low == high)
             return QString("<%1>%2</%1>").arg(hightlightTag).arg(low);
 
@@ -396,8 +420,17 @@ void BattleControlWidget::planUpdate()
                                                  .arg(low).arg(high);
         return formatted;
     };
-    auto formatDamageRollSingle = [&formatDamageRoll](int avg, bool kills) -> QString {
-        return formatDamageRoll(avg, avg , avg, kills);
+    auto formatDamageRollSingle = [&formatDamageRoll](int avg, bool deaths) -> QString {
+        return formatDamageRoll(avg, avg , avg, deaths);
+    };
+    auto formatEstimateDamage = [&formatDamageRoll](const DamageEstimate & estimate) -> QString {
+        return formatDamageRoll(estimate.lowRoll.loss.damageTotal, estimate.maxRoll.loss.damageTotal, estimate.avgRoll.loss.damageTotal, false);
+    };
+    auto formatEstimateDeaths = [&formatDamageRoll](const DamageEstimate & estimate) -> QString {
+        if (estimate.maxRoll.loss.deaths == 0)
+            return "";
+        QString str = formatDamageRoll(estimate.lowRoll.loss.deaths, estimate.maxRoll.loss.deaths, estimate.avgRoll.loss.deaths, true);
+        return tr(", deaths %1").arg(str);
     };
     auto formatResist = [](const BonusRatio & succRatio) -> QString {
         const int percent = (succRatio * 100).roundDownInt();
@@ -410,71 +443,112 @@ void BattleControlWidget::planUpdate()
     if (movePlan.isValid()) {
         if (!movePlan.m_attackTarget.isEmpty()) {
             auto estimate = movePlan.m_mainDamage ;
-            hint = tr("Target attack: %1, damage %2, killing %3")
-                   .arg(localizedNameWithCount(hoveredStack, true))
-                   .arg(formatDamageRoll(estimate.lowRoll.loss.damageTotal, estimate.maxRoll.loss.damageTotal, estimate.avgRoll.loss.damageTotal, false))
-                   .arg(formatDamageRoll(estimate.lowRoll.loss.deaths     , estimate.maxRoll.loss.deaths     , estimate.avgRoll.loss.deaths     , true))
-                   ;
+            if (hoveredStack) {
+                hint = tr("Target attack: %1, damage %2%3")
+                       .arg(localizedNameWithCount(hoveredStack, true))
+                       .arg(formatEstimateDamage(estimate))
+                       .arg(formatEstimateDeaths(estimate))
+                       ;
+            }
             if (m_appSettings.battle().retaliationHint) {
                 auto estimateRet = movePlan.m_retaliationDamage;
                 if (estimateRet.isValid) {
-                    hint += "<br>" + tr("Possible retaliation: damage %1, killing %2")
-                            .arg(formatDamageRoll(estimateRet.lowRoll.loss.damageTotal, estimateRet.maxRoll.loss.damageTotal, estimateRet.avgRoll.loss.damageTotal, false))
-                            .arg(formatDamageRoll(estimateRet.lowRoll.loss.deaths     , estimateRet.maxRoll.loss.deaths     , estimateRet.avgRoll.loss.deaths     , true));
+                    hint += "<br>" + tr("Possible retaliation: damage %1%2")
+                            .arg(formatEstimateDamage(estimateRet))
+                            .arg(formatEstimateDeaths(estimateRet));
+                }
+            }
+            if (m_appSettings.battle().massDamageHint && movePlan.m_extraAffectedTargets.size() > 0) {
+                hint += tr(", extra affected: ");
+                for (size_t i=0; i< movePlan.m_extraAffectedTargets.size(); i++)
+                {
+                    auto damageEstimate   = movePlan.m_extraAffectedTargets[i].damage;
+                    auto stack  = movePlan.m_extraAffectedTargets[i].stack;
+                    auto name  = m_modelsProvider.units()->find(stack->library)->getName();
+                    if (i > 0)
+                        hint += ", ";
+                    hint += tr("%1 - damage %2%3").arg(name)
+                            .arg(formatEstimateDamage(damageEstimate))
+                            .arg(formatEstimateDeaths(damageEstimate))
+                            ;
                 }
             }
         } else {
             hint = tr("Move to %1").arg(posToStr(movePlan.m_moveTo.mainPos()));
         }
     } else if (castPlan.isValid()) {
+        const bool isOffensive = castPlan.m_spell->type == LibrarySpell::Type::Offensive;
         hint = tr("Cast %1").arg(m_modelsProvider.spells()->find(castPlan.m_spell)->getName());
-         if (castPlan.m_targeted.size() > 3 || castPlan.m_spell->type == LibrarySpell::Type::Temp) {
-             if (castPlan.m_spell->type == LibrarySpell::Type::Offensive) {
-                 hint += " - " + tr("total damage %1, deaths %2")
-                         .arg(formatDamageRollSingle(castPlan.lossTotal.damageTotal, false))
-                         .arg(formatDamageRollSingle(castPlan.lossTotal.deaths, true));
-             }
-             BonusRatio magicSuccessChanceMin {1,1};
-             BonusRatio magicSuccessChanceMax {1,100};
-             for (auto & target : castPlan.m_targeted)
-             {
-                magicSuccessChanceMin = std::min(magicSuccessChanceMin, target.magicSuccessChance);
-                magicSuccessChanceMax = std::max(magicSuccessChanceMax, target.magicSuccessChance);
-             }
-
-             if (magicSuccessChanceMin != BonusRatio{1,1} && magicSuccessChanceMax == magicSuccessChanceMin)
-                 hint += QString(" (<i>%1%</i> ").arg(formatResist(magicSuccessChanceMin)) + tr("succ. ch.") + ")";
-             else if (magicSuccessChanceMax != magicSuccessChanceMin)
-                 hint += QString(" (<i>%1..%2%</i> ").arg(formatResist(magicSuccessChanceMin)).arg(formatResist(magicSuccessChanceMax)) + tr("succ. ch.") + ")";
-
-         } else if (castPlan.m_targeted.size() > 0) {
-             hint += " - ";
-             if (castPlan.m_targeted.size() > 1)
-                hint += tr("total damage %1, deaths %2, affected: ")
+        if (castPlan.m_targeted.size() > 3 || castPlan.m_spell->type == LibrarySpell::Type::Temp) {
+            if (isOffensive) {
+                hint += " - " + tr("total damage %1, deaths %2")
                         .arg(formatDamageRollSingle(castPlan.lossTotal.damageTotal, false))
                         .arg(formatDamageRollSingle(castPlan.lossTotal.deaths, true));
+            }
+            BonusRatio magicSuccessChanceMin {1,1};
+            BonusRatio magicSuccessChanceMax {1,100};
+            if (m_appSettings.battle().massDamageHint && isOffensive) {
+                hint += tr(", deaths by creature: ");
+            }
+            int i = 0;
+            for (auto & target : castPlan.m_targeted)
+            {
+                magicSuccessChanceMin = std::min(magicSuccessChanceMin, target.magicSuccessChance);
+                magicSuccessChanceMax = std::max(magicSuccessChanceMax, target.magicSuccessChance);
+                if (m_appSettings.battle().massDamageHint && isOffensive) {
 
-             for (size_t i=0; i< castPlan.m_targeted.size(); i++)
-             {
-                auto loss = castPlan.m_targeted[i].loss;
-                auto stack = castPlan.m_targeted[i].unit;
-                auto succ = castPlan.m_targeted[i].magicSuccessChance;
-                auto reduce = castPlan.m_targeted[i].totalFactor;
-                auto name  = m_modelsProvider.units()->find(stack->library)->getName();
-                if (i > 0)
-                    hint += ", ";
-                hint += tr("%1 - damage %2, deaths %3").arg(name)
-                        .arg(formatDamageRollSingle(loss.damageTotal, false))
-                        .arg(formatDamageRollSingle(loss.deaths, true))
-                        .replace(' ', QChar(QChar::Nbsp))
-                        ;
+                    auto loss   = target.loss;
+                    auto stack  = target.stack;
+                    auto name  = m_modelsProvider.units()->find(stack->library)->getName();
+                    if (i++ > 0)
+                        hint += ", ";
+                    hint += tr("%1 - %2").arg(name).arg(formatDamageRollSingle(loss.deaths, true));
+                }
+            }
+
+
+            if (magicSuccessChanceMin != BonusRatio{1,1} && magicSuccessChanceMax == magicSuccessChanceMin)
+                hint += QString(" (<i>%1%</i> ").arg(formatResist(magicSuccessChanceMin)) + tr("succ. ch.") + ")";
+            else if (magicSuccessChanceMax != magicSuccessChanceMin)
+                hint += QString(" (<i>%1..%2%</i> ").arg(formatResist(magicSuccessChanceMin)).arg(formatResist(magicSuccessChanceMax)) + tr("succ. ch.") + ")";
+
+        } else if (castPlan.m_targeted.size() > 0) {
+            hint += " - ";
+            hint += tr("total damage %1, deaths %2")
+                    .arg(formatDamageRollSingle(castPlan.lossTotal.damageTotal, false))
+                    .arg(formatDamageRollSingle(castPlan.lossTotal.deaths, true));
+
+            if (m_appSettings.battle().massDamageHint && castPlan.m_targeted.size() > 1) {
+                hint += tr(", affected: ");
+                for (size_t i=0; i< castPlan.m_targeted.size(); i++)
+                {
+                    auto loss   = castPlan.m_targeted[i].loss;
+                    auto stack  = castPlan.m_targeted[i].stack;
+                    auto succ   = castPlan.m_targeted[i].magicSuccessChance;
+                    auto reduce = castPlan.m_targeted[i].totalFactor;
+                    auto name  = m_modelsProvider.units()->find(stack->library)->getName();
+                    if (i > 0)
+                        hint += ", ";
+                    hint += tr("%1 - damage %2, deaths %3").arg(name)
+                            .arg(formatDamageRollSingle(loss.damageTotal, false))
+                            .arg(formatDamageRollSingle(loss.deaths, true))
+                            ;
+                    if (succ != BonusRatio{1,1})
+                        hint += " " + tr("(<i>%1%</i> %2)").arg(formatResist(succ)).arg(tr("succ. ch."));
+
+                    if (reduce != BonusRatio{1,1})
+                        hint += " " + tr("(<i>%1%</i> %2)").arg(formatResist(reduce)).arg(tr("of base"));
+                }
+            } else if (castPlan.m_targeted.size() == 1) {
+                auto succ   = castPlan.m_targeted[0].magicSuccessChance;
+                auto reduce = castPlan.m_targeted[0].totalFactor;
                 if (succ != BonusRatio{1,1})
                     hint += " " + tr("(<i>%1%</i> %2)").arg(formatResist(succ)).arg(tr("succ. ch."));
 
                 if (reduce != BonusRatio{1,1})
                     hint += " " + tr("(<i>%1%</i> %2)").arg(formatResist(reduce)).arg(tr("of base"));
-             }
-         }
+            }
+        }
     } else if (hoveredStack) {
         hint = localizedNameWithCount(hoveredStack);
     }

@@ -23,6 +23,7 @@ namespace FreeHeroes::Core {
 
 CORELOGIC_EXPORT BattleDirectionPrecise directionMirrorHor(BattleDirectionPrecise direction);
 
+CORELOGIC_EXPORT BattleAttackDirection attackDirectionInverse(BattleAttackDirection direction);
 
 struct CORELOGIC_EXPORT BattleFieldGeometry {
     int width  = std::numeric_limits<int>::min();
@@ -35,6 +36,7 @@ struct CORELOGIC_EXPORT BattleFieldGeometry {
     }
 
     BattlePosition neighbour(const BattlePosition pos, BattleDirection direction) const noexcept;
+    BattlePositionSet validNeighbours(const BattlePosition pos, const std::vector<BattleDirection> & directions) const noexcept;
     BattlePositionExtended suggestPositionForAttack(BattlePositionExtended startPos, const BattlePositionExtended target, const BattlePositionExtended::Sub targetInner, BattleAttackDirection direction) const noexcept;
 
     AdjacentMap getAdjacent(const BattlePosition pos) const;

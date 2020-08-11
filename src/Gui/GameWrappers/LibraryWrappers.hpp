@@ -76,7 +76,6 @@ public:
     QPixmap getPortraitSmall() const { return m_portraitSmall->get(); }
     QPixmap getPortraitLarge() const { return m_portraitLarge->get(); }
     SpritePtr getBattleSprite() const { return m_battleSprite->get(); }
-    SpritePtr getSplashSprite() const { return m_splashSprite->get(); }
     SpritePtr getProjectileSprite() const { return m_projectileSprite->get(); }
     QIcon getSplashControl() const;
 
@@ -85,7 +84,6 @@ private:
     IAsyncPixmapPtr m_portraitLarge;
 
     IAsyncSpritePtr m_battleSprite;
-    IAsyncSpritePtr m_splashSprite;
     IAsyncSpritePtr m_projectileSprite;
 
     IAsyncIconPtr m_splashControl;
@@ -167,6 +165,9 @@ public:
     SpritePtr getBottomAnimation() const { return m_bottomAnimation->get(); }
     SpritePtr getProjectile     () const { return m_projectile->get(); }
 
+    Sound::ISoundResourcePtr getSound   () const { return m_sound; }
+    Sound::ISoundResourcePtr getSoundAlt() const { return m_soundAlt; }
+
     bool hasBottomAnimation() const { return m_bottomAnimation->exists(); }
     bool hasProjectile     () const { return m_projectile->exists(); }
 
@@ -183,6 +184,9 @@ private:
     IAsyncSpritePtr m_animation;
     IAsyncSpritePtr m_bottomAnimation;
     IAsyncSpritePtr m_projectile;
+
+    Sound::ISoundResourcePtr m_sound;
+    Sound::ISoundResourcePtr m_soundAlt;
     //std::string sound;
 
 };

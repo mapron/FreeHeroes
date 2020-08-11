@@ -62,6 +62,7 @@ struct BattleStack {
         bool canAttackMelee = false;
         bool canAttackRanged = false;
         bool canAttackFreeSplash = false;
+        bool rangeAttackIsBlocked = false;
     };
     EstimatedParams estimatedOnStart;  // adventure->estimated + land bonus/castle bonus + hero.rngParamsOppBonus + environment
 
@@ -92,8 +93,6 @@ struct BattleStack {
     int sameSpeedOrder = 0;
 
     BattlePositionExtended pos;
-
-    std::vector<BattleStackConstPtr> aliveNeighbours;
 
     struct Effect {
         enum class Type { Spell, Guard };

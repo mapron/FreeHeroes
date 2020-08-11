@@ -25,7 +25,8 @@ public:
 
     void calculateUnitStats(BattleStack& unit);
 
-    bool checkSpellTarget(const BattleStack& possibleTarget, LibrarySpellConstPtr spell);
+    bool checkSpellTarget (const BattleStack& possibleTarget, LibrarySpellConstPtr spell);
+    bool checkAttackElementPossibility(const BattleStack& possibleTarget, LibraryUnit::Abilities::AttackWithElement element);
 
 private:
     void bindTypes(sol::state & lua);

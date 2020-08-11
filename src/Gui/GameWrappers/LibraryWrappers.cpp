@@ -13,6 +13,8 @@
 #include "LibraryHeroSpec.hpp"
 #include "LibrarySecondarySkill.hpp"
 
+#include "IMusicBox.hpp"
+
 #include <QCoreApplication>
 #include <QIcon>
 
@@ -137,7 +139,6 @@ GuiUnit::GuiUnit(Sound::IMusicBox& musicBox, IGraphicsLibrary& graphicsLibrary, 
     , m_portraitSmall(graphicsLibrary.getPixmap(source->presentationParams.portraitSmall))
     , m_portraitLarge(graphicsLibrary.getPixmap(source->presentationParams.portrait))
     , m_battleSprite(graphicsLibrary.getObjectAnimation(source->presentationParams.spriteBattle))
-    , m_splashSprite(graphicsLibrary.getObjectAnimation(source->abilities.splashAnimation))
     , m_projectileSprite(graphicsLibrary.getObjectAnimation(source->presentationParams.spriteProjectile))
 {
     std::string splashButtons = source->abilities.splashButtons;
@@ -268,6 +269,8 @@ GuiSpell::GuiSpell(Sound::IMusicBox& musicBox, IGraphicsLibrary& graphicsLibrary
     , m_animation      {graphicsLibrary.getObjectAnimation(source->presentationParams.animation)}
     , m_bottomAnimation{graphicsLibrary.getObjectAnimation(source->presentationParams.bottomAnimation)}
     , m_projectile     {graphicsLibrary.getObjectAnimation(source->presentationParams.projectile)}
+    , m_sound          {musicBox.effectPrepare(Sound::IMusicBox::EffectSettings{source->presentationParams.sound       }.setFadeIn(100).setFadeOut(100))}
+    , m_soundAlt       {musicBox.effectPrepare(Sound::IMusicBox::EffectSettings{source->presentationParams.soundSpecial}.setFadeIn(100).setFadeOut(100))}
 {
 
 }

@@ -50,10 +50,10 @@ ArmyConfigWidget::ArmyConfigWidget(QWidget* parent)
             if (!changed)
                 return;
             if (!useHero)
-                *m_army->getHero()->getSource() = {};
+                m_army->getHero()->setHero(nullptr);
             else
                 m_ui->heroWithArmyConfigWidget->initHero();
-            emit dataChanged();
+
         });
     }
     connect(m_ui->heroWithArmyConfigWidget, &HeroWithArmyConfigWidget::showHeroDialog, this, &ArmyConfigWidget::showHeroDialog);
@@ -79,7 +79,6 @@ void ArmyConfigWidget::initFromMapObject(LibraryMapObjectConstPtr mapObject, int
             m_army->getSquad()->getStack(i)->setCount(0);
         }
     }
-    emit dataChanged();
 }
 
 void ArmyConfigWidget::refresh()
@@ -120,8 +119,6 @@ void ArmyConfigWidget::setSource(Gui::GuiAdventureArmy * army)
 
     m_ui->heroWithArmyConfigWidget->setSource(m_army);
     m_ui->monsterSquadConfigWidget->setSource(m_army);
-
-    connect(m_army, &Gui::GuiAdventureArmy::dataChanged, this, &ArmyConfigWidget::dataChanged);
 
     m_adventureControl = std::make_unique<AdventureControl>(*m_army);
 }

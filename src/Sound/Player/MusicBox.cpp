@@ -92,6 +92,9 @@ public:
     void play() const override {
         m_parent.musicPlay(m_settings);
     }
+    void playFor(int) const override {
+        m_parent.musicPlay(m_settings);
+    }
 private:
     MusicBox & m_parent;
     IMusicBox::MusicSettings m_settings;
@@ -103,6 +106,10 @@ public:
 
     void play() const override {
         m_parent.effectPlay(m_settings);
+    }
+    void playFor(int expectedDurationMS) const override {
+        auto settings = m_settings;
+        m_parent.effectPlay(settings.setExpectedDuration(expectedDurationMS));
     }
 private:
     MusicBox & m_parent;

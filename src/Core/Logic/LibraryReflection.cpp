@@ -284,14 +284,27 @@ RTTR_REGISTRATION
         value("distance",  LibraryUnit::Abilities::DamagePenalty::Distance),
         value("obstacle",  LibraryUnit::Abilities::DamagePenalty::Obstacle)
         );
+    registration::enumeration<LibraryUnit::Abilities::AttackWithElement>("AttackWithElement")
+        (
+        value(""       ,  LibraryUnit::Abilities::AttackWithElement::None),
+        value("fire"   ,  LibraryUnit::Abilities::AttackWithElement::Fire),
+        value("earth"  ,  LibraryUnit::Abilities::AttackWithElement::Earth),
+        value("air"    ,  LibraryUnit::Abilities::AttackWithElement::Air),
+        value("ice"    ,  LibraryUnit::Abilities::AttackWithElement::Ice),
+        value("mind"   ,  LibraryUnit::Abilities::AttackWithElement::Mind),
+        value("magic"  ,  LibraryUnit::Abilities::AttackWithElement::Magic),
+        value("undead" ,  LibraryUnit::Abilities::AttackWithElement::Undead)
+        );
 
     registration::class_<LibraryUnit::Abilities>("LibraryUnitAbilities")
         .constructor<>()
         .property("type"               , &LibraryUnit::Abilities::type)
         .property("nonLivingType"      , &LibraryUnit::Abilities::nonLivingType)
         .property("splash"             , &LibraryUnit::Abilities::splashType)
+        .property("splashFriendlyFire" , &LibraryUnit::Abilities::splashFriendlyFire)
         .property("splashButtons"      , &LibraryUnit::Abilities::splashButtons)
-        .property("splashAnimation"    , &LibraryUnit::Abilities::splashAnimation)
+        .property("splashSpell"        , &LibraryUnit::Abilities::splashSpell)
+        .property("splashElement"      , &LibraryUnit::Abilities::splashElement)
         .property("retaliations"       , &LibraryUnit::Abilities::maxRetaliations)
         .property("chargeAttack"       , &LibraryUnit::Abilities::chargeAttack)
         .property("noPenalty"          , &LibraryUnit::Abilities::disabledPenalties)(ref)

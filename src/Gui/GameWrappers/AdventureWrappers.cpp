@@ -64,9 +64,13 @@ bool GuiAdventureStack::isValid() const
     return m_source->isValid();
 }
 
-void GuiAdventureStack::refreshExternalChange()
+void GuiAdventureStack::updateGuiState()
 {
     m_guiUnit = m_unitProvider.find(m_source->library);
+}
+
+void GuiAdventureStack::emitChanges()
+{
     emit dataChanged();
 }
 
@@ -107,23 +111,34 @@ Core::LibraryUnitConstPtr GuiAdventureSquad::getStackUnitLibrary(size_t index) c
 
 void GuiAdventureSquad::clearAll()
 {
+    this->blockSignals(true);
     for (auto & stack : m_stacks) {
         stack.setUnit(nullptr);
         stack.setCount(0);
-    }
-}
-
-void GuiAdventureSquad::refreshExternalChange()
-{
-    this->blockSignals(true);
-
-    for (auto & stack : m_stacks) {
-        stack.refreshExternalChange();
     }
     this->blockSignals(false);
     emit dataChanged();
 }
 
+void GuiAdventureSquad::updateGuiState()
+{
+    for (auto & stack : m_stacks) {
+        stack.updateGuiState();
+    }
+}
+
+void GuiAdventureSquad::emitChanges()
+{
+    this->blockSignals(true);
+
+    for (auto & stack : m_stacks) {
+        stack.emitChanges();
+    }
+    this->blockSignals(false);
+    emit dataChanged();
+}
+
+void GuiAdventureSquad::externalChange() { updateGuiState(); emitChanges(); }
 
 size_t GuiAdventureSquad::getCount() const
 {
@@ -144,6 +159,7 @@ GuiAdventureHero::GuiAdventureHero(GuiHeroProvider& heroProvider, Core::Adventur
 {
     Q_ASSERT(source);
     m_guiHero = m_heroProvider.find(m_source->library);
+    Q_ASSERT(m_guiHero || !m_source->library);
 }
 
 GuiAdventureHero::~GuiAdventureHero() = default;
@@ -156,6 +172,7 @@ void GuiAdventureHero::setHero(Core::LibraryHeroConstPtr hero)
 
     m_source->reset(hero);
     m_guiHero = m_heroProvider.find(m_source->library);
+    Q_ASSERT(m_guiHero || !m_source->library);
     emit dataChanged();
 }
 
@@ -249,9 +266,21 @@ QAbstractItemModel* GuiAdventureHero::getSkillsEditModel() const
     return m_skillsEditModel;
 }
 
-void GuiAdventureHero::refreshExternalChange()
+void GuiAdventureHero::updateGuiState()
+{
+    m_guiHero = m_heroProvider.find(m_source->library);
+    Q_ASSERT(!m_source->library || m_guiHero);
+}
+
+void GuiAdventureHero::emitChanges()
 {
     emit dataChanged();
+}
+
+void GuiAdventureHero::externalChange()
+{
+    updateGuiState();
+    emitChanges();
 }
 
 GuiAdventureArmy::GuiAdventureArmy(GuiUnitProvider& unitProvider,
@@ -263,6 +292,27 @@ GuiAdventureArmy::GuiAdventureArmy(GuiUnitProvider& unitProvider,
 {
     connect(&m_squad, &GuiAdventureSquad::dataChanged, this, &GuiAdventureArmy::dataChanged);
     connect(&m_hero , &GuiAdventureHero::dataChanged , this, &GuiAdventureArmy::dataChanged);
+}
+
+void GuiAdventureArmy::updateGuiState()
+{
+    m_squad.updateGuiState();
+    m_hero .updateGuiState();
+}
+
+void GuiAdventureArmy::emitChanges()
+{
+    this->blockSignals(true);
+    m_squad.emitChanges();
+    m_hero .emitChanges();
+    this->blockSignals(false);
+    emit dataChanged();
+}
+
+void GuiAdventureArmy::externalChange()
+{
+    updateGuiState();
+    emitChanges();
 }
 
 

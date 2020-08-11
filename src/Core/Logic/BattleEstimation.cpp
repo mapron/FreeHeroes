@@ -140,12 +140,6 @@ void BattleEstimation::calculateUnitStats(BattleStack& unit)
     cur.hasBuff = hasBuff;
     cur.hasDebuff = hasDebuff;
 
-    for (BattleStackConstPtr neighbour : unit.aliveNeighbours) {
-        if (neighbour->side != unit.side) {
-            cur.canAttackRanged = false;
-            break;
-        }
-    }
     cur.canAttackFreeSplash = cur.canAttackRanged && unit.library->abilities.splashType == LibraryUnit::Abilities::SplashAttack::Ranged;
     cur.canDoAnything   = cur.canMove || cur.canAttackMelee || cur.canAttackRanged || cur.canCast;
 
@@ -175,6 +169,20 @@ bool BattleEstimation::checkSpellTarget(const BattleStack& possibleTarget, Libra
 
     bool result = lua["result"];
     return result;
+}
+
+bool BattleEstimation::checkAttackElementPossibility(const BattleStack& possibleTarget, LibraryUnit::Abilities::AttackWithElement element)
+{
+    if (element == LibraryUnit::Abilities::AttackWithElement::Fire) {
+        if (!possibleTarget.current.immunes.isDefault() && possibleTarget.current.immunes.contains(MagicSchool::Fire))
+            return false;
+    }
+    if (element == LibraryUnit::Abilities::AttackWithElement::Undead) {
+        if (possibleTarget.library->abilities.type != UnitType::Living)
+            return false;
+    }
+
+    return true;
 }
 
 void BattleEstimation::calculateHeroStatsStartBattle(BattleHero& hero, const BattleSquad & squad, const BattleHero & opponent)

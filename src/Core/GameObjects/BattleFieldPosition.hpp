@@ -192,8 +192,21 @@ public:
             { leftPos () , to.leftPos ()},
         }};
     }
+    constexpr std::array<BattlePositionPair, 2> possibleLinesTo(const BattlePosition& to)  const noexcept {
+        return {{
+            { rightPos() , to},
+            { leftPos () , to},
+        }};
+    }
 
     constexpr std::pair<int, BattlePositionPair> shortestHexDistance(const BattlePositionExtended & to) const noexcept {
+        const auto variants = possibleLinesTo(to);
+        auto it = std::min_element(variants.cbegin(), variants.cend(), [](const BattlePositionPair &lh, const BattlePositionPair &rh){
+            return lh.first.hexDistance(lh.second) < rh.first.hexDistance(rh.second);
+        });
+        return {it->first.hexDistance(it->second), *it};
+    }
+    constexpr std::pair<int, BattlePositionPair> shortestHexDistance(const BattlePosition & to) const noexcept {
         const auto variants = possibleLinesTo(to);
         auto it = std::min_element(variants.cbegin(), variants.cend(), [](const BattlePositionPair &lh, const BattlePositionPair &rh){
             return lh.first.hexDistance(lh.second) < rh.first.hexDistance(rh.second);

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>454</width>
-    <height>287</height>
+    <width>468</width>
+    <height>294</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -32,7 +32,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>3</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tabSound">
       <attribute name="title">
@@ -96,103 +96,131 @@
       <attribute name="title">
        <string>Battle View</string>
       </attribute>
-      <layout class="QFormLayout" name="formLayout_2">
-       <property name="fieldGrowthPolicy">
-        <enum>QFormLayout::ExpandingFieldsGrow</enum>
-       </property>
-       <property name="rowWrapPolicy">
-        <enum>QFormLayout::DontWrapRows</enum>
-       </property>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>Battle movement time %:</string>
+      <layout class="QVBoxLayout" name="formLayoutW_2" stretch="0,1">
+       <item>
+        <layout class="QFormLayout" name="formLayout_2">
+         <property name="fieldGrowthPolicy">
+          <enum>QFormLayout::ExpandingFieldsGrow</enum>
          </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
-         <item>
-          <widget class="QSlider" name="horizontalSliderBattleMovementTime">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+         <property name="rowWrapPolicy">
+          <enum>QFormLayout::DontWrapRows</enum>
+         </property>
+         <property name="bottomMargin">
+          <number>5</number>
+         </property>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Battle movement time %:</string>
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="QSpinBox" name="spinBoxBattleMovementTime"/>
+         <item row="0" column="1">
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <item>
+            <widget class="QSlider" name="horizontalSliderBattleMovementTime">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="spinBoxBattleMovementTime"/>
+           </item>
+          </layout>
          </item>
-        </layout>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>Battle general anim. time %:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <layout class="QHBoxLayout" name="horizontalLayout_4">
-         <item>
-          <widget class="QSlider" name="horizontalSliderBattleGeneralTime">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>Battle general anim. time %:</string>
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="QSpinBox" name="spinBoxBattleGeneralTime"/>
+         <item row="1" column="1">
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <item>
+            <widget class="QSlider" name="horizontalSliderBattleGeneralTime">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="spinBoxBattleGeneralTime"/>
+           </item>
+          </layout>
          </item>
-        </layout>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_5">
-         <property name="text">
-          <string>Reduce time holding SHIFT::</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <layout class="QHBoxLayout" name="horizontalLayout_5">
-         <item>
-          <widget class="QSlider" name="horizontalSliderShiftSpeed">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_5">
+           <property name="text">
+            <string>Reduce time holding SHIFT::</string>
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="QSpinBox" name="spinBoxShiftSpeed"/>
+         <item row="2" column="1">
+          <layout class="QHBoxLayout" name="horizontalLayout_5">
+           <item>
+            <widget class="QSlider" name="horizontalSliderShiftSpeed">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="spinBoxShiftSpeed"/>
+           </item>
+          </layout>
          </item>
         </layout>
        </item>
-       <item row="3" column="1">
-        <widget class="QCheckBox" name="checkBoxDisplayGrid">
-         <property name="text">
-          <string>Display grid</string>
+       <item>
+        <layout class="QGridLayout" name="gridLayout">
+         <property name="bottomMargin">
+          <number>40</number>
          </property>
-        </widget>
-       </item>
-       <item row="4" column="1">
-        <widget class="QCheckBox" name="checkBoxDisplayPath">
-         <property name="text">
-          <string>Display path</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="1">
-        <widget class="QCheckBox" name="checkBoxLogMoves">
-         <property name="text">
-          <string>Log moves</string>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="1">
-        <widget class="QCheckBox" name="checkBoxRetaliationHint">
-         <property name="text">
-          <string>Retaliation hints</string>
-         </property>
-        </widget>
+         <item row="1" column="0">
+          <widget class="QCheckBox" name="checkBoxDisplayGrid">
+           <property name="text">
+            <string>Display grid</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QCheckBox" name="checkBoxDisplayPath">
+           <property name="text">
+            <string>Display path</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QCheckBox" name="checkBoxLogMoves">
+           <property name="text">
+            <string>Log moves</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QCheckBox" name="checkBoxRetaliationHint">
+           <property name="text">
+            <string>Retaliation hints</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QCheckBox" name="checkBoxMassDamageHint">
+           <property name="text">
+            <string>Massive damage hints</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QCheckBox" name="checkBoxDeathHintsInCounters">
+           <property name="text">
+            <string>Display death hints in counters</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>

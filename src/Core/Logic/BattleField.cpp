@@ -40,6 +40,23 @@ BattleDirectionPrecise directionMirrorHor(BattleDirectionPrecise direction)
     return static_cast<BattleDirectionPrecise>(count - index);
 }
 
+BattleAttackDirection attackDirectionInverse(BattleAttackDirection direction)
+{
+    switch(direction) {
+        case BattleAttackDirection::TR: return BattleAttackDirection::BL;
+        case BattleAttackDirection::R : return BattleAttackDirection::L;
+        case BattleAttackDirection::BR: return BattleAttackDirection::TL;
+        case BattleAttackDirection::BL: return BattleAttackDirection::TR;
+        case BattleAttackDirection::L : return BattleAttackDirection::R;
+        case BattleAttackDirection::TL: return BattleAttackDirection::BR;
+        case BattleAttackDirection::T : return BattleAttackDirection::B;
+        case BattleAttackDirection::B : return BattleAttackDirection::T;
+        default: break;
+    }
+    return BattleAttackDirection::None;
+}
+
+
 BattlePosition BattleFieldGeometry::neighbour(const BattlePosition pos, BattleDirection direction) const noexcept
 {
     const bool oddRow = pos.y % 2 == 1;
@@ -58,6 +75,20 @@ BattlePosition BattleFieldGeometry::neighbour(const BattlePosition pos, BattleDi
     }
     assert(!"Unexistent direction");
     return {};
+}
+
+BattlePositionSet BattleFieldGeometry::validNeighbours(const BattlePosition pos, const std::vector<BattleDirection>& directions) const noexcept
+{
+    if (!isValid(pos))
+        return {};
+
+    BattlePositionSet result;
+    for (auto dir : directions) {
+        auto npos = neighbour(pos, dir);
+        if (isValid(npos))
+            result.insert(npos);
+    }
+    return result;
 }
 
 BattlePositionExtended BattleFieldGeometry::suggestPositionForAttack(BattlePositionExtended startPos, const BattlePositionExtended target, const BattlePositionExtended::Sub targetInner, BattleAttackDirection direction) const noexcept
@@ -299,6 +330,7 @@ BattlePosition BattleFieldPreset::calcPosition(bool attacker, int orderIndex, in
 
     return pos;
 }
+
 
 
 

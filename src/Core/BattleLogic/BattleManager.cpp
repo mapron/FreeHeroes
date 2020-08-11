@@ -45,13 +45,13 @@ public:
     }
 
     void beforeMove(BattleStackConstPtr stack, const BattlePositionPath & path) override { for (auto * child : m_children) child->beforeMove(stack, path); }
-    void beforeAttackMelee(BattleStackConstPtr stack, BattleStackConstPtr target, DamageResult damage, bool isRetaliation) override { for (auto * child : m_children) child->beforeAttackMelee(stack, target, damage, isRetaliation); }
-    void beforeAttackRanged(BattleStackConstPtr stack, BattleStackConstPtr target, DamageResult damage) override { for (auto * child : m_children) child->beforeAttackRanged(stack, target, damage); }
+    void beforeAttackMelee(BattleStackConstPtr stack , const AffectedPhysical & affected, bool isRetaliation) override { for (auto * child : m_children) child->beforeAttackMelee(stack, affected, isRetaliation); }
+    void beforeAttackRanged(BattleStackConstPtr stack, const AffectedPhysical & affected) override { for (auto * child : m_children) child->beforeAttackRanged(stack, affected); }
     void beforeWait(BattleStackConstPtr stack) override { for (auto * child : m_children) child->beforeWait(stack); }
     void beforeGuard(BattleStackConstPtr stack, int defBonus) override { for (auto * child : m_children) child->beforeGuard(stack, defBonus); }
 
     void onStackUnderEffect(BattleStackConstPtr stack, Effect effect) override  { for (auto * child : m_children) child->onStackUnderEffect(stack, effect); }
-    void onCast(const Caster & caster, const Affected & affected, LibrarySpellConstPtr spell) override  { for (auto * child : m_children) child->onCast(caster, affected, spell); }
+    void onCast(const Caster & caster, const AffectedMagic & affected, LibrarySpellConstPtr spell) override  { for (auto * child : m_children) child->onCast(caster, affected, spell); }
 
 
     void onPositionReset(BattleStackConstPtr stack) override { for (auto * child : m_children) child->onPositionReset(stack); }
@@ -101,8 +101,8 @@ IBattleView::AvailableActions BattleManager::getAvailableActions() const
     result.heroCast = hero && !hero->castedInRound && hero->adventure->hasSpellBook;
     result.move         = currentStack->current.canMove;        // @todo: battle machine, arrow tower
     result.meleeAttack  = currentStack->current.canAttackMelee; // @todo: battle machine
-    result.rangeAttack  = currentStack->current.canAttackRanged;
-    result.splashAttack = currentStack->current.canAttackFreeSplash;
+    result.rangeAttack  = currentStack->current.canAttackRanged     && !currentStack->current.rangeAttackIsBlocked;
+    result.splashAttack = currentStack->current.canAttackFreeSplash && !currentStack->current.rangeAttackIsBlocked;
     result.cast = false;       // @todo: caster units
     result.wait  = !currentStack->roundState.waited;
     result.guard = true;       // @todo:
@@ -169,23 +169,33 @@ BattlePlanMove BattleManager::findPlanMove(const BattlePlanMoveParams & movePara
     result.m_moveTo   = moveParams.m_movePos;
 
 
-    BattleStackConstPtr targetStack = attackParams.isActive() ? findStack(attackParams.m_attackTargetPos.mainPos(), true) : nullptr;
+    BattleStackConstPtr targetStack = attackParams.isActive() ? findStack(attackParams.m_attackTarget, true) : nullptr;
+    result.m_freeAttack = attackParams.m_alteration == BattlePlanAttackParams::Alteration::FreeAttack;
 
-    if (targetStack) {
-        if (stack->side == targetStack->side)
+    if (targetStack || result.m_freeAttack) {
+        if (targetStack && stack->side == targetStack->side)
             return result;
 
         result.m_attackMode = BattlePlanMove::Attack::Melee;
-        result.m_attackTarget = attackParams.m_attackTargetPos;
+        result.m_attackTarget = attackParams.m_attackTarget;
         result.m_attackDirection  = attackParams.m_attackDirection;
 
-        if (attackParams.m_alteration != BattlePlanAttackParams::Alteration::ForceMelee && stack->current.canAttackRanged) {
+        if (attackParams.m_alteration != BattlePlanAttackParams::Alteration::ForceMelee && stack->current.canAttackRanged && !stack->current.rangeAttackIsBlocked) {
             result.m_moveTo = result.m_moveFrom;
 
             result.m_attackMode = BattlePlanMove::Attack::Ranged;
-            result.m_rangedAttackDenominator = rangedAttackFactor(stack, targetStack).denom();
+            if (targetStack)
+                result.m_rangedAttackDenominator = rangedDenom(stack, targetStack);
+            else
+                result.m_rangedAttackDenominator = rangedDenom(stack, attackParams.m_attackTarget);
         } else {
-            auto checkMove = m_field.suggestPositionForAttack(stack->pos, targetStack->pos, targetStack->pos.getPosSub(attackParams.m_attackSide), attackParams.m_attackDirection);
+            if (attackParams.m_alteration == BattlePlanAttackParams::Alteration::FreeAttack)
+                return result;
+
+            auto checkMove = m_field.suggestPositionForAttack(stack->pos,
+                                                              targetStack->pos,
+                                                              targetStack->pos.mainPos() == attackParams.m_attackTarget ? BattlePositionExtended::Sub::Main :  BattlePositionExtended::Sub::Secondary,
+                                                              attackParams.m_attackDirection);
             if (checkMove != result.m_moveTo) {
                 assert(!"Should not really happen from ui");
                 return result;
@@ -197,8 +207,68 @@ BattlePlanMove BattleManager::findPlanMove(const BattlePlanMoveParams & movePara
         result.m_defender = targetStack;
         result.m_attacker = stack;
 
-        result.m_mainDamage        = estimateDamage(stack, targetStack, result.m_attackMode);
-        result.m_retaliationDamage = estimateRetaliationDamage(stack, targetStack, result.m_attackMode, result.m_mainDamage);
+        if (targetStack) {
+            result.m_mainDamage        = estimateDamage(stack, targetStack, result.m_attackMode, result.m_rangedAttackDenominator);
+            result.m_retaliationDamage = estimateRetaliationDamage(stack, targetStack, result.m_attackMode, result.m_mainDamage);
+        }
+
+        if (result.m_attackMode == BattlePlanMove::Attack::Melee
+                && stack->library->abilities.hasMeleeSplash()) {
+            result.m_splashPositions = getSplashExtraTargets(stack->library->abilities.splashType, result.m_moveTo, result.m_attackDirection);
+            std::set<BattleStackConstPtr> splashAffected;
+            for (auto pos : result.m_splashPositions) {
+                BattleStackConstPtr targetCandidate = findStack(pos, true);
+                if (!targetCandidate || targetCandidate == stack || targetCandidate == targetStack || splashAffected.contains(targetCandidate))
+                    continue;
+                if (!stack->library->abilities.splashFriendlyFire && targetCandidate->side == stack->side)
+                    continue;
+
+                splashAffected.insert(targetCandidate);
+                BattlePlanMove::Target extraTarget;
+                extraTarget.stack = targetCandidate;
+                extraTarget.damage = estimateDamage(stack, targetCandidate, BattlePlanMove::Attack::Melee, 1);
+                result.m_extraAffectedTargets.push_back(extraTarget);
+            }
+        }
+        if (result.m_retaliationDamage.isValid
+                && result.m_attackMode == BattlePlanMove::Attack::Melee
+                && targetStack->library->abilities.hasMeleeSplash()) {
+            result.m_splashRetaliationPositions = getSplashExtraTargets(targetStack->library->abilities.splashType, targetStack->pos, attackDirectionInverse(result.m_attackDirection));
+            std::set<BattleStackConstPtr> splashAffected;
+            for (auto pos : result.m_splashRetaliationPositions) {
+                BattleStackConstPtr targetCandidate = findStack(pos, true);
+                if (!targetCandidate || targetCandidate == stack || targetCandidate == targetStack || splashAffected.contains(targetCandidate))
+                    continue;
+                if (!targetStack->library->abilities.splashFriendlyFire && targetCandidate->side == targetStack->side)
+                    continue;
+
+                splashAffected.insert(targetCandidate);
+                BattlePlanMove::Target extraTarget;
+                extraTarget.stack = targetCandidate;
+                extraTarget.damage = estimateDamage(targetStack, targetCandidate, BattlePlanMove::Attack::Melee, 1);
+                result.m_extraRetaliationAffectedTargets.push_back(extraTarget);
+            }
+        }
+        if (result.m_attackMode == BattlePlanMove::Attack::Ranged && stack->library->abilities.splashType == LibraryUnit::Abilities::SplashAttack::Ranged) {
+            result.m_splashPositions = m_field.getAdjacentSet( attackParams.m_attackTarget );
+            std::set<BattleStackConstPtr> splashAffected;
+            for (auto pos : result.m_splashPositions) {
+                BattleStackConstPtr targetCandidate = findStack(pos, true);
+                if (!targetCandidate || targetCandidate == stack || targetCandidate == targetStack || splashAffected.contains(targetCandidate))
+                    continue;
+                if (!stack->library->abilities.splashFriendlyFire && targetCandidate->side == stack->side)
+                    continue;
+
+                if (!BattleEstimation().checkAttackElementPossibility(*targetCandidate, stack->library->abilities.splashElement))
+                    continue;
+
+                splashAffected.insert(targetCandidate);
+                BattlePlanMove::Target extraTarget;
+                extraTarget.stack = targetCandidate;
+                extraTarget.damage = estimateDamage(stack, targetCandidate, BattlePlanMove::Attack::Ranged, result.m_rangedAttackDenominator);
+                result.m_extraAffectedTargets.push_back(extraTarget);
+            }
+        }
     }
 
     if (!m_field.isValid(result.m_moveTo.leftPos()) || !m_field.isValid(result.m_moveTo.rightPos()))
@@ -349,7 +419,7 @@ BattlePlanCast BattleManager::findPlanCast(const BattlePlanCastParams & castPara
     for (BattleStackConstPtr targetStack : affectedStackCandidates) {
 
         BattlePlanCast::Target target;
-        target.unit = targetStack;
+        target.stack = targetStack;
         target.magicSuccessChance *= targetStack->current.magicOppSuccessChance;
         if (castParams.m_spell->type == LibrarySpell::Type::Offensive) {
             const int level = targetStack->library->level / 10;
@@ -382,6 +452,8 @@ BattlePlanCast BattleManager::findPlanCast(const BattlePlanCastParams & castPara
 DamageResult BattleManager::estimateAvgDamageFromOpponentAfterMove(BattleStackConstPtr stack, BattlePosition newPos) const
 {
     DamageResult result;
+    (void)stack;
+    (void)newPos;
     // @todo:
     return result;
 }
@@ -438,7 +510,7 @@ bool BattleManager::doMoveAttack(BattlePlanMoveParams moveParams, BattlePlanAtta
 
     const auto plan = findPlanMove(moveParams, attackParams);
     if (!plan.isValid()) {
-        (void)findPlanMove(moveParams, attackParams);
+        //(void)findPlanMove(moveParams, attackParams);
         assert(!"Invalid task for battle, that should be discarded earlier");
         return false;
     }
@@ -455,26 +527,41 @@ bool BattleManager::doMoveAttack(BattlePlanMoveParams moveParams, BattlePlanAtta
 
 
     if (plan.m_attackMode == BattlePlanMove::Attack::Melee || plan.m_attackMode == BattlePlanMove::Attack::Ranged ) {
-        assert(m_field.isValid(plan.m_attackTarget.mainPos()));
-        auto target = findStackNonConst(plan.m_attackTarget.mainPos(), true);
-        assert(target);
-        assert(target->side != current->side); // @todo: what about Hypnosis???
-        assert(target->isAlive());
+        assert(m_field.isValid(plan.m_attackTarget));
+        auto mainTarget = findStackNonConst(plan.m_attackTarget, true);
+        if (!plan.m_freeAttack) {
+            assert(mainTarget);
+            assert(mainTarget->side != current->side); // @todo: what about Hypnosis???
+            assert(mainTarget->isAlive());
+        }
+        std::vector<BattleStackConstPtr> extraMain, extraRetaliate;
+        for (auto target : plan.m_extraAffectedTargets)
+            extraMain.push_back(target.stack);
+        for (auto target : plan.m_extraRetaliationAffectedTargets)
+            extraRetaliate.push_back(target.stack);
 
         if (plan.m_attackMode == BattlePlanMove::Attack::Ranged) {
             assert(current->current.canAttackRanged);
-            makeRanged(current, target);
-            if (current->current.maxAttacksRanged > 1 && current->current.canAttackRanged && target->isAlive())
-                makeRanged(current, target);
+            makeRanged(current, plan.m_attackTarget, mainTarget, extraMain, plan.m_rangedAttackDenominator);
+            if (current->current.maxAttacksRanged > 1 && current->current.canAttackRanged && (!mainTarget || mainTarget->isAlive()))
+                makeRanged(current, plan.m_attackTarget, mainTarget, extraMain, plan.m_rangedAttackDenominator);
         } else {
             assert(current->current.canAttackMelee);
-
-            makeMelee(current, target, false);
-            if (current->current.maxAttacksMelee > 1 && current->current.canAttackMelee && target->isAlive())
-                makeMelee(current, target, false);
+            makeMelee(current, mainTarget, extraMain, false);
+            if (canRetaliate(current, mainTarget)) {
+                mainTarget->roundState.retaliationsDone++;
+                makeMelee(mainTarget, current, extraRetaliate, true);
+            }
+            if (current->current.maxAttacksMelee > 1 && current->current.canAttackMelee && (!mainTarget || mainTarget->isAlive())) {
+                makeMelee(current, mainTarget, extraMain, false);
+                if (canRetaliate(current, mainTarget)) {
+                    mainTarget->roundState.retaliationsDone++;
+                    makeMelee(mainTarget, current, extraRetaliate, true);
+                }
+            }
         }
-
-        m_notifiers->onPositionReset(target);
+        if (mainTarget)
+            m_notifiers->onPositionReset(mainTarget);
     }
     m_notifiers->onPositionReset(current);
 
@@ -564,38 +651,38 @@ bool BattleManager::doCast(BattlePlanCastParams planParams)
 
 
 
-    IBattleNotify::Affected affected;
+    IBattleNotify::AffectedMagic affected;
     if (plan.m_spell->type == LibrarySpell::Type::Temp) {
         // @todo: special duration caluations!
         const int rounds = plan.m_power.spellPower + plan.m_power.durationBonus;
         const auto effect = BattleStack::Effect(plan.m_power, rounds);
 
         for (auto & target : plan.m_targeted) {
-            auto targetStack = findStackNonConst(target.unit);
+            auto targetStack = findStackNonConst(target.stack);
 
             if (target.magicSuccessChance != BonusRatio{1,1}) {
                 if (checkResist(target.magicSuccessChance)) {
-                    m_notifiers->onStackUnderEffect(target.unit, IBattleNotify::Effect::Resist);
+                    m_notifiers->onStackUnderEffect(target.stack, IBattleNotify::Effect::Resist);
                     continue;
                 }
             }
 
             targetStack->appliedEffects.push_back(effect);
-            affected.targets.push_back({target.unit, {}});
+            affected.targets.push_back({target.stack, {}});
 
             recalcStack(targetStack);
         }
     } else if (plan.m_spell->type == LibrarySpell::Type::Offensive){
         for (auto & target : plan.m_targeted) {
-            auto targetStack = findStackNonConst(target.unit);
+            auto targetStack = findStackNonConst(target.stack);
             auto loss = target.loss;
             if (target.magicSuccessChance != BonusRatio{1,1}) {
                 if (checkResist(target.magicSuccessChance)) {
-                    m_notifiers->onStackUnderEffect(target.unit, IBattleNotify::Effect::Resist);
+                    m_notifiers->onStackUnderEffect(target.stack, IBattleNotify::Effect::Resist);
                     continue;
                 }
             }
-            affected.targets.push_back({target.unit, loss});
+            affected.targets.push_back({target.stack, loss});
 
             targetStack->applyLoss(loss);
         }
@@ -642,40 +729,73 @@ BattleHeroMutablePtr BattleManager::getHeroMutable(BattleStack::Side side)
     return hero->isValid() ? hero : nullptr;
 }
 
-void BattleManager::makeMelee(BattleStackMutablePtr attacker, BattleStackMutablePtr defender, bool isRetaliation)
+void BattleManager::makeMelee(BattleStackMutablePtr attacker, BattleStackMutablePtr defender, const std::vector<BattleStackConstPtr> & sideTargets, bool isRetaliation)
 {
     const LuckRoll luckRoll = makeLuckRoll(attacker);
-    const DamageResult damage = damageRoll(attacker, attacker->count, defender, GeneralEstimation::DamageRollMode::Random, true, luckRoll);
+    const DamageResult damage = damageRoll(attacker, attacker->count, defender, GeneralEstimation::DamageRollMode::Random, true, 1, luckRoll);
     attacker->roundState.baseRoll = damage.damageBaseRoll;
     attacker->roundState.baseRollCount = attacker->count;
 
-    m_notifiers->beforeAttackMelee(attacker, defender, damage, isRetaliation);
+    IBattleNotify::AffectedPhysical affected;
+    affected.main = {defender, damage};
+    for (auto sideTarget : sideTargets) {
+        if (!sideTarget->isAlive())
+            continue;
+        const DamageResult damage = damageRoll(attacker, attacker->count, sideTarget, GeneralEstimation::DamageRollMode::Random, true, 1, luckRoll);
+        affected.extra.push_back({sideTarget, damage});
+    }
+    m_notifiers->beforeAttackMelee(attacker, affected, isRetaliation);
 
     defender->applyLoss(damage.loss);
+    for (const auto & extra : affected.extra) {
+        auto stack = findStackNonConst(extra.stack);
+        stack->applyLoss(extra.damage.loss);
+        recalcStack(stack);
+    }
 
     recalcStack(defender);
     recalcStack(attacker);
-
-    if (!isRetaliation && canRetaliate(attacker, defender)) {
-        defender->roundState.retaliationsDone++;
-        this->makeMelee(defender, attacker, true);
-    }
 }
 
-void BattleManager::makeRanged(BattleStackMutablePtr attacker, BattleStackMutablePtr defender)
+void BattleManager::makeRanged(BattleStackMutablePtr attacker, BattlePosition target, BattleStackMutablePtr defender, const std::vector<BattleStackConstPtr> & sideTargets, int64_t rangeDenom)
 {
     const LuckRoll luckRoll = makeLuckRoll(attacker);
-    const DamageResult damage = damageRoll(attacker, attacker->count, defender, GeneralEstimation::DamageRollMode::Random, false, luckRoll);
-    attacker->roundState.baseRoll = damage.damageBaseRoll;
-    attacker->roundState.baseRollCount = attacker->count;
+    const DamageResult damage = defender ? damageRoll(attacker, attacker->count, defender, GeneralEstimation::DamageRollMode::Random, false, rangeDenom, luckRoll) : DamageResult{};
+    if (defender) {
+        attacker->roundState.baseRoll = damage.damageBaseRoll;
+        attacker->roundState.baseRollCount = attacker->count;
+    }
 
-    m_notifiers->beforeAttackRanged(attacker, defender, damage);
+    IBattleNotify::AffectedPhysical affected;
+    if (defender)
+        affected.mainTargetPos = defender->pos;
+    else
+        affected.mainTargetPos.setMainPos(target);
 
-    defender->applyLoss(damage.loss);
+    affected.main = {defender, damage};
+    for (auto sideTarget : sideTargets) {
+        if (!sideTarget->isAlive())
+            continue;
+        const DamageResult damageSide = damageRoll(attacker, attacker->count, sideTarget, GeneralEstimation::DamageRollMode::Random, false, rangeDenom, luckRoll);
+        affected.extra.push_back({sideTarget, damageSide});
+        if (attacker->roundState.baseRoll == -1) {
+            attacker->roundState.baseRoll = damageSide.damageBaseRoll;
+            attacker->roundState.baseRollCount = attacker->count;
+        }
+    }
+    m_notifiers->beforeAttackRanged(attacker, affected);
+    if (defender)
+        defender->applyLoss(damage.loss);
+
+    for (const auto & extra : affected.extra) {
+        auto stack = findStackNonConst(extra.stack);
+        stack->applyLoss(extra.damage.loss);
+        recalcStack(stack);
+    }
 
     attacker->remainingShoots--; // @todo: ammo cart?
-
-    recalcStack(defender);
+    if (defender)
+        recalcStack(defender);
     recalcStack(attacker);
 }
 
@@ -721,7 +841,8 @@ std::vector<BattleStackMutablePtr> BattleManager::findMutableNeighboursOf(Battle
 
 DamageEstimate BattleManager::estimateDamage(BattleStackConstPtr attacker,
                                              BattleStackConstPtr defender,
-                                             BattlePlanMove::Attack mode) const
+                                             BattlePlanMove::Attack mode,
+                                             int64_t rangedDenom) const
 {
     if (!attacker || !defender)
         return {};
@@ -730,9 +851,9 @@ DamageEstimate BattleManager::estimateDamage(BattleStackConstPtr attacker,
 
     return {
         true,
-        damageRoll(attacker, attacker->count, defender, GeneralEstimation::DamageRollMode::Min, isMelee),
-        damageRoll(attacker, attacker->count, defender, GeneralEstimation::DamageRollMode::Avg, isMelee),
-        damageRoll(attacker, attacker->count, defender, GeneralEstimation::DamageRollMode::Max, isMelee)
+        damageRoll(attacker, attacker->count, defender, GeneralEstimation::DamageRollMode::Min, rangedDenom, isMelee),
+        damageRoll(attacker, attacker->count, defender, GeneralEstimation::DamageRollMode::Avg, rangedDenom, isMelee),
+        damageRoll(attacker, attacker->count, defender, GeneralEstimation::DamageRollMode::Max, rangedDenom, isMelee)
     };
 }
 
@@ -756,14 +877,16 @@ DamageEstimate BattleManager::estimateRetaliationDamage(BattleStackConstPtr atta
 
     return {
         true,
-        damageRoll(defender, defender->count - mainEstimate.lowRoll.loss.deaths, attacker, GeneralEstimation::DamageRollMode::Min, true),
-        damageRoll(defender, defender->count - mainEstimate.avgRoll.loss.deaths, attacker, GeneralEstimation::DamageRollMode::Avg, true),
-        damageRoll(defender, defender->count - mainEstimate.maxRoll.loss.deaths, attacker, GeneralEstimation::DamageRollMode::Max, true)
+        damageRoll(defender, defender->count - mainEstimate.lowRoll.loss.deaths, attacker, GeneralEstimation::DamageRollMode::Min, 1, true),
+        damageRoll(defender, defender->count - mainEstimate.avgRoll.loss.deaths, attacker, GeneralEstimation::DamageRollMode::Avg, 1, true),
+        damageRoll(defender, defender->count - mainEstimate.maxRoll.loss.deaths, attacker, GeneralEstimation::DamageRollMode::Max, 1, true)
     };
 }
 
 bool BattleManager::canRetaliate(BattleStackConstPtr attacker, BattleStackConstPtr defender) const
 {
+    if (!defender || !attacker)
+        return false;
     if (!defender->isAlive() || !attacker->isAlive() || !defender->current.canAttackMelee)
         return false;
     if (attacker->library->traits.freeAttack)
@@ -777,15 +900,26 @@ bool BattleManager::canRetaliate(BattleStackConstPtr attacker, BattleStackConstP
     return true;
 }
 
-
-
-BonusRatio BattleManager::rangedAttackFactor(BattleStackConstPtr attacker, BattleStackConstPtr defender) const
+int64_t BattleManager::rangedDenom(BattleStackConstPtr attacker, BattleStackConstPtr defender) const
 {
     const int distance = attacker->pos.shortestHexDistance(defender->pos).first;
+    const bool wallOnTheWay = false;//@todo: walls
+    return rangedDenom(attacker, distance, wallOnTheWay);
+}
+
+int64_t BattleManager::rangedDenom(BattleStackConstPtr attacker, BattlePosition target) const
+{
+    const int distance = attacker->pos.shortestHexDistance(target).first;
+    const bool wallOnTheWay = false;//@todo: walls
+    return rangedDenom(attacker, distance, wallOnTheWay);
+}
+
+int64_t BattleManager::rangedDenom(BattleStackConstPtr attacker, int distance, bool wallOnTheWay) const
+{
     const bool hasDistancePenalty = attacker->library->abilities.hasPenalty(LibraryUnit::Abilities::DamagePenalty::Distance);
     const int distanceDen = (hasDistancePenalty && distance > rangedLimit) ? 2 : 1;
-    const int wallsDen = 1; //@todo: walls
-    return BonusRatio(1, distanceDen * wallsDen);
+    const int wallsDen = wallOnTheWay ? 2 : 1;
+    return distanceDen * wallsDen;
 }
 
 BonusRatio BattleManager::meleeAttackFactor(BattleStackConstPtr attacker, BattleStackConstPtr defender) const
@@ -804,6 +938,7 @@ DamageResult BattleManager::damageRoll(BattleStackConstPtr attacker,
                                        BattleStackConstPtr defender,
                                        GeneralEstimation::DamageRollMode mode,
                                        bool melee,
+                                       int64_t rangedDenom,
                                        LuckRoll luckFactor) const
 {
 
@@ -841,7 +976,7 @@ DamageResult BattleManager::damageRoll(BattleStackConstPtr attacker,
         totalBaseFactor   += attacker->current.meleeAttack;
         totalReduceFactor *= (BonusRatio{1,1} - defender->current.meleeDefense);
     } else {
-        totalReduceFactor *= rangedAttackFactor(attacker, defender);
+        totalReduceFactor *= BonusRatio{1,rangedDenom};
         if (attacker->hero)
             totalBaseFactor += attacker->hero->adventure->estimated.rangedAttack;
 
@@ -906,9 +1041,9 @@ BattleFieldPathFinder BattleManager::setupFinder(BattleStackConstPtr stack) cons
     return finder;
 }
 
-std::set<BattlePosition> BattleManager::getSpellArea(BattlePosition pos, LibrarySpell::Range range) const
+BattlePositionSet BattleManager::getSpellArea(BattlePosition pos, LibrarySpell::Range range) const
 {
-    std::set<BattlePosition> result;
+    BattlePositionSet result;
     result.insert(pos);
     int floodIterations = 0;
     if (range == LibrarySpell::Range::R1 || range == LibrarySpell::Range::R1NoCenter) {
@@ -935,6 +1070,54 @@ std::set<BattlePosition> BattleManager::getSpellArea(BattlePosition pos, Library
     if (range == LibrarySpell::Range::R1NoCenter) {
         result.erase(pos);
     }
+    return result;
+}
+
+BattlePositionSet BattleManager::getSplashExtraTargets(LibraryUnit::Abilities::SplashAttack splash,
+                                                       BattlePositionExtended from,
+                                                       BattleAttackDirection direction) const
+{
+    BattlePositionSet result;
+    if (splash == LibraryUnit::Abilities::SplashAttack::Sides) {
+        if (direction == BattleAttackDirection::R)  result = m_field.validNeighbours(from.rightPos(), {BattleDirection::BR, BattleDirection::TR});
+        if (direction == BattleAttackDirection::TR) result = m_field.validNeighbours(from.rightPos(), {BattleDirection::TL, BattleDirection::R});
+        if (direction == BattleAttackDirection::BR) result = m_field.validNeighbours(from.rightPos(), {BattleDirection::BL, BattleDirection::R});
+
+        if (direction == BattleAttackDirection::L) result = m_field.validNeighbours(from.leftPos(), {BattleDirection::BL, BattleDirection::TL});
+        if (direction == BattleAttackDirection::TL)result = m_field.validNeighbours(from.leftPos(), {BattleDirection::TR, BattleDirection::L});
+        if (direction == BattleAttackDirection::BL)result = m_field.validNeighbours(from.leftPos(), {BattleDirection::BR, BattleDirection::L});
+
+        if (from.sightDirection() == BattlePositionExtended::Sight::ToRight) {
+            if (direction == BattleAttackDirection::T) result = m_field.validNeighbours(from.rightPos(), {BattleDirection::TR});
+            if (direction == BattleAttackDirection::B) result = m_field.validNeighbours(from.rightPos(), {BattleDirection::BR});
+        }
+        if (from.sightDirection() == BattlePositionExtended::Sight::ToLeft) {
+            if (direction == BattleAttackDirection::T) result = m_field.validNeighbours(from.leftPos(), {BattleDirection::TL});
+            if (direction == BattleAttackDirection::B) result = m_field.validNeighbours(from.leftPos(), {BattleDirection::BL});
+        }
+    }
+    if (splash == LibraryUnit::Abilities::SplashAttack::Neighbours) {
+        result = m_field.getAdjacentSet(from);
+    }
+    if (splash == LibraryUnit::Abilities::SplashAttack::Dragon) {
+        if (direction == BattleAttackDirection::R)  result = m_field.validNeighbours(m_field.neighbour(from.rightPos(), BattleDirection::R ), {BattleDirection::R});
+        if (direction == BattleAttackDirection::TR) result = m_field.validNeighbours(m_field.neighbour(from.rightPos(), BattleDirection::TR), {BattleDirection::TR});
+        if (direction == BattleAttackDirection::BR) result = m_field.validNeighbours(m_field.neighbour(from.rightPos(), BattleDirection::BR), {BattleDirection::BR});
+
+        if (direction == BattleAttackDirection::L)  result = m_field.validNeighbours(m_field.neighbour(from.leftPos(), BattleDirection::L ), {BattleDirection::L});
+        if (direction == BattleAttackDirection::TL) result = m_field.validNeighbours(m_field.neighbour(from.leftPos(), BattleDirection::TL), {BattleDirection::TL});
+        if (direction == BattleAttackDirection::BL) result = m_field.validNeighbours(m_field.neighbour(from.leftPos(), BattleDirection::BL), {BattleDirection::BL});
+
+        if (from.sightDirection() == BattlePositionExtended::Sight::ToRight) {
+            if (direction == BattleAttackDirection::T) result = m_field.validNeighbours(m_field.neighbour(from.rightPos(), BattleDirection::TL), {BattleDirection::TL});
+            if (direction == BattleAttackDirection::B) result = m_field.validNeighbours(m_field.neighbour(from.rightPos(), BattleDirection::BL), {BattleDirection::BL});
+        }
+        if (from.sightDirection() == BattlePositionExtended::Sight::ToLeft) {
+            if (direction == BattleAttackDirection::T) result = m_field.validNeighbours(m_field.neighbour(from.leftPos(), BattleDirection::TR), {BattleDirection::TR});
+            if (direction == BattleAttackDirection::B) result = m_field.validNeighbours(m_field.neighbour(from.leftPos(), BattleDirection::BR), {BattleDirection::BR});
+        }
+    }
+
     return result;
 }
 
@@ -1082,7 +1265,7 @@ void BattleManager::beforeFirstTurn(BattleStack::Side side)
     for (auto & castBeforeStart : army.battleHero.adventure->estimated.castsBeforeStart) {
         int rounds = castBeforeStart.spellPower;
         const auto effect = BattleStack::Effect(castBeforeStart, rounds);
-        IBattleNotify::Affected affected;
+        IBattleNotify::AffectedMagic affected;
         for (auto targetStack : m_alive) {
             if (castBeforeStart.spell->qualify == LibrarySpell::Qualify::Good && targetStack->side != side)
                 continue;
@@ -1155,8 +1338,14 @@ BattleManager::LuckRoll BattleManager::makeLuckRoll(BattleStackConstPtr attacker
 
 void BattleManager::recalcStack(BattleStackMutablePtr stack)
 {
-    stack->aliveNeighbours = findNeighboursOf(stack);
     BattleEstimation().calculateUnitStats(*stack);
+
+    for (BattleStackConstPtr neighbour : findNeighboursOf(stack)) {
+        if (neighbour->side != stack->side) {
+            stack->current.rangeAttackIsBlocked = true;
+            break;
+        }
+    }
 }
 
 BattleManager::ControlGuard::ControlGuard(BattleManager* parent) : parent(parent)

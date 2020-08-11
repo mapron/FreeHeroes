@@ -53,6 +53,11 @@
             <numerusform></numerusform>
         </translation>
     </message>
+    <message>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="229"/>
+        <source>, deaths %1 (remain %2)</source>
+        <translation type="unfinished"></translation>
+    </message>
     <message numerus="yes">
         <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="233"/>
         <source>retaliate on</source>
@@ -75,12 +80,28 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="251"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="242"/>
+        <source>, splash has done damage to: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="252"/>
+        <source>%1 - dmg. %2, deaths %3 (remain %4) </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="257"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="366"/>
+        <source>%1 - dmg. %2, killing all %3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="270"/>
         <source>%1 %2 for better move</source>
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="253"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="272"/>
         <source>is waiting</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -88,12 +109,12 @@
         </translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="258"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="277"/>
         <source>%1 %2 defending position and get +%3 defense</source>
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="260"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="279"/>
         <source>is taking</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -101,81 +122,96 @@
         </translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="309"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="328"/>
         <source>%1 - high morale allows one more attack!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="310"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="329"/>
         <source>%1 - low morale forces to skip turn.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="311"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="330"/>
         <source>%1 - high luck, extra damage!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="312"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="331"/>
         <source>%1 - low luck, damage penalty.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="328"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="347"/>
         <source>casting %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="333"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="352"/>
         <source>, as a result:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="342"/>
-        <source>%1 - dmg. %2, killed %3 with %4 remain</source>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="361"/>
+        <source>%1 - dmg. %2, deaths %3 (remain %4)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="345"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="428"/>
+        <source>, deaths %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="441"/>
+        <source>Target attack: %1, damage %2%3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="449"/>
+        <source>Possible retaliation: damage %1%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="455"/>
+        <source>, extra affected: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="463"/>
+        <source>%1 - damage %2%3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="255"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="364"/>
         <source>%1 - dmg. %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="347"/>
-        <source>%1 - dmg. %2, all %3 are killed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="446"/>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="448"/>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="472"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="504"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="506"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="530"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="539"/>
         <source>succ. ch.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="472"/>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="475"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="530"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="533"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="539"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="542"/>
         <source>(&lt;i&gt;%1%&lt;/i&gt; %2)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="475"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="533"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="542"/>
         <source>of base</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="453"/>
-        <source>total damage %1, deaths %2, affected: </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="466"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="525"/>
         <source>%1 - damage %2, deaths %3</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="413"/>
-        <source>Target attack: %1, damage %2, killing %3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -189,57 +225,63 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="229"/>
-        <source>, killing %1 with %2 remain</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="301"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="320"/>
         <source>Starting round &lt;i&gt;%1&lt;/i&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="313"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="332"/>
         <source>%1 - resist chance deflects casted spell.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="421"/>
-        <source>Possible retaliation: damage %1, killing %2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="427"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="470"/>
         <source>Move to %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="430"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="474"/>
         <source>Cast %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="433"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="477"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="510"/>
         <source>total damage %1, deaths %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="559"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="484"/>
+        <source>, deaths by creature: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="498"/>
+        <source>%1 - %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="515"/>
+        <source>, affected: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="626"/>
         <source>Attacker side now controlled by AI.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="559"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="626"/>
         <source>Attacker side now controlled by Player.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="562"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="629"/>
         <source>Defender side now controlled by AI.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="562"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="629"/>
         <source>Defender side now controlled by Player.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1766,7 +1808,7 @@ hero dialog</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Application/SettingsWidget.ui" line="151"/>
+        <location filename="../../src/Gui/Application/SettingsWidget.ui" line="156"/>
         <source>Reduce time holding SHIFT::</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1781,72 +1823,82 @@ hero dialog</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Application/SettingsWidget.ui" line="109"/>
+        <location filename="../../src/Gui/Application/SettingsWidget.ui" line="114"/>
         <source>Battle movement time %:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Application/SettingsWidget.ui" line="130"/>
+        <location filename="../../src/Gui/Application/SettingsWidget.ui" line="135"/>
         <source>Battle general anim. time %:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Application/SettingsWidget.ui" line="172"/>
+        <location filename="../../src/Gui/Application/SettingsWidget.ui" line="184"/>
         <source>Display grid</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Application/SettingsWidget.ui" line="179"/>
+        <location filename="../../src/Gui/Application/SettingsWidget.ui" line="191"/>
         <source>Display path</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Application/SettingsWidget.ui" line="186"/>
+        <location filename="../../src/Gui/Application/SettingsWidget.ui" line="198"/>
         <source>Log moves</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Application/SettingsWidget.ui" line="193"/>
+        <location filename="../../src/Gui/Application/SettingsWidget.ui" line="205"/>
         <source>Retaliation hints</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Application/SettingsWidget.ui" line="201"/>
-        <source>App global</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Gui/Application/SettingsWidget.ui" line="207"/>
-        <source>&lt;b&gt;Warning&lt;/b&gt;: all these require application restart!</source>
+        <location filename="../../src/Gui/Application/SettingsWidget.ui" line="212"/>
+        <source>Massive damage hints</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Application/SettingsWidget.ui" line="219"/>
+        <source>Display death hints in counters</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Application/SettingsWidget.ui" line="229"/>
+        <source>App global</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Application/SettingsWidget.ui" line="235"/>
+        <source>&lt;b&gt;Warning&lt;/b&gt;: all these require application restart!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Application/SettingsWidget.ui" line="247"/>
         <source>Log level:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Application/SettingsWidget.ui" line="236"/>
+        <location filename="../../src/Gui/Application/SettingsWidget.ui" line="264"/>
         <source>Language:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Application/SettingsWidget.ui" line="246"/>
+        <location filename="../../src/Gui/Application/SettingsWidget.ui" line="274"/>
         <source>Game database:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Application/SettingsWidget.ui" line="272"/>
+        <location filename="../../src/Gui/Application/SettingsWidget.ui" line="300"/>
         <source>User interface</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Application/SettingsWidget.ui" line="278"/>
+        <location filename="../../src/Gui/Application/SettingsWidget.ui" line="306"/>
         <source>Show absolute value in Morale/Luck</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Application/SettingsWidget.ui" line="285"/>
+        <location filename="../../src/Gui/Application/SettingsWidget.ui" line="313"/>
         <source>Clamp Morale/Luck to efffective numbers</source>
         <translation type="unfinished"></translation>
     </message>

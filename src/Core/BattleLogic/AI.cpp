@@ -129,12 +129,11 @@ void AI::prepareReachable()
         for (const auto & attackVariant : attackVariantList) {
             BattlePlanMoveParams moveParams;
             BattlePlanAttackParams attackParams;
-            attackParams.m_attackTargetPos = opp.m_stack->pos;
-            attackParams.m_attackSide =  attackVariant.second ;
+            attackParams.m_attackTarget = opp.m_stack->pos.specificPos(attackVariant.second);
             attackParams.m_attackDirection = attackVariant.first;
 
             auto currentExtPos = m_stepData.m_current->pos;
-            auto attackFromPos = m_field.suggestPositionForAttack(currentExtPos, opp.m_stack->pos, opp.m_stack->pos.getPosSub(attackParams.m_attackSide), attackParams.m_attackDirection);
+            auto attackFromPos = m_field.suggestPositionForAttack(currentExtPos, opp.m_stack->pos, opp.m_stack->pos.getPosSub(attackVariant.second), attackParams.m_attackDirection);
             moveParams.m_movePos = attackFromPos;
             moveParams.m_moveFrom = m_stepData.m_current->pos;
 
@@ -187,7 +186,7 @@ void AI::prepareReachable()
 int64_t AI::calculateValueForRanged(BattleStackConstPtr stack)
 {
     BattlePlanMoveParams moveParams{m_stepData.m_current->pos, m_stepData.m_current->pos};
-    BattlePlanAttackParams attackParams{stack->pos};
+    BattlePlanAttackParams attackParams{stack->pos.mainPos()};
 
     BattlePlanMove plan = m_battleView.findPlanMove(moveParams, attackParams);
     return calculateValueForAttackPlan(plan);
@@ -208,17 +207,22 @@ int64_t AI::calculateValueForAttackPlan(const BattlePlanMove& planResult)
     damageEstimateByDamage += defenderValue * rollMain.avgRoll.loss.damageTotal * m_params.mainDamageWeight / planResult.m_defender->current.primary.maxHealth;
 
     if (retaliate.isValid) {
-        damageEstimateByKills += attackerValue * retaliate.avgRoll.loss.deaths * m_params.retaliationKillsWeight;
+        damageEstimateByKills  += attackerValue * retaliate.avgRoll.loss.deaths * m_params.retaliationKillsWeight;
         damageEstimateByDamage += attackerValue * retaliate.avgRoll.loss.damageTotal * m_params.retaliationDamageWeight / planResult.m_attacker->current.primary.maxHealth;
     }
     for (auto & extra : planResult.m_extraAffectedTargets) {
-        const int64_t extraValue = extra.unit->library->value;
+        const int64_t extraValue = extra.stack->library->value;
         auto deathWeight =  m_params.mainKillsWeight  * m_params.extraKillsMultiply;
         auto dmgWeight   =  m_params.mainDamageWeight * m_params.extraKillsMultiply;
         if (extra.damage.avgRoll.loss.remainCount == 0)
             deathWeight *= m_params.fullKillsMultiply;
         damageEstimateByKills  += extraValue * extra.damage.avgRoll.loss.deaths * deathWeight;
-        damageEstimateByDamage += extraValue * extra.damage.avgRoll.loss.damageTotal * dmgWeight / extra.unit->current.primary.maxHealth;
+        damageEstimateByDamage += extraValue * extra.damage.avgRoll.loss.damageTotal * dmgWeight / extra.stack->current.primary.maxHealth;
+    }
+    for (auto & extraRet : planResult.m_extraRetaliationAffectedTargets) {
+        const int64_t extraValue = extraRet.stack->library->value;
+        damageEstimateByKills  += extraValue * retaliate.avgRoll.loss.deaths * m_params.retaliationKillsWeight;
+        damageEstimateByDamage += extraValue * retaliate.avgRoll.loss.damageTotal * m_params.retaliationDamageWeight / extraRet.stack->current.primary.maxHealth;
     }
     const DamageResult potentialDamageBeforeMove = m_battleView.estimateAvgDamageFromOpponentAfterMove(m_stepData.m_current, m_stepData.m_current->pos.mainPos());
     const DamageResult potentialDamageAfterMove  = m_battleView.estimateAvgDamageFromOpponentAfterMove(m_stepData.m_current, planResult.m_moveTo.mainPos());
@@ -262,7 +266,7 @@ void AI::makeRangedAttack()
     });
 
     BattlePlanMoveParams planParams{m_stepData.m_current->pos, m_stepData.m_current->pos};
-    BattlePlanAttackParams attackParams{it->m_stack->pos};
+    BattlePlanAttackParams attackParams{it->m_stack->pos.mainPos()};
 
     Logger() << " => " << it->m_stack->library->id << " at " << it->m_stack->pos.mainPos() << ", value=" << it->m_rangedAttackValue;
 

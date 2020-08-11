@@ -29,6 +29,8 @@ public:
         bool displayPath = false;
         bool logMoves = false;
         bool retaliationHint = true;
+        bool massDamageHint = true;
+        bool counterDamageHint = true;
     };
 
     struct AppGlobal {
