@@ -176,6 +176,12 @@ void GuiAdventureHero::setHero(Core::LibraryHeroConstPtr hero)
     emit dataChanged();
 }
 
+void GuiAdventureHero::resetHeroToDefault()
+{
+    *m_source = Core::AdventureHero(m_source->library);
+    emit dataChanged();
+}
+
 void GuiAdventureHero::createArtifactsModelsIfNeeded(ArtifactsModel * artifacts)
 {
     if (m_bagEditModel)

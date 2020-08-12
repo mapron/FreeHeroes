@@ -159,9 +159,11 @@ struct ArtifactSlotRequirement {
 
 struct LibraryArtifact {
     enum class TreasureClass { Treasure, Minor, Major, Relic, Unique, Complex, BattleMachine, Scroll, Special };
+    enum class OrderCategory  { Special, Stats, Skills, Magic, Income , Misc, Complex, Scrolls  };
     struct Presentation {
-        int order = 0;
+        OrderCategory orderCategory = OrderCategory::Special;
         int orderGroup = 0;
+        int order = 0;
         std::string  iconStash;
         std::string  iconBonus;
     };
@@ -186,7 +188,7 @@ struct LibraryArtifact {
 
     Presentation presentationParams;
 
-    constexpr auto sortOrdering() const noexcept { return std::tie(presentationParams.orderGroup, presentationParams.order, value);}
+    constexpr auto sortOrdering() const noexcept { return std::tie(presentationParams.orderCategory, presentationParams.orderGroup, presentationParams.order, value);}
 };
 
 struct ArtifactRewardAmount {

@@ -27,6 +27,7 @@ namespace FreeHeroes::Gui {
 class LibraryModelsProvider;
 class GuiAdventureArmy;
 class GuiAdventureHero;
+class ArtifactQuickFilterModel;
 
 class GUIEDITOR_EXPORT HeroWithArmyConfigWidget : public QWidget
 {
@@ -63,6 +64,7 @@ private:
     void makeNoSpells();
     void makeAllArtifacts();
     void makeNoArtifacts();
+    void resetHero();
 
 private:
     struct Impl;
@@ -75,6 +77,8 @@ private:
     GuiAdventureArmy * m_adventureArmy = nullptr;
     GuiAdventureHero * m_hero = nullptr;
     LibraryModelsProvider * m_modelProvider = nullptr;
+
+    ArtifactQuickFilterModel * m_artifactsFilter = nullptr;
 };
 
 }

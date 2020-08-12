@@ -94,6 +94,7 @@ public:
     ~GuiAdventureHero();
 
     void setHero(Core::LibraryHeroConstPtr hero);
+    void resetHeroToDefault();
 
     void createArtifactsModelsIfNeeded(ArtifactsModel * artifacts);
     void refreshArtifactsModels();

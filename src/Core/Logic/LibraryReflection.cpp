@@ -403,12 +403,24 @@ RTTR_REGISTRATION
         value("scroll"   ,   LibraryArtifact::TreasureClass::Scroll),
         value("special"  ,   LibraryArtifact::TreasureClass::Special)
         );
+    registration::enumeration<LibraryArtifact::OrderCategory>("ArtifactOrderCategory")
+        (
+        value("special"  ,  LibraryArtifact::OrderCategory::Special),
+        value("stats"    ,  LibraryArtifact::OrderCategory::Stats  ),
+        value("skills"   ,  LibraryArtifact::OrderCategory::Skills ),
+        value("magic"    ,  LibraryArtifact::OrderCategory::Magic  ),
+        value("income"   ,  LibraryArtifact::OrderCategory::Income ),
+        value("misc"     ,  LibraryArtifact::OrderCategory::Misc   ),
+        value("complex"  ,  LibraryArtifact::OrderCategory::Complex),
+        value("scrolls"  ,  LibraryArtifact::OrderCategory::Scrolls)
+        );
     registration::class_<LibraryArtifact::Presentation>("LibraryArtifactPres")
         .constructor<>()
         .property("iconStash"       , &LibraryArtifact::Presentation::iconStash)
         .property("iconBonus"       , &LibraryArtifact::Presentation::iconBonus)
         .property("order"           , &LibraryArtifact::Presentation::order)
         .property("orderGroup"      , &LibraryArtifact::Presentation::orderGroup)
+        .property("orderCategory"   , &LibraryArtifact::Presentation::orderCategory)
         ;
     registration::class_<LibraryArtifact>("LibraryArtifact")
         .constructor<>()

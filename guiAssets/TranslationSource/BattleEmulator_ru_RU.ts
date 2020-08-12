@@ -145,77 +145,77 @@ adventure mode</source>
 <context>
     <name>FreeHeroes::BattleEmulator::EmulatorMainWidget</name>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="142"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="143"/>
         <source>Empty field</source>
         <translation>Без препятствий на поле</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="152"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="153"/>
         <source>Standard</source>
         <translation>Стандартное</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="153"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="154"/>
         <source>Map object common</source>
         <translation>Обычный объект карты приключений</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="154"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="155"/>
         <source>Churchyard 1</source>
         <translation>Погост 1</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="155"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="156"/>
         <source>Churchyard 2</source>
         <translation>Погост 2</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="156"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="157"/>
         <source>Ruins</source>
         <translation>Руины</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="157"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="158"/>
         <source>Spit</source>
         <translation>Вертеп</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="176"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="177"/>
         <source>Renaming replay</source>
         <translation>Переименование реплея</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="176"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="177"/>
         <source>Enter new name:</source>
         <translation>Введите новое имя:</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="194"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="195"/>
         <source>Battle emulator</source>
         <translation>Эмулятор сражений</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="429"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="430"/>
         <source> and </source>
         <translation> и </translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="432"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="433"/>
         <source>%1 is no problem anymore, and %2 now in your hands.</source>
         <translation>%1 - больше не помеха, и %2 теперь у вас в руках.</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="530"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="531"/>
         <source>AI reached step limit: that probably an error.</source>
         <translation>ИИ достиг лимита шагов; это возможно ошибка.</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="587"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="588"/>
         <source>Glorious victory!&lt;br&gt;For the valor in the battle, %1 recieves %2 experience</source>
         <translation>Славная победа!&lt;br&gt;За доблесть в боюю %1 получает %2 опыта</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="588"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="589"/>
         <source>Your forces have suffered a crushing defeat, and %1 now leaves you</source>
         <translation>Ваши войска потерпели сокрушительное поражение, и %1 теперь покидает вас</translation>
     </message>

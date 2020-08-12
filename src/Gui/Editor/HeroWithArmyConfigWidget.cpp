@@ -17,6 +17,7 @@
 #include "FormatUtils.hpp"
 #include "LibraryWrappersMetatype.hpp"
 #include "AdventureWrappers.hpp"
+#include "ArtifactQuickFilterModel.hpp"
 
 // Core
 #include "IRandomGenerator.hpp"
@@ -28,6 +29,8 @@
 
 // Platform
 #include "Profiler.hpp"
+
+#include <QButtonGroup>
 
 namespace FreeHeroes::Gui {
 
@@ -106,9 +109,80 @@ HeroWithArmyConfigWidget::HeroWithArmyConfigWidget(QWidget* parent)
         m_hero->getSource()->hasSpellBook = state;
         m_hero->emitChanges();
     });
-
+    connect(m_ui->pushButtonResetHero, &QPushButton::clicked, this, &HeroWithArmyConfigWidget::resetHero);
     connect(m_ui->comboBoxHeroIdentity, qOverload<int>(&QComboBox::currentIndexChanged),
             this, &HeroWithArmyConfigWidget::heroIndexChanged);
+
+    {
+        QList<QPushButton*> tsButtons{
+            m_ui->pushButtonTSAny,
+            m_ui->pushButtonTSTreasure,
+            m_ui->pushButtonTSMinor,
+            m_ui->pushButtonTSMajor,
+            m_ui->pushButtonTSRelic,
+            m_ui->pushButtonTSUnique,
+            m_ui->pushButtonTSComplex,
+            m_ui->pushButtonTSScroll,
+            m_ui->pushButtonTSSpecial
+        };
+        QList<LibraryArtifact::TreasureClass> tc {
+            LibraryArtifact::TreasureClass::Treasure,
+            LibraryArtifact::TreasureClass::Minor,
+            LibraryArtifact::TreasureClass::Major,
+            LibraryArtifact::TreasureClass::Relic,
+            LibraryArtifact::TreasureClass::Unique,
+            LibraryArtifact::TreasureClass::Complex,
+            LibraryArtifact::TreasureClass::Scroll,
+            LibraryArtifact::TreasureClass::Special
+        };
+        QButtonGroup * tsGroup = new QButtonGroup(this);
+        tsGroup->setExclusive(true);
+        for (int i = 0; i < tsButtons.size(); i++) {
+            tsGroup->addButton(tsButtons[i]);
+            tsButtons[i]->setContentsMargins(1, 2, 1, 2);
+
+            connect(tsButtons[i], &QPushButton::clicked, this, [this, i, tc]{
+                if (!m_artifactsFilter)
+                    return;
+                if (i == 0)
+                    m_artifactsFilter->resetTreasureClassFilter();
+                else
+                    m_artifactsFilter->setTreasureClassFilter(tc[i-1]);
+            });
+        }
+    }
+    {
+        QList<QPushButton*> ocButtons{
+            m_ui->pushButtonOCAny,
+            m_ui->pushButtonOCStats,
+            m_ui->pushButtonOCSkills,
+            m_ui->pushButtonOCMagic,
+            m_ui->pushButtonOCIncome,
+            m_ui->pushButtonOCMisc
+        };
+        QList<LibraryArtifact::OrderCategory> oc {
+            LibraryArtifact::OrderCategory::Stats,
+            LibraryArtifact::OrderCategory::Skills,
+            LibraryArtifact::OrderCategory::Magic,
+            LibraryArtifact::OrderCategory::Income,
+            LibraryArtifact::OrderCategory::Misc
+        };
+        QButtonGroup * ocGroup = new QButtonGroup(this);
+        ocGroup->setExclusive(true);
+        for (int i = 0; i < ocButtons.size(); i++) {
+            ocGroup->addButton(ocButtons[i]);
+            ocButtons[i]->setContentsMargins(1, 2, 1, 2);
+
+            connect(ocButtons[i], &QPushButton::clicked, this, [this, i, oc]{
+                if (!m_artifactsFilter)
+                    return;
+                if (i == 0)
+                    m_artifactsFilter->resetOrderCategoryFilter();
+                else
+                    m_artifactsFilter->setOrderCategoryFilter(oc[i-1]);
+            });
+        }
+    }
 }
 
 HeroWithArmyConfigWidget::~HeroWithArmyConfigWidget() = default;
@@ -153,8 +227,11 @@ void HeroWithArmyConfigWidget::setSource(GuiAdventureArmy* adventureArmy)
     m_hero->createArtifactsModelsIfNeeded(m_modelProvider->artifacts());
     m_hero->createSpellsModelsIfNeeded(m_modelProvider->spells());
     m_hero->createSkillsModelsIfNeeded(m_modelProvider->skills());
+    if (!m_artifactsFilter)
+        m_artifactsFilter = new ArtifactQuickFilterModel(this);
+    m_artifactsFilter->setSourceModel(m_hero->getBagEditModel());
 
-    m_ui->tableViewBag->setModel(m_hero->getBagEditModel());
+    m_ui->tableViewBag->setModel(m_artifactsFilter);
     m_ui->tableViewBag->setColumnWidth(0, 240);
     m_ui->tableViewBag->setColumnWidth(1, 40);
 
@@ -302,8 +379,6 @@ void HeroWithArmyConfigWidget::displayHeroSpells()
 
 void HeroWithArmyConfigWidget::useHeroDefaultArmy()
 {
-   // return;
-   // int foo = 1;
     // @todo: maybe not utilize RNG here, but emit signal to generate army at top level.
     auto advHero = m_adventureArmy->getHero()->getSource();
     Q_ASSERT(advHero);
@@ -355,7 +430,7 @@ void HeroWithArmyConfigWidget::makeNoSpells()
 
 void HeroWithArmyConfigWidget::makeAllArtifacts()
 {
-    auto * bagModel = m_hero->getBagEditModel();
+    auto * bagModel = m_artifactsFilter;
     for (int row = 0; row < bagModel->rowCount(); row++) {
         auto * art = bagModel->index(row, 0).data(ArtifactsModel::SourceObject).value<LibraryArtifactConstPtr>();
         m_hero->getSource()->artifactsBag[art] = 1;
@@ -366,9 +441,20 @@ void HeroWithArmyConfigWidget::makeAllArtifacts()
 
 void HeroWithArmyConfigWidget::makeNoArtifacts()
 {
-    m_hero->getSource()->artifactsBag.clear();
+    auto * bagModel = m_artifactsFilter;
+    for (int row = 0; row < bagModel->rowCount(); row++) {
+        auto * art = bagModel->index(row, 0).data(ArtifactsModel::SourceObject).value<LibraryArtifactConstPtr>();
+        m_hero->getSource()->artifactsBag.erase(art);
+    }
     m_hero->refreshArtifactsModels();
     m_hero->emitChanges();
+}
+
+void HeroWithArmyConfigWidget::resetHero()
+{
+    m_hero->resetHeroToDefault();
+    if (m_ui->checkBoxUseDefaultArmy->isChecked())
+        useHeroDefaultArmy();
 }
 
 }

@@ -443,7 +443,8 @@ bool GameDatabase::load(const std::vector<std_path>& files)
         art.untranslatedName = "Scroll " + spell->untranslatedName;
         art.presentationParams.iconStash = art.presentationParams.iconBonus = spell->presentationParams.iconScroll;
         art.presentationParams.order = spell->level * 1000 + spell->presentationParams.order;
-        art.presentationParams.orderGroup = 1000;
+        art.presentationParams.orderGroup = 0;
+        art.presentationParams.orderCategory = LibraryArtifact::OrderCategory::Scrolls;
         art.treasureClass = LibraryArtifact::TreasureClass::Scroll;
         m_impl->m_artifacts.insertObject(art.id, std::move(art));
     }
