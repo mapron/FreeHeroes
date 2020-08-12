@@ -46,6 +46,7 @@ public:
 
     void doWait();
     void doGuard();
+    void switchSplash();
 
 
     using BattleStackConstPtr = Core::BattleStackConstPtr;

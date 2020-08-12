@@ -369,6 +369,11 @@ void BattleWidget::keyPressEvent(QKeyEvent* event)
         m_battleControlWidget->doWait();
         return;
     }
+    if (event->key() == Qt::Key_G && event->modifiers() == Qt::NoModifier) {
+        event->accept();
+        m_battleControlWidget->switchSplash();
+        return;
+    }
     if (event->key() == Qt::Key_Space && event->modifiers() == Qt::NoModifier) {
         event->accept();
         m_battleControlWidget->doGuard();

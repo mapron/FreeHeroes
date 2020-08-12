@@ -204,6 +204,16 @@ void BattleControlWidget::doGuard()
         m_ui->pushButtonGuard->click();
 }
 
+void BattleControlWidget::switchSplash()
+{
+    if (m_humanControlAvailable) {
+        if (m_ui->pushButtonSplashAttack->isChecked())
+            m_ui->pushButtonRangeAttack->click();
+        else
+            m_ui->pushButtonSplashAttack->click();
+    }
+}
+
 void BattleControlWidget::beforeMove(BattleStackConstPtr stack, const BattlePositionPath& path)
 {
     if (!m_appSettings.battle().logMoves)
@@ -301,8 +311,11 @@ void BattleControlWidget::onStateChanged()
     m_ui->pushButtonUnitCast->setVisible(available.cast);
 
     m_ui->pushButtonSplashAttack->setVisible(available.splashAttack);
-    m_ui->pushButtonMeleeAttack->setVisible(available.meleeAttack);
-    m_ui->pushButtonRangeAttack->setVisible(available.rangeAttack);
+    m_ui->pushButtonMeleeAttack ->setVisible(available.meleeAttack);
+    m_ui->pushButtonRangeAttack ->setVisible(available.rangeAttack);
+    m_ui->pushButtonSplashAttack->setEnabled(available.splashAttack);
+    m_ui->pushButtonMeleeAttack ->setEnabled(available.meleeAttack);
+    m_ui->pushButtonRangeAttack ->setEnabled(available.rangeAttack);
 
     for (auto *pb : m_alternateButtons->buttons()) {
         pb->setProperty("altIndex", QVariant::fromValue(Core::BattlePlanAttackParams::Alteration::None));
