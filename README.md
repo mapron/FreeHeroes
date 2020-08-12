@@ -66,3 +66,8 @@ All of these are permissive and compatible with MIT.
 3. Webm (as part of ffmpeg binary), https://github.com/webmproject/libwebp/, [3-Clause BSD](https://github.com/webmproject/libwebp/blob/master/COPYING)
 
 Keep this in mind if you decide to create closed source derivative work.
+
+# Special thanks
+- Vitaliy / Gomunguls - for inspiration and consult;
+- Chichulina Alexandra - for support, preliminary testing and also for some graphics design parts;
+- Artyom Glavatskih / Monsieur Metal - for thorough testing of early versions;
