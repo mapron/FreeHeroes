@@ -44,7 +44,7 @@ If requirements are met, then go "cmake/build/build install". For windows platfo
 Optional dependency: **FFMpeg** with **webm encoder support**. FFMpeg required to convert audio and video resources. You could provide it through "FFMPEG_BINARY" cmake option for convenience (it does not affect the build).
 
 # Contribution
-Project is in active developemnt, so I don't expect patches (Yeah, I could not say "patches are welcome" yet), but I won't deny them too. Just keep in mind any fix could potentially conflict with my plans to htow away half of the project. For reading and understanding the code, design desisions, and answers "why it had done such way", [read an article for contribution](docs/en/Contribute.md)
+Project is in active developemnt, so I don't expect a lot of third party work, but I won't deny any contribution too. Just keep in mind any fix could potentially conflict with my plans to htow away half of the project. For reading and understanding the code, design desisions, and answers "why it had done such way", [read an article for contribution](docs/en/Contribute.md)
 
 # License
 Project source code is licensed under [MIT license](LICENSE).
