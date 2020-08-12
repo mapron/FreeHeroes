@@ -12,6 +12,8 @@
 #include "LibraryHero.hpp"
 #include "LibraryHeroSpec.hpp"
 #include "LibrarySecondarySkill.hpp"
+#include "LibraryTerrain.hpp"
+#include "LibraryMapObject.hpp"
 
 #include "IMusicBox.hpp"
 
@@ -41,9 +43,9 @@ template<> struct TranslationContextName<Core::LibrarySecondarySkill>     { stat
 template<> struct TranslationContextName<Core::LibrarySpell>              { static constexpr const char * context = "spells"; };
 template<> struct TranslationContextName<Core::LibraryArtifact>           { static constexpr const char * context = "artifacts"; };
 template<> struct TranslationContextName<Core::LibraryFactionHeroClass>   { static constexpr const char * context = "classes"; };
-//template<> struct TranslationContextName<Core::LibraryMapObject>          { static constexpr const char * context = "mapObjects"; };
-//template<> struct TranslationContextName<Core::LibraryTerrain>            { static constexpr const char * context = "terrains"; };
 template<> struct TranslationContextName<Core::LibraryFaction>            { static constexpr const char * context = "factions"; };
+template<> struct TranslationContextName<Core::LibraryMapObject>          { static constexpr const char * context = "mapObjects"; };
+template<> struct TranslationContextName<Core::LibraryTerrain>            { static constexpr const char * context = "terrains"; };
 
 
 template<typename T>
@@ -78,7 +80,7 @@ QString AbstractGuiWrapper<WrapperType, SrcType>::getName(int n) const
 }
 
 
-GuiArtifact::GuiArtifact(Sound::IMusicBox & musicBox, IGraphicsLibrary & graphicsLibrary, Core::LibraryArtifactConstPtr source)
+GuiArtifact::GuiArtifact(Sound::IMusicBox & , IGraphicsLibrary & graphicsLibrary, Core::LibraryArtifactConstPtr source)
     : QObject(nullptr), Base(source)
     , m_iconStash(graphicsLibrary.getPixmap(source->presentationParams.iconStash))
     , m_iconBonus(graphicsLibrary.getPixmap(source->presentationParams.iconBonus))
@@ -134,7 +136,7 @@ QString GuiArtifact::localizedDisassemblySetDescr() const
     return prepareDescription(localizedDescr);
 }
 
-GuiUnit::GuiUnit(Sound::IMusicBox& musicBox, IGraphicsLibrary& graphicsLibrary, Core::LibraryUnitConstPtr source)
+GuiUnit::GuiUnit(Sound::IMusicBox& , IGraphicsLibrary& graphicsLibrary, Core::LibraryUnitConstPtr source)
     : QObject(nullptr), Base(source)
     , m_portraitSmall(graphicsLibrary.getPixmap(source->presentationParams.portraitSmall))
     , m_portraitLarge(graphicsLibrary.getPixmap(source->presentationParams.portrait))
@@ -169,7 +171,7 @@ QString GuiUnit::getNameWithCount(int n, GuiUnit::Variation variation) const
 
 QIcon GuiUnit::getSplashControl() const {return m_splashControl->get(); }
 
-GuiHero::GuiHero(Sound::IMusicBox& musicBox, IGraphicsLibrary& graphicsLibrary, Core::LibraryHeroConstPtr source)
+GuiHero::GuiHero(Sound::IMusicBox& , IGraphicsLibrary& graphicsLibrary, Core::LibraryHeroConstPtr source)
     : QObject(nullptr), Base(source)
     , m_portraitSmall(graphicsLibrary.getPixmap(source->presentationParams.portraitSmall))
     , m_portraitLarge(graphicsLibrary.getPixmap(source->presentationParams.portrait))
@@ -225,7 +227,7 @@ QString GuiHero::getSpecName() const
     return QString::fromStdString(spec->id);
 }
 
-GuiSkill::GuiSkill(Sound::IMusicBox& musicBox, IGraphicsLibrary& graphicsLibrary, Core::LibrarySecondarySkillConstPtr source)
+GuiSkill::GuiSkill(Sound::IMusicBox& , IGraphicsLibrary& graphicsLibrary, Core::LibrarySecondarySkillConstPtr source)
     : QObject(nullptr), Base(source)
     , m_iconSmall{{
         graphicsLibrary.getPixmap(source->presentationParams.levels[0].iconSmall),
@@ -302,12 +304,28 @@ QString GuiSpell::spellBookInfo(int manaCost, bool shortFormat) const
     return prepareDescription(descr);
 }
 
-GuiFaction::GuiFaction(Sound::IMusicBox& musicBox, IGraphicsLibrary& graphicsLibrary, Core::LibraryFactionConstPtr source)
+GuiFaction::GuiFaction(Sound::IMusicBox& , IGraphicsLibrary& graphicsLibrary, Core::LibraryFactionConstPtr source)
     : QObject(nullptr), Base(source)
     , m_unitBackground(graphicsLibrary.getObjectAnimation(source->presentationParams.unitBackground))
 {
 
 }
+
+GuiTerrain::GuiTerrain(Sound::IMusicBox& , IGraphicsLibrary& graphicsLibrary, Core::LibraryTerrainConstPtr source)
+    : QObject(nullptr), Base(source)
+    , m_icon(graphicsLibrary.getPixmap(source->presentationParams.icon))
+{
+
+}
+
+GuiMapObject::GuiMapObject(Sound::IMusicBox& , IGraphicsLibrary& graphicsLibrary, Core::LibraryMapObjectConstPtr source)
+    : QObject(nullptr), Base(source)
+    , m_icon(graphicsLibrary.getPixmap(source->presentationParams.icon))
+{
+    for (auto & variant : source->variants)
+        m_variantNames << QString::fromStdString(variant.name);
+}
+
 
 QList<ResourceAmountHelper::ResourceInfo> ResourceAmountHelper::trasformResourceAmount(const Core::ResourceAmount& resourceAmount) const
 {
@@ -343,5 +361,7 @@ template class AbstractGuiWrapper<GuiHero, Core::LibraryHero>;
 template class AbstractGuiWrapper<GuiSkill, Core::LibrarySecondarySkill>;
 template class AbstractGuiWrapper<GuiSpell, Core::LibrarySpell>;
 template class AbstractGuiWrapper<GuiFaction, Core::LibraryFaction>;
+template class AbstractGuiWrapper<GuiTerrain, Core::LibraryTerrain>;
+template class AbstractGuiWrapper<GuiMapObject, Core::LibraryMapObject>;
 
 }

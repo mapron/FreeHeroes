@@ -180,14 +180,14 @@
 "sod.artifact.misc.growth5"                 : {"class":"major"   , "value": 5000 , "untranslatedName": "Charm of ExtraGrowth T5"    ,"slot":"misc"  , "townGrowth":{"level": 5, "size":2  }},
 "sod.artifact.misc.growth6"                 : {"class":"major"   , "value": 5000 , "untranslatedName": "Charm of ExtraGrowth T6"    ,"slot":"misc"  , "townGrowth":{"level": 6, "size":1  }},
 
-"sod.artifact.sword.armag"                  : {"class":"relic"   , "value":50000, "untranslatedName": "Sword With Armag"             ,"slot":"sword" ,
+"sod.artifact.sword.armag"                  : {"class":"unique"  , "value":50000, "untranslatedName": "Sword With Armag"             ,"slot":"sword" ,
     "calc": ["h.primary:incAll(3)", "h.primary.magic:incInt(3)"],  "provideSpells": {"onlySpells": ["sod.spell.armageddon"] }, "protectSpells": {"onlySpells": ["sod.spell.armageddon"] } },
 
 "sod.artifact.cape.spellFly"                : {"class":"relic"   , "value":20000, "untranslatedName": "Cape of Fly"           ,"slot":"cape"  , "permanentCast":{"fly":{}   }},
-"hota.artifact.misc.summon"                 : {"class":"relic"   , "value":50000, "untranslatedName": "Fangarm Summon"        ,"slot":"misc"  , "special":"summonFangarm"},
+"hota.artifact.misc.summon"                 : {"class":"unique"  , "value":50000, "untranslatedName": "Fangarm Summon"        ,"slot":"misc"  , "special":"summonFangarm"},
 "sod.artifact.boots.spellWalkWater"         : {"class":"relic"   , "value":10000, "untranslatedName": "Boots of Waterwalk"    ,"slot":"boots" , "permanentCast":{"waterWalk":{}   }},
 "sod.artifact.misc.archeryNoDistance"       : {"class":"major"   , "value": 8000, "untranslatedName": "Bow No Distance"       ,"slot":"misc"  , "removePenatly": ["distanceShoot"]},
-"sod.artifact.misc.dragonStuff"             : {"class":"relic"   , "value":20000, "untranslatedName": "Charm Dragon Buff"     ,"slot":"misc"  },
+"sod.artifact.misc.dragonStuff"             : {"class":"unique"  , "value":20000, "untranslatedName": "Charm Dragon Buff"     ,"slot":"misc"  },
 "sod.artifact.misc.noSurrender"             : {"class":"major"   , "value": 5000, "untranslatedName": "Charm No Surrender"    ,"slot":"misc"  , "special":"noSurrender"},
 "sod.artifact.helm.boat"                    : {"class":"relic"   , "value":15000, "untranslatedName": "Helm of Boat Sumon"    ,"slot":"helm"  , "special":"noDamageWhirl",
     "provideSpells": {"onlySpells": ["sod.spell.summonBoat", "sod.spell.scuttleBoat" ] }, "calc": ["h.extraMPWater = h.extraMPWater + 500"       ]},

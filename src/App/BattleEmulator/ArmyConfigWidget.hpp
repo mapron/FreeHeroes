@@ -41,6 +41,7 @@ public:
     ArmyConfigWidget(QWidget * parent);
     ~ArmyConfigWidget();
 
+    void setAIControl(bool isAI);
     bool isAIControl() const;
     void initFromMapObject(Core::LibraryMapObjectConstPtr mapObject, int variant);
 

@@ -5,7 +5,6 @@
 
 "sod.map.crypt"             : {
     "untranslatedName": "Crypt",
-    "order": 1,
     "rewards": [
         {"resources":"1500"},
         {"resources":"2000"},
@@ -22,7 +21,6 @@
 },
 "sod.map.utopia"           : {
     "untranslatedName": "Utopia",
-    "order": 2,
     "rewards": [
         {"resources":"20000","artifacts":"treasure=1,minor=1,major=1,relic=1"},
         {"resources":"30000","artifacts":"minor=1,major=1,relic=2"},
@@ -38,7 +36,6 @@
 },
 "sod.map.derelictShip"             : {
     "untranslatedName": "Derelict Ship",
-    "order": 1001,
     "rewards": [
         {"resources":"3000"},
         {"resources":"3000","artifacts":"treasure=1"},
@@ -54,7 +51,6 @@
 },
 "sod.map.shipwreck"             : {
     "untranslatedName": "Shipwreck",
-    "order": 1002,
     "rewards": [
         {"resources":"2000"},
         {"resources":"3000"},
@@ -72,7 +68,6 @@
 "hota.map.blackTower"             : {
     "untranslatedName": "Black tower",
     "fieldLayout": "std",
-    "order": 3,
     "rewards": [
         {"resources":"2000","artifacts":"minor=1"},
         {"resources":"2250","artifacts":"minor=1"},
@@ -89,7 +84,6 @@
 },
 "hota.map.mansion"             : {
     "untranslatedName": "Mansion",
-    "order": 4,
     "rewards": [
         {"resources": "2500,mercury=2,sulfur=2,crystal=2,gems=2","artifacts":"major=1"},
         {"resources": "5000,mercury=3,sulfur=3,crystal=3,gems=3","artifacts":"major=1"},
@@ -106,7 +100,6 @@
 },
 "hota.map.beholderSanctuary"             : {
     "untranslatedName": "Beholders' Sanctuary",
-    "order": 5,
     "rewards": [
         {"resources": "3000","artifacts":"minor=1"},
         {"resources": "5000","artifacts":"minor=1"},
@@ -123,8 +116,6 @@
 },
 "hota.map.templeSea"           : {
     "untranslatedName": "Temple of the Sea",
-
-    "order": 1003,
     "rewards": [
         {"resources":"10000","artifacts":"treasure=2,minor=1,relic=1"},
         {"resources":"15000","artifacts":"treasure=1,minor=1,major=1,relic=1"},
@@ -141,7 +132,6 @@
 "hota.map.churchyard"           : {
     "untranslatedName": "Churchyard",
     "fieldLayout": "churchyard2",
-    "order": 6,
     "rewards": [
         {"resources":"2500","artifacts":"minor=1" }
     ],
@@ -152,7 +142,6 @@
 "sod.map.conservatory"           : {
     "untranslatedName": "Griffins' conservatory",
 
-    "order": 100,
     "rewards": [
         {"unit":"sod.unit.angel=1"},
         {"unit":"sod.unit.angel=2"},
@@ -173,7 +162,6 @@
 "sod.map.hive"           : {
     "untranslatedName": "Dragonflies hive",
 
-    "order": 101,
     "rewards": [
         {"unit":"sod.unit.wyvern=1"},
         {"unit":"sod.unit.wyvern=2"},
@@ -190,7 +178,6 @@
 "hota.map.experimentalShop"           : {
     "untranslatedName": "Experimental Shop",
 
-    "order": 102,
     "rewards": [
         {"unit":"sod.unit.giant=1"},
         {"unit":"sod.unit.giant=2"},
@@ -206,7 +193,6 @@
 },
 "hota.map.wolfRaiderPicket"           : {
     "untranslatedName": "Wolf Raider Picket",
-    "order": 103,
     "rewards": [
         {"unit":"sod.unit.cyclop=4"},
         {"unit":"sod.unit.cyclop=6"},
@@ -222,7 +208,6 @@
 },
 "hota.map.vermilionTower"             : {
     "untranslatedName": "Vermilion tower",
-    "order": 104,
     "rewards": [
         {"unit":"sod.unit.firebird=1"},
         {"unit":"sod.unit.firebird=2"},
@@ -239,7 +224,6 @@
 },
 "hota.map.pirateCave"             : {
     "untranslatedName": "Pirate Cave",
-    "order": 105,
     "rewards": [
         {"unit":"hota.unit.seaSerpent=1"},
         {"unit":"hota.unit.seaSerpent=2"},
@@ -256,7 +240,6 @@
 },
 "hota.map.ivoryTower"             : {
     "untranslatedName": "Ivory tower",
-    "order": 106,
     "rewards": [
         {"unit":"sod.unit.enchanter=3"},
         {"unit":"sod.unit.enchanter=6"},
@@ -272,7 +255,6 @@
 },
 "sod.map.impCache"             : {
     "untranslatedName": "Imp cache",
-    "order": 200,
     "rewards": [
         {"resources":"1000,mercury=2"},
         {"resources":"1500,mercury=3"},
@@ -292,7 +274,6 @@
 },
 "sod.map.dwarvenTreasury"             : {
     "untranslatedName": "Dwarven Treasury",
-    "order": 201,
     "rewards": [
         {"resources":"2500,crystal=2"},
         {"resources":"4000,crystal=3"},
@@ -312,7 +293,6 @@
 },
 "sod.map.medusaStores"             : {
     "untranslatedName": "Medusa Stores",
-    "order": 202,
     "rewards": [
         {"resources":"2000,sulfur=5"},
         {"resources":"3000,sulfur=6"},
@@ -332,7 +312,6 @@
 },
 "sod.map.cyclopsStockpile"             : {
     "untranslatedName": "Cyclops Stockpile",
-    "order": 203,
     "rewards": [
          {"resources": "mercury=4,sulfur=4,crystal=4,gems=4"},
          {"resources": "mercury=6,sulfur=6,crystal=6,gems=6"},
@@ -352,7 +331,6 @@
 },
 "sod.map.nagaBank"             : {
     "untranslatedName": "Naga bank",
-    "order": 204,
     "rewards": [
         {"resources": "4000,gems=8" },
         {"resources": "6000,gems=12"},
@@ -373,7 +351,6 @@
 "hota.map.spit"             : {
     "untranslatedName": "Basilisk Spit",
     "fieldLayout" : "spit",
-    "order": 205,
     "rewards": [
         {"resources": "3000"},
         {"resources": "4500"},
@@ -394,7 +371,6 @@
 "hota.map.ruins"             : {
     "untranslatedName": "Ruins",
     "fieldLayout" : "ruins",
-    "order": 206,
     "rewards": [
         {"resources": "1000"},
         {"resources": "2000"},

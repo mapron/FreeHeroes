@@ -75,33 +75,38 @@
         </translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="235"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="237"/>
         <source>%1 %2 %3, %4 %5</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="242"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="243"/>
+        <source>%1 %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="247"/>
         <source>, splash has done damage to: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="252"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="257"/>
         <source>%1 - dmg. %2, deaths %3 (remain %4) </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="257"/>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="366"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="262"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="371"/>
         <source>%1 - dmg. %2, killing all %3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="270"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="275"/>
         <source>%1 %2 for better move</source>
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="272"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="277"/>
         <source>is waiting</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -109,12 +114,12 @@
         </translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="277"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="282"/>
         <source>%1 %2 defending position and get +%3 defense</source>
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="279"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="284"/>
         <source>is taking</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -122,95 +127,95 @@
         </translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="328"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="333"/>
         <source>%1 - high morale allows one more attack!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="329"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="334"/>
         <source>%1 - low morale forces to skip turn.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="330"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="335"/>
         <source>%1 - high luck, extra damage!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="331"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="336"/>
         <source>%1 - low luck, damage penalty.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="347"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="352"/>
         <source>casting %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="352"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="357"/>
         <source>, as a result:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="361"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="366"/>
         <source>%1 - dmg. %2, deaths %3 (remain %4)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="428"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="433"/>
         <source>, deaths %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="441"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="447"/>
         <source>Target attack: %1, damage %2%3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="449"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="456"/>
         <source>Possible retaliation: damage %1%2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="455"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="462"/>
         <source>, extra affected: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="463"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="470"/>
         <source>%1 - damage %2%3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="255"/>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="364"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="260"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="369"/>
         <source>%1 - dmg. %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="504"/>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="506"/>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="530"/>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="539"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="511"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="513"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="537"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="546"/>
         <source>succ. ch.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="530"/>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="533"/>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="539"/>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="542"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="537"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="540"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="546"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="549"/>
         <source>(&lt;i&gt;%1%&lt;/i&gt; %2)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="533"/>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="542"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="540"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="549"/>
         <source>of base</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="525"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="532"/>
         <source>%1 - damage %2, deaths %3</source>
         <translation type="unfinished"></translation>
     </message>
@@ -225,63 +230,63 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="320"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="325"/>
         <source>Starting round &lt;i&gt;%1&lt;/i&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="332"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="337"/>
         <source>%1 - resist chance deflects casted spell.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="470"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="477"/>
         <source>Move to %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="474"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="481"/>
         <source>Cast %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="477"/>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="510"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="484"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="517"/>
         <source>total damage %1, deaths %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="484"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="491"/>
         <source>, deaths by creature: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="498"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="505"/>
         <source>%1 - %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="515"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="522"/>
         <source>, affected: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="626"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="633"/>
         <source>Attacker side now controlled by AI.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="626"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="633"/>
         <source>Attacker side now controlled by Player.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="629"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="636"/>
         <source>Defender side now controlled by AI.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="629"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="636"/>
         <source>Defender side now controlled by Player.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -390,32 +395,32 @@
 <context>
     <name>FreeHeroes::Gui::GuiArtifact</name>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="110"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="114"/>
         <source>This artifacts is a part of the set: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="113"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="117"/>
         <source>Parts of set assemblied: {%1} / {%2}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="116"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="120"/>
         <source>Last remaining artifact: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="119"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="123"/>
         <source>Congratulations! You found all parts of the set!&lt;br&gt;For assembly, press {Control+Left Click}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="128"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="132"/>
         <source>This artifact can be disassembled into: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="131"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="135"/>
         <source>Press {Control+Left Click} to disassemble</source>
         <translation type="unfinished"></translation>
     </message>
@@ -423,18 +428,18 @@
 <context>
     <name>FreeHeroes::Gui::GuiHero</name>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="216"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="219"/>
         <source>%1 (+%2/day)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="219"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="222"/>
         <source>Dragons</source>
         <comment>speciality</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="222"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="225"/>
         <source>Speed</source>
         <comment>speciality</comment>
         <translation type="unfinished"></translation>
@@ -443,22 +448,22 @@
 <context>
     <name>FreeHeroes::Gui::GuiSkill</name>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="258"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="261"/>
         <source>None</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="258"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="261"/>
         <source>Basic</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="258"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="261"/>
         <source>Advanced</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="258"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="261"/>
         <source>Expert</source>
         <translation type="unfinished"></translation>
     </message>
@@ -466,18 +471,18 @@
 <context>
     <name>FreeHeroes::Gui::GuiSpell</name>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="282"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="287"/>
         <source>Inflicts damage:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="293"/>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="296"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="298"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="301"/>
         <source>lvl.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="297"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="302"/>
         <source>Mana:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -485,7 +490,7 @@
 <context>
     <name>FreeHeroes::Gui::GuiUnit</name>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="164"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="167"/>
         <source>%1 %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -825,12 +830,12 @@
 <context>
     <name>FreeHeroes::Gui::HeroSkillsEditModel</name>
     <message>
-        <location filename="../../src/Gui/GameWrappers/AdventureModels.cpp" line="324"/>
+        <location filename="../../src/Gui/GameWrappers/AdventureModels.cpp" line="322"/>
         <source>Skill</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/AdventureModels.cpp" line="324"/>
+        <location filename="../../src/Gui/GameWrappers/AdventureModels.cpp" line="322"/>
         <source>Level</source>
         <translation type="unfinished"></translation>
     </message>
@@ -982,6 +987,14 @@
     </message>
 </context>
 <context>
+    <name>FreeHeroes::Gui::MapObjectsComboModel</name>
+    <message>
+        <location filename="../../src/Gui/Editor/LibraryEditorModels.cpp" line="95"/>
+        <source>-- No creature bank --</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>FreeHeroes::Gui::MoraleLabel</name>
     <message>
         <location filename="../../src/Gui/Widgets/RngParamLabel.cpp" line="110"/>
@@ -1035,43 +1048,43 @@
 <context>
     <name>FreeHeroes::Gui::ResourceAmountHelper</name>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="324"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="345"/>
         <source>Gold</source>
         <comment>as resource</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="326"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="347"/>
         <source>Wood</source>
         <comment>as resource</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="327"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="348"/>
         <source>Mercury</source>
         <comment>as resource</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="328"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="349"/>
         <source>Ore</source>
         <comment>as resource</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="329"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="350"/>
         <source>Sulfur</source>
         <comment>as resource</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="330"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="351"/>
         <source>Crystal</source>
         <comment>as resource</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="331"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="352"/>
         <source>Gems</source>
         <comment>as resource</comment>
         <translation type="unfinished"></translation>

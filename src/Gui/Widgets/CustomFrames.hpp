@@ -12,7 +12,7 @@
 #include <QPushButton>
 #include <QComboBox>
 
-
+class QTreeView;
 namespace FreeHeroes::Gui {
 class DarkFrameLabel : public QLabel {
 public:
@@ -99,6 +99,21 @@ public:
     void showPopup() override;
 
     int calculateMaxModelWidth() const;
+};
+
+class GUIWIDGETS_EXPORT TreeComboBox : public ResizeableComboBox {
+    Q_OBJECT
+public:
+    TreeComboBox(QWidget * parent = nullptr);
+
+    void expandAll();
+    void selectIndex(const QModelIndex & index);
+
+    void showPopup() override;
+    void hidePopup() override;
+
+private:
+    QTreeView * m_view = nullptr;
 };
 
 }

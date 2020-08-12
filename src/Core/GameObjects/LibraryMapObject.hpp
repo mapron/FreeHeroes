@@ -24,7 +24,7 @@ struct UnitWithCount {
 
 struct LibraryMapObject {
     std::string id;
-    int order = 0;
+
     std::string untranslatedName;
     FieldLayout fieldLayout = FieldLayout::Object;
 
@@ -48,6 +48,11 @@ struct LibraryMapObject {
     using Variants = std::vector<Variant>;
     Variants variants;
 
+    struct Presentation {
+        int order = 0;
+        std::string icon;
+    };
+    Presentation presentationParams;
 };
 
 }

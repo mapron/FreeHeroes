@@ -152,11 +152,6 @@ adventure mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="130"/>
-        <source>Select from the list</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="153"/>
         <source>Map object common</source>
         <translation type="unfinished"></translation>
@@ -192,37 +187,32 @@ adventure mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="193"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="194"/>
         <source>Battle emulator</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="425"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="429"/>
         <source> and </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="428"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="432"/>
         <source>%1 is no problem anymore, and %2 now in your hands.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="526"/>
-        <source>Error</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="526"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="530"/>
         <source>AI reached step limit: that probably an error.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="583"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="587"/>
         <source>Glorious victory!&lt;br&gt;For the valor in the battle, %1 recieves %2 experience</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="584"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="588"/>
         <source>Your forces have suffered a crushing defeat, and %1 now leaves you</source>
         <translation type="unfinished"></translation>
     </message>

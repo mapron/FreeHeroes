@@ -155,11 +155,6 @@ adventure mode</source>
         <translation>Стандартное</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="130"/>
-        <source>Select from the list</source>
-        <translation>Выберите из списка</translation>
-    </message>
-    <message>
         <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="153"/>
         <source>Map object common</source>
         <translation>Обычный объект карты приключений</translation>
@@ -195,37 +190,32 @@ adventure mode</source>
         <translation>Введите новое имя:</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="193"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="194"/>
         <source>Battle emulator</source>
         <translation>Эмулятор сражений</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="425"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="429"/>
         <source> and </source>
         <translation> и </translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="428"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="432"/>
         <source>%1 is no problem anymore, and %2 now in your hands.</source>
         <translation>%1 - больше не помеха, и %2 теперь у вас в руках.</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="526"/>
-        <source>Error</source>
-        <translation>Ошибка</translation>
-    </message>
-    <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="526"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="530"/>
         <source>AI reached step limit: that probably an error.</source>
         <translation>ИИ достиг лимита шагов; это возможно ошибка.</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="583"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="587"/>
         <source>Glorious victory!&lt;br&gt;For the valor in the battle, %1 recieves %2 experience</source>
         <translation>Славная победа!&lt;br&gt;За доблесть в боюю %1 получает %2 опыта</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="584"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="588"/>
         <source>Your forces have suffered a crushing defeat, and %1 now leaves you</source>
         <translation>Ваши войска потерпели сокрушительное поражение, и %1 теперь покидает вас</translation>
     </message>

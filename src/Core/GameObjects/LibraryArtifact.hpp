@@ -158,7 +158,7 @@ struct ArtifactSlotRequirement {
 
 
 struct LibraryArtifact {
-    enum class TreasureClass { Treasure, Minor, Major, Relic, Complex, BattleMachine, Scroll, Special };
+    enum class TreasureClass { Treasure, Minor, Major, Relic, Unique, Complex, BattleMachine, Scroll, Special };
     struct Presentation {
         int order = 0;
         int orderGroup = 0;

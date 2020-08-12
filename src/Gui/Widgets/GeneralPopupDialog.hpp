@@ -37,6 +37,7 @@ public:
     void closeNonModal();
 
     static bool confirmRequest(const QString & message, QWidget * parent);
+    static void messageBox(const QString & message, QWidget * parent);
 
 private:
 

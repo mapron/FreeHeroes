@@ -156,5 +156,11 @@ bool GeneralPopupDialog::confirmRequest(const QString& message, QWidget * parent
     return result == QDialog::Accepted;
 }
 
+void GeneralPopupDialog::messageBox(const QString& message, QWidget* parent)
+{
+    GeneralPopupDialog dlg(message, {}, true, false, parent);
+    dlg.exec();
+}
+
 
 }

@@ -18,6 +18,7 @@ struct LibraryTerrain {
         int order = 0;
         std::string music;
         std::vector<std::string> backgroundsBattle;
+        std::string icon;
     };
 
     std::string id;

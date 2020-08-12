@@ -528,7 +528,7 @@ bool GameDatabase::load(const std::vector<std_path>& files)
     }
     // mapObjects postproc
     std::sort(m_impl->m_mapObjects.m_unsorted.begin(), m_impl->m_mapObjects.m_unsorted.end(), [](auto * l, auto * r){
-        return l->order < r->order;
+        return l->presentationParams.order < r->presentationParams.order;
     });
     for (auto * obj : m_impl->m_mapObjects.m_unsorted) {
 

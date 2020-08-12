@@ -10,6 +10,8 @@
 #include <QAbstractItemView>
 #include <QEvent>
 #include <QPainter>
+#include <QTreeView>
+#include <QHeaderView>
 
 namespace FreeHeroes::Gui {
 
@@ -163,6 +165,49 @@ int ResizeableComboBox::calculateMaxModelWidth() const
         maxWidth = std::max(maxWidth, fm.horizontalAdvance(text));
     }
     return maxWidth;
+}
+
+TreeComboBox::TreeComboBox(QWidget* parent)
+    : ResizeableComboBox(parent)
+{
+    m_view = new QTreeView(parent);
+
+    m_view->setFrameShape(QFrame::NoFrame);
+    m_view->setEditTriggers(QTreeView::NoEditTriggers);
+    m_view->setAlternatingRowColors(false);
+    m_view->setSelectionBehavior(QTreeView::SelectRows);
+    m_view->setRootIsDecorated(false);
+    m_view->setAllColumnsShowFocus(false);
+    m_view->setItemsExpandable(false);
+    setView(m_view);
+    m_view->header()->setVisible(false);
+}
+
+void TreeComboBox::expandAll()
+{
+    m_view->expandAll();
+}
+
+void TreeComboBox::selectIndex(const QModelIndex& index)
+{
+    setRootModelIndex(index.parent());
+    setCurrentIndex(index.row());
+    m_view->setCurrentIndex( index );
+}
+
+void TreeComboBox::showPopup()
+{
+    setRootModelIndex(QModelIndex());
+    // @todo: calculateMaxModelWidth not accurate here, it does not walk recursive.
+    this->view()->setMinimumWidth(calculateMaxModelWidth()  + this->iconSize().width() * 2 + 50);
+    QComboBox::showPopup();
+}
+
+void TreeComboBox::hidePopup()
+{
+    setRootModelIndex(m_view->currentIndex().parent());
+    setCurrentIndex  (m_view->currentIndex().row());
+    ResizeableComboBox::hidePopup();
 }
 
 

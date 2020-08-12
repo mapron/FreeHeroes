@@ -62,7 +62,13 @@ ArmyConfigWidget::ArmyConfigWidget(QWidget* parent)
     connect(m_ui->pushButtonLevelUpHero, &QPushButton::clicked, this, &ArmyConfigWidget::checkForHeroLevelUps);
 
 }
+
 ArmyConfigWidget::~ArmyConfigWidget() = default;
+
+void ArmyConfigWidget::setAIControl(bool isAI)
+{
+    m_ui->checkBoxAIControl->setChecked(isAI);
+}
 
 bool ArmyConfigWidget::isAIControl() const
 {

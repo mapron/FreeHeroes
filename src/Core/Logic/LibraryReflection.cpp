@@ -136,6 +136,7 @@ RTTR_REGISTRATION
         .property("music"              , &LibraryTerrain::Presentation::music)
         .property("backgroundsBattle"  , &LibraryTerrain::Presentation::backgroundsBattle)(ref)
         .property("order"              , &LibraryTerrain::Presentation::order)
+        .property("icon"               , &LibraryTerrain::Presentation::icon)
         ;
     registration::class_<LibraryTerrain>("LibraryTerrain")
         .constructor<>()
@@ -396,8 +397,10 @@ RTTR_REGISTRATION
         value("minor"    ,   LibraryArtifact::TreasureClass::Minor),
         value("major"    ,   LibraryArtifact::TreasureClass::Major),
         value("relic"    ,   LibraryArtifact::TreasureClass::Relic),
+        value("unique"   ,   LibraryArtifact::TreasureClass::Unique),
         value("complex"  ,   LibraryArtifact::TreasureClass::Complex),
         value("bm"       ,   LibraryArtifact::TreasureClass::BattleMachine),
+        value("scroll"   ,   LibraryArtifact::TreasureClass::Scroll),
         value("special"  ,   LibraryArtifact::TreasureClass::Special)
         );
     registration::class_<LibraryArtifact::Presentation>("LibraryArtifactPres")
@@ -622,12 +625,17 @@ RTTR_REGISTRATION
         .property("rewardIndex" , &LibraryMapObject::Variant::rewardIndex)
         .property("guards"      , &LibraryMapObject::Variant::guards)(ref)
         ;
+    registration::class_<LibraryMapObject::Presentation>("LibraryMapObjectPres")
+        .constructor<>()
+        .property("order"              , &LibraryMapObject::Presentation::order)
+        .property("icon"               , &LibraryMapObject::Presentation::icon)
+        ;
     registration::class_<LibraryMapObject>("LibraryMapObject")
         .constructor<>()
         .property("untranslatedName"    , &LibraryMapObject::untranslatedName)
         .property("variants"            , &LibraryMapObject::variants)(ref)
         .property("rewards"             , &LibraryMapObject::rewards)(ref)
-        .property("order"               , &LibraryMapObject::order)
+        .property("pres"                , &LibraryMapObject::presentationParams)(ref)
         .property("fieldLayout"         , &LibraryMapObject::fieldLayout)
         ;
     // ------------------------------------------------------------------------------------------

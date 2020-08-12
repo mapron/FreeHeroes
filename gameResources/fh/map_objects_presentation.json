@@ -1,0 +1,33 @@
+[{
+"scope": "mapObjects",
+
+"records" : {
+
+"sod.map.crypt"                      : { "pres": { "order":1    , "icon": "avxgyds0:0" } },
+"sod.map.utopia"                     : { "pres": { "order":2    , "icon": "avsutop0" } },
+"sod.map.derelictShip"               : { "pres": { "order":1001 , "icon": "avadlic0:0" } },
+"sod.map.shipwreck"                  : { "pres": { "order":1002 , "icon": "avawrek0:0" } },
+"hota.map.blackTower"                : { "pres": { "order":3    , "icon": "avblktgr" } },
+"hota.map.mansion"                   : { "pres": { "order":4    , "icon": "avmnsion" } },
+"hota.map.beholderSanctuary"         : { "pres": { "order":5    , "icon": "sanct_wt" } },
+"hota.map.templeSea"                 : { "pres": { "order":1003 , "icon": "avsutopw" } },
+"hota.map.churchyard"                : { "pres": { "order":6    , "icon": "avcmetry" } },
+"sod.map.conservatory"               : { "pres": { "order":100  , "icon": "avxbnk30" } },
+"sod.map.hive"                       : { "pres": { "order":101  , "icon": "avxbnk70" } },
+"hota.map.experimentalShop"          : { "pres": { "order":102  , "icon": "avxbnk90" } },
+"hota.map.wolfRaiderPicket"          : { "pres": { "order":103  , "icon": "avxbnk80" } },
+"hota.map.vermilionTower"            : { "pres": { "order":104  , "icon": "avredtwr" } },
+"hota.map.pirateCave"                : { "pres": { "order":105  , "icon": "hapcave" } },
+"hota.map.ivoryTower"                : { "pres": { "order":106  , "icon": "avivtow2" } },
+
+"sod.map.impCache"                   : { "pres": { "order":200  , "icon": "avxbnk40:0" } },
+"sod.map.dwarvenTreasury"            : { "pres": { "order":201  , "icon": "avxbnk20" } },
+"sod.map.medusaStores"               : { "pres": { "order":202  , "icon": "avxbnk50:0" } },
+"sod.map.cyclopsStockpile"           : { "pres": { "order":203  , "icon": "avxbnk10" } },
+"sod.map.nagaBank"                   : { "pres": { "order":204  , "icon": "avxbnk60:0" } },
+"hota.map.spit"                      : { "pres": { "order":205  , "icon": "avbone02" } },
+"hota.map.ruins"                     : { "pres": { "order":206  , "icon": "avxruins" } }
+
+}
+
+}]

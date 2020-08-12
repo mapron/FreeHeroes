@@ -62,7 +62,7 @@
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QComboBox" name="comboBoxTerrain"/>
+        <widget class="FreeHeroes::Gui::ResizeableComboBox" name="comboBoxTerrain"/>
        </item>
        <item row="1" column="0">
         <widget class="QLabel" name="label_2">
@@ -72,7 +72,7 @@
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QComboBox" name="comboBoxObstaclePreset"/>
+        <widget class="FreeHeroes::Gui::ResizeableComboBox" name="comboBoxObstaclePreset"/>
        </item>
       </layout>
      </item>
@@ -98,7 +98,7 @@
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QComboBox" name="comboBoxPositionsPreset"/>
+        <widget class="FreeHeroes::Gui::ResizeableComboBox" name="comboBoxPositionsPreset"/>
        </item>
        <item row="1" column="0">
         <widget class="QLabel" name="label_4">
@@ -108,7 +108,7 @@
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QComboBox" name="comboBoxObjectPreset"/>
+        <widget class="FreeHeroes::Gui::TreeComboBox" name="comboBoxObjectPreset"/>
        </item>
       </layout>
      </item>
@@ -152,7 +152,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="comboBoxReplaySelect"/>
+      <widget class="FreeHeroes::Gui::ResizeableComboBox" name="comboBoxReplaySelect"/>
      </item>
      <item>
       <widget class="QPushButton" name="pushButtonRenameReplay">
@@ -311,6 +311,16 @@ adventure mode</string>
   </layout>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>FreeHeroes::Gui::ResizeableComboBox</class>
+   <extends>QComboBox</extends>
+   <header>CustomFrames.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>FreeHeroes::Gui::TreeComboBox</class>
+   <extends>QComboBox</extends>
+   <header>CustomFrames.hpp</header>
+  </customwidget>
   <customwidget>
    <class>FreeHeroes::BattleEmulator::ArmyConfigWidget</class>
    <extends>QWidget</extends>

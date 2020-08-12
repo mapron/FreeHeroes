@@ -73,5 +73,35 @@ public:
     FactionsComboModel(QAbstractItemModel * sourceModel, QObject * parent);
 };
 
+class GUIEDITOR_EXPORT TerrainsComboModel : public ComboModel
+{
+    Q_OBJECT
+public:
+    TerrainsComboModel(QAbstractItemModel * sourceModel, QObject * parent);
+};
+
+class GUIEDITOR_EXPORT MapObjectsComboModel : public ComboModel
+{
+    Q_OBJECT
+public:
+    MapObjectsComboModel(QAbstractItemModel * sourceModel, QObject * parent);
+};
+
+
+class GUIEDITOR_EXPORT MapObjectsTreeModel : public QAbstractItemModel
+{
+public:
+    MapObjectsTreeModel(QAbstractItemModel * source, QObject * parent);
+
+    QVariant data(const QModelIndex &index, int role) const override;
+    QModelIndex index(int row, int column, const QModelIndex& parent) const override;
+    QModelIndex parent(const QModelIndex& child) const override;
+    int rowCount(const QModelIndex& parent) const override;
+    int columnCount(const QModelIndex& parent) const override;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
+
+private:
+    QAbstractItemModel * m_source = nullptr;
+};
 
 }

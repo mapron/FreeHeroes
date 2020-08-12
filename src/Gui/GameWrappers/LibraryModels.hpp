@@ -187,6 +187,38 @@ protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
 };
 
+class GUIGAMEWRAPPERS_EXPORT TerrainsModel : public AbstractGuiWrapperListModel<GuiTerrain>
+{
+public:
+    using Base = AbstractGuiWrapperListModel<GuiTerrain>;
+    using AbstractGuiWrapperListModel::AbstractGuiWrapperListModel;
+
+    QVariant data(const QModelIndex &index, int role) const override;
+};
+
+class GUIGAMEWRAPPERS_EXPORT TerrainsFilterModel  : public QSortFilterProxyModel
+{
+public:
+    TerrainsFilterModel(QObject * parent);
+
+    // QSortFilterProxyModel interface
+protected:
+    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
+};
+
+class GUIGAMEWRAPPERS_EXPORT MapObjectsModel : public AbstractGuiWrapperListModel<GuiMapObject>
+{
+public:
+    using Base = AbstractGuiWrapperListModel<GuiMapObject>;
+    using AbstractGuiWrapperListModel::AbstractGuiWrapperListModel;
+
+    enum MapItemDataRole {
+        VaraintNames = LastBaseRole + 1,
+    };
+
+    QVariant data(const QModelIndex &index, int role) const override;
+};
+
 class UiCommonModel;
 class GUIGAMEWRAPPERS_EXPORT LibraryModelsProvider : public QObject
 {
@@ -197,22 +229,26 @@ public:
                           IGraphicsLibrary & graphicsLibrary,
                           QObject * parent = nullptr);
 
-    ArtifactsModel * artifacts() const noexcept { return m_artifacts;}
-    UnitsModel     * units    () const noexcept { return m_units;}
-    HeroesModel    * heroes   () const noexcept { return m_heroes;}
-    SkillsModel    * skills   () const noexcept { return m_skills;}
-    SpellsModel    * spells   () const noexcept { return m_spells;}
-    FactionsModel  * factions () const noexcept { return m_factions;}
-    UiCommonModel  * ui       () const noexcept { return m_uiCommon;}
+    ArtifactsModel   * artifacts  () const noexcept { return m_artifacts;}
+    UnitsModel       * units      () const noexcept { return m_units;}
+    HeroesModel      * heroes     () const noexcept { return m_heroes;}
+    SkillsModel      * skills     () const noexcept { return m_skills;}
+    SpellsModel      * spells     () const noexcept { return m_spells;}
+    FactionsModel    * factions   () const noexcept { return m_factions;}
+    TerrainsModel    * terrains   () const noexcept { return m_terrains;}
+    MapObjectsModel  * mapObjects () const noexcept { return m_mapObjects;}
+    UiCommonModel    * ui         () const noexcept { return m_uiCommon;}
 
 private:
-    ArtifactsModel * m_artifacts;
-    UnitsModel     * m_units;
-    HeroesModel    * m_heroes;
-    SkillsModel    * m_skills;
-    SpellsModel    * m_spells;
-    FactionsModel  * m_factions;
-    UiCommonModel  * m_uiCommon;
+    ArtifactsModel    * m_artifacts;
+    UnitsModel        * m_units;
+    HeroesModel       * m_heroes;
+    SkillsModel       * m_skills;
+    SpellsModel       * m_spells;
+    FactionsModel     * m_factions;
+    TerrainsModel     * m_terrains;
+    MapObjectsModel   * m_mapObjects;
+    UiCommonModel     * m_uiCommon;
 };
 
 }

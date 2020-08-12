@@ -8,21 +8,26 @@
 #include "ui_EmulatorMainWidget.h"
 
 // Gui
-#include "IGraphicsLibrary.hpp"
-#include "IMusicBox.hpp"
-#include "FsUtilsQt.hpp"
-
 #include "BattleWidget.hpp"
 #include "SettingsWidget.hpp"
 #include "DependencyInjector.hpp"
 #include "BattleResultDialog.hpp"
 #include "HeroLevelupDialog.hpp"
 #include "GeneralPopupDialog.hpp"
-#include "LibraryWrappers.hpp"
-#include "LibraryModels.hpp"
+#include "ReplayFileManager.hpp"
+
+// Gui - wrappers
 #include "UiCommonModel.hpp"
 #include "AdventureWrappers.hpp"
-#include "ReplayFileManager.hpp"
+#include "LibraryWrappers.hpp"
+#include "LibraryModels.hpp"
+#include "LibraryEditorModels.hpp"
+#include "LibraryWrappersMetatype.hpp"
+
+// Gui - interface
+#include "IGraphicsLibrary.hpp"
+#include "IMusicBox.hpp"
+#include "FsUtilsQt.hpp"
 
 // Core
 #include "IGameDatabase.hpp"
@@ -41,13 +46,10 @@
 #include "Profiler.hpp"
 #include "Logger.hpp"
 
-#include <QDialog>
 #include <QInputDialog>
-#include <QSettings>
 /// @todo some  AppLocationManager for paths??
 #include <QStandardPaths>
 #include <QSet>
-#include <QMessageBox>
 
 namespace FreeHeroes::BattleEmulator {
 
@@ -113,28 +115,27 @@ EmulatorMainWidget::EmulatorMainWidget(IGraphicsLibrary & graphicsLibrary,
     m_ui->armyConfigAtt->setSource(m_guiAdventureArmyAtt.get());
     m_ui->armyConfigDef->setSource(m_guiAdventureArmyDef.get());
     m_ui->armyConfigAtt->initHero();
+    m_ui->armyConfigDef->setAIControl(true);
 
-
-    int currentIndex = 0;
-    for (auto terrain : gameDatabase.terrains()->records()) {
-        if (terrain->id == "sod.terrain.grass")
-            currentIndex = m_ui->comboBoxTerrain->count();
-        if (terrain->isObstacle)
-            continue;
-
-        m_ui->comboBoxTerrain->addItem(QString::fromStdString(terrain->untranslatedName), QString::fromStdString(terrain->id));
-    }
-    m_ui->comboBoxTerrain->setCurrentIndex(currentIndex);
-    connect(m_ui->comboBoxTerrain, qOverload<int>(&QComboBox::currentIndexChanged), this, &EmulatorMainWidget::onTerrainChanged);
-
-    m_ui->comboBoxObjectPreset->addItem(tr("Select from the list"));
-    for (auto map : gameDatabase.mapObjects()->records()) {
-        auto name = map->untranslatedName;
-        for (int i = 0; i < (int) map->variants.size(); ++i) {
-            auto variantName = map->variants[i].name;
-            m_ui->comboBoxObjectPreset->addItem(QString::fromStdString(map->untranslatedName) + " " + QString::fromStdString(variantName), QString::fromStdString(map->id) + ":" + QString::number(i));
+    auto * terrainsFilter = new TerrainsFilterModel(this);
+    terrainsFilter->setSourceModel(modelsProvider.terrains());
+    m_ui->comboBoxTerrain->setModel(new TerrainsComboModel(terrainsFilter, this));
+    m_ui->comboBoxTerrain->setIconSize({24, 24});
+    for (int i = 0; i < m_ui->comboBoxTerrain->count(); ++i) {
+        auto terrain = m_ui->comboBoxTerrain->itemData(i, TerrainsModel::SourceObject).value<Core::LibraryTerrainConstPtr>();
+        if (terrain && terrain->id == "sod.terrain.grass") {
+            m_ui->comboBoxTerrain->setCurrentIndex(i);
+            break;
         }
     }
+    connect(m_ui->comboBoxTerrain, qOverload<int>(&QComboBox::currentIndexChanged), this, &EmulatorMainWidget::onTerrainChanged);
+    auto * comboModel = new MapObjectsComboModel(modelsProvider.mapObjects(), this);
+    auto * mapObjectsTree = new MapObjectsTreeModel(comboModel, this);
+    m_ui->comboBoxObjectPreset->setModel(mapObjectsTree);
+    m_ui->comboBoxObjectPreset->setIconSize({32, 24});
+    m_ui->comboBoxObjectPreset->expandAll();
+
+
     connect(m_ui->comboBoxObjectPreset, qOverload<int>(&QComboBox::currentIndexChanged), this, &EmulatorMainWidget::onObjectPresetChanged);
 
 
@@ -188,7 +189,8 @@ EmulatorMainWidget::EmulatorMainWidget(IGraphicsLibrary & graphicsLibrary,
     m_ui->comboBoxReplaySelect->setModel(m_replayManager.get());
     m_ui->comboBoxReplaySelect->setCurrentIndex(m_ui->comboBoxReplaySelect->count() - 1);
 
-    m_ui->comboBoxObjectPreset->setCurrentIndex(1);
+    m_ui->comboBoxObjectPreset->selectIndex(mapObjectsTree->index(0, 0, mapObjectsTree->index(1, 0, {})));
+
 
     setWindowTitle(tr("Battle emulator"));
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
@@ -302,8 +304,7 @@ void EmulatorMainWidget::makeManaRegen()
 
 void EmulatorMainWidget::onTerrainChanged()
 {
-    auto terrId = m_ui->comboBoxTerrain->currentData().toString();
-    auto terrain = m_gameDatabase.terrains()->find(terrId.toStdString());
+    auto terrain = m_ui->comboBoxTerrain->currentData(TerrainsModel::SourceObject).value<TerrainsModel::SrcTypePtr>();
     assert(terrain);
     m_adventureState->m_terrain = terrain;
     onAttDataChanged(true);
@@ -313,12 +314,14 @@ void EmulatorMainWidget::onTerrainChanged()
 void EmulatorMainWidget::onObjectPresetChanged()
 {
     m_adventureState->m_mapObject = nullptr;
-    auto mapId = m_ui->comboBoxObjectPreset->currentData().toString();
-    if (mapId.isEmpty())
+    auto mapObject = m_ui->comboBoxObjectPreset->currentData(MapObjectsModel::SourceObject).value<MapObjectsModel::SrcTypePtr>();
+    if (!mapObject) {
+        m_ui->comboBoxPositionsPreset->setCurrentIndex(0);
         return;
+    }
 
-    m_adventureState->m_mapObjectVariant = mapId.split(":").value(1).toInt();
-    m_adventureState->m_mapObject = m_gameDatabase.mapObjects()->find(mapId.split(":").value(0).toStdString());
+    m_adventureState->m_mapObjectVariant = m_ui->comboBoxObjectPreset->currentIndex();
+    m_adventureState->m_mapObject = mapObject;
 
     const int layoutIndex = static_cast<int>(m_adventureState->m_mapObject->fieldLayout);
     m_ui->comboBoxPositionsPreset->setCurrentIndex(layoutIndex);
@@ -405,6 +408,8 @@ void EmulatorMainWidget::applyCurrentObjectRewards(QString defenderName)
         }
         if (reward.unit.unit) {
             m_adventureState->m_att.squad.addWithMerge(reward.unit.unit, reward.unit.count);
+            m_guiAdventureArmyAtt->getSquad()->updateGuiState();
+            m_guiAdventureArmyAtt->getSquad()->emitChanges();
             auto name = m_modelsProvider.units()->find(reward.unit.unit)->getNameWithCount(reward.unit.count);
             rewardDescriptionTitles << name;
             auto iconId = reward.unit.unit->presentationParams.portrait;
@@ -523,7 +528,7 @@ int EmulatorMainWidget::execBattle(bool isReplay, bool isQuick)
         auto ai = battle.makeAI(params, *battleControl);
         limitStepCheck = ai->run(limitStepCheck);
         if (!limitStepCheck) {
-             QMessageBox::warning(this, tr("Error"), tr("AI reached step limit: that probably an error."));
+             GeneralPopupDialog::messageBox(tr("AI reached step limit: that probably an error."), this);
              return 0;
         }
         Logger(Logger::Info) << ai->getProfiling();

@@ -264,6 +264,45 @@ bool FactionsFilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& sou
     return faction->alignment != LibraryFaction::Alignment::Special;
 }
 
+QVariant TerrainsModel::data(const QModelIndex& index, int role) const
+{
+    if (role == Qt::DecorationRole || role == IconSmall) {
+        auto terrain = Base::data(index, GuiObject).value<GuiTerrainConstPtr>();
+        QPixmap img = terrain->getIcon();
+        return QVariant(img);
+    }
+    return Base::data(index, role);
+}
+
+TerrainsFilterModel::TerrainsFilterModel(QObject* parent)
+    : QSortFilterProxyModel(parent)
+{
+}
+
+bool TerrainsFilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
+{
+    QModelIndex index0 = sourceModel()->index(sourceRow, 0, sourceParent);
+    auto terrain = index0.data(TerrainsModel::SourceObject).value<TerrainsModel::SrcTypePtr>();
+    if (!terrain)
+        return false;
+
+    return !terrain->isObstacle;
+}
+
+QVariant MapObjectsModel::data(const QModelIndex& index, int role) const
+{
+    if (role == Qt::DecorationRole || role == IconSmall) {
+        auto mapObject = Base::data(index, GuiObject).value<GuiMapObjectConstPtr>();
+        QPixmap img = mapObject->getIcon();
+        return QVariant(img);
+    }
+    if (role == VaraintNames) {
+        auto mapObject = Base::data(index, GuiObject).value<GuiMapObjectConstPtr>();
+        return QVariant(mapObject->getVariantNames());
+    }
+    return Base::data(index, role);
+}
+
 LibraryModelsProvider::LibraryModelsProvider(IGameDatabase& gameDatabase,
                                              Sound::IMusicBox& musicBox,
                                              IGraphicsLibrary& graphicsLibrary,
@@ -276,6 +315,8 @@ LibraryModelsProvider::LibraryModelsProvider(IGameDatabase& gameDatabase,
     m_skills = new SkillsModel(musicBox, graphicsLibrary, this);
     m_spells = new SpellsModel(musicBox, graphicsLibrary, this);
     m_factions = new FactionsModel(musicBox, graphicsLibrary, this);
+    m_terrains = new TerrainsModel(musicBox, graphicsLibrary, this);
+    m_mapObjects = new MapObjectsModel(musicBox, graphicsLibrary, this);
     m_uiCommon = new UiCommonModel(musicBox, graphicsLibrary, this);
 
     for (auto * rec : gameDatabase.artifacts()->records())
@@ -290,6 +331,10 @@ LibraryModelsProvider::LibraryModelsProvider(IGameDatabase& gameDatabase,
         m_spells->addRecord(rec);
     for (auto * rec : gameDatabase.factions()->records())
         m_factions->addRecord(rec);
+    for (auto * rec : gameDatabase.terrains()->records())
+        m_terrains->addRecord(rec);
+    for (auto * rec : gameDatabase.mapObjects()->records())
+        m_mapObjects->addRecord(rec);
 
     QMap<QString, QPixmap> resourceIcons;
     for (auto * res : gameDatabase.resources()->records())  {
@@ -305,7 +350,7 @@ template class AbstractGuiWrapperListModel<GuiHero>;
 template class AbstractGuiWrapperListModel<GuiSkill>;
 template class AbstractGuiWrapperListModel<GuiSpell>;
 template class AbstractGuiWrapperListModel<GuiFaction>;
-
-
+template class AbstractGuiWrapperListModel<GuiTerrain>;
+template class AbstractGuiWrapperListModel<GuiMapObject>;
 
 }

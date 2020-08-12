@@ -217,6 +217,44 @@ public:
     virtual GuiFactionConstPtr find(Core::LibraryFactionConstPtr source) const = 0;
 };
 
+class GUIGAMEWRAPPERS_EXPORT GuiTerrain : public QObject, public AbstractGuiWrapper<GuiTerrain, Core::LibraryTerrain> {
+    Q_OBJECT
+    using Base = AbstractGuiWrapper<GuiTerrain, Core::LibraryTerrain>;
+public:
+    GuiTerrain(Sound::IMusicBox & musicBox, IGraphicsLibrary & graphicsLibrary, Core::LibraryTerrainConstPtr source);
+
+    QPixmap getIcon () const { return m_icon->get(); }
+
+private:
+    IAsyncPixmapPtr m_icon;
+};
+using GuiTerrainConstPtr = const GuiTerrain *;
+class GuiTerrainProvider {
+public:
+    virtual ~GuiTerrainProvider() = default;
+    virtual GuiTerrainConstPtr find(Core::LibraryTerrainConstPtr source) const = 0;
+};
+
+class GUIGAMEWRAPPERS_EXPORT GuiMapObject : public QObject, public AbstractGuiWrapper<GuiMapObject, Core::LibraryMapObject> {
+    Q_OBJECT
+    using Base = AbstractGuiWrapper<GuiMapObject, Core::LibraryMapObject>;
+public:
+    GuiMapObject(Sound::IMusicBox & musicBox, IGraphicsLibrary & graphicsLibrary, Core::LibraryMapObjectConstPtr source);
+
+    QPixmap getIcon () const { return m_icon->get(); }
+    const QStringList & getVariantNames() const { return m_variantNames;}
+
+private:
+    IAsyncPixmapPtr m_icon;
+    QStringList m_variantNames;
+};
+using GuiMapObjectConstPtr = const GuiMapObject *;
+class GuiMapObjectProvider {
+public:
+    virtual ~GuiMapObjectProvider() = default;
+    virtual GuiMapObjectConstPtr find(Core::LibraryMapObjectConstPtr source) const = 0;
+};
+
 class GUIGAMEWRAPPERS_EXPORT ResourceAmountHelper : public QObject
 {
     Q_OBJECT
