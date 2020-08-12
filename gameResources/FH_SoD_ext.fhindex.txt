@@ -49,7 +49,7 @@ translation	ru_RU	units
 	sod.unit.titan	+	Титана	Титанов	Титана
 	sod.unit.skeleton	+	Скелета	Скелетов	Скелета
 	sod.unit.skeletonWarrior	+	Скелета-Воина	Скелетов-Воинов	Скелета-Воина
-	sod.unit.walkingDead	+	Ходячих Мертвеца	Ходячих Мертвецев	Ходячего Мертвеца
+	sod.unit.walkingDead	+	Ходячих Мертвеца	Ходячих Мертвецов	Ходячего Мертвеца
 	sod.unit.zombieLord	+	Зомби	Зомби	Зомби
 	sod.unit.wight	+	Духа	Духов	Духа
 	sod.unit.wraith	+	Привидения	Привидений	Привидение
