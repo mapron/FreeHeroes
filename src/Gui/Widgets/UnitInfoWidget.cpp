@@ -417,7 +417,12 @@ QStringList UnitInfoWidget::abilitiesText(Core::LibraryUnitConstPtr params) cons
     if (a.reduceAttackerAttack != BonusRatio{1,1})
         parts << tr("Ignores %1 of attacker's attack").arg(toString(BonusRatio{1,1} - a.reduceAttackerAttack, false));
 
-
+    if (!a.extraDamage.isEmpty()) {
+        QStringList enemies;
+        for (auto enemy : a.extraDamage.enemies)
+            enemies << m_impl->modelsProvider->units()->find(enemy)->getName();
+        parts << tr("Extra damage (%1) against (%2)").arg(toString(a.extraDamage.damageBonus)).arg(enemies.join(", "));
+    }
 
     return parts;
 }

@@ -1010,6 +1010,10 @@ DamageResult BattleManager::damageRoll(const BonusRatio baseRoll,
     if (defender->hero)
         totalReduceFactor *= (BonusRatio{1,1} - defender->hero->adventure->estimated.defense);
 
+    auto & enemies = attacker->library->abilities.extraDamage.enemies;
+    if (std::find(enemies.cbegin(), enemies.cend(), defender->library) != enemies.cend())
+        totalBaseFactor   += attacker->library->abilities.extraDamage.damageBonus;
+
     DamageResult damageResult;
     damageResult.damageBaseRoll = std::max(1, baseRoll.roundDownInt());
 

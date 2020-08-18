@@ -15,8 +15,8 @@
 "sod.unit.zealot"              : {"abilities": {"noPenalty":["melee"]                                                                                      } } ,
 "sod.unit.cavalier"            : {"abilities": {"chargeAttack": true                                                                                       } } ,
 "sod.unit.champion"            : {"abilities": {"chargeAttack": true                                                                                       } } ,
-"sod.unit.angel"               : {"abilities": {"squadBonus":{"morale": 1}, "hate":["sod.unit.devil", "sod.unit.archDevil" ], "hateBonus":50, "giantLevel":2  } } ,
-"sod.unit.archangel"           : {"abilities": {"squadBonus":{"morale": 1}, "hate":["sod.unit.devil", "sod.unit.archDevil" ], "hateBonus":50, "giantLevel":2  }, "spells":{"TODO_RESURRECT":1} } ,
+"sod.unit.angel"               : {"abilities": {"squadBonus":{"morale": 1}, "extraDamage":{"enemies":["sod.unit.devil", "sod.unit.archDevil" ], "bonus":"50/100"}, "giantLevel":2  } } ,
+"sod.unit.archangel"           : {"abilities": {"squadBonus":{"morale": 1}, "extraDamage":{"enemies":["sod.unit.devil", "sod.unit.archDevil" ], "bonus":"50/100"}, "giantLevel":2  }, "spells":{"TODO_RESURRECT":1} } ,
 
 
 "sod.unit.centaur"             : {"abilities": {                                                                                                           } } ,
@@ -43,12 +43,12 @@
 "sod.unit.ironGolem"           : {"abilities": {"type":"nonLiving", "nonLivingType":"golem", "magicReduce":{"all": "25/100"}                               } } ,
 "sod.unit.mage"                : {"abilities": {"noPenalty":["melee","obstacle"], "squadBonus":{"manaCost": -2}                                             } },
 "sod.unit.archMage"            : {"abilities": {"noPenalty":["melee","obstacle"], "squadBonus":{"manaCost": -2}                                             } },
-"sod.unit.genie"               : {"abilities": { "hate":["sod.unit.efreet", "sod.unit.efreetSultan" ], "hateBonus":50                                    } },
-"sod.unit.masterGenie"         : {"abilities": { "hate":["sod.unit.efreet", "sod.unit.efreetSultan" ], "hateBonus":50                                    }, "spells":{"TODO_CASTS":1} },
+"sod.unit.genie"               : {"abilities": { "extraDamage":{"enemies": ["sod.unit.efreet", "sod.unit.efreetSultan" ], "bonus":"50/100"}         } },
+"sod.unit.masterGenie"         : {"abilities": { "extraDamage":{"enemies": ["sod.unit.efreet", "sod.unit.efreetSultan" ], "bonus":"50/100"}         }, "spells":{"TODO_CASTS":1} },
 "sod.unit.naga"                : {"abilities": {                                                                                                           } },
 "sod.unit.nagaQueen"           : {"abilities": {                                                                                                           } },
 "sod.unit.giant"               : {"abilities": {"immunes": {"tags": ["mind" ]  } , "giantLevel":3                                                                        } },
-"sod.unit.titan"               : {"abilities": {"immunes": {"tags": ["mind" ]  } , "noPenalty":["melee"],"hate":["sod.unit.blackDragon"], "hateBonus":50, "giantLevel":3                     } },
+"sod.unit.titan"               : {"abilities": {"immunes": {"tags": ["mind" ]  } , "noPenalty":["melee"], "extraDamage":{"enemies": ["sod.unit.blackDragon"], "bonus":"50/100"}, "giantLevel":3                     } },
 
 
 "sod.unit.skeleton"            : {"abilities": {"type":"nonLiving", "nonLivingType":"undead"                                                                                        } },
@@ -79,7 +79,7 @@
 "sod.unit.manticore"           : {"abilities": {                                                                                                           } },
 "sod.unit.scorpicore"          : {"abilities": {                                                                                                           } },
 "sod.unit.redDragon"           : {"abilities": {"splash":"dragon","splashFriendlyFire":true, "immunes": {"levels": [1,2,3]      }, "giantLevel":1                                            } },
-"sod.unit.blackDragon"         : {"abilities": {"splash":"dragon","splashFriendlyFire":true, "immunes": {"levels": [1,2,3,4,5]  }, "giantLevel":1,"hate":["sod.unit.titan"], "hateBonus":50 } },
+"sod.unit.blackDragon"         : {"abilities": {"splash":"dragon","splashFriendlyFire":true, "immunes": {"levels": [1,2,3,4,5]  }, "giantLevel":1, "extraDamage":{"enemies": ["sod.unit.titan"], "bonus":"50/100"} } },
 
 
 "sod.unit.imp"                 : {"abilities": {                                                                                                           } },
@@ -92,10 +92,10 @@
 "sod.unit.hornedDemon"         : {"abilities": {                                                                                                           } },
 "sod.unit.pitFiend"            : {"abilities": {                                                                                                           } },
 "sod.unit.pitLord"             : {"abilities": {                                                                                                           }, "spells":{"TODO_CAST_DEMONS":1} },
-"sod.unit.efreet"              : {"abilities": {"hate":["sod.unit.genie", "sod.unit.masterGenie" ], "hateBonus":50, "magicReduce":{"fire": "50/100"}       } },
-"sod.unit.efreetSultan"        : {"abilities": {"hate":["sod.unit.genie", "sod.unit.masterGenie" ], "hateBonus":50, "immunes": {"schools": ["fire"]    }      }, "spells":{"TODO_CAST_FIRESHIELD":1} },
-"sod.unit.devil"               : {"abilities": {"hate":["sod.unit.angel", "sod.unit.archangel" ], "hateBonus":50,"opponentBonus":{"luck": -1},"giantLevel":2    } },
-"sod.unit.archDevil"           : {"abilities": {"hate":["sod.unit.angel", "sod.unit.archangel" ], "hateBonus":50,"opponentBonus":{"luck": -2},"giantLevel":2    } },
+"sod.unit.efreet"              : {"abilities": { "extraDamage":{"enemies": ["sod.unit.genie", "sod.unit.masterGenie" ], "bonus": "50/100"}, "magicReduce":{"fire": "50/100"}       } },
+"sod.unit.efreetSultan"        : {"abilities": { "extraDamage":{"enemies": ["sod.unit.genie", "sod.unit.masterGenie" ], "bonus": "50/100"}, "immunes": {"schools": ["fire"]    }      }, "spells":{"TODO_CAST_FIRESHIELD":1} },
+"sod.unit.devil"               : {"abilities": { "extraDamage":{"enemies": ["sod.unit.angel", "sod.unit.archangel"   ], "bonus": "50/100"}, "opponentBonus":{"luck": -1}, "giantLevel":2    } },
+"sod.unit.archDevil"           : {"abilities": { "extraDamage":{"enemies": ["sod.unit.angel", "sod.unit.archangel"   ], "bonus": "50/100"}, "opponentBonus":{"luck": -2}, "giantLevel":2    } },
 
 
 "sod.unit.gnoll"               : {"abilities": {                                                                                                           } },
@@ -138,8 +138,8 @@
 "sod.unit.iceElemental"        : {"abilities": {"type":"nonLiving", "nonLivingType":"elemental", "immunes": {"tags": ["ice"]    },"spellDoubleDamage":["$inf", "$fireball", "$armag"],"attackWithElement":"ice"            } },
 "sod.unit.fireElemental"       : {"abilities": {"type":"nonLiving", "nonLivingType":"elemental", "immunes": {"schools": ["fire"]    },"attackWithElement":"fire"                                                              } },
 "sod.unit.energyElemental"     : {"abilities": {"type":"nonLiving", "nonLivingType":"elemental", "immunes": {"schools": ["fire"]    },"attackWithElement":"fire"                                                              } },
-"sod.unit.earthElemental"      : {"abilities": {"type":"nonLiving", "nonLivingType":"elemental",  "immunes": {"tags": ["lightning"],"onlySpells":["sod.spell.armageddon"]    },"attackWithElement":"fire"                                                      } },
-"sod.unit.magmaElemental"      : {"abilities": {"type":"nonLiving", "nonLivingType":"elemental",  "immunes": {"tags": ["lightning"],"onlySpells":["sod.spell.armageddon"]    },"attackWithElement":"fire"                                                      }, "spells":{"TODO_DEF_CAST":1} },
+"sod.unit.earthElemental"      : {"abilities": {"type":"nonLiving", "nonLivingType":"elemental",  "immunes": {"tags": ["lightning"],"onlySpells":["sod.spell.armageddon"]    },"attackWithElement":"earth"                                                      } },
+"sod.unit.magmaElemental"      : {"abilities": {"type":"nonLiving", "nonLivingType":"elemental",  "immunes": {"tags": ["lightning"],"onlySpells":["sod.spell.armageddon"]    },"attackWithElement":"earth"                                                      }, "spells":{"TODO_DEF_CAST":1} },
 "sod.unit.psychicElemental"    : {"abilities": {"type":"nonLiving", "nonLivingType":"elemental", "splash":"neighbours"                                                                                      } },
 "sod.unit.magicElemental"      : {"abilities": {"type":"nonLiving", "nonLivingType":"elemental", "splash":"neighbours"                                                                                      } },
 "sod.unit.firebird"            : {"abilities": {"splash":"dragon","splashFriendlyFire":true, "giantLevel":1 ,"magicReduce":{"fire": "50/100"}                                                                           } },

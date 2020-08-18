@@ -313,6 +313,12 @@ RTTR_REGISTRATION
         .property("chances"          , &LibraryUnit::Abilities::StatBonus::chances)(ref)
         ;
 
+    registration::class_<LibraryUnit::Abilities::ExtraDamage>("LibraryUnitAbilitiesExtraDamage")
+        .constructor<>()
+        .property("enemies"           , &LibraryUnit::Abilities::ExtraDamage::enemies)(ref)
+        .property("bonus"             , &LibraryUnit::Abilities::ExtraDamage::damageBonus)
+        ;
+
     registration::class_<LibraryUnit::Abilities>("LibraryUnitAbilities")
         .constructor<>()
         .property("type"               , &LibraryUnit::Abilities::type)
@@ -327,6 +333,9 @@ RTTR_REGISTRATION
         .property("noPenalty"          , &LibraryUnit::Abilities::disabledPenalties)(ref)
         .property("squadBonus"         , &LibraryUnit::Abilities::squadBonus)(ref)
         .property("opponentBonus"      , &LibraryUnit::Abilities::opponentBonus)(ref)
+
+        .property("extraDamage"        , &LibraryUnit::Abilities::extraDamage)(ref)
+        .property("attackWithElement"  , &LibraryUnit::Abilities::attackWithElement)
 
         .property("reduceTargetDefense"             , &LibraryUnit::Abilities::reduceTargetDefense)
         .property("reduceAttackerAttack"            , &LibraryUnit::Abilities::reduceAttackerAttack)

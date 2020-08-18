@@ -25,9 +25,16 @@ struct LibraryUnit {
         enum class SplashAttack { None, Dragon, Neighbours, Sides, Ranged };
         enum class AttackWithElement { None, Fire, Earth, Air, Ice, Mind, Magic, Undead };
 
-        struct Hate {
-            std::set<std::string> enemyIds;
-            int bonusPercent = 0;
+        struct ExtraDamage {
+            std::vector<LibraryUnitConstPtr> enemies;
+            BonusRatio damageBonus {0, 1};
+            bool isEmpty() const noexcept { return enemies.empty() || damageBonus == BonusRatio{0,1};}
+        };
+        struct StatBonus {
+            int morale = 0;
+            int luck = 0;
+            int manaCost = 0;
+            RngChanceParams chances;
         };
 
         UnitType type = UnitType::Living;
@@ -47,27 +54,23 @@ struct LibraryUnit {
         int maxRetaliations = 1;
         bool chargeAttack  = false;
 
-        struct StatBonus {
-            int morale = 0;
-            int luck = 0;
-            int manaCost = 0;
-            RngChanceParams chances;
-        };
+
         StatBonus squadBonus;
         StatBonus opponentBonus;
 
-        Hate hate;
+        ExtraDamage extraDamage;
+        AttackWithElement attackWithElement = AttackWithElement::None;
 
-        bool bindOnAttack = false;
+        //bool bindOnAttack = false;
 
-        int giantLevel = 0; // used for Slayer spell.
+        //int giantLevel = 0; // used for Slayer spell.
 
-        int doubleDamageChance = 0;
+        //int doubleDamageChance = 0;
 
         int minimalMoraleLevel = -3;
         int minimalLuckLevel = -3;
 
-        int manaStealPercent = 0;
+        //int manaStealPercent = 0;
 
         BonusRatio reduceTargetDefense  {1,1};
         BonusRatio reduceAttackerAttack {1,1};
@@ -88,7 +91,6 @@ struct LibraryUnit {
 
         ResourceAmount weekIncome;
 
-        AttackWithElement attackWithElement = AttackWithElement::None;
 
     };
     struct Traits {
