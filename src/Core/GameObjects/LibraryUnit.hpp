@@ -59,7 +59,8 @@ struct LibraryUnit {
         StatBonus opponentBonus;
 
         ExtraDamage extraDamage;
-        AttackWithElement attackWithElement = AttackWithElement::None;
+        AttackWithElement attackWithElement    = AttackWithElement::None;
+        AttackWithElement vulnerableAgainstElement = AttackWithElement::None;
 
         //bool bindOnAttack = false;
 
@@ -78,7 +79,7 @@ struct LibraryUnit {
         std::vector<SpellCastParams> casts;
 
         SpellFilter vulnerable;
-        BonusRatio vulnerableRatio = {1,1};
+        BonusRatio vulnerableBonus = {1,1}; // 1/1 => +100% of base damage.
 
         SpellFilter immunes;
         bool immuneBreakable = true;

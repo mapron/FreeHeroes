@@ -39,11 +39,12 @@ signals:
     void deleteStack(Core::AdventureStackConstPtr stack);
 
 private:
-    QStringList abilitiesText(Core::LibraryUnitConstPtr params) const;
+    QStringList abilitiesText(Core::LibraryUnitConstPtr unit) const;
     QStringList abilitiesTextExtra(Core::AdventureStackConstPtr adventure) const;
     QStringList retaliationsDescription(int countMax) const;
     QStringList resistInfo(const Core::MagicReduce & reduce, const Core::BonusRatio & successRate) const;
     QStringList immuneInfo(const Core::SpellFilter & immunes) const;
+    QStringList vulnerabilityInfo(Core::LibraryUnitConstPtr unit) const;
 
 private:
 

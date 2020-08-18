@@ -364,7 +364,7 @@
             "if type ~= CType.Living and type ~= CType.NonLiving then result=false end",
             "if type == NLType.BattleMachine then result=false end"
         ],
-        "tags": ["lightning"]
+        "tags": ["lightning", "airElem"]
     },
     "sod.spell.implosion" : {
         "calc": [
@@ -395,7 +395,7 @@
         "filter" : [
             "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
         ],
-        "tags": ["lightning"]
+        "tags": ["lightning", "airElem"]
     },
     "sod.spell.frostRing" : {
         "indistinctive": true,
@@ -422,7 +422,8 @@
         "rangeByLevel": ["r1","r1","r1","r1"],
         "filter" : [
             "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
-        ]
+        ],
+        "tags": ["fireElem"]
     },
     "sod.spell.inferno" : {
         "indistinctive": true,
@@ -435,7 +436,8 @@
         "rangeByLevel": ["r2","r2","r2","r2"],
         "filter" : [
             "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
-        ]
+        ],
+        "tags": ["fireElem"]
     },
     "sod.spell.meteorShower" : {
         "indistinctive": true,
@@ -486,7 +488,8 @@
         "rangeByLevel": ["all","all","all","all"],
         "filter" : [
             "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
-        ]
+        ],
+        "tags": ["fireElem", "airElem"]
     },
     "sod.spell.titanBolt" : {
         "calc": [
@@ -497,7 +500,7 @@
             "if type ~= CType.Living and type ~= CType.NonLiving then result=false end",
             "if type == NLType.BattleMachine then result=false end"
         ],
-        "tags": ["lightning"]
+        "tags": ["lightning", "airElem"]
     },
 
 

@@ -22,7 +22,7 @@ struct LibrarySpell {
     enum class Qualify     { None, Good, Bad };
     enum class TargetClass { Units, Land, Immediate, None };
     enum class Range       { Single, R1, R1NoCenter, R2, R3, Obstacle2, Obstacle3, Chain4, Chain5, All };
-    enum class Tag         { Mind, Vision, Ice, Lightning };
+    enum class Tag         { Mind, Vision, Ice, Lightning, AirElem, FireElem };
 
     struct Presentation {
         std::string iconBonus;

@@ -317,14 +317,12 @@ UnitInfoWidget::UnitInfoWidget(Core::BattleStackConstPtr battle,
     abilsText << retaliationsDescription(battle ? battle->current.maxRetaliations : adventure->library->abilities.maxRetaliations);
     auto resistInfo = this->resistInfo(battle ? battle->current.magicReduce : adventure->estimated.magicReduce,
                                          battle ? battle->current.magicOppSuccessChance : adventure->estimated.magicOppSuccessChance);
-    auto immuneInfo = this->immuneInfo(battle ? battle->current.immunes : adventure->estimated.immunes);
+    resistInfo += this->immuneInfo(battle ? battle->current.immunes : adventure->estimated.immunes);
+    resistInfo += this->vulnerabilityInfo(adventure->library);
+
     auto abilsTextStr = abilsText.join(". ");
-    if (!resistInfo.isEmpty()) {
+    if (!resistInfo.isEmpty())
         abilsTextStr += "<br><br>" + resistInfo.join(". ");
-    }
-    if (!immuneInfo.isEmpty()) {
-        abilsTextStr += "<br><br>" + immuneInfo.join(". ");
-    }
 
     QFrame * descLabelFrame = new QFrame(this);
     descLabelFrame->setFrameStyle(QFrame::Panel);
@@ -365,11 +363,11 @@ UnitInfoWidget::UnitInfoWidget(Core::BattleStackConstPtr battle,
 }
 
 
-QStringList UnitInfoWidget::abilitiesText(Core::LibraryUnitConstPtr params) const
+QStringList UnitInfoWidget::abilitiesText(Core::LibraryUnitConstPtr unit) const
 {
     QStringList parts;
-    const auto &a = params->abilities;
-    const auto &t = params->traits;
+    const auto &a = unit->abilities;
+    const auto &t = unit->traits;
 
     if (a.type == Core::UnitType::Living) parts << tr("Living");
     if (a.nonLivingType == Core::UnitNonLivingType::Undead) parts << tr("Undead");
@@ -491,6 +489,10 @@ QStringList UnitInfoWidget::immuneInfo(const Core::SpellFilter& immunes) const
             parts << tr("Immune to mind control spells");
         else if (tag == Core::LibrarySpell::Tag::Vision)
             parts << tr("Blind, immune to spells targeting vision");
+        else if (tag == Core::LibrarySpell::Tag::AirElem)
+            parts << tr("Immune to Lightnings and Armageddon");
+        else if (tag == Core::LibrarySpell::Tag::FireElem)
+            parts << tr("Immune to pure Fire spells");
     }
     for (auto school : immunes.schools) {
         if (school == Core::MagicSchool::Air)
@@ -509,6 +511,49 @@ QStringList UnitInfoWidget::immuneInfo(const Core::SpellFilter& immunes) const
         parts << tr("Immune to '%1' spell").arg(name);
     }
 
+
+    return parts;
+}
+
+QStringList UnitInfoWidget::vulnerabilityInfo(Core::LibraryUnitConstPtr unit) const
+{
+    QStringList parts;
+    const auto & vulnerable = unit->abilities.vulnerable;
+    for (auto tag : vulnerable.tags) {
+        if (tag == Core::LibrarySpell::Tag::Ice)
+            parts << tr("Vulnerable to Ice");
+        else if (tag == Core::LibrarySpell::Tag::Lightning)
+            parts << tr("Vulnerable to Lightnings");
+        else if (tag == Core::LibrarySpell::Tag::Mind)
+            parts << tr("Vulnerable to mind control spells");
+        else if (tag == Core::LibrarySpell::Tag::Vision)
+            parts << tr("Vulnerable to spells targeting vision");
+        else if (tag == Core::LibrarySpell::Tag::AirElem)
+            parts << tr("Vulnerable to Lightnings and Armageddon");
+        else if (tag == Core::LibrarySpell::Tag::FireElem)
+            parts << tr("Vulnerable to pure Fire spells");
+    }
+    for (auto spell : vulnerable.onlySpells) {
+        auto name = m_impl->modelsProvider->spells()->find(spell)->getName();
+        parts << tr("Vulnerable to '%1' spell").arg(name);
+    }
+    using AWE = Core::LibraryUnit::Abilities::AttackWithElement;
+    switch (unit->abilities.vulnerableAgainstElement) {
+        case AWE::Air  : parts << tr("Vulnerable to air charges");   break;
+        case AWE::Earth: parts << tr("Vulnerable to earth charges"); break;
+        case AWE::Fire : parts << tr("Vulnerable to fire charges");  break;
+        case AWE::Ice  : parts << tr("Vulnerable to ice charges");   break;
+        default:
+        break;
+    }
+    switch (unit->abilities.attackWithElement) {
+        case AWE::Air  : parts << tr("Attack charged with air");   break;
+        case AWE::Earth: parts << tr("Attack charged with earth"); break;
+        case AWE::Fire : parts << tr("Attack charged with fire");  break;
+        case AWE::Ice  : parts << tr("Attack charged with ice");   break;
+        default:
+        break;
+    }
 
     return parts;
 }

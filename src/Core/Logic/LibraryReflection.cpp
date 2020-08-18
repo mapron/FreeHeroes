@@ -334,8 +334,9 @@ RTTR_REGISTRATION
         .property("squadBonus"         , &LibraryUnit::Abilities::squadBonus)(ref)
         .property("opponentBonus"      , &LibraryUnit::Abilities::opponentBonus)(ref)
 
-        .property("extraDamage"        , &LibraryUnit::Abilities::extraDamage)(ref)
-        .property("attackWithElement"  , &LibraryUnit::Abilities::attackWithElement)
+        .property("extraDamage"                     , &LibraryUnit::Abilities::extraDamage)(ref)
+        .property("attackWithElement"               , &LibraryUnit::Abilities::attackWithElement)
+        .property("vulnerableAgainstElement"        , &LibraryUnit::Abilities::vulnerableAgainstElement)
 
         .property("reduceTargetDefense"             , &LibraryUnit::Abilities::reduceTargetDefense)
         .property("reduceAttackerAttack"            , &LibraryUnit::Abilities::reduceAttackerAttack)
@@ -347,7 +348,7 @@ RTTR_REGISTRATION
 
         .property("casts"              , &LibraryUnit::Abilities::casts)(ref)
         .property("vulnerable"         , &LibraryUnit::Abilities::vulnerable)(ref)
-        .property("vulnerableRatio"    , &LibraryUnit::Abilities::vulnerableRatio)
+        .property("vulnerableBonus"    , &LibraryUnit::Abilities::vulnerableBonus)
         .property("immunes"            , &LibraryUnit::Abilities::immunes)(ref)
         .property("immuneBreakable"    , &LibraryUnit::Abilities::immuneBreakable)
 
@@ -591,7 +592,9 @@ RTTR_REGISTRATION
         value("mind"        ,  LibrarySpell::Tag::Mind),
         value("vision"      ,  LibrarySpell::Tag::Vision),
         value("ice"         ,  LibrarySpell::Tag::Ice),
-        value("lightning"   ,  LibrarySpell::Tag::Lightning)
+        value("lightning"   ,  LibrarySpell::Tag::Lightning),
+        value("airElem"     ,  LibrarySpell::Tag::AirElem),
+        value("fireElem"    ,  LibrarySpell::Tag::FireElem)
         );
     registration::class_<LibrarySpell::Presentation>("LibrarySpellPres")
         .constructor<>()

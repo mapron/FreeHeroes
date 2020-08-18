@@ -307,7 +307,7 @@ BattlePlanCast BattleManager::findPlanCast(const BattlePlanCastParams & castPara
         return result;
 
     result.m_power.spell = castParams.m_spell;
-    BonusRatio spellIncreaseFactor {0,1};
+    BonusRatio spellHeroIncreaseFactor {0,1};
     LibrarySpell::Range range = LibrarySpell::Range::Single;
     if (castParams.m_isHeroCast) {
         auto hero = currentHero();
@@ -319,7 +319,7 @@ BattlePlanCast BattleManager::findPlanCast(const BattlePlanCastParams & castPara
             return result;
         }
         int schoolLevel = hero->adventure->estimated.schoolLevels.getLevelForSpell(castParams.m_spell->school);
-        spellIncreaseFactor = hero->adventure->estimated.magicIncrease.getIncreaseForSpell(castParams.m_spell->school);
+        spellHeroIncreaseFactor = hero->adventure->estimated.magicIncrease.getIncreaseForSpell(castParams.m_spell->school);
 
         if (schoolLevel < (int)castParams.m_spell->rangeByLevel.size())
             range = castParams.m_spell->rangeByLevel[schoolLevel];
@@ -430,7 +430,10 @@ BattlePlanCast BattleManager::findPlanCast(const BattlePlanCastParams & castPara
             const int baseSpellDamage = std::max(1, GeneralEstimation(m_rules).spellBaseDamage(level, result.m_power, static_cast<int>(affectedIndex)));
             BonusRatio spellDamage(baseSpellDamage, 1);
             const BonusRatio spellDamageInit = spellDamage;
-            spellDamage += spellDamage * spellIncreaseFactor;
+            spellDamage += spellDamageInit * spellHeroIncreaseFactor;
+            if (   !targetStack->library->abilities.vulnerable.isDefault()
+                 && targetStack->library->abilities.vulnerable.contains(castParams.m_spell))
+                spellDamage += spellDamageInit * targetStack->library->abilities.vulnerableBonus;
 
             auto reduceFactor = targetStack->current.magicReduce.getReduceForSpell(castParams.m_spell->school);
             spellDamage *= reduceFactor;
@@ -1013,6 +1016,11 @@ DamageResult BattleManager::damageRoll(const BonusRatio baseRoll,
     auto & enemies = attacker->library->abilities.extraDamage.enemies;
     if (std::find(enemies.cbegin(), enemies.cend(), defender->library) != enemies.cend())
         totalBaseFactor   += attacker->library->abilities.extraDamage.damageBonus;
+
+    const auto & awe = attacker->library->abilities.attackWithElement;
+    if (awe != LibraryUnit::Abilities::AttackWithElement::None
+        && awe == defender->library->abilities.vulnerableAgainstElement)
+        totalBaseFactor += defender->library->abilities.vulnerableBonus;
 
     DamageResult damageResult;
     damageResult.damageBaseRoll = std::max(1, baseRoll.roundDownInt());

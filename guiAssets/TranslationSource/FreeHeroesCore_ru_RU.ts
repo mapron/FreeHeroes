@@ -1409,249 +1409,334 @@
         <translation>Вы действительно хотите распустить отряд?</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="374"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="372"/>
         <source>Living</source>
         <translation>Живое существо</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="375"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="373"/>
         <source>Undead</source>
         <translation>Нежить</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="376"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="374"/>
         <source>Golem</source>
         <translation>Голем</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="377"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="375"/>
         <source>Gargoyle</source>
         <translation>Горгулья</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="378"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="376"/>
         <source>Elemental</source>
         <translation>Элементаль</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="379"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="377"/>
         <source>Battle machine</source>
         <translation>Боевая машина</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="381"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="379"/>
         <source>Flies</source>
         <translation>Летает</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="382"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="380"/>
         <source>Large creature</source>
         <translation>Большое</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="383"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="381"/>
         <source>Shoots</source>
         <translation>Стреляет</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="384"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="382"/>
         <source>Teleportation</source>
         <translation>Телепортация</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="385"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="383"/>
         <source>Double attack</source>
         <translation>Двойная атака</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="386"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="384"/>
         <source>Target no retaliation</source>
         <translation>Цель не отвечает на атаку</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="387"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="385"/>
         <source>Attacks walls</source>
         <translation>Атака крепостных стен</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="388"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="386"/>
         <source>Return after attack</source>
         <translation>Возможность возврата после атаки</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="390"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="388"/>
         <source>Always positive luck</source>
         <translation>Всегда положительная удача</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="391"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="389"/>
         <source>Always positive morale</source>
         <translation>Всегда положительный боевой дух</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="394"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="392"/>
         <source>No distance penalty</source>
         <translation>Нет штрафа на расстоянии</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="396"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="394"/>
         <source>No melee penalty</source>
         <translation>Нет штрафа в ближнем бою</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="398"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="396"/>
         <source>No penalty through walls</source>
         <translation>Нет штрафа при стельбе через стены</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="401"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="399"/>
         <source>+%1 to army luck</source>
         <translation>+%1 к удаче в армии</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="403"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="401"/>
         <source>+%1 to army morale</source>
         <translation>+%1 к боевому духу армии</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="405"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="403"/>
         <source>Reduces spell cost %1 mana</source>
         <translation>Понижает стоимость заклинаний %1 маны</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="407"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="405"/>
         <source>Increases luck chance %1</source>
         <translation>Увеличивает шанс срабатывания удачи %1</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="409"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="407"/>
         <source>%1 to enemy luck</source>
         <translation>%1 к удаче противника</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="411"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="409"/>
         <source>%1 to enemy morale</source>
         <translation>%1 к боевому духу противника</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="413"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="411"/>
         <source>Increases enemy spell cost +%1 mana</source>
         <translation>Увеличивает стоимость заклинаний противнику %1 маны</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="416"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="414"/>
         <source>Ignores %1 of target defense</source>
         <translation>Игнорирует %1 защиты цели</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="418"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="416"/>
         <source>Ignores %1 of attacker&apos;s attack</source>
         <translation>Игнорирует %1 атаки нападающего</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="424"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="422"/>
         <source>Extra damage (%1) against (%2)</source>
         <translation>Дополнительный урон (%1) против (%2)</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="434"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="432"/>
         <source>Regenerates health</source>
         <translation>Восстанавливает здоровье</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="441"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="439"/>
         <source>Retaliate %1 attacks</source>
         <translation>Отвечает на %1 атаки</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="442"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="440"/>
         <source>Retaliate all attacks</source>
         <translation>Отвечает на все атаки</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="452"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="450"/>
         <source>Damage from any magic:</source>
         <translation>Урон от любой магии:</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="454"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="452"/>
         <source>Damage from air:</source>
         <translation>Урон от Воздуха:</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="455"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="453"/>
         <source>Damage from earth:</source>
         <translation>Урон от Земли:</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="456"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="454"/>
         <source>Damage from fire:</source>
         <translation>Урон от Огня:</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="457"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="455"/>
         <source>Damage from water:</source>
         <translation>Урон от Воды (Льда):</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="461"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="459"/>
         <source>Chance to resist spell:</source>
         <translation>Шанс отразить заклинание:</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="471"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="469"/>
         <source>Immune to magic levels %1</source>
         <translation>Иммунитет к магии уровня %1</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="474"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="472"/>
         <source>Immune to all magic</source>
         <translation>Иммунитет ко всей магии</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="487"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="485"/>
         <source>Immune to Ice</source>
         <translation>Иммунитет ко Льду</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="489"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="487"/>
         <source>Immune to Lightnings</source>
         <translation>Иммунитет к Молниям</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="491"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="489"/>
         <source>Immune to mind control spells</source>
         <translation>Иммунитет к заклинаням контроля разума</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="493"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="491"/>
         <source>Blind, immune to spells targeting vision</source>
         <translation>Слепое существо, неуязвимо к заклинаниям зрения</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="497"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="493"/>
+        <source>Immune to Lightnings and Armageddon</source>
+        <translation>Иммунитет к молниям и Армагеддону</translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="532"/>
+        <source>Vulnerable to Lightnings and Armageddon</source>
+        <translation>Уязвим к молниям и Армагеддону</translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="495"/>
+        <source>Immune to pure Fire spells</source>
+        <translation>Иммунитет к заклинаниям чистого Огня</translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="499"/>
         <source>Immune to Air magic</source>
         <translation>Иммунитет к магии Воздуха</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="499"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="501"/>
         <source>Immune to Earth magic</source>
         <translation>Иммунитет к магии Земли</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="501"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="503"/>
         <source>Immune to Fire magic</source>
         <translation>Иммунитет к магии Огня</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="503"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="505"/>
         <source>Immune to Water magic</source>
         <translation>Иммунитет к магии Воды</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="509"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="511"/>
         <source>Immune to &apos;%1&apos; spell</source>
         <translation>Иммун. к закл. &apos;%1&apos;</translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="524"/>
+        <source>Vulnerable to Ice</source>
+        <translation>Уязвим ко Льду</translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="526"/>
+        <source>Vulnerable to Lightnings</source>
+        <translation>Уязвим к Молниям</translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="528"/>
+        <source>Vulnerable to mind control spells</source>
+        <translation>Уязвим к контролю разума</translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="530"/>
+        <source>Vulnerable to spells targeting vision</source>
+        <translation>Уязвим к слепоте</translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="534"/>
+        <source>Vulnerable to pure Fire spells</source>
+        <translation>Уязвим к заклинаниям чистого Огня</translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="538"/>
+        <source>Vulnerable to &apos;%1&apos; spell</source>
+        <translation>Уязвим к заклинанию &apos;%1&apos;</translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="542"/>
+        <source>Vulnerable to air charges</source>
+        <translation>Уязвим к зарядам Воздуха</translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="543"/>
+        <source>Vulnerable to earth charges</source>
+        <translation>Уязвим к зарядам Земли</translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="544"/>
+        <source>Vulnerable to fire charges</source>
+        <translation>Уязвим к зарядам Огня</translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="545"/>
+        <source>Vulnerable to ice charges</source>
+        <translation>Уязвим к зарядам Льда</translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="550"/>
+        <source>Attack charged with air</source>
+        <translation>Атака заряжена Воздухом</translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="551"/>
+        <source>Attack charged with earth</source>
+        <translation>Атака заряжена Землёй</translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="552"/>
+        <source>Attack charged with fire</source>
+        <translation>Атака заряжена Огнём</translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="553"/>
+        <source>Attack charged with ice</source>
+        <translation>Атака заряжена Льдом</translation>
     </message>
 </context>
 <context>
