@@ -388,13 +388,6 @@ QStringList UnitInfoWidget::abilitiesText(Core::LibraryUnitConstPtr unit) const
     if (a.minimalLuckLevel   > 0) parts << tr("Always positive luck");
     if (a.minimalMoraleLevel > 0) parts << tr("Always positive morale");
 
-    if (!a.hasPenalty(Core::LibraryUnit::Abilities::DamagePenalty::Distance))
-        parts << tr("No distance penalty");
-    if (!a.hasPenalty(Core::LibraryUnit::Abilities::DamagePenalty::Melee))
-        parts << tr("No melee penalty");
-    if (!a.hasPenalty(Core::LibraryUnit::Abilities::DamagePenalty::Obstacle))
-        parts << tr("No penalty through walls");
-
     if (a.squadBonus.luck)
         parts << tr("+%1 to army luck").arg(a.squadBonus.luck);
     if (a.squadBonus.morale)
@@ -430,6 +423,17 @@ QStringList UnitInfoWidget::abilitiesTextExtra(AdventureStackConstPtr adventure)
     QStringList parts;
     if (adventure->estimated.regenerate)
         parts << tr("Regenerates health");
+    auto & noPenalty = adventure->estimated.disabledPenalties;
+    if (adventure->library->traits.rangeAttack) {
+        if (noPenalty.contains(RangeAttackPenalty::Distance))
+            parts << tr("No distance penalty");
+        if (noPenalty.contains(RangeAttackPenalty::Melee))
+            parts << tr("No melee penalty");
+        if (noPenalty.contains(RangeAttackPenalty::Obstacle))
+            parts << tr("No penalty through walls");
+        if (noPenalty.contains(RangeAttackPenalty::Blocked))
+            parts << tr("Range attack cannot be blocked");
+    }
     return parts;
 }
 

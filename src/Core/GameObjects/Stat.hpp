@@ -217,6 +217,8 @@ struct DamageEstimate {
    DamageResult maxRoll;
 };
 
+enum class RangeAttackPenalty { Melee, Distance, Obstacle, Blocked };
+
 enum class MagicSchool { Any, Air, Earth, Fire, Water };
 
 struct MagicSchoolLevels {

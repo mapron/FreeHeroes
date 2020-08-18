@@ -458,6 +458,8 @@ void AdventureEstimation::calculateHeroStats(AdventureHero& hero)
                 spellbook.insert(art->scrollSpell);
             hero.estimated.immunes.makeUnion(art->protectSpells);
             hero.estimated.forbidSpells.makeUnion(art->forbidSpells);
+            for (auto penalty : art->disabledPenalties)
+                hero.estimated.disabledPenalties.insert(penalty);
         }
 
         hero.estimated.moraleDetails.artifacts = hero.estimated.rngParams.morale - lastRng.morale;
@@ -703,6 +705,8 @@ void calculateUnitStats(LibraryGameRulesConstPtr rules, AdventureStack& unit, co
         cur.immunesWithoutBreakable    = cur.immunes;
 
     cur.regenerate = unit.library->abilities.regenerate;
+    for (auto penalty : unit.library->abilities.disabledPenalties)
+        cur.disabledPenalties.insert(penalty);
 
     if (!hero.isValid())
         return;
@@ -731,6 +735,9 @@ void calculateUnitStats(LibraryGameRulesConstPtr rules, AdventureStack& unit, co
 
     cur.immunes.makeUnion(heroEstimate.immunes);
     cur.immunesWithoutBreakable.makeUnion(heroEstimate.immunes);
+
+    for (auto penalty : heroEstimate.disabledPenalties)
+        cur.disabledPenalties.insert(penalty);
 
     if (hero.library->spec->type == LibraryHeroSpec::Type::SpecialSpeed) {
         cur.primary.battleSpeed += 2; // no army speed bonus intentional.

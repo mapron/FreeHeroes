@@ -1481,252 +1481,257 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="392"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="429"/>
         <source>No distance penalty</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="394"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="431"/>
         <source>No melee penalty</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="396"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="433"/>
         <source>No penalty through walls</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="399"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="392"/>
         <source>+%1 to army luck</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="401"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="394"/>
         <source>+%1 to army morale</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="403"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="396"/>
         <source>Reduces spell cost %1 mana</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="405"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="398"/>
         <source>Increases luck chance %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="407"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="400"/>
         <source>%1 to enemy luck</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="409"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="402"/>
         <source>%1 to enemy morale</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="411"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="404"/>
         <source>Increases enemy spell cost +%1 mana</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="414"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="407"/>
         <source>Ignores %1 of target defense</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="416"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="409"/>
         <source>Ignores %1 of attacker&apos;s attack</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="422"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="415"/>
         <source>Extra damage (%1) against (%2)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="432"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="425"/>
         <source>Regenerates health</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="439"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="435"/>
+        <source>Range attack cannot be blocked</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="443"/>
         <source>Retaliate %1 attacks</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="440"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="444"/>
         <source>Retaliate all attacks</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="450"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="454"/>
         <source>Damage from any magic:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="452"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="456"/>
         <source>Damage from air:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="453"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="457"/>
         <source>Damage from earth:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="454"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="458"/>
         <source>Damage from fire:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="455"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="459"/>
         <source>Damage from water:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="459"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="463"/>
         <source>Chance to resist spell:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="469"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="473"/>
         <source>Immune to magic levels %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="472"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="476"/>
         <source>Immune to all magic</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="485"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="489"/>
         <source>Immune to Ice</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="487"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="491"/>
         <source>Immune to Lightnings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="489"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="493"/>
         <source>Immune to mind control spells</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="491"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="495"/>
         <source>Blind, immune to spells targeting vision</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="493"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="497"/>
         <source>Immune to Lightnings and Armageddon</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="532"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="536"/>
         <source>Vulnerable to Lightnings and Armageddon</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="495"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="499"/>
         <source>Immune to pure Fire spells</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="499"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="503"/>
         <source>Immune to Air magic</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="501"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="505"/>
         <source>Immune to Earth magic</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="503"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="507"/>
         <source>Immune to Fire magic</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="505"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="509"/>
         <source>Immune to Water magic</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="511"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="515"/>
         <source>Immune to &apos;%1&apos; spell</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="524"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="528"/>
         <source>Vulnerable to Ice</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="526"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="530"/>
         <source>Vulnerable to Lightnings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="528"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="532"/>
         <source>Vulnerable to mind control spells</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="530"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="534"/>
         <source>Vulnerable to spells targeting vision</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="534"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="538"/>
         <source>Vulnerable to pure Fire spells</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="538"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="542"/>
         <source>Vulnerable to &apos;%1&apos; spell</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="542"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="546"/>
         <source>Vulnerable to air charges</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="543"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="547"/>
         <source>Vulnerable to earth charges</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="544"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="548"/>
         <source>Vulnerable to fire charges</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="545"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="549"/>
         <source>Vulnerable to ice charges</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="550"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="554"/>
         <source>Attack charged with air</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="551"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="555"/>
         <source>Attack charged with earth</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="552"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="556"/>
         <source>Attack charged with fire</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="553"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="557"/>
         <source>Attack charged with ice</source>
         <translation type="unfinished"></translation>
     </message>

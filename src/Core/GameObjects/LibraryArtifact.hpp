@@ -175,11 +175,13 @@ struct LibraryArtifact {
     std::string  untranslatedName;
 
     int value = 0;
-    LibrarySpellConstPtr  scrollSpell = nullptr; // @todo: maybe move it to bonus?
+    LibrarySpellConstPtr  scrollSpell = nullptr;
     SpellFilter provideSpells;
     SpellFilter protectSpells;
     SpellFilter forbidSpells;
     SpellCastParamsList spellCasts;
+    std::vector<RangeAttackPenalty> disabledPenalties;
+
     std::vector<LibraryArtifactConstPtr> parts;
     LibraryUnitConstPtr battleMachineUnit = nullptr;
 

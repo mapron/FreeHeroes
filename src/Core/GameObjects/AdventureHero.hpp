@@ -207,6 +207,7 @@ struct AdventureHero {
         int unitBattleSpeedAbs = 0;             //  artifacts, spec on speed
         int unitLifeAbs = 0;                    //  artifacts
         BonusRatio unitLife = {0, 1};           //  artifacts
+        std::set<RangeAttackPenalty> disabledPenalties; // artifacts
 
         BonusRatio spReduceOpp     = {0, 1};      // skills + artifacts
         BonusRatio manaIncrease    = {0, 1};      // skills

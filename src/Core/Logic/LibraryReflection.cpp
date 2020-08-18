@@ -287,11 +287,12 @@ RTTR_REGISTRATION
         value("sides"     ,  LibraryUnit::Abilities::SplashAttack::Sides),
         value("ranged"    ,  LibraryUnit::Abilities::SplashAttack::Ranged)
         );
-    registration::enumeration<LibraryUnit::Abilities::DamagePenalty>("DamagePenalty")
+    registration::enumeration<RangeAttackPenalty>("RangeAttackPenalty")
         (
-        value("melee"   ,  LibraryUnit::Abilities::DamagePenalty::Melee),
-        value("distance",  LibraryUnit::Abilities::DamagePenalty::Distance),
-        value("obstacle",  LibraryUnit::Abilities::DamagePenalty::Obstacle)
+        value("melee"   , RangeAttackPenalty::Melee),
+        value("distance", RangeAttackPenalty::Distance),
+        value("obstacle", RangeAttackPenalty::Obstacle),
+        value("blocked" , RangeAttackPenalty::Blocked)
         );
     registration::enumeration<LibraryUnit::Abilities::AttackWithElement>("AttackWithElement")
         (
@@ -461,6 +462,7 @@ RTTR_REGISTRATION
         .property("forbidSpells"    , &LibraryArtifact::forbidSpells)(ref)
         .property("spellCasts"      , &LibraryArtifact::spellCasts)(ref)
         .property("parts"           , &LibraryArtifact::parts)(ref)
+        .property("noPenalty"       , &LibraryArtifact::disabledPenalties)(ref)
         .property("bmUnit"          , &LibraryArtifact::battleMachineUnit)(metadata("optional", true))
         .property("pres"            , &LibraryArtifact::presentationParams)(ref)
         ;

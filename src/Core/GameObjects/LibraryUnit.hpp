@@ -21,7 +21,6 @@ enum class UnitNonLivingType { None, Undead, Golem, Gargoyle, Elemental, BattleM
 
 struct LibraryUnit {
     struct Abilities {
-        enum class DamagePenalty { Melee, Distance, Obstacle };
         enum class SplashAttack { None, Dragon, Neighbours, Sides, Ranged };
         enum class AttackWithElement { None, Fire, Earth, Air, Ice, Mind, Magic, Undead };
 
@@ -41,8 +40,7 @@ struct LibraryUnit {
         UnitNonLivingType nonLivingType = UnitNonLivingType::None;
 
 
-        std::vector<DamagePenalty> disabledPenalties;
-        [[nodiscard]] bool hasPenalty(DamagePenalty penalty) const noexcept{  return std::find(disabledPenalties.cbegin(), disabledPenalties.cend(), penalty) == disabledPenalties.cend(); }
+        std::vector<RangeAttackPenalty> disabledPenalties;
 
         SplashAttack splashType = SplashAttack::None;
         bool splashFriendlyFire = false;

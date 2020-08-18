@@ -938,9 +938,10 @@ int64_t BattleManager::rangedDenom(BattleStackConstPtr attacker, BattlePosition 
 
 int64_t BattleManager::rangedDenom(BattleStackConstPtr attacker, int distance, bool wallOnTheWay) const
 {
-    const bool hasDistancePenalty = attacker->library->abilities.hasPenalty(LibraryUnit::Abilities::DamagePenalty::Distance);
+    const bool hasDistancePenalty = !attacker->adventure->estimated.disabledPenalties.contains(RangeAttackPenalty::Distance);
+    const bool hasWallPenalty     = !attacker->adventure->estimated.disabledPenalties.contains(RangeAttackPenalty::Obstacle);
     const int distanceDen = (hasDistancePenalty && distance > rangedLimit) ? 2 : 1;
-    const int wallsDen = wallOnTheWay ? 2 : 1;
+    const int wallsDen = hasWallPenalty && wallOnTheWay ? 2 : 1;
     return distanceDen * wallsDen;
 }
 
@@ -950,7 +951,7 @@ BonusRatio BattleManager::meleeAttackFactor(BattleStackConstPtr attacker, Battle
     if (!attacker->library->traits.rangeAttack)
         return BonusRatio(1, 1);
 
-    const bool hasMeleePenalty = attacker->library->abilities.hasPenalty(LibraryUnit::Abilities::DamagePenalty::Melee);
+    const bool hasMeleePenalty = !attacker->adventure->estimated.disabledPenalties.contains(RangeAttackPenalty::Melee);
 
     return BonusRatio(1, hasMeleePenalty ? 2 : 1);
 }
@@ -1381,10 +1382,13 @@ void BattleManager::recalcStack(BattleStackMutablePtr stack)
 {
     BattleEstimation(m_rules).calculateUnitStats(*stack);
 
-    for (BattleStackConstPtr neighbour : findNeighboursOf(stack)) {
-        if (neighbour->side != stack->side) {
-            stack->current.rangeAttackIsBlocked = true;
-            break;
+    const bool canBeBlocked = !stack->adventure->estimated.disabledPenalties.contains(RangeAttackPenalty::Blocked);
+    if (canBeBlocked) {
+        for (BattleStackConstPtr neighbour : findNeighboursOf(stack)) {
+            if (neighbour->side != stack->side) {
+                stack->current.rangeAttackIsBlocked = true;
+                break;
+            }
         }
     }
 }
