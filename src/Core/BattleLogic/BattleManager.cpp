@@ -101,7 +101,7 @@ IBattleView::AvailableActions BattleManager::getAvailableActions() const
         return result;
     auto currentStack  = m_current;
     auto hero = currentHero();
-    result.heroCast = hero && !hero->castedInRound && hero->adventure->hasSpellBook;
+    result.heroCast = hero && !hero->castedInRound && hero->adventure->hasSpellBook && !hero->estimated.availableSpells.empty();
     result.move         = currentStack->current.canMove;        // @todo: battle machine, arrow tower
     result.meleeAttack  = currentStack->current.canAttackMelee; // @todo: battle machine
     result.rangeAttack  = currentStack->current.canAttackRanged     && !currentStack->current.rangeAttackIsBlocked;
@@ -1187,8 +1187,9 @@ void BattleManager::makePositions(const BattleFieldPreset & fieldPreset)
 
 void BattleManager::initialParams()
 {
-    BattleEstimation(m_rules).calculateArmyOnBattleStart(m_def, m_att);
-    BattleEstimation(m_rules).calculateArmyOnBattleStart(m_att, m_def);
+    BattleEstimation(m_rules).calculateEnvironmentOnBattleStart(m_env, m_att, m_def);
+    BattleEstimation(m_rules).calculateArmyOnBattleStart(m_def, m_att, m_env);
+    BattleEstimation(m_rules).calculateArmyOnBattleStart(m_att, m_def, m_env);
 
     for (auto * stack : m_all) {
         stack->pos.setLarge(stack->adventure->library->traits.large);

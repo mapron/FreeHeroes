@@ -147,9 +147,9 @@
 "sod.artifact.misc.sphereFire"        : {"class":"major"   , "value": 6000 , "untranslatedName": "Fire Sphere"             ,"slot":"misc"  , "calc": ["h.magicIncrease.fire:add(50, 100)" ]},
 "sod.artifact.misc.sphereWater"       : {"class":"major"   , "value": 6000 , "untranslatedName": "Water Sphere"            ,"slot":"misc"  , "calc": ["h.magicIncrease.water:add(50, 100)"]},
 
-"hota.artifact.cape.noMagic12"        : {"class":"major"   , "value": 7500 , "untranslatedName": "Cape No Magic 1-2"        ,"slot":"cape"  , "castDisable":"2-"},
-"sod.artifact.cape.noMagic3plus"      : {"class":"major"   , "value": 8000 , "untranslatedName": "Cape No Magic 3+"         ,"slot":"misc"  , "castDisable":"3+"},
-"sod.artifact.misc.noMagic"           : {"class":"relic"   , "value":20000 , "untranslatedName": "Charm No Magic"           ,"slot":"misc"  , "castDisable":"all"},
+"hota.artifact.cape.noMagic12"        : {"class":"major"   , "value": 7500 , "untranslatedName": "Cape No Magic 1-2"        ,"slot":"cape"  , "forbidSpells":{"levels": [1,2], "teachableOnly": true }},
+"sod.artifact.cape.noMagic3plus"      : {"class":"major"   , "value": 8000 , "untranslatedName": "Cape No Magic 3+"         ,"slot":"cape"  , "forbidSpells":{"levels": [3,4,5], "teachableOnly": true }},
+"sod.artifact.misc.noMagic"           : {"class":"relic"   , "value":20000 , "untranslatedName": "Charm No Magic"           ,"slot":"misc"  , "forbidSpells":{"levels": [1,2,3,4,5], "teachableOnly": false }},
 
 "sod.artifact.misc.noDispell"         : {"class":"major"   , "value": 7500 , "untranslatedName": "Charm No Dispell"         , "slot":"misc"  , "special": "noDispell"},
 "sod.artifact.misc.noImmune"          : {"class":"relic"   , "value":25000 , "untranslatedName": "Immune Breaker"           , "slot":"misc"  , "special": "noImmune" },

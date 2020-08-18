@@ -202,6 +202,7 @@ struct AdventureHero {
         MagicReduce   magicReduce;                  // this currently never used by database. created for symmetry..
         BonusRatio    magicResistChance = {0, 1};  //  skills + artifacts
         SpellFilter   immunes;                      // protector artifacts
+        SpellFilter   forbidSpells;                 // artifacts
 
         int unitBattleSpeedAbs = 0;             //  artifacts, spec on speed
         int unitLifeAbs = 0;                    //  artifacts

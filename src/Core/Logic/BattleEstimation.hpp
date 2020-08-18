@@ -8,6 +8,7 @@
 #include "BattleStack.hpp"
 #include "BattleHero.hpp"
 #include "BattleArmy.hpp"
+#include "BattleEnvironment.hpp"
 
 #include "CoreLogicExport.hpp"
 
@@ -22,7 +23,9 @@ public:
 
     BattleEstimation(LibraryGameRulesConstPtr rules) : m_rules(rules) {}
 
-    void calculateArmyOnBattleStart(BattleArmy & army, const BattleArmy & opponent);
+    void calculateEnvironmentOnBattleStart(BattleEnvironment & battleEnvironment, const BattleArmy & att, const BattleArmy & def);
+
+    void calculateArmyOnBattleStart(BattleArmy & army, const BattleArmy & opponent, const BattleEnvironment & battleEnvironment);
     void calculateArmyOnRoundStart(BattleArmy & army);
 
     void calculateUnitStats(BattleStack& unit);
@@ -33,7 +36,7 @@ public:
 private:
     void bindTypes(sol::state & lua);
     void calculateUnitStatsStartBattle(BattleStack& unit, const BattleSquad& squad, const BattleArmy& opponent);
-    void calculateHeroStatsStartBattle(BattleHero& hero, const BattleSquad& squad, const BattleArmy& opponent);
+    void calculateHeroStatsStartBattle(BattleHero& hero, const BattleSquad& squad, const BattleArmy& opponent, const BattleEnvironment & battleEnvironment);
 
 private:
     LibraryGameRulesConstPtr m_rules;

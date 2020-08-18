@@ -457,6 +457,7 @@ void AdventureEstimation::calculateHeroStats(AdventureHero& hero)
             if (art->scrollSpell)
                 spellbook.insert(art->scrollSpell);
             hero.estimated.immunes.makeUnion(art->protectSpells);
+            hero.estimated.forbidSpells.makeUnion(art->forbidSpells);
         }
 
         hero.estimated.moraleDetails.artifacts = hero.estimated.rngParams.morale - lastRng.morale;

@@ -13,6 +13,7 @@
 
 #include "BattleField.hpp"
 #include "BattleArmy.hpp"
+#include "BattleEnvironment.hpp"
 #include "GeneralEstimation.hpp"
 
 namespace FreeHeroes::Core {
@@ -138,6 +139,7 @@ private:
 private:
     BattleArmy & m_att;
     BattleArmy & m_def;
+    BattleEnvironment m_env;
     std::vector<BattlePosition> m_obstacles;
     const BattleFieldGeometry m_field;
     std::vector<BattleStackMutablePtr> m_all;

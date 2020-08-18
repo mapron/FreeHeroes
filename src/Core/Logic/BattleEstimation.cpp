@@ -187,7 +187,7 @@ bool BattleEstimation::checkAttackElementPossibility(const BattleStack& possible
     return true;
 }
 
-void BattleEstimation::calculateHeroStatsStartBattle(BattleHero& hero, const BattleSquad & squad, const BattleArmy & opponent)
+void BattleEstimation::calculateHeroStatsStartBattle(BattleHero& hero, const BattleSquad & squad, const BattleArmy & opponent, const BattleEnvironment & battleEnvironment)
 {
     if (!hero.isValid())
         return;
@@ -198,15 +198,18 @@ void BattleEstimation::calculateHeroStatsStartBattle(BattleHero& hero, const Bat
         auto & spellPower = hero.estimated.primary.magic.spellPower;
         spellPower = BonusRatio::calcSubDecrease(spellPower, opponent.battleHero.adventure->estimated.spReduceOpp, 1);
     }
-    // @todo: animag garrisons, antimag sphere, etc.
-    hero.estimated.availableSpells = hero.adventure->estimated.availableSpells;
+    // @todo: animag garrisons? cursed grounds?
     hero.estimated.squadRngParams  = squad.adventure->estimated.squadBonus.rngParams;
-    for (auto & spell : hero.estimated.availableSpells) {
-        if (!spell.manaCost)
+    for (auto spell : hero.adventure->estimated.availableSpells) {
+        if (!battleEnvironment.forbidSpells.isDefault() && battleEnvironment.forbidSpells.contains(spell.spell))
             continue;
-        spell.manaCost += squad.adventure->estimated.squadBonus.manaCost;
-        spell.manaCost += opponent.squad->adventure->estimated.oppBonus.manaCost;
-        spell.manaCost = std::max(0, spell.manaCost);
+
+        if (spell.manaCost) {
+            spell.manaCost += squad.adventure->estimated.squadBonus.manaCost;
+            spell.manaCost += opponent.squad->adventure->estimated.oppBonus.manaCost;
+            spell.manaCost = std::max(0, spell.manaCost);
+        }
+        hero.estimated.availableSpells.push_back(spell);
     }
 }
 
@@ -259,10 +262,20 @@ void BattleEstimation::calculateUnitStatsStartBattle(BattleStack& unit, const Ba
 }
 
 
-void BattleEstimation::calculateArmyOnBattleStart(BattleArmy& army, const BattleArmy& opponent)
+void BattleEstimation::calculateEnvironmentOnBattleStart(BattleEnvironment & battleEnvironment, const BattleArmy& att, const BattleArmy& def)
+{
+    if (att.battleHero.isValid()) {
+        battleEnvironment.forbidSpells.makeUnion( att.battleHero.adventure->estimated.forbidSpells );
+    }
+    if (def.battleHero.isValid()) {
+        battleEnvironment.forbidSpells.makeUnion( def.battleHero.adventure->estimated.forbidSpells );
+    }
+}
+
+void BattleEstimation::calculateArmyOnBattleStart(BattleArmy& army, const BattleArmy& opponent, const BattleEnvironment & battleEnvironment)
 {
     if (army.battleHero.isValid()) {
-        calculateHeroStatsStartBattle(army.battleHero, *army.squad, opponent);
+        calculateHeroStatsStartBattle(army.battleHero, *army.squad, opponent, battleEnvironment);
     }
     for (auto & stack : army.squad->stacks) {
         calculateUnitStatsStartBattle(stack, *army.squad, opponent);
