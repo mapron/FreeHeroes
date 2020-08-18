@@ -7,6 +7,7 @@
 
 #include "DependencyInjector.hpp"
 #include "UiCommonModel.hpp"
+#include "FormatUtils.hpp"
 
 // Core
 #include "AdventureSquad.hpp"
@@ -37,12 +38,7 @@ namespace {
     }
 
     QString toString(const Core::BonusRatio & bonus, bool plus = true, int digits = 0) {
-        const double value = double(bonus.num() * 100) / bonus.denom();
-        QString str = QString("%1%").arg(value, 0, 'f', digits);
-        if (plus && value > 0.) {
-            str = "+" + str;
-        }
-        return str;
+        return FormatUtils::formatBonus(bonus, plus, digits);
     }
 
 }

@@ -19,6 +19,7 @@
 #include "LibraryTerrain.hpp"
 #include "LibraryResource.hpp"
 #include "LibraryMapObject.hpp"
+#include "LibraryGameRules.hpp"
 
 #include "StringUtils.hpp"
 
@@ -106,6 +107,12 @@ bool deserialize(LibraryIdResolver & idResolver, SkillHeroItem & obj, const json
     deserializeFromJson(idResolver, obj, jsonObj);
     return true;
 }
+bool deserialize(LibraryIdResolver & idResolver, LibraryGameRules& obj, const json& jsonObj)
+{
+    deserializeFromJson(idResolver, obj, jsonObj);
+    return true;
+}
+
 bool serialize(const SkillHeroItem& obj, json& jsonObj)
 {
     jsonObj = serializeToJson(obj);
@@ -294,4 +301,5 @@ const IJsonTransform * getJsonTransform<LibraryFactionHeroClass::SkillWeights>()
     static const ClassWeightsTransform transform;
     return &transform;
 }
+
 }

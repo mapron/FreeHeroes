@@ -85,5 +85,15 @@ QString FormatUtils::formatLargeInt(int64_t value) {
     return QString("%1%2").arg(value).arg(suffix);
 }
 
+QString FormatUtils::formatBonus(const Core::BonusRatio& bonus, bool plus, int digits)
+{
+   const double value = double(bonus.num() * 100) / bonus.denom();
+   QString str = QString("%1%").arg(value, 0, 'f', digits);
+   if (plus && value > 0.) {
+       str = "+" + str;
+   }
+   return str;
+}
+
 
 }

@@ -13,6 +13,7 @@
 #include "BattleFieldPathFinder.hpp"
 #include "LibraryHeroSpec.hpp"
 #include "LibrarySpell.hpp"
+#include "LibraryGameRules.hpp"
 #include "BattleEstimation.hpp"
 
 #include "Logger.hpp"
@@ -67,7 +68,8 @@ BattleManager::~BattleManager()
 
 BattleManager::BattleManager(BattleArmy & attArmy, BattleArmy & defArmy,
                              const BattleFieldPreset & fieldPreset,
-                             const std::shared_ptr<IRandomGenerator> & randomGenerator)
+                             const std::shared_ptr<IRandomGenerator> & randomGenerator,
+                             LibraryGameRulesConstPtr rules)
     : m_att(attArmy)
     , m_def(defArmy)
     , m_obstacles(fieldPreset.obstacles)
@@ -75,6 +77,7 @@ BattleManager::BattleManager(BattleArmy & attArmy, BattleArmy & defArmy,
     , m_roundIndex(0)
     , m_notifiers(new BattleNotifyEach)
     , m_randomGenerator(randomGenerator)
+    , m_rules(rules)
 {
     makePositions(fieldPreset);
 
@@ -259,7 +262,7 @@ BattlePlanMove BattleManager::findPlanMove(const BattlePlanMoveParams & movePara
                 if (!stack->library->abilities.splashFriendlyFire && targetCandidate->side == stack->side)
                     continue;
 
-                if (!BattleEstimation().checkAttackElementPossibility(*targetCandidate, stack->library->abilities.splashElement))
+                if (!BattleEstimation(m_rules).checkAttackElementPossibility(*targetCandidate, stack->library->abilities.splashElement))
                     continue;
 
                 splashAffected.insert(targetCandidate);
@@ -359,7 +362,7 @@ BattlePlanCast BattleManager::findPlanCast(const BattlePlanCastParams & castPara
         if (!targetStack)
             return result;
 
-        if (!BattleEstimation().checkSpellTarget(*targetStack, castParams.m_spell))
+        if (!BattleEstimation(m_rules).checkSpellTarget(*targetStack, castParams.m_spell))
             return result;
 
         size_t limit = range == LibrarySpell::Range::Chain4 ? 4 : 5;
@@ -374,7 +377,7 @@ BattlePlanCast BattleManager::findPlanCast(const BattlePlanCastParams & castPara
 
             currentPos = *nextPossible.begin(); // @todo: check weird things like "goto opposite side first";
             auto stack = takeNextAlive(currentPos);
-            if (!BattleEstimation().checkSpellTarget(*stack, castParams.m_spell))
+            if (!BattleEstimation(m_rules).checkSpellTarget(*stack, castParams.m_spell))
                 continue;
 
             affectedStackCandidates.push_back(stack);
@@ -406,8 +409,9 @@ BattlePlanCast BattleManager::findPlanCast(const BattlePlanCastParams & castPara
                 if (currentSide == targetStack->side)
                     continue;
             }
-            if (!BattleEstimation().checkSpellTarget(*targetStack, castParams.m_spell))
+            if (!BattleEstimation(m_rules).checkSpellTarget(*targetStack, castParams.m_spell))
                 continue;
+
             affectedStackCandidates.push_back(targetStack);
         }
     }
@@ -423,7 +427,7 @@ BattlePlanCast BattleManager::findPlanCast(const BattlePlanCastParams & castPara
         target.magicSuccessChance *= targetStack->current.magicOppSuccessChance;
         if (castParams.m_spell->type == LibrarySpell::Type::Offensive) {
             const int level = targetStack->library->level / 10;
-            const int baseSpellDamage = std::max(1, GeneralEstimation().spellBaseDamage(level, result.m_power, static_cast<int>(affectedIndex)));
+            const int baseSpellDamage = std::max(1, GeneralEstimation(m_rules).spellBaseDamage(level, result.m_power, static_cast<int>(affectedIndex)));
             BonusRatio spellDamage(baseSpellDamage, 1);
             const BonusRatio spellDamageInit = spellDamage;
             spellDamage += spellDamage * spellIncreaseFactor;
@@ -567,7 +571,7 @@ bool BattleManager::doMoveAttack(BattlePlanMoveParams moveParams, BattlePlanAtta
 
     if (current->count > 0 && !current->roundState.hadHighMorale) {
         const int morale = current->current.rngParams.morale;
-        if (morale > 0 && checkRngEffect(morale)) {
+        if (morale > 0 && checkRngEffect(m_current->current.moraleChance)) {
             current->roundState.hadHighMorale = true;
             current->roundState.finishedTurn = false;
             m_notifiers->onStackUnderEffect(current, IBattleNotify::Effect::GoodMorale);
@@ -732,7 +736,11 @@ BattleHeroMutablePtr BattleManager::getHeroMutable(BattleStack::Side side)
 void BattleManager::makeMelee(BattleStackMutablePtr attacker, BattleStackMutablePtr defender, const std::vector<BattleStackConstPtr> & sideTargets, bool isRetaliation)
 {
     const LuckRoll luckRoll = makeLuckRoll(attacker);
-    const DamageResult damage = damageRoll(attacker, attacker->count, defender, GeneralEstimation::DamageRollMode::Random, true, 1, luckRoll);
+    const BonusRatio baseRoll = attacker->roundState.baseRoll == -1
+                              ? GeneralEstimation(m_rules).calculatePhysicalBase(attacker->current.primary.dmg, attacker->count, GeneralEstimation::DamageRollMode::Random, *m_randomGenerator)
+                              : BonusRatio(attacker->roundState.baseRoll, 1) * BonusRatio(attacker->count, attacker->roundState.baseRollCount); // if count changed after last roll, scale it.
+
+    const DamageResult damage = damageRoll(baseRoll, attacker, defender, true, 1, luckRoll);
     attacker->roundState.baseRoll = damage.damageBaseRoll;
     attacker->roundState.baseRollCount = attacker->count;
 
@@ -741,7 +749,8 @@ void BattleManager::makeMelee(BattleStackMutablePtr attacker, BattleStackMutable
     for (auto sideTarget : sideTargets) {
         if (!sideTarget->isAlive())
             continue;
-        const DamageResult damage = damageRoll(attacker, attacker->count, sideTarget, GeneralEstimation::DamageRollMode::Random, true, 1, luckRoll);
+
+        const DamageResult damage = damageRoll(baseRoll, attacker, sideTarget, true, 1, LuckRoll::None);
         affected.extra.push_back({sideTarget, damage});
     }
     m_notifiers->beforeAttackMelee(attacker, affected, isRetaliation);
@@ -760,11 +769,15 @@ void BattleManager::makeMelee(BattleStackMutablePtr attacker, BattleStackMutable
 void BattleManager::makeRanged(BattleStackMutablePtr attacker, BattlePosition target, BattleStackMutablePtr defender, const std::vector<BattleStackConstPtr> & sideTargets, int64_t rangeDenom)
 {
     const LuckRoll luckRoll = makeLuckRoll(attacker);
-    const DamageResult damage = defender ? damageRoll(attacker, attacker->count, defender, GeneralEstimation::DamageRollMode::Random, false, rangeDenom, luckRoll) : DamageResult{};
-    if (defender) {
-        attacker->roundState.baseRoll = damage.damageBaseRoll;
-        attacker->roundState.baseRollCount = attacker->count;
-    }
+    const BonusRatio baseRoll = attacker->roundState.baseRoll == -1
+                              ? GeneralEstimation(m_rules).calculatePhysicalBase(attacker->current.primary.dmg, attacker->count, GeneralEstimation::DamageRollMode::Random, *m_randomGenerator)
+                              : BonusRatio(attacker->roundState.baseRoll, 1) * BonusRatio(attacker->count, attacker->roundState.baseRollCount); // if count changed after last roll, scale it.
+
+    const DamageResult damage = defender ? damageRoll(baseRoll, attacker, defender, false, rangeDenom, luckRoll) : DamageResult{};
+
+    attacker->roundState.baseRoll = std::max(1, baseRoll.roundDownInt());
+    attacker->roundState.baseRollCount = attacker->count;
+
 
     IBattleNotify::AffectedPhysical affected;
     if (defender)
@@ -776,12 +789,9 @@ void BattleManager::makeRanged(BattleStackMutablePtr attacker, BattlePosition ta
     for (auto sideTarget : sideTargets) {
         if (!sideTarget->isAlive())
             continue;
-        const DamageResult damageSide = damageRoll(attacker, attacker->count, sideTarget, GeneralEstimation::DamageRollMode::Random, false, rangeDenom, luckRoll);
+
+        const DamageResult damageSide = damageRoll(baseRoll, attacker, sideTarget, false, rangeDenom, LuckRoll::None);
         affected.extra.push_back({sideTarget, damageSide});
-        if (attacker->roundState.baseRoll == -1) {
-            attacker->roundState.baseRoll = damageSide.damageBaseRoll;
-            attacker->roundState.baseRollCount = attacker->count;
-        }
     }
     m_notifiers->beforeAttackRanged(attacker, affected);
     if (defender)
@@ -849,11 +859,15 @@ DamageEstimate BattleManager::estimateDamage(BattleStackConstPtr attacker,
 
     const bool isMelee = mode == BattlePlanMove::Attack::Melee;
 
+    const BonusRatio baseRollMin =  GeneralEstimation(m_rules).calculatePhysicalBase(attacker->current.primary.dmg, attacker->count, GeneralEstimation::DamageRollMode::Min, *m_randomGenerator);
+    const BonusRatio baseRollAvg =  GeneralEstimation(m_rules).calculatePhysicalBase(attacker->current.primary.dmg, attacker->count, GeneralEstimation::DamageRollMode::Avg, *m_randomGenerator);
+    const BonusRatio baseRollMax =  GeneralEstimation(m_rules).calculatePhysicalBase(attacker->current.primary.dmg, attacker->count, GeneralEstimation::DamageRollMode::Max, *m_randomGenerator);
+
     return {
         true,
-        damageRoll(attacker, attacker->count, defender, GeneralEstimation::DamageRollMode::Min, rangedDenom, isMelee),
-        damageRoll(attacker, attacker->count, defender, GeneralEstimation::DamageRollMode::Avg, rangedDenom, isMelee),
-        damageRoll(attacker, attacker->count, defender, GeneralEstimation::DamageRollMode::Max, rangedDenom, isMelee)
+        damageRoll(baseRollMin, attacker, defender, rangedDenom, isMelee),
+        damageRoll(baseRollAvg, attacker, defender, rangedDenom, isMelee),
+        damageRoll(baseRollMax, attacker, defender, rangedDenom, isMelee)
     };
 }
 
@@ -875,11 +889,16 @@ DamageEstimate BattleManager::estimateRetaliationDamage(BattleStackConstPtr atta
     if (!canRetaliate(attacker, defender))
         return {};
 
+    const BonusRatio baseRollMin =  GeneralEstimation(m_rules).calculatePhysicalBase(defender->current.primary.dmg, defender->count - mainEstimate.lowRoll.loss.deaths, GeneralEstimation::DamageRollMode::Min, *m_randomGenerator);
+    const BonusRatio baseRollAvg =  GeneralEstimation(m_rules).calculatePhysicalBase(defender->current.primary.dmg, defender->count - mainEstimate.avgRoll.loss.deaths, GeneralEstimation::DamageRollMode::Avg, *m_randomGenerator);
+    const BonusRatio baseRollMax =  GeneralEstimation(m_rules).calculatePhysicalBase(defender->current.primary.dmg, defender->count - mainEstimate.maxRoll.loss.deaths, GeneralEstimation::DamageRollMode::Max, *m_randomGenerator);
+
+
     return {
         true,
-        damageRoll(defender, defender->count - mainEstimate.lowRoll.loss.deaths, attacker, GeneralEstimation::DamageRollMode::Min, 1, true),
-        damageRoll(defender, defender->count - mainEstimate.avgRoll.loss.deaths, attacker, GeneralEstimation::DamageRollMode::Avg, 1, true),
-        damageRoll(defender, defender->count - mainEstimate.maxRoll.loss.deaths, attacker, GeneralEstimation::DamageRollMode::Max, 1, true)
+        damageRoll(baseRollMin, defender, attacker, 1, true),
+        damageRoll(baseRollAvg, defender, attacker, 1, true),
+        damageRoll(baseRollMax, defender, attacker, 1, true)
     };
 }
 
@@ -933,18 +952,13 @@ BonusRatio BattleManager::meleeAttackFactor(BattleStackConstPtr attacker, Battle
     return BonusRatio(1, hasMeleePenalty ? 2 : 1);
 }
 
-DamageResult BattleManager::damageRoll(BattleStackConstPtr attacker,
-                                       int attackerCount,
+DamageResult BattleManager::damageRoll(const BonusRatio baseRoll,
+                                       BattleStackConstPtr attacker,
                                        BattleStackConstPtr defender,
-                                       GeneralEstimation::DamageRollMode mode,
                                        bool melee,
                                        int64_t rangedDenom,
                                        LuckRoll luckFactor) const
 {
-
-    const BonusRatio baseRoll = attacker->roundState.baseRoll == -1 || mode != GeneralEstimation::DamageRollMode::Random
-                              ? GeneralEstimation().calculatePhysicalBase(attacker->current.primary.dmg, attackerCount, mode, *m_randomGenerator)
-                              : BonusRatio(attacker->roundState.baseRoll, 1) * BonusRatio(attackerCount, attacker->roundState.baseRollCount); // if count changed after last roll, scale it.
     BonusRatio totalBaseFactor      {0,1}; // use to base = base + base * factor
     BonusRatio totalReduceFactor    {1,1}; // use to baseIncreased = baseIncreased * factor
     int attack = attacker->current.primary.ad.attack;
@@ -956,13 +970,23 @@ DamageResult BattleManager::damageRoll(BattleStackConstPtr attacker,
         attack  += attacker->current.adRanged.attack;
         defense += defender->current.adRanged.defense;
     }
+    attack  = (defender->library->abilities.reduceAttackerAttack * attack ).roundDownInt();
+    defense = (attacker->library->abilities.reduceTargetDefense  * defense).roundDownInt();
 
-    auto [apCalcBase, apCalcReduce] = GeneralEstimation().calculateAttackPower(attack, defense);
+    BonusRatio apCalcBase   {0,1};
+    BonusRatio apCalcReduce {0,1};
+    const int attackPower = attack - defense;
+    if (attackPower > 0) {
+        const int effectiveAttackPower = std::clamp(attackPower, 0, m_rules->physicalConst.maxEffectiveAttack);
+        apCalcBase = m_rules->physicalConst.attackValue * effectiveAttackPower;
+    } else if (attackPower < 0) {
+        const int effectiveDefensePower = std::clamp(-attackPower, 0, m_rules->physicalConst.maxEffectiveDefense);
+        apCalcReduce = m_rules->physicalConst.defenseValue * effectiveDefensePower;
+    }
 
     totalBaseFactor   += apCalcBase;
     totalReduceFactor *= (BonusRatio{1,1} - apCalcReduce);
 
-    // @todo: for several targets, extra damage will be only for one of them!
     if (luckFactor == LuckRoll::Luck)
         totalBaseFactor += BonusRatio{1,1};
     else if (luckFactor == LuckRoll::Unluck)
@@ -987,7 +1011,7 @@ DamageResult BattleManager::damageRoll(BattleStackConstPtr attacker,
         totalReduceFactor *= (BonusRatio{1,1} - defender->hero->adventure->estimated.defense);
 
     DamageResult damageResult;
-    damageResult.damageBaseRoll = (baseRoll).roundDownInt();
+    damageResult.damageBaseRoll = std::max(1, baseRoll.roundDownInt());
 
     BonusRatio finalRoll      = baseRoll * (BonusRatio(1,1) + totalBaseFactor) * totalReduceFactor;
     auto damageTotal   = std::max(finalRoll.roundDownInt(), 1);
@@ -1151,8 +1175,8 @@ void BattleManager::makePositions(const BattleFieldPreset & fieldPreset)
 
 void BattleManager::initialParams()
 {
-    BattleEstimation().calculateArmyOnBattleStart(m_def, m_att);
-    BattleEstimation().calculateArmyOnBattleStart(m_att, m_def);
+    BattleEstimation(m_rules).calculateArmyOnBattleStart(m_def, m_att);
+    BattleEstimation(m_rules).calculateArmyOnBattleStart(m_att, m_def);
 
     for (auto * stack : m_all) {
         stack->pos.setLarge(stack->adventure->library->traits.large);
@@ -1215,8 +1239,8 @@ void BattleManager::updateState()
 
 void BattleManager::startNewRound()
 {
-    BattleEstimation().calculateArmyOnRoundStart(m_def);
-    BattleEstimation().calculateArmyOnRoundStart(m_att);
+    BattleEstimation(m_rules).calculateArmyOnRoundStart(m_def);
+    BattleEstimation(m_rules).calculateArmyOnRoundStart(m_att);
 
 
     m_roundIndex++;
@@ -1232,7 +1256,7 @@ void BattleManager::beforeCurrentActive()
         return;
 
     const int morale = m_current->current.rngParams.morale;
-    if (m_current->count > 0 && morale < 0 && !m_current->roundState.hadLowMorale && checkRngEffect(morale)) {
+    if (m_current->count > 0 && morale < 0 && !m_current->roundState.hadLowMorale && checkRngEffect(m_current->current.moraleChance)) {
         m_current->roundState.finishedTurn = true;
         m_current->roundState.hadLowMorale = true;
         m_notifiers->onStackUnderEffect(m_current, IBattleNotify::Effect::BadMorale);
@@ -1271,7 +1295,7 @@ void BattleManager::beforeFirstTurn(BattleStack::Side side)
                 continue;
             if (castBeforeStart.spell->qualify == LibrarySpell::Qualify::Bad && targetStack->side == side)
                 continue;
-            if (!BattleEstimation().checkSpellTarget(*targetStack, castBeforeStart.spell))
+            if (!BattleEstimation(m_rules).checkSpellTarget(*targetStack, castBeforeStart.spell))
                 continue;
 
             targetStack->appliedEffects.push_back(effect);
@@ -1297,18 +1321,18 @@ bool BattleManager::canMoveOrAttack(BattleStackConstPtr stack) const
 
 
 
-bool BattleManager::checkRngEffect(int bonusValue)
+bool BattleManager::checkRngEffect(BonusRatio rollChance)
 {
-    // 1/24, 2/24, 3/24 - positive
-    // 2/24, 4/24, 6/24 - negative
-    bonusValue = std::clamp(bonusValue, -3, +3);
-    if (bonusValue == 0)
+    if (rollChance.num() == 0)
         return false;
-    if (bonusValue < 0) {
-        bonusValue = -bonusValue * 2;
+
+    assert(rollChance > BonusRatio(0,1));
+    if (rollChance.denom() < 128) {
+        auto roll = m_randomGenerator->genSmall(static_cast<uint8_t>(rollChance.denom()) - 1);
+        return (roll < rollChance.num());
     }
-    auto roll = m_randomGenerator->genSmall(23); // @todo: we can actually have increased luck chance.
-    return (roll < bonusValue);
+    auto roll = static_cast<int64_t>(m_randomGenerator->gen(rollChance.denom() - 1));
+    return (roll < rollChance.num());
 }
 
 bool BattleManager::checkResist(BonusRatio successChance)
@@ -1325,7 +1349,7 @@ BattleManager::LuckRoll BattleManager::makeLuckRoll(BattleStackConstPtr attacker
     if (!luckLevel)
         return LuckRoll::None;
 
-    if (!checkRngEffect(luckLevel))
+    if (!checkRngEffect(m_current->current.luckChance))
         return LuckRoll::None;
 
     if (luckLevel > 0) {
@@ -1338,7 +1362,7 @@ BattleManager::LuckRoll BattleManager::makeLuckRoll(BattleStackConstPtr attacker
 
 void BattleManager::recalcStack(BattleStackMutablePtr stack)
 {
-    BattleEstimation().calculateUnitStats(*stack);
+    BattleEstimation(m_rules).calculateUnitStats(*stack);
 
     for (BattleStackConstPtr neighbour : findNeighboursOf(stack)) {
         if (neighbour->side != stack->side) {

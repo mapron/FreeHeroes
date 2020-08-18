@@ -31,6 +31,7 @@ inline IGraphicsLibrary::PixmapKey primaryHeroStatResourceId(Core::HeroPrimaryPa
     }
     return IGraphicsLibrary::PixmapKey(base, index);
 }
+
 }
 
 
@@ -182,6 +183,12 @@ QStringList UiCommonModel::getLuckDescription(const Core::LuckDetails& details) 
         mods << tr("Positive luck was neutralized by artifact");
     if (mods.empty())
         mods << tr("No modificators");
+
+    if (details.total > 0)
+        mods << tr("Chance of positive luck: %1").arg(FormatUtils::formatBonus(details.rollChance, false, 1));
+    else if (details.total < 0)
+        mods << tr("Chance of negative luck: %1").arg(FormatUtils::formatBonus(details.rollChance, false, 1));
+
     return mods;
 }
 
@@ -209,6 +216,11 @@ QStringList UiCommonModel::getMoraleDescription(const Core::MoraleDetails& detai
         mods << tr("Positive morale was neutralized by artifact");
     if (mods.empty())
         mods << tr("No modificators");
+
+    if (details.total > 0)
+        mods << tr("Chance of positive morale: %1").arg(FormatUtils::formatBonus(details.rollChance, false, 1));
+    else if (details.total < 0)
+        mods << tr("Chance of negative morale: %1").arg(FormatUtils::formatBonus(details.rollChance, false, 1));
 
     return mods;
 }

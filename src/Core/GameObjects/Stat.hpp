@@ -86,6 +86,16 @@ struct PrimaryRngParams : public internal::MakeAggregate<PrimaryRngParams> {
     constexpr auto asTuple() noexcept       { return std::tie(luck, morale);}
 };
 
+struct RngChanceParams : public internal::MakeAggregate<RngChanceParams> {
+    BonusRatio luck     {1,1};
+    BonusRatio morale   {1,1};
+    BonusRatio unluck   {1,1};
+    BonusRatio dismorale{1,1};
+
+    constexpr auto asTuple() const noexcept { return std::tie(luck, morale, unluck, dismorale);}
+    constexpr auto asTuple() noexcept       { return std::tie(luck, morale, unluck, dismorale);}
+};
+
 struct PrimaryAttackParams : public internal::MakeAggregate<PrimaryAttackParams> {
     int attack = 0;
     int defense = 0;
@@ -158,6 +168,10 @@ struct MoraleDetails : public internal::MakeAggregate<MoraleDetails> {
     int minimalMoraleLevel = -3;
 
     bool neutralizedPositive = false;
+
+    BonusRatio rollChance {0,1};
+
+    // @todo: isn't it weird not to have all the fields here?
     constexpr auto asTuple() const noexcept { return std::tie(undead, extraUnwantedFactions, factionsPenalty, unitBonus, skills, artifacts);}
     constexpr auto asTuple() noexcept       { return std::tie(undead, extraUnwantedFactions, factionsPenalty, unitBonus, skills, artifacts);}
 };
@@ -172,6 +186,9 @@ struct LuckDetails : public internal::MakeAggregate<LuckDetails>  {
 
     bool neutralizedPositive = false;
 
+    BonusRatio rollChance {0,1};
+
+    // @todo: isn't it weird not to have all the fields here?
     constexpr auto asTuple() const noexcept { return std::tie(unitBonus, skills, artifacts);}
     constexpr auto asTuple() noexcept       { return std::tie(unitBonus, skills, artifacts);}
 };

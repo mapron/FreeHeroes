@@ -209,8 +209,8 @@ void HeroMainDialog::updateHeroAppearence()
                 );
 
 
-    m_ui->labelMoraleIcon->setValue(m_heroArmy->getSource()->squad.estimated.rngParams.morale);
-    m_ui->labelLuckIcon  ->setValue(m_heroArmy->getSource()->squad.estimated.rngParams.luck);
+    m_ui->labelMoraleIcon->setValue(m_heroArmy->getSource()->squad.estimated.squadBonus.rngParams.morale);
+    m_ui->labelLuckIcon  ->setValue(m_heroArmy->getSource()->squad.estimated.squadBonus.rngParams.luck);
     m_ui->labelMoraleIcon->setDetails(m_heroArmy->getSource()->squad.estimated.moraleDetails);
     m_ui->labelLuckIcon  ->setDetails(m_heroArmy->getSource()->squad.estimated.luckDetails);
 

@@ -32,6 +32,8 @@ public:
    LibraryMapObjectContainerPtr      mapObjects() const override;
    LibraryHeroSpecContainerPtr       heroSpecs() const override;
 
+   LibraryGameRulesConstPtr          gameRules() const override;
+
 private:
     bool load(const std::vector<std_path> & files);
 

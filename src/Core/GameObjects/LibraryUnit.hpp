@@ -47,29 +47,30 @@ struct LibraryUnit {
         int maxRetaliations = 1;
         bool chargeAttack  = false;
 
-        int increaseHeroMorale = 0;
-        int decreaseEnemyMorale = 0;
-        int increaseHeroLuck = 0;
-        int decreaseEnemyLuck = 0;
+        struct StatBonus {
+            int morale = 0;
+            int luck = 0;
+            int manaCost = 0;
+            RngChanceParams chances;
+        };
+        StatBonus squadBonus;
+        StatBonus opponentBonus;
 
         Hate hate;
 
-        int increaseEnemyManaCost = 0;
-        int decreaseHeroManaCost = 0;
-
         bool bindOnAttack = false;
 
-        int giantLevel = 0;
+        int giantLevel = 0; // used for Slayer spell.
 
         int doubleDamageChance = 0;
 
         int minimalMoraleLevel = -3;
         int minimalLuckLevel = -3;
 
-        int manaStealPercent = 20;
+        int manaStealPercent = 0;
 
-        int ignoreTargetDefense = 0;
-        int ignoreAttackerAttack = 0;
+        BonusRatio reduceTargetDefense  {1,1};
+        BonusRatio reduceAttackerAttack {1,1};
 
         std::vector<SpellCastParams> casts;
 

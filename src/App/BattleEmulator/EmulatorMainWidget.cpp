@@ -37,9 +37,11 @@
 #include "BattleManager.hpp"
 #include "AdventureReplay.hpp"
 #include "AdventureEstimation.hpp"
+#include "GeneralEstimation.hpp"
 #include "LibraryTerrain.hpp"
 #include "LibraryMapObject.hpp"
 #include "LibrarySecondarySkill.hpp"
+#include "LibraryGameRules.hpp"
 #include "AdventureKingdom.hpp"
 
 // Platform
@@ -103,8 +105,8 @@ EmulatorMainWidget::EmulatorMainWidget(IGraphicsLibrary & graphicsLibrary,
     connect(m_ui->pushButtonReplayLoadAdv, &QPushButton::clicked, this, &EmulatorMainWidget::loadAdventureData);
 
 
-    m_adventureState->m_att.squad.stacks.resize(7);
-    m_adventureState->m_def.squad.stacks.resize(7);
+    m_adventureState->m_att.squad.stacks.resize(m_gameDatabase.gameRules()->limits.stacks);
+    m_adventureState->m_def.squad.stacks.resize(m_gameDatabase.gameRules()->limits.stacks);
 
     m_ui->armyConfigAtt->setModels(modelsProvider, m_uiRng.get());
     m_ui->armyConfigDef->setModels(modelsProvider, m_uiRng.get());
@@ -162,8 +164,14 @@ EmulatorMainWidget::EmulatorMainWidget(IGraphicsLibrary & graphicsLibrary,
     connect(m_guiAdventureArmyAtt.get(), &GuiAdventureArmy::dataChanged, this, [this]{onAttDataChanged(); });
     connect(m_guiAdventureArmyDef.get(), &GuiAdventureArmy::dataChanged, this, [this]{onDefDataChanged(); });
 
-    connect(m_ui->armyConfigAtt, &ArmyConfigWidget::checkForHeroLevelUps, this, [this]{checkForHeroLevelUps(); });
-    connect(m_ui->armyConfigDef, &ArmyConfigWidget::checkForHeroLevelUps, this, [this]{checkForHeroLevelUps(); });
+    connect(m_ui->armyConfigAtt, &ArmyConfigWidget::makeLevelup, this, [this](int newLevel){
+        m_adventureState->m_att.hero.experience = GeneralEstimation(m_gameDatabase.gameRules()).getExperienceForLevel(newLevel);
+        checkForHeroLevelUps();
+    });
+    connect(m_ui->armyConfigDef, &ArmyConfigWidget::makeLevelup, this, [this](int newLevel){
+        m_adventureState->m_def.hero.experience = GeneralEstimation(m_gameDatabase.gameRules()).getExperienceForLevel(newLevel);
+        checkForHeroLevelUps();
+    });
 
     connect(m_ui->pushButtonNextDay  , &QPushButton::clicked, this, &EmulatorMainWidget::makeNewDay);
     connect(m_ui->pushButtonRegenMana, &QPushButton::clicked, this, &EmulatorMainWidget::makeManaRegen);
@@ -232,7 +240,7 @@ void EmulatorMainWidget::onAttDataChanged(bool forcedUpdate)
 
     m_adventureStatePrev->m_att = m_adventureState->m_att;
 
-    AdventureEstimation().calculateArmy(m_adventureState->m_att, m_adventureState->m_terrain);
+    AdventureEstimation(m_gameDatabase.gameRules()).calculateArmy(m_adventureState->m_att, m_adventureState->m_terrain);
 
     m_adventureKingdom->dayIncome  = m_adventureState->m_att.estimated.dayIncome;
     m_adventureKingdom->weekIncome = m_adventureState->m_att.estimated.weekIncomeMax;
@@ -252,7 +260,7 @@ void EmulatorMainWidget::onDefDataChanged(bool forcedUpdate)
 
     m_adventureStatePrev->m_def = m_adventureState->m_def;
 
-    AdventureEstimation().calculateArmy(m_adventureState->m_def, m_adventureState->m_terrain);
+    AdventureEstimation(m_gameDatabase.gameRules()).calculateArmy(m_adventureState->m_def, m_adventureState->m_terrain);
 
     m_ui->armyConfigDef->refresh();
 }
@@ -260,12 +268,12 @@ void EmulatorMainWidget::onDefDataChanged(bool forcedUpdate)
 void EmulatorMainWidget::makeNewDay()
 {
     if (m_adventureState->m_att.hasHero()) {
-        AdventureEstimation().calculateDayStart(m_adventureState->m_att.hero);
+        AdventureEstimation(m_gameDatabase.gameRules()).calculateDayStart(m_adventureState->m_att.hero);
         m_ui->armyConfigAtt->refresh();
         onAttDataChanged(true);
     }
     if (m_adventureState->m_def.hasHero()) {
-        AdventureEstimation().calculateDayStart(m_adventureState->m_def.hero);
+        AdventureEstimation(m_gameDatabase.gameRules()).calculateDayStart(m_adventureState->m_def.hero);
         m_ui->armyConfigDef->refresh();
         onDefDataChanged(true);
     }
@@ -448,8 +456,8 @@ int EmulatorMainWidget::execBattle(bool isReplay, bool isQuick)
     {
         replayRec = m_replayManager->m_records[m_ui->comboBoxReplaySelect->currentIndex()];
         replayData.load(replayRec.battleReplay, m_gameDatabase);
-        AdventureEstimation().calculateArmy(replayData.m_adv.m_att, replayData.m_adv.m_terrain);
-        AdventureEstimation().calculateArmy(replayData.m_adv.m_def, replayData.m_adv.m_terrain);
+        AdventureEstimation(m_gameDatabase.gameRules()).calculateArmy(replayData.m_adv.m_att, replayData.m_adv.m_terrain);
+        AdventureEstimation(m_gameDatabase.gameRules()).calculateArmy(replayData.m_adv.m_def, replayData.m_adv.m_terrain);
     }
     else
     {
@@ -467,7 +475,8 @@ int EmulatorMainWidget::execBattle(bool isReplay, bool isQuick)
 
     BattleManager battle(att, def,
                          replayData.m_adv.m_field,
-                         rng);
+                         rng,
+                         m_gameDatabase.gameRules());
     IBattleView * battleView = &battle;
     IBattleControl * battleControl= &battle;
     IAIFactory * aiFactory = &battle;
@@ -629,8 +638,9 @@ void EmulatorMainWidget::checkForHeroLevelUps(bool fromDebugWidget)
         auto rng = m_randomGeneratorFactory.create();
         rng->makeGoodSeed();
         HeroLevelupDialog dlg(this);
+        AdventureEstimation estimation(m_gameDatabase.gameRules());
 
-        while ((result = AdventureEstimation().calculateHeroLevelUp(hero, *rng)).isValid()) {
+        while ((result = estimation.calculateHeroLevelUp(hero, *rng)).isValid()) {
             decision.choices.clear();
             const auto & statInfo = m_modelsProvider.ui()->skillInfo[result.primarySkillUpdated];
             decision.primaryStatName = statInfo.name;
@@ -663,9 +673,9 @@ void EmulatorMainWidget::checkForHeroLevelUps(bool fromDebugWidget)
             if (index >= 0 && result.choices.size() > 0)
                 choice = result.choices[index];
 
-            AdventureEstimation().applyLevelUpChoice(m_adventureState->m_att.hero, choice);
+            estimation.applyLevelUpChoice(m_adventureState->m_att.hero, choice);
 
-            AdventureEstimation().calculateArmy(m_adventureState->m_att, m_adventureState->m_terrain);
+            estimation.calculateArmy(m_adventureState->m_att, m_adventureState->m_terrain);
         }
 
     }

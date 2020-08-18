@@ -21,6 +21,7 @@ class IRandomGenerator;
 
 class CORELOGIC_EXPORT AdventureEstimation {
 public:
+    AdventureEstimation(LibraryGameRulesConstPtr rules) : m_rules(rules) {}
     struct LevelUpResult {
         bool valid = false;
         int newLevel = 0;
@@ -42,10 +43,12 @@ private:
     void bindTypes(sol::state & lua);
     void calculateHeroStats(AdventureHero& hero);
     void calculateHeroStatsAfterSquad(AdventureHero& hero, const AdventureSquad& squad);
-    void calculateUnitSquadBonus(AdventureStack& unit);
     void calculateSquad(AdventureSquad& squad, bool reduceExtraFactionsPenalty);
     void calculateSquadHeroRng(AdventureSquad& squad, const AdventureHero& hero);
     void calculateSquadSpeed(AdventureSquad& squad);
+
+private:
+    LibraryGameRulesConstPtr m_rules;
 };
 
 }

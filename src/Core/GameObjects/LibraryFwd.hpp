@@ -39,5 +39,7 @@ using LibraryResourceConstPtr = const LibraryResource*;
 struct LibraryMapObject;
 using LibraryMapObjectConstPtr = const LibraryMapObject*;
 
+struct LibraryGameRules;
+using LibraryGameRulesConstPtr = const LibraryGameRules*;
 
 }

@@ -17,6 +17,7 @@
 #include "LibraryTerrain.hpp"
 #include "LibraryResource.hpp"
 #include "LibraryMapObject.hpp"
+#include "LibraryGameRules.hpp"
 
 #include "StringUtils.hpp"
 
@@ -128,6 +129,13 @@ RTTR_REGISTRATION
         .property("earth"    , &MagicIncrease::earth )
         .property("fire"     , &MagicIncrease::fire  )
         .property("water"    , &MagicIncrease::water )
+        ;
+    registration::class_<RngChanceParams>("RngChanceParams")
+        .constructor<>()
+        .property("luck"       , &RngChanceParams::luck)
+        .property("morale"     , &RngChanceParams::morale)
+        .property("unluck"     , &RngChanceParams::unluck)
+        .property("dismorale"  , &RngChanceParams::dismorale)
         ;
 
     // ------------------------------------------------------------------------------------------
@@ -297,6 +305,14 @@ RTTR_REGISTRATION
         value("undead" ,  LibraryUnit::Abilities::AttackWithElement::Undead)
         );
 
+    registration::class_<LibraryUnit::Abilities::StatBonus>("LibraryUnitAbilitiesStat")
+        .constructor<>()
+        .property("morale"           , &LibraryUnit::Abilities::StatBonus::morale)
+        .property("luck"             , &LibraryUnit::Abilities::StatBonus::luck)
+        .property("manaCost"         , &LibraryUnit::Abilities::StatBonus::manaCost)
+        .property("chances"          , &LibraryUnit::Abilities::StatBonus::chances)(ref)
+        ;
+
     registration::class_<LibraryUnit::Abilities>("LibraryUnitAbilities")
         .constructor<>()
         .property("type"               , &LibraryUnit::Abilities::type)
@@ -309,14 +325,14 @@ RTTR_REGISTRATION
         .property("retaliations"       , &LibraryUnit::Abilities::maxRetaliations)
         .property("chargeAttack"       , &LibraryUnit::Abilities::chargeAttack)
         .property("noPenalty"          , &LibraryUnit::Abilities::disabledPenalties)(ref)
-        .property("increaseHeroMorale" , &LibraryUnit::Abilities::increaseHeroMorale)
-        .property("decreaseEnemyMorale", &LibraryUnit::Abilities::decreaseEnemyMorale)
-        .property("increaseHeroLuck"   , &LibraryUnit::Abilities::increaseHeroLuck)
-        .property("decreaseEnemyLuck"  , &LibraryUnit::Abilities::decreaseEnemyLuck)
+        .property("squadBonus"         , &LibraryUnit::Abilities::squadBonus)(ref)
+        .property("opponentBonus"      , &LibraryUnit::Abilities::opponentBonus)(ref)
 
-        .property("minimalLuckLevel"    , &LibraryUnit::Abilities::minimalLuckLevel)
-        .property("minimalMoraleLevel"  , &LibraryUnit::Abilities::minimalMoraleLevel)
-        .property("magicReduce"         , &LibraryUnit::Abilities::magicReduce)(ref)
+        .property("reduceTargetDefense"             , &LibraryUnit::Abilities::reduceTargetDefense)
+        .property("reduceAttackerAttack"            , &LibraryUnit::Abilities::reduceAttackerAttack)
+        .property("minimalLuckLevel"                , &LibraryUnit::Abilities::minimalLuckLevel)
+        .property("minimalMoraleLevel"              , &LibraryUnit::Abilities::minimalMoraleLevel)
+        .property("magicReduce"                     , &LibraryUnit::Abilities::magicReduce)(ref)
         .property("magicOppSuccessChance"           , &LibraryUnit::Abilities::magicOppSuccessChance)
         .property("magicOppSuccessChanceNeighbours" , &LibraryUnit::Abilities::magicOppSuccessChanceNeighbours)
 
@@ -650,6 +666,37 @@ RTTR_REGISTRATION
         .property("pres"                , &LibraryMapObject::presentationParams)(ref)
         .property("fieldLayout"         , &LibraryMapObject::fieldLayout)
         ;
+    // ------------------------------------------------------------------------------------------
+    registration::class_<LibraryGameRules::RngRules>("LibraryGameRulesRng")
+        .constructor<>()
+        .property("positiveChances"      , &LibraryGameRules::RngRules::positiveChances)(ref)
+        .property("negativeChances"      , &LibraryGameRules::RngRules::negativeChances)(ref)
+        .property("maxEffectiveValue"    , &LibraryGameRules::RngRules::maxEffectiveValue)
+        .property("minEffectiveValue"    , &LibraryGameRules::RngRules::minEffectiveValue)
+        ;
+    registration::class_<LibraryGameRules::PhysicalConst>("LibraryGameRulesPhysicalConst")
+        .constructor<>()
+        .property("maxEffectiveAttack"      , &LibraryGameRules::PhysicalConst::maxEffectiveAttack)
+        .property("maxEffectiveDefense"     , &LibraryGameRules::PhysicalConst::maxEffectiveDefense)
+        .property("attackValue"             , &LibraryGameRules::PhysicalConst::attackValue)
+        .property("defenseValue"            , &LibraryGameRules::PhysicalConst::defenseValue)
+        ;
+    registration::class_<LibraryGameRules::Limits>("LibraryGameRulesLimits")
+        .constructor<>()
+        .property("stacks"           , &LibraryGameRules::Limits::stacks)
+        .property("maxHeroLevel"     , &LibraryGameRules::Limits::maxHeroLevel)
+        .property("maxHeroAd"        , &LibraryGameRules::Limits::maxHeroAd)(ref)
+        .property("maxHeroMagic"     , &LibraryGameRules::Limits::maxHeroMagic)(ref)
+        .property("maxUnitAd"        , &LibraryGameRules::Limits::maxUnitAd)(ref)
+        ;
+    registration::class_<LibraryGameRules>("LibraryGameRules")
+        .constructor<>()
+        .property("luck"            , &LibraryGameRules::luck)(ref)
+        .property("morale"          , &LibraryGameRules::morale)(ref)
+        .property("physicalConst"   , &LibraryGameRules::physicalConst)(ref)
+        .property("limits"          , &LibraryGameRules::limits)(ref)
+        ;
+
     // ------------------------------------------------------------------------------------------
 
     registerConverters<LibraryUnit>();

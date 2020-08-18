@@ -334,7 +334,6 @@ UnitInfoWidget::UnitInfoWidget(Core::BattleStackConstPtr battle,
 
 
     QLabel * descLabel = new QLabel(abilsTextStr, this);
-    descLabel->setFixedWidth(200);
     descLabel->setWordWrap(true);
     descLabel->setMinimumHeight(descLabel->sizeHint().height());
     descLabelFrameLayout->addWidget(descLabel);
@@ -387,8 +386,7 @@ QStringList UnitInfoWidget::abilitiesText(Core::LibraryUnitConstPtr params) cons
     if (t.canBeCatapult) parts << tr("Attacks walls");
     if (t.returnAfterAttack) parts << tr("Return after attack");
 
-
-    if (a.minimalLuckLevel > 0) parts << tr("Always positive luck");
+    if (a.minimalLuckLevel   > 0) parts << tr("Always positive luck");
     if (a.minimalMoraleLevel > 0) parts << tr("Always positive morale");
 
     if (!a.hasPenalty(Core::LibraryUnit::Abilities::DamagePenalty::Distance))
@@ -397,6 +395,27 @@ QStringList UnitInfoWidget::abilitiesText(Core::LibraryUnitConstPtr params) cons
         parts << tr("No melee penalty");
     if (!a.hasPenalty(Core::LibraryUnit::Abilities::DamagePenalty::Obstacle))
         parts << tr("No penalty through walls");
+
+    if (a.squadBonus.luck)
+        parts << tr("+%1 to army luck").arg(a.squadBonus.luck);
+    if (a.squadBonus.morale)
+        parts << tr("+%1 to army morale").arg(a.squadBonus.morale);
+    if (a.squadBonus.manaCost)
+        parts << tr("Reduces spell cost %1 mana").arg(a.squadBonus.manaCost);
+    if (a.squadBonus.chances.luck != BonusRatio{1,1})
+        parts << tr("Increases luck chance %1").arg(toString(a.squadBonus.chances.luck - BonusRatio{1,1}, true));
+    if (a.opponentBonus.luck)
+        parts << tr("%1 to enemy luck").arg(a.opponentBonus.luck);
+    if (a.opponentBonus.morale)
+        parts << tr("%1 to enemy morale").arg(a.opponentBonus.morale);
+    if (a.opponentBonus.manaCost)
+        parts << tr("Increases enemy spell cost +%1 mana").arg(a.opponentBonus.manaCost);
+
+    if (a.reduceTargetDefense != BonusRatio{1,1})
+        parts << tr("Ignores %1 of target defense").arg(toString(BonusRatio{1,1} - a.reduceTargetDefense, false));
+    if (a.reduceAttackerAttack != BonusRatio{1,1})
+        parts << tr("Ignores %1 of attacker's attack").arg(toString(BonusRatio{1,1} - a.reduceAttackerAttack, false));
+
 
     return parts;
 }

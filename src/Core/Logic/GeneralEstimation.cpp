@@ -6,6 +6,8 @@
 #include "GeneralEstimation.hpp"
 
 #include "LibraryUnit.hpp"
+#include "LibraryGameRules.hpp"
+
 #include "IRandomGenerator.hpp"
 
 #include <sol/sol.hpp>
@@ -170,7 +172,6 @@ BonusRatio GeneralEstimation::calculatePhysicalBase(DamageDesc dmg, int count, D
         if (rollMode == DamageRollMode::Avg)
             return spread * count / 2;
 
-        //int result = 0;
         const int limitRngRequests = 10;
         const int count1 = std::min(limitRngRequests, count);
         assert(spread <= std::numeric_limits<uint8_t>::max()); // @todo: add this check to GameDatabase loader as well!
@@ -187,18 +188,22 @@ BonusRatio GeneralEstimation::calculatePhysicalBase(DamageDesc dmg, int count, D
     return BonusRatio(damageBaseRoll, 1);
 }
 
-std::pair<BonusRatio, BonusRatio> GeneralEstimation::calculateAttackPower(int attackerAttack, int targetDefense)
+BonusRatio GeneralEstimation::estimateMoraleRoll(int moraleValue, const RngChanceParams& chanceModifiers)
 {
-    const int maxEffectiveAttack = 60;
-    const int maxEffectiveDefense = 28;
-    const BonusRatio attackValue ( 1, 20); // 5% per attack power;
-    const BonusRatio defenseValue(-1, 40); // -2.5% per neg. attack power;
-    const int attackPower = std::clamp(attackerAttack - targetDefense, -maxEffectiveDefense, maxEffectiveAttack);
-    if (attackPower > 0) {
-        return {attackValue * attackPower, {0,1}};
-    } else {
-        return {{0,1}, defenseValue * attackPower};
-    }
+    moraleValue = std::clamp(moraleValue, m_rules->morale.minEffectiveValue, m_rules->morale.maxEffectiveValue);
+    const int moraleValueAbs = std::abs(moraleValue);
+    const BonusRatio baseChance = moraleValue  >= 0 ? m_rules->morale.positiveChances[moraleValueAbs] : m_rules->morale.negativeChances[moraleValueAbs];
+    const BonusRatio result = baseChance * ( moraleValue  >= 0 ?  chanceModifiers.morale : chanceModifiers.dismorale);
+    return result;
+}
+
+BonusRatio GeneralEstimation::estimateLuckRoll( int luckValue, const RngChanceParams& chanceModifiers)
+{
+    luckValue = std::clamp(luckValue, m_rules->luck.minEffectiveValue, m_rules->luck.maxEffectiveValue);
+    const int luckValueAbs = std::abs(luckValue);
+    const BonusRatio baseChance = luckValue  >= 0 ? m_rules->luck.positiveChances[luckValueAbs] : m_rules->luck.negativeChances[luckValueAbs];
+    const BonusRatio result = baseChance * ( luckValue  >= 0 ?  chanceModifiers.luck : chanceModifiers.unluck);
+    return result;
 }
 
 int GeneralEstimation::spellBaseDamage(int targetUnitLevel, const SpellCastParams & castParams, int targetIndex)

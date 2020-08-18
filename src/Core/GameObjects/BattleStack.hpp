@@ -39,6 +39,7 @@ struct BattleStack {
         PrimaryAttackParams adRanged;
         PrimaryRngParams rngParams;
         PrimaryRngParams rngMax;
+        RngChanceParams  rngChances;
         bool hasMorale = false;
         int maxRetaliations = 0;
         int maxAttacksMelee = 0;
@@ -50,6 +51,9 @@ struct BattleStack {
         BonusRatio rangedAttack   = {0, 1};          // spells
         BonusRatio meleeDefense   = {0, 1};          // spells
         BonusRatio rangedDefense  = {0, 1};          // spells
+
+        BonusRatio luckChance;
+        BonusRatio moraleChance;
 
         MagicReduce  magicReduce;
         BonusRatio   magicOppSuccessChance = {1,1}; // 1 - resist chance.

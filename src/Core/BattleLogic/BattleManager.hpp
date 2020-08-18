@@ -29,7 +29,8 @@ public:
 
     BattleManager(BattleArmy & attArmy, BattleArmy & defArmy,
                   const BattleFieldPreset & fieldPreset,
-                  const std::shared_ptr<IRandomGenerator> & randomGenerator);
+                  const std::shared_ptr<IRandomGenerator> & randomGenerator,
+                  LibraryGameRulesConstPtr rules);
 
     void start();
 
@@ -98,10 +99,9 @@ private:
     BonusRatio meleeAttackFactor(BattleStackConstPtr attacker, BattleStackConstPtr defender) const;
 
     enum class LuckRoll { None, Luck, Unluck };
-    DamageResult damageRoll(BattleStackConstPtr attacker,
-                            int attackerCount,
+    DamageResult damageRoll(const BonusRatio baseRoll,
+                            BattleStackConstPtr attacker,
                             BattleStackConstPtr defender,
-                            GeneralEstimation::DamageRollMode mode,
                             bool melee,
                             int64_t rangedDenom,
                             LuckRoll luckFactor = LuckRoll::None) const;
@@ -129,7 +129,7 @@ private:
 private:
     bool canMoveOrAttack(BattleStackConstPtr stack) const;
 
-    bool checkRngEffect(int bonusValue);
+    bool checkRngEffect(BonusRatio rollChance);
     bool checkResist(BonusRatio successChance);
     LuckRoll makeLuckRoll(BattleStackConstPtr attacker);
 
@@ -153,6 +153,7 @@ private:
     class BattleNotifyEach;
     std::unique_ptr<BattleNotifyEach> m_notifiers;
     std::shared_ptr<IRandomGenerator> m_randomGenerator;
+    LibraryGameRulesConstPtr m_rules = nullptr;
 
     struct ControlGuard {
         ControlGuard(BattleManager * parent);

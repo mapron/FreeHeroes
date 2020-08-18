@@ -18,6 +18,7 @@
 #include "LibraryTerrain.hpp"
 #include "LibraryResource.hpp"
 #include "LibraryMapObject.hpp"
+#include "LibraryGameRules.hpp"
 
 #include "LibraryReflection.hpp"
 #include "AdventureReflection.hpp"
@@ -152,6 +153,8 @@ struct GameDatabase::Impl {
     LibraryContainer<LibraryHero>           m_heroes;
     LibraryContainer<LibraryMapObject>      m_mapObjects;
 
+    LibraryGameRules                        m_gameRules;
+
 
     template<typename T>
     LibraryContainer<T> & getContainer() {
@@ -274,6 +277,10 @@ IGameDatabase::LibraryHeroSpecContainerPtr GameDatabase::heroSpecs() const
     return &m_impl->m_specs;
 }
 
+LibraryGameRulesConstPtr GameDatabase::gameRules() const
+{
+    return &m_impl->m_gameRules;
+}
 
 bool GameDatabase::load(const std::vector<std_path>& files)
 {
@@ -317,6 +324,9 @@ bool GameDatabase::load(const std::vector<std_path>& files)
             ;
 
     if (!result)
+        return false;
+
+    if (!Reflection::deserialize(idResolver, m_impl->m_gameRules, recordObjectMaps["gameRules"][""]))
         return false;
 
     // making object links.

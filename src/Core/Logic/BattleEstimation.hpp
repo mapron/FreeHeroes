@@ -20,6 +20,8 @@ namespace FreeHeroes::Core {
 class CORELOGIC_EXPORT BattleEstimation {
 public:
 
+    BattleEstimation(LibraryGameRulesConstPtr rules) : m_rules(rules) {}
+
     void calculateArmyOnBattleStart(BattleArmy & army, const BattleArmy & opponent);
     void calculateArmyOnRoundStart(BattleArmy & army);
 
@@ -31,7 +33,10 @@ public:
 private:
     void bindTypes(sol::state & lua);
     void calculateUnitStatsStartBattle(BattleStack& unit, const BattleSquad& squad, const BattleArmy& opponent);
-    void calculateHeroStatsStartBattle(BattleHero& hero, const BattleSquad& squad, const BattleHero& opponent);
+    void calculateHeroStatsStartBattle(BattleHero& hero, const BattleSquad& squad, const BattleArmy& opponent);
+
+private:
+    LibraryGameRulesConstPtr m_rules;
 };
 
 }

@@ -46,7 +46,7 @@ public:
     void initFromMapObject(Core::LibraryMapObjectConstPtr mapObject, int variant);
 
 signals:
-    void checkForHeroLevelUps();
+    void makeLevelup(int newLevel);
 
 public:
     void refresh();
@@ -58,7 +58,7 @@ public:
 private:
     void generate();
     void showHeroDialog();
-    void makeLevelup();
+    void makeLevelupInternal();
 
 
 private:

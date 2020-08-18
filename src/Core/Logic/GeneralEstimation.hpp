@@ -25,6 +25,8 @@ class BonusRatio;
 
 struct CORELOGIC_EXPORT GeneralEstimation {
 
+    GeneralEstimation(LibraryGameRulesConstPtr rules) : m_rules(rules){ }
+
     void bindTypes(sol::state & lua);
 
 
@@ -37,7 +39,12 @@ struct CORELOGIC_EXPORT GeneralEstimation {
     enum class DamageRollMode { Random, Min, Max, Avg };
 
     BonusRatio calculatePhysicalBase(DamageDesc dmg, int count, DamageRollMode rollMode, IRandomGenerator &randomGenerator);
-    std::pair<BonusRatio, BonusRatio> calculateAttackPower(int attackerAttack, int targetDefense);
+
+    BonusRatio estimateMoraleRoll(int moraleValue, const RngChanceParams & chanceModifiers);
+    BonusRatio estimateLuckRoll  (int luckValue  , const RngChanceParams & chanceModifiers);
+
+private:
+    LibraryGameRulesConstPtr m_rules;
 };
 
 }

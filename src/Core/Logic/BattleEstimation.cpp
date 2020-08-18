@@ -6,13 +6,15 @@
 #include "BattleEstimation.hpp"
 #include "GeneralEstimation.hpp"
 
+#include "LibraryGameRules.hpp"
+
 #include <sol/sol.hpp>
 
 namespace FreeHeroes::Core {
 
 void BattleEstimation::bindTypes(sol::state& lua)
 {
-    GeneralEstimation().bindTypes(lua);
+    GeneralEstimation(m_rules).bindTypes(lua);
 
     lua.new_usertype<BattleStack::EstimatedParams>( "BattleUnitEstimatedParams",
        "primary"      , &BattleStack::EstimatedParams::primary,
@@ -143,12 +145,12 @@ void BattleEstimation::calculateUnitStats(BattleStack& unit)
     cur.canAttackFreeSplash = cur.canAttackRanged && unit.library->abilities.splashType == LibraryUnit::Abilities::SplashAttack::Ranged;
     cur.canDoAnything   = cur.canMove || cur.canAttackMelee || cur.canAttackRanged || cur.canCast;
 
-    cur.primary.ad.attack   = std::clamp(cur.primary.ad.attack         , 0, 99);
-    cur.primary.ad.defense  = std::clamp(cur.primary.ad.defense        , 0, 99);
+    cur.primary.ad.attack   = std::clamp(cur.primary.ad.attack         , 0, m_rules->limits.maxUnitAd.attack );
+    cur.primary.ad.defense  = std::clamp(cur.primary.ad.defense        , 0, m_rules->limits.maxUnitAd.defense);
 
-//   Logger(Logger::Info) << "calculated stack:" << unit.library->id
-//           << ", maxRetaliations=" << cur.maxRetaliations
-    //                           ;
+    cur.moraleChance = GeneralEstimation(m_rules).estimateMoraleRoll(cur.rngParams.morale, cur.rngChances);
+    cur.luckChance   = GeneralEstimation(m_rules).estimateLuckRoll  (cur.rngParams.luck  , cur.rngChances);
+
 }
 
 bool BattleEstimation::checkSpellTarget(const BattleStack& possibleTarget, LibrarySpellConstPtr spell)
@@ -185,21 +187,27 @@ bool BattleEstimation::checkAttackElementPossibility(const BattleStack& possible
     return true;
 }
 
-void BattleEstimation::calculateHeroStatsStartBattle(BattleHero& hero, const BattleSquad & squad, const BattleHero & opponent)
+void BattleEstimation::calculateHeroStatsStartBattle(BattleHero& hero, const BattleSquad & squad, const BattleArmy & opponent)
 {
     if (!hero.isValid())
         return;
 
     hero.mana = hero.adventure->mana;
     hero.estimated.primary   = hero.adventure->estimated.primary;
-    if (opponent.isValid()) {
+    if (opponent.battleHero.isValid()) {
         auto & spellPower = hero.estimated.primary.magic.spellPower;
-        spellPower = BonusRatio::calcSubDecrease(spellPower, opponent.adventure->estimated.spReduceOpp, 1);
+        spellPower = BonusRatio::calcSubDecrease(spellPower, opponent.battleHero.adventure->estimated.spReduceOpp, 1);
     }
     // @todo: animag garrisons, antimag sphere, etc.
     hero.estimated.availableSpells = hero.adventure->estimated.availableSpells;
-    hero.estimated.squadRngParams  = squad.adventure->estimated.rngParams;
-
+    hero.estimated.squadRngParams  = squad.adventure->estimated.squadBonus.rngParams;
+    for (auto & spell : hero.estimated.availableSpells) {
+        if (!spell.manaCost)
+            continue;
+        spell.manaCost += squad.adventure->estimated.squadBonus.manaCost;
+        spell.manaCost += opponent.squad->adventure->estimated.oppBonus.manaCost;
+        spell.manaCost = std::max(0, spell.manaCost);
+    }
 }
 
 
@@ -212,6 +220,7 @@ void BattleEstimation::calculateUnitStatsStartBattle(BattleStack& unit, const Ba
     unit.estimatedOnStart.rngParams = unit.adventure->estimated.rngParams; // hero + own squad
     unit.estimatedOnStart.hasMorale = unit.adventure->estimated.hasMorale;
     unit.estimatedOnStart.rngMax    = squad.adventure->estimated.rngMax;
+    unit.estimatedOnStart.rngChances    = squad.adventure->estimated.squadBonus.rngChance;
     unit.estimatedOnStart.magicOppSuccessChance = unit.adventure->estimated.magicOppSuccessChance;
     unit.estimatedOnStart.magicReduce           = unit.adventure->estimated.magicReduce;
     unit.estimatedOnStart.immunes               = unit.adventure->estimated.immunes;
@@ -220,11 +229,16 @@ void BattleEstimation::calculateUnitStatsStartBattle(BattleStack& unit, const Ba
     }
 
     const auto & oppEstim = opponent.squad->adventure->estimated;
-    unit.estimatedOnStart.rngParams += oppEstim.rngParamsForOpponent;
+    unit.estimatedOnStart.rngParams += oppEstim.oppBonus.rngParams;
     unit.estimatedOnStart.rngMax.luck   = std::min(unit.estimatedOnStart.rngMax.luck  , oppEstim.rngMax.luck);
     unit.estimatedOnStart.rngMax.morale = std::min(unit.estimatedOnStart.rngMax.morale, oppEstim.rngMax.morale);
     if (!unit.estimatedOnStart.hasMorale)
         unit.estimatedOnStart.rngParams.morale = 0;
+
+    unit.estimatedOnStart.rngChances.luck      *= oppEstim.oppBonus.rngChance.luck;
+    unit.estimatedOnStart.rngChances.morale    *= oppEstim.oppBonus.rngChance.morale;
+    unit.estimatedOnStart.rngChances.unluck    *= oppEstim.oppBonus.rngChance.unluck;
+    unit.estimatedOnStart.rngChances.dismorale *= oppEstim.oppBonus.rngChance.dismorale;
 
     unit.estimatedOnStart.maxAttacksMelee = 1; // @todo: ballista. ?
     if (unit.library->traits.rangeAttack)
@@ -248,7 +262,7 @@ void BattleEstimation::calculateUnitStatsStartBattle(BattleStack& unit, const Ba
 void BattleEstimation::calculateArmyOnBattleStart(BattleArmy& army, const BattleArmy& opponent)
 {
     if (army.battleHero.isValid()) {
-        calculateHeroStatsStartBattle(army.battleHero, *army.squad, opponent.battleHero);
+        calculateHeroStatsStartBattle(army.battleHero, *army.squad, opponent);
     }
     for (auto & stack : army.squad->stacks) {
         calculateUnitStatsStartBattle(stack, *army.squad, opponent);

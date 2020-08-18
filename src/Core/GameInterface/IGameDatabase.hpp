@@ -50,6 +50,8 @@ public:
     virtual LibraryMapObjectContainerPtr      mapObjects() const = 0;
     virtual LibraryHeroSpecContainerPtr       heroSpecs() const = 0;
 
+    virtual LibraryGameRulesConstPtr          gameRules() const = 0;
+
     template <typename T>
     inline const ContainerInterface<T>* container() const {
         static_assert(sizeof (T) == 3);

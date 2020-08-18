@@ -19,7 +19,6 @@
 
 // Core
 #include "IRandomGenerator.hpp"
-#include "GeneralEstimation.hpp"
 #include "LibraryFaction.hpp"
 #include "LibraryMapObject.hpp"
 #include "AdventureArmy.hpp"
@@ -59,7 +58,6 @@ ArmyConfigWidget::ArmyConfigWidget(QWidget* parent)
     connect(m_ui->heroWithArmyConfigWidget, &HeroWithArmyConfigWidget::showHeroDialog, this, &ArmyConfigWidget::showHeroDialog);
 
     connect(m_ui->pushButtonLevelUpHero, &QPushButton::clicked, this, &ArmyConfigWidget::makeLevelup);
-    connect(m_ui->pushButtonLevelUpHero, &QPushButton::clicked, this, &ArmyConfigWidget::checkForHeroLevelUps);
 
 }
 
@@ -162,7 +160,7 @@ void ArmyConfigWidget::generate()
     int totalValue = m_ui->spinBoxArmyValue->value();
     QList<int> denominators = {9, 9, 9, 8, 7, 5, 5};
     int  remainingValue = 0;
-    for (size_t i = 0 ;i < m_army->getSquad()->getCount(); ++i) {
+    for (size_t i = 0 ; i < m_army->getSquad()->getCount(); ++i) {
         remainingValue += totalValue / denominators.value(i);
         auto advStack = generateRandomStack(level, level + 9, remainingValue);
         m_army->getSquad()->getStack(m_army->getSquad()->getCount() - i - 1)->setParams(advStack.library, advStack.count);
@@ -184,13 +182,13 @@ void ArmyConfigWidget::showHeroDialog()
     m_tmpRefresh = {};
 }
 
-void ArmyConfigWidget::makeLevelup()
+void ArmyConfigWidget::makeLevelupInternal()
 {
     if (!m_army->getSource()->hasHero())
         return;
-    int levelUps = m_ui->spinBoxLevelUpsCount->value();
-    int newLevel = std::min(m_army->getHero()->getSource()->level + levelUps, 75);
-    m_army->getHero()->getSource()->experience = GeneralEstimation().getExperienceForLevel(newLevel);
+    const int levelUps = m_ui->spinBoxLevelUpsCount->value();
+    const int newLevel = std::min(m_army->getHero()->getSource()->level + levelUps, 75);
+    emit makeLevelup(newLevel);
 }
 
 

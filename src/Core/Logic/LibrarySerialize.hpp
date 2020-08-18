@@ -24,8 +24,9 @@ bool deserialize(LibraryIdResolver & idResolver, LibrarySpell & spell, const nlo
 bool deserialize(LibraryIdResolver & idResolver, LibraryResource & obj, const nlohmann::json & jsonObj);
 bool deserialize(LibraryIdResolver & idResolver, LibraryTerrain & obj, const nlohmann::json & jsonObj);
 bool deserialize(LibraryIdResolver & idResolver, LibraryMapObject & obj, const nlohmann::json & jsonObj);
-bool deserialize(LibraryIdResolver & idResolver, Core::SkillHeroItem & obj, const nlohmann::json& jsonObj);
+bool deserialize(LibraryIdResolver & idResolver, SkillHeroItem & obj, const nlohmann::json& jsonObj);
+bool deserialize(LibraryIdResolver & idResolver, LibraryGameRules & obj, const nlohmann::json& jsonObj);
 
-bool serialize(const Core::SkillHeroItem & obj, nlohmann::json& jsonObj);
+bool serialize(const SkillHeroItem & obj, nlohmann::json& jsonObj);
 
 }

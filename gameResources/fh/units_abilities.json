@@ -15,8 +15,8 @@
 "sod.unit.zealot"              : {"abilities": {"noPenalty":["melee"]                                                                                      } } ,
 "sod.unit.cavalier"            : {"abilities": {"chargeAttack": true                                                                                       } } ,
 "sod.unit.champion"            : {"abilities": {"chargeAttack": true                                                                                       } } ,
-"sod.unit.angel"               : {"abilities": {"increaseHeroMorale":1,"hate":["sod.unit.devil", "sod.unit.archDevil" ], "hateBonus":50, "giantLevel":2  } } ,
-"sod.unit.archangel"           : {"abilities": {"increaseHeroMorale":1,"hate":["sod.unit.devil", "sod.unit.archDevil" ], "hateBonus":50, "giantLevel":2  }, "spells":{"TODO_RESURRECT":1} } ,
+"sod.unit.angel"               : {"abilities": {"squadBonus":{"morale": 1}, "hate":["sod.unit.devil", "sod.unit.archDevil" ], "hateBonus":50, "giantLevel":2  } } ,
+"sod.unit.archangel"           : {"abilities": {"squadBonus":{"morale": 1}, "hate":["sod.unit.devil", "sod.unit.archDevil" ], "hateBonus":50, "giantLevel":2  }, "spells":{"TODO_RESURRECT":1} } ,
 
 
 "sod.unit.centaur"             : {"abilities": {                                                                                                           } } ,
@@ -25,8 +25,8 @@
 "sod.unit.battleDwarf"         : {"abilities": {"magicOppSuccessChance": "60/100"                                                                          } } ,
 "sod.unit.woodElf"             : {"abilities": {                                                                                                           } } ,
 "sod.unit.grandElf"            : {"abilities": {                                                                                                           } } ,
-"sod.unit.pegasus"             : {"abilities": {"increaseEnemyManaCost":2                                                                                  } } ,
-"sod.unit.silverPegasus"       : {"abilities": {"increaseEnemyManaCost":2                                                                                  } } ,
+"sod.unit.pegasus"             : {"abilities": {"opponentBonus":{"manaCost": 2}                                                                            } } ,
+"sod.unit.silverPegasus"       : {"abilities": {"opponentBonus":{"manaCost": 2}                                                                            } } ,
 "sod.unit.dendroidGuard"       : {"abilities": {"bindOnAttack":true                                                                                        } } ,
 "sod.unit.dendroidSoldier"     : {"abilities": {"bindOnAttack":true                                                                                        } } ,
 "sod.unit.unicorn"             : {"abilities": {"magicOppSuccessChanceNeighbours": "80/100"                                                                }, "spells":{"TODO_BLIND_CAST":1} },
@@ -41,8 +41,8 @@
 "sod.unit.obsidianGargoyle"    : {"abilities": {"type":"nonLiving", "nonLivingType":"gargoyle"                                                             } } ,
 "sod.unit.stoneGolem"          : {"abilities": {"type":"nonLiving", "nonLivingType":"golem", "magicReduce":{"all": "50/100"}                               } } ,
 "sod.unit.ironGolem"           : {"abilities": {"type":"nonLiving", "nonLivingType":"golem", "magicReduce":{"all": "25/100"}                               } } ,
-"sod.unit.mage"                : {"abilities": {"noPenalty":["melee","obstacle"], "decreaseHeroManaCost":2                                                 } },
-"sod.unit.archMage"            : {"abilities": {"noPenalty":["melee","obstacle"], "decreaseHeroManaCost":2                                                 } },
+"sod.unit.mage"                : {"abilities": {"noPenalty":["melee","obstacle"], "squadBonus":{"manaCost": -2}                                             } },
+"sod.unit.archMage"            : {"abilities": {"noPenalty":["melee","obstacle"], "squadBonus":{"manaCost": -2}                                             } },
 "sod.unit.genie"               : {"abilities": { "hate":["sod.unit.efreet", "sod.unit.efreetSultan" ], "hateBonus":50                                    } },
 "sod.unit.masterGenie"         : {"abilities": { "hate":["sod.unit.efreet", "sod.unit.efreetSultan" ], "hateBonus":50                                    }, "spells":{"TODO_CASTS":1} },
 "sod.unit.naga"                : {"abilities": {                                                                                                           } },
@@ -63,8 +63,8 @@
 "sod.unit.powerLich"           : {"abilities": {"type":"nonLiving", "nonLivingType":"undead","splash":"ranged","splashFriendlyFire":true,"splashElement":"undead","splashButtons":"st_lcx0,st_lcx1,st_lcx2","splashSpell": "sod.spell.deathCloud"   } },
 "sod.unit.blackKnight"         : {"abilities": {"type":"nonLiving", "nonLivingType":"undead"                                                                                        }, "spells":{"TODO_CAST_CURSE":1} },
 "sod.unit.dreadKnight"         : {"abilities": {"type":"nonLiving", "nonLivingType":"undead","doubleDamageChance":20                                                                }, "spells":{"TODO_CAST_CURSE":1} },
-"sod.unit.boneDragon"          : {"abilities": {"type":"nonLiving", "nonLivingType":"undead","decreaseEnemyMorale":1, "giantLevel":1                                                } },
-"sod.unit.ghostDragon"         : {"abilities": {"type":"nonLiving", "nonLivingType":"undead","decreaseEnemyMorale":1, "giantLevel":1                                                }, "spells":{"TODO_CAST_AGE":1} },
+"sod.unit.boneDragon"          : {"abilities": {"type":"nonLiving", "nonLivingType":"undead","opponentBonus":{"morale": -1}, "giantLevel":1                                                } },
+"sod.unit.ghostDragon"         : {"abilities": {"type":"nonLiving", "nonLivingType":"undead","opponentBonus":{"morale": -1}, "giantLevel":1                                                }, "spells":{"TODO_CAST_AGE":1} },
 
 "sod.unit.troglodyte"          : {"abilities": {"immunes": {"tags": ["vision" ]  }, "immuneBreakable": false                                   } },
 "sod.unit.infernalTroglodyte"  : {"abilities": {"immunes": {"tags": ["vision" ]  }, "immuneBreakable": false                                   } },
@@ -94,8 +94,8 @@
 "sod.unit.pitLord"             : {"abilities": {                                                                                                           }, "spells":{"TODO_CAST_DEMONS":1} },
 "sod.unit.efreet"              : {"abilities": {"hate":["sod.unit.genie", "sod.unit.masterGenie" ], "hateBonus":50, "magicReduce":{"fire": "50/100"}       } },
 "sod.unit.efreetSultan"        : {"abilities": {"hate":["sod.unit.genie", "sod.unit.masterGenie" ], "hateBonus":50, "immunes": {"schools": ["fire"]    }      }, "spells":{"TODO_CAST_FIRESHIELD":1} },
-"sod.unit.devil"               : {"abilities": {"hate":["sod.unit.angel", "sod.unit.archangel" ], "hateBonus":50,"decreaseEnemyLuck":1,"giantLevel":2    } },
-"sod.unit.archDevil"           : {"abilities": {"hate":["sod.unit.angel", "sod.unit.archangel" ], "hateBonus":50,"decreaseEnemyLuck":2,"giantLevel":2    } },
+"sod.unit.devil"               : {"abilities": {"hate":["sod.unit.angel", "sod.unit.archangel" ], "hateBonus":50,"opponentBonus":{"luck": -1},"giantLevel":2    } },
+"sod.unit.archDevil"           : {"abilities": {"hate":["sod.unit.angel", "sod.unit.archangel" ], "hateBonus":50,"opponentBonus":{"luck": -2},"giantLevel":2    } },
 
 
 "sod.unit.gnoll"               : {"abilities": {                                                                                                           } },
@@ -126,8 +126,8 @@
 "sod.unit.thunderbird"         : {"abilities": {                                                                                                           }, "spells":{"TODO_THUNDER_CAST":1} },
 "sod.unit.cyclop"              : {"abilities": {                                                                                                           } },
 "sod.unit.cyclopKing"          : {"abilities": {                                                                                                           } },
-"sod.unit.behemoth"            : {"abilities": {"ignoreTargetDefense":40,"giantLevel":1                                                                    } },
-"sod.unit.ancientBehemoth"     : {"abilities": {"ignoreTargetDefense":80,"giantLevel":1                                                                    } },
+"sod.unit.behemoth"            : {"abilities": {"reduceTargetDefense":"60/100","giantLevel":1                                                                    } },
+"sod.unit.ancientBehemoth"     : {"abilities": {"reduceTargetDefense":"20/100","giantLevel":1                                                                    } },
 
 
 "sod.unit.pixie"               : {"abilities": {                                                                                                           } },
@@ -158,8 +158,8 @@
 "hota.unit.assid"              : {"abilities": { "doubleAttackIfAlive":1                                                                                   }  },
 "hota.unit.seaWitch"           : {"abilities": {                                                                                                           }, "spells":{"TODO_CAST":1} },
 "hota.unit.sorceress"          : {"abilities": {                                                                                                           }, "spells":{"TODO_CAST":1} },
-"hota.unit.nix"                : {"abilities": {"ignoreAttackerAttack":30                                                                                  }  },
-"hota.unit.nixWarrior"         : {"abilities": {"ignoreAttackerAttack":60                                                                                  }  },
+"hota.unit.nix"                : {"abilities": {"reduceAttackerAttack":"70/100"                                                                                  }  },
+"hota.unit.nixWarrior"         : {"abilities": {"reduceAttackerAttack":"40/100"                                                                                  }  },
 "hota.unit.seaSerpent"         : {"abilities": {                                                                                                           }, "spells":{"TODO_POISION":1} },
 "hota.unit.haspid"             : {"abilities": {                                                                                                           }, "spells":{"TODO_POISION":1, "TODO_VENDETTA":1} },
 
@@ -180,7 +180,7 @@
 "sod.unit.crystalDragon"       : {"abilities": {"magicOppSuccessChance": "80/100", "weekIncome":"crystal=3"                                                            } },
 "sod.unit.azureDragon"         : {"abilities": {"splash":"dragon", "splashFriendlyFire":true, "immunes": {"levels": [1,2,3]    }                                                               }, "spells":{"TODO_FEAR":1} },
 
-"hota.unit.leprechaun"         : {"abilities": {"increaseLuckChance":100                                                                                   }, "spells":{"TODO_LUCK":1} },
+"hota.unit.leprechaun"         : {"abilities": {"squadBonus":{"chances": {"luck": "200/100"} }                                                                      }, "spells":{"TODO_LUCK":1} },
 "hota.unit.satyr"              : {"abilities": {                                                                                                           }, "spells":{"TODO_JOY":1} },
 "hota.unit.fangarm"            : {"abilities": {"retaliations": -1, "immunes": {"tags": ["mind"]    }                                                                    }, "spells":{"TODO_HYPNO":1} },
 "hota.unit.steelGolem"         : {"abilities": {"type":"nonLiving", "nonLivingType":"golem", "magicReduce":{"all": "20/100"}                                           } },

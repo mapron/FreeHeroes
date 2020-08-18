@@ -8,6 +8,7 @@
 
 #include "LibrarySecondarySkill.hpp"
 #include "LibraryHeroSpec.hpp"
+#include "LibraryGameRules.hpp"
 
 #include "IRandomGenerator.hpp"
 
@@ -59,7 +60,7 @@ LibrarySecondarySkillConstPtr selectKeyFromWeightMap(const AdventureHero::Estima
 
 void AdventureEstimation::bindTypes(sol::state& lua)
 {
-    GeneralEstimation().bindTypes(lua);
+    GeneralEstimation(m_rules).bindTypes(lua);
     lua.new_usertype<AdventureHero::EstimatedParams>( "AdventureHeroEstimatedParams",
         "meleeAttack"           , &AdventureHero::EstimatedParams::meleeAttack,
         "rangedAttack"          , &AdventureHero::EstimatedParams::rangedAttack,
@@ -348,15 +349,15 @@ void AdventureEstimation::calculateHeroStats(AdventureHero& hero)
 
     // Set level and Exp.
     if (hero.editorParams.expIsDirty) {
-        hero.experience = GeneralEstimation().getExperienceForLevel(hero.level);
+        hero.experience = GeneralEstimation(m_rules).getExperienceForLevel(hero.level);
         hero.editorParams.expIsDirty = false;
     }
     if (hero.editorParams.levelIsDirty) {
-        hero.level = GeneralEstimation().getLevelByExperience(hero.experience);
+        hero.level = GeneralEstimation(m_rules).getLevelByExperience(hero.experience);
         hero.editorParams.levelIsDirty = false;
     }
-    hero.estimated.experienceStartLevel = GeneralEstimation().getExperienceForLevel(hero.level);
-    hero.estimated.experienceNextLevel  = GeneralEstimation().getExperienceForLevel(hero.level + 1);
+    hero.estimated.experienceStartLevel = GeneralEstimation(m_rules).getExperienceForLevel(hero.level);
+    hero.estimated.experienceNextLevel  = GeneralEstimation(m_rules).getExperienceForLevel(hero.level + 1);
 
     sol::state lua;
 
@@ -465,11 +466,13 @@ void AdventureEstimation::calculateHeroStats(AdventureHero& hero)
 
     // Clamp parameters.
 
-    // @todo: config constants.
-    hero.estimated.primary.ad.attack          = std::clamp(hero.estimated.primary.ad.attack         , 0, 99);
-    hero.estimated.primary.ad.defense         = std::clamp(hero.estimated.primary.ad.defense        , 0, 99);
-    hero.estimated.primary.magic.spellPower   = std::clamp(hero.estimated.primary.magic.spellPower  , 1, 99);
-    hero.estimated.primary.magic.intelligence = std::clamp(hero.estimated.primary.magic.intelligence, 1, 99);
+
+
+
+    hero.estimated.primary.ad.attack          = std::clamp(hero.estimated.primary.ad.attack         , 0, m_rules->limits.maxHeroAd.attack );
+    hero.estimated.primary.ad.defense         = std::clamp(hero.estimated.primary.ad.defense        , 0, m_rules->limits.maxHeroAd.defense);
+    hero.estimated.primary.magic.spellPower   = std::clamp(hero.estimated.primary.magic.spellPower  , 1, m_rules->limits.maxHeroMagic.spellPower );
+    hero.estimated.primary.magic.intelligence = std::clamp(hero.estimated.primary.magic.intelligence, 1, m_rules->limits.maxHeroMagic.intelligence);
 
     hero.estimated.availableSpells.reserve(spellbook.size());
 
@@ -531,28 +534,12 @@ void AdventureEstimation::calculateHeroStatsAfterSquad(AdventureHero& hero, cons
         hero.thisDayMovePoints = hero.estimated.nextDayMovePoints;
         hero.movePointsRemain  = hero.thisDayMovePoints ;
     }
-    hero.estimatedFromSquad.rngParams            = squad.estimated.rngParams;
-    hero.estimatedFromSquad.rngParamsForOpponent = squad.estimated.rngParamsForOpponent;
+    hero.estimatedFromSquad.rngParams            = squad.estimated.squadBonus.rngParams;
+    hero.estimatedFromSquad.rngParamsForOpponent = squad.estimated.oppBonus.rngParams;
     hero.estimatedFromSquad.moraleDetails        = squad.estimated.moraleDetails;
     hero.estimatedFromSquad.luckDetails          = squad.estimated.luckDetails;
 }
 
-
-void AdventureEstimation::calculateUnitSquadBonus(AdventureStack& unit)
-{
-    if (!unit.isValid())
-        return;
-    unit.estimated.primary = unit.library->primary; // armySpeed later
-    unit.estimatedSquadBonus = {};
-    const bool isUndead = unit.library->abilities.nonLivingType == UnitNonLivingType::Undead;
-    if (isUndead)
-        unit.estimatedSquadBonus.undeadBonus = -1;
-
-    unit.estimatedSquadBonus.rngParamsBonus   .luck   =  unit.library->abilities.increaseHeroLuck;
-    unit.estimatedSquadBonus.rngParamsBonus   .morale =  unit.library->abilities.increaseHeroMorale;
-    unit.estimatedSquadBonus.rngParamsOpponent.luck   = -unit.library->abilities.decreaseEnemyLuck;
-    unit.estimatedSquadBonus.rngParamsOpponent.morale = -unit.library->abilities.decreaseEnemyMorale;
-}
 
 void AdventureEstimation::calculateSquad(AdventureSquad& squad, bool reduceExtraFactionsPenalty)
 {
@@ -563,18 +550,44 @@ void AdventureEstimation::calculateSquad(AdventureSquad& squad, bool reduceExtra
         if (!stack.isValid())
             continue;
         factions.insert(stack.library->faction);
-        squad.estimated.moraleDetails.undead = std::min(squad.estimated.moraleDetails.undead, stack.estimatedSquadBonus.undeadBonus);
 
-        squad.estimated.rngParams.luck   = std::max(squad.estimated.rngParams.luck  , stack.estimatedSquadBonus.rngParamsBonus.luck);
-        squad.estimated.rngParams.morale = std::max(squad.estimated.rngParams.morale, stack.estimatedSquadBonus.rngParamsBonus.morale);
-        squad.estimated.rngParamsForOpponent.luck   = std::min(squad.estimated.rngParamsForOpponent.luck  , stack.estimatedSquadBonus.rngParamsOpponent.luck);
-        squad.estimated.rngParamsForOpponent.morale = std::min(squad.estimated.rngParamsForOpponent.morale, stack.estimatedSquadBonus.rngParamsOpponent.morale);
+        stack.estimated.primary = stack.library->primary; // armySpeed later
+        const bool isUndead = stack.library->abilities.nonLivingType == UnitNonLivingType::Undead;
+        if (isUndead)
+            squad.estimated.moraleDetails.undead = -1;
+
+        auto & squadBonus = stack.library->abilities.squadBonus;
+        auto & oppBonus   = stack.library->abilities.opponentBonus;
+
+        auto & squadEst = squad.estimated.squadBonus.rngParams;
+        auto & oppEst   = squad.estimated.oppBonus.rngParams;
+        auto & squadChances = squad.estimated.squadBonus.rngChance;
+        auto & oppChances   = squad.estimated.oppBonus.rngChance;
+
+        squadEst.luck              = std::max(squadEst.luck  , squadBonus.luck);
+        squadEst.morale            = std::max(squadEst.morale, squadBonus.morale);
+
+        squadChances.luck          = std::max(squadChances.luck     , squadBonus.chances.luck);
+        squadChances.morale        = std::max(squadChances.morale   , squadBonus.chances.morale);
+        squadChances.unluck        = std::min(squadChances.unluck   , squadBonus.chances.unluck);
+        squadChances.dismorale     = std::min(squadChances.dismorale, squadBonus.chances.dismorale);
+
+        oppEst.luck                = std::min(oppEst.luck    , oppBonus.luck);
+        oppEst.morale              = std::min(oppEst.morale  , oppBonus.morale);
+
+        oppChances.luck          = std::min(oppChances.luck     , oppBonus.chances.luck);
+        oppChances.morale        = std::min(oppChances.morale   , oppBonus.chances.morale);
+        oppChances.unluck        = std::max(oppChances.unluck   , oppBonus.chances.unluck);
+        oppChances.dismorale     = std::max(oppChances.dismorale, oppBonus.chances.dismorale);
+
+        squad.estimated.squadBonus.manaCost = std::min(squad.estimated.squadBonus.manaCost, squadBonus.manaCost);
+        squad.estimated.oppBonus.manaCost   = std::max(squad.estimated.oppBonus.manaCost  , oppBonus.manaCost);
 
         squad.estimated.weekIncomeMax.maxWith(stack.library->abilities.weekIncome);
     }
 
-    squad.estimated.moraleDetails.unitBonus = squad.estimated.rngParams.morale;
-    squad.estimated.luckDetails.unitBonus   = squad.estimated.rngParams.luck;
+    squad.estimated.moraleDetails.unitBonus = squad.estimated.squadBonus.rngParams.morale;
+    squad.estimated.luckDetails.unitBonus   = squad.estimated.squadBonus.rngParams.luck;
     int totalExtraFactionsCount = static_cast<int>(factions.size()) - 1;
     if (reduceExtraFactionsPenalty) {
         int totalGoodAndNeutral = 0;
@@ -590,12 +603,16 @@ void AdventureEstimation::calculateSquad(AdventureSquad& squad, bool reduceExtra
     }
     squad.estimated.moraleDetails.extraUnwantedFactions = std::max(0, totalExtraFactionsCount);
     squad.estimated.moraleDetails.factionsPenalty = 1 - totalExtraFactionsCount;
-    squad.estimated.rngParams.morale += squad.estimated.moraleDetails.factionsPenalty;
-    squad.estimated.rngParams.morale += squad.estimated.moraleDetails.undead;
+    squad.estimated.squadBonus.rngParams.morale += squad.estimated.moraleDetails.factionsPenalty;
+    squad.estimated.squadBonus.rngParams.morale += squad.estimated.moraleDetails.undead;
     squad.estimated.rngMax.luck = 3;
     squad.estimated.rngMax.morale = 3;
 
+    squad.estimated.moraleDetails.total =  squad.estimated.squadBonus.rngParams.morale;
+    squad.estimated.luckDetails.total   =  squad.estimated.squadBonus.rngParams.luck  ;
 
+    squad.estimated.moraleDetails.rollChance = GeneralEstimation(m_rules).estimateMoraleRoll(squad.estimated.squadBonus.rngParams.morale, squad.estimated.squadBonus.rngChance);
+    squad.estimated.luckDetails.rollChance   = GeneralEstimation(m_rules).estimateLuckRoll  (squad.estimated.squadBonus.rngParams.luck  , squad.estimated.squadBonus.rngChance);
 }
 
 void AdventureEstimation::calculateSquadHeroRng(AdventureSquad& squad, const AdventureHero& hero)
@@ -606,9 +623,16 @@ void AdventureEstimation::calculateSquadHeroRng(AdventureSquad& squad, const Adv
     squad.estimated.moraleDetails   += hero.estimated.moraleDetails;
     squad.estimated.luckDetails     += hero.estimated.luckDetails;
 
-    squad.estimated.rngParams             += hero.estimated.rngParams;
-    squad.estimated.rngParamsForOpponent  += hero.estimated.rngParamsForOpponent;
-    squad.estimated.rngMax                = hero.estimated.rngMax;
+    squad.estimated.squadBonus.rngParams   += hero.estimated.rngParams;
+    squad.estimated.oppBonus.rngParams     += hero.estimated.rngParamsForOpponent;
+    squad.estimated.rngMax                 = hero.estimated.rngMax;
+
+    squad.estimated.moraleDetails.total =  squad.estimated.squadBonus.rngParams.morale;
+    squad.estimated.luckDetails.total   =  squad.estimated.squadBonus.rngParams.luck  ;
+
+    squad.estimated.moraleDetails.rollChance = GeneralEstimation(m_rules).estimateMoraleRoll(squad.estimated.squadBonus.rngParams.morale, squad.estimated.squadBonus.rngChance);
+    squad.estimated.luckDetails.rollChance   = GeneralEstimation(m_rules).estimateLuckRoll  (squad.estimated.squadBonus.rngParams.luck  , squad.estimated.squadBonus.rngChance);
+
 }
 
 void AdventureEstimation::calculateSquadSpeed(AdventureSquad& squad)
@@ -630,7 +654,7 @@ void AdventureEstimation::calculateSquadSpeed(AdventureSquad& squad)
     squad.estimated.armySpeed = armySpeed;
 }
 
-void calculateUnitStats(AdventureStack& unit, const AdventureSquad& squad, LibraryTerrainConstPtr currentTerrain, const AdventureHero& hero)
+void calculateUnitStats(LibraryGameRulesConstPtr rules, AdventureStack& unit, const AdventureSquad& squad, LibraryTerrainConstPtr currentTerrain, const AdventureHero& hero)
 {
     if (!unit.isValid())
         return;
@@ -638,7 +662,7 @@ void calculateUnitStats(AdventureStack& unit, const AdventureSquad& squad, Libra
     cur.luckDetails   = squad.estimated.luckDetails;
     cur.moraleDetails = squad.estimated.moraleDetails;
     cur.primary   = unit.library->primary;
-    cur.rngParams = squad.estimated.rngParams; // already included possible hero rng.
+    cur.rngParams = squad.estimated.squadBonus.rngParams; // already included possible hero rng.
     const auto & abils = unit.library->abilities;
 
     cur.hasMorale = abils.type == UnitType::Living || abils.nonLivingType == UnitNonLivingType::Gargoyle;
@@ -649,6 +673,9 @@ void calculateUnitStats(AdventureStack& unit, const AdventureSquad& squad, Libra
     }
     cur.moraleDetails.total =  cur.rngParams.morale;
     cur.luckDetails.total   =  cur.rngParams.luck;
+    cur.moraleDetails.rollChance = GeneralEstimation(rules).estimateMoraleRoll(cur.moraleDetails.total, squad.estimated.squadBonus.rngChance);
+    cur.luckDetails.rollChance   = GeneralEstimation(rules).estimateLuckRoll  (cur.luckDetails.total  , squad.estimated.squadBonus.rngChance);
+
     cur.moraleDetails.minimalMoraleLevel = unit.library->abilities.minimalMoraleLevel;
     cur.luckDetails.minimalLuckLevel     = unit.library->abilities.minimalLuckLevel;
 
@@ -691,8 +718,8 @@ void calculateUnitStats(AdventureStack& unit, const AdventureSquad& squad, Libra
     maxHealth   = BonusRatio::calcAddIncrease(maxHealth, heroEstimate.unitLife);
     maxHealth   += heroEstimate.unitLifeAbs;
 
-    cur.primary.ad.attack   = std::clamp(cur.primary.ad.attack         , 0, 99);
-    cur.primary.ad.defense  = std::clamp(cur.primary.ad.defense        , 0, 99);
+    cur.primary.ad.attack   = std::clamp(cur.primary.ad.attack         , 0, rules->limits.maxUnitAd.attack );
+    cur.primary.ad.defense  = std::clamp(cur.primary.ad.defense        , 0, rules->limits.maxUnitAd.defense);
 
     cur.immunes.makeUnion(heroEstimate.immunes);
     cur.immunesWithoutBreakable.makeUnion(heroEstimate.immunes);
@@ -718,8 +745,8 @@ void calculateUnitStats(AdventureStack& unit, const AdventureSquad& squad, Libra
     cur.primary.ad.attack  +=  (unit.library->primary.ad.attack * levelRatio + 19 ) / 20;
     cur.primary.ad.defense +=  (unit.library->primary.ad.defense * levelRatio + 19 ) / 20;
 
-    cur.primary.ad.attack   = std::clamp(cur.primary.ad.attack         , 0, 99);
-    cur.primary.ad.defense  = std::clamp(cur.primary.ad.defense        , 0, 99);
+    cur.primary.ad.attack   = std::clamp(cur.primary.ad.attack         , 0, rules->limits.maxUnitAd.attack );
+    cur.primary.ad.defense  = std::clamp(cur.primary.ad.defense        , 0, rules->limits.maxUnitAd.defense);
 }
 
 
@@ -736,16 +763,13 @@ void AdventureEstimation::calculateArmy(AdventureArmy& army, LibraryTerrainConst
     if (army.hasHero())
         calculateHeroStats(army.hero);
 
-    for (auto & stack : army.squad.stacks)
-        calculateUnitSquadBonus(stack);
-
     calculateSquad(army.squad, army.hasHero() ? army.hero.estimated.factionsAllianceSpecial : false);
 
     if (army.hasHero())
         calculateSquadHeroRng(army.squad, army.hero);
 
     for (auto & stack : army.squad.stacks)
-        calculateUnitStats(stack, army.squad, terrain, army.hasHero() ? army.hero : AdventureHero());
+        calculateUnitStats(m_rules, stack, army.squad, terrain, army.hasHero() ? army.hero : AdventureHero());
 
     calculateSquadSpeed(army.squad);
 

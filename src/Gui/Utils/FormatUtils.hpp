@@ -12,6 +12,7 @@
 
 namespace FreeHeroes::Core {
 struct DamageDesc;
+class BonusRatio;
 }
 
 namespace FreeHeroes::Gui {
@@ -31,6 +32,8 @@ public:
     static QString formatSequenceDmg(Core::DamageDesc base, Core::DamageDesc start, Core::DamageDesc cur);
 
     static QString formatLargeInt(int64_t value);
+
+    static QString formatBonus(const Core::BonusRatio & bonus, bool plus = true, int digits = 0);
 
 };
 

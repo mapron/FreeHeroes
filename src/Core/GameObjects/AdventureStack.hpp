@@ -29,20 +29,12 @@ struct AdventureStack {
     struct ArmyParams {
         int                      indexInArmy      = 0; // that's error-prone, probably, need to sure indeces are unique. Whatever.
         int                      indexInArmyValid = 0; // same.
-        int                      indexInArmySparse = 0; // same.
     };
     ArmyParams armyParams;
 
     // estimated params:
-    struct EstimatedSquadBonus {
-        int undeadBonus = 0;
-        PrimaryRngParams   rngParamsBonus;
-        PrimaryRngParams   rngParamsOpponent;
-    };
-    EstimatedSquadBonus estimatedSquadBonus;
-
     struct EstimatedParams {
-        UnitPrimaryParams    primary;    // library->primary + hero->primary.
+        UnitPrimaryParams        primary;    // library->primary + hero->primary.
         PrimaryRngParams         rngParams;  // (if hero) hero(skills+artifacts) + squad(abilities,factions,undead)
         bool                     hasMorale = false;
         MoraleDetails            moraleDetails;
