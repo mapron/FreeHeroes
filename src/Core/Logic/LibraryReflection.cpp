@@ -646,6 +646,7 @@ RTTR_REGISTRATION
         .property("schools"      , &SpellFilter::schools)(ref)
         .property("tags"         , &SpellFilter::tags)(ref)
         .property("teachableOnly", &SpellFilter::teachableOnly)
+        .property("all"          , &SpellFilter::all)
         ;
 
         // ------------------------------------------------------------------------------------------

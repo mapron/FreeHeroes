@@ -109,9 +109,9 @@
 "sod.artifact.misc.scoutRadius1a"     : {"class":"treasure", "value": 1000 , "untranslatedName": "Charm Scout A +1"     ,"slot":"misc"   , "calc": ["h.scoutingRadius = h.scoutingRadius + 1" ]},
 "sod.artifact.misc.scoutRadius1b"     : {"class":"treasure", "value": 1000 , "untranslatedName": "Charm Scout B +1"     ,"slot":"misc"   , "calc": ["h.scoutingRadius = h.scoutingRadius + 1" ]},
 
-"sod.artifact.neck.necr1"             : {"class":"treasure", "value": 2000 , "untranslatedName": "Neck Necr"            ,"slot":"neck"   , "bonusSkill":{"necromancy":25 }},
-"sod.artifact.cape.necr1"             : {"class":"minor"   , "value": 4000 , "untranslatedName": "Cape Necr"            ,"slot":"cape"   , "bonusSkill":{"necromancy":50 }},
-"sod.artifact.boots.necr1"            : {"class":"major"   , "value": 6000 , "untranslatedName": "Boots Necr"           ,"slot":"boots"  , "bonusSkill":{"necromancy":75 }},
+"sod.artifact.neck.necr1"             : {"class":"treasure", "value": 2000 , "untranslatedName": "Neck Necr"            ,"slot":"neck"   , "bonusSkill":{"necromancy":"25/1000" }},
+"sod.artifact.cape.necr1"             : {"class":"minor"   , "value": 4000 , "untranslatedName": "Cape Necr"            ,"slot":"cape"   , "bonusSkill":{"necromancy":"50/1000" }},
+"sod.artifact.boots.necr1"            : {"class":"major"   , "value": 6000 , "untranslatedName": "Boots Necr"           ,"slot":"boots"  , "bonusSkill":{"necromancy":"75/1000" }},
 
 "sod.artifact.neck.resist1"           : {"class":"major"   , "value": 2000 , "untranslatedName": "Neck Resist"           ,"slot":"neck"   , "calc": ["h.magicResistChance:add(5 , 100)" ]},
 "sod.artifact.cape.resist1"           : {"class":"major"   , "value": 4000 , "untranslatedName": "Cape Resist"           ,"slot":"cape"   , "calc": ["h.magicResistChance:add(10, 100)" ]},
@@ -121,13 +121,13 @@
 "sod.artifact.misc.archery2"          : {"class":"minor"   , "value": 4000 , "untranslatedName": "Charm Archery"          ,"slot":"misc"  , "calc": ["if h.rangedAttack:num() > 0 then h.rangedAttack:add(10, 100) end "  ]},
 "sod.artifact.misc.archery3"          : {"class":"major"   , "value": 6000 , "untranslatedName": "Charm Archery"          ,"slot":"misc"  , "calc": ["if h.rangedAttack:num() > 0 then h.rangedAttack:add(15, 100) end "  ]},
 
-"sod.artifact.misc.eagle1"            : {"class":"treasure", "value": 1000 , "untranslatedName": "Charm EagleEye"         ,"slot":"misc"   , "bonusSkill":{"eagleEye":50  }},
-"sod.artifact.misc.eagle2"            : {"class":"treasure", "value": 2000 , "untranslatedName": "Charm EagleEye"         ,"slot":"misc"   , "bonusSkill":{"eagleEye":100 }},
-"sod.artifact.misc.eagle3"            : {"class":"minor"   , "value": 3000 , "untranslatedName": "Charm EagleEye"         ,"slot":"misc"   , "bonusSkill":{"eagleEye":150 }},
+"sod.artifact.misc.eagle1"            : {"class":"treasure", "value": 1000 , "untranslatedName": "Charm EagleEye"         ,"slot":"misc"   , "bonusSkill":{"eagleEye":5  }},
+"sod.artifact.misc.eagle2"            : {"class":"treasure", "value": 2000 , "untranslatedName": "Charm EagleEye"         ,"slot":"misc"   , "bonusSkill":{"eagleEye":10 }},
+"sod.artifact.misc.eagle3"            : {"class":"minor"   , "value": 3000 , "untranslatedName": "Charm EagleEye"         ,"slot":"misc"   , "bonusSkill":{"eagleEye":15 }},
 
-"sod.artifact.neck.diplomacy1"        : {"class":"major"   , "value": 5000 , "untranslatedName": "Neck Diplomacy"         ,"slot":"neck"   , "bonusStat":{"surrender":100 }},
-"sod.artifact.ring.diplomacy2"        : {"class":"major"   , "value": 5000 , "untranslatedName": "Ring Diplomacy"         ,"slot":"ring"   , "bonusStat":{"surrender":100 }},
-"sod.artifact.cape.diplomacy3"        : {"class":"major"   , "value": 5000 , "untranslatedName": "Cape Diplomacy"         ,"slot":"cape"   , "bonusStat":{"surrender":100 }},
+"sod.artifact.neck.diplomacy1"        : {"class":"major"   , "value": 5000 , "untranslatedName": "Neck Diplomacy"         ,"slot":"neck"   , "bonusStat":{"surrenderCost":10 }},
+"sod.artifact.ring.diplomacy2"        : {"class":"major"   , "value": 5000 , "untranslatedName": "Ring Diplomacy"         ,"slot":"ring"   , "bonusStat":{"surrenderCost":10 }},
+"sod.artifact.cape.diplomacy3"        : {"class":"major"   , "value": 5000 , "untranslatedName": "Cape Diplomacy"         ,"slot":"cape"   , "bonusStat":{"surrenderCost":10 }},
 
 "hota.artifact.misc.interfere"        : {"class":"minor"   , "value": 5000 , "untranslatedName": "Charm Interfere 10"      ,"slot":"misc"   , "calc": ["h.spReduceOpp:add(10, 100)"  ]},
 "hota.artifact.ring.interfere"        : {"class":"minor"   , "value": 5000 , "untranslatedName": "Ring Interfere 10"       ,"slot":"ring"   , "calc": ["h.spReduceOpp:add(10, 100)"  ]},
@@ -147,11 +147,11 @@
 "sod.artifact.misc.sphereFire"        : {"class":"major"   , "value": 6000 , "untranslatedName": "Fire Sphere"             ,"slot":"misc"  , "calc": ["h.magicIncrease.fire:add(50, 100)" ]},
 "sod.artifact.misc.sphereWater"       : {"class":"major"   , "value": 6000 , "untranslatedName": "Water Sphere"            ,"slot":"misc"  , "calc": ["h.magicIncrease.water:add(50, 100)"]},
 
-"hota.artifact.cape.noMagic12"        : {"class":"major"   , "value": 7500 , "untranslatedName": "Cape No Magic 1-2"        ,"slot":"cape"  , "forbidSpells":{"levels": [1,2], "teachableOnly": true }},
-"sod.artifact.cape.noMagic3plus"      : {"class":"major"   , "value": 8000 , "untranslatedName": "Cape No Magic 3+"         ,"slot":"cape"  , "forbidSpells":{"levels": [3,4,5], "teachableOnly": true }},
-"sod.artifact.misc.noMagic"           : {"class":"relic"   , "value":20000 , "untranslatedName": "Charm No Magic"           ,"slot":"misc"  , "forbidSpells":{"levels": [1,2,3,4,5], "teachableOnly": false }},
+"hota.artifact.cape.noMagic12"        : {"class":"major"   , "value": 7500 , "untranslatedName": "Cape No Magic 1-2"        ,"slot":"cape"  , "forbidSpells":{"levels": [1,2]  , "teachableOnly": false }},
+"sod.artifact.cape.noMagic3plus"      : {"class":"major"   , "value": 8000 , "untranslatedName": "Cape No Magic 3+"         ,"slot":"cape"  , "forbidSpells":{"levels": [3,4,5], "teachableOnly": false }},
+"sod.artifact.misc.noMagic"           : {"class":"relic"   , "value":20000 , "untranslatedName": "Charm No Magic"           ,"slot":"misc"  , "forbidSpells":{"all": true      , "teachableOnly": false }},
 
-"sod.artifact.misc.noDispell"         : {"class":"major"   , "value": 7500 , "untranslatedName": "Charm No Dispell"         , "slot":"misc"  , "special": "noDispell"},
+"sod.artifact.misc.noDispell"         : {"class":"major"   , "value": 7500 , "untranslatedName": "Charm No Dispel"          , "slot":"misc"  , "protectSpells": {"onlySpells": ["sod.spell.dispel", "sod.spell.dispelHelpful" ] }},
 "sod.artifact.misc.noImmune"          : {"class":"relic"   , "value":25000 , "untranslatedName": "Immune Breaker"           , "slot":"misc"  , "special": "noImmune" },
 "hota.artifact.ring.noResurrect"      : {"class":"major"   , "value": 7500 , "untranslatedName": "Ring of Permadeath"       , "slot":"neck"  , "special": "deathPermanent"},
 
@@ -187,8 +187,8 @@
 "hota.artifact.misc.summon"                 : {"class":"unique"  , "value":50000, "untranslatedName": "Fangarm Summon"        ,"slot":"misc"  , "special":"summonFangarm"},
 "sod.artifact.boots.spellWalkWater"         : {"class":"relic"   , "value":10000, "untranslatedName": "Boots of Waterwalk"    ,"slot":"boots" , "permanentCast":{"waterWalk":{}   }},
 "sod.artifact.misc.archeryNoDistance"       : {"class":"major"   , "value": 8000, "untranslatedName": "Bow No Distance"       ,"slot":"misc"  , "noPenalty":["distance", "obstacle"] },
-"sod.artifact.misc.dragonStuff"             : {"class":"unique"  , "value":20000, "untranslatedName": "Charm Dragon Buff"     ,"slot":"misc"  },
-"sod.artifact.misc.noSurrender"             : {"class":"major"   , "value": 5000, "untranslatedName": "Charm No Surrender"    ,"slot":"misc"  , "special":"noSurrender"},
+"sod.artifact.misc.dragonStuff"             : {"class":"unique"  , "value":20000, "untranslatedName": "Charm Dragon Buff"     ,"slot":"misc"  , "special":"dragonsBuffs" },
+"sod.artifact.misc.noSurrender"             : {"class":"major"   , "value": 5000, "untranslatedName": "Charm No Surrender"    ,"slot":"misc"  , "special":"noSurrender"  },
 "sod.artifact.helm.boat"                    : {"class":"relic"   , "value":15000, "untranslatedName": "Helm of Boat Sumon"    ,"slot":"helm"  , "special":"noDamageWhirl",
     "provideSpells": {"onlySpells": ["sod.spell.summonBoat", "sod.spell.scuttleBoat" ] }, "calc": ["h.extraMPWater = h.extraMPWater + 500"       ]},
 
@@ -226,7 +226,7 @@
 "sod.artifact.complex.resources"           : {"class":"complex"  , "value":20000, "untranslatedName": "Complex Resource Income"  ,"slot":"misc"   ,
     "parts":["sod.artifact.cape.resourceCrystal", "sod.artifact.ring.resourceGems","sod.artifact.misc.resourceCrystal","sod.artifact.ring.resourceSulfur"],
     "calc":["h.dayIncome.crystal = h.dayIncome.crystal + 4 "," h.dayIncome.gems    = h.dayIncome.gems + 4 "," h.dayIncome.mercury = h.dayIncome.mercury + 4 "," h.dayIncome.sulfur  = h.dayIncome.sulfur + 4"]},
-"hota.artifact.complex.diplomacy"           : {"class":"complex"  , "value":15000, "untranslatedName": "Complex Diplomacy"       ,"slot":"cape"   ,
+"hota.artifact.complex.diplomacy"           : {"class":"complex"  , "value":15000, "untranslatedName": "Complex Diplomacy"       ,"slot":"cape"   , "special":"neutralDiplomacy",
     "parts": ["sod.artifact.neck.diplomacy1", "sod.artifact.ring.diplomacy2","sod.artifact.cape.diplomacy3"] },
 
 

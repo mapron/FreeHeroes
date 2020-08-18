@@ -473,9 +473,6 @@ bool GameDatabase::load(const std::vector<std_path>& files)
 
         m_impl->m_units.m_sorted.push_back(unit);
         m_impl->findMutable(unit->faction)->units.push_back(unit);
-
-        unit->abilities.immunes.fillFilterCache(m_impl->m_spells.m_unsorted);
-        unit->abilities.vulnerable.fillFilterCache(m_impl->m_spells.m_unsorted);
     }
     for (auto * unit : m_impl->m_units.m_unsorted) {
         LibraryUnitConstPtr unitIt = unit;
@@ -504,9 +501,7 @@ bool GameDatabase::load(const std::vector<std_path>& files)
         if (artifact->parts.empty())
             req.add(artifact->slot);
         artifact->slotReq = req;
-        artifact->provideSpells.fillFilterCache(m_impl->m_spells.m_unsorted);
-        artifact->protectSpells.fillFilterCache(m_impl->m_spells.m_unsorted);
-        artifact->forbidSpells.fillFilterCache(m_impl->m_spells.m_unsorted);
+        artifact->provideSpellsCache = artifact->provideSpells.filterPossible(m_impl->m_spells.m_unsorted);
 
         m_impl->m_artifacts.m_sorted.push_back(artifact);
     }

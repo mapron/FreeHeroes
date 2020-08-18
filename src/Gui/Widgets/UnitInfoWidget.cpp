@@ -471,8 +471,7 @@ QStringList UnitInfoWidget::immuneInfo(const Core::SpellFilter& immunes) const
         return {};
     QStringList parts;
     const QString magicLevelsFormat = tr("Immune to magic levels %1");
-    if (immunes.levels == std::vector{1,2,3,4,5}
-            || immunes.schools == std::vector{Core::MagicSchool::Air, Core::MagicSchool::Earth, Core::MagicSchool::Fire, Core::MagicSchool::Water}) {
+    if (immunes.containsAll()) {
         parts << tr("Immune to all magic");
         return parts;
     } else if (immunes.levels == std::vector{1,2,3,4}) {
@@ -555,6 +554,8 @@ QStringList UnitInfoWidget::vulnerabilityInfo(Core::LibraryUnitConstPtr unit) co
         case AWE::Earth: parts << tr("Attack charged with earth"); break;
         case AWE::Fire : parts << tr("Attack charged with fire");  break;
         case AWE::Ice  : parts << tr("Attack charged with ice");   break;
+        case AWE::Mind : parts << tr("Attack charged against mind");   break;
+        case AWE::Magic: parts << tr("Weak attack against magic immune");break;
         default:
         break;
     }

@@ -181,6 +181,7 @@ struct LibraryArtifact {
     SpellFilter forbidSpells;
     SpellCastParamsList spellCasts;
     std::vector<RangeAttackPenalty> disabledPenalties;
+    std::set<LibrarySpellConstPtr> provideSpellsCache;
 
     std::vector<LibraryArtifactConstPtr> parts;
     LibraryUnitConstPtr battleMachineUnit = nullptr;

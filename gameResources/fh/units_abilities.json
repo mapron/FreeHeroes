@@ -79,7 +79,7 @@
 "sod.unit.manticore"           : {"abilities": {                                                                                                           } },
 "sod.unit.scorpicore"          : {"abilities": {                                                                                                           } },
 "sod.unit.redDragon"           : {"abilities": {"splash":"dragon","splashFriendlyFire":true, "immunes": {"levels": [1,2,3]      }, "giantLevel":1                                            } },
-"sod.unit.blackDragon"         : {"abilities": {"splash":"dragon","splashFriendlyFire":true, "immunes": {"levels": [1,2,3,4,5]  }, "giantLevel":1, "extraDamage":{"enemies": ["sod.unit.titan"], "bonus":"50/100"} } },
+"sod.unit.blackDragon"         : {"abilities": {"splash":"dragon","splashFriendlyFire":true, "immunes": {"all": true  }, "giantLevel":1, "extraDamage":{"enemies": ["sod.unit.titan"], "bonus":"50/100"} } },
 
 
 "sod.unit.imp"                 : {"abilities": {                                                                                                           } },
@@ -140,8 +140,8 @@
 "sod.unit.energyElemental"     : {"abilities": {"type":"nonLiving", "nonLivingType":"elemental", "immunes": {"schools": ["fire"]                        }, "vulnerable": {"tags": ["ice"]                            }, "attackWithElement":"fire" ,"vulnerableAgainstElement":"ice"             } },
 "sod.unit.earthElemental"      : {"abilities": {"type":"nonLiving", "nonLivingType":"elemental", "immunes": {"tags": ["airElem"]                        }, "vulnerable": {"onlySpells":["sod.spell.meteorShower"]    }, "attackWithElement":"earth","vulnerableAgainstElement":"air"             } },
 "sod.unit.magmaElemental"      : {"abilities": {"type":"nonLiving", "nonLivingType":"elemental", "immunes": {"tags": ["airElem"]                        }, "vulnerable": {"onlySpells":["sod.spell.meteorShower"]    }, "attackWithElement":"earth","vulnerableAgainstElement":"air"             }, "spells":{"TODO_DEF_CAST":1} },
-"sod.unit.psychicElemental"    : {"abilities": {"type":"nonLiving", "nonLivingType":"elemental", "splash":"neighbours"                                                                                      } },
-"sod.unit.magicElemental"      : {"abilities": {"type":"nonLiving", "nonLivingType":"elemental", "splash":"neighbours"                                                                                      } },
+"sod.unit.psychicElemental"    : {"abilities": {"type":"nonLiving", "nonLivingType":"elemental", "splash":"neighbours", "attackWithElement":"mind"                                                                                      } },
+"sod.unit.magicElemental"      : {"abilities": {"type":"nonLiving", "nonLivingType":"elemental", "splash":"neighbours", "attackWithElement":"magic", "immunes": {"all": true  }                                                          } },
 "sod.unit.firebird"            : {"abilities": {"splash":"dragon","splashFriendlyFire":true, "giantLevel":1 ,"magicReduce":{"fire": "50/100"}                                                                           } },
 "sod.unit.phoenix"             : {"abilities": {"splash":"dragon","splashFriendlyFire":true, "giantLevel":1 , "immunes": {"schools": ["fire"]    }                                      } },
 

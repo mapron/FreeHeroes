@@ -95,6 +95,7 @@ struct SpellFilter {
     std::vector<MagicSchool> schools;
     std::vector<LibrarySpell::Tag> tags;
     bool teachableOnly = false;
+    bool all = false;
 
     bool isDefault() const {
         return onlySpells.empty() &&
@@ -102,10 +103,17 @@ struct SpellFilter {
                 levels.empty() &&
                 tags.empty()  &&
                 schools.empty() &&
-                !teachableOnly;
+                !teachableOnly &&
+                !all;
     }
 
     bool contains(LibrarySpellConstPtr spell) const {
+        if (isDefault())
+            return false;
+
+        if (containsAll())
+            return true;
+
         bool result = true;
         if (!onlySpells.empty()) {
             result = result && std::find(onlySpells.cbegin(), onlySpells.cend(), spell) != onlySpells.cend();
@@ -136,25 +144,65 @@ struct SpellFilter {
         return result;
     }
 
+    bool containsAll() const {
+        if (isDefault())
+            return false;
+
+        if (all)
+            return true;
+
+        if (!levels.empty()) {
+            auto levelsTmp = levels;
+            std::sort(levelsTmp.begin(), levelsTmp.end());
+            if (levelsTmp == std::vector{1,2,3,4,5})
+                return true;
+        }
+        if (!schools.empty()) {
+            auto schoolsTmp = schools;
+            std::sort(schoolsTmp.begin(), schoolsTmp.end());
+            if (schoolsTmp == std::vector{Core::MagicSchool::Air, Core::MagicSchool::Earth, Core::MagicSchool::Fire, Core::MagicSchool::Water})
+                return true;
+        }
+
+        return false;
+    }
+
+    bool containsMind() const {
+        if (isDefault())
+            return false;
+        if (containsAll())
+            return true;
+        if (std::find(tags.cbegin(), tags.cend(), LibrarySpell::Tag::Mind) != tags.cend())
+            return true;
+
+        return false;
+    }
+
     bool contains(MagicSchool school) const {
-        if (levels == std::vector{1,2,3,4,5})
+        if (containsAll())
             return true;
 
         return std::find(schools.cbegin(), schools.cend(), school) != schools.cend();
     }
 
-    void fillFilterCache(const std::vector<LibrarySpell*> & allPossibleSpells) {
+    std::set<LibrarySpellConstPtr> filterPossible(const std::vector<LibrarySpell*> & allPossibleSpells) {
         if (isDefault())
-            return;
+            return {};
+
+        std::set<LibrarySpellConstPtr> populatedFilter;
         for (auto spell : allPossibleSpells) {
             if (contains(spell))
                 populatedFilter.insert(spell);
         }
+        return populatedFilter;
     }
 
     void makeUnion(const SpellFilter & another) {
         if (another.isDefault())
             return;
+
+        all = all || another.all;
+
         for (auto spell : another.onlySpells) {
            if (std::find(onlySpells.cbegin(), onlySpells.cend(), spell) == onlySpells.cend())
                onlySpells.push_back(spell);
@@ -178,11 +226,6 @@ struct SpellFilter {
            if (std::find(tags.cbegin(), tags.cend(), tag) == tags.cend())
                tags.push_back(tag);
         }
-        std::set<LibrarySpellConstPtr> out;
-        std::set_union(populatedFilter.cbegin(), populatedFilter.cend(),
-                       another.populatedFilter.cbegin(), another.populatedFilter.cend(),
-                       std::inserter(out, out.end()));
-        populatedFilter = out;
 
         auto onlySpellsCopy = onlySpells;
         onlySpells.clear();
@@ -195,8 +238,6 @@ struct SpellFilter {
                 onlySpells.push_back(spell);
         }
     }
-
-    std::set<LibrarySpellConstPtr> populatedFilter;
 };
 
 }

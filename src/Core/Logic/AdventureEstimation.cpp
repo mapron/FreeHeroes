@@ -452,7 +452,7 @@ void AdventureEstimation::calculateHeroStats(AdventureHero& hero)
         }
         hero.estimated = lua["h"];
         for (auto * art : usedForCalculation) {
-            for (auto * spell : art->provideSpells.populatedFilter)
+            for (auto * spell : art->provideSpellsCache)
                 spellbook.insert(spell);
             if (art->scrollSpell)
                 spellbook.insert(art->scrollSpell);

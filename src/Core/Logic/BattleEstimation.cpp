@@ -155,7 +155,7 @@ void BattleEstimation::calculateUnitStats(BattleStack& unit)
 
 bool BattleEstimation::checkSpellTarget(const BattleStack& possibleTarget, LibrarySpellConstPtr spell)
 {
-    if (!possibleTarget.current.immunes.isDefault() && possibleTarget.current.immunes.contains(spell))
+    if (possibleTarget.current.immunes.contains(spell))
         return false;
 
     sol::state lua;
@@ -176,7 +176,7 @@ bool BattleEstimation::checkSpellTarget(const BattleStack& possibleTarget, Libra
 bool BattleEstimation::checkAttackElementPossibility(const BattleStack& possibleTarget, LibraryUnit::Abilities::AttackWithElement element)
 {
     if (element == LibraryUnit::Abilities::AttackWithElement::Fire) {
-        if (!possibleTarget.current.immunes.isDefault() && possibleTarget.current.immunes.contains(MagicSchool::Fire))
+        if (possibleTarget.current.immunes.contains(MagicSchool::Fire))
             return false;
     }
     if (element == LibraryUnit::Abilities::AttackWithElement::Undead) {
@@ -201,7 +201,7 @@ void BattleEstimation::calculateHeroStatsStartBattle(BattleHero& hero, const Bat
     // @todo: animag garrisons? cursed grounds?
     hero.estimated.squadRngParams  = squad.adventure->estimated.squadBonus.rngParams;
     for (auto spell : hero.adventure->estimated.availableSpells) {
-        if (!battleEnvironment.forbidSpells.isDefault() && battleEnvironment.forbidSpells.contains(spell.spell))
+        if (battleEnvironment.forbidSpells.contains(spell.spell))
             continue;
 
         if (spell.manaCost) {

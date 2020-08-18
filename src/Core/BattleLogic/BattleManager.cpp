@@ -1023,6 +1023,14 @@ DamageResult BattleManager::damageRoll(const BonusRatio baseRoll,
         && awe == defender->library->abilities.vulnerableAgainstElement)
         totalBaseFactor += defender->library->abilities.vulnerableBonus;
 
+    static const std::set<UnitNonLivingType> s_mindImmunes {UnitNonLivingType::Golem, UnitNonLivingType::Elemental, UnitNonLivingType::Undead};
+    if (awe == LibraryUnit::Abilities::AttackWithElement::Magic && defender->current.immunes.containsAll())
+        totalReduceFactor *= BonusRatio{1,2};
+    else if (awe == LibraryUnit::Abilities::AttackWithElement::Mind
+             && (defender->current.immunes.containsMind()
+                 || s_mindImmunes.contains(defender->library->abilities.nonLivingType)))
+        totalReduceFactor *= BonusRatio{1,2};
+
     DamageResult damageResult;
     damageResult.damageBaseRoll = std::max(1, baseRoll.roundDownInt());
 
