@@ -43,6 +43,7 @@ struct AdventureStack {
         BonusRatio               magicOppSuccessChance = {1,1};
         SpellFilter              immunes;
         SpellFilter              immunesWithoutBreakable;
+        bool                     regenerate = false;
     };
     EstimatedParams estimated;
 

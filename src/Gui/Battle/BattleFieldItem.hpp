@@ -89,7 +89,6 @@ public:
     void onSelectSpell(Core::LibrarySpellConstPtr spell);
     struct CastPresentation {
          int soundDuration = 0;
-         bool useSpecialSound = false;
          const GuiSpell * spell = nullptr;
     };
     void onCastInternal(const Caster & caster, const AffectedMagic & affected, const CastPresentation & pres);

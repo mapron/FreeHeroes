@@ -272,7 +272,6 @@ GuiSpell::GuiSpell(Sound::IMusicBox& musicBox, IGraphicsLibrary& graphicsLibrary
     , m_bottomAnimation{graphicsLibrary.getObjectAnimation(source->presentationParams.bottomAnimation)}
     , m_projectile     {graphicsLibrary.getObjectAnimation(source->presentationParams.projectile)}
     , m_sound          {musicBox.effectPrepare(Sound::IMusicBox::EffectSettings{source->presentationParams.sound       }.setFadeIn(100).setFadeOut(100))}
-    , m_soundAlt       {musicBox.effectPrepare(Sound::IMusicBox::EffectSettings{source->presentationParams.soundSpecial}.setFadeIn(100).setFadeOut(100))}
 {
 
 }

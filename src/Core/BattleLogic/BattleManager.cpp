@@ -1264,6 +1264,10 @@ void BattleManager::beforeCurrentActive()
         updateState();
         return;
     }
+    if (m_current->count > 0 && m_current->adventure->estimated.regenerate && m_current->health < m_current->current.primary.maxHealth) {
+        m_current->health = m_current->current.primary.maxHealth;
+        m_notifiers->onStackUnderEffect(m_current, IBattleNotify::Effect::Regenerate);
+    }
     checkSidesFirstTurn();
 
     m_notifiers->onStateChanged();

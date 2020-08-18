@@ -348,6 +348,7 @@ void BattleControlWidget::onStackUnderEffect(BattleStackConstPtr stack, Effect e
         case Effect::GoodLuck  : fmt = tr("%1 - high luck, extra damage!"); break;
         case Effect::BadLuck   : fmt = tr("%1 - low luck, damage penalty."); break;
         case Effect::Resist    : fmt = tr("%1 - resist chance deflects casted spell."); break;
+        case Effect::Regenerate: fmt = tr("%1 - regenerates to full health."); break;
     }
 
     addLog(fmt.arg(localizedNameWithCount(stack)), true);

@@ -342,6 +342,7 @@ RTTR_REGISTRATION
         .property("immunes"            , &LibraryUnit::Abilities::immunes)(ref)
         .property("immuneBreakable"    , &LibraryUnit::Abilities::immuneBreakable)
 
+        .property("regenerate"                      , &LibraryUnit::Abilities::regenerate)
 
         .property("weekIncome"                      , &LibraryUnit::Abilities::weekIncome)(ref)
         ;
@@ -596,7 +597,6 @@ RTTR_REGISTRATION
         .property("configOrder"         , &LibrarySpell::Presentation::configOrder)
         .property("animation"           , &LibrarySpell::Presentation::animation)
         .property("sound"               , &LibrarySpell::Presentation::sound)
-        .property("soundSpecial"        , &LibrarySpell::Presentation::soundSpecial)
         ;
 
     registration::class_<LibrarySpell>("LibrarySpell")

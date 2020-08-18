@@ -32,7 +32,6 @@ struct LibrarySpell {
 
         std::string animation;
         std::string sound;
-        std::string soundSpecial;
 
         std::string bottomAnimation;
         std::string projectile;

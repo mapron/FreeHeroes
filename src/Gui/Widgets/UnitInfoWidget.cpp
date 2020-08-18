@@ -313,6 +313,7 @@ UnitInfoWidget::UnitInfoWidget(Core::BattleStackConstPtr battle,
     }
 
     auto abilsText = abilitiesText(adventure->library);
+    abilsText << abilitiesTextExtra(adventure);
     abilsText << retaliationsDescription(battle ? battle->current.maxRetaliations : adventure->library->abilities.maxRetaliations);
     auto resistInfo = this->resistInfo(battle ? battle->current.magicReduce : adventure->estimated.magicReduce,
                                          battle ? battle->current.magicOppSuccessChance : adventure->estimated.magicOppSuccessChance);
@@ -417,6 +418,15 @@ QStringList UnitInfoWidget::abilitiesText(Core::LibraryUnitConstPtr params) cons
         parts << tr("Ignores %1 of attacker's attack").arg(toString(BonusRatio{1,1} - a.reduceAttackerAttack, false));
 
 
+
+    return parts;
+}
+
+QStringList UnitInfoWidget::abilitiesTextExtra(AdventureStackConstPtr adventure) const
+{
+    QStringList parts;
+    if (adventure->estimated.regenerate)
+        parts << tr("Regenerates health");
     return parts;
 }
 

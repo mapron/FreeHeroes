@@ -772,23 +772,23 @@ void BattleFieldItem::beforeAttackRanged(BattleStackConstPtr stack,  const Affec
 
 void BattleFieldItem::onStackUnderEffect(BattleStackConstPtr stack, Effect effect)
 {
-    const std::vector<std::string> res { // GoodMorale, BadMorale, GoodLuck, BadLuck, Resist
-        "sod.spell.mirth"       ,
-        "sod.spell.sorrow"      ,
-        "sod.spell.fortune"     ,
-        "sod.spell.misfortune"  ,
-        "sod.spell.magicMirror" ,
+    const std::vector<std::string> res { // GoodMorale, BadMorale, GoodLuck, BadLuck, Resist, Regenerate
+       "sod.effect.goodMorale"   ,
+       "sod.effect.badMorale"    ,
+       "sod.effect.goodLuck"     ,
+       "sod.effect.badLuck"      ,
+       "sod.effect.resist"       ,
+       "sod.effect.regen"        ,
     };
-    const QList<int> durations {1800, 2300, 3500, 2600, 1800};
+    const QList<int> durations {1800, 2300, 3500, 2600};
     const int index = static_cast<int>(effect);
     AffectedMagic affected;
     affected.targets.push_back({stack, {}});
     affected.area.push_back(stack->pos.mainPos());
     CastPresentation pres;
 
-    pres.useSpecialSound = true;
     pres.spell = m_modelsProvider.spells()->find(res[index]);
-    pres.soundDuration = durations.value(index);
+    pres.soundDuration = durations.value(index, 1800);
 
     onCastInternal({}, affected, pres);
 }
@@ -842,12 +842,10 @@ void BattleFieldItem::onCastInternal(const Caster & caster, const AffectedMagic 
     auto sequencer = makeSequencer();
     (void)caster;
 
-    //const int maxDuration = soundDuration;
     const int animationDuration = std::max(1, 1500 * m_appSettings.battle().otherTimePercent / 100);
     const int animationDurationExtend = animationDuration + 2000;
     const int soundDurationMax = std::min(pres.soundDuration, animationDurationExtend);
 
-    //QString::fromStdString(spell->presentationParams.projectile).split(',', Qt::SkipEmptyParts);
     bool animationOnMainPosition = pres.spell->getSource()->presentationParams.animationOnMainPosition;
 
 
@@ -916,7 +914,7 @@ void BattleFieldItem::onCastInternal(const Caster & caster, const AffectedMagic 
         }
     }
 
-    auto soundHandle = pres.useSpecialSound ? pres.spell->getSoundAlt() : pres.spell->getSound();
+    auto soundHandle = pres.spell->getSound();
     sequencer->beginParallel();
         sequencer->addCallback([soundHandle, soundDurationMax](){
             soundHandle->playFor(soundDurationMax);

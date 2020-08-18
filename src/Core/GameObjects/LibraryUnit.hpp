@@ -84,6 +84,8 @@ struct LibraryUnit {
         BonusRatio magicOppSuccessChance = {1,1};
         BonusRatio magicOppSuccessChanceNeighbours = {1,1};
 
+        bool regenerate = false;
+
         ResourceAmount weekIncome;
 
         AttackWithElement attackWithElement = AttackWithElement::None;

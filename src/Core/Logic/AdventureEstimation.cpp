@@ -96,6 +96,7 @@ void AdventureEstimation::bindTypes(sol::state& lua)
         "extraRounds"           , &AdventureHero::EstimatedParams::extraRounds,
         "dayIncome"             , &AdventureHero::EstimatedParams::dayIncome,
 
+        "regenerateStackHealth" , &AdventureHero::EstimatedParams::regenerateStackHealth,
         "factionsAlliance"      , &AdventureHero::EstimatedParams::factionsAllianceSpecial
     );
 }
@@ -700,6 +701,8 @@ void calculateUnitStats(LibraryGameRulesConstPtr rules, AdventureStack& unit, co
     if (!unit.library->abilities.immuneBreakable)
         cur.immunesWithoutBreakable    = cur.immunes;
 
+    cur.regenerate = unit.library->abilities.regenerate;
+
     if (!hero.isValid())
         return;
 
@@ -715,7 +718,11 @@ void calculateUnitStats(LibraryGameRulesConstPtr rules, AdventureStack& unit, co
     cur.magicOppSuccessChance *= BonusRatio(1,1) - std::min(heroEstimate.magicResistChance, BonusRatio(99,100));
 
     auto & maxHealth = cur.primary.maxHealth;
-    maxHealth   = BonusRatio::calcAddIncrease(maxHealth, heroEstimate.unitLife);
+    if (unit.library->abilities.type == UnitType::Living) {
+        cur.regenerate = cur.regenerate || heroEstimate.regenerateStackHealth;
+        maxHealth   = BonusRatio::calcAddIncrease(maxHealth, heroEstimate.unitLife);
+    }
+
     maxHealth   += heroEstimate.unitLifeAbs;
 
     cur.primary.ad.attack   = std::clamp(cur.primary.ad.attack         , 0, rules->limits.maxUnitAd.attack );

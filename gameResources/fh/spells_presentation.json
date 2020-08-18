@@ -73,7 +73,6 @@
 "sod.spell.disease"                   : [ [  0         , "spellbon:73", "spellint:74", "spells:73", "spellscr:73",  "sp05_"   , "sod.spell.disease"   ] ],
 "sod.spell.paralyze"                  : [ [  0         , "spellbon:74", "spellint:75", "spells:74", "spellscr:74",  ""        , "sod.spell.paralyze"  ] ],
 "sod.spell.age"                       : [ [  0         , "spellbon:75", "spellint:76", "spells:75", "spellscr:75",  "sp01_"   , "sod.spell.age"       ] ],
-"sod.spell.deathCloud"                : [ [  0         , "spellbon:76", "spellint:77", "spells:76", "spellscr:76",  "sp04_"   , "sod.spell.deathcld"  ] ],
 "sod.spell.thunderbolt"               : [ [  0         , "spellbon:77", "spellint:78", "spells:77", "spellscr:77", "c11spa1"  , "sod.spell.lightblt"  ] ],
 "sod.spell.dispelHelpful"             : [ [  0         , "spellbon:78", "spellint:79", "spells:78", "spellscr:78", "c05spw"   , "sod.spell.dispell"   ] ],
 "sod.spell.deathStare"                : [ [  0         , "spellbon:79", "spellint:80", "spells:79", "spellscr:79", "c07spe0"  , "sod.spell.deathstr"  ] ],
@@ -113,11 +112,17 @@
 "sod.spell.titanBolt"                 : { "pres": {"bottomAnimation":"c03spa0"} },
 "sod.spell.thunderbolt"               : { "pres": {"bottomAnimation":"c03spa0"} },
 
-"sod.spell.mirth"                     : { "pres": {"soundSpecial":"goodmrle"} },
-"sod.spell.sorrow"                    : { "pres": {"soundSpecial":"badmrle" } },
-"sod.spell.fortune"                   : { "pres": {"soundSpecial":"goodluck"} },
-"sod.spell.misfortune"                : { "pres": {"soundSpecial":"badluck" } },
-"sod.spell.magicMirror"               : { "pres": {"soundSpecial":"magicres"} }
+
+"sod.effect.fireball"                : { "pres": { "animation":"c13spf" , "sound":"sod.spell.spontcomb" } },
+"sod.effect.deathCloud"              : { "pres": { "animation":"sp04_"  , "sound":"sod.spell.deathcld"  } },
+
+"sod.effect.goodMorale"              : { "pres": { "animation":"c09spw0" , "sound":"goodmrle" } },
+"sod.effect.badMorale"               : { "pres": { "animation":"c14spe0" , "sound":"badmrle"  } },
+"sod.effect.goodLuck"                : { "pres": { "animation":"c09spa0" , "sound":"goodluck" } },
+"sod.effect.badLuck"                 : { "pres": { "animation":"c10spf0" , "sound":"badluck"  } },
+"sod.effect.resist"                  : { "pres": { "animation":"c02spa0" , "sound":"magicres" } },
+"sod.effect.regen"                   : { "pres": { "animation":"sp12_"   , "sound":"regener"  } }
+
 
 
 }

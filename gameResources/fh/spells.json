@@ -73,7 +73,6 @@
 "sod.spell.disease"                   : [     false   , "temp"      , "bad"  , "units"        ,  "any"  ,  5,       0         , "Disease"                    ],
 "sod.spell.paralyze"                  : [     false   , "temp"      , "bad"  , "units"        ,  "any"  ,  5,       0         , "Paralyze"                   ],
 "sod.spell.age"                       : [     false   , "temp"      , "bad"  , "units"        ,  "any"  ,  5,       0         , "Age"                        ],
-"sod.spell.deathCloud"                : [     false   , "special"   , ""     , "units"        ,  "any"  ,  5,       0         , "Death cloud"                ],
 "sod.spell.thunderbolt"               : [     false   , "special"   , ""     , "units"        ,  "any"  ,  5,       0         , "Thunderbolt"                ],
 "sod.spell.dispelHelpful"             : [     false   , "special"   , ""     , "units"        ,  "water",  5,       0         , "Dispel"                     ],
 "sod.spell.deathStare"                : [     false   , "special"   , ""     , "units"        ,  "any"  ,  5,       0         , "Death Stare"                ],
@@ -88,8 +87,17 @@
 "sod.spell.fly"                       : [     true    , "adventure" , ""     , ""             ,  "air"  ,  5,       20        , "Fly"                        ],
 "sod.spell.waterWalk"                 : [     true    , "adventure" , ""     , ""             ,  "water",  4,       12        , "Water Walk"                 ],
 "sod.spell.dimensionDoor"             : [     true    , "adventure" , ""     , ""             ,  "air"  ,  5,       25        , "Dimension Door"             ],
-"sod.spell.townPortal"                : [     true    , "adventure" , ""     , ""             ,  "earth",  4,       16        , "Town Portal"                ]
+"sod.spell.townPortal"                : [     true    , "adventure" , ""     , ""             ,  "earth",  4,       16        , "Town Portal"                ],
 
+"sod.effect.fireball"                 : [     false   , "special" ],
+"sod.effect.deathCloud"               : [     false   , "special" ],
+
+"sod.effect.goodMorale"               : [     false   , "special" ],
+"sod.effect.badMorale"                : [     false   , "special" ],
+"sod.effect.goodLuck"                 : [     false   , "special" ],
+"sod.effect.badLuck"                  : [     false   , "special" ],
+"sod.effect.resist"                   : [     false   , "special" ],
+"sod.effect.regen"                    : [     false   , "special" ]
 
 }
 

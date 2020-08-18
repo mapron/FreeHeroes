@@ -43,7 +43,7 @@ public:
     virtual void beforeWait(BattleStackConstPtr stack) = 0;
     virtual void beforeGuard(BattleStackConstPtr stack, int defBonus) = 0;
 
-    enum class Effect { GoodMorale, BadMorale, GoodLuck, BadLuck, Resist };
+    enum class Effect { GoodMorale, BadMorale, GoodLuck, BadLuck, Resist, Regenerate };
     virtual void onStackUnderEffect(BattleStackConstPtr stack, Effect effect) = 0;
     struct Caster {
         BattleHeroConstPtr hero = nullptr;

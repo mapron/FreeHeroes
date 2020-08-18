@@ -200,8 +200,8 @@
 "sod.artifact.complex.noBowPenalty"         : { "pres": { "orderCategory" : "complex", "orderGroup":  0, "order": 9, "iconStash":"sod.sprites.artifactsInventory:137" , "iconBonus":"sod.sprites.artifactsBonus:137" } },
 "sod.artifact.complex.manaRegen"            : { "pres": { "orderCategory" : "complex", "orderGroup":  0, "order": 10,"iconStash":"sod.sprites.artifactsInventory:138" , "iconBonus":"sod.sprites.artifactsBonus:138" } },
 "sod.artifact.complex.spellRounds"          : { "pres": { "orderCategory" : "complex", "orderGroup":  0, "order": 11,"iconStash":"sod.sprites.artifactsInventory:139" , "iconBonus":"sod.sprites.artifactsBonus:139" } },
+"sod.artifact.complex.resources"            : { "pres": { "orderCategory" : "complex", "orderGroup":  0, "order":12, "iconStash":"sod.sprites.artifactsInventory:140" , "iconBonus":"sod.sprites.artifactsBonus:140" } },
 
-"hota.artifact.complex.resources"           : { "pres": { "orderCategory" : "complex", "orderGroup":  0, "order":12, "iconStash":"sod.sprites.artifactsInventory:140" , "iconBonus":"sod.sprites.artifactsBonus:140" } },
 "hota.artifact.complex.diplomacy"           : { "pres": { "orderCategory" : "complex", "orderGroup":  0, "order":13, "iconStash":"sod.sprites.artifactsInventory:141" , "iconBonus":"sod.sprites.artifactsBonus:141" } },
 "hota.artifact.complex.resist"              : { "pres": { "orderCategory" : "complex", "orderGroup":  0, "order":14, "iconStash":"sod.sprites.artifactsInventory:142" , "iconBonus":"sod.sprites.artifactsBonus:142" } },
 "hota.artifact.complex.buff"                : { "pres": { "orderCategory" : "complex", "orderGroup":  0, "order":15, "iconStash":"sod.sprites.artifactsInventory:143" , "iconBonus":"sod.sprites.artifactsBonus:143" } },

@@ -31,7 +31,7 @@ struct LibraryGameRules {
 
     struct Limits {
         int stacks = 7;
-        int maxHeroLevel = 75;
+        int maxHeroLevel = 75;  // @todo: not really applied for now.
         PrimaryAttackParams maxHeroAd;
         PrimaryMagicParams  maxHeroMagic;
         PrimaryAttackParams maxUnitAd;

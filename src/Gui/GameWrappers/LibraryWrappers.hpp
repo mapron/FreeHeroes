@@ -166,7 +166,6 @@ public:
     SpritePtr getProjectile     () const { return m_projectile->get(); }
 
     Sound::ISoundResourcePtr getSound   () const { return m_sound; }
-    Sound::ISoundResourcePtr getSoundAlt() const { return m_soundAlt; }
 
     bool hasBottomAnimation() const { return m_bottomAnimation->exists(); }
     bool hasProjectile     () const { return m_projectile->exists(); }
@@ -186,7 +185,6 @@ private:
     IAsyncSpritePtr m_projectile;
 
     Sound::ISoundResourcePtr m_sound;
-    Sound::ISoundResourcePtr m_soundAlt;
     //std::string sound;
 
 };

@@ -212,6 +212,7 @@ struct AdventureHero {
         BonusRatio mpIncrease      = {0, 1};      // skills
         BonusRatio mpWaterIncrease = {0, 1};      // skills
 
+        bool regenerateStackHealth = false;      // artifacts.
         bool factionsAllianceSpecial = false;    //  AA.
 
         MoraleDetails moraleDetails;

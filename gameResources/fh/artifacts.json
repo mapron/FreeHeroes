@@ -200,7 +200,7 @@
 "sod.artifact.complex.necro"                : {"class":"complex"  , "value":12000,  "untranslatedName": "Complex Necro"            ,"slot":"cape"   ,
     "parts": ["sod.artifact.neck.necr1", "sod.artifact.cape.necr1" ,"sod.artifact.boots.necr1" ]},
 "sod.artifact.complex.life"                 : {"class":"complex"  , "value":20000,  "untranslatedName": "Complex Extra Life"       ,"slot":"misc"   ,
-    "parts":["sod.artifact.ring.life1a" , "sod.artifact.ring.life1b", "sod.artifact.misc.life2"   ], "calc": ["h.unitLife:set(25, 100)"  ]},
+    "parts":["sod.artifact.ring.life1a" , "sod.artifact.ring.life1b", "sod.artifact.misc.life2"   ], "calc": ["h.unitLife:set(25, 100)", "h.regenerateStackHealth=true" ]},
 "sod.artifact.complex.debuff"               : {"class":"complex"  , "value":12000,  "untranslatedName": "Complex Debuff"           ,"slot":"torso"  ,
     "parts":["sod.artifact.sword.att3", "sod.artifact.shield.def3","sod.artifact.torso.spl2" ,"sod.artifact.helm.int2"],
     "spellCasts":[{"spell":"sod.spell.slow", "sp":50, "level":3},{"spell":"sod.spell.curse", "sp":50, "level":3},{"spell":"sod.spell.weakness", "sp":50, "level":3},{"spell":"sod.spell.misfortune", "sp":50, "level":3}]},
@@ -222,7 +222,7 @@
     "parts":["sod.artifact.neck.rounds1", "sod.artifact.ring.rounds2" ,"sod.artifact.cape.rounds3" ], "calc": ["h.extraRounds = h.extraRounds + 50" ]},
 
 
-"hota.artifact.complex.resources"           : {"class":"complex"  , "value":20000, "untranslatedName": "Complex Resource Income"  ,"slot":"misc"   ,
+"sod.artifact.complex.resources"           : {"class":"complex"  , "value":20000, "untranslatedName": "Complex Resource Income"  ,"slot":"misc"   ,
     "parts":["sod.artifact.cape.resourceCrystal", "sod.artifact.ring.resourceGems","sod.artifact.misc.resourceCrystal","sod.artifact.ring.resourceSulfur"],
     "calc":["h.dayIncome.crystal = h.dayIncome.crystal + 4 "," h.dayIncome.gems    = h.dayIncome.gems + 4 "," h.dayIncome.mercury = h.dayIncome.mercury + 4 "," h.dayIncome.sulfur  = h.dayIncome.sulfur + 4"]},
 "hota.artifact.complex.diplomacy"           : {"class":"complex"  , "value":15000, "untranslatedName": "Complex Diplomacy"       ,"slot":"cape"   ,
