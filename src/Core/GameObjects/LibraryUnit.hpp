@@ -43,6 +43,10 @@ struct LibraryUnit {
             BonusRatio chance {1,1};
         };
         using CastsOnHit = std::vector<CastOnHit>;
+        struct FixedCast {
+            SpellCastParams params;
+            int count = 0;
+        };
 
         UnitType type = UnitType::Living;
         UnitNonLivingType nonLivingType = UnitNonLivingType::None;
@@ -95,6 +99,7 @@ struct LibraryUnit {
         bool regenerate = false;
 
         CastsOnHit castsOnHit;
+        FixedCast fixedCast;
 
         ResourceAmount weekIncome;
     };

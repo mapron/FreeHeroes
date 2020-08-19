@@ -33,12 +33,12 @@
 <context>
     <name>FreeHeroes::Gui::BattleControlWidget</name>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="221"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="223"/>
         <source>%1 %2 from %3 to %4</source>
         <translation>%1 %2 из %3 в %4</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="223"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="225"/>
         <source>moving</source>
         <translation>
             <numerusform>идёт</numerusform>
@@ -47,7 +47,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="231"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="233"/>
         <source>dealing</source>
         <translation>
             <numerusform>наносит</numerusform>
@@ -56,12 +56,12 @@
         </translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="239"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="241"/>
         <source>, deaths %1 (remain %2)</source>
         <translation>, смертей %1 (останется %2)</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="243"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="245"/>
         <source>retaliate on</source>
         <translation>
             <numerusform>бьёт в ответ</numerusform>
@@ -70,7 +70,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="243"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="245"/>
         <source>attack</source>
         <translation>
             <numerusform>бьёт</numerusform>
@@ -79,38 +79,38 @@
         </translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="247"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="249"/>
         <source>%1 %2 %3, %4 %5</source>
         <translation>%1 %2 %3, %4 %5</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="253"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="255"/>
         <source>%1 %2</source>
         <translation>%1 %2</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="257"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="259"/>
         <source>, splash has done damage to: </source>
         <translation>, сплеш наносит урон по: </translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="267"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="269"/>
         <source>%1 - dmg. %2, deaths %3 (remain %4) </source>
         <translation>%1 - ур. %2, смертей %3 (ост. %4) </translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="272"/>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="385"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="274"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="388"/>
         <source>%1 - dmg. %2, killing all %3</source>
         <translation>%1 - ур. %2, убивая всех %3</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="285"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="287"/>
         <source>%1 %2 for better move</source>
         <translation>%1 %2 лучший момент для атаки</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="287"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="289"/>
         <source>is waiting</source>
         <translation>
             <numerusform>медлит и выжидает</numerusform>
@@ -119,12 +119,12 @@
         </translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="292"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="294"/>
         <source>%1 %2 defending position and get +%3 defense</source>
         <translation>%1 %2 оборонительную позицию, получая +%3 к защите</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="294"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="296"/>
         <source>is taking</source>
         <translation>
             <numerusform>занимает</numerusform>
@@ -133,171 +133,171 @@
         </translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="346"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="349"/>
         <source>%1 - high morale allows one more attack!</source>
         <translation>%1 - высокий боевой дух позволяет сделать еще одну атаку!</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="347"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="350"/>
         <source>%1 - low morale forces to skip turn.</source>
         <translation>%1 - низкий боевой дух вынуждает пропусть ход.</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="348"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="351"/>
         <source>%1 - high luck, extra damage!</source>
         <translation>%1 - удачная атака, дополнительный урон!</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="349"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="352"/>
         <source>%1 - low luck, damage penalty.</source>
         <translation>%1 - атака неудачна, уменьшенный урон.</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="351"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="354"/>
         <source>%1 - regenerates to full health.</source>
         <translation>%1 - восстанавливает здоровье до максимума.</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="366"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="369"/>
         <source>casting %1</source>
         <translation>колдовство заклинания %1</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="371"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="374"/>
         <source>, as a result:</source>
         <translation>, в результате: </translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="380"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="383"/>
         <source>%1 - dmg. %2, deaths %3 (remain %4)</source>
         <translation>%1 - ур. %2, смертей %3 (ост. %4)</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="447"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="450"/>
         <source>, deaths %1</source>
         <translation>, смертей %1</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="461"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="464"/>
         <source>Target attack: %1, damage %2%3</source>
         <translation>Атаковать цель: %1, урон %2%3</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="470"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="473"/>
         <source>Possible retaliation: damage %1%2</source>
         <translation>Возможна ответная атака, урон %1%2</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="476"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="479"/>
         <source>, extra affected: </source>
         <translation>, также задеты: </translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="484"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="487"/>
         <source>%1 - damage %2%3</source>
         <translation>%1 - урон %2%3</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="270"/>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="383"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="272"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="386"/>
         <source>%1 - dmg. %2</source>
         <translation>%1 - ур. %2</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="525"/>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="527"/>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="551"/>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="560"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="528"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="530"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="554"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="563"/>
         <source>succ. ch.</source>
         <translation>шанс усп.</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="551"/>
         <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="554"/>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="560"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="557"/>
         <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="563"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="566"/>
         <source>(&lt;i&gt;%1%&lt;/i&gt; %2)</source>
         <translation>(&lt;i&gt;%1%&lt;/i&gt; %2)</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="554"/>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="563"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="557"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="566"/>
         <source>of base</source>
         <translation>базового</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="546"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="549"/>
         <source>%1 - damage %2, deaths %3</source>
         <translation>%1 - урон %2, смертей %3</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="230"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="232"/>
         <source>%1 %2 total damage (N * %3 * %4)</source>
         <translation>%1 %2 итогового урона (N * %3 * %4)</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="237"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="239"/>
         <source>, killing all %1 creatures</source>
         <translation>, убивая всех %1 существ</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="338"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="341"/>
         <source>Starting round &lt;i&gt;%1&lt;/i&gt;</source>
         <translation>Начало раунда &lt;i&gt;%1&lt;/i&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="350"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="353"/>
         <source>%1 - resist chance deflects casted spell.</source>
         <translation>%1 - шанс сопротивления отражает наложенное заклинание.</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="491"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="494"/>
         <source>Move to %1</source>
         <translation>Идти к %1</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="495"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="498"/>
         <source>Cast %1</source>
         <translation>Колдовать %1</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="498"/>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="531"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="501"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="534"/>
         <source>total damage %1, deaths %2</source>
         <translation>всего урона %1, смертей %2</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="505"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="508"/>
         <source>, deaths by creature: </source>
         <translation>, смертей по существам: </translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="519"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="522"/>
         <source>%1 - %2</source>
         <translation>%1 - %2</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="536"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="539"/>
         <source>, affected: </source>
         <translation>, затронуты: </translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="647"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="653"/>
         <source>Attacker side now controlled by AI.</source>
         <translation>Нападающая сторона теперь управляется ИИ.</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="647"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="653"/>
         <source>Attacker side now controlled by Player.</source>
         <translation>Нападающая сторона теперь управляется игроком.</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="650"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="656"/>
         <source>Defender side now controlled by AI.</source>
         <translation>Защищающаяся сторона теперь управляется ИИ.</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="650"/>
+        <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="656"/>
         <source>Defender side now controlled by Player.</source>
         <translation>Защищающаяся сторона теперь управляется игроком.</translation>
     </message>
@@ -1358,53 +1358,53 @@
 <context>
     <name>FreeHeroes::Gui::UnitInfoWidget</name>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="205"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="201"/>
         <source>Attack</source>
         <translation>Атака</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="208"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="204"/>
         <source>Defense</source>
         <translation>Защита</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="212"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="208"/>
         <source>Shoots</source>
         <comment>Count</comment>
         <translation>Стреляет</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="215"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="211"/>
         <source>Damage</source>
         <translation>Урон</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="219"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="215"/>
         <source>Health</source>
         <translation>Здоровье</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="219"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="215"/>
         <source>Max Health</source>
         <translation>Макс. здоровье</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="223"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="219"/>
         <source>Speed</source>
         <translation>Скорость</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="228"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="224"/>
         <source>Count</source>
         <translation>Число</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="297"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="293"/>
         <source>Disband squad</source>
         <translation>Распустить отряд</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="304"/>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="300"/>
         <source>Are you sure to disband this squad?</source>
         <translation>Вы действительно хотите распустить отряд?</translation>
     </message>
@@ -1512,6 +1512,31 @@
         <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="558"/>
         <source>Weak attack against magic immune</source>
         <translation>Слабая атака против иммунных к магии</translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="573"/>
+        <source>Casting &apos;%1&apos; on hit</source>
+        <translation>Колдует &apos;%1&apos; при ударе</translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="575"/>
+        <source>Casting &apos;%1&apos; on hit with %2 chance</source>
+        <translation>Колдует &apos;%1&apos; при ударе с %2 шансом</translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="580"/>
+        <source>Casting &apos;%1&apos; (%2)</source>
+        <translation>Колдует &apos;%1&apos; (%2)</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="582"/>
+        <source>%1 times</source>
+        <translatorcomment>Разы</translatorcomment>
+        <translation>
+            <numerusform>%1 раз</numerusform>
+            <numerusform>%1 раза</numerusform>
+            <numerusform>%1 раз</numerusform>
+        </translation>
     </message>
     <message>
         <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="392"/>

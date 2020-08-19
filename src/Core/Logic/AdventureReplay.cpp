@@ -47,11 +47,6 @@ bool AdventureReplayData::load(const std_path& filename, IGameDatabase & gameDat
     Reflection::deserializeFromJson(idResolver, m_adv.m_att, jsonAdventure["att"]);
     Reflection::deserializeFromJson(idResolver, m_adv.m_def, jsonAdventure["def"]);
 
-    for (const auto & event : m_bat.m_records) {
-        if (event.type == BattleReplayData::EventRecord::Type::Cast) {
-             assert(event.castParams.m_spell);
-        }
-    }
     return true;
 }
 

@@ -104,13 +104,15 @@ RTTR_REGISTRATION
 
     registration::class_<BattlePlanMoveParams>("BattlePlanMoveParams")
         .constructor<>()
-        .property("target"    , &BattlePlanMoveParams::m_movePos)(ref)
-         .property("targetDbg"    , &BattlePlanMoveParams::m_moveFrom)(ref)
+        .property("target"       , &BattlePlanMoveParams::m_movePos)(ref)
+        .property("targetDbg"    , &BattlePlanMoveParams::m_moveFrom)(ref)
         ;
     registration::class_<BattlePlanCastParams>("BattlePlanCastParams")
         .constructor<>()
         .property("target"    , &BattlePlanCastParams::m_target)(ref)
         .property("spell"     , &BattlePlanCastParams::m_spell)(metadata("optional", true))
+        .property("isHeroCast", &BattlePlanCastParams::m_isHeroCast)
+        .property("isUnitCast", &BattlePlanCastParams::m_isUnitCast)
         ;
 
 }

@@ -121,7 +121,7 @@
 "sod.unit.orc"                 : {"abilities": {                                                                                                           } },
 "sod.unit.orcChieftain"        : {"abilities": {                                                                                                           } },
 "sod.unit.ogre"                : {"abilities": {                                                                                                           } },
-"sod.unit.ogreMage"            : {"abilities": {                                                                                                           }, "spells":{"TODO_BLOODLUST_CAST":1} },
+"sod.unit.ogreMage"            : {"abilities": { "fixedCast": {"params":{"spell":"sod.spell.bloodLust", "sp":3, "level":2}, "count": 3 }                   } },
 "sod.unit.roc"                 : {"abilities": {                                                                                                           } },
 "sod.unit.thunderbird"         : {"abilities": {                                                                                                           }, "spells":{"TODO_THUNDER_CAST":1} },
 "sod.unit.cyclop"              : {"abilities": {                                                                                                           } },
@@ -133,17 +133,17 @@
 "sod.unit.pixie"               : {"abilities": {                                                                                                           } },
 "sod.unit.sprite"              : {"abilities": {                                                                                                           } },
 "sod.unit.airElemental"        : {"abilities": {"type":"nonLiving", "nonLivingType":"elemental", "immunes": {"onlySpells":["sod.spell.meteorShower"]    }, "vulnerable": {"tags": ["airElem"]                        }, "attackWithElement":"air"  ,"vulnerableAgainstElement":"earth"           } },
-"sod.unit.stormElemental"      : {"abilities": {"type":"nonLiving", "nonLivingType":"elemental", "immunes": {"onlySpells":["sod.spell.meteorShower"]    }, "vulnerable": {"tags": ["airElem"]                        }, "attackWithElement":"air"  ,"vulnerableAgainstElement":"earth"           }, "spells":{"TODO_DEF_CAST":1} },
+"sod.unit.stormElemental"      : {"abilities": {"type":"nonLiving", "nonLivingType":"elemental", "immunes": {"onlySpells":["sod.spell.meteorShower"]    }, "vulnerable": {"tags": ["airElem"]                        }, "attackWithElement":"air"  ,"vulnerableAgainstElement":"earth", "fixedCast": {"params":{"spell":"sod.spell.protectFromAir", "sp":3, "level":2}, "count": 3 }           } },
 "sod.unit.waterElemental"      : {"abilities": {"type":"nonLiving", "nonLivingType":"elemental", "immunes": {"tags": ["ice"]                            }, "vulnerable": {"tags": ["fireElem"]                       }, "attackWithElement":"ice"  ,"vulnerableAgainstElement":"fire"            } },
-"sod.unit.iceElemental"        : {"abilities": {"type":"nonLiving", "nonLivingType":"elemental", "immunes": {"tags": ["ice"]                            }, "vulnerable": {"tags": ["fireElem"]                       }, "attackWithElement":"ice"  ,"vulnerableAgainstElement":"fire"            } },
+"sod.unit.iceElemental"        : {"abilities": {"type":"nonLiving", "nonLivingType":"elemental", "immunes": {"tags": ["ice"]                            }, "vulnerable": {"tags": ["fireElem"]                       }, "attackWithElement":"ice"  ,"vulnerableAgainstElement":"fire", "fixedCast": {"params":{"spell":"sod.spell.protectFromWater", "sp":3, "level":2}, "count": 3 }            } },
 "sod.unit.fireElemental"       : {"abilities": {"type":"nonLiving", "nonLivingType":"elemental", "immunes": {"schools": ["fire"]                        }, "vulnerable": {"tags": ["ice"]                            }, "attackWithElement":"fire" ,"vulnerableAgainstElement":"ice"             } },
-"sod.unit.energyElemental"     : {"abilities": {"type":"nonLiving", "nonLivingType":"elemental", "immunes": {"schools": ["fire"]                        }, "vulnerable": {"tags": ["ice"]                            }, "attackWithElement":"fire" ,"vulnerableAgainstElement":"ice"             } },
+"sod.unit.energyElemental"     : {"abilities": {"type":"nonLiving", "nonLivingType":"elemental", "immunes": {"schools": ["fire"]                        }, "vulnerable": {"tags": ["ice"]                            }, "attackWithElement":"fire" ,"vulnerableAgainstElement":"ice", "fixedCast": {"params":{"spell":"sod.spell.protectFromFire", "sp":3, "level":2}, "count": 3 }             } },
 "sod.unit.earthElemental"      : {"abilities": {"type":"nonLiving", "nonLivingType":"elemental", "immunes": {"tags": ["airElem"]                        }, "vulnerable": {"onlySpells":["sod.spell.meteorShower"]    }, "attackWithElement":"earth","vulnerableAgainstElement":"air"             } },
-"sod.unit.magmaElemental"      : {"abilities": {"type":"nonLiving", "nonLivingType":"elemental", "immunes": {"tags": ["airElem"]                        }, "vulnerable": {"onlySpells":["sod.spell.meteorShower"]    }, "attackWithElement":"earth","vulnerableAgainstElement":"air"             }, "spells":{"TODO_DEF_CAST":1} },
+"sod.unit.magmaElemental"      : {"abilities": {"type":"nonLiving", "nonLivingType":"elemental", "immunes": {"tags": ["airElem"]                        }, "vulnerable": {"onlySpells":["sod.spell.meteorShower"]    }, "attackWithElement":"earth","vulnerableAgainstElement":"air", "fixedCast": {"params":{"spell":"sod.spell.protectFromEarth", "sp":3, "level":2}, "count": 3 }             } },
 "sod.unit.psychicElemental"    : {"abilities": {"type":"nonLiving", "nonLivingType":"elemental", "splash":"neighbours", "attackWithElement":"mind"                                                                                      } },
 "sod.unit.magicElemental"      : {"abilities": {"type":"nonLiving", "nonLivingType":"elemental", "splash":"neighbours", "attackWithElement":"magic", "immunes": {"all": true  }                                                          } },
-"sod.unit.firebird"            : {"abilities": {"splash":"dragon","splashFriendlyFire":true, "giantLevel":1 ,"magicReduce":{"fire": "50/100"}                                                                           } },
-"sod.unit.phoenix"             : {"abilities": {"splash":"dragon","splashFriendlyFire":true, "giantLevel":1 , "immunes": {"schools": ["fire"]    }                                      } },
+"sod.unit.firebird"            : {"abilities": {"splash":"dragon", "splashFriendlyFire":true, "giantLevel":1 ,"magicReduce":{"fire": "50/100"}                                                                           } },
+"sod.unit.phoenix"             : {"abilities": {"splash":"dragon", "splashFriendlyFire":true, "giantLevel":1 , "immunes": {"schools": ["fire"]    }                                      } },
 
 
 
@@ -180,8 +180,8 @@
 "sod.unit.crystalDragon"       : {"abilities": {"magicOppSuccessChance": "80/100", "weekIncome":"crystal=3"                                                            } },
 "sod.unit.azureDragon"         : {"abilities": {"splash":"dragon", "splashFriendlyFire":true, "immunes": {"levels": [1,2,3]    }                                                               }, "spells":{"TODO_FEAR":1} },
 
-"hota.unit.leprechaun"         : {"abilities": {"squadBonus":{"chances": {"luck": "200/100"} }                                                                      }, "spells":{"TODO_LUCK":1} },
-"hota.unit.satyr"              : {"abilities": {                                                                                                           }, "spells":{"TODO_JOY":1} },
+"hota.unit.leprechaun"         : {"abilities": { "fixedCast": {"params":{"spell":"sod.spell.fortune", "sp":3, "level":2}, "count": 3 }, "squadBonus":{"chances": {"luck": "200/100"} } }  },
+"hota.unit.satyr"              : {"abilities": { "fixedCast": {"params":{"spell":"sod.spell.mirth"  , "sp":3, "level":2}, "count": 3 }                                                 } },
 "hota.unit.fangarm"            : {"abilities": {"retaliations": -1, "immunes": {"tags": ["mind"]    }                                                                    }, "spells":{"TODO_HYPNO":1} },
 "hota.unit.steelGolem"         : {"abilities": {"type":"nonLiving", "nonLivingType":"golem", "magicReduce":{"all": "20/100"}                                           } },
 

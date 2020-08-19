@@ -46,6 +46,7 @@ struct AdventureStack {
         std::set<RangeAttackPenalty> disabledPenalties;
         bool                     regenerate = false;
         LibraryUnit::Abilities::CastsOnHit castsOnHit;
+        LibraryUnit::Abilities::FixedCast fixedCast;
     };
     EstimatedParams estimated;
 

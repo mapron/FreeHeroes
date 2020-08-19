@@ -39,10 +39,11 @@ struct BattlePlanCast {
 struct BattlePlanCastParams {
     BattlePosition m_target;
     LibrarySpellConstPtr m_spell = nullptr;
-    bool m_isHeroCast = true;
+    bool m_isHeroCast = false;
+    bool m_isUnitCast = false;
 
-    void clear() noexcept { m_spell = {}; }
-    bool isActive() const noexcept { return m_spell != nullptr; }
+    void clear() noexcept { m_isHeroCast = false; m_isUnitCast = false; }
+    bool isActive() const noexcept { return m_isHeroCast || m_isUnitCast; }
 };
 
 }

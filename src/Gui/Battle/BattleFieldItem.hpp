@@ -86,7 +86,6 @@ public:
     void onControlAvailableChanged(bool controlAvailable) override;
 
     //slot
-    void onSelectSpell(Core::LibrarySpellConstPtr spell);
     struct CastPresentation {
          int soundDuration = 0;
          const GuiSpell * spell = nullptr;

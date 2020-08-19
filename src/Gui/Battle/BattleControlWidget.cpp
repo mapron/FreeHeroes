@@ -111,8 +111,7 @@ BattleControlWidget::BattleControlWidget(Core::IBattleView & battleView,
     for (auto *btn : {m_ui->pushButtonWait,
          m_ui->pushButtonGuard,
          m_ui->pushButtonSpellBook,
-        // m_ui->pushButtonSurrender,
-         m_ui->pushButtonUnitCast}) {
+        }) {
         m_controlButtons->addButton(btn);
     }
     m_controlButtons->setExclusive(false);
@@ -121,6 +120,7 @@ BattleControlWidget::BattleControlWidget(Core::IBattleView & battleView,
          m_ui->pushButtonRangeAttack,
          m_ui->pushButtonMeleeAttack,
          m_ui->pushButtonSplashAttack,
+         m_ui->pushButtonUnitCast,
      }) {
         btn->setCheckable(true);
         btn->setAutoExclusive(false);
@@ -167,6 +167,8 @@ BattleControlWidget::BattleControlWidget(Core::IBattleView & battleView,
         }
         auto index = btn ? btn->property("altIndex").value<Core::BattlePlanAttackParams::Alteration>() : Core::BattlePlanAttackParams::Alteration::None;
         m_controlPlan.setButtonsAltIndex( index );
+        m_controlPlan.m_planCastParams.m_isUnitCast = btn == m_ui->pushButtonUnitCast;
+        altUpdate();
     });
     m_ui->pushButtonRangeAttack->setAutoExclusive(true);
 
@@ -309,10 +311,11 @@ void BattleControlWidget::onStateChanged()
     m_ui->pushButtonSpellBook->setEnabled(available.heroCast);
 
     m_ui->pushButtonUnitCast->setVisible(available.cast);
-
     m_ui->pushButtonSplashAttack->setVisible(available.splashAttack);
     m_ui->pushButtonMeleeAttack ->setVisible(available.meleeAttack);
     m_ui->pushButtonRangeAttack ->setVisible(available.rangeAttack);
+
+    m_ui->pushButtonUnitCast->setEnabled(available.cast);
     m_ui->pushButtonSplashAttack->setEnabled(available.splashAttack);
     m_ui->pushButtonMeleeAttack ->setEnabled(available.meleeAttack);
     m_ui->pushButtonRangeAttack ->setEnabled(available.rangeAttack);
@@ -575,9 +578,12 @@ void BattleControlWidget::altUpdate()
 {
     auto currntAlt = m_controlPlan.getAlt();
     for (auto * pb : m_alternateButtons->buttons()) {
+        if (m_ui->pushButtonUnitCast == pb)
+            continue;
         auto pbAlt = pb->property("altIndex").value<Core::BattlePlanAttackParams::Alteration>();
-        pb->setChecked(pbAlt  == currntAlt);
+        pb->setChecked(pbAlt  == currntAlt && !m_controlPlan.m_planCastParams.m_isUnitCast);
     }
+    m_ui->pushButtonUnitCast->setChecked(m_controlPlan.m_planCastParams.m_isUnitCast);
 }
 
 
@@ -600,7 +606,7 @@ void BattleControlWidget::showSpellBook()
     dlg.exec();
 
     if (dlg.getSelectedSpell()) {
-        m_controlPlan.setSpell( dlg.getSelectedSpell() );
+        m_controlPlan.setHeroSpell( dlg.getSelectedSpell() );
     }
 
 }

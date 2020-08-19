@@ -106,7 +106,10 @@ IBattleView::AvailableActions BattleManager::getAvailableActions() const
     result.meleeAttack  = currentStack->current.canAttackMelee; // @todo: battle machine
     result.rangeAttack  = currentStack->current.canAttackRanged     && !currentStack->current.rangeAttackIsBlocked;
     result.splashAttack = currentStack->current.canAttackFreeSplash && !currentStack->current.rangeAttackIsBlocked;
-    result.cast = false;       // @todo: caster units
+    result.cast         = currentStack->current.canCast;
+    if (result.cast)
+        result.possibleUnitCast = currentStack->current.fixedCast.params.spell;
+
     result.wait  = !currentStack->roundState.waited;
     result.guard = true;       // @todo:
     result.baseUnitActions = result.move || result.meleeAttack || result.rangeAttack || result.cast;
@@ -298,7 +301,7 @@ BattlePlanMove BattleManager::findPlanMove(const BattlePlanMoveParams & movePara
 BattlePlanCast BattleManager::findPlanCast(const BattlePlanCastParams & castParams) const
 {
     BattlePlanCast result;
-    result.m_spell = castParams.m_spell;
+
     result.m_castPosition = castParams.m_target;
     result.m_isValid = false;
 
@@ -306,7 +309,6 @@ BattlePlanCast BattleManager::findPlanCast(const BattlePlanCastParams & castPara
     if (!m_field.isValid(castParams.m_target))
         return result;
 
-    result.m_power.spell = castParams.m_spell;
     BonusRatio spellHeroIncreaseFactor {0,1};
     LibrarySpell::Range range = LibrarySpell::Range::Single;
     if (castParams.m_isHeroCast) {
@@ -314,25 +316,37 @@ BattlePlanCast BattleManager::findPlanCast(const BattlePlanCastParams & castPara
         if (!hero)
             return result;
 
-        if (hero->manaCost(castParams.m_spell) > hero->mana) {
+        assert(castParams.m_spell);
+        result.m_spell       = castParams.m_spell;
+        result.m_power.spell = castParams.m_spell;
+
+        if (hero->manaCost(result.m_spell) > hero->mana) {
             assert(!"That should not happen.");
             return result;
         }
+
         int schoolLevel = hero->adventure->estimated.schoolLevels.getLevelForSpell(castParams.m_spell->school);
         spellHeroIncreaseFactor = hero->adventure->estimated.magicIncrease.getIncreaseForSpell(castParams.m_spell->school);
 
-        if (schoolLevel < (int)castParams.m_spell->rangeByLevel.size())
-            range = castParams.m_spell->rangeByLevel[schoolLevel];
+        if (schoolLevel < (int)result.m_spell->rangeByLevel.size())
+            range = result.m_spell->rangeByLevel[schoolLevel];
 
         result.m_power.spellPower = hero->estimated.primary.magic.spellPower;
         result.m_power.durationBonus = hero->adventure->estimated.extraRounds;
         result.m_power.skillLevel = schoolLevel;
         result.m_power.heroSpecLevel = -1;
-        if (hero->library->spec->spell == castParams.m_spell)
+        if (hero->library->spec->spell == result.m_spell)
             result.m_power.heroSpecLevel = hero->adventure->level;
+    } else if (castParams.m_isUnitCast){
+        auto stack = getActiveStack();
+        if (stack->current.fixedCast.count <=0) {
+            assert(!"That should not happen.");
+            return {};
+        }
+
+        result.m_power = stack->current.fixedCast.params;
+        result.m_spell = result.m_power.spell;
     } else {
-        //auto stack = getActiveStack();
-        assert(!"support casting units");
         return {};
     }
     const auto currentSide = getCurrentSide();
@@ -359,7 +373,7 @@ BattlePlanCast BattleManager::findPlanCast(const BattlePlanCastParams & castPara
         if (!targetStack)
             return result;
 
-        if (!BattleEstimation(m_rules).checkSpellTarget(*targetStack, castParams.m_spell))
+        if (!BattleEstimation(m_rules).checkSpellTarget(*targetStack, result.m_spell))
             return result;
 
         size_t limit = range == LibrarySpell::Range::Chain4 ? 4 : 5;
@@ -374,7 +388,7 @@ BattlePlanCast BattleManager::findPlanCast(const BattlePlanCastParams & castPara
 
             currentPos = *nextPossible.begin(); // @todo: check weird things like "goto opposite side first";
             auto stack = takeNextAlive(currentPos);
-            if (!BattleEstimation(m_rules).checkSpellTarget(*stack, castParams.m_spell))
+            if (!BattleEstimation(m_rules).checkSpellTarget(*stack, result.m_spell))
                 continue;
 
             affectedStackCandidates.push_back(stack);
@@ -397,24 +411,21 @@ BattlePlanCast BattleManager::findPlanCast(const BattlePlanCastParams & castPara
                 continue;
 
             alreadyCovered.insert(targetStack);
-            if (castParams.m_spell->qualify == LibrarySpell::Qualify::Good) {
+            if (result.m_spell->qualify == LibrarySpell::Qualify::Good) {
                 if (currentSide != targetStack->side)
                     continue;
             }
-            if (castParams.m_spell->qualify == LibrarySpell::Qualify::Bad
-                    || (castParams.m_spell->type == LibrarySpell::Type::Offensive && !castParams.m_spell->indistinctive)) {
+            if (result.m_spell->qualify == LibrarySpell::Qualify::Bad
+                    || (result.m_spell->type == LibrarySpell::Type::Offensive && !result.m_spell->indistinctive)) {
                 if (currentSide == targetStack->side)
                     continue;
             }
-            if (!BattleEstimation(m_rules).checkSpellTarget(*targetStack, castParams.m_spell))
+            if (!BattleEstimation(m_rules).checkSpellTarget(*targetStack, result.m_spell))
                 continue;
 
             affectedStackCandidates.push_back(targetStack);
         }
     }
-
-
-
 
     size_t affectedIndex = 0;
     for (BattleStackConstPtr targetStack : affectedStackCandidates) {
@@ -422,17 +433,17 @@ BattlePlanCast BattleManager::findPlanCast(const BattlePlanCastParams & castPara
         BattlePlanCast::Target target;
         target.stack = targetStack;
         target.magicSuccessChance *= targetStack->current.magicOppSuccessChance;
-        if (castParams.m_spell->type == LibrarySpell::Type::Offensive) {
+        if (result.m_spell->type == LibrarySpell::Type::Offensive) {
             const int level = targetStack->library->level / 10;
             const int baseSpellDamage = std::max(1, GeneralEstimation(m_rules).spellBaseDamage(level, result.m_power, static_cast<int>(affectedIndex)));
             BonusRatio spellDamage(baseSpellDamage, 1);
             const BonusRatio spellDamageInit = spellDamage;
             spellDamage += spellDamageInit * spellHeroIncreaseFactor;
             if (   !targetStack->library->abilities.vulnerable.isDefault()
-                 && targetStack->library->abilities.vulnerable.contains(castParams.m_spell))
+                 && targetStack->library->abilities.vulnerable.contains(result.m_spell))
                 spellDamage += spellDamageInit * targetStack->library->abilities.vulnerableBonus;
 
-            auto reduceFactor = targetStack->current.magicReduce.getReduceForSpell(castParams.m_spell->school);
+            auto reduceFactor = targetStack->current.magicReduce.getReduceForSpell(result.m_spell->school);
             spellDamage *= reduceFactor;
             const int totalDamage = std::max(1, spellDamage.roundDownInt() );
             DamageResult::Loss loss = damageLoss(targetStack, totalDamage);
@@ -634,7 +645,7 @@ bool BattleManager::doCast(BattlePlanCastParams planParams)
         assert(!"Invalid task for battle, that should be discarded earlier");
         return false;
     }
-    Logger(Logger::Info) << "doCast " << planParams.m_spell->id;
+    Logger(Logger::Info) << "doCast " << plan.m_spell->id;
 
     ControlGuard guard(this);
     IBattleNotify::Caster caster;
@@ -651,6 +662,7 @@ bool BattleManager::doCast(BattlePlanCastParams planParams)
     } else {
         caster.unit = m_current;
         m_current->roundState.finishedTurn = true;
+        m_current->castsDone++;
     }
 
 

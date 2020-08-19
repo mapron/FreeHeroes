@@ -48,11 +48,15 @@ void BattleControlPlan::setButtonsAltIndex(Core::BattlePlanAttackParams::Alterat
 }
 
 
-void BattleControlPlan::setSpell(Core::LibrarySpellConstPtr spell)
+void BattleControlPlan::setHeroSpell(Core::LibrarySpellConstPtr spell)
 {
-    if (m_spell == spell)
+    bool isHeroCast = !!spell;
+    if (m_planCastParams.m_spell == spell && m_planCastParams.m_isHeroCast == isHeroCast)
         return;
-    m_spell = spell;
+
+    m_planCastParams.m_spell = spell;
+    m_planCastParams.m_isHeroCast = isHeroCast;
+
     emit spellChanged();
 }
 

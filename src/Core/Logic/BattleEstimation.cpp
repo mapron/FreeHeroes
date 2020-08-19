@@ -53,6 +53,9 @@ void BattleEstimation::calculateUnitStats(BattleStack& unit)
     if (cur.rngMax.luck < 3)
         cur.rngParams.luck = std::min(cur.rngParams.luck, cur.rngMax.luck);
 
+    if (unit.current.fixedCast.count > 0)
+        unit.current.fixedCast.count -= unit.castsDone;
+
 //    Logger(Logger::Info) << "start stack:" << unit.library->id
 //            << ", maxRetaliations=" << cur.maxRetaliations
 //                            ;
@@ -63,7 +66,7 @@ void BattleEstimation::calculateUnitStats(BattleStack& unit)
     bool hasDebuff = false;
 
     cur.canMove = true;
-    cur.canCast = false;
+    cur.canCast = unit.current.fixedCast.count > 0;
     cur.canAttackMelee =  true;
     cur.canAttackRanged =  unit.library->traits.rangeAttack && unit.remainingShoots > 0;
 
@@ -228,6 +231,8 @@ void BattleEstimation::calculateUnitStatsStartBattle(BattleStack& unit, const Ba
         if (!battleEnvironment.forbidSpells.contains(cast.params.spell))
             unit.estimatedOnStart.castsOnHit.push_back(cast);
     }
+    if (!battleEnvironment.forbidSpells.contains(unit.adventure->estimated.fixedCast.params.spell))
+        unit.estimatedOnStart.fixedCast = unit.adventure->estimated.fixedCast;
 
     const auto & oppEstim = opponent.squad->adventure->estimated;
     unit.estimatedOnStart.rngParams += oppEstim.oppBonus.rngParams;

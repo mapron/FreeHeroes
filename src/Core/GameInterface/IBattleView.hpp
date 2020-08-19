@@ -30,6 +30,8 @@ public:
 
         bool heroCast = false;
 
+        LibrarySpellConstPtr possibleUnitCast = nullptr;
+
         std::vector<BattlePlanAttackParams::Alteration> alternatives;
     };
 

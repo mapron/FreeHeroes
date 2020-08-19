@@ -327,6 +327,11 @@ RTTR_REGISTRATION
         .property("ranged"           , &LibraryUnit::Abilities::CastOnHit::ranged)
         .property("chance"           , &LibraryUnit::Abilities::CastOnHit::chance)
         ;
+    registration::class_<LibraryUnit::Abilities::FixedCast>("LibraryUnitAbilitiesFixedCast")
+        .constructor<>()
+        .property("params"           , &LibraryUnit::Abilities::FixedCast::params)(ref)
+        .property("count"            , &LibraryUnit::Abilities::FixedCast::count)
+        ;
 
     registration::class_<LibraryUnit::Abilities>("LibraryUnitAbilities")
         .constructor<>()
@@ -363,6 +368,7 @@ RTTR_REGISTRATION
         .property("regenerate"                      , &LibraryUnit::Abilities::regenerate)
 
         .property("castsOnHit"                      , &LibraryUnit::Abilities::castsOnHit)(ref)
+        .property("fixedCast"                       , &LibraryUnit::Abilities::fixedCast)(ref)
 
         .property("weekIncome"                      , &LibraryUnit::Abilities::weekIncome)(ref)
         ;

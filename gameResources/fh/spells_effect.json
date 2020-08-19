@@ -301,7 +301,8 @@
         "filter" : [
             "if type ~= CType.Living and type ~= CType.NonLiving then result=false end",
             "if type == NLType.BattleMachine then result=false end"
-        ]
+        ],
+        "endConditions": ["time"]
     },
     "sod.spell.protectFromFire" : {
         "calc": [
@@ -313,7 +314,8 @@
         "filter" : [
             "if type ~= CType.Living and type ~= CType.NonLiving then result=false end",
             "if type == NLType.BattleMachine then result=false end"
-        ]
+        ],
+        "endConditions": ["time"]
     },
     "sod.spell.protectFromWater" : {
         "calc": [
@@ -325,7 +327,8 @@
         "filter" : [
             "if type ~= CType.Living and type ~= CType.NonLiving then result=false end",
             "if type == NLType.BattleMachine then result=false end"
-        ]
+        ],
+        "endConditions": ["time"]
     },
     "sod.spell.protectFromEarth" : {
         "calc": [
@@ -337,7 +340,8 @@
         "filter" : [
             "if type ~= CType.Living and type ~= CType.NonLiving then result=false end",
             "if type == NLType.BattleMachine then result=false end"
-        ]
+        ],
+        "endConditions": ["time"]
     },
     "sod.spell.antiMagic" : {
     },
@@ -616,7 +620,8 @@
         "rangeByLevel": ["single","single","single","single"],
         "filter" : [
             "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
-        ]
+        ],
+        "endConditions": ["time"]
     },
     "sod.spell.paralyze" : {
         "calc": [

@@ -26,7 +26,7 @@ public:
     void sendPlanUpdated();
     void setModifiers(Qt::KeyboardModifiers mods);
     void setButtonsAltIndex(Core::BattlePlanAttackParams::Alteration index);
-    void setSpell(Core::LibrarySpellConstPtr spell);
+    void setHeroSpell(Core::LibrarySpellConstPtr spell);
 
 signals:
     void planUpdated();
@@ -50,7 +50,7 @@ public:
     Core::BattlePlanAttackParams::Alteration getAlt() const { return m_alt; }
     Core::BattlePlanAttackParams::Alteration getAltForButtons() const { return m_altButtons;}
 
-    Core::LibrarySpellConstPtr m_spell = nullptr;
+
     std::vector<Core::BattlePlanAttackParams::Alteration> m_currentAlternatives;
 
     bool m_humanControlAvailable = false;

@@ -574,6 +574,13 @@ QStringList UnitInfoWidget::castsInfo(BattleStackConstPtr battle, AdventureStack
         else
             parts << tr("Casting '%1' on hit with %2 chance").arg(spellName).arg(toString(cast.chance, false));
     }
+    const auto & fixedCasts = battle ? battle->current.fixedCast : adventure->estimated.fixedCast;
+    if (fixedCasts.count) {
+        auto spellName = m_impl->modelsProvider->spells()->find(fixedCasts.params.spell)->getName();
+        parts << tr("Casting '%1' (%2)")
+                 .arg(spellName)
+                 .arg(tr("%1 times", "", fixedCasts.count).arg(fixedCasts.count));
+    }
     return parts;
 }
 

@@ -328,7 +328,6 @@ void BattleFieldItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
             if (m_controlPlan.m_planCast.isValid()) {
                 auto copyParams = m_controlPlan.m_planCastParams;
                 m_controlPlan.m_planCastParams.clear();
-                m_controlPlan.m_spell = nullptr;
                 m_battleControl.doCast(copyParams);
                 return;
             }
@@ -351,8 +350,9 @@ void BattleFieldItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
             return;
         }
     } else if (event->button() == Qt::RightButton) {
-        if (m_controlPlan.m_planCastParams.isActive()) {
-            m_controlPlan.setSpell(nullptr);
+        if (m_controlPlan.m_planCastParams.m_isHeroCast) {
+            m_controlPlan.setHeroSpell(nullptr);
+            m_controlPlan.sendPlanUpdated();
             return;
         }
         emit showInfo(m_battleView.findStack(battlePos, true), m_mousePosition.toPoint());
@@ -835,11 +835,6 @@ void BattleFieldItem::onControlAvailableChanged(bool controlAvailable)
     this->update();
 }
 
-void BattleFieldItem::onSelectSpell(LibrarySpellConstPtr spell)
-{
-    m_controlPlan.m_planCastParams.m_spell = spell;
-}
-
 void BattleFieldItem::onCastInternal(const Caster & caster, const AffectedMagic & affected, const CastPresentation & pres)
 {
     auto sequencer = makeSequencer();
@@ -1045,11 +1040,9 @@ void BattleFieldItem::refreshHoveringState()
     m_hovered = {};
     m_controlPlan.m_planMove.clear();
     m_controlPlan.m_planCast.clear();
-    m_controlPlan.m_planCastParams = {};
     m_controlPlan.m_planMoveParams = {};
     m_controlPlan.m_planAttackParams = {};
 
-    m_controlPlan.m_planCastParams.m_spell = m_controlPlan.m_spell;
     if (m_battleGeometry.isValid(battlePos)) {
         m_hovered = battlePos;
         const QPointF posInCell = m_mousePosition - defaultGeometry.hexCenterFromCoord(battlePos);

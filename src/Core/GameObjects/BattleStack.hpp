@@ -61,6 +61,7 @@ struct BattleStack {
         BonusRatio   magicOppSuccessChance = {1,1}; // 1 - resist chance.
         SpellFilter  immunes; // common or without breakable
         LibraryUnit::Abilities::CastsOnHit castsOnHit;
+        LibraryUnit::Abilities::FixedCast fixedCast;
 
 
         bool canDoAnything = false;
@@ -78,6 +79,7 @@ struct BattleStack {
     int count = 0;
     int health = 0;
     int remainingShoots = 0;
+    int castsDone = 0;
 
     struct RoundState {
         int baseRoll = -1;
