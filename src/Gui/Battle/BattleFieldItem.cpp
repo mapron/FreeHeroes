@@ -433,6 +433,8 @@ void BattleFieldItem::hoverCell(BattlePosition battlePos, const QPointF posInCel
 void BattleFieldItem::tick(int msElapsed)
 {
     for (auto & item : m_unitGraphics) {
+        if (!item.animationEnabled)
+            continue;
         item.sporadic.tick(msElapsed);
         item.spriteItem->tick(msElapsed);
     }
@@ -537,8 +539,9 @@ void BattleFieldItem::beforeAttackMelee(BattleStackConstPtr stack, const Affecte
 {
     (void)isRetaliation;
     auto target = affected.main.stack;
-    //auto damage = affected.main.damage;
+    enableAnimationFor(affected);
     BattleStackSpriteItem * itemAttacker =  m_unitGraphics[stack].spriteItem;
+    m_unitGraphics[stack].animationEnabled = true;
 
 
     Q_ASSERT(stack->isAlive());
@@ -612,7 +615,7 @@ void BattleFieldItem::beforeAttackRanged(BattleStackConstPtr stack,  const Affec
 {
 
     BattleStackSpriteItem * itemAttacker =  m_unitGraphics[stack].spriteItem;
-
+    enableAnimationFor(affected);
 
     SpritePtr projectileSprite = m_unitGraphics[stack].projectileSprite;
 
@@ -847,12 +850,13 @@ void BattleFieldItem::onCastInternal(const Caster & caster, const AffectedMagic 
     const int soundDurationMax = std::min(pres.soundDuration, animationDurationExtend);
 
     bool animationOnMainPosition = pres.spell->getSource()->presentationParams.animationOnMainPosition;
-
+    for (const auto & target : affected.targets)
+        m_unitGraphics[target.stack].animationEnabled = true;
 
     QList<SpriteItemObj*> extraBottom;
     if (!animationOnMainPosition) {
         for (const auto & target : affected.targets) {
-            auto posGlobal = defaultGeometry.hexCenterFromExtCoord(target.unit->pos);
+            auto posGlobal = defaultGeometry.hexCenterFromExtCoord(target.stack->pos);
             if (pres.spell->hasBottomAnimation())
             {
                 auto sprite = pres.spell->getBottomAnimation();
@@ -950,7 +954,7 @@ void BattleFieldItem::onCastInternal(const Caster & caster, const AffectedMagic 
             if (target.loss.damageTotal <= 0)
                 continue;
 
-            auto affectedBattleStack  = target.unit;
+            auto affectedBattleStack  = target.stack;
             BattleStackSpriteItem * itemDefender =  m_unitGraphics[affectedBattleStack].spriteItem;
             auto * defHandle = sequencer->addHandle(itemDefender, affectedBattleStack);
             const bool isKilled = target.loss.remainCount == 0;
@@ -980,6 +984,14 @@ void BattleFieldItem::onCastInternal(const Caster & caster, const AffectedMagic 
     refreshCounters();
 }
 
+void BattleFieldItem::enableAnimationFor(const IBattleNotify::AffectedPhysical& affected)
+{
+    for (const auto & target : affected.extra)
+        m_unitGraphics[target.stack].animationEnabled = true;
+    if (affected.main.stack)
+        m_unitGraphics[affected.main.stack].animationEnabled = true;
+}
+
 void BattleFieldItem::planUpdate()
 {
 }
@@ -1004,6 +1016,7 @@ void BattleFieldItem::refreshCounters()
 {
     for (BattleStackConstPtr stack : m_unitGraphics.keys()) {
         BattleStackSpriteItemPtr item = m_unitGraphics[stack].spriteItem;
+        m_unitGraphics[stack].animationEnabled = stack->count > 0 && stack->current.canDoAnything;
         if (stack->count <= 0) {
             item->setCounterVisible(false);
             continue;

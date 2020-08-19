@@ -70,12 +70,14 @@ void BattleEstimation::calculateUnitStats(BattleStack& unit)
     // bindings
     bindTypes(lua);
 
-    std::vector<BattleStack::Effect> effectsTmp;
+    BattleStack::EffectList effectsTmp;
 
     // remove outdated;
     {
         effectsTmp.clear();
         for (auto & effect : unit.appliedEffects) {
+            if (!effect.power.spell->hasEndCondition(LibrarySpell::EndCondition::Time))
+                continue;
             if (effect.roundsRemain <= 0)
                 continue;
             effectsTmp.push_back(effect);
@@ -91,10 +93,6 @@ void BattleEstimation::calculateUnitStats(BattleStack& unit)
         std::set<LibrarySpellConstPtr> used;
         std::reverse(tmp.begin(), tmp.end());
         for (auto & effect : tmp) {
-            if (effect.type != BattleStack::Effect::Type::Spell) {
-                effectsTmp.push_back(effect);
-                continue;
-            }
             if (used.count(effect.power.spell))
                 continue;
             const bool counterSpellIsUsed = [&used, &effect]() -> bool{
@@ -113,14 +111,10 @@ void BattleEstimation::calculateUnitStats(BattleStack& unit)
         std::reverse(effectsTmp.begin(), effectsTmp.end());
         unit.appliedEffects = effectsTmp;
     }
+    cur.primary.ad.defense += unit.roundState.guardBonus;
     lua["u"] = cur;
 
     for (auto & effect : unit.appliedEffects) {
-        if (effect.type == BattleStack::Effect::Type::Guard) {
-            cur.primary.ad.defense += effect.value;
-            lua["u"] = cur;
-            continue;
-        }
         const bool isBuff   = effect.power.spell->qualify == LibrarySpell::Qualify::Good;
         const bool isDebuff = effect.power.spell->qualify == LibrarySpell::Qualify::Bad;
         const bool isSomething = isBuff || isDebuff;
@@ -215,7 +209,7 @@ void BattleEstimation::calculateHeroStatsStartBattle(BattleHero& hero, const Bat
 
 
 
-void BattleEstimation::calculateUnitStatsStartBattle(BattleStack& unit, const BattleSquad& squad, const BattleArmy& opponent)
+void BattleEstimation::calculateUnitStatsStartBattle(BattleStack& unit, const BattleSquad& squad, const BattleArmy& opponent, const BattleEnvironment & battleEnvironment)
 {
     unit.estimatedOnStart.maxRetaliations = unit.library->abilities.maxRetaliations;
 
@@ -226,9 +220,13 @@ void BattleEstimation::calculateUnitStatsStartBattle(BattleStack& unit, const Ba
     unit.estimatedOnStart.rngChances    = squad.adventure->estimated.squadBonus.rngChance;
     unit.estimatedOnStart.magicOppSuccessChance = unit.adventure->estimated.magicOppSuccessChance;
     unit.estimatedOnStart.magicReduce           = unit.adventure->estimated.magicReduce;
-    unit.estimatedOnStart.immunes               = unit.adventure->estimated.immunes;
+
     if (0) { // @todo: black sphere
         unit.estimatedOnStart.immunes           = unit.adventure->estimated.immunesWithoutBreakable;
+    }
+    for (auto & cast : unit.adventure->estimated.castsOnHit) {
+        if (!battleEnvironment.forbidSpells.contains(cast.params.spell))
+            unit.estimatedOnStart.castsOnHit.push_back(cast);
     }
 
     const auto & oppEstim = opponent.squad->adventure->estimated;
@@ -278,7 +276,7 @@ void BattleEstimation::calculateArmyOnBattleStart(BattleArmy& army, const Battle
         calculateHeroStatsStartBattle(army.battleHero, *army.squad, opponent, battleEnvironment);
     }
     for (auto & stack : army.squad->stacks) {
-        calculateUnitStatsStartBattle(stack, *army.squad, opponent);
+        calculateUnitStatsStartBattle(stack, *army.squad, opponent, battleEnvironment);
     }
 }
 
@@ -295,8 +293,10 @@ void BattleEstimation::calculateArmyOnRoundStart(BattleArmy& army)
 
         stack.roundState = {};
 
-        for (auto & eff : stack.appliedEffects)
-            eff.roundsRemain--;
+        for (auto & eff : stack.appliedEffects) {
+            if (eff.power.spell->hasEndCondition(LibrarySpell::EndCondition::Time))
+                eff.roundsRemain--;
+        }
 
         calculateUnitStats(stack);
 

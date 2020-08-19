@@ -36,6 +36,14 @@ struct LibraryUnit {
             RngChanceParams chances;
         };
 
+        struct CastOnHit {
+            SpellCastParams params;
+            bool melee = true;
+            bool ranged = true;
+            BonusRatio chance {1,1};
+        };
+        using CastsOnHit = std::vector<CastOnHit>;
+
         UnitType type = UnitType::Living;
         UnitNonLivingType nonLivingType = UnitNonLivingType::None;
 
@@ -74,8 +82,6 @@ struct LibraryUnit {
         BonusRatio reduceTargetDefense  {1,1};
         BonusRatio reduceAttackerAttack {1,1};
 
-        std::vector<SpellCastParams> casts;
-
         SpellFilter vulnerable;
         BonusRatio vulnerableBonus = {1,1}; // 1/1 => +100% of base damage.
 
@@ -88,9 +94,9 @@ struct LibraryUnit {
 
         bool regenerate = false;
 
+        CastsOnHit castsOnHit;
+
         ResourceAmount weekIncome;
-
-
     };
     struct Traits {
         bool large = false; // 2hex

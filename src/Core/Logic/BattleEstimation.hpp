@@ -35,7 +35,7 @@ public:
 
 private:
     void bindTypes(sol::state & lua);
-    void calculateUnitStatsStartBattle(BattleStack& unit, const BattleSquad& squad, const BattleArmy& opponent);
+    void calculateUnitStatsStartBattle(BattleStack& unit, const BattleSquad& squad, const BattleArmy& opponent, const BattleEnvironment & battleEnvironment);
     void calculateHeroStatsStartBattle(BattleHero& hero, const BattleSquad& squad, const BattleArmy& opponent, const BattleEnvironment & battleEnvironment);
 
 private:

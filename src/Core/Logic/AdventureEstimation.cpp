@@ -708,6 +708,8 @@ void calculateUnitStats(LibraryGameRulesConstPtr rules, AdventureStack& unit, co
     for (auto penalty : unit.library->abilities.disabledPenalties)
         cur.disabledPenalties.insert(penalty);
 
+    cur.castsOnHit = unit.library->abilities.castsOnHit;
+
     if (!hero.isValid())
         return;
 

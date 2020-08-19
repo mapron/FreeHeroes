@@ -100,11 +100,11 @@ private:
     BonusRatio meleeAttackFactor(BattleStackConstPtr attacker, BattleStackConstPtr defender) const;
 
     enum class LuckRoll { None, Luck, Unluck };
-    DamageResult damageRoll(const BonusRatio baseRoll,
+    DamageResult fullDamageEstimate(const BonusRatio baseRoll,
                             BattleStackConstPtr attacker,
                             BattleStackConstPtr defender,
                             bool melee,
-                            int64_t rangedDenom,
+                            BonusRatio extraReduce,
                             LuckRoll luckFactor = LuckRoll::None) const;
     DamageResult::Loss damageLoss(BattleStackConstPtr defender, int damage) const;
 
@@ -130,11 +130,12 @@ private:
 private:
     bool canMoveOrAttack(BattleStackConstPtr stack) const;
 
-    bool checkRngEffect(BonusRatio rollChance);
+    bool checkRngRoll(BonusRatio rollChance);
     bool checkResist(BonusRatio successChance);
     LuckRoll makeLuckRoll(BattleStackConstPtr attacker);
 
     void recalcStack(BattleStackMutablePtr stack);
+    void applyLoss(BattleStackMutablePtr stack, const DamageResult::Loss & loss);
 
 private:
     BattleArmy & m_att;

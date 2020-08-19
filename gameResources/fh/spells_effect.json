@@ -8,24 +8,26 @@
             "bonus =  15",
             "if level >= 2 then bonus = 30 end",
             "if isSpec then bonus = bonus + math.ceil(bonus * heroLevel * 3 / 100) end ",
-            "u.meleeDefense:set(bonus, 100)"
+            "u.meleeDefense:add(bonus, 100)"
         ],
         "rangeByLevel": ["single","single","single","all"],
         "filter" : [
             "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
-        ]
+        ],
+        "endConditions": ["time"]
     },
     "sod.spell.airShield" : {
         "calc": [
             "bonus =  25",
             "if level >= 2 then bonus = 50 end",
             "if isSpec then bonus = bonus + math.ceil(bonus * heroLevel * 3 / 100) end ",
-            "u.rangedDefense:set(bonus, 100)"
+            "u.rangedDefense:add(bonus, 100)"
         ],
         "rangeByLevel": ["single","single","single","all"],
         "filter" : [
             "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
-        ]
+        ],
+        "endConditions": ["time"]
     },
     "sod.spell.bless" : {
         "calc": [
@@ -39,7 +41,8 @@
         "filter" : [
             "if type ~= CType.Living and type ~= CType.NonLiving then result=false end",
             "if nonLivingType == NLType.Undead then result=false end"
-        ]
+        ],
+        "endConditions": ["time"]
     },
     "sod.spell.curse" : {
         "calc": [
@@ -50,7 +53,8 @@
         "filter" : [
             "if type ~= CType.Living and type ~= CType.NonLiving then result=false end",
             "if nonLivingType == NLType.Undead then result=false end"
-        ]
+        ],
+        "endConditions": ["time"]
     },
     "sod.spell.bloodLust" : {
         "calc": [
@@ -66,7 +70,8 @@
         "rangeByLevel": ["single","single","single","all"],
         "filter" : [
             "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
-        ]
+        ],
+        "endConditions": ["time"]
     },
     "sod.spell.precision" : {
         "calc": [
@@ -82,7 +87,8 @@
         "rangeByLevel": ["single","single","single","all"],
         "filter" : [
             "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
-        ]
+        ],
+        "endConditions": ["time"]
     },
     "sod.spell.weakness" : {
         "calc": [
@@ -98,7 +104,8 @@
         "rangeByLevel": ["single","single","single","all"],
         "filter" : [
             "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
-        ]
+        ],
+        "endConditions": ["time"]
     },
     "sod.spell.stoneSkin" : {
         "calc": [
@@ -114,7 +121,8 @@
         "rangeByLevel": ["single","single","single","all"],
         "filter" : [
             "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
-        ]
+        ],
+        "endConditions": ["time"]
     },
     "sod.spell.prayer" : {
         "calc": [
@@ -131,7 +139,8 @@
         "rangeByLevel": ["single","single","single","all"],
         "filter" : [
             "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
-        ]
+        ],
+        "endConditions": ["time"]
     },
     "sod.spell.mirth" : {
         "calc": [
@@ -146,7 +155,8 @@
             "if type == CType.Living then result=true end",
             "if nonLivingType == NLType.Gargoyle then result=true end"
         ],
-        "tags": ["mind"]
+        "tags": ["mind"],
+        "endConditions": ["time"]
     },
     "sod.spell.sorrow" : {
         "calc": [
@@ -161,7 +171,8 @@
             "if type == CType.Living then result=true end",
             "if nonLivingType == NLType.Gargoyle then result=true end"
         ],
-        "tags": ["mind"]
+        "tags": ["mind"],
+        "endConditions": ["time"]
     },
     "sod.spell.fortune" : {
         "calc": [
@@ -173,7 +184,8 @@
         "rangeByLevel": ["single","single","single","all"],
         "filter" : [
             "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
-        ]
+        ],
+        "endConditions": ["time"]
     },
     "sod.spell.misfortune" : {
         "calc": [
@@ -185,7 +197,8 @@
         "rangeByLevel": ["single","single","single","all"],
         "filter" : [
             "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
-        ]
+        ],
+        "endConditions": ["time"]
     },
     "sod.spell.haste" : {
         "calc": [
@@ -201,7 +214,8 @@
         "rangeByLevel": ["single","single","single","all"],
         "filter" : [
             "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
-        ]
+        ],
+        "endConditions": ["time"]
     },
     "sod.spell.slow" : {
         "calc": [
@@ -211,7 +225,8 @@
         "rangeByLevel": ["single","single","single","all"],
         "filter" : [
             "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
-        ]
+        ],
+        "endConditions": ["time"]
     },
     "sod.spell.disruptingRay" : {
 
@@ -221,7 +236,8 @@
     },
     "sod.spell.frenzy" : {
 
-        "tags": ["mind"]
+        "tags": ["mind"],
+        "endConditions": ["time"]
     },
     "sod.spell.counterstrike" : {
         "calc": [
@@ -234,13 +250,16 @@
         "filter" : [
             "if type ~= CType.Living and type ~= CType.NonLiving then result=false end",
             "if type == NLType.BattleMachine then result=false end"
-        ]
+        ],
+        "endConditions": ["time"]
     },
     "sod.spell.berserk" : {
-        "tags": ["mind"]
+        "tags": ["mind"],
+        "endConditions": ["makingAttack"]
     },
     "sod.spell.hypnotize" : {
-        "tags": ["mind"]
+        "tags": ["mind"],
+        "endConditions": ["time"]
     },
     "sod.spell.forgetfulness" : {
         "calc": [
@@ -250,7 +269,8 @@
         "filter" : [
             "if type ~= CType.Living then result=false end"
         ],
-        "tags": ["mind"]
+        "tags": ["mind"],
+        "endConditions": ["time"]
     },
     "sod.spell.blind" : {
         "calc": [
@@ -263,7 +283,9 @@
         "filter" : [
             "if type ~= CType.Living then result=false end"
         ],
-        "tags": ["mind", "vision"]
+        "tags": ["mind", "vision"],
+        "endConditions": ["time", "getHit"],
+        "retaliationWhenCancel": ["50/100", "50/100", "25/100", "0/100"]
     },
 
 
@@ -564,6 +586,20 @@
 
 
     "sod.spell.stoneGaze" : {
+        "calc": [
+            "u.canCast         = false",
+            "u.canMove         = false",
+            "u.canAttackMelee  = false",
+            "u.canAttackRanged = false",
+            "u.meleeDefense:add(50, 100)",
+            "u.rangedDefense:add(50, 100)"
+        ],
+        "rangeByLevel": ["single","single","single","single"],
+        "filter" : [
+            "if type ~= CType.Living then result=false end"
+        ],
+        "tags": ["vision"],
+        "endConditions": ["time", "getHit"]
 
     },
     "sod.spell.poison" : {
@@ -573,10 +609,28 @@
 
     },
     "sod.spell.disease" : {
-
+        "calc": [
+            "bonus=2",
+            "u.primary.ad:incAll(-bonus) "
+        ],
+        "rangeByLevel": ["single","single","single","single"],
+        "filter" : [
+            "if type ~= CType.Living and type ~= CType.NonLiving then result=false end"
+        ]
     },
     "sod.spell.paralyze" : {
-
+        "calc": [
+            "u.canCast         = false",
+            "u.canMove         = false",
+            "u.canAttackMelee  = false",
+            "u.canAttackRanged = false"
+        ],
+        "rangeByLevel": ["single","single","single","single"],
+        "filter" : [
+            "if type ~= CType.Living then result=false end"
+        ],
+        "endConditions": ["time", "getHit"],
+        "retaliationWhenCancel": ["25/100", "25/100", "25/100", "25/100"]
     },
     "sod.spell.age" : {
 

@@ -45,6 +45,7 @@ struct AdventureStack {
         SpellFilter              immunesWithoutBreakable;
         std::set<RangeAttackPenalty> disabledPenalties;
         bool                     regenerate = false;
+        LibraryUnit::Abilities::CastsOnHit castsOnHit;
     };
     EstimatedParams estimated;
 

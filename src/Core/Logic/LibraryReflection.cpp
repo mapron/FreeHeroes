@@ -320,6 +320,14 @@ RTTR_REGISTRATION
         .property("bonus"             , &LibraryUnit::Abilities::ExtraDamage::damageBonus)
         ;
 
+    registration::class_<LibraryUnit::Abilities::CastOnHit>("LibraryUnitAbilitiesCastOnHit")
+        .constructor<>()
+        .property("params"           , &LibraryUnit::Abilities::CastOnHit::params)(ref)
+        .property("melee"            , &LibraryUnit::Abilities::CastOnHit::melee)
+        .property("ranged"           , &LibraryUnit::Abilities::CastOnHit::ranged)
+        .property("chance"           , &LibraryUnit::Abilities::CastOnHit::chance)
+        ;
+
     registration::class_<LibraryUnit::Abilities>("LibraryUnitAbilities")
         .constructor<>()
         .property("type"               , &LibraryUnit::Abilities::type)
@@ -347,13 +355,14 @@ RTTR_REGISTRATION
         .property("magicOppSuccessChance"           , &LibraryUnit::Abilities::magicOppSuccessChance)
         .property("magicOppSuccessChanceNeighbours" , &LibraryUnit::Abilities::magicOppSuccessChanceNeighbours)
 
-        .property("casts"              , &LibraryUnit::Abilities::casts)(ref)
         .property("vulnerable"         , &LibraryUnit::Abilities::vulnerable)(ref)
         .property("vulnerableBonus"    , &LibraryUnit::Abilities::vulnerableBonus)
         .property("immunes"            , &LibraryUnit::Abilities::immunes)(ref)
         .property("immuneBreakable"    , &LibraryUnit::Abilities::immuneBreakable)
 
         .property("regenerate"                      , &LibraryUnit::Abilities::regenerate)
+
+        .property("castsOnHit"                      , &LibraryUnit::Abilities::castsOnHit)(ref)
 
         .property("weekIncome"                      , &LibraryUnit::Abilities::weekIncome)(ref)
         ;
@@ -598,6 +607,12 @@ RTTR_REGISTRATION
         value("airElem"     ,  LibrarySpell::Tag::AirElem),
         value("fireElem"    ,  LibrarySpell::Tag::FireElem)
         );
+    registration::enumeration<LibrarySpell::EndCondition>("LibrarySpellEndCondition")
+        (
+        value("time"          ,  LibrarySpell::EndCondition::Time),
+        value("getHit"        ,  LibrarySpell::EndCondition::GetHit),
+        value("makingAttack"  ,  LibrarySpell::EndCondition::MakingAttack)
+        );
     registration::class_<LibrarySpell::Presentation>("LibrarySpellPres")
         .constructor<>()
         .property("bottomAnimation"     , &LibrarySpell::Presentation::bottomAnimation)
@@ -615,28 +630,29 @@ RTTR_REGISTRATION
 
     registration::class_<LibrarySpell>("LibrarySpell")
         .constructor<>()
-        .property("untranslatedName" , &LibrarySpell::untranslatedName)
-        .property("isTeachable"      , &LibrarySpell::isTeachable)
-        .property("type"             , &LibrarySpell::type)
-        .property("qualify"          , &LibrarySpell::qualify)
-        .property("school"           , &LibrarySpell::school)
-        .property("tags"             , &LibrarySpell::tags)(ref)
-        .property("level"            , &LibrarySpell::level)
-        .property("manaCost"         , &LibrarySpell::manaCost)
-        .property("indistinctive"    , &LibrarySpell::indistinctive)
-        .property("targetClass"      , &LibrarySpell::targetClass)
-        .property("counterSpells"    , &LibrarySpell::counterSpells)(ref)
-        .property("calc"             , &LibrarySpell::calcScript)(ref)
-        .property("filter"           , &LibrarySpell::filterScript)(ref)
-        .property("rangeByLevel"     , &LibrarySpell::rangeByLevel)(ref)
-        .property("pres"             , &LibrarySpell::presentationParams)(ref)
+        .property("untranslatedName"      , &LibrarySpell::untranslatedName)
+        .property("isTeachable"           , &LibrarySpell::isTeachable)
+        .property("type"                  , &LibrarySpell::type)
+        .property("qualify"               , &LibrarySpell::qualify)
+        .property("school"                , &LibrarySpell::school)
+        .property("tags"                  , &LibrarySpell::tags)(ref)
+        .property("level"                 , &LibrarySpell::level)
+        .property("manaCost"              , &LibrarySpell::manaCost)
+        .property("indistinctive"         , &LibrarySpell::indistinctive)
+        .property("targetClass"           , &LibrarySpell::targetClass)
+        .property("counterSpells"         , &LibrarySpell::counterSpells)(ref)
+        .property("calc"                  , &LibrarySpell::calcScript)(ref)
+        .property("filter"                , &LibrarySpell::filterScript)(ref)
+        .property("rangeByLevel"          , &LibrarySpell::rangeByLevel)(ref)
+        .property("endConditions"         , &LibrarySpell::endConditions)(ref)
+        .property("retaliationWhenCancel" , &LibrarySpell::retaliationWhenCancel)(ref)
+        .property("pres"                  , &LibrarySpell::presentationParams)(ref)
         ;
     registration::class_<SpellCastParams>("SpellCastParams")
         .constructor<>()
         .property("spell"       , &SpellCastParams::spell)
         .property("sp"          , &SpellCastParams::spellPower)
         .property("level"       , &SpellCastParams::skillLevel)
-        .property("probability" , &SpellCastParams::probability)
         ;
     registration::class_<SpellFilter>("SpellFilter")
         .constructor<>()

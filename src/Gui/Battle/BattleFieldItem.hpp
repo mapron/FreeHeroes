@@ -92,6 +92,7 @@ public:
          const GuiSpell * spell = nullptr;
     };
     void onCastInternal(const Caster & caster, const AffectedMagic & affected, const CastPresentation & pres);
+    void enableAnimationFor(const AffectedPhysical & affected);
 
 signals:
     void showInfo(BattleStackConstPtr stack, QPoint pos);
@@ -128,6 +129,7 @@ private:
         BattleStackSpriteItemPtr spriteItem = nullptr;
         SpritePtr projectileSprite;
         SporadicHandle sporadic;
+        bool animationEnabled = true;
     };
 
     BattleStackSpriteItemPtr m_projectile = nullptr;

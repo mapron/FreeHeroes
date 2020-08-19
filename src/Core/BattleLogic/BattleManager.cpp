@@ -355,9 +355,6 @@ BattlePlanCast BattleManager::findPlanCast(const BattlePlanCastParams & castPara
         };
 
 
-        //auto it = std::find_if(pointers.begin(), pointers.end(), [&pos](auto * stack){ return stack->pos.contains(pos);});
-        //return it == pointers.end() ? nullptr : *it;
-
         BattleStackConstPtr targetStack = takeNextAlive(castParams.m_target);
         if (!targetStack)
             return result;
@@ -574,7 +571,7 @@ bool BattleManager::doMoveAttack(BattlePlanMoveParams moveParams, BattlePlanAtta
 
     if (current->count > 0 && !current->roundState.hadHighMorale) {
         const int morale = current->current.rngParams.morale;
-        if (morale > 0 && checkRngEffect(m_current->current.moraleChance)) {
+        if (morale > 0 && checkRngRoll(m_current->current.moraleChance)) {
             current->roundState.hadHighMorale = true;
             current->roundState.finishedTurn = false;
             m_notifiers->onStackUnderEffect(current, IBattleNotify::Effect::GoodMorale);
@@ -619,7 +616,7 @@ bool BattleManager::doGuard()
 
 
     current->roundState.finishedTurn = true;
-    current->appliedEffects.push_back(BattleStack::Effect(BattleStack::Effect::Type::Guard, bonus));
+    current->roundState.guardBonus = bonus;
     recalcStack(current);
 
     m_current = nullptr;
@@ -691,7 +688,7 @@ bool BattleManager::doCast(BattlePlanCastParams planParams)
             }
             affected.targets.push_back({target.stack, loss});
 
-            targetStack->applyLoss(loss);
+            applyLoss(targetStack, loss);
         }
     } else {
         assert(!"Unsupported");
@@ -743,7 +740,8 @@ void BattleManager::makeMelee(BattleStackMutablePtr attacker, BattleStackMutable
                               ? GeneralEstimation(m_rules).calculatePhysicalBase(attacker->current.primary.dmg, attacker->count, GeneralEstimation::DamageRollMode::Random, *m_randomGenerator)
                               : BonusRatio(attacker->roundState.baseRoll, 1) * BonusRatio(attacker->count, attacker->roundState.baseRollCount); // if count changed after last roll, scale it.
 
-    const DamageResult damage = damageRoll(baseRoll, attacker, defender, true, 1, luckRoll);
+    const BonusRatio retaliationPenalty = isRetaliation ? attacker->current.retaliationPower : BonusRatio{1,1};
+    const DamageResult damage = fullDamageEstimate(baseRoll, attacker, defender, true, retaliationPenalty, luckRoll);
     attacker->roundState.baseRoll = damage.damageBaseRoll;
     attacker->roundState.baseRollCount = attacker->count;
 
@@ -753,20 +751,36 @@ void BattleManager::makeMelee(BattleStackMutablePtr attacker, BattleStackMutable
         if (!sideTarget->isAlive())
             continue;
 
-        const DamageResult damage = damageRoll(baseRoll, attacker, sideTarget, true, 1, LuckRoll::None);
+        const DamageResult damage = fullDamageEstimate(baseRoll, attacker, sideTarget, true, {1,1}, LuckRoll::None);
         affected.extra.push_back({sideTarget, damage});
     }
     m_notifiers->beforeAttackMelee(attacker, affected, isRetaliation);
 
-    defender->applyLoss(damage.loss);
+    applyLoss(defender, damage.loss);
     for (const auto & extra : affected.extra) {
         auto stack = findStackNonConst(extra.stack);
-        stack->applyLoss(extra.damage.loss);
-        recalcStack(stack);
+        applyLoss(stack, extra.damage.loss);
+    }
+    if (isRetaliation) {
+        attacker->current.retaliationPower = {1,1};
     }
 
-    recalcStack(defender);
     recalcStack(attacker);
+
+    if (defender->isAlive()) {
+        for (const auto & cast : attacker->current.castsOnHit) {
+            if (!cast.melee)
+                continue;
+            if (!BattleEstimation(m_rules).checkSpellTarget(*defender, cast.params.spell))
+                continue;
+            if (!checkRngRoll(cast.chance))
+                continue;
+
+            defender->appliedEffects.emplace_back(cast.params, cast.params.spellPower);
+            recalcStack(defender);
+            m_notifiers->onCast({.unit = attacker}, { .targets = {{defender, {}}} }, cast.params.spell);
+        }
+    }
 }
 
 void BattleManager::makeRanged(BattleStackMutablePtr attacker, BattlePosition target, BattleStackMutablePtr defender, const std::vector<BattleStackConstPtr> & sideTargets, int64_t rangeDenom)
@@ -776,7 +790,7 @@ void BattleManager::makeRanged(BattleStackMutablePtr attacker, BattlePosition ta
                               ? GeneralEstimation(m_rules).calculatePhysicalBase(attacker->current.primary.dmg, attacker->count, GeneralEstimation::DamageRollMode::Random, *m_randomGenerator)
                               : BonusRatio(attacker->roundState.baseRoll, 1) * BonusRatio(attacker->count, attacker->roundState.baseRollCount); // if count changed after last roll, scale it.
 
-    const DamageResult damage = defender ? damageRoll(baseRoll, attacker, defender, false, rangeDenom, luckRoll) : DamageResult{};
+    const DamageResult damage = defender ? fullDamageEstimate(baseRoll, attacker, defender, false, {1, rangeDenom}, luckRoll) : DamageResult{};
 
     attacker->roundState.baseRoll = std::max(1, baseRoll.roundDownInt());
     attacker->roundState.baseRollCount = attacker->count;
@@ -793,22 +807,19 @@ void BattleManager::makeRanged(BattleStackMutablePtr attacker, BattlePosition ta
         if (!sideTarget->isAlive())
             continue;
 
-        const DamageResult damageSide = damageRoll(baseRoll, attacker, sideTarget, false, rangeDenom, LuckRoll::None);
+        const DamageResult damageSide = fullDamageEstimate(baseRoll, attacker, sideTarget, false, {1, rangeDenom}, LuckRoll::None);
         affected.extra.push_back({sideTarget, damageSide});
     }
     m_notifiers->beforeAttackRanged(attacker, affected);
     if (defender)
-        defender->applyLoss(damage.loss);
+        applyLoss(defender, damage.loss);
 
     for (const auto & extra : affected.extra) {
         auto stack = findStackNonConst(extra.stack);
-        stack->applyLoss(extra.damage.loss);
-        recalcStack(stack);
+        applyLoss(stack, extra.damage.loss);
     }
 
     attacker->remainingShoots--; // @todo: ammo cart?
-    if (defender)
-        recalcStack(defender);
     recalcStack(attacker);
 }
 
@@ -855,7 +866,7 @@ std::vector<BattleStackMutablePtr> BattleManager::findMutableNeighboursOf(Battle
 DamageEstimate BattleManager::estimateDamage(BattleStackConstPtr attacker,
                                              BattleStackConstPtr defender,
                                              BattlePlanMove::Attack mode,
-                                             int64_t rangedDenom) const
+                                             int64_t rangeDenom) const
 {
     if (!attacker || !defender)
         return {};
@@ -868,9 +879,9 @@ DamageEstimate BattleManager::estimateDamage(BattleStackConstPtr attacker,
 
     return {
         true,
-        damageRoll(baseRollMin, attacker, defender, rangedDenom, isMelee),
-        damageRoll(baseRollAvg, attacker, defender, rangedDenom, isMelee),
-        damageRoll(baseRollMax, attacker, defender, rangedDenom, isMelee)
+        fullDamageEstimate(baseRollMin, attacker, defender, isMelee, {1, rangeDenom}),
+        fullDamageEstimate(baseRollAvg, attacker, defender, isMelee, {1, rangeDenom}),
+        fullDamageEstimate(baseRollMax, attacker, defender, isMelee, {1, rangeDenom})
     };
 }
 
@@ -899,9 +910,9 @@ DamageEstimate BattleManager::estimateRetaliationDamage(BattleStackConstPtr atta
 
     return {
         true,
-        damageRoll(baseRollMin, defender, attacker, 1, true),
-        damageRoll(baseRollAvg, defender, attacker, 1, true),
-        damageRoll(baseRollMax, defender, attacker, 1, true)
+        fullDamageEstimate(baseRollMin, defender, attacker, true, {1,1} ),
+        fullDamageEstimate(baseRollAvg, defender, attacker, true, {1,1} ),
+        fullDamageEstimate(baseRollMax, defender, attacker, true, {1,1} )
     };
 }
 
@@ -912,6 +923,8 @@ bool BattleManager::canRetaliate(BattleStackConstPtr attacker, BattleStackConstP
     if (!defender->isAlive() || !attacker->isAlive() || !defender->current.canAttackMelee)
         return false;
     if (attacker->library->traits.freeAttack)
+        return false;
+    if (defender->current.retaliationPower.num() == 0)
         return false;
     if (defender->current.maxRetaliations == -1)
         return true;
@@ -956,12 +969,12 @@ BonusRatio BattleManager::meleeAttackFactor(BattleStackConstPtr attacker, Battle
     return BonusRatio(1, hasMeleePenalty ? 2 : 1);
 }
 
-DamageResult BattleManager::damageRoll(const BonusRatio baseRoll,
-                                       BattleStackConstPtr attacker,
-                                       BattleStackConstPtr defender,
-                                       bool melee,
-                                       int64_t rangedDenom,
-                                       LuckRoll luckFactor) const
+DamageResult BattleManager::fullDamageEstimate(const BonusRatio baseRoll,
+                                               BattleStackConstPtr attacker,
+                                               BattleStackConstPtr defender,
+                                               bool melee,
+                                               BonusRatio extraReduce,
+                                               LuckRoll luckFactor) const
 {
     BonusRatio totalBaseFactor      {0,1}; // use to base = base + base * factor
     BonusRatio totalReduceFactor    {1,1}; // use to baseIncreased = baseIncreased * factor
@@ -996,6 +1009,8 @@ DamageResult BattleManager::damageRoll(const BonusRatio baseRoll,
     else if (luckFactor == LuckRoll::Unluck)
         totalReduceFactor *= BonusRatio{1,2};
 
+    totalReduceFactor *= extraReduce;
+
     if (melee) {
         totalReduceFactor *= meleeAttackFactor(attacker, defender);
         if (attacker->hero)
@@ -1004,7 +1019,6 @@ DamageResult BattleManager::damageRoll(const BonusRatio baseRoll,
         totalBaseFactor   += attacker->current.meleeAttack;
         totalReduceFactor *= (BonusRatio{1,1} - defender->current.meleeDefense);
     } else {
-        totalReduceFactor *= BonusRatio{1,rangedDenom};
         if (attacker->hero)
             totalBaseFactor += attacker->hero->adventure->estimated.rangedAttack;
 
@@ -1211,32 +1225,37 @@ void BattleManager::updateState()
     m_alive.clear();
     std::copy_if(m_all.begin(), m_all.end(), std::back_inserter(m_alive), [](auto * stack){ return stack->count > 0;});
 
-    int attackerAlive = 0;
-    int defenderAlive = 0;
-    for (auto * stack : m_alive) {
-        if (stack->side == BattleStack::Side::Attacker)
-            attackerAlive++;
-        else
-            defenderAlive++;
+    {
+        int attackerAlive = 0;
+        int defenderAlive = 0;
+        for (auto * stack : m_alive) {
+            if (stack->side == BattleStack::Side::Attacker)
+                attackerAlive++;
+            else
+                defenderAlive++;
+        }
+        auto endGame = [this](BattleResult::Result result) {
+            m_battleFinished = true;
+            m_notifiers->onBattleFinished({result});
+        };
+        if (attackerAlive == 0 && defenderAlive == 0)
+            return endGame(BattleResult::Result::Tie);
+        else if (attackerAlive == 0)
+            return endGame(BattleResult::Result::DefenderWon);
+        else if (defenderAlive == 0)
+            return endGame(BattleResult::Result::AttackerWon);
     }
-    auto endGame = [this](BattleResult::Result result) {
-        m_battleFinished = true;
-        m_notifiers->onBattleFinished({result});
-    };
-    if (attackerAlive == 0 && defenderAlive == 0)
-        return endGame(BattleResult::Result::Tie);
-    else if (attackerAlive == 0)
-        return endGame(BattleResult::Result::DefenderWon);
-    else if (defenderAlive == 0)
-        return endGame(BattleResult::Result::AttackerWon);
 
-    std::map<BattleStack::Side, std::map<int, int>> bySpeed;
-    for (auto * stack : m_alive) {
-        recalcStack(stack);
-        int & order = bySpeed[stack->side][stack->current.primary.battleSpeed];
-        stack->sameSpeedOrder = order++;
-        stack->speedOrder = -stack->current.primary.battleSpeed;
+    {
+        std::map<BattleStack::Side, std::map<int, int>> bySpeed;
+        for (auto * stack : m_alive) {
+            recalcStack(stack);
+            int & order = bySpeed[stack->side][stack->current.primary.battleSpeed];
+            stack->sameSpeedOrder = order++;
+            stack->speedOrder = -stack->current.primary.battleSpeed;
+        }
     }
+
     m_roundQueue.clear();
     std::copy_if(m_alive.begin(), m_alive.end(), std::back_inserter(m_roundQueue), [](auto * stack){
         return !stack->roundState.finishedTurn && stack->current.canDoAnything;
@@ -1247,13 +1266,15 @@ void BattleManager::updateState()
     });
 
     if (m_roundQueue.empty()) {
-        startNewRound();          // @todo: i HOPE recursion depth won't be too much. It really unlikely skipping dozens of rounds
+        // @note: Long recursion in calls when a lot of units skip turns every round is a small concern, we have not so much data on the stack.
+        // braces in blocks above just to reduce stack data.
+        startNewRound();
         return;
     }
 
-    if (!m_current) {
+    if (!m_current)
         m_current = m_roundQueue[0];
-    }
+
     beforeCurrentActive();
 
     m_notifiers->onStateChanged();
@@ -1263,7 +1284,6 @@ void BattleManager::startNewRound()
 {
     BattleEstimation(m_rules).calculateArmyOnRoundStart(m_def);
     BattleEstimation(m_rules).calculateArmyOnRoundStart(m_att);
-
 
     m_roundIndex++;
 
@@ -1277,18 +1297,20 @@ void BattleManager::beforeCurrentActive()
     if (!m_current)
         return;
 
-    const int morale = m_current->current.rngParams.morale;
-    if (m_current->count > 0 && morale < 0 && !m_current->roundState.hadLowMorale && checkRngEffect(m_current->current.moraleChance)) {
-        m_current->roundState.finishedTurn = true;
-        m_current->roundState.hadLowMorale = true;
-        m_notifiers->onStackUnderEffect(m_current, IBattleNotify::Effect::BadMorale);
-        m_current = nullptr;
-        updateState();
-        return;
-    }
-    if (m_current->count > 0 && m_current->adventure->estimated.regenerate && m_current->health < m_current->current.primary.maxHealth) {
-        m_current->health = m_current->current.primary.maxHealth;
-        m_notifiers->onStackUnderEffect(m_current, IBattleNotify::Effect::Regenerate);
+    if (m_current->count > 0 && m_current->current.canDoAnything) {
+        const int morale = m_current->current.rngParams.morale;
+        if (morale < 0 && !m_current->roundState.hadLowMorale && checkRngRoll(m_current->current.moraleChance)) {
+            m_current->roundState.finishedTurn = true;
+            m_current->roundState.hadLowMorale = true;
+            m_notifiers->onStackUnderEffect(m_current, IBattleNotify::Effect::BadMorale);
+            m_current = nullptr;
+            updateState();
+            return;
+        }
+        if (m_current->adventure->estimated.regenerate && m_current->health < m_current->current.primary.maxHealth) {
+            m_current->health = m_current->current.primary.maxHealth;
+            m_notifiers->onStackUnderEffect(m_current, IBattleNotify::Effect::Regenerate);
+        }
     }
     checkSidesFirstTurn();
 
@@ -1347,10 +1369,13 @@ bool BattleManager::canMoveOrAttack(BattleStackConstPtr stack) const
 
 
 
-bool BattleManager::checkRngEffect(BonusRatio rollChance)
+bool BattleManager::checkRngRoll(BonusRatio rollChance)
 {
     if (rollChance.num() == 0)
         return false;
+
+    if (rollChance >= BonusRatio{1,1})
+        return true;
 
     assert(rollChance > BonusRatio(0,1));
     if (rollChance.denom() < 128) {
@@ -1363,10 +1388,11 @@ bool BattleManager::checkRngEffect(BonusRatio rollChance)
 
 bool BattleManager::checkResist(BonusRatio successChance)
 {
-    int percent = (successChance * 100).roundDownInt();
-    if (percent <= 0) percent = 1;
-    auto roll = m_randomGenerator->genSmall(99);
-    return (roll >= percent);
+    if (successChance < BonusRatio{1, 100})
+        successChance = {1, 100}; // @todo: move to  gameRules.
+
+    const bool isSuccess = checkRngRoll(successChance);
+    return !isSuccess;
 }
 
 BattleManager::LuckRoll BattleManager::makeLuckRoll(BattleStackConstPtr attacker)
@@ -1375,7 +1401,7 @@ BattleManager::LuckRoll BattleManager::makeLuckRoll(BattleStackConstPtr attacker
     if (!luckLevel)
         return LuckRoll::None;
 
-    if (!checkRngEffect(m_current->current.luckChance))
+    if (!checkRngRoll(m_current->current.luckChance))
         return LuckRoll::None;
 
     if (luckLevel > 0) {
@@ -1399,6 +1425,30 @@ void BattleManager::recalcStack(BattleStackMutablePtr stack)
             }
         }
     }
+}
+
+void BattleManager::applyLoss(BattleStackMutablePtr stack, const DamageResult::Loss & loss)
+{
+    stack->count  = loss.remainCount;
+    stack->health = loss.remainCount > 0 ? loss.remainTopStackHealth : 0;
+    BonusRatio retaliationPower {1,1};
+    {
+        BattleStack::EffectList effectsTmp;
+        for (auto & effect : stack->appliedEffects) {
+            if (effect.power.spell->hasEndCondition(LibrarySpell::EndCondition::GetHit)) {
+                if (!effect.power.spell->retaliationWhenCancel.empty())
+                    retaliationPower = effect.power.spell->retaliationWhenCancel[effect.power.skillLevel];
+
+                continue;
+            }
+            effectsTmp.push_back(effect);
+        }
+        stack->appliedEffects = effectsTmp;
+    }
+
+    recalcStack(stack);
+
+    stack->current.retaliationPower = retaliationPower;
 }
 
 BattleManager::ControlGuard::ControlGuard(BattleManager* parent) : parent(parent)

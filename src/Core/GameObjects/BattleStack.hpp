@@ -52,14 +52,17 @@ struct BattleStack {
         BonusRatio meleeDefense   = {0, 1};          // spells
         BonusRatio rangedDefense  = {0, 1};          // spells
 
+        BonusRatio retaliationPower = {1, 1};
+
         BonusRatio luckChance;
         BonusRatio moraleChance;
 
         MagicReduce  magicReduce;
         BonusRatio   magicOppSuccessChance = {1,1}; // 1 - resist chance.
         SpellFilter  immunes; // common or without breakable
+        LibraryUnit::Abilities::CastsOnHit castsOnHit;
 
-        //bool isAlive = false;
+
         bool canDoAnything = false;
         bool canCast =  false;
         bool canMove = false;
@@ -76,11 +79,6 @@ struct BattleStack {
     int health = 0;
     int remainingShoots = 0;
 
-    void applyLoss(DamageResult::Loss loss) {
-        count  = loss.remainCount;
-        health = loss.remainCount > 0 ? loss.remainTopStackHealth : 0;
-    }
-
     struct RoundState {
         int baseRoll = -1;
         int baseRollCount = 0;
@@ -90,6 +88,7 @@ struct BattleStack {
         bool hadLowMorale = false;
        // bool guarded = false;
         int retaliationsDone = 0;
+        int guardBonus = 0;
     };
     RoundState roundState;
 
@@ -99,15 +98,10 @@ struct BattleStack {
     BattlePositionExtended pos;
 
     struct Effect {
-        enum class Type { Spell, Guard };
-        Type type = Type::Spell;
-        Effect() = default;
-        explicit Effect(SpellCastParams sc, int remainRounds = 0) : type(Type::Spell), power(sc), roundsRemain(remainRounds) {}
-        explicit Effect(Type type, int v) : type(type), value(v) {}
+        explicit Effect(SpellCastParams sc, int remainRounds = 0) : power(sc), roundsRemain(remainRounds) {}
 
         SpellCastParams power; // spell
         int roundsRemain = 0; // spell
-        int value = 0; // guard
     };
     using EffectList = std::vector<Effect>;
     EffectList appliedEffects;

@@ -102,15 +102,11 @@ public:
         QGridLayout * layout = new QGridLayout(this);
         layout->setMargin(0);
         layout->setSpacing(1);
-        Core::BattleStack::EffectList spellEffects;
-        for (auto  & eff : effects)
-            if (eff.type == Core::BattleStack::Effect::Type::Spell)
-                spellEffects.push_back(eff);
-        for (size_t i =0 ; i < spellEffects.size(); ++i) {
+        for (size_t i =0 ; i < effects.size(); ++i) {
             int row = i / 3;
             int col = i % 3;
             auto *btn = new EffectsButton(this);
-            btn->setEffect(spellsModel.find(spellEffects[i].power.spell)->getIconInt(), spellEffects[i].roundsRemain);
+            btn->setEffect(spellsModel.find(effects[i].power.spell)->getIconInt(), effects[i].roundsRemain);
             layout->addWidget(btn, row, col);
         }
     }
@@ -323,6 +319,10 @@ UnitInfoWidget::UnitInfoWidget(Core::BattleStackConstPtr battle,
     auto abilsTextStr = abilsText.join(". ");
     if (!resistInfo.isEmpty())
         abilsTextStr += "<br><br>" + resistInfo.join(". ");
+
+    auto castsInfo = this->castsInfo(battle, adventure);
+    if (!castsInfo.isEmpty())
+        abilsTextStr += "<br><br>" + castsInfo.join(". ");
 
     QFrame * descLabelFrame = new QFrame(this);
     descLabelFrame->setFrameStyle(QFrame::Panel);
@@ -560,6 +560,20 @@ QStringList UnitInfoWidget::vulnerabilityInfo(Core::LibraryUnitConstPtr unit) co
         break;
     }
 
+    return parts;
+}
+
+QStringList UnitInfoWidget::castsInfo(BattleStackConstPtr battle, AdventureStackConstPtr adventure) const
+{
+    QStringList parts;
+    const auto & onHitCasts = battle ? battle->current.castsOnHit : adventure->estimated.castsOnHit;
+    for (const auto & cast : onHitCasts) {
+        auto spellName = m_impl->modelsProvider->spells()->find(cast.params.spell)->getName();
+        if (cast.chance == BonusRatio{1,1})
+            parts << tr("Casting '%1' on hit").arg(spellName);
+        else
+            parts << tr("Casting '%1' on hit with %2 chance").arg(spellName).arg(toString(cast.chance, false));
+    }
     return parts;
 }
 

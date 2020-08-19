@@ -71,7 +71,7 @@
 "sod.spell.poison"                    : [ [  0         , "spellbon:71", "spellint:72", "spells:71", "spellscr:71",  "sp11_"   , "sod.spell.poison"    ] ],
 "sod.spell.bind"                      : [ [  0         , "spellbon:72", "spellint:73", "spells:72", "spellscr:72",  "sp02_"   , "sod.spell.bind"      ] ],
 "sod.spell.disease"                   : [ [  0         , "spellbon:73", "spellint:74", "spells:73", "spellscr:73",  "sp05_"   , "sod.spell.disease"   ] ],
-"sod.spell.paralyze"                  : [ [  0         , "spellbon:74", "spellint:75", "spells:74", "spellscr:74",  ""        , "sod.spell.paralyze"  ] ],
+"sod.spell.paralyze"                  : [ [  0         , "spellbon:74", "spellint:75", "spells:74", "spellscr:74",  "sp10_"   , "sod.spell.paralyze"  ] ],
 "sod.spell.age"                       : [ [  0         , "spellbon:75", "spellint:76", "spells:75", "spellscr:75",  "sp01_"   , "sod.spell.age"       ] ],
 "sod.spell.thunderbolt"               : [ [  0         , "spellbon:77", "spellint:78", "spells:77", "spellscr:77", "c11spa1"  , "sod.spell.lightblt"  ] ],
 "sod.spell.dispelHelpful"             : [ [  0         , "spellbon:78", "spellint:79", "spells:78", "spellscr:78", "c05spw"   , "sod.spell.dispell"   ] ],
@@ -111,7 +111,7 @@
 "sod.spell.armageddon"                : { "pres": {"tile": true } },
 "sod.spell.titanBolt"                 : { "pres": {"bottomAnimation":"c03spa0"} },
 "sod.spell.thunderbolt"               : { "pres": {"bottomAnimation":"c03spa0"} },
-
+"sod.spell.paralyze"                  : { "pres": {"bottomPosition":"true"} },
 
 "sod.effect.fireball"                : { "pres": { "animation":"c13spf" , "sound":"sod.spell.spontcomb" } },
 "sod.effect.deathCloud"              : { "pres": { "animation":"sp04_"  , "sound":"sod.spell.deathcld"  } },

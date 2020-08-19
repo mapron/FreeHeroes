@@ -372,7 +372,7 @@ void BattleControlWidget::onCast(const Caster & caster, const AffectedMagic & af
         for (size_t i=0; i< affected.targets.size(); i++)
         {
            auto loss = affected.targets[i].loss;
-           auto stack = affected.targets[i].unit;
+           auto stack = affected.targets[i].stack;
            auto name = m_modelsProvider.units()->find(stack->library)->getName();
            if (i > 0)
                msg += ", ";

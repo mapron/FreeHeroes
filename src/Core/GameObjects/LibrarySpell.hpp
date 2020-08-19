@@ -23,6 +23,7 @@ struct LibrarySpell {
     enum class TargetClass { Units, Land, Immediate, None };
     enum class Range       { Single, R1, R1NoCenter, R2, R3, Obstacle2, Obstacle3, Chain4, Chain5, All };
     enum class Tag         { Mind, Vision, Ice, Lightning, AirElem, FireElem };
+    enum class EndCondition{ Time, GetHit, MakingAttack };
 
     struct Presentation {
         std::string iconBonus;
@@ -69,10 +70,14 @@ struct LibrarySpell {
     std::vector<std::string> calcScript;
     std::vector<std::string> filterScript;
     std::vector<Range> rangeByLevel;
+    std::vector<EndCondition> endConditions;
 
     std::vector<LibrarySpellConstPtr> counterSpells;
+    std::vector<BonusRatio> retaliationWhenCancel;
 
     Presentation presentationParams;
+
+    bool hasEndCondition(EndCondition condition) const { return std::find(endConditions.cbegin(), endConditions.cend(), condition) != endConditions.cend(); }
 };
 
 struct SpellCastParams {
@@ -81,7 +86,6 @@ struct SpellCastParams {
     int skillLevel = 0; // 0-3
     int durationBonus = 0;
     int heroSpecLevel = -1;
-    int probability = 1;
 
     // reference only
     LibraryArtifactConstPtr art = nullptr;

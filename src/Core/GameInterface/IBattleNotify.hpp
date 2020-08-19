@@ -54,7 +54,7 @@ public:
         BattlePosition mainPosition;
         std::vector<BattlePosition> area;
         struct Target {
-            BattleStackConstPtr unit = nullptr;;
+            BattleStackConstPtr stack = nullptr;
             DamageResult::Loss loss;
         };
 

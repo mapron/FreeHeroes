@@ -105,8 +105,14 @@ public:
     bool operator > (const BonusRatio & left) const noexcept {
         return commonNumWith(left) > left.commonNumWith(*this);
     }
+    bool operator >= (const BonusRatio & left) const noexcept {
+        return commonNumWith(left) >= left.commonNumWith(*this);
+    }
     bool operator < (const BonusRatio & left) const noexcept {
         return commonNumWith(left) < left.commonNumWith(*this);
+    }
+    bool operator <= (const BonusRatio & left) const noexcept {
+        return commonNumWith(left) <= left.commonNumWith(*this);
     }
     auto asTuple() const noexcept { return std::tie(m_num, m_denom); }
     bool operator == (const BonusRatio & left) const noexcept {

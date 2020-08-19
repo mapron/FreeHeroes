@@ -45,6 +45,8 @@ private:
     QStringList resistInfo(const Core::MagicReduce & reduce, const Core::BonusRatio & successRate) const;
     QStringList immuneInfo(const Core::SpellFilter & immunes) const;
     QStringList vulnerabilityInfo(Core::LibraryUnitConstPtr unit) const;
+    QStringList castsInfo(Core::BattleStackConstPtr battle,
+                          Core::AdventureStackConstPtr adventure) const;
 
 private:
 
