@@ -180,15 +180,21 @@ HeroParameterWidget::HeroParameterWidget(QWidget* parent)
         {tr("Extra Water MP abs. " ) , [](auto hero){ return toString(hero->estimated.extraMovePointsWater); }},
         {tr("Next day Water MP "   ) , [](auto hero){ return toString(hero->estimated.nextDayMovePointsWater); }},
     };
-    QList<Record> misc {
-        {tr("Scouting radius"   ) , [](auto hero){ return toString(hero->estimated.scoutingRadius); }},
+    QList<Record> skills {
+        {tr("Scouting radius"                   ) , [](auto hero){ return toString(hero->estimated.scoutingRadius); }},
+        {tr("Reduced surrender cost"            ) , [](auto hero){ return "-" + toString(hero->estimated.surrenderDiscount, false); }},
+        {tr("Neutral join chance"               ) , [](auto hero){ return toString(hero->estimated.neutralJoinChance, false); }},
+        {tr("Minimal level for Great Library"   ) , [](auto hero){ return toString(hero->estimated.greatLibraryVisitLevel); }},
+        {tr("Experience gain bonus"             ) , [](auto hero){ return toString(hero->estimated.bonusExperience); }},
+        {tr("Eagle Eye chance"                  ) , [](auto hero){ return toString(hero->estimated.eagleEyeChance, false); }},
+        {tr("Necromancy efficiency"             ) , [](auto hero){ return toString(hero->estimated.necromancy, false); }},
+
     };
 
     makeRows(tr("Primary stats"), main);
     makeRows(tr("Physical damage"), physical);
     makeRows(tr("Magical"), magical);
     makeRows(tr("Speed"), speed);
-    makeRows(tr("Misc"), misc);
 
     makeHeader(tr("Army luck"));
     makeRow({tr("Luck value"), [](auto hero){ return toString(hero->estimatedFromSquad.rngParams.luck); } });
@@ -199,6 +205,8 @@ HeroParameterWidget::HeroParameterWidget(QWidget* parent)
     makeRowPlainText([this](auto hero){ return m_impl->m_ui->getMoraleDescription( hero->estimatedFromSquad.moraleDetails).join("<br>"); });
 
     makeHeader(tr("Skills"));
+    for (const auto & rec : skills)
+        makeRow(rec);
 
     auto printSkillsProbabilities = [this](const Core::LibraryFactionHeroClass::SkillWeights & weights) -> QStringList {
         if (weights.empty())

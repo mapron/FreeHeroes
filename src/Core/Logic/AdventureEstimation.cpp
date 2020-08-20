@@ -96,8 +96,14 @@ void AdventureEstimation::bindTypes(sol::state& lua)
         "extraRounds"           , &AdventureHero::EstimatedParams::extraRounds,
         "dayIncome"             , &AdventureHero::EstimatedParams::dayIncome,
 
-        "regenerateStackHealth" , &AdventureHero::EstimatedParams::regenerateStackHealth,
-        "factionsAlliance"      , &AdventureHero::EstimatedParams::factionsAllianceSpecial
+        "surrenderDiscount"       , &AdventureHero::EstimatedParams::surrenderDiscount,
+        "neutralJoinChance"       , &AdventureHero::EstimatedParams::neutralJoinChance,
+        "greatLibraryVisitLevel"  , &AdventureHero::EstimatedParams::greatLibraryVisitLevel,
+        "bonusExperience"         , &AdventureHero::EstimatedParams::bonusExperience,
+        "eagleEyeChance"          , &AdventureHero::EstimatedParams::eagleEyeChance,
+        "necromancy"              , &AdventureHero::EstimatedParams::necromancy,
+
+        "regenerateStackHealth"   , &AdventureHero::EstimatedParams::regenerateStackHealth
     );
 }
 
@@ -141,9 +147,9 @@ void AdventureEstimation::calculateHeroLevelUp(AdventureHero& hero)
         heroExisting.insert(skillRec.skill);
         if (skillRec.level >= 2)
             continue;
-        skillWeightsForUpgrade[skillRec.skill] = allSkillWeights.at(skillRec.skill);
+        skillWeightsForUpgrade[skillRec.skill] = std::max(1, allSkillWeights.at(skillRec.skill));
         if (isSchool(skillRec.skill))
-            schoolWeightsForUpgrade[skillRec.skill] = allSkillWeights.at(skillRec.skill);
+            schoolWeightsForUpgrade[skillRec.skill] = std::max(1, allSkillWeights.at(skillRec.skill));
 
     }
     levelupParams.unupgradedSkillCount = skillWeightsForUpgrade.size();
@@ -436,21 +442,14 @@ void AdventureEstimation::calculateHeroStats(AdventureHero& hero)
 
         freeWearing = wearingFreeDefault - allWearing;
 
-
-
-
         lua["h"] = hero.estimated;
-        SpellCastParamsList extraCasts;
+
         for (auto * art : usedForCalculation) {
             for (const auto & calc : art->calc)
                 lua.script(calc);
-
-            for (auto cast :  art->spellCasts) {
-                cast.art = art;
-                extraCasts.push_back(cast);
-            }
         }
         hero.estimated = lua["h"];
+        SpellCastParamsList extraCasts;
         for (auto * art : usedForCalculation) {
             for (auto * spell : art->provideSpellsCache)
                 spellbook.insert(spell);
@@ -460,6 +459,12 @@ void AdventureEstimation::calculateHeroStats(AdventureHero& hero)
             hero.estimated.forbidSpells.makeUnion(art->forbidSpells);
             for (auto penalty : art->disabledPenalties)
                 hero.estimated.disabledPenalties.insert(penalty);
+            for (auto cast :  art->spellCasts) {
+                cast.art = art;
+                extraCasts.push_back(cast);
+            }
+            if (art->special != LibraryArtifact::SpecialEffect::None)
+                hero.estimated.specialArtifactEffects.insert(art->special);
         }
 
         hero.estimated.moraleDetails.artifacts = hero.estimated.rngParams.morale - lastRng.morale;
@@ -781,7 +786,7 @@ void AdventureEstimation::calculateArmy(AdventureArmy& army, LibraryTerrainConst
     if (army.hasHero())
         calculateHeroStats(army.hero);
 
-    calculateSquad(army.squad, army.hasHero() ? army.hero.estimated.factionsAllianceSpecial : false);
+    calculateSquad(army.squad, army.hasHero() ? army.hero.estimated.specialArtifactEffects.contains(LibraryArtifact::SpecialEffect::FactionsAlliance) : false);
 
     if (army.hasHero())
         calculateSquadHeroRng(army.squad, army.hero);

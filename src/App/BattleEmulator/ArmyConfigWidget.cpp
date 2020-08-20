@@ -57,8 +57,7 @@ ArmyConfigWidget::ArmyConfigWidget(QWidget* parent)
     }
     connect(m_ui->heroWithArmyConfigWidget, &HeroWithArmyConfigWidget::showHeroDialog, this, &ArmyConfigWidget::showHeroDialog);
 
-    connect(m_ui->pushButtonLevelUpHero, &QPushButton::clicked, this, &ArmyConfigWidget::makeLevelup);
-
+    connect(m_ui->pushButtonLevelUpHero, &QPushButton::clicked, this, &ArmyConfigWidget::makeLevelupInternal);
 }
 
 ArmyConfigWidget::~ArmyConfigWidget() = default;

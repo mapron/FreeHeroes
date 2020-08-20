@@ -215,7 +215,7 @@ struct AdventureHero {
         BonusRatio mpWaterIncrease = {0, 1};      // skills
 
         bool regenerateStackHealth = false;      // artifacts.
-        bool factionsAllianceSpecial = false;    //  AA.
+
 
         MoraleDetails moraleDetails;
         LuckDetails   luckDetails;
@@ -227,7 +227,17 @@ struct AdventureHero {
 
         SpellCastParamsList castsBeforeStart;
 
+        BonusRatio surrenderDiscount  = {0, 1}; // skills + artifacts
+        BonusRatio neutralJoinChance  = {0, 1}; // skills
+        int greatLibraryVisitLevel    = 10;     // skills
+
+        BonusRatio bonusExperience    = {0, 1}; // skills
+        BonusRatio eagleEyeChance     = {0, 1}; // skills + artifacts
+        BonusRatio necromancy         = {0, 1}; // skills + artifacts
+
         ResourceAmount dayIncome;
+
+        std::set<LibraryArtifact::SpecialEffect> specialArtifactEffects;
 
         struct LevelupParams {
             struct Special {

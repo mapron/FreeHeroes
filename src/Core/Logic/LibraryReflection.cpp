@@ -457,6 +457,23 @@ RTTR_REGISTRATION
         value("complex"  ,  LibraryArtifact::OrderCategory::Complex),
         value("scrolls"  ,  LibraryArtifact::OrderCategory::Scrolls)
         );
+    registration::enumeration<LibraryArtifact::SpecialEffect>("ArtifactSpecialEffect")
+        (
+        value( "none"               ,  LibraryArtifact::SpecialEffect::None               ),
+        value( "neutralDiplomacy"   ,  LibraryArtifact::SpecialEffect::NeutralDiplomacy   ),
+        value( "factionsAlliance"   ,  LibraryArtifact::SpecialEffect::FactionsAlliance   ),
+        value( "alwaysFly"          ,  LibraryArtifact::SpecialEffect::AlwaysFly          ),
+        value( "alwaysWaterWalk"    ,  LibraryArtifact::SpecialEffect::AlwaysWaterWalk    ),
+        value( "resurrectFangarms"  ,  LibraryArtifact::SpecialEffect::ResurrectFangarms  ),
+        value( "extendedNecromancy" ,  LibraryArtifact::SpecialEffect::ExtendedNecromancy ),
+        value( "dragonsBuffs"       ,  LibraryArtifact::SpecialEffect::DragonsBuffs       ),
+        value( "disableSurrender"   ,  LibraryArtifact::SpecialEffect::DisableSurrender   ),
+        value( "noDamageWhirl"      ,  LibraryArtifact::SpecialEffect::NoDamageWhirl      ),
+        value( "noTerrainPenalty"   ,  LibraryArtifact::SpecialEffect::NoTerrainPenalty   ),
+        value( "disableImmunes"     ,  LibraryArtifact::SpecialEffect::DisableImmunes     ),
+        value( "permanentDeath"     ,  LibraryArtifact::SpecialEffect::PermanentDeath     )
+        );
+
     registration::class_<LibraryArtifact::Presentation>("LibraryArtifactPres")
         .constructor<>()
         .property("iconStash"       , &LibraryArtifact::Presentation::iconStash)
@@ -469,6 +486,7 @@ RTTR_REGISTRATION
         .constructor<>()
         .property("slot"            , &LibraryArtifact::slot)
         .property("class"           , &LibraryArtifact::treasureClass)
+        .property("special"         , &LibraryArtifact::special)
         .property("calc"            , &LibraryArtifact::calc)(ref)
         .property("untranslatedName", &LibraryArtifact::untranslatedName)
         .property("value"           , &LibraryArtifact::value)

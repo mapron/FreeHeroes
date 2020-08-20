@@ -752,82 +752,107 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="185"/>
+        <source>Reduced surrender cost</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="186"/>
+        <source>Neutral join chance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="187"/>
-        <source>Primary stats</source>
+        <source>Minimal level for Great Library</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="188"/>
-        <source>Physical damage</source>
+        <source>Experience gain bonus</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="189"/>
-        <source>Magical</source>
+        <source>Eagle Eye chance</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="190"/>
-        <source>Speed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="191"/>
-        <source>Misc</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="193"/>
-        <source>Army luck</source>
+        <source>Necromancy efficiency</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="194"/>
-        <source>Luck value</source>
+        <source>Primary stats</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="195"/>
+        <source>Physical damage</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="196"/>
+        <source>Magical</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="197"/>
+        <source>Speed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="199"/>
+        <source>Army luck</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="200"/>
+        <source>Luck value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="203"/>
         <source>Army morale</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="198"/>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="204"/>
         <source>Morale value</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="201"/>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="207"/>
         <source>Skills</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="219"/>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="227"/>
         <source>Upgrade - prioritized</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="221"/>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="229"/>
         <source>Upgrade - normal</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="224"/>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="232"/>
         <source>New - prioritized</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="226"/>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="234"/>
         <source>New - normal</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="230"/>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="238"/>
         <source>Levelups to wisdom suggest</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="231"/>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="239"/>
         <source>Levelups to magic school suggest</source>
         <translation type="unfinished"></translation>
     </message>

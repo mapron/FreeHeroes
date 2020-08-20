@@ -68,7 +68,15 @@
     "if isSpec then bonus = bonus + math.floor(heroLevel / 6) end ",
     "h.scoutingRadius = h.scoutingRadius + bonus"
 ]},
-"sod.skill.diplomacy"             : { "untranslatedName":"Diplomacy", "frequencyFighter": 3 , "frequencyMage": 4 },
+"sod.skill.diplomacy"             : { "untranslatedName":"Diplomacy", "frequencyFighter": 3 , "frequencyMage": 4, "handler": "stat","calc": [
+    "surrenderDiscounts = { 20, 40, 60 } ",
+    "h.surrenderDiscount:set( surrenderDiscounts[skillLevel + 1], 100)",
+    "neutralJoinChances = { 10, 20, 30 } ",
+    "h.neutralJoinChance:set( neutralJoinChances[skillLevel + 1], 100)",
+    "greatLibraryVisitLevels = { 8, 6, 4 } ",
+    "h.greatLibraryVisitLevel = greatLibraryVisitLevels[skillLevel + 1]"
+] },
+
 "sod.skill.wisdom"             : { "untranslatedName":"Wisdom", "frequencyFighter": 3 , "frequencyMage": 8, "handler": "wisdom", "calc": [
     "h.maxLearningSpell = skillLevel + 3"
 ]},
@@ -80,8 +88,18 @@
 ]},
 
 "sod.skill.ballistics"        : { "untranslatedName":"Ballistics", "frequencyFighter": 7 , "frequencyMage": 5 },
-"sod.skill.eagleEye"          : { "untranslatedName":"Eagle Eye", "frequencyFighter": 2 , "frequencyMage": 7 },
-"sod.skill.necromancy"        : { "untranslatedName":"Necromancy", "frequencyFighter": 0 , "frequencyMage": 0 },
+"sod.skill.eagleEye"          : { "untranslatedName":"Eagle Eye", "frequencyFighter": 2 , "frequencyMage": 7, "handler": "stat","calc":[
+    "values = { 40, 50, 60 } ",
+    "bonus = values[skillLevel + 1] ",
+    "if isSpec then bonus = bonus + math.ceil(bonus * heroLevel / 20) end ",
+    "h.eagleEyeChance:add(bonus, 100)"
+] },
+"sod.skill.necromancy"        : { "untranslatedName":"Necromancy", "frequencyFighter": 0 , "frequencyMage": 0,  "handler": "stat", "calc":[
+    "values = { 50, 100, 150 } ",
+    "bonus = values[skillLevel + 1] ",
+    "if isSpec then bonus = bonus + math.ceil(bonus * heroLevel / 20) end ",
+    "h.necromancy:add(bonus, 1000)"
+] },
 "sod.skill.estates"           : { "untranslatedName":"Estates", "frequencyFighter": 3 , "frequencyMage": 3, "handler":"stat", "calc":[
     "values = { 250, 500, 1000 } ",
     "bonus = values[skillLevel + 1] ",
@@ -93,7 +111,12 @@
 ]},
 "sod.skill.tactics"        : { "untranslatedName":"Tactics", "frequencyFighter": 6 , "frequencyMage": 2 },
 "sod.skill.artillery"        : { "untranslatedName":"Artillery", "frequencyFighter": 6 , "frequencyMage": 1 },
-"sod.skill.learning"        : { "untranslatedName":"Learning", "frequencyFighter": 4 , "frequencyMage": 4 },
+"sod.skill.learning"        : { "untranslatedName":"Learning", "frequencyFighter": 4 , "frequencyMage": 4, "handler":"stat", "calc":[
+    "values = { 5, 10, 15 } ",
+    "bonus = values[skillLevel + 1] ",
+    "if isSpec then bonus = bonus * 2 end ",
+    "h.bonusExperience:set(bonus, 100)"
+] },
 "sod.skill.sorcery"           : { "untranslatedName":"Sorcery", "frequencyFighter": 2 , "frequencyMage": 6, "handler": "stat", "calc": [
     "values = { 5, 10, 15 } ",
     "bonus = values[skillLevel + 1] ",

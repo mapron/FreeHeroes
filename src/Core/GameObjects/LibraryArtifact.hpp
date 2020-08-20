@@ -160,6 +160,9 @@ struct ArtifactSlotRequirement {
 struct LibraryArtifact {
     enum class TreasureClass { Treasure, Minor, Major, Relic, Unique, Complex, BattleMachine, Scroll, Special };
     enum class OrderCategory  { Special, Stats, Skills, Magic, Income , Misc, Complex, Scrolls  };
+    enum class SpecialEffect { None, NeutralDiplomacy, FactionsAlliance, AlwaysFly, AlwaysWaterWalk, ResurrectFangarms,
+                               ExtendedNecromancy, DragonsBuffs, DisableSurrender, NoDamageWhirl, NoTerrainPenalty, DisableImmunes, PermanentDeath };
+
     struct Presentation {
         OrderCategory orderCategory = OrderCategory::Special;
         int orderGroup = 0;
@@ -172,6 +175,7 @@ struct LibraryArtifact {
     std::vector<std::string> calc;
     ArtifactSlotType slot;
     TreasureClass treasureClass = TreasureClass::Special;
+    SpecialEffect special = SpecialEffect::None;
     std::string  untranslatedName;
 
     int value = 0;

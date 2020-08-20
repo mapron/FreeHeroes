@@ -759,82 +759,107 @@
         <translation>Радиус обзора</translation>
     </message>
     <message>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="185"/>
+        <source>Reduced surrender cost</source>
+        <translation>Уменьшение цены откупа при сдаче</translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="186"/>
+        <source>Neutral join chance</source>
+        <translation>Шанс присоединения нейтралов</translation>
+    </message>
+    <message>
         <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="187"/>
+        <source>Minimal level for Great Library</source>
+        <translation>Минимальный уровень для посещения Библиотеки</translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="188"/>
+        <source>Experience gain bonus</source>
+        <translation>Бонус получаемого опыта</translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="189"/>
+        <source>Eagle Eye chance</source>
+        <translation>Шанс Орлиного Глаза</translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="190"/>
+        <source>Necromancy efficiency</source>
+        <translation>Эффективность Некромантии</translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="194"/>
         <source>Primary stats</source>
         <translation>Первичные параметры</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="188"/>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="195"/>
         <source>Physical damage</source>
         <translation>Физический урон</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="189"/>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="196"/>
         <source>Magical</source>
         <translation>Магические параметры</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="190"/>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="197"/>
         <source>Speed</source>
         <translation>Скорость</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="191"/>
-        <source>Misc</source>
-        <translation>Прочее</translation>
-    </message>
-    <message>
-        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="193"/>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="199"/>
         <source>Army luck</source>
         <translation>Удача армии</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="194"/>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="200"/>
         <source>Luck value</source>
         <translation>Уровень удачи</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="197"/>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="203"/>
         <source>Army morale</source>
         <translation>Боевой дух армии</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="198"/>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="204"/>
         <source>Morale value</source>
         <translation>Уровень боевого духа</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="201"/>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="207"/>
         <source>Skills</source>
         <translation>Навыки</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="219"/>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="227"/>
         <source>Upgrade - prioritized</source>
         <translation>Продвижение - приоритет</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="221"/>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="229"/>
         <source>Upgrade - normal</source>
         <translation>Продвижение - обычные</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="224"/>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="232"/>
         <source>New - prioritized</source>
         <translation>Изучение - приоритет</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="226"/>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="234"/>
         <source>New - normal</source>
         <translation>Изучение - обычные</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="230"/>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="238"/>
         <source>Levelups to wisdom suggest</source>
         <translation>Кол-во уровней&lt;br&gt;до предложения Мудрости</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="231"/>
+        <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="239"/>
         <source>Levelups to magic school suggest</source>
         <translation>Кол-во уровне&lt;br&gt;до предложения стихии</translation>
     </message>
