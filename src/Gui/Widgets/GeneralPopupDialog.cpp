@@ -16,10 +16,6 @@
 
 namespace FreeHeroes::Gui {
 
-namespace {
-
-}
-
 GeneralPopupDialog::GeneralPopupDialog(QString description,
                                        const Items & items,
                                        bool isModal,
@@ -28,6 +24,7 @@ GeneralPopupDialog::GeneralPopupDialog(QString description,
     : QDialog(parent), m_isModal(isModal)
 {
     setWindowFlag(Qt::Popup, true);
+    setWindowFlag(Qt::WindowStaysOnTopHint, true);
     DialogUtils::commonDialogSetup(this);
 
     QVBoxLayout * mainLayout = DialogUtils::makeMainDialogFrame(this);

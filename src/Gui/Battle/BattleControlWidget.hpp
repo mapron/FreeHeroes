@@ -80,6 +80,7 @@ private: /* slots */
     void autoPlay();
     void showSpellBook();
     void showPopupLogs();
+    void updateTurnFlags();
 
 private:
     QString localizedNameWithCount(BattleStackConstPtr stack, bool asTarget = false) const;

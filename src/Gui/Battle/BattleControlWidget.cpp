@@ -72,7 +72,7 @@ BattleControlWidget::BattleControlWidget(Core::IBattleView & battleView,
     connect(m_ui->pushButtonGuard, &QPushButton::clicked, this, [this]{if (m_humanControlAvailable) m_battleControl.doGuard();});
     connect(m_ui->pushButtonSettings, &QPushButton::clicked, this, &BattleControlWidget::showSettings);
     connect(m_ui->pushButtonSpellBook, &QPushButton::clicked, this,  &BattleControlWidget::showSpellBook);
-    connect(m_ui->pushButtonAuto, &QPushButton::clicked, this, &BattleControlWidget::autoPlay);
+    //connect(m_ui->pushButtonAuto, &QPushButton::clicked, this, &BattleControlWidget::autoPlay);
 
     connect(&m_aiTimer, &QTimer::timeout, this, &BattleControlWidget::aiCheckTick);
     QTimer::singleShot(2000, this, [this]{
@@ -84,7 +84,7 @@ BattleControlWidget::BattleControlWidget(Core::IBattleView & battleView,
         {m_ui->pushButtonGuard    , bcIcons.guard},
         {m_ui->pushButtonSpellBook, bcIcons.spellBook},
         {m_ui->pushButtonSurrender, bcIcons.surrender},
-        {m_ui->pushButtonAuto     , bcIcons.autoCombat},
+       // {m_ui->pushButtonAuto     , bcIcons.autoCombat},
         {m_ui->pushButtonSettings , bcIcons.settings},
 
         {m_ui->pushButtonUnitCast   ,  bcIcons.unitCast},
@@ -344,6 +344,7 @@ void BattleControlWidget::onStartRound(int round)
 
 void BattleControlWidget::onStackUnderEffect(BattleStackConstPtr stack, Effect effect)
 {
+    updateTurnFlags();
     QString fmt;
     switch (effect) {
         case Effect::GoodMorale: fmt = tr("%1 - high morale allows one more attack!"); break;
@@ -394,8 +395,7 @@ void BattleControlWidget::onCast(const Caster & caster, const AffectedMagic & af
 
 void BattleControlWidget::onControlAvailableChanged(bool controlAvailable)
 {
-    m_turnIsAttacker = !m_battleView.isFinished() && m_battleView.getCurrentSide() == BattleStack::Side::Attacker;
-    m_turnIsDefender = !m_battleView.isFinished() && m_battleView.getCurrentSide() == BattleStack::Side::Defender;
+    updateTurnFlags();
     bool humanAttacker = !m_aiAttacker && !m_replayIsActive;
     bool humanDefender = !m_aiDefender && !m_replayIsActive;
     m_anyControlAvailable   = controlAvailable;
@@ -416,7 +416,7 @@ void BattleControlWidget::onBattleFinished(Core::BattleResult)
         pb->setEnabled(false);
     for (auto * pb : m_alternateButtons->buttons())
         pb->setEnabled(false);
-    m_ui->pushButtonAuto->setEnabled(false);
+   // m_ui->pushButtonAuto->setEnabled(false);
 }
 
 void BattleControlWidget::planUpdate()
@@ -476,7 +476,8 @@ void BattleControlWidget::planUpdate()
                 }
             }
             if (m_appSettings.battle().massDamageHint && movePlan.m_extraAffectedTargets.size() > 0) {
-                hint += tr(", extra affected: ");
+                if (!hint.isEmpty())
+                    hint += tr(", extra affected: ");
                 for (size_t i=0; i< movePlan.m_extraAffectedTargets.size(); i++)
                 {
                     auto damageEstimate   = movePlan.m_extraAffectedTargets[i].damage;
@@ -639,6 +640,12 @@ void BattleControlWidget::showPopupLogs()
     dlg.updateGeometry();
    // dlg.resize(dlg.sizeHint());
     dlg.exec();
+}
+
+void BattleControlWidget::updateTurnFlags()
+{
+    m_turnIsAttacker = !m_battleView.isFinished() && m_battleView.getCurrentSide() == BattleStack::Side::Attacker;
+    m_turnIsDefender = !m_battleView.isFinished() && m_battleView.getCurrentSide() == BattleStack::Side::Defender;
 }
 
 QString BattleControlWidget::localizedNameWithCount(BattleControlWidget::BattleStackConstPtr stack, bool asTarget) const

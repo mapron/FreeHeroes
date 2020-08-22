@@ -257,6 +257,7 @@ BattlePlanMove BattleManager::findPlanMove(const BattlePlanMoveParams & movePara
         }
         if (result.m_attackMode == BattlePlanMove::Attack::Ranged && stack->library->abilities.splashType == LibraryUnit::Abilities::SplashAttack::Ranged) {
             result.m_splashPositions = m_field.getAdjacentSet( attackParams.m_attackTarget );
+            result.m_splashPositions.insert(attackParams.m_attackTarget);
             std::set<BattleStackConstPtr> splashAffected;
             for (auto pos : result.m_splashPositions) {
                 BattleStackConstPtr targetCandidate = findStack(pos, true);

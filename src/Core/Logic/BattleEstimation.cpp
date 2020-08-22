@@ -223,6 +223,7 @@ void BattleEstimation::calculateUnitStatsStartBattle(BattleStack& unit, const Ba
     unit.estimatedOnStart.rngChances    = squad.adventure->estimated.squadBonus.rngChance;
     unit.estimatedOnStart.magicOppSuccessChance = unit.adventure->estimated.magicOppSuccessChance;
     unit.estimatedOnStart.magicReduce           = unit.adventure->estimated.magicReduce;
+    unit.estimatedOnStart.immunes               = unit.adventure->estimated.immunes;
 
     if (0) { // @todo: black sphere
         unit.estimatedOnStart.immunes           = unit.adventure->estimated.immunesWithoutBreakable;

@@ -219,6 +219,7 @@ void BattleFieldItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* o
     const QBrush shadowMoveTarget = QColor(0, 0, 0, 170);
     const QBrush hightlightFocus = QColor(200, 200, 200, 40);
     const QBrush hightlightAttackFocus = QColor(50, 0, 0, 150);
+    const QBrush hightlightRetaliationSplash = QColor(150, 100, 0, 150);
     const auto mainGrid = QColor(192, 192, 0, 80);
     const auto hintGrid = QColor(0, 0, 0, 100);
     const auto pathTrace = QColor(0, 150, 0, 150);
@@ -246,13 +247,22 @@ void BattleFieldItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* o
             result << el;
         return result;
     };
+    auto getRetaliationSplashArea = [this]() -> QSet<BattlePosition> {
+        QSet<BattlePosition> result;
+        for (auto target : m_controlPlan.m_planMove.m_extraRetaliationAffectedTargets) {
+            result << target.stack->pos.leftPos();
+            result << target.stack->pos.rightPos();
+        }
+        return result;
+    };
 
     const bool validMove  = m_controlPlan.m_planMove.isValid();
     const bool makingCast = m_controlPlan.m_planCastParams.isActive();
     const int checkAvaiDx = m_controlPlan.m_selectedStack && m_controlPlan.m_selectedStack->library->traits.large ? (m_controlPlan.m_selectedStack->side == BattleStack::Side::Attacker ? -1 : +1) : 0;
     const auto currentAvailableCells = makingCast ? getAvailableCastArea() : getAvailableMovement(m_controlPlan.m_selectedStack);
     const auto hoveredAvailableCells = m_showAvailableForHovered ? getAvailableMovement(m_controlPlan.m_hoveredStack) : QSet<BattlePosition>{};
-    //const auto hoveredCells = m_castPlanParams.isActive() ? getActiveCastArea() : QSet<BattlePosition>{m_hovered};
+    const auto retaliationSplashArea = validMove ? getRetaliationSplashArea() : QSet<BattlePosition>{};
+
     QSet<BattlePosition> obstacles;
     for (auto pos : m_battleView.getObstacles())
         obstacles << pos;
@@ -261,20 +271,20 @@ void BattleFieldItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* o
         for (int w = 0, totalW = m_battleGeometry.width; w < totalW; ++w) {
             const BattlePosition pos{w, h};
             const bool isHovered = m_hovered == pos;
-            const bool isHoveredOnAttack = validMove &&  ((isHovered && m_controlPlan.m_hoveredStack) || m_controlPlan.m_planMove.m_splashPositions.contains(pos));
-            const bool isAvai = currentAvailableCells.contains(pos);
+            const bool isHoveredOnAttack = !makingCast && validMove &&  ((isHovered && m_controlPlan.m_hoveredStack) || m_controlPlan.m_planMove.m_splashPositions.contains(pos));
             const bool isMoveTo = validMove && m_controlPlan.m_planMove.m_moveTo.contains(pos);
-            const bool isObstacle = obstacles.contains(pos);
             QBrush brush = QBrush(Qt::NoBrush);
             if (isMoveTo)
                 brush = shadowMoveTarget;
-            else if (isObstacle)
+            else if (obstacles.contains(pos))
                 brush = obstacleColor;
-            else if (isHoveredOnAttack && !makingCast)
+            else if (isHoveredOnAttack)
                 brush = hightlightAttackFocus;
             else if (isHovered && !makingCast)
                 brush = hightlightFocus;
-            else if (isAvai)
+            else if (retaliationSplashArea.contains(pos))
+                brush = hightlightRetaliationSplash;
+            else if (currentAvailableCells.contains(pos))
                 brush = shadowAvailable;
             else if (!makingCast && currentAvailableCells.contains({pos.x + checkAvaiDx, pos.y}))
                 brush = shadowAvailable;

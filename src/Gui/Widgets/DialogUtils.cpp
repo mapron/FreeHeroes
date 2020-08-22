@@ -13,6 +13,8 @@
 #include <QVariant>
 #include <QPushButton>
 #include <QDialog>
+#include <QGuiApplication>
+#include <QScreen>
 
 namespace FreeHeroes::Gui {
 
@@ -103,6 +105,19 @@ void DialogUtils::setupClickSound(QPushButton* button)
     QObject::connect(button, &QPushButton::clicked, button, [&modelProvider]{
         modelProvider.ui()->clickEffect->play();
     });
+}
+
+void DialogUtils::moveWidgetWithinVisible(QWidget* dialog, QPoint globalPos)
+{
+    const QSize s = dialog->sizeHint();
+    const QRect availableRect = QGuiApplication::screenAt(globalPos)->availableGeometry();
+    QRect popupRect(globalPos, globalPos + QPoint(s.width(), s.height()));
+    if (popupRect.bottom() > availableRect.bottom())
+        popupRect.translate(0, availableRect.bottom() - popupRect.bottom());
+    if (popupRect.right() > availableRect.right())
+        popupRect.translate(availableRect.right() - popupRect.right(), 0);
+
+    dialog->move(popupRect.x(), popupRect.y());
 }
 
 }

@@ -268,7 +268,7 @@ void HeroMainDialog::showInfo(const GuiAdventureStack * stack, bool modal)
 
     connect(m_infoWidget.get(), &UnitInfoWidget::deleteStack, this, &HeroMainDialog::deleteStack );
     QPoint pos = this->mapToGlobal(QPoint(-10 + advStack->armyParams.indexInArmy * 66, 470 - m_infoWidget->sizeHint().height()));
-    m_infoWidget->move(pos);
+    DialogUtils::moveWidgetWithinVisible(m_infoWidget.get(), pos);
     if (modal)
         m_infoWidget->exec();
     else

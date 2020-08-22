@@ -153,7 +153,7 @@ UnitInfoWidget::UnitInfoWidget(Core::BattleStackConstPtr battle,
     auto guiUnit = modelsProvider->units()->find(adventure->library);
     auto guiFaction = modelsProvider->factions()->find(adventure->library->faction);
     const int count =  battle ? battle->count : adventure->count;
-    QString title = guiUnit->getNameWithCount(count);
+    QString title = battle ? QString("%1/%2 ").arg(count).arg(adventure->count) +  guiUnit->getName(count)  : guiUnit->getNameWithCount(count);
     title = QString("<font color=\"#EDD57A\">%1</font>").arg(title);
     DarkFrameLabel * titleLabel = new DarkFrameLabel(title, this);
     QFont f = this->font();
@@ -180,7 +180,12 @@ UnitInfoWidget::UnitInfoWidget(Core::BattleStackConstPtr battle,
                                                                       this);
     if (showModal)
         portrait->startTimer();
-    paramAndPortraitLayout->addWidget(portrait);
+    QVBoxLayout * portraitWrap = new QVBoxLayout();
+    portraitWrap->setMargin(0);
+    portraitWrap->setSpacing(0);
+    portraitWrap->addWidget(portrait);
+    portraitWrap->addStretch();
+    paramAndPortraitLayout->addLayout(portraitWrap);
 
     QVBoxLayout * paramLayout = new QVBoxLayout();
     paramLayout->setSpacing(1);
@@ -217,11 +222,10 @@ UnitInfoWidget::UnitInfoWidget(Core::BattleStackConstPtr battle,
               "hp"};
 
     params << Row{tr("Speed"),
-              FormatUtils::formatSequenceInt(libraryPrimary.battleSpeed, advPrimary.battleSpeed, battlePrimary.battleSpeed) +
-              (battle ? " (#" +  QString::number(battle->sameSpeedOrder + 1) + ")" : ""),
+              FormatUtils::formatSequenceInt(libraryPrimary.battleSpeed, advPrimary.battleSpeed, battlePrimary.battleSpeed),
               "speed"};
     if (battle)
-        params << Row{tr("Count"), QString::number(battle->count) + " / " + QString::number(adventure->count),
+        params << Row{tr("Order on same spd."), "#" +  QString::number(battle->sameSpeedOrder + 1),
                   {}};
 
 
@@ -242,7 +246,7 @@ UnitInfoWidget::UnitInfoWidget(Core::BattleStackConstPtr battle,
         lbl1->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Preferred );
         //lbl1->setMinimumWidth(100);
         auto lbl2 = new QLabel(row.value, this);
-        titleValue->setMinimumWidth(150);
+        titleValue->setMinimumWidth(180);
         lbl1->setContentsMargins(5, 3, 5, 3);
         lbl2->setContentsMargins(5, 3, 5, 3);
         titleValueLayout->addWidget(lbl2, 0, Qt::AlignRight);

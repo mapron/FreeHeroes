@@ -246,6 +246,7 @@ BattleWidget::BattleWidget(IBattleView & battleView,
     DialogUtils::commonDialogSetup(this);
     setWindowFlag(Qt::WindowContextHelpButtonHint, false);
     auto * layout = DialogUtils::makeMainDialogFrame(this, true);
+    layout->setSpacing(0);
 
     m_battlefield.reset(new BattleFieldItem(m_cursorLibrary, m_musicBox, m_modelsProvider,
                                             m_battleView, m_battleControl, battleGeometry, *m_controlPlan, m_appSettings));
@@ -258,8 +259,6 @@ BattleWidget::BattleWidget(IBattleView & battleView,
 
     m_battleControlWidget = new FreeHeroes::Gui::BattleControlWidget(battleView, battleControl, aiFactory, *m_controlPlan,
                                                                      m_modelsProvider, this);
-    m_battleControlWidget->setMinimumSize(QSize(0, 80));
-
     layout->addWidget(m_battleControlWidget);
 
 
@@ -304,9 +303,6 @@ BattleWidget::BattleWidget(IBattleView & battleView,
     m_battleView.addNotify(this);
 
     m_battleControlWidget->setFocusPolicy(Qt::NoFocus);
-    //m_ui->battleView->setFixedSize()
-
-   // setFixedSize(QSize(800, 660) );
 
     QStringList paramLabels {
        tr("Att:"),
@@ -364,12 +360,12 @@ void BattleWidget::showSettingsDialog()
 
 void BattleWidget::keyPressEvent(QKeyEvent* event)
 {
-    if (event->key() == Qt::Key_W && event->modifiers() == Qt::NoModifier) {
+    if ((event->key() == Qt::Key_W || event->nativeVirtualKey() == 'W') && event->modifiers() == Qt::NoModifier) {
         event->accept();
         m_battleControlWidget->doWait();
         return;
     }
-    if (event->key() == Qt::Key_G && event->modifiers() == Qt::NoModifier) {
+    if ((event->key() == Qt::Key_G || event->nativeVirtualKey() == 'G') && event->modifiers() == Qt::NoModifier) {
         event->accept();
         m_battleControlWidget->switchSplash();
         return;
@@ -425,8 +421,7 @@ void BattleWidget::showInfoWidget(BattleStackConstPtr stack, QPoint pos)
                                           &m_modelsProvider,
                                           false,
                                           this));
-
-    m_infoWidget->move(pos + this->pos() + QPoint(40, 100));
+    DialogUtils::moveWidgetWithinVisible(m_infoWidget.get(), pos + this->pos() + QPoint(40, 100));
     m_infoWidget->show();
 }
 

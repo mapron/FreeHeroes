@@ -6,6 +6,7 @@
 #include "HoverHelper.hpp"
 
 #include "GeneralPopupDialog.hpp"
+#include "DialogUtils.hpp"
 
 #include <QWidget>
 #include <QLabel>
@@ -124,7 +125,7 @@ bool HoverHelper::showPopup(QWidget * what, bool isModal) {
     if (popupOffsetAnchorVert == "bottom")
         globalPos -= QPoint(0, s.height());
 
-    m_dialog->move(globalPos );
+    DialogUtils::moveWidgetWithinVisible(m_dialog, globalPos);
     if (isModal)
         m_dialog->exec();
     else
