@@ -48,7 +48,7 @@ if (MSVC)
 else()
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
     add_compile_options(-Wall -Wextra -Wno-unused-parameter)
-
+    AddCompilerFlagIfSupported(-Wno-missing-field-initializers)
     set(THREADS_PREFER_PTHREAD_FLAG ON)
     find_package(Threads REQUIRED)
     set(PTHREAD Threads::Threads)
