@@ -1269,14 +1269,28 @@ void BattleManager::updateState()
         }
     }
 
-    m_roundQueue.clear();
-    std::copy_if(m_alive.begin(), m_alive.end(), std::back_inserter(m_roundQueue), [](auto * stack){
+
+    std::vector<BattleStackMutablePtr> roundQueue, roundQueueWaited, roundQueueNonWaited;
+    std::copy_if(m_alive.begin(), m_alive.end(), std::back_inserter(roundQueue), [](auto * stack){
         return !stack->roundState.finishedTurn && stack->current.canDoAnything;
     });
+    for (auto stack : roundQueue)
+        if (stack->roundState.waited)
+            roundQueueWaited.push_back(stack);
+        else
+            roundQueueNonWaited.push_back(stack);
 
-    std::sort(m_roundQueue.begin(), m_roundQueue.end(), [](BattleStackMutablePtr left, BattleStackMutablePtr right){
+    // Non-waited stacks have their turn according to base order (speed, side, index).
+    // But waited stack have reverse order, so fastest stack will go last.
+
+    std::sort(roundQueueNonWaited.begin(), roundQueueNonWaited.end(), [](auto left, auto right){
         return left->turnOrder() < right->turnOrder();
     });
+    std::sort(roundQueueWaited.begin(), roundQueueWaited.end(), [](auto left, auto right){
+        return left->turnOrder() > right->turnOrder();
+    });
+    m_roundQueue = roundQueueNonWaited;
+    m_roundQueue.insert(m_roundQueue.end(), roundQueueWaited.cbegin(), roundQueueWaited.cend());
 
     if (m_roundQueue.empty()) {
         // @note: Long recursion in calls when a lot of units skip turns every round is a small concern, we have not so much data on the stack.

@@ -112,7 +112,7 @@ struct BattleStack {
 
 
     constexpr auto turnOrder() const noexcept {
-        return std::tie(roundState.waited, speedOrder, sameSpeedOrder, side);
+        return std::tie(speedOrder, sameSpeedOrder, side);
     }
     constexpr bool isAlive() const noexcept {
         return count > 0;
