@@ -44,14 +44,14 @@ An incomplete list of features that are considered key for the future project, i
 10. It should be convenient, easy and pleasant to create tournaments and show matches with custom templates and rules for modders, streamers and players alike.
 
 # History of past versions and RoadMap for future releases
-(plan) 0.4? 11/01/2020? - Adventure mode
+(plan) 0.4 - Adventure mode
 - Map editor
 - Import of SoD / HotA cards
 - Minimal functionality of random maps
 - implementation of most of the objects of the adventure map
 - the ability to play over the network 1: 1.
 
-(plan) 0.3? 09/14/2020? - completion of work on battles:
+(plan) 0.3 - completion of work on battles:
 - Complete all creature abilities;
 - Combat vehicles, city siege;
 - Rebuilding the city, buying an army and heroes;
