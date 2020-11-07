@@ -12,6 +12,7 @@
 #include <array>
 #include <compare>
 #include <unordered_map>
+#include <algorithm>
 
 namespace FreeHeroes::Core {
 
