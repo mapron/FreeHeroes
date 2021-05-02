@@ -146,6 +146,7 @@ RTTR_REGISTRATION
         .property("backgroundsBattle"  , &LibraryTerrain::Presentation::backgroundsBattle)(ref)
         .property("order"              , &LibraryTerrain::Presentation::order)
         .property("icon"               , &LibraryTerrain::Presentation::icon)
+        .property("centerTiles"        , &LibraryTerrain::Presentation::centerTiles)(ref)
         ;
     registration::class_<LibraryTerrain>("LibraryTerrain")
         .constructor<>()

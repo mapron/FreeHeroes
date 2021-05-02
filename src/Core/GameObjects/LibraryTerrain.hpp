@@ -18,6 +18,8 @@ struct LibraryTerrain {
         std::string              music;
         std::vector<std::string> backgroundsBattle;
         std::string              icon;
+        //std::string tileset;
+        std::vector<std::string> centerTiles;
     };
 
     std::string id;
