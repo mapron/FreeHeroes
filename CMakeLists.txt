@@ -281,7 +281,24 @@ AddTarget(FH QT TYPE app NAME BattleEmulator
     DEPS Qt5::Widgets
     )
 
+AddTarget(FH QT TYPE app NAME MapGenTest
+    ROOT src/App/MapGenTest
+    DEPS_FH
+        CorePlatform
+        GuiInt
+        SoundInt
+        GameObjects
+        GameInt
 
+        GuiApplication
+        GuiWidgets
+        GuiEditor
+        GuiBattle
+        GuiGameWrappers
+        CoreLogic
+        BattleLogic
+    DEPS Qt5::Widgets
+    )
 
 # tests
 
