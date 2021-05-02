@@ -16,23 +16,24 @@
 
 namespace FreeHeroes::Gui {
 
-GeneralPopupDialog::GeneralPopupDialog(QString description,
-                                       const Items & items,
-                                       bool isModal,
-                                       bool hasCancel,
-                                       QWidget* parent)
-    : QDialog(parent), m_isModal(isModal)
+GeneralPopupDialog::GeneralPopupDialog(QString      description,
+                                       const Items& items,
+                                       bool         isModal,
+                                       bool         hasCancel,
+                                       QWidget*     parent)
+    : QDialog(parent)
+    , m_isModal(isModal)
 {
     setWindowFlag(Qt::Popup, true);
     setWindowFlag(Qt::WindowStaysOnTopHint, true);
     DialogUtils::commonDialogSetup(this);
 
-    QVBoxLayout * mainLayout = DialogUtils::makeMainDialogFrame(this);
+    QVBoxLayout* mainLayout = DialogUtils::makeMainDialogFrame(this);
 
     description = FormatUtils::prepareDescription(description);
     {
-        QHBoxLayout * labelWrap = new QHBoxLayout();
-        QLabel * mainLabel = new QLabel(description, this);
+        QHBoxLayout* labelWrap = new QHBoxLayout();
+        QLabel*      mainLabel = new QLabel(description, this);
         mainLabel->setAlignment(Qt::AlignHCenter);
         mainLabel->setWordWrap(true);
         mainLabel->setMaximumWidth(300);
@@ -47,19 +48,19 @@ GeneralPopupDialog::GeneralPopupDialog(QString description,
 
     if (!items.isEmpty()) {
         mainLayout->addSpacing(20);
-        QHBoxLayout * imgWrap = new QHBoxLayout();
+        QHBoxLayout* imgWrap = new QHBoxLayout();
         imgWrap->setMargin(0);
         imgWrap->setSpacing(20);
         mainLayout->addLayout(imgWrap);
         imgWrap->addStretch(0);
         imgWrap->addSpacing(100);
-        for (const auto & item : items) {
-            QVBoxLayout * itemLayout = new QVBoxLayout();
+        for (const auto& item : items) {
+            QVBoxLayout* itemLayout = new QVBoxLayout();
             imgWrap->addLayout(itemLayout);
-            QHBoxLayout * imgLayout = new QHBoxLayout();
+            QHBoxLayout* imgLayout = new QHBoxLayout();
             itemLayout->addLayout(imgLayout);
 
-            DarkFrameLabelIcon * imgLabel = item.addBorder ?  new DarkFrameLabelIcon(this) : new FlatLabelIcon(this);
+            DarkFrameLabelIcon* imgLabel = item.addBorder ? new DarkFrameLabelIcon(this) : new FlatLabelIcon(this);
             imgLabel->setProperty("fill", false);
             imgLabel->setFixedSize(item.bottomPicture.size());
             imgLabel->setPixmap(item.bottomPicture);
@@ -70,7 +71,7 @@ GeneralPopupDialog::GeneralPopupDialog(QString description,
             if (item.bottomText.isEmpty())
                 continue;
 
-            QLabel * bottomLabel = new QLabel(item.bottomText, this);
+            QLabel* bottomLabel = new QLabel(item.bottomText, this);
             bottomLabel->setAlignment(Qt::AlignHCenter | Qt::AlignTop);
             bottomLabel->setWordWrap(true);
             bottomLabel->setMaximumWidth(item.bottomPicture.size().width() * 2);
@@ -79,9 +80,8 @@ GeneralPopupDialog::GeneralPopupDialog(QString description,
         imgWrap->addSpacing(100);
         imgWrap->addStretch(0);
     }
-    if (isModal)
-    {
-        QHBoxLayout * bottomButtons = new QHBoxLayout();
+    if (isModal) {
+        QHBoxLayout* bottomButtons = new QHBoxLayout();
         mainLayout->addLayout(bottomButtons);
         bottomButtons->addStretch();
         if (hasCancel) {
@@ -91,7 +91,6 @@ GeneralPopupDialog::GeneralPopupDialog(QString description,
         bottomButtons->addWidget(DialogUtils::makeAcceptButton(this));
         bottomButtons->addStretch();
     }
-
 }
 
 void GeneralPopupDialog::mouseReleaseEvent(QMouseEvent* ev)
@@ -111,20 +110,20 @@ void GeneralPopupDialog::closeNonModal()
     }
 }
 
-bool GeneralPopupDialog::confirmRequest(const QString& message, QWidget * parent)
+bool GeneralPopupDialog::confirmRequest(const QString& message, QWidget* parent)
 {
     QDialog dlg(parent);
     dlg.setWindowFlag(Qt::Popup, true);
     DialogUtils::commonDialogSetup(&dlg);
 
-    QVBoxLayout * mainLayout = DialogUtils::makeMainDialogFrame(&dlg);
-   // mainLayout->addWidget(new QLabel("adadasdasd", &dlg));
-    mainLayout->setContentsMargins(5,10,5,5);
+    QVBoxLayout* mainLayout = DialogUtils::makeMainDialogFrame(&dlg);
+    // mainLayout->addWidget(new QLabel("adadasdasd", &dlg));
+    mainLayout->setContentsMargins(5, 10, 5, 5);
 
-    auto msg  = FormatUtils::prepareDescription(message);
+    auto msg = FormatUtils::prepareDescription(message);
     {
-        QHBoxLayout * labelWrap = new QHBoxLayout();
-        QLabel * mainLabel = new QLabel(msg, &dlg);
+        QHBoxLayout* labelWrap = new QHBoxLayout();
+        QLabel*      mainLabel = new QLabel(msg, &dlg);
         mainLabel->setAlignment(Qt::AlignHCenter);
         mainLabel->setWordWrap(true);
         mainLabel->setMaximumWidth(300);
@@ -138,7 +137,7 @@ bool GeneralPopupDialog::confirmRequest(const QString& message, QWidget * parent
         labelWrap->addStretch(0);
     }
     mainLayout->addSpacing(10);
-    QHBoxLayout * bottomButtons = new QHBoxLayout();
+    QHBoxLayout* bottomButtons = new QHBoxLayout();
     mainLayout->addLayout(bottomButtons);
     bottomButtons->addStretch();
     bottomButtons->addSpacing(50);
@@ -158,6 +157,5 @@ void GeneralPopupDialog::messageBox(const QString& message, QWidget* parent)
     GeneralPopupDialog dlg(message, {}, true, false, parent);
     dlg.exec();
 }
-
 
 }

@@ -29,11 +29,11 @@ using namespace Core;
 
 class ArmyControlWidget::UnitButton : public DarkFrameLabel {
 public:
-    const GuiAdventureStack * m_stack = nullptr;
-    bool m_isSelected = false;
-    ArmyControlWidget * m_parent = nullptr;
+    const GuiAdventureStack* m_stack      = nullptr;
+    bool                     m_isSelected = false;
+    ArmyControlWidget*       m_parent     = nullptr;
 
-    UnitButton(ArmyControlWidget * parent)
+    UnitButton(ArmyControlWidget* parent)
         : DarkFrameLabel(parent)
         , m_parent(parent)
     {
@@ -42,16 +42,17 @@ public:
         setFixedSize(QSize(58, 64) + QSize(4, 4));
     }
 
-    void refresh() {
+    void refresh()
+    {
         update();
     }
 
-    void paintEvent(QPaintEvent * e) override{
+    void paintEvent(QPaintEvent* e) override
+    {
         DarkFrameLabel::paintEvent(e);
         QPainter painter(this);
 
-
-        QRect itemRect = rect().adjusted(0, 0, -1, -1);
+        QRect itemRect      = rect().adjusted(0, 0, -1, -1);
         QRect selectionRect = itemRect.adjusted(2, 2, -2, -2);
 
         const bool isEmpty = !m_stack || !m_stack->isValid();
@@ -62,7 +63,7 @@ public:
         } else {
             auto cm = painter.compositionMode();
             painter.setCompositionMode(QPainter::CompositionMode_ColorBurn);
-            painter.fillRect(selectionRect.adjusted(0,0,1,1), QColor(185,185,185, 190)); // @todo: specialColor?;
+            painter.fillRect(selectionRect.adjusted(0, 0, 1, 1), QColor(185, 185, 185, 190)); // @todo: specialColor?;
             painter.setCompositionMode(cm);
         }
 
@@ -79,19 +80,19 @@ public:
 
         QFontMetrics fm(f);
 
-        const QString count = QString::number(m_stack->getSource()->count);
-        int textWidth = fm.horizontalAdvance(count);
+        const QString count     = QString::number(m_stack->getSource()->count);
+        int           textWidth = fm.horizontalAdvance(count);
         //int textHeight = fm.height();
 
         int textX = selectionRect.x() + selectionRect.width() - textWidth - 2;
-        int textY = selectionRect.y() + selectionRect.height() -  2;
+        int textY = selectionRect.y() + selectionRect.height() - 2;
 
         QPainterPath myPath;
         myPath.addText(textX, textY, f, count);
 
         QPainterPathStroker stroker;
-        stroker.setWidth( 3 );
-        const QPainterPath stroked = stroker.createStroke( myPath );
+        stroker.setWidth(3);
+        const QPainterPath stroked = stroker.createStroke(myPath);
 
         painter.setBrush(Qt::black);
         painter.setPen(Qt::NoPen);
@@ -102,7 +103,6 @@ public:
         painter.setPen(Qt::white);
         painter.setFont(f);
         painter.drawText(textX, textY, count);
-
     }
 
     void mousePressEvent(QMouseEvent* e) override;
@@ -110,19 +110,19 @@ public:
 };
 
 struct ArmyControlWidget::Impl {
-    const GuiAdventureSquad * m_squad = nullptr;
-    Core::IAdventureSquadControl * m_adventureSquadControl = nullptr;
-    QList<UnitButton*> m_buttons;
-    QHBoxLayout * m_layout = nullptr;
+    const GuiAdventureSquad*      m_squad                 = nullptr;
+    Core::IAdventureSquadControl* m_adventureSquadControl = nullptr;
+    QList<UnitButton*>            m_buttons;
+    QHBoxLayout*                  m_layout = nullptr;
 };
 
 ArmyControlWidget::ArmyControlWidget(QWidget* parent)
-    : QFrame(parent), m_impl(std::make_unique<Impl>())
+    : QFrame(parent)
+    , m_impl(std::make_unique<Impl>())
 {
     m_impl->m_layout = new QHBoxLayout(this);
     m_impl->m_layout->setSpacing(4);
     m_impl->m_layout->setMargin(5);
-
 }
 
 void ArmyControlWidget::refresh()
@@ -132,21 +132,21 @@ void ArmyControlWidget::refresh()
 
 ArmyControlWidget::~ArmyControlWidget() = default;
 
-void ArmyControlWidget::setSource(const GuiAdventureSquad * squad,
-                                  Core::IAdventureSquadControl * adventureSquadControl)
+void ArmyControlWidget::setSource(const GuiAdventureSquad*      squad,
+                                  Core::IAdventureSquadControl* adventureSquadControl)
 {
-    m_impl->m_squad = squad;
+    m_impl->m_squad                 = squad;
     m_impl->m_adventureSquadControl = adventureSquadControl;
 
     for (size_t i = 0; i < squad->getCount(); ++i) {
-        if (i >= (size_t)m_impl->m_buttons.size()) {
-            auto * btn = new UnitButton(this);
+        if (i >= (size_t) m_impl->m_buttons.size()) {
+            auto* btn = new UnitButton(this);
             m_impl->m_buttons << btn;
             m_impl->m_layout->addWidget(btn);
         }
         m_impl->m_buttons[i]->m_stack = squad->getStack(i);
     }
-    Q_ASSERT(squad->getCount() == (size_t)m_impl->m_buttons.size()); // @todo: add removing of buttons if it become smaller.
+    Q_ASSERT(squad->getCount() == (size_t) m_impl->m_buttons.size()); // @todo: add removing of buttons if it become smaller.
 }
 
 void ArmyControlWidget::paintEvent(QPaintEvent* e)
@@ -192,7 +192,7 @@ void ArmyControlWidget::groupTogether(AdventureStackConstPtr active)
 
 void ArmyControlWidget::clearState()
 {
-    for (auto *btn : m_impl->m_buttons) {
+    for (auto* btn : m_impl->m_buttons) {
         btn->m_isSelected = false;
         btn->refresh();
     }
@@ -217,11 +217,10 @@ void ArmyControlWidget::UnitButton::mousePressEvent(QMouseEvent* e)
         return;
 
     GuiAdventureStackConstPtr prevSelected = nullptr;
-    for (auto *btn : m_parent->m_impl->m_buttons) {
+    for (auto* btn : m_parent->m_impl->m_buttons) {
         if (btn->m_isSelected)
             prevSelected = btn->m_stack;
     }
-
 
     if (noMods) {
         if (!prevSelected) {
@@ -257,7 +256,6 @@ void ArmyControlWidget::UnitButton::mousePressEvent(QMouseEvent* e)
     } else if (altMod) {
         m_parent->groupTogether(m_stack->getSource());
     }
-
 }
 
 void ArmyControlWidget::UnitButton::mouseReleaseEvent(QMouseEvent* e)

@@ -5,7 +5,9 @@
  */
 #include "LegacyMapping.hpp"
 
+// clang-format off
 namespace FreeHeroes::Conversion {
+
 
 const std::vector<std::string> unitIds[2] ={ {
     "sod.unit.pikeman"                    ,
@@ -698,6 +700,5 @@ const std::vector<std::string> classIds[2] = {
     "hota.class.coveM",
 }
 };
-
 
 }

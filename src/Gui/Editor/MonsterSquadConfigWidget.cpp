@@ -26,10 +26,10 @@ MonsterSquadConfigWidget::MonsterSquadConfigWidget(QWidget* parent)
     QList<QWidget*> modePages{
         m_ui->pageArmy
     };
-    for (auto * modeButton : modeButtons) {
-        connect(modeButton, &QPushButton::clicked, this, [this, modeButton, modeButtons, modePages](){
+    for (auto* modeButton : modeButtons) {
+        connect(modeButton, &QPushButton::clicked, this, [this, modeButton, modeButtons, modePages]() {
             const int index = modeButtons.indexOf(qobject_cast<QPushButton*>(sender()));
-            for (auto * modeButtonOther : modeButtons) {
+            for (auto* modeButtonOther : modeButtons) {
                 modeButtonOther->setChecked(modeButtonOther == modeButton);
             }
             this->m_ui->stackedWidget->setCurrentWidget(modePages[index]);
@@ -48,6 +48,5 @@ void MonsterSquadConfigWidget::setSource(GuiAdventureArmy* adventureArmy)
 {
     m_ui->stackEditorPack->setSource(adventureArmy->getSquad());
 }
-
 
 }

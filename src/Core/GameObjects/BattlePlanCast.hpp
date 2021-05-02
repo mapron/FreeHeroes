@@ -15,34 +15,41 @@
 namespace FreeHeroes::Core {
 
 struct BattlePlanCast {
-    BattlePosition m_castPosition;
-    LibrarySpellConstPtr m_spell = nullptr;
-    bool m_isValid = false;
+    BattlePosition       m_castPosition;
+    LibrarySpellConstPtr m_spell   = nullptr;
+    bool                 m_isValid = false;
 
     DamageResult::Loss lossTotal;
 
     std::set<BattlePosition> m_affectedArea;
-    struct Target{
+    struct Target {
         BattleStackConstPtr stack = nullptr;
-        DamageResult::Loss loss;
-        BonusRatio magicSuccessChance {1,1};
-        BonusRatio totalFactor{1,1};
+        DamageResult::Loss  loss;
+        BonusRatio          magicSuccessChance{ 1, 1 };
+        BonusRatio          totalFactor{ 1, 1 };
     };
     std::vector<Target> m_targeted;
 
     SpellCastParams m_power;
 
-    void clear() noexcept { m_spell = nullptr; m_isValid = false; }
+    void clear() noexcept
+    {
+        m_spell   = nullptr;
+        m_isValid = false;
+    }
     bool isValid() const noexcept { return m_spell != nullptr && m_isValid; }
-
 };
 struct BattlePlanCastParams {
-    BattlePosition m_target;
-    LibrarySpellConstPtr m_spell = nullptr;
-    bool m_isHeroCast = false;
-    bool m_isUnitCast = false;
+    BattlePosition       m_target;
+    LibrarySpellConstPtr m_spell      = nullptr;
+    bool                 m_isHeroCast = false;
+    bool                 m_isUnitCast = false;
 
-    void clear() noexcept { m_isHeroCast = false; m_isUnitCast = false; }
+    void clear() noexcept
+    {
+        m_isHeroCast = false;
+        m_isUnitCast = false;
+    }
     bool isActive() const noexcept { return m_isHeroCast || m_isUnitCast; }
 };
 

@@ -21,39 +21,47 @@ namespace FreeHeroes::Core {
 
 struct AdventureHero {
     AdventureHero() = default;
-    explicit AdventureHero(LibraryHeroConstPtr library) {
+    explicit AdventureHero(LibraryHeroConstPtr library)
+    {
         reset(library);
     }
-    void reset(LibraryHeroConstPtr library) {
-        this->library = library;
-        secondarySkills = getInitialSkills();
+    void reset(LibraryHeroConstPtr library)
+    {
+        this->library      = library;
+        secondarySkills    = getInitialSkills();
         currentBasePrimary = getInitialPrimary();
-        name = getInitialName();
+        name               = getInitialName();
         setSpellAvailable(getInitialSpell(), true);
         level = 1;
     }
-    HeroSkillsList getInitialSkills() const  {
+    HeroSkillsList getInitialSkills() const
+    {
         return library ? library->secondarySkills : HeroSkillsList{};
     }
-    HeroPrimaryParams getInitialPrimary() const  {
+    HeroPrimaryParams getInitialPrimary() const
+    {
         return library ? library->heroClass()->startParams : HeroPrimaryParams();
     }
-    std::string getInitialName() const {
+    std::string getInitialName() const
+    {
         return library ? library->untranslatedName : std::string();
     }
-    LibrarySpellConstPtr getInitialSpell() const {
+    LibrarySpellConstPtr getInitialSpell() const
+    {
         return library ? library->startSpell : nullptr;
     }
-    int getSkillLevel(LibrarySecondarySkillConstPtr skill) const {
-        auto it = std::find_if(secondarySkills.cbegin(), secondarySkills.cend(), [skill](auto sk){return sk.skill == skill;});
+    int getSkillLevel(LibrarySecondarySkillConstPtr skill) const
+    {
+        auto it = std::find_if(secondarySkills.cbegin(), secondarySkills.cend(), [skill](auto sk) { return sk.skill == skill; });
         if (it == secondarySkills.cend())
             return -1;
         return it->level;
     };
-    bool setSkillLevel(LibrarySecondarySkillConstPtr skill, int level, int limit) {
+    bool setSkillLevel(LibrarySecondarySkillConstPtr skill, int level, int limit)
+    {
         if (level < 0 || level > 2)
             return false;
-        auto it = std::find_if(secondarySkills.begin(), secondarySkills.end(), [skill](auto sk){return sk.skill == skill;});
+        auto it = std::find_if(secondarySkills.begin(), secondarySkills.end(), [skill](auto sk) { return sk.skill == skill; });
         if (it == secondarySkills.cend()) {
             if (static_cast<int>(secondarySkills.size()) >= limit)
                 return false;
@@ -64,8 +72,9 @@ struct AdventureHero {
         it->level = level;
         return true;
     };
-    bool removeSkill(LibrarySecondarySkillConstPtr skill) {
-        auto it = std::find_if(secondarySkills.begin(), secondarySkills.end(), [skill](auto sk){return sk.skill == skill;});
+    bool removeSkill(LibrarySecondarySkillConstPtr skill)
+    {
+        auto it = std::find_if(secondarySkills.begin(), secondarySkills.end(), [skill](auto sk) { return sk.skill == skill; });
         if (it != secondarySkills.end())
             secondarySkills.erase(it);
         else
@@ -73,37 +82,43 @@ struct AdventureHero {
         return true;
     }
 
-    void setSpellAvailable(LibrarySpellConstPtr spell, bool state) {
+    void setSpellAvailable(LibrarySpellConstPtr spell, bool state)
+    {
         if (state && spell) {
             spellbook.insert(spell);
             return;
         }
         auto it = spellbook.find(spell);
         if (it != spellbook.end())
-           spellbook.erase(it);
+            spellbook.erase(it);
     }
-    LibraryUnit::HeroStackSize getExpectedStackSize(size_t index) const {
-        if (library && index < library->startStacks.size() ) {
+    LibraryUnit::HeroStackSize getExpectedStackSize(size_t index) const
+    {
+        if (library && index < library->startStacks.size()) {
             auto c = library->startStacks[index];
             return c.stackSize.isValid() ? c.stackSize : c.unit->countWithHeroBase;
         }
         return {};
     }
 
-    LibraryArtifactConstPtr getArtifact(ArtifactSlotType slot) const {
+    LibraryArtifactConstPtr getArtifact(ArtifactSlotType slot) const
+    {
         return artifactsOn.contains(slot) ? artifactsOn.at(slot) : nullptr;
     }
-    int getBagCount(LibraryArtifactConstPtr art) const {
+    int getBagCount(LibraryArtifactConstPtr art) const
+    {
         return artifactsBag.contains(art) ? artifactsBag.at(art) : 0;
     }
-    bool isArtifactOn(LibraryArtifactConstPtr art) const {
-        for (auto & p : artifactsOn) {
+    bool isArtifactOn(LibraryArtifactConstPtr art) const
+    {
+        for (auto& p : artifactsOn) {
             if (p.second == art)
                 return true;
         }
         return false;
     }
-    size_t getWearingCountFromSet(LibraryArtifactConstPtr artSet) const {
+    size_t getWearingCountFromSet(LibraryArtifactConstPtr artSet) const
+    {
         size_t count = 0;
         for (auto part : artSet->parts) {
             if (!isArtifactOn(part))
@@ -112,7 +127,8 @@ struct AdventureHero {
         }
         return count;
     }
-    std::vector<LibraryArtifactConstPtr> getMissingPartsFromSet(LibraryArtifactConstPtr artSet) const {
+    std::vector<LibraryArtifactConstPtr> getMissingPartsFromSet(LibraryArtifactConstPtr artSet) const
+    {
         std::vector<LibraryArtifactConstPtr> result;
         for (auto part : artSet->parts) {
             if (!isArtifactOn(part))
@@ -127,26 +143,26 @@ struct AdventureHero {
     // main params:
     LibraryHeroConstPtr library = nullptr;
 
-    HeroPrimaryParams                                   currentBasePrimary; // base parameters without artifacts.
-    ArtifactsOnMap                                      artifactsOn;
-    ArtifactsBagMap                                     artifactsBag;
-    HeroSkillsList                                      secondarySkills;
-    std::set<LibrarySpellConstPtr>                      spellbook;
-    bool                                                hasSpellBook = false;
+    HeroPrimaryParams              currentBasePrimary; // base parameters without artifacts.
+    ArtifactsOnMap                 artifactsOn;
+    ArtifactsBagMap                artifactsBag;
+    HeroSkillsList                 secondarySkills;
+    std::set<LibrarySpellConstPtr> spellbook;
+    bool                           hasSpellBook = false;
 
-    int          level = 0;
-    int64_t      experience = 0;
-    int          mana = 0;
-    int          movePointsRemain = 0;
-    int          thisDayMovePoints = 0;
-    bool         newBornHero = true; // for full mana and MP.
-    int          levelupsWithoutWisdom = 1;
-    int          levelupsWithoutSchool = 1;
+    int     level                 = 0;
+    int64_t experience            = 0;
+    int     mana                  = 0;
+    int     movePointsRemain      = 0;
+    int     thisDayMovePoints     = 0;
+    bool    newBornHero           = true; // for full mana and MP.
+    int     levelupsWithoutWisdom = 1;
+    int     levelupsWithoutSchool = 1;
 
-    auto asTuple() const noexcept { return std::tie(library, currentBasePrimary, artifactsOn, artifactsBag, secondarySkills, spellbook,
-                                                    hasSpellBook, level, experience, mana, movePointsRemain);}
+    auto asTuple() const noexcept { return std::tie(library, currentBasePrimary, artifactsOn, artifactsBag, secondarySkills, spellbook, hasSpellBook, level, experience, mana, movePointsRemain); }
 
-    bool isEqualTo(const AdventureHero & another) const noexcept {
+    bool isEqualTo(const AdventureHero& another) const noexcept
+    {
         if (isValid() != another.isValid())
             return false;
         if (!isValid() && !another.isValid())
@@ -156,7 +172,7 @@ struct AdventureHero {
     bool isValid() const noexcept { return !!library; }
     // editor params
     struct EditorParams {
-        bool expIsDirty = false;
+        bool expIsDirty   = false;
         bool levelIsDirty = false;
     };
     EditorParams editorParams;
@@ -166,56 +182,55 @@ struct AdventureHero {
 
     // estimation cache:
     struct SpellDetails {
-        LibrarySpellConstPtr spell = nullptr;
-        int manaCost = 0;
-        int level = 0;
-        int hintDamage = 0;
+        LibrarySpellConstPtr spell      = nullptr;
+        int                  manaCost   = 0;
+        int                  level      = 0;
+        int                  hintDamage = 0;
     };
     using SpellList = std::vector<SpellDetails>;
 
     struct EstimatedParams {
-        int nextDayMovePoints = 0;
+        int nextDayMovePoints      = 0;
         int nextDayMovePointsWater = 0;
-        int extraMovePoints = 0;     // artifacts + stables/map objects etc
-        int extraMovePointsWater = 0;// artifacts + beacons/etc
-        int armyMovePoints = 0;
+        int extraMovePoints        = 0; // artifacts + stables/map objects etc
+        int extraMovePointsWater   = 0; // artifacts + beacons/etc
+        int armyMovePoints         = 0;
 
-        int maxMana = 0;                            // skills
-        int manaRegenAbs = 1;                       // skills,artifacts
-        int scoutingRadius = 5;                     // skills,artifacts
+        int maxMana               = 0; // skills
+        int manaRegenAbs          = 1; // skills,artifacts
+        int scoutingRadius        = 5; // skills,artifacts
         int maxLearningSpellLevel = 2;
         int maxTeachingSpellLevel = 0;
 
         int64_t experienceStartLevel = 0;
-        int64_t experienceNextLevel = 0;
+        int64_t experienceNextLevel  = 0;
 
-        HeroPrimaryParams   primary;                // skills + artifacts
-        PrimaryRngParams    rngParams;              // skills + artifacts
-        PrimaryRngParams    rngParamsForOpponent;   // artifacts
-        PrimaryRngParams    rngMax;                 // artifacts: 0 morale, 0  luck
+        HeroPrimaryParams primary;              // skills + artifacts
+        PrimaryRngParams  rngParams;            // skills + artifacts
+        PrimaryRngParams  rngParamsForOpponent; // artifacts
+        PrimaryRngParams  rngMax;               // artifacts: 0 morale, 0  luck
 
-        BonusRatio meleeAttack  = {0, 1};          // skills
-        BonusRatio rangedAttack = {0, 1};          // skills
-        BonusRatio defense      = {0, 1};          // skills
+        BonusRatio meleeAttack  = { 0, 1 }; // skills
+        BonusRatio rangedAttack = { 0, 1 }; // skills
+        BonusRatio defense      = { 0, 1 }; // skills
 
-        MagicIncrease magicIncrease;               // skills
+        MagicIncrease magicIncrease;                // skills
         MagicReduce   magicReduce;                  // this currently never used by database. created for symmetry..
-        BonusRatio    magicResistChance = {0, 1};  //  skills + artifacts
+        BonusRatio    magicResistChance = { 0, 1 }; //  skills + artifacts
         SpellFilter   immunes;                      // protector artifacts
         SpellFilter   forbidSpells;                 // artifacts
 
-        int unitBattleSpeedAbs = 0;             //  artifacts, spec on speed
-        int unitLifeAbs = 0;                    //  artifacts
-        BonusRatio unitLife = {0, 1};           //  artifacts
-        std::set<RangeAttackPenalty> disabledPenalties; // artifacts
+        int                          unitBattleSpeedAbs = 0;        //  artifacts, spec on speed
+        int                          unitLifeAbs        = 0;        //  artifacts
+        BonusRatio                   unitLife           = { 0, 1 }; //  artifacts
+        std::set<RangeAttackPenalty> disabledPenalties;             // artifacts
 
-        BonusRatio spReduceOpp     = {0, 1};      // skills + artifacts
-        BonusRatio manaIncrease    = {0, 1};      // skills
-        BonusRatio mpIncrease      = {0, 1};      // skills
-        BonusRatio mpWaterIncrease = {0, 1};      // skills
+        BonusRatio spReduceOpp     = { 0, 1 }; // skills + artifacts
+        BonusRatio manaIncrease    = { 0, 1 }; // skills
+        BonusRatio mpIncrease      = { 0, 1 }; // skills
+        BonusRatio mpWaterIncrease = { 0, 1 }; // skills
 
-        bool regenerateStackHealth = false;      // artifacts.
-
+        bool regenerateStackHealth = false; // artifacts.
 
         MoraleDetails moraleDetails;
         LuckDetails   luckDetails;
@@ -223,48 +238,55 @@ struct AdventureHero {
         SpellList availableSpells; // sorted by order.
 
         MagicSchoolLevels schoolLevels; // skills
-        int extraRounds = 0;
+        int               extraRounds = 0;
 
         SpellCastParamsList castsBeforeStart;
 
-        BonusRatio surrenderDiscount  = {0, 1}; // skills + artifacts
-        BonusRatio neutralJoinChance  = {0, 1}; // skills
-        int greatLibraryVisitLevel    = 10;     // skills
+        BonusRatio surrenderDiscount      = { 0, 1 }; // skills + artifacts
+        BonusRatio neutralJoinChance      = { 0, 1 }; // skills
+        int        greatLibraryVisitLevel = 10;       // skills
 
-        BonusRatio bonusExperience    = {0, 1}; // skills
-        BonusRatio eagleEyeChance     = {0, 1}; // skills + artifacts
-        BonusRatio necromancy         = {0, 1}; // skills + artifacts
+        BonusRatio bonusExperience = { 0, 1 }; // skills
+        BonusRatio eagleEyeChance  = { 0, 1 }; // skills + artifacts
+        BonusRatio necromancy      = { 0, 1 }; // skills + artifacts
 
         ResourceAmount dayIncome;
 
         std::set<LibraryArtifact::SpecialEffect> specialArtifactEffects;
 
+        using PrimaryWeights = LibraryFactionHeroClass::PrimaryWeights;
+        using SkillWeights   = LibraryFactionHeroClass::SkillWeights;
+
         struct LevelupParams {
             struct Special {
-                bool canBeSuggested = false;
-                bool canBeSuggestedNew = false;
+                bool canBeSuggested        = false;
+                bool canBeSuggestedNew     = false;
                 bool canBeSuggestedUpgrade = false;
-                bool forceNew = false;
-                bool forceUpgrade = false;
-                int suggestEveryLevel = 0;
+                bool forceNew              = false;
+                bool forceUpgrade          = false;
+                int  suggestEveryLevel     = 0;
             };
             struct PriorSkillWeights {
-                LibraryFactionHeroClass::SkillWeights high;
-                LibraryFactionHeroClass::SkillWeights normal;
-                size_t size() const { return high.size() + normal.size();}
-                bool isEmpty() const { return high.empty() && normal.empty(); }
-                void erase(LibrarySecondarySkillConstPtr key) {
-                    if (!high.empty()) high.erase(key);
-                    if (!normal.empty()) normal.erase(key);
+                SkillWeights high;
+                SkillWeights normal;
+
+                size_t size() const { return high.size() + normal.size(); }
+                bool   isEmpty() const { return high.empty() && normal.empty(); }
+                void   erase(LibrarySecondarySkillConstPtr key)
+                {
+                    if (!high.empty())
+                        high.erase(key);
+                    if (!normal.empty())
+                        normal.erase(key);
                 }
             };
 
-            Special wisdom;
-            Special school;
-            LibraryFactionHeroClass::PrimaryWeights primaryWeights;
+            Special           wisdom;
+            Special           school;
+            PrimaryWeights    primaryWeights;
             PriorSkillWeights weightsForNew;
             PriorSkillWeights weightsForUpgrade;
-            int unupgradedSkillCount = 0;
+            int               unupgradedSkillCount = 0;
         };
         LevelupParams levelUp;
         struct SlotsInfo {
@@ -282,19 +304,19 @@ struct AdventureHero {
     };
     // not really used; for UI usage only.
     struct EstimatedParamsSquad {
-        PrimaryRngParams    rngParams;
-        PrimaryRngParams    rngParamsForOpponent;
-        MoraleDetails       moraleDetails;
-        LuckDetails         luckDetails;
-        int                 armySpeed = 0;
-        int                 fastestBattleSpeed = 0;
+        PrimaryRngParams rngParams;
+        PrimaryRngParams rngParamsForOpponent;
+        MoraleDetails    moraleDetails;
+        LuckDetails      luckDetails;
+        int              armySpeed          = 0;
+        int              fastestBattleSpeed = 0;
     };
 
-    EstimatedParams estimated;
+    EstimatedParams      estimated;
     EstimatedParamsSquad estimatedFromSquad;
 };
 
-using AdventureHeroConstPtr = const AdventureHero*;
+using AdventureHeroConstPtr   = const AdventureHero*;
 using AdventureHeroMutablePtr = AdventureHero*;
 
 }

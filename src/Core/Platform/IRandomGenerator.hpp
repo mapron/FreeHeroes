@@ -24,14 +24,14 @@ public:
 
     virtual std::vector<uint8_t> serialize() const = 0;
 
-    virtual void deserialize(const std::vector<uint8_t> & state) = 0;
+    virtual void deserialize(const std::vector<uint8_t>& state) = 0;
 
-    virtual uint64_t gen(uint64_t max) = 0;
-    virtual uint64_t genSumN(size_t n, uint64_t max) = 0;
+    virtual uint64_t              gen(uint64_t max)                      = 0;
+    virtual uint64_t              genSumN(size_t n, uint64_t max)        = 0;
     virtual std::vector<uint64_t> genSequence(size_t size, uint64_t max) = 0;
 
-    virtual uint8_t genSmall(uint8_t max) = 0;
-    virtual uint64_t genSumSmallN(size_t n, uint8_t max) = 0;
+    virtual uint8_t              genSmall(uint8_t max)                      = 0;
+    virtual uint64_t             genSumSmallN(size_t n, uint8_t max)        = 0;
     virtual std::vector<uint8_t> genSmallSequence(size_t size, uint8_t max) = 0;
 };
 

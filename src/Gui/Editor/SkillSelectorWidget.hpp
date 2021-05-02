@@ -22,33 +22,34 @@ using LibrarySecondarySkillConstPtr = const LibrarySecondarySkill*;
 namespace FreeHeroes::Gui {
 
 class SkillsComboModel;
-class SkillSelectorWidget : public ResizeableComboBox
-{
+class SkillSelectorWidget : public ResizeableComboBox {
     Q_OBJECT
 public:
-    SkillSelectorWidget(QWidget * parent = nullptr);
+    SkillSelectorWidget(QWidget* parent = nullptr);
     ~SkillSelectorWidget();
 
     Core::LibrarySecondarySkillConstPtr getSkill() const;
-    void setSkill(Core::LibrarySecondarySkillConstPtr skill);
+    void                                setSkill(Core::LibrarySecondarySkillConstPtr skill);
 
-    void setSkillsModel(QAbstractItemModel * rootSkillsModel);
+    void setSkillsModel(QAbstractItemModel* rootSkillsModel);
 
 private:
-    SkillsComboModel * m_finalModel = nullptr;
+    SkillsComboModel* m_finalModel = nullptr;
 };
 
-class SkillSelectDelegate : public QStyledItemDelegate
-{
+class SkillSelectDelegate : public QStyledItemDelegate {
     Q_OBJECT
-    QAbstractItemModel * m_rootSkillsModel = nullptr;
+    QAbstractItemModel* m_rootSkillsModel = nullptr;
+
 public:
-    SkillSelectDelegate(QAbstractItemModel * rootSkillsModel, QObject * parent)
-        : QStyledItemDelegate(parent), m_rootSkillsModel(rootSkillsModel) {}
+    SkillSelectDelegate(QAbstractItemModel* rootSkillsModel, QObject* parent)
+        : QStyledItemDelegate(parent)
+        , m_rootSkillsModel(rootSkillsModel)
+    {}
 
     // QAbstractItemDelegate interface
 public:
-    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& , const QModelIndex& index) const override;
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem&, const QModelIndex& index) const override;
 
     void setEditorData(QWidget* editor, const QModelIndex& index) const override;
 

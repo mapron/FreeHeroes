@@ -16,12 +16,11 @@ class GuiAdventureArmy;
 }
 
 class AdventureControl : public QObject
-        ,  public Core::IAdventureHeroControl
-        ,  public Core::IAdventureSquadControl
-{
+    , public Core::IAdventureHeroControl
+    , public Core::IAdventureSquadControl {
     Q_OBJECT
 public:
-    AdventureControl(Gui::GuiAdventureArmy & army);
+    AdventureControl(Gui::GuiAdventureArmy& army);
 
     void heroStackAction(StackAction action) override;
 
@@ -34,7 +33,7 @@ public:
     void setCompactFormation(bool enabled) override;
 
 private:
-    Gui::GuiAdventureArmy & m_army;
+    Gui::GuiAdventureArmy& m_army;
 };
 
 }

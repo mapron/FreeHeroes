@@ -15,33 +15,35 @@ namespace FreeHeroes::Core {
 struct BattleHero {
     BattleHero() = default;
     explicit BattleHero(AdventureHeroConstPtr adventure)
-        : library(adventure->library), adventure(adventure)
-    { mana = adventure->mana; }
+        : library(adventure->library)
+        , adventure(adventure)
+    {
+        mana = adventure->mana;
+    }
 
-    bool isValid() const noexcept { return !!adventure;}
+    bool isValid() const noexcept { return !!adventure; }
 
-    LibraryHeroConstPtr library = nullptr; // for convenience and shorter code.
+    LibraryHeroConstPtr   library   = nullptr; // for convenience and shorter code.
     AdventureHeroConstPtr adventure = nullptr;
-    BattleStack::Side side = BattleStack::Side::Attacker;
+    BattleStack::Side     side      = BattleStack::Side::Attacker;
 
     struct EstimatedParams {
-        HeroPrimaryParams   primary;
-        PrimaryRngParams    squadRngParams;
+        HeroPrimaryParams        primary;
+        PrimaryRngParams         squadRngParams;
         AdventureHero::SpellList availableSpells; // sorted by order.
     };
     EstimatedParams estimated;
 
-    int manaCost(LibrarySpellConstPtr spell) const {
-        auto it = std::find_if(estimated.availableSpells.cbegin(), estimated.availableSpells.cend(),
-                     [spell](const AdventureHero::SpellDetails & det) { return det.spell == spell; });
+    int manaCost(LibrarySpellConstPtr spell) const
+    {
+        auto it = std::find_if(estimated.availableSpells.cbegin(), estimated.availableSpells.cend(), [spell](const AdventureHero::SpellDetails& det) { return det.spell == spell; });
         if (it == estimated.availableSpells.cend())
             return -1;
         return it->manaCost;
     }
 
-    int mana = 0;
+    int  mana          = 0;
     bool castedInRound = false;
 };
-
 
 }

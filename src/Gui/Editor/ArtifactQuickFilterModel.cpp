@@ -8,26 +8,24 @@
 #include "LibraryModels.hpp"
 #include "LibraryWrappersMetatype.hpp"
 
-
 namespace FreeHeroes::Gui {
 
 ArtifactQuickFilterModel::ArtifactQuickFilterModel(QObject* parent)
     : QSortFilterProxyModel(parent)
 {
-
 }
 
 void ArtifactQuickFilterModel::setTreasureClassFilter(Core::LibraryArtifact::TreasureClass treasureClass)
 {
     m_treasureClassEnable = true;
-    m_treasureClass = treasureClass;
+    m_treasureClass       = treasureClass;
     invalidateFilter();
 }
 
 void ArtifactQuickFilterModel::setOrderCategoryFilter(Core::LibraryArtifact::OrderCategory orderCategory)
 {
     m_orderCategoryEnable = true;
-    m_orderCategory = orderCategory;
+    m_orderCategory       = orderCategory;
     invalidateFilter();
 }
 
@@ -46,7 +44,7 @@ void ArtifactQuickFilterModel::resetOrderCategoryFilter()
 bool ArtifactQuickFilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
 {
     QModelIndex index0 = sourceModel()->index(sourceRow, 0, sourceParent);
-    auto rec = index0.data(ArtifactsModel::SourceObject).value<ArtifactsModel::SrcTypePtr>();
+    auto        rec    = index0.data(ArtifactsModel::SourceObject).value<ArtifactsModel::SrcTypePtr>();
     if (!rec)
         return true; // we don't care for "zero element" stuff.
 

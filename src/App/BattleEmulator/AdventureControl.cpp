@@ -16,34 +16,32 @@
 
 namespace FreeHeroes {
 using namespace Core;
-AdventureControl::AdventureControl(Gui::GuiAdventureArmy & army)
+AdventureControl::AdventureControl(Gui::GuiAdventureArmy& army)
     : m_army(army)
 {
-
 }
 
 void AdventureControl::heroStackAction(StackAction action)
 {
-    auto guiSquad = m_army.getSquad();
-    auto stackFrom = guiSquad->getStack(action.from->armyParams.indexInArmy);
+    auto guiSquad    = m_army.getSquad();
+    auto stackFrom   = guiSquad->getStack(action.from->armyParams.indexInArmy);
     auto fromLibrary = stackFrom->getSource()->library;
     auto fromCount   = stackFrom->getSource()->count;
     if (action.type == StackActionType::Swap) {
         auto stackTo   = guiSquad->getStack(action.to->armyParams.indexInArmy);
-        auto toLibrary   = stackTo->getSource()->library;
-        auto toCount     = stackTo->getSource()->count;
+        auto toLibrary = stackTo->getSource()->library;
+        auto toCount   = stackTo->getSource()->count;
         if (fromLibrary != toLibrary) {
             stackFrom->setParams(toLibrary, toCount);
-            stackTo  ->setParams(fromLibrary, fromCount);
+            stackTo->setParams(fromLibrary, fromCount);
         } else {
             stackFrom->setCount(fromCount + toCount);
-            stackTo  ->setCount(0);
+            stackTo->setCount(0);
         }
     } else if (action.type == StackActionType::EqualSplit) {
-
         int currentGroupCount = 0;
-        int freeIndex = -1;
-        int totalCount = 0;
+        int freeIndex         = -1;
+        int totalCount        = 0;
         for (size_t i = 0; i < guiSquad->getCount(); ++i) {
             if (guiSquad->getStackUnitLibrary(i) == fromLibrary) {
                 currentGroupCount++;
@@ -56,12 +54,12 @@ void AdventureControl::heroStackAction(StackAction action)
             return;
         if (totalCount == currentGroupCount)
             return;
-        const int newGroupCount = currentGroupCount + 1;// 3
-        const int newBaseCount = totalCount / newGroupCount; // 13 / 3 => 4
+        const int newGroupCount    = currentGroupCount + 1;                                            // 3
+        const int newBaseCount     = totalCount / newGroupCount;                                       // 13 / 3 => 4
         const int newExistingCount = totalCount % newBaseCount == 0 ? newBaseCount : newBaseCount + 1; // 5
-        const int remainCount = totalCount - newExistingCount * currentGroupCount;
+        const int remainCount      = totalCount - newExistingCount * currentGroupCount;
 
-        for (size_t i =0; i < guiSquad->getCount(); ++i) {
+        for (size_t i = 0; i < guiSquad->getCount(); ++i) {
             if (guiSquad->getStackUnitLibrary(i) == fromLibrary) {
                 guiSquad->getStack(i)->setCount(newExistingCount);
             }
@@ -79,7 +77,7 @@ void AdventureControl::heroStackAction(StackAction action)
         }
     } else if (action.type == StackActionType::GroupTogether) {
         for (size_t i = 0; i < guiSquad->getCount(); ++i) {
-            if ((int)i == action.from->armyParams.indexInArmy)
+            if ((int) i == action.from->armyParams.indexInArmy)
                 continue;
             auto stackTo = guiSquad->getStack(i);
 
@@ -92,14 +90,12 @@ void AdventureControl::heroStackAction(StackAction action)
     } else if (action.type == StackActionType::Delete) {
         stackFrom->setCount(0);
     }
-
 }
 
 void AdventureControl::setCompactFormation(bool enabled)
 {
     m_army.getSquad()->setFormation(enabled);
 }
-
 
 bool AdventureControl::heroArtifactPutOn(ArtifactPutOn putOnParams)
 {
@@ -108,7 +104,7 @@ bool AdventureControl::heroArtifactPutOn(ArtifactPutOn putOnParams)
     assert(ArtifactWearingSet::getCompatibleSlotType(putOnParams.slot) == putOnParams.bagItem->slot);
     auto freeSlots = hero->estimated.slotsInfo.freeUsed;
 
-    auto & current = hero->artifactsOn[putOnParams.slot];
+    auto& current = hero->artifactsOn[putOnParams.slot];
     if (current) {
         freeSlots = freeSlots + current->slotReq;
     }
@@ -116,13 +112,12 @@ bool AdventureControl::heroArtifactPutOn(ArtifactPutOn putOnParams)
     if (!putOnParams.bagItem->slotReq.canFitInto(freeSlots))
         return false;
 
-
     auto prev = current;
     if (prev && putOnParams.onlyEmpty) {
         return false;
     }
-    auto & bag = hero->artifactsBag[putOnParams.bagItem];
-    if (bag<=0)
+    auto& bag = hero->artifactsBag[putOnParams.bagItem];
+    if (bag <= 0)
         return false;
 
     current = putOnParams.bagItem;
@@ -139,20 +134,20 @@ void AdventureControl::heroArtifactTakeOff(ArtifactTakeOff takeOffParams)
 {
     auto hero = m_army.getHero()->getSource();
 
-    auto & from = hero->artifactsOn[takeOffParams.slot];
+    auto& from = hero->artifactsOn[takeOffParams.slot];
     hero->artifactsBag[from]++;
     from = nullptr;
     m_army.getHero()->refreshArtifactsModels();
     m_army.getHero()->emitChanges();
 }
 
-void AdventureControl::heroArtifactSwap( ArtifactSwap swapParams)
+void AdventureControl::heroArtifactSwap(ArtifactSwap swapParams)
 {
     auto hero = m_army.getHero()->getSource();
 
     assert(ArtifactWearingSet::getCompatibleSlotType(swapParams.slotFrom) == ArtifactWearingSet::getCompatibleSlotType(swapParams.slotTo));
-    auto & from = hero->artifactsOn[swapParams.slotFrom];
-    auto & to = hero->artifactsOn[swapParams.slotTo];
+    auto& from = hero->artifactsOn[swapParams.slotFrom];
+    auto& to   = hero->artifactsOn[swapParams.slotTo];
     std::swap(from, to);
 
     m_army.getHero()->refreshArtifactsModels();
@@ -161,16 +156,16 @@ void AdventureControl::heroArtifactSwap( ArtifactSwap swapParams)
 
 void AdventureControl::heroArtifactAssembleSet(ArtifactAssembleSet assembleSetParams)
 {
-    auto hero = m_army.getHero()->getSource();
-    auto & from = hero->artifactsOn[assembleSetParams.slot];
-    auto setArt = from->partOfSet;
+    auto  hero   = m_army.getHero()->getSource();
+    auto& from   = hero->artifactsOn[assembleSetParams.slot];
+    auto  setArt = from->partOfSet;
     if (!setArt)
         return;
 
-    std::vector<ArtifactSlotType> setSlots;
-    ArtifactSlotType assemblyOnSlot = ArtifactSlotType::Invalid;
+    std::vector<ArtifactSlotType>     setSlots;
+    ArtifactSlotType                  assemblyOnSlot = ArtifactSlotType::Invalid;
     std::set<LibraryArtifactConstPtr> requiredParts(setArt->parts.cbegin(), setArt->parts.cend());
-    for (auto & p : hero->artifactsOn) {
+    for (auto& p : hero->artifactsOn) {
         if (requiredParts.contains(p.second)) {
             setSlots.push_back(p.first);
             requiredParts.erase(p.second);
@@ -193,18 +188,18 @@ void AdventureControl::heroArtifactAssembleSet(ArtifactAssembleSet assembleSetPa
 
 void AdventureControl::heroArtifactDisassembleSet(ArtifactAssembleSet assembleSetParams)
 {
-    auto hero = m_army.getHero()->getSource();
-    auto & from = hero->artifactsOn[assembleSetParams.slot];
+    auto  hero = m_army.getHero()->getSource();
+    auto& from = hero->artifactsOn[assembleSetParams.slot];
     if (!from->parts.size())
         return;
 
     AdventureHero::ArtifactsOnMap newArts;
 
-    auto lockedSlots =  hero->estimated.slotsInfo.extraWearing;
+    auto lockedSlots = hero->estimated.slotsInfo.extraWearing;
     lockedSlots.wearingSlots.insert(assembleSetParams.slot);
     for (auto part : from->parts) {
-        auto possibleWearingSlots =  ArtifactWearingSet::getCompatibleWearingSlots(part->slot);
-        ArtifactSlotType partWearing = ArtifactSlotType::Invalid;
+        auto             possibleWearingSlots = ArtifactWearingSet::getCompatibleWearingSlots(part->slot);
+        ArtifactSlotType partWearing          = ArtifactSlotType::Invalid;
         for (auto wearing : possibleWearingSlots) {
             if (lockedSlots.wearingSlots.contains(wearing)) {
                 partWearing = wearing;
@@ -216,7 +211,7 @@ void AdventureControl::heroArtifactDisassembleSet(ArtifactAssembleSet assembleSe
         newArts[partWearing] = part;
     }
     from = nullptr;
-    for (auto & p : newArts) {
+    for (auto& p : newArts) {
         assert(hero->artifactsOn[p.first] == nullptr);
         hero->artifactsOn[p.first] = p.second;
     }
@@ -224,6 +219,5 @@ void AdventureControl::heroArtifactDisassembleSet(ArtifactAssembleSet assembleSe
     m_army.getHero()->refreshArtifactsModels();
     m_army.getHero()->emitChanges();
 }
-
 
 }

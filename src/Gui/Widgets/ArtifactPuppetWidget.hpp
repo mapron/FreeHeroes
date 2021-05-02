@@ -26,8 +26,7 @@ class ArtifactsModel;
 class GuiAdventureHero;
 class UiCommonModel;
 
-class GUIWIDGETS_EXPORT ArtifactPuppetWidget : public QWidget
-{
+class GUIWIDGETS_EXPORT ArtifactPuppetWidget : public QWidget {
     Q_OBJECT
 public:
     ArtifactPuppetWidget(QWidget* parent = nullptr);
@@ -35,11 +34,11 @@ public:
 
     void refresh();
 
-    void setHoverLabel(QLabel * hoverLabel);
+    void setHoverLabel(QLabel* hoverLabel);
 
-    void setSource(const GuiAdventureHero * hero,
-                   const ArtifactsModel * artifactsModel,
-                   const UiCommonModel * ui,
+    void setSource(const GuiAdventureHero*      hero,
+                   const ArtifactsModel*        artifactsModel,
+                   const UiCommonModel*         ui,
                    Core::IAdventureHeroControl* adventureHeroControl);
 
 signals:
@@ -57,4 +56,3 @@ private:
 
 }
 }
-

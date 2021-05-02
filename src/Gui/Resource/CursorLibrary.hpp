@@ -17,14 +17,15 @@ namespace FreeHeroes::Gui {
 
 class GUIRESOURCE_EXPORT CursorLibrary : public ICursorLibrary {
     QMap<BattleDirection, QCursor> attackCursors;
-    QMap<Type, QCursor> otherCursors;
-    QList<QCursor> cast;
-public:
-    CursorLibrary(IGraphicsLibrary & graphicsLibrary);
+    QMap<Type, QCursor>            otherCursors;
+    QList<QCursor>                 cast;
 
-    QCursor getAttackCursor(BattleDirection direction) const override  { return attackCursors.value(direction); }
-    QCursor getOther(Type type) const override { return otherCursors.value(type); }
-    QList<QCursor> getCast() const override { return cast;}
+public:
+    CursorLibrary(IGraphicsLibrary& graphicsLibrary);
+
+    QCursor        getAttackCursor(BattleDirection direction) const override { return attackCursors.value(direction); }
+    QCursor        getOther(Type type) const override { return otherCursors.value(type); }
+    QList<QCursor> getCast() const override { return cast; }
 };
 
 }

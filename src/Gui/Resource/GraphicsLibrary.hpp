@@ -12,25 +12,24 @@
 
 namespace FreeHeroes::Gui {
 
-class GUIRESOURCE_EXPORT GraphicsLibrary : public IGraphicsLibrary
-{
+class GUIRESOURCE_EXPORT GraphicsLibrary : public IGraphicsLibrary {
 public:
-    GraphicsLibrary(Core::IResourceLibrary & resourceLibrary);
+    GraphicsLibrary(Core::IResourceLibrary& resourceLibrary);
     ~GraphicsLibrary();
 
-    IAsyncSpritePtr getObjectAnimation(const std::string & resourceName   ) override;
-    IAsyncPixmapPtr getPixmapByKey    (const PixmapKey & resourceCode     ) override;
-    IAsyncMoviePtr  getVideo          (const std::string& resourceName    ) override;
-    IAsyncIconPtr   getIcon           (const PixmapKeyList & resourceCodes) override;
+    IAsyncSpritePtr getObjectAnimation(const std::string& resourceName) override;
+    IAsyncPixmapPtr getPixmapByKey(const PixmapKey& resourceCode) override;
+    IAsyncMoviePtr  getVideo(const std::string& resourceName) override;
+    IAsyncIconPtr   getIcon(const PixmapKeyList& resourceCodes) override;
 
-    PixmapKey splitKeyFromString(const std::string & resourceName) const override;
+    PixmapKey splitKeyFromString(const std::string& resourceName) const override;
+
 private:
-
 private:
     class AsyncSprite;
     class AsyncPixmap;
-    class AsyncMovie ;
-    class AsyncIcon ;
+    class AsyncMovie;
+    class AsyncIcon;
     struct Impl;
     std::unique_ptr<Impl> m_impl;
 };

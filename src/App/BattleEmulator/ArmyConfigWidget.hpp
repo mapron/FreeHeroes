@@ -12,9 +12,7 @@
 #include <memory>
 #include <functional>
 
-
-namespace Ui
-{
+namespace Ui {
 class ArmyConfigWidget;
 }
 
@@ -33,12 +31,10 @@ class UnitsFilterModel;
 class AdventureControl;
 namespace BattleEmulator {
 
-
-class ArmyConfigWidget : public QWidget
-{
+class ArmyConfigWidget : public QWidget {
     Q_OBJECT
 public:
-    ArmyConfigWidget(QWidget * parent);
+    ArmyConfigWidget(QWidget* parent);
     ~ArmyConfigWidget();
 
     void setAIControl(bool isAI);
@@ -51,8 +47,8 @@ signals:
 public:
     void refresh();
 
-    void setModels(Gui::LibraryModelsProvider & modelProvider, Core::IRandomGenerator * randomGenerator);
-    void setSource(Gui::GuiAdventureArmy * army);
+    void setModels(Gui::LibraryModelsProvider& modelProvider, Core::IRandomGenerator* randomGenerator);
+    void setSource(Gui::GuiAdventureArmy* army);
     void initHero();
 
 private:
@@ -60,16 +56,15 @@ private:
     void showHeroDialog();
     void makeLevelupInternal();
 
-
 private:
     std::unique_ptr<Ui::ArmyConfigWidget> m_ui;
-    Core::IRandomGenerator * m_randomGenerator = nullptr;
-    Gui::GuiAdventureArmy * m_army = nullptr;
-    Gui::LibraryModelsProvider * m_modelProvider= nullptr;
-    Gui::UnitsFilterModel * m_unitsFilter = nullptr;
+    Core::IRandomGenerator*               m_randomGenerator = nullptr;
+    Gui::GuiAdventureArmy*                m_army            = nullptr;
+    Gui::LibraryModelsProvider*           m_modelProvider   = nullptr;
+    Gui::UnitsFilterModel*                m_unitsFilter     = nullptr;
 
     std::unique_ptr<AdventureControl> m_adventureControl;
-    std::function<void()> m_tmpRefresh;
+    std::function<void()>             m_tmpRefresh;
 };
 
 }

@@ -12,18 +12,17 @@
 
 namespace FreeHeroes::Core {
 
-static_assert (BattlePosition{0,0}.hexDistance(BattlePosition{0,0}) == 0);
-static_assert (BattlePosition{0,0}.hexDistance(BattlePosition{1,0}) == 1);
-static_assert (BattlePosition{0,0}.hexDistance(BattlePosition{0,1}) == 1);
-static_assert (BattlePosition{0,0}.hexDistance(BattlePosition{1,1}) == 1);
-static_assert (BattlePosition{0,0}.hexDistance(BattlePosition{2,1}) == 2);
-static_assert (BattlePosition{2,1}.hexDistance(BattlePosition{0,0}) == 2);
-static_assert (BattlePosition{0,0}.hexDistance(BattlePosition{2,2}) == 3);
-static_assert (BattlePosition{0,0}.hexDistance(BattlePosition{2,0}) == 2);
-static_assert (BattlePosition{0,0}.hexDistance(BattlePosition{4,3}) == 5);
-static_assert (BattlePosition{1,2}.hexDistance(BattlePosition{3,1}) == 2);
-static_assert (BattlePosition{1,2}.hexDistance(BattlePosition{3,2}) == 2);
-
+static_assert(BattlePosition{ 0, 0 }.hexDistance(BattlePosition{ 0, 0 }) == 0);
+static_assert(BattlePosition{ 0, 0 }.hexDistance(BattlePosition{ 1, 0 }) == 1);
+static_assert(BattlePosition{ 0, 0 }.hexDistance(BattlePosition{ 0, 1 }) == 1);
+static_assert(BattlePosition{ 0, 0 }.hexDistance(BattlePosition{ 1, 1 }) == 1);
+static_assert(BattlePosition{ 0, 0 }.hexDistance(BattlePosition{ 2, 1 }) == 2);
+static_assert(BattlePosition{ 2, 1 }.hexDistance(BattlePosition{ 0, 0 }) == 2);
+static_assert(BattlePosition{ 0, 0 }.hexDistance(BattlePosition{ 2, 2 }) == 3);
+static_assert(BattlePosition{ 0, 0 }.hexDistance(BattlePosition{ 2, 0 }) == 2);
+static_assert(BattlePosition{ 0, 0 }.hexDistance(BattlePosition{ 4, 3 }) == 5);
+static_assert(BattlePosition{ 1, 2 }.hexDistance(BattlePosition{ 3, 1 }) == 2);
+static_assert(BattlePosition{ 1, 2 }.hexDistance(BattlePosition{ 3, 2 }) == 2);
 
 BattleDirectionPrecise directionMirrorHor(BattleDirectionPrecise direction)
 {
@@ -42,6 +41,7 @@ BattleDirectionPrecise directionMirrorHor(BattleDirectionPrecise direction)
 
 BattleAttackDirection attackDirectionInverse(BattleAttackDirection direction)
 {
+    // clang-format off
     switch(direction) {
         case BattleAttackDirection::TR: return BattleAttackDirection::BL;
         case BattleAttackDirection::R : return BattleAttackDirection::L;
@@ -53,15 +53,16 @@ BattleAttackDirection attackDirectionInverse(BattleAttackDirection direction)
         case BattleAttackDirection::B : return BattleAttackDirection::T;
         default: break;
     }
+    // clang-format on
     return BattleAttackDirection::None;
 }
 
-
 BattlePosition BattleFieldGeometry::neighbour(const BattlePosition pos, BattleDirection direction) const noexcept
 {
-    const bool oddRow = pos.y % 2 == 1;
-    const int evenRightStep = oddRow ? 0 : 1;
-    const int oddLeftStep   = oddRow ?  -1 : 0;
+    const bool oddRow        = pos.y % 2 == 1;
+    const int  evenRightStep = oddRow ? 0 : 1;
+    const int  oddLeftStep   = oddRow ? -1 : 0;
+    // clang-format off
     switch (direction) {
         case BattleDirection::TR: return pos + BattlePosition{evenRightStep, -1};
         case BattleDirection::R:  return pos + BattlePosition{1,              0};
@@ -73,6 +74,7 @@ BattlePosition BattleFieldGeometry::neighbour(const BattlePosition pos, BattleDi
         case BattleDirection::None:
             break;
     }
+    // clang-format on
     assert(!"Unexistent direction");
     return {};
 }
@@ -94,6 +96,7 @@ BattlePositionSet BattleFieldGeometry::validNeighbours(const BattlePosition pos,
 BattlePositionExtended BattleFieldGeometry::suggestPositionForAttack(BattlePositionExtended startPos, const BattlePositionExtended target, const BattlePositionExtended::Sub targetInner, BattleAttackDirection direction) const noexcept
 {
     BattlePosition targetSpecific = target.specificPos(targetInner);
+    // clang-format off
     switch (direction) {
      // if we attack to the right, we need to be at the left of our target. Seems logical?
         case BattleAttackDirection::R   : startPos.setRightPos( neighbour(targetSpecific , BattleDirection::L) ); break;
@@ -107,13 +110,14 @@ BattlePositionExtended BattleFieldGeometry::suggestPositionForAttack(BattlePosit
         case BattleAttackDirection::B   : startPos.setLeftPos ( neighbour(targetSpecific , BattleDirection::TL) ); break;
         case BattleAttackDirection::None  : assert(!"Invalid direction"); break;
     }
+    // clang-format on
     return startPos;
 }
 
 BattleFieldGeometry::AdjacentMap BattleFieldGeometry::getAdjacent(const BattlePosition pos) const
 {
     AdjacentMap result;
-    for (auto direction : {BattleDirection::TR, BattleDirection::R, BattleDirection::BR, BattleDirection::TL, BattleDirection::L, BattleDirection::BL}) {
+    for (auto direction : { BattleDirection::TR, BattleDirection::R, BattleDirection::BR, BattleDirection::TL, BattleDirection::L, BattleDirection::BL }) {
         const BattlePosition neighbourPos = neighbour(pos, direction);
         if (isValid(neighbourPos))
             result[direction] = neighbourPos;
@@ -123,9 +127,9 @@ BattleFieldGeometry::AdjacentMap BattleFieldGeometry::getAdjacent(const BattlePo
 
 BattlePositionSet BattleFieldGeometry::getAdjacentSet(const BattlePosition pos) const
 {
-    auto mapping = getAdjacent(pos);
+    auto              mapping = getAdjacent(pos);
     BattlePositionSet result;
-    for (const auto & item : mapping)
+    for (const auto& item : mapping)
         result.insert(item.second);
     return result;
 }
@@ -135,7 +139,7 @@ BattlePositionSet BattleFieldGeometry::getAdjacentSet(const BattlePositionExtend
     BattlePositionSet result = this->getAdjacentSet(pos.mainPos());
     if (pos.isLarge()) {
         auto extra = this->getAdjacentSet(pos.secondaryPos());
-        for (auto && pos : extra)
+        for (auto&& pos : extra)
             result.insert(pos);
         result.erase(pos.mainPos());
         result.erase(pos.secondaryPos());
@@ -148,7 +152,7 @@ BattlePositionSet BattleFieldGeometry::getAllPositions() const
     BattlePositionSet result;
     for (int w = 0; w < width; ++w) {
         for (int h = 0; h < height; ++h) {
-            result.insert({w, h});
+            result.insert({ w, h });
         }
     }
     return result;
@@ -183,14 +187,14 @@ BattlePositionSet BattleFieldGeometry::closestTo(const BattlePosition pos, const
 
     std::vector<BattlePosition> all(candidates.cbegin(), candidates.cend());
 
-    std::sort(all.begin(), all.end(), [pos](const BattlePosition & l, const BattlePosition & r){
+    std::sort(all.begin(), all.end(), [pos](const BattlePosition& l, const BattlePosition& r) {
         const int decartL = pos.decartDistanceSqr(l);
         const int decartR = pos.decartDistanceSqr(r);
         return decartL < decartR;
     });
     BattlePositionSet result;
-    BattlePosition firstClosest = all[0];
-    const int decartFirst = pos.decartDistanceSqr(firstClosest);
+    BattlePosition    firstClosest = all[0];
+    const int         decartFirst  = pos.decartDistanceSqr(firstClosest);
     for (auto candidate : all) {
         const int decartCandidate = pos.decartDistanceSqr(candidate);
         if (decartCandidate != decartFirst)
@@ -204,6 +208,7 @@ BattlePositionSet BattleFieldGeometry::closestTo(const BattlePosition pos, const
 BattlePosition BattleFieldPreset::calcPosition(bool attacker, int orderIndex, int totalCount, bool compactPositioning) const
 {
     assert(orderIndex >= 0);
+    // clang-format off
     static const std::vector<BattlePosition> objAtt {
         BattlePosition{5, 3},
         BattlePosition{9, 3},
@@ -276,39 +281,42 @@ BattlePosition BattleFieldPreset::calcPosition(bool attacker, int orderIndex, in
             }
         },
     };
+    // clang-format on
     auto calcDefaultY = [](int orderIndex, int totalCount, bool compactPositioning) {
-        const auto & mapping = compactPositioning ? compactPositions : sparsePositions;
+        const auto& mapping = compactPositioning ? compactPositions : sparsePositions;
         assert(totalCount <= 7);
         assert(orderIndex <= 7);
         return mapping[totalCount][orderIndex];
     };
-    auto calcRealPos = [this](const BattlePosition & pseudo) {
-       if (pseudo.x == -1)
-           return BattlePosition{field.width - 1, pseudo.y};
-       if (pseudo.x == -2)
-           return BattlePosition{field.width / 2, pseudo.y};
+    auto calcRealPos = [this](const BattlePosition& pseudo) {
+        if (pseudo.x == -1)
+            return BattlePosition{ field.width - 1, pseudo.y };
+        if (pseudo.x == -2)
+            return BattlePosition{ field.width / 2, pseudo.y };
 
-       return pseudo;
+        return pseudo;
     };
     auto dirToPseudo = [](FieldLayoutPos dir) -> BattlePosition {
-      switch(dir) {
-          case FieldLayoutPos::TR    : return {-1, 0};
-          case FieldLayoutPos::R     : return {-1, 5};
-          case FieldLayoutPos::BR    : return {-1, 10};
-          case FieldLayoutPos::TL    : return {1, 0};
-          case FieldLayoutPos::L     : return {1, 5};
-          case FieldLayoutPos::BL    : return {1, 10};
-          case FieldLayoutPos::T     : return {-2, 0};
-          case FieldLayoutPos::B     : return {-2, 10};
-      default: break;
-      }
-      return {};
+        // clang-format off
+        switch(dir) {
+            case FieldLayoutPos::TR    : return {-1, 0};
+            case FieldLayoutPos::R     : return {-1, 5};
+            case FieldLayoutPos::BR    : return {-1, 10};
+            case FieldLayoutPos::TL    : return {1, 0};
+            case FieldLayoutPos::L     : return {1, 5};
+            case FieldLayoutPos::BL    : return {1, 10};
+            case FieldLayoutPos::T     : return {-2, 0};
+            case FieldLayoutPos::B     : return {-2, 10};
+            default: break;
+        }
+        // clang-format on
+        return {};
     };
     BattlePosition pos;
     if (attacker) {
         if (layout == FieldLayout::Standard) {
             const int y = calcDefaultY(orderIndex, totalCount, compactPositioning);
-            pos = {0, y};
+            pos         = { 0, y };
         } else {
             pos = objAtt.at(orderIndex);
         }
@@ -317,9 +325,9 @@ BattlePosition BattleFieldPreset::calcPosition(bool attacker, int orderIndex, in
     } else {
         if (layout == FieldLayout::Standard) {
             const int y = calcDefaultY(orderIndex, totalCount, compactPositioning);
-            pos = {-1, y};
+            pos         = { -1, y };
         } else {
-            const auto & dirVector = objDef.at(layout);
+            const auto& dirVector = objDef.at(layout);
             if (orderIndex >= static_cast<int>(dirVector.size()))
                 return {};
 
@@ -330,8 +338,5 @@ BattlePosition BattleFieldPreset::calcPosition(bool attacker, int orderIndex, in
 
     return pos;
 }
-
-
-
 
 }

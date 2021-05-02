@@ -14,7 +14,8 @@
 namespace FreeHeroes::Gui {
 
 GuiAdventureStack::GuiAdventureStack(GuiUnitProvider& unitProvider, Core::AdventureStackMutablePtr source)
-    : m_unitProvider(unitProvider), m_source(source)
+    : m_unitProvider(unitProvider)
+    , m_source(source)
 {
     Q_ASSERT(source);
     m_guiUnit = m_unitProvider.find(m_source->library);
@@ -23,7 +24,7 @@ GuiAdventureStack::GuiAdventureStack(GuiUnitProvider& unitProvider, Core::Advent
 void GuiAdventureStack::setUnit(Core::LibraryUnitConstPtr unit)
 {
     const bool changed = m_source->library != unit;
-    m_source->library = unit;
+    m_source->library  = unit;
     if (unit && !m_source->count) {
         m_source->count = 1;
     }
@@ -35,25 +36,26 @@ void GuiAdventureStack::setUnit(Core::LibraryUnitConstPtr unit)
 void GuiAdventureStack::setCount(int count)
 {
     const bool changed = m_source->count != count;
-    m_source->count = count;
+    m_source->count    = count;
     if (count == 0) {
         m_source->library = nullptr;
-        m_guiUnit = nullptr;
+        m_guiUnit         = nullptr;
     }
     if (changed)
         emit dataChanged();
 }
 
-void GuiAdventureStack::setParams(Core::LibraryUnitConstPtr unit, int count) {
+void GuiAdventureStack::setParams(Core::LibraryUnitConstPtr unit, int count)
+{
     const bool changed = m_source->count != count || m_source->library != unit;
     if (count && unit) {
-        m_source->count = count;
+        m_source->count   = count;
         m_source->library = unit;
-        m_guiUnit = m_unitProvider.find(m_source->library);
+        m_guiUnit         = m_unitProvider.find(m_source->library);
     } else {
-        m_source->count = 0;
+        m_source->count   = 0;
         m_source->library = nullptr;
-        m_guiUnit = nullptr;
+        m_guiUnit         = nullptr;
     }
     if (changed)
         emit dataChanged();
@@ -83,7 +85,7 @@ GuiAdventureSquad::GuiAdventureSquad(GuiUnitProvider& unitProvider, Core::Advent
 {
     Q_ASSERT(source);
     m_source = source;
-    for (auto & stack : source->stacks) {
+    for (auto& stack : source->stacks) {
         m_stacks.emplace_back(unitProvider, &stack);
         connect(&m_stacks.back(), &GuiAdventureStack::dataChanged, this, &GuiAdventureSquad::dataChanged);
     }
@@ -112,7 +114,7 @@ Core::LibraryUnitConstPtr GuiAdventureSquad::getStackUnitLibrary(size_t index) c
 void GuiAdventureSquad::clearAll()
 {
     this->blockSignals(true);
-    for (auto & stack : m_stacks) {
+    for (auto& stack : m_stacks) {
         stack.setUnit(nullptr);
         stack.setCount(0);
     }
@@ -122,7 +124,7 @@ void GuiAdventureSquad::clearAll()
 
 void GuiAdventureSquad::updateGuiState()
 {
-    for (auto & stack : m_stacks) {
+    for (auto& stack : m_stacks) {
         stack.updateGuiState();
     }
 }
@@ -131,14 +133,18 @@ void GuiAdventureSquad::emitChanges()
 {
     this->blockSignals(true);
 
-    for (auto & stack : m_stacks) {
+    for (auto& stack : m_stacks) {
         stack.emitChanges();
     }
     this->blockSignals(false);
     emit dataChanged();
 }
 
-void GuiAdventureSquad::externalChange() { updateGuiState(); emitChanges(); }
+void GuiAdventureSquad::externalChange()
+{
+    updateGuiState();
+    emitChanges();
+}
 
 size_t GuiAdventureSquad::getCount() const
 {
@@ -155,7 +161,8 @@ void GuiAdventureSquad::setFormation(bool compact)
 }
 
 GuiAdventureHero::GuiAdventureHero(GuiHeroProvider& heroProvider, Core::AdventureHeroMutablePtr source)
-    : m_heroProvider(heroProvider), m_source(source)
+    : m_heroProvider(heroProvider)
+    , m_source(source)
 {
     Q_ASSERT(source);
     m_guiHero = m_heroProvider.find(m_source->library);
@@ -182,7 +189,7 @@ void GuiAdventureHero::resetHeroToDefault()
     emit dataChanged();
 }
 
-void GuiAdventureHero::createArtifactsModelsIfNeeded(ArtifactsModel * artifacts)
+void GuiAdventureHero::createArtifactsModelsIfNeeded(ArtifactsModel* artifacts)
 {
     if (m_bagEditModel)
         return;
@@ -207,7 +214,7 @@ void GuiAdventureHero::createSpellsModelsIfNeeded(SpellsModel* spellsModel)
 {
     if (m_spellbookEditModel)
         return;
-    m_spellbookEditModel     = new HeroSpellbookEditModel(spellsModel, m_source, this);
+    m_spellbookEditModel = new HeroSpellbookEditModel(spellsModel, m_source, this);
     connect(m_spellbookEditModel, &HeroSpellbookEditModel::dataChanged, this, &GuiAdventureHero::dataChanged);
 }
 
@@ -224,7 +231,7 @@ void GuiAdventureHero::createSkillsModelsIfNeeded(SkillsModel* skillsModel)
 {
     if (m_skillsEditModel)
         return;
-    m_skillsEditModel     = new HeroSkillsEditModel(skillsModel, m_source, this);
+    m_skillsEditModel = new HeroSkillsEditModel(skillsModel, m_source, this);
     connect(m_skillsEditModel, &HeroSkillsEditModel::dataChanged, this, &GuiAdventureHero::dataChanged);
 }
 
@@ -289,28 +296,28 @@ void GuiAdventureHero::externalChange()
     emitChanges();
 }
 
-GuiAdventureArmy::GuiAdventureArmy(GuiUnitProvider& unitProvider,
-                                   GuiHeroProvider& heroProvider,
+GuiAdventureArmy::GuiAdventureArmy(GuiUnitProvider&              unitProvider,
+                                   GuiHeroProvider&              heroProvider,
                                    Core::AdventureArmyMutablePtr source)
     : m_source(source)
     , m_squad(unitProvider, &source->squad)
     , m_hero(heroProvider, &source->hero)
 {
     connect(&m_squad, &GuiAdventureSquad::dataChanged, this, &GuiAdventureArmy::dataChanged);
-    connect(&m_hero , &GuiAdventureHero::dataChanged , this, &GuiAdventureArmy::dataChanged);
+    connect(&m_hero, &GuiAdventureHero::dataChanged, this, &GuiAdventureArmy::dataChanged);
 }
 
 void GuiAdventureArmy::updateGuiState()
 {
     m_squad.updateGuiState();
-    m_hero .updateGuiState();
+    m_hero.updateGuiState();
 }
 
 void GuiAdventureArmy::emitChanges()
 {
     this->blockSignals(true);
     m_squad.emitChanges();
-    m_hero .emitChanges();
+    m_hero.emitChanges();
     this->blockSignals(false);
     emit dataChanged();
 }
@@ -320,6 +327,5 @@ void GuiAdventureArmy::externalChange()
     updateGuiState();
     emitChanges();
 }
-
 
 }

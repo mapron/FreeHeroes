@@ -14,35 +14,31 @@ namespace FreeHeroes::Conversion {
 
 struct Palette;
 
-struct AnimationPaletteShift
-{
+struct AnimationPaletteShift {
     int from;
     int count;
 };
-struct AnimationPaletteConfig
-{
+struct AnimationPaletteConfig {
     QVector<AnimationPaletteShift> shifts;
-    int variantsCount = 1;
+    int                            variantsCount = 1;
 };
 
-
-class DefParser
-{
+class DefParser {
 public:
-    DefParser(const char * dataPtr, int size, const AnimationPaletteConfig & animConfig);
+    DefParser(const char* dataPtr, int size, const AnimationPaletteConfig& animConfig);
     ~DefParser() = default;
 
     struct ParsedFrame {
-        QPoint paddingLeftTop;
+        QPoint  paddingLeftTop;
         QPixmap data;
-        QSize boundarySize;
-        int frameId = 0;
+        QSize   boundarySize;
+        int     frameId = 0;
     };
 
     struct ParsedGroup {
-        int groupId = 0;
+        int        groupId = 0;
         QList<int> frameIds;
-        QSize boundarySize;
+        QSize      boundarySize;
     };
 
     const QVector<ParsedFrame>& getFrames() const { return m_parsedFrames; }
@@ -52,16 +48,16 @@ public:
     bool status() const { return m_status; }
 
     QString type() const { return m_type; }
-private:
 
-    QByteArray       m_data;
-    QBuffer          m_dataBuffer;
+private:
+    QByteArray                   m_data;
+    QBuffer                      m_dataBuffer;
     const AnimationPaletteConfig m_animConfig;
 
     QVector<ParsedFrame> m_parsedFrames;
     QVector<ParsedGroup> m_parsedGroups;
 
-    bool m_status = false;
+    bool    m_status = false;
     QString m_type;
 
     ParsedFrame loadFrame(uint32_t offset, const Palette& palette);

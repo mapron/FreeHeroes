@@ -15,7 +15,8 @@
 namespace FreeHeroes::Core {
 
 namespace {
-const std::map<int, int64_t> levelTable = []()->std::map<int, int64_t>{
+const std::map<int, int64_t> levelTable = []() -> std::map<int, int64_t> {
+    // clang-format off
     std::map<int, int64_t> start {
         {1,  0     },
         {2,  1000  },
@@ -31,14 +32,15 @@ const std::map<int, int64_t> levelTable = []()->std::map<int, int64_t>{
         {12, 20600 },
         {13, 24320 },
     };
+    // clang-format on
     int64_t current = 24320;
     for (int i = 14; i < 100; i++) {
-        current = current * 6 / 5;
+        current  = current * 6 / 5;
         start[i] = current;
     }
     return start;
-} ();
-const std::map<int64_t, int> levelTableInv = []()->std::map<int64_t, int>{
+}();
+const std::map<int64_t, int> levelTableInv = []() -> std::map<int64_t, int> {
     std::map<int64_t, int> ret;
     for (auto p : levelTable)
         ret[p.second] = p.first;
@@ -47,9 +49,9 @@ const std::map<int64_t, int> levelTableInv = []()->std::map<int64_t, int>{
 
 }
 
-
-void GeneralEstimation::bindTypes(sol::state & lua)
+void GeneralEstimation::bindTypes(sol::state& lua)
 {
+    // clang-format off
     lua.open_libraries(sol::lib::math);
     lua.new_usertype<MagicSchoolLevels>("MagicSchoolLevels",
         "air"              , &MagicSchoolLevels::air  ,
@@ -142,8 +144,8 @@ void GeneralEstimation::bindTypes(sol::state & lua)
                 "Elemental",     UnitNonLivingType::Elemental,
                 "BattleMachine", UnitNonLivingType::BattleMachine
                  );
+    // clang-format on
 }
-
 
 int64_t GeneralEstimation::getExperienceForLevel(int level)
 {
@@ -173,7 +175,7 @@ BonusRatio GeneralEstimation::calculatePhysicalBase(DamageDesc dmg, int count, D
             return spread * count / 2;
 
         const int limitRngRequests = 10;
-        const int count1 = std::min(limitRngRequests, count);
+        const int count1           = std::min(limitRngRequests, count);
         assert(spread <= std::numeric_limits<uint8_t>::max()); // @todo: add this check to GameDatabase loader as well!
 
         int total = static_cast<int>(randomGenerator.genSumSmallN(count1, static_cast<uint8_t>(spread)));
@@ -183,49 +185,48 @@ BonusRatio GeneralEstimation::calculatePhysicalBase(DamageDesc dmg, int count, D
         }
         return total;
     };
-    const int damageSpread = dmg.maxDamage - dmg.minDamage;
+    const int damageSpread   = dmg.maxDamage - dmg.minDamage;
     const int damageBaseRoll = (dmg.minDamage * count + makeSpreadRoll(damageSpread, count));
     return BonusRatio(damageBaseRoll, 1);
 }
 
 BonusRatio GeneralEstimation::estimateMoraleRoll(int moraleValue, const RngChanceParams& chanceModifiers)
 {
-    moraleValue = std::clamp(moraleValue, m_rules->morale.minEffectiveValue, m_rules->morale.maxEffectiveValue);
-    const int moraleValueAbs = std::abs(moraleValue);
-    const BonusRatio baseChance = moraleValue  >= 0 ? m_rules->morale.positiveChances[moraleValueAbs] : m_rules->morale.negativeChances[moraleValueAbs];
-    const BonusRatio result = baseChance * ( moraleValue  >= 0 ?  chanceModifiers.morale : chanceModifiers.dismorale);
+    moraleValue                     = std::clamp(moraleValue, m_rules->morale.minEffectiveValue, m_rules->morale.maxEffectiveValue);
+    const int        moraleValueAbs = std::abs(moraleValue);
+    const BonusRatio baseChance     = moraleValue >= 0 ? m_rules->morale.positiveChances[moraleValueAbs] : m_rules->morale.negativeChances[moraleValueAbs];
+    const BonusRatio result         = baseChance * (moraleValue >= 0 ? chanceModifiers.morale : chanceModifiers.dismorale);
     return result;
 }
 
-BonusRatio GeneralEstimation::estimateLuckRoll( int luckValue, const RngChanceParams& chanceModifiers)
+BonusRatio GeneralEstimation::estimateLuckRoll(int luckValue, const RngChanceParams& chanceModifiers)
 {
-    luckValue = std::clamp(luckValue, m_rules->luck.minEffectiveValue, m_rules->luck.maxEffectiveValue);
-    const int luckValueAbs = std::abs(luckValue);
-    const BonusRatio baseChance = luckValue  >= 0 ? m_rules->luck.positiveChances[luckValueAbs] : m_rules->luck.negativeChances[luckValueAbs];
-    const BonusRatio result = baseChance * ( luckValue  >= 0 ?  chanceModifiers.luck : chanceModifiers.unluck);
+    luckValue                     = std::clamp(luckValue, m_rules->luck.minEffectiveValue, m_rules->luck.maxEffectiveValue);
+    const int        luckValueAbs = std::abs(luckValue);
+    const BonusRatio baseChance   = luckValue >= 0 ? m_rules->luck.positiveChances[luckValueAbs] : m_rules->luck.negativeChances[luckValueAbs];
+    const BonusRatio result       = baseChance * (luckValue >= 0 ? chanceModifiers.luck : chanceModifiers.unluck);
     return result;
 }
 
-int GeneralEstimation::spellBaseDamage(int targetUnitLevel, const SpellCastParams & castParams, int targetIndex)
+int GeneralEstimation::spellBaseDamage(int targetUnitLevel, const SpellCastParams& castParams, int targetIndex)
 {
     sol::state lua;
 
     bindTypes(lua);
 
-    lua["damage"] = 0;
+    lua["damage"]     = 0;
     lua["spellPower"] = castParams.spellPower;
-    lua["level"] = castParams.skillLevel;
-    lua["isSpec"] = castParams.heroSpecLevel != -1;
-    lua["unitLevel"] = targetUnitLevel;
-    lua["heroLevel"] = castParams.heroSpecLevel;
-    lua["index"] = targetIndex;
+    lua["level"]      = castParams.skillLevel;
+    lua["isSpec"]     = castParams.heroSpecLevel != -1;
+    lua["unitLevel"]  = targetUnitLevel;
+    lua["heroLevel"]  = castParams.heroSpecLevel;
+    lua["index"]      = targetIndex;
 
-    for (const auto & calc : castParams.spell->calcScript)
+    for (const auto& calc : castParams.spell->calcScript)
         lua.script(calc);
 
     int damage = lua["damage"];
     return damage;
 }
-
 
 }

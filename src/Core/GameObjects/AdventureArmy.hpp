@@ -12,9 +12,10 @@ namespace FreeHeroes::Core {
 
 struct AdventureArmy {
     AdventureSquad squad;
-    AdventureHero hero;
+    AdventureHero  hero;
 
-    bool isEqualTo(const AdventureArmy & another) const noexcept {
+    bool isEqualTo(const AdventureArmy& another) const noexcept
+    {
         if (!hero.isEqualTo(another.hero))
             return false;
 
@@ -24,7 +25,7 @@ struct AdventureArmy {
         return true;
     }
 
-    bool isEmpty() const noexcept { return squad.isEmpty();}
+    bool isEmpty() const noexcept { return squad.isEmpty(); }
 
     bool hasHero() const noexcept { return hero.isValid(); }
 
@@ -34,6 +35,5 @@ struct AdventureArmy {
     };
     EstimatedParams estimated;
 };
-
 
 }

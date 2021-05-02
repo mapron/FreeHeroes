@@ -12,7 +12,6 @@
 #include <memory>
 #include <functional>
 
-
 namespace FreeHeroes {
 namespace Core {
 }
@@ -20,8 +19,7 @@ namespace Core {
 namespace Gui {
 
 // @todo: will be handy in adventure mode.right panel with heroes portraits.
-class GUIWIDGETS_EXPORT HeroSelectorDialogWidget : public QWidget
-{
+class GUIWIDGETS_EXPORT HeroSelectorDialogWidget : public QWidget {
     Q_OBJECT
 public:
     HeroSelectorDialogWidget(QWidget* parent = nullptr);
@@ -30,4 +28,3 @@ public:
 
 }
 }
-

@@ -15,36 +15,34 @@
 
 namespace FreeHeroes::Gui {
 
-class GUIWIDGETS_EXPORT HeroLevelupDialog : public QDialog
-{
+class GUIWIDGETS_EXPORT HeroLevelupDialog : public QDialog {
     Q_OBJECT
 public:
-    HeroLevelupDialog(QWidget * parent);
+    HeroLevelupDialog(QWidget* parent);
     ~HeroLevelupDialog();
 
     struct Choice {
         QString skillName;
         QString skillLevelName;
         QPixmap icon;
-
     };
 
     struct LevelUpDecision {
-        QString heroHame;
-        QPixmap heroPortrait;
-        QString heroClass;
-        QPixmap primaryStatIcon;
-        QString primaryStatName;
-        QPixmap expIcon;
-        int level = 0;
+        QString       heroHame;
+        QPixmap       heroPortrait;
+        QString       heroClass;
+        QPixmap       primaryStatIcon;
+        QString       primaryStatName;
+        QPixmap       expIcon;
+        int           level = 0;
         QList<Choice> choices;
     };
 
-    void setInfo(const LevelUpDecision & info);
+    void setInfo(const LevelUpDecision& info);
 
     void accept() override;
     void reject() override;
-    int getChoiceIndex() const;
+    int  getChoiceIndex() const;
 
 private:
     struct Impl;
@@ -52,5 +50,3 @@ private:
 };
 
 }
-
-

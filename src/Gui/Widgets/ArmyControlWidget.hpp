@@ -23,24 +23,24 @@ namespace Gui {
 class GuiAdventureSquad;
 class GuiAdventureStack;
 
-class GUIWIDGETS_EXPORT ArmyControlWidget : public QFrame
-{
+class GUIWIDGETS_EXPORT ArmyControlWidget : public QFrame {
     Q_OBJECT
 public:
     ArmyControlWidget(QWidget* parent = nullptr);
     ~ArmyControlWidget();
 
 signals:
-    void showInfo(const GuiAdventureStack * stack, bool modal);
+    void showInfo(const GuiAdventureStack* stack, bool modal);
     void hideInfo();
 
 public:
     void refresh();
 
-    void setSource(const GuiAdventureSquad * squad,
-                   Core::IAdventureSquadControl * adventureSquadControl);
+    void setSource(const GuiAdventureSquad*      squad,
+                   Core::IAdventureSquadControl* adventureSquadControl);
 
-    void paintEvent(QPaintEvent *) override;
+    void paintEvent(QPaintEvent*) override;
+
 private:
     void swapItems(Core::AdventureStackConstPtr first, Core::AdventureStackConstPtr second);
     void equalSplit(Core::AdventureStackConstPtr active);
@@ -57,4 +57,3 @@ private:
 
 }
 }
-

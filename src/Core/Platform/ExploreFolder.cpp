@@ -10,29 +10,26 @@
 #include <Shlobj.h>
 
 namespace FreeHeroes::Core {
-class CoInitializer
-{
+class CoInitializer {
 public:
-    CoInitializer(){::CoInitialize(NULL);}
+    CoInitializer() { ::CoInitialize(NULL); }
 
-    ~CoInitializer(){::CoUninitialize(); }
+    ~CoInitializer() { ::CoUninitialize(); }
 };
 
 bool showFolderInFileManager(const std_path& path)
 {
     CoInitializer coInit;
-    return ::ShellExecuteW(nullptr, nullptr, path.wstring().c_str() , nullptr, nullptr, SW_SHOWNORMAL) > HINSTANCE(32);
+    return ::ShellExecuteW(nullptr, nullptr, path.wstring().c_str(), nullptr, nullptr, SW_SHOWNORMAL) > HINSTANCE(32);
 }
 }
 #else
 namespace FreeHeroes::Core {
 
-bool showFolderInFileManager(const std_path& )
+bool showFolderInFileManager(const std_path&)
 {
     return false;
 }
 
-
 }
 #endif
-

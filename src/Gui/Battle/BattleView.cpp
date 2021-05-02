@@ -10,18 +10,18 @@
 
 namespace FreeHeroes::Gui {
 
-BattleView::BattleView(QWidget *parent) :
-    QGraphicsView(parent)
+BattleView::BattleView(QWidget* parent)
+    : QGraphicsView(parent)
 {
-     setDragMode(QGraphicsView::NoDrag);
-     setInteractive(true);
+    setDragMode(QGraphicsView::NoDrag);
+    setInteractive(true);
 }
 
-void BattleView::wheelEvent(QWheelEvent *)
+void BattleView::wheelEvent(QWheelEvent*)
 {
 }
 
-void BattleView::keyPressEvent(QKeyEvent *event)
+void BattleView::keyPressEvent(QKeyEvent* event)
 {
     QGraphicsView::keyPressEvent(event);
 }

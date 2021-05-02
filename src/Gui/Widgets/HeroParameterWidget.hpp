@@ -19,11 +19,12 @@ class LibraryModelsProvider;
 class GUIWIDGETS_EXPORT HeroParameterWidget : public QWidget {
     Q_OBJECT
 public:
-    HeroParameterWidget(QWidget * parent = nullptr);
+    HeroParameterWidget(QWidget* parent = nullptr);
     ~HeroParameterWidget();
 
     void refresh();
     void setSource(Core::AdventureHeroConstPtr hero);
+
 private:
     struct Impl;
     std::unique_ptr<Impl> m_impl;

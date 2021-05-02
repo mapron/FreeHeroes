@@ -13,19 +13,16 @@
 #include <memory>
 #include <functional>
 
-namespace Ui
-{
+namespace Ui {
 class ConverterDialog;
 }
 
 namespace FreeHeroes::Conversion {
 
-
-class ConverterDialog : public QDialog
-{
+class ConverterDialog : public QDialog {
     Q_OBJECT
 public:
-    ConverterDialog(QWidget * parent = nullptr);
+    ConverterDialog(QWidget* parent = nullptr);
     ~ConverterDialog();
 
 private:
@@ -37,10 +34,8 @@ private:
 
 private:
     std::unique_ptr<Ui::ConverterDialog> m_ui;
-    Core::std_path m_hotaInstallDir;
-    QSettings m_converterSettings;
+    Core::std_path                       m_hotaInstallDir;
+    QSettings                            m_converterSettings;
 };
 
 }
-
-

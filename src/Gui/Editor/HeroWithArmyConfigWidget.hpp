@@ -12,9 +12,7 @@
 #include <memory>
 #include <functional>
 
-
-namespace Ui
-{
+namespace Ui {
 class HeroWithArmyConfigWidget;
 }
 
@@ -29,16 +27,15 @@ class GuiAdventureArmy;
 class GuiAdventureHero;
 class ArtifactQuickFilterModel;
 
-class GUIEDITOR_EXPORT HeroWithArmyConfigWidget : public QWidget
-{
+class GUIEDITOR_EXPORT HeroWithArmyConfigWidget : public QWidget {
     Q_OBJECT
 public:
-    HeroWithArmyConfigWidget(QWidget * parent = nullptr);
+    HeroWithArmyConfigWidget(QWidget* parent = nullptr);
     ~HeroWithArmyConfigWidget();
 
     void refresh();
 
-    void setModels(LibraryModelsProvider & modelProvider, Core::IRandomGenerator * randomGenerator);
+    void setModels(LibraryModelsProvider& modelProvider, Core::IRandomGenerator* randomGenerator);
     void setSource(GuiAdventureArmy* adventureArmy);
     void initHero();
 
@@ -72,13 +69,13 @@ private:
 
     std::unique_ptr<Ui::HeroWithArmyConfigWidget> m_ui;
 
-    Core::IRandomGenerator  * m_randomGenerator = nullptr;
+    Core::IRandomGenerator* m_randomGenerator = nullptr;
 
-    GuiAdventureArmy * m_adventureArmy = nullptr;
-    GuiAdventureHero * m_hero = nullptr;
-    LibraryModelsProvider * m_modelProvider = nullptr;
+    GuiAdventureArmy*      m_adventureArmy = nullptr;
+    GuiAdventureHero*      m_hero          = nullptr;
+    LibraryModelsProvider* m_modelProvider = nullptr;
 
-    ArtifactQuickFilterModel * m_artifactsFilter = nullptr;
+    ArtifactQuickFilterModel* m_artifactsFilter = nullptr;
 };
 
 }

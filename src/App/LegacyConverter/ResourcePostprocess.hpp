@@ -9,14 +9,12 @@
 
 namespace FreeHeroes::Conversion {
 
-class ResourcePostprocess
-{
+class ResourcePostprocess {
 public:
-
-    void concatSprites(Core::IResourceLibrary & resources,
-                      const std::vector<std::string> &  in,
-                      const std::string & out,
-                      bool vertical);
+    void concatSprites(Core::IResourceLibrary&         resources,
+                       const std::vector<std::string>& in,
+                       const std::string&              out,
+                       bool                            vertical);
 };
 
 }

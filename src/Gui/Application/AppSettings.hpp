@@ -14,12 +14,10 @@
 #include <memory>
 #include <vector>
 
-
 namespace FreeHeroes::Gui {
 
-
-class AppSettings : public QObject, public IAppSettings {
-
+class AppSettings : public QObject
+    , public IAppSettings {
     Q_OBJECT
 public:
     AppSettings(QString filename);
@@ -30,22 +28,21 @@ signals:
     void setEffectsVolume(int percent);
 
 public:
-
     void load();
     void save();
 
-    const Sound & sound() const  noexcept override{ return m_all.sound; }
+    const Sound& sound() const noexcept override { return m_all.sound; }
 
-    const Battle & battle() const noexcept override{ return m_all.battle;}
+    const Battle& battle() const noexcept override { return m_all.battle; }
 
-    const AppGlobal & global() const noexcept override{ return m_all.global;}
-    const UI & ui() const noexcept override { return m_all.ui;}
+    const AppGlobal& global() const noexcept override { return m_all.global; }
+    const UI&        ui() const noexcept override { return m_all.ui; }
 
-    void showSettingsEditor(QWidget * parent) override;
+    void showSettingsEditor(QWidget* parent) override;
 
-    QSettings & uiSettings() override { return m_settings; }
+    QSettings& uiSettings() override { return m_settings; }
 
-    AppGlobal & globalMutable() { return m_all.global; }
+    AppGlobal& globalMutable() { return m_all.global; }
 
 private:
     class QVariantRef;
@@ -53,9 +50,8 @@ private:
     std::vector<QVariantRefList> m_allWrappers;
 
     AllSettings m_all;
-    QString m_filename;
-    QSettings m_settings;
+    QString     m_filename;
+    QSettings   m_settings;
 };
-
 
 }

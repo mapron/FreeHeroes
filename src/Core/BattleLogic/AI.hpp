@@ -14,21 +14,20 @@
 
 namespace FreeHeroes::Core {
 
-class AI : public IAI
-{
+class AI : public IAI {
 public:
-    AI(const AIParams & params, IBattleControl & battleControl, IBattleView & battleView, BattleFieldGeometry geometry);
+    AI(const AIParams& params, IBattleControl& battleControl, IBattleView& battleView, BattleFieldGeometry geometry);
 
-    int run(int stepLimit) override;
-    void runStep() override;
+    int         run(int stepLimit) override;
+    void        runStep() override;
     std::string getProfiling() const override;
-    void clearProfiling() override;
+    void        clearProfiling() override;
 
 private:
-    void prepareReachable();
+    void    prepareReachable();
     int64_t calculateValueForRanged(BattleStackConstPtr stack);
-    int64_t calculateValueForAttackPlan(const BattlePlanMove & planResult);
-    bool findWaitReachable();
+    int64_t calculateValueForAttackPlan(const BattlePlanMove& planResult);
+    bool    findWaitReachable();
 
     void makeRangedAttack();
     void makeMeleeAttack();
@@ -43,37 +42,38 @@ private:
     struct Try {
         BattleStackConstPtr stack;
 
-        BattlePlanMoveParams moveParams;
+        BattlePlanMoveParams   moveParams;
         BattlePlanAttackParams attackParams;
-        int distanceTurns = 0;
-        int distanceCells = 0;
-        int64_t meleeAttackValue = 0;
+        int                    distanceTurns    = 0;
+        int                    distanceCells    = 0;
+        int64_t                meleeAttackValue = 0;
     };
 
     struct OpponentStack {
         BattleStackConstPtr m_stack;
-        bool m_isWide = false;
+        bool                m_isWide = false;
 
-        int m_turnsToReach = -1; // -1 => unreachable
+        int m_turnsToReach  = -1; // -1 => unreachable
         int m_distanceCells = -1;
 
         int64_t m_rangedAttackValue = 0;
     };
 
     struct StepData {
-        BattleStackConstPtr m_current = nullptr;
-        bool m_rangeAttackAvaiable = false;
-        bool isWide = false;
-        int currentSpeed = 0;
+        BattleStackConstPtr m_current             = nullptr;
+        bool                m_rangeAttackAvaiable = false;
+        bool                isWide                = false;
+        int                 currentSpeed          = 0;
 
         std::vector<OpponentStack> m_opponent;
 
-        std::vector<Try> m_possibleAttacks;
-        std::vector<Try> m_possibleAttacksNotNow;
+        std::vector<Try>          m_possibleAttacks;
+        std::vector<Try>          m_possibleAttacksNotNow;
         BattlePositionDistanceMap reachNow;
         BattlePositionDistanceMap reachAtAll;
 
-        void clear() { // no preserve allocated space
+        void clear()
+        { // no preserve allocated space
             m_opponent.clear();
 
             m_possibleAttacks.clear();
@@ -82,8 +82,8 @@ private:
             reachAtAll.clear();
         }
     };
-    StepData m_stepData;
-    ProfilerContext m_profileContext;
+    StepData                  m_stepData;
+    ProfilerContext           m_profileContext;
     const BattleFieldGeometry m_field;
 };
 

@@ -15,6 +15,7 @@
 #include <limits>
 #include <climits>
 
+// clang-format off
 // all inside hacked_std is just copy-paste from libc++ <random>
 // that is done for missing binary serialization, and also to be serialized data consistent between implementations.
 

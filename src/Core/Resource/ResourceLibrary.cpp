@@ -23,34 +23,42 @@ const std::string extension1 = ".txt";
 const std::string extension2 = ".fhindex";
 const std::string fullSuffix = extension2 + extension1;
 
-const std::string typeDatabase = "database";
+const std::string typeDatabase    = "database";
 const std::string typeTranslation = "translation";
 
-enum class ParseMode  {Undefined, Media, Database, Translation };
+enum class ParseMode
+{
+    Undefined,
+    Media,
+    Database,
+    Translation
+};
 
-std::vector<std::string> getStringsFromViews(const std::vector<std::string_view> & arr) {
+std::vector<std::string> getStringsFromViews(const std::vector<std::string_view>& arr)
+{
     std::vector<std::string> result;
     result.reserve(arr.size());
-    for (auto & s : arr)
-        result.push_back(std::string{s});
+    for (auto& s : arr)
+        result.push_back(std::string{ s });
     return result;
 }
 
-const std::map<ResourceMedia::Type, std::string> mediaTypeMapping {
-    {ResourceMedia::Type::Sprite, "sprites"},
-    {ResourceMedia::Type::Sound, "sounds"},
-    {ResourceMedia::Type::Music, "music"},
-    {ResourceMedia::Type::Video, "video"},
-    {ResourceMedia::Type::Other, "other"},
+const std::map<ResourceMedia::Type, std::string> mediaTypeMapping{
+    { ResourceMedia::Type::Sprite, "sprites" },
+    { ResourceMedia::Type::Sound, "sounds" },
+    { ResourceMedia::Type::Music, "music" },
+    { ResourceMedia::Type::Video, "video" },
+    { ResourceMedia::Type::Other, "other" },
 };
 
 class Graph {
     std::map<std::string, ResourceLibrary::DepList> nodes;
-    std::map<std::string, bool> visited;
-    std::map<std::string, bool> onStack;
-    std::vector<std::string> sortResult;
+    std::map<std::string, bool>                     visited;
+    std::map<std::string, bool>                     onStack;
+    std::vector<std::string>                        sortResult;
 
-    void dfs(const std::string & node, bool optional) {
+    void dfs(const std::string& node, bool optional)
+    {
         if (nodes.count(node) == 0) {
             if (optional)
                 return;
@@ -59,7 +67,7 @@ class Graph {
         visited[node] = true;
         onStack[node] = true;
 
-        for (const ResourceLibrary::Dep & neighbour: nodes[node]) {
+        for (const ResourceLibrary::Dep& neighbour : nodes[node]) {
             if (visited[neighbour.id] && onStack[neighbour.id])
                 throw std::runtime_error("Loop detected in resource dependencies");
 
@@ -70,39 +78,43 @@ class Graph {
         onStack[node] = false;
         sortResult.push_back(node);
     }
+
 public:
     Graph() = default;
-    void add(std::string id, ResourceLibrary::DepList deps) {
+    void add(std::string id, ResourceLibrary::DepList deps)
+    {
         nodes[std::move(id)] = std::move(deps);
     }
 
-    void sort() {
-        for(auto & nodeP : nodes) {
+    void sort()
+    {
+        for (auto& nodeP : nodes) {
             if (!visited[nodeP.first])
                 dfs(nodeP.first, false);
-
         }
     }
-    const std::vector<std::string>&  getSortResult() const { return sortResult;}
+    const std::vector<std::string>& getSortResult() const { return sortResult; }
 };
 
-class FastCsvTable
-{
-    const char * begin;
-    const char * end;
-    const char * curr;
+class FastCsvTable {
+    const char* begin;
+    const char* end;
+    const char* curr;
+
 public:
-    FastCsvTable(const char * begin, size_t length) {
+    FastCsvTable(const char* begin, size_t length)
+    {
         this->begin = begin;
-        this->curr = begin;
-        this->end = begin + length;
+        this->curr  = begin;
+        this->end   = begin + length;
     }
-    bool scanLine() {
+    bool scanLine()
+    {
         if (curr >= end)
             return false;
 
-        const char * peek = curr;
-        size_t tabs = 0;
+        const char* peek = curr;
+        size_t      tabs = 0;
         while (peek < end) {
             if (*peek == '\t')
                 tabs++;
@@ -110,9 +122,9 @@ public:
                 break;
             peek++;
         }
-        const char * i = curr;
-        const char * lineEnd  = peek;
-        line = std::string_view(curr, peek - curr);
+        const char* i       = curr;
+        const char* lineEnd = peek;
+        line                = std::string_view(curr, peek - curr);
         if (*peek == '\r')
             ++peek;
         if (*peek == '\n')
@@ -120,34 +132,30 @@ public:
 
         curr = peek;
         row.resize(tabs + 1);
-        size_t index = 0;
-        const char * prevI = i;
+        size_t      index = 0;
+        const char* prevI = i;
         while (i < lineEnd) {
             if (*i == '\t') {
-                row[index] =  i == prevI ? std::string_view() : std::string_view(prevI, i - prevI);
-                prevI = i+1;
+                row[index] = i == prevI ? std::string_view() : std::string_view(prevI, i - prevI);
+                prevI      = i + 1;
                 index++;
             }
             i++;
         }
-        row[index] =  i == prevI ? std::string_view() : std::string_view(prevI, i - prevI);
+        row[index] = i == prevI ? std::string_view() : std::string_view(prevI, i - prevI);
 
         return true;
     }
 
     std::vector<std::string_view> row;
-    std::string_view line;
-
-
+    std::string_view              line;
 };
 
 }
 
-
 ResourceLibrary::ResourceLibrary(std::string id)
     : m_id(id)
 {
-
 }
 
 ResourceLibrary::ResourceLibraryPathList ResourceLibrary::searchIndexInFolderRecursive(const std_path& folder)
@@ -157,47 +165,47 @@ ResourceLibrary::ResourceLibraryPathList ResourceLibrary::searchIndexInFolderRec
         return result;
 
     std::list<std_path> children;
-    for (const auto & it : std_fs::directory_iterator(folder)) {
+    for (const auto& it : std_fs::directory_iterator(folder)) {
         if (!it.is_regular_file()) {
             if (it.is_directory())
                 children.push_back(it.path());
             continue;
         }
-        auto f = it.path().filename();
+        auto f    = it.path().filename();
         auto ext1 = f.extension();
         if (ext1 != extension1)
             continue;
         auto f2 = f.stem();
         if (f2.extension() != extension2)
             continue;
-        std::string id = path2string(f2.stem());
-        auto root = it.path().parent_path();
+        std::string id   = path2string(f2.stem());
+        auto        root = it.path().parent_path();
 
         ResourceLibrary tmp(id);
         tmp.setIndexFolder(root);
         if (tmp.loadIndex(true)) {
-            result.records.push_back(ResourceLibraryPathList::Record{root, tmp.m_id, tmp.m_dependencies});
+            result.records.push_back(ResourceLibraryPathList::Record{ root, tmp.m_id, tmp.m_dependencies });
         } else {
             std::cerr << "Warning: failed to load index from:" << path2string(root) << "/" << id << "\n";
         }
     }
     if (result.records.empty()) {
-        for (const std_path & path : children) {
+        for (const std_path& path : children) {
             auto subRecords = searchIndexInFolderRecursive(path);
-            for (const auto & rec : subRecords.records)
+            for (const auto& rec : subRecords.records)
                 result.records.push_back(rec);
         }
     }
-    return  result;
+    return result;
 }
 
-std::shared_ptr<ResourceLibrary> ResourceLibrary::makeMergedLibrary(const ResourceLibraryPathList & pathList)
+std::shared_ptr<ResourceLibrary> ResourceLibrary::makeMergedLibrary(const ResourceLibraryPathList& pathList)
 {
     ProfilerScope scope("makeMergedLibrary");
-    auto result = std::make_shared<ResourceLibrary>();
+    auto          result = std::make_shared<ResourceLibrary>();
     {
         ProfilerScope scopeEx("start");
-        for (const auto & rec : pathList.records) {
+        for (const auto& rec : pathList.records) {
             ResourceLibrary tmp(rec.id);
             tmp.setIndexFolder(rec.path);
             Logger(Logger::Info) << "Loading resource index:" << path2string(rec.path / rec.id);
@@ -208,27 +216,26 @@ std::shared_ptr<ResourceLibrary> ResourceLibrary::makeMergedLibrary(const Resour
     }
     {
         ProfilerScope scopeEx("end");
-        Graph g;
+        Graph         g;
         {
             ProfilerScope scopeEx("g.sort");
-            for (const auto & dbPair : result->m_databases) {
+            for (const auto& dbPair : result->m_databases) {
                 DepList depList;
                 if (!dbPair.second.baseId.empty())
-                    depList.push_back(Dep{std::string{dbPair.second.baseId}});
-                g.add(std::string{dbPair.first}, depList);
+                    depList.push_back(Dep{ std::string{ dbPair.second.baseId } });
+                g.add(std::string{ dbPair.first }, depList);
             }
             g.sort();
         }
-        for (const auto & dbId : g.getSortResult()) {
-            ResourceDatabase & db = result->m_databases[dbId];
-            if (!db.baseId.empty())
-            {
-                ResourceDatabase & depDb = result->m_databases[db.baseId];
-                for (auto & f : depDb.filesFullPathsWithDeps) {
+        for (const auto& dbId : g.getSortResult()) {
+            ResourceDatabase& db = result->m_databases[dbId];
+            if (!db.baseId.empty()) {
+                ResourceDatabase& depDb = result->m_databases[db.baseId];
+                for (auto& f : depDb.filesFullPathsWithDeps) {
                     db.filesFullPathsWithDeps.push_back(f);
                 }
             }
-            for (auto & f : db.filesFullPaths) {
+            for (auto& f : db.filesFullPaths) {
                 db.filesFullPathsWithDeps.push_back(f);
             }
         }
@@ -236,14 +243,15 @@ std::shared_ptr<ResourceLibrary> ResourceLibrary::makeMergedLibrary(const Resour
     return result;
 }
 
-void ResourceLibrary::setIndexFolder(const std_path& folder) {
-    m_indexFolder = folder;
+void ResourceLibrary::setIndexFolder(const std_path& folder)
+{
+    m_indexFolder           = folder;
     m_mainStorage.m_rootDir = path2string(m_indexFolder) + "/";
 }
 
 void ResourceLibrary::addDep(std::string dep, ResourceLibrary::DepsRequire require)
 {
-    m_dependencies.push_back({dep, require});
+    m_dependencies.push_back({ dep, require });
 }
 
 bool ResourceLibrary::loadIndex(bool onlyMeta)
@@ -255,7 +263,7 @@ bool ResourceLibrary::loadIndex(bool onlyMeta)
     if (m_id.empty())
         return false;
 
-    std::ifstream ifs(m_indexFolder / (m_id + fullSuffix), std::ios_base::in |  std::ios_base::binary);
+    std::ifstream ifs(m_indexFolder / (m_id + fullSuffix), std::ios_base::in | std::ios_base::binary);
     if (!ifs)
         return false;
 
@@ -270,8 +278,7 @@ bool ResourceLibrary::loadIndex(bool onlyMeta)
     m_dependencies.clear();
 
     {
-        while(csvTable.scanLine()) {
-
+        while (csvTable.scanLine()) {
             if (csvTable.line.empty() || csvTable.line == "$")
                 break;
             //tokens = splitLine(line, '\t', true);
@@ -286,33 +293,33 @@ bool ResourceLibrary::loadIndex(bool onlyMeta)
     if (onlyMeta)
         return true; // @todo: we still reading whole file in the memory
 
-    IdMappingMedia * currentMapping = nullptr;
-    IdMappingTrans * currentLocMapping = nullptr;
-    ResourceMedia::Type currentType = ResourceMedia::Type::None;
-    ParseMode parseMode = ParseMode::Undefined;
+    IdMappingMedia*     currentMapping    = nullptr;
+    IdMappingTrans*     currentLocMapping = nullptr;
+    ResourceMedia::Type currentType       = ResourceMedia::Type::None;
+    ParseMode           parseMode         = ParseMode::Undefined;
 
-    while(csvTable.scanLine()) {
+    while (csvTable.scanLine()) {
         if (csvTable.line.empty())
             break;
 
         const bool isHeader = !csvTable.row[0].empty();
 
         if (isHeader) {
-            const std::string_view & typeName = csvTable.row[0];
-            parseMode = ParseMode::Undefined;
-            if (typeName == typeDatabase){
+            const std::string_view& typeName = csvTable.row[0];
+            parseMode                        = ParseMode::Undefined;
+            if (typeName == typeDatabase) {
                 parseMode = ParseMode::Database;
-            }else if (typeName == typeTranslation) {
+            } else if (typeName == typeTranslation) {
                 parseMode = ParseMode::Translation;
-                std::string_view localeId {csvTable.row[1]};
-                std::string_view contextId {csvTable.row[2]};
+                std::string_view localeId{ csvTable.row[1] };
+                std::string_view contextId{ csvTable.row[2] };
                 currentLocMapping = &m_translations[localeId][contextId];
             }
-            auto it = std::find_if(mediaTypeMapping.cbegin(), mediaTypeMapping.cend(), [&typeName](const auto & pair) {return pair.second == typeName;});
+            auto it = std::find_if(mediaTypeMapping.cbegin(), mediaTypeMapping.cend(), [&typeName](const auto& pair) { return pair.second == typeName; });
             if (it != mediaTypeMapping.cend()) {
-                currentType = it->first;
+                currentType    = it->first;
                 currentMapping = &m_media[it->first];
-                parseMode = ParseMode::Media;
+                parseMode      = ParseMode::Media;
             }
             continue;
         }
@@ -320,33 +327,32 @@ bool ResourceLibrary::loadIndex(bool onlyMeta)
             throw std::runtime_error("Encountered undefined section in the index file");
 
         //tokens.erase(tokens.begin());
-        const std::string_view id{csvTable.row[1]};
+        const std::string_view id{ csvTable.row[1] };
         //tokens.erase(tokens.begin());
 
         if (parseMode == ParseMode::Media) {
-            ResourceMedia & res = (*currentMapping)[id];
-            res.type = currentType;
-            res.id = id;
-            res.subdir = ensureTrailingSlashOrEmpty(csvTable.row[2]);
-            res.mainFilename = csvTable.row[3];
-            res.root = m_mainStorage.m_rootDir;
+            ResourceMedia& res = (*currentMapping)[id];
+            res.type           = currentType;
+            res.id             = id;
+            res.subdir         = ensureTrailingSlashOrEmpty(csvTable.row[2]);
+            res.mainFilename   = csvTable.row[3];
+            res.root           = m_mainStorage.m_rootDir;
         } else if (parseMode == ParseMode::Translation) {
-            auto & values = (*currentLocMapping)[id].values;
-            for (size_t i = 2; i < csvTable.row.size();i++) {
+            auto& values = (*currentLocMapping)[id].values;
+            for (size_t i = 2; i < csvTable.row.size(); i++) {
                 values.push_back(csvTable.row[i]);
             }
         } else if (parseMode == ParseMode::Database) {
-            ResourceDatabase & res = m_databases[id];
-            res.id = id;
-            res.baseId = csvTable.row[2];
-            res.subdir = ensureTrailingSlashOrEmpty(csvTable.row[3]);
-            res.root = m_mainStorage.m_rootDir;
-            for (size_t i = 4; i < csvTable.row.size();i++) {
+            ResourceDatabase& res = m_databases[id];
+            res.id                = id;
+            res.baseId            = csvTable.row[2];
+            res.subdir            = ensureTrailingSlashOrEmpty(csvTable.row[3]);
+            res.root              = m_mainStorage.m_rootDir;
+            for (size_t i = 4; i < csvTable.row.size(); i++) {
                 res.files.push_back(csvTable.row[i]);
             }
-            for (auto & f : res.files)
-                res.filesFullPaths.push_back(std::string{res.root} + std::string{res.subdir} + std::string{f});
-
+            for (auto& f : res.files)
+                res.filesFullPaths.push_back(std::string{ res.root } + std::string{ res.subdir } + std::string{ f });
         }
     }
 
@@ -362,7 +368,7 @@ bool ResourceLibrary::saveIndex()
     if (!ofs)
         return false;
 
-    for (auto & dep : m_dependencies) {
+    for (auto& dep : m_dependencies) {
         ofs << dep.id << '\t';
         ofs << (dep.require == DepsRequire::Hard ? "hard" : "soft") << '\t';
         //ofs << (dep.merge == DepsMerge::Extend ? "extend" : (dep.merge == DepsMerge::Append ? "append" : "replace")) << '\t';
@@ -370,23 +376,23 @@ bool ResourceLibrary::saveIndex()
     }
     ofs << "\n";
     const std::string replaceStart = path2string(m_indexFolder);
-    for (const auto & pair1 : m_media) {
+    for (const auto& pair1 : m_media) {
         const ResourceMedia::Type type = pair1.first;
-        const std::string & name = mediaTypeMapping.at(type);
+        const std::string&        name = mediaTypeMapping.at(type);
         ofs << name << "\n";
-        for (const auto & pair2 : pair1.second) {
+        for (const auto& pair2 : pair1.second) {
             const ResourceMedia& desc = pair2.second;
             ofs << '\t' << desc.id << '\t' << desc.subdir << '\t' << desc.mainFilename << "\n";
         }
     }
-    for (const auto & pair1 : m_translations) {
-        const auto & localeId = pair1.first;
-        for (const auto & pair2 : pair1.second) {
-            const auto & contextId = pair2.first;
+    for (const auto& pair1 : m_translations) {
+        const auto& localeId = pair1.first;
+        for (const auto& pair2 : pair1.second) {
+            const auto& contextId = pair2.first;
             ofs << typeTranslation << '\t' << localeId << '\t' << contextId << "\n";
-            for (const auto & pair3 : pair2.second) {
+            for (const auto& pair3 : pair2.second) {
                 ofs << '\t' << pair3.first;
-                for (auto & val : pair3.second.values)
+                for (auto& val : pair3.second.values)
                     ofs << '\t' << val;
                 ofs << "\n";
             }
@@ -395,10 +401,10 @@ bool ResourceLibrary::saveIndex()
     if (!m_databases.empty()) {
         ofs << typeDatabase << "\n";
     }
-    for (const auto & pair1 : m_databases) {
+    for (const auto& pair1 : m_databases) {
         const ResourceDatabase& desc = pair1.second;
         ofs << '\t' << desc.id << '\t' << desc.baseId << '\t' << desc.subdir;
-        for (auto & f : desc.files) {
+        for (auto& f : desc.files) {
             ofs << '\t' << f;
         }
         ofs << "\n";
@@ -412,12 +418,12 @@ bool ResourceLibrary::mediaExists(ResourceMedia::Type type, const std::string& i
     if (itType == m_media.cend())
         return false;
 
-    auto & idMapping = itType->second;
-    auto it = idMapping.find(id);
+    auto& idMapping = itType->second;
+    auto  it        = idMapping.find(id);
     if (it == idMapping.cend())
         return false;
 
-    const auto & desc = it->second;
+    const auto&     desc = it->second;
     std::error_code ec;
     return std_fs::exists(std_path(desc.getFullPath()), ec);
 }
@@ -431,7 +437,7 @@ const ResourceMedia& ResourceLibrary::getMedia(ResourceMedia::Type type, const s
 
 void ResourceLibrary::registerResource(ResourceMedia desc)
 {
-    ResourceMedia newRec{desc.type, deepCopy(desc.id),  deepCopy(desc.subdir, true), deepCopy(desc.mainFilename), m_mainStorage.m_rootDir};
+    ResourceMedia newRec{ desc.type, deepCopy(desc.id), deepCopy(desc.subdir, true), deepCopy(desc.mainFilename), m_mainStorage.m_rootDir };
 
     m_media[desc.type][newRec.id] = newRec;
 }
@@ -446,12 +452,12 @@ std::vector<std::string> ResourceLibrary::getTranslationContextChildren(const st
         return {};
     std::vector<std::string> result;
     result.reserve(it2->second.size());
-    for (auto & p : it2->second)
-        result.push_back(std::string{p.first});
+    for (auto& p : it2->second)
+        result.push_back(std::string{ p.first });
     return result;
 }
 
-std::vector<std::string> ResourceLibrary::getTranslation(const std::string & localeId,  const std::string & contextId,  const std::string& id) const
+std::vector<std::string> ResourceLibrary::getTranslation(const std::string& localeId, const std::string& contextId, const std::string& id) const
 {
     auto it = m_translations.find(localeId);
     if (it == m_translations.cend())
@@ -467,16 +473,16 @@ std::vector<std::string> ResourceLibrary::getTranslation(const std::string & loc
 
 void ResourceLibrary::registerResource(ResourceTranslation desc)
 {
-
-    ResourceTranslation newRec{deepCopy(desc.localeId),  deepCopy(desc.contextId), deepCopy(desc.id), deepCopy(desc.values)};;
+    ResourceTranslation newRec{ deepCopy(desc.localeId), deepCopy(desc.contextId), deepCopy(desc.id), deepCopy(desc.values) };
+    ;
     m_translations[newRec.localeId][newRec.contextId][newRec.id] = newRec;
 }
 
 std::vector<std::string> ResourceLibrary::getDatabaseIds() const
 {
     std::vector<std::string> result;
-    for (auto & p : m_databases)
-        result.push_back(std::string{p.first});
+    for (auto& p : m_databases)
+        result.push_back(std::string{ p.first });
     return result;
 }
 
@@ -489,46 +495,45 @@ const ResourceDatabase& ResourceLibrary::getDatabase(const std::string& id) cons
 
 void ResourceLibrary::registerResource(ResourceDatabase desc)
 {
-    ResourceDatabase newRec{deepCopy(desc.id), deepCopy(desc.baseId),  deepCopy(desc.subdir, true), deepCopy(desc.files), m_mainStorage.m_rootDir, {}, {}};
+    ResourceDatabase newRec{ deepCopy(desc.id), deepCopy(desc.baseId), deepCopy(desc.subdir, true), deepCopy(desc.files), m_mainStorage.m_rootDir, {}, {} };
     newRec.filesFullPaths.reserve(desc.files.size());
-    for (auto & f : newRec.files)
-        newRec.filesFullPaths.push_back(std::string{newRec.root} + std::string{newRec.subdir} + std::string{f});
+    for (auto& f : newRec.files)
+        newRec.filesFullPaths.push_back(std::string{ newRec.root } + std::string{ newRec.subdir } + std::string{ f });
     m_databases[newRec.id] = newRec;
 }
-
 
 void ResourceLibrary::mergeWith(ResourceLibrary& newData)
 {
     ProfilerScope scope("mergeWith");
     m_storages.insert(m_storages.end(),
-        std::make_move_iterator(newData.m_storages.begin()),
-        std::make_move_iterator(newData.m_storages.end()));
+                      std::make_move_iterator(newData.m_storages.begin()),
+                      std::make_move_iterator(newData.m_storages.end()));
 
     newData.m_storages.erase(newData.m_storages.begin(), newData.m_storages.end());
 
     {
         ProfilerScope scope("media");
-        for (const auto & pair1 : newData.m_media) {
-            const ResourceMedia::Type type = pair1.first;
-            auto & idMapping = m_media[type];
-            for (const auto & pair2 : pair1.second) {
-                auto & resourceDesc = idMapping[pair2.first];
-                resourceDesc = pair2.second;
+        for (const auto& pair1 : newData.m_media) {
+            const ResourceMedia::Type type      = pair1.first;
+            auto&                     idMapping = m_media[type];
+            for (const auto& pair2 : pair1.second) {
+                auto& resourceDesc = idMapping[pair2.first];
+                resourceDesc       = pair2.second;
             }
         }
     }
     {
         ProfilerScope scope("translations");
-        for (const auto & pair1 : newData.m_translations) {
-            const auto & key1 = pair1.first;
-            auto & mapping1 = m_translations[key1];
-            for (const auto & pair2 : pair1.second) {
-                const auto & key2 = pair2.first;
-                auto & mapping2 = mapping1[key2];
-                for (const auto & pair3 : pair2.second) {
-                    const auto & key3 = pair3.first;
-                    ResourceTranslation & mapping3 = mapping2[key3];
-                    const ResourceTranslation & value = pair3.second;
+        for (const auto& pair1 : newData.m_translations) {
+            const auto& key1     = pair1.first;
+            auto&       mapping1 = m_translations[key1];
+            for (const auto& pair2 : pair1.second) {
+                const auto& key2     = pair2.first;
+                auto&       mapping2 = mapping1[key2];
+                for (const auto& pair3 : pair2.second) {
+                    const auto&                key3     = pair3.first;
+                    ResourceTranslation&       mapping3 = mapping2[key3];
+                    const ResourceTranslation& value    = pair3.second;
                     if (value.values.size() > 1 && value.values[0] == "+") {
                         if (mapping3.values.size() > 0)
                             mapping3.values.insert(mapping3.values.end(), value.values.cbegin() + 1, value.values.cend());
@@ -539,22 +544,22 @@ void ResourceLibrary::mergeWith(ResourceLibrary& newData)
             }
         }
     }
-    for (const auto & db : newData.m_databases) {
+    for (const auto& db : newData.m_databases) {
         m_databases[db.first] = db.second;
     }
 }
 
 std::string_view ResourceLibrary::deepCopy(const std::string_view& data, bool ensureSlash)
 {
-    const bool appendSlash = ensureSlash && !data.empty() && data[data.size()-1] != '/';
-    return makeNewString(std::string{data} + (appendSlash ? "/" : ""));
+    const bool appendSlash = ensureSlash && !data.empty() && data[data.size() - 1] != '/';
+    return makeNewString(std::string{ data } + (appendSlash ? "/" : ""));
 }
 
 std::vector<std::string_view> ResourceLibrary::deepCopy(const std::vector<std::string_view>& data)
 {
     std::vector<std::string_view> result;
     result.reserve(data.size());
-    for (auto &s : data)
+    for (auto& s : data)
         result.push_back(deepCopy(s));
     return result;
 }
@@ -562,32 +567,31 @@ std::vector<std::string_view> ResourceLibrary::deepCopy(const std::vector<std::s
 std::string_view ResourceLibrary::makeNewString(std::string data)
 {
     m_mainStorage.m_strStorage.push_back(std::move(data));
-    std::string & newRecord = m_mainStorage.m_strStorage.back();
+    std::string& newRecord = m_mainStorage.m_strStorage.back();
     return std::string_view(newRecord.data(), newRecord.size());
 }
 
 std::string_view ResourceLibrary::ensureTrailingSlashOrEmpty(std::string_view path)
 {
-    if (path.empty() || path[path.size()-1] == '/')
+    if (path.empty() || path[path.size() - 1] == '/')
         return path;
-    return makeNewString(std::string{path} + '/');
+    return makeNewString(std::string{ path } + '/');
 }
 
 void ResourceLibrary::ResourceLibraryPathList::topoSort()
 {
     Graph g;
-    for (const auto & rec : records) {
+    for (const auto& rec : records) {
         g.add(rec.id, rec.deps);
     }
     g.sort();
     std::vector<Record> recordsNew;
-    for (const auto & id : g.getSortResult()) {
-        auto it = std::find_if(records.cbegin(), records.cend(), [id](const auto & rec){return rec.id == id;});
+    for (const auto& id : g.getSortResult()) {
+        auto it = std::find_if(records.cbegin(), records.cend(), [id](const auto& rec) { return rec.id == id; });
         assert(it != records.cend());
         recordsNew.push_back(*it);
     }
     this->records = recordsNew;
 }
-
 
 }

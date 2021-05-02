@@ -14,6 +14,7 @@ RTTR_REGISTRATION
 {
     using namespace FreeHeroes::Core;
     using EventRecord = BattleReplayData::EventRecord;
+    // clang-format off
     registration::enumeration<EventRecord::Type>("BattleReplayDataEventRecordType")
         (
             value("guard"       ,   EventRecord::Type::Guard),
@@ -28,11 +29,12 @@ RTTR_REGISTRATION
          .property("attack"  , &EventRecord::attackParams)(policy::prop::as_reference_wrapper)
          .property("cast"    , &EventRecord::castParams  )(policy::prop::as_reference_wrapper)
          ;
+    // clang-format on
 }
 
 namespace FreeHeroes::Core {
-BattleReplayPlayer::BattleReplayPlayer(IBattleControl & sourceControl,
-                                       BattleReplayData & data)
+BattleReplayPlayer::BattleReplayPlayer(IBattleControl&   sourceControl,
+                                       BattleReplayData& data)
     : m_sourceControl(sourceControl)
     , m_data(data)
 {
@@ -71,23 +73,24 @@ bool BattleReplayPlayer::executeCurrent()
 
 bool BattleReplayPlayer::handleEvent(const BattleReplayData::EventRecord& rec)
 {
+    // clang-format off
     switch (rec.type) {
         case BattleReplayData::EventRecord::Type::Guard      : return m_sourceControl.doGuard();
         case BattleReplayData::EventRecord::Type::Wait       : return m_sourceControl.doWait();
         case BattleReplayData::EventRecord::Type::MoveAttack : return m_sourceControl.doMoveAttack(rec.moveParams, rec.attackParams);
         case BattleReplayData::EventRecord::Type::Cast       : return m_sourceControl.doCast(rec.castParams);
-    default:
-        break;
+        default:
+            break;
     }
+    // clang-format on
     throw std::runtime_error("Unknown event type");
     return false;
 }
 
-
 BattleReplayRecorder::BattleReplayRecorder(IBattleControl& sourceControl, BattleReplayData& data)
-    : m_sourceControl(sourceControl), m_data(data)
+    : m_sourceControl(sourceControl)
+    , m_data(data)
 {
-
 }
 
 BattleReplayRecorder::~BattleReplayRecorder() = default;
@@ -96,7 +99,7 @@ bool BattleReplayRecorder::doGuard()
 {
     auto res = m_sourceControl.doGuard();
     if (res)
-        m_data.m_records.push_back({BattleReplayData::EventRecord::Type::Guard, {}, {}, {}});
+        m_data.m_records.push_back({ BattleReplayData::EventRecord::Type::Guard, {}, {}, {} });
     return res;
 }
 
@@ -104,7 +107,7 @@ bool BattleReplayRecorder::doWait()
 {
     auto res = m_sourceControl.doWait();
     if (res)
-        m_data.m_records.push_back({BattleReplayData::EventRecord::Type::Wait, {}, {}, {}});
+        m_data.m_records.push_back({ BattleReplayData::EventRecord::Type::Wait, {}, {}, {} });
     return res;
 }
 
@@ -112,7 +115,7 @@ bool BattleReplayRecorder::doMoveAttack(BattlePlanMoveParams moveParams, BattleP
 {
     auto res = m_sourceControl.doMoveAttack(moveParams, attackParams);
     if (res)
-        m_data.m_records.push_back({BattleReplayData::EventRecord::Type::MoveAttack, moveParams, attackParams, {}});
+        m_data.m_records.push_back({ BattleReplayData::EventRecord::Type::MoveAttack, moveParams, attackParams, {} });
     return res;
 }
 
@@ -120,11 +123,8 @@ bool BattleReplayRecorder::doCast(BattlePlanCastParams planParams)
 {
     auto res = m_sourceControl.doCast(planParams);
     if (res)
-        m_data.m_records.push_back({BattleReplayData::EventRecord::Type::Cast, {}, {}, planParams});
+        m_data.m_records.push_back({ BattleReplayData::EventRecord::Type::Cast, {}, {}, planParams });
     return res;
 }
-
-
-
 
 }

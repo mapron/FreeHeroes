@@ -15,23 +15,23 @@ struct LibraryGameRules {
     struct RngRules {
         std::vector<BonusRatio> positiveChances;
         std::vector<BonusRatio> negativeChances;
-        int maxEffectiveValue = +3;
-        int minEffectiveValue = -3;
+        int                     maxEffectiveValue = +3;
+        int                     minEffectiveValue = -3;
     };
     RngRules luck;
     RngRules morale;
 
     struct PhysicalConst {
-        int maxEffectiveAttack  = 60;
-        int maxEffectiveDefense = 28;
-        BonusRatio attackValue  { 1, 20};
-        BonusRatio defenseValue { 1, 40};
+        int        maxEffectiveAttack  = 60;
+        int        maxEffectiveDefense = 28;
+        BonusRatio attackValue{ 1, 20 };
+        BonusRatio defenseValue{ 1, 40 };
     };
     PhysicalConst physicalConst;
 
     struct Limits {
-        int stacks = 7;
-        int maxHeroLevel = 75;  // @todo: not really applied for now.
+        int                 stacks       = 7;
+        int                 maxHeroLevel = 75; // @todo: not really applied for now.
         PrimaryAttackParams maxHeroAd;
         PrimaryMagicParams  maxHeroMagic;
         PrimaryAttackParams maxUnitAd;

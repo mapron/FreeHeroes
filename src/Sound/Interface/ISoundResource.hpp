@@ -7,14 +7,13 @@
 
 #include <memory>
 
-namespace FreeHeroes::Sound
-{
+namespace FreeHeroes::Sound {
 
 class ISoundResource {
 public:
     virtual ~ISoundResource() = default;
 
-    virtual void play   () const = 0;
+    virtual void play() const                          = 0;
     virtual void playFor(int expectedDurationMS) const = 0;
 };
 

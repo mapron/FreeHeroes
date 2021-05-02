@@ -11,6 +11,6 @@
 
 namespace FreeHeroes::Core {
 
-COREPLATFORM_EXPORT bool showFolderInFileManager(const std_path & path);
+COREPLATFORM_EXPORT bool showFolderInFileManager(const std_path& path);
 
 }

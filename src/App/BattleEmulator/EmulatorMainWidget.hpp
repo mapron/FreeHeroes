@@ -9,8 +9,7 @@
 
 #include <memory>
 
-namespace Ui
-{
+namespace Ui {
 class EmulatorMainWidget;
 }
 namespace FreeHeroes {
@@ -34,18 +33,17 @@ class IMusicBox;
 
 namespace BattleEmulator {
 class ReplayFileManager;
-class EmulatorMainWidget : public QWidget
-{
+class EmulatorMainWidget : public QWidget {
     Q_OBJECT
 public:
-    EmulatorMainWidget(Gui::IGraphicsLibrary & graphicsLibrary,
-                       Gui::ICursorLibrary & cursorLibrary,
-                       Core::IGameDatabase & gameDatabase,
-                       Core::IRandomGeneratorFactory & randomGeneratorFactory,
-                       Sound::IMusicBox & musicBox,
-                       Gui::IAppSettings & appSettings,
-                       Gui::LibraryModelsProvider & modelsProvider,
-                       QWidget * parent = nullptr);
+    EmulatorMainWidget(Gui::IGraphicsLibrary&         graphicsLibrary,
+                       Gui::ICursorLibrary&           cursorLibrary,
+                       Core::IGameDatabase&           gameDatabase,
+                       Core::IRandomGeneratorFactory& randomGeneratorFactory,
+                       Sound::IMusicBox&              musicBox,
+                       Gui::IAppSettings&             appSettings,
+                       Gui::LibraryModelsProvider&    modelsProvider,
+                       QWidget*                       parent = nullptr);
     ~EmulatorMainWidget();
 
     void startBattle();
@@ -72,24 +70,23 @@ private:
 private:
     std::unique_ptr<Ui::EmulatorMainWidget> m_ui;
 
-    Gui::IGraphicsLibrary & m_graphicsLibrary;
-    Gui::ICursorLibrary & m_cursorLibrary;
-    Core::IGameDatabase & m_gameDatabase;
-    Core::IRandomGeneratorFactory & m_randomGeneratorFactory;
-    Sound::IMusicBox & m_musicBox;
-    Gui::IAppSettings & m_appSettings;
-    Gui::LibraryModelsProvider & m_modelsProvider;
+    Gui::IGraphicsLibrary&         m_graphicsLibrary;
+    Gui::ICursorLibrary&           m_cursorLibrary;
+    Core::IGameDatabase&           m_gameDatabase;
+    Core::IRandomGeneratorFactory& m_randomGeneratorFactory;
+    Sound::IMusicBox&              m_musicBox;
+    Gui::IAppSettings&             m_appSettings;
+    Gui::LibraryModelsProvider&    m_modelsProvider;
 
-    std::unique_ptr<Core::AdventureState> m_adventureState;
-    std::unique_ptr<Core::AdventureState> m_adventureStatePrev;
+    std::unique_ptr<Core::AdventureState>   m_adventureState;
+    std::unique_ptr<Core::AdventureState>   m_adventureStatePrev;
     std::unique_ptr<Core::AdventureKingdom> m_adventureKingdom;
-
 
     std::unique_ptr<Gui::GuiAdventureArmy> m_guiAdventureArmyAtt;
     std::unique_ptr<Gui::GuiAdventureArmy> m_guiAdventureArmyDef;
 
     std::shared_ptr<Core::IRandomGenerator> m_uiRng;
-    std::unique_ptr<ReplayFileManager> m_replayManager;
+    std::unique_ptr<ReplayFileManager>      m_replayManager;
 };
 
 }

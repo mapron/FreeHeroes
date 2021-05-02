@@ -18,14 +18,15 @@ struct BattleArmy {
     BattleArmy() = default;
 
     explicit BattleArmy(AdventureArmyConstPtr adventure, BattleStack::Side side)
-        : adventure(adventure) {
-
+        : adventure(adventure)
+    {
         if (adventure->hasHero()) {
             battleHero = BattleHero(&adventure->hero);
         }
         squad = std::make_unique<BattleSquad>(&adventure->squad, battleHero.isValid() ? &battleHero : nullptr, side);
     }
-    void updateAdventure(AdventureArmy & adventure, const BattleSquad::LossInformation & opponentLoss, bool isWin) {
+    void updateAdventure(AdventureArmy& adventure, const BattleSquad::LossInformation& opponentLoss, bool isWin)
+    {
         squad->updateAdventure(adventure.squad);
 
         if (battleHero.isValid()) {
@@ -34,9 +35,10 @@ struct BattleArmy {
                 adventure.hero.experience += opponentLoss.totalHpLoss;
         }
     }
-    bool isEmpty() const noexcept { return squad->stacks.empty();}
-    bool hasAlive() const noexcept {
-        for (auto & stack : squad->stacks) {
+    bool isEmpty() const noexcept { return squad->stacks.empty(); }
+    bool hasAlive() const noexcept
+    {
+        for (auto& stack : squad->stacks) {
             if (stack.count > 0)
                 return true;
         }
@@ -45,7 +47,7 @@ struct BattleArmy {
     AdventureArmyConstPtr adventure = nullptr;
 
     std::unique_ptr<BattleSquad> squad;
-    BattleHero battleHero;
+    BattleHero                   battleHero;
 };
 
 }

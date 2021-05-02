@@ -15,10 +15,10 @@ namespace FreeHeroes::Core {
 class IGameDatabase;
 struct CORELOGIC_EXPORT AdventureReplayData {
     BattleReplayData m_bat;
-    AdventureState m_adv;
+    AdventureState   m_adv;
 
-    bool load(const std_path & filename, IGameDatabase & gameDatabase);
-    bool save(const std_path & filename) const;
+    bool load(const std_path& filename, IGameDatabase& gameDatabase);
+    bool save(const std_path& filename) const;
 };
 
 }

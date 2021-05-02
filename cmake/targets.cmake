@@ -6,6 +6,7 @@ set(FH_PREFIX FH)
 
 include(GenerateExportHeader)
 include(CheckCXXCompilerFlag)
+include(staticCheck)
 
 function(AddCompilerFlagIfSupported)
     foreach(instruction ${ARGN})
@@ -298,6 +299,10 @@ function(AddTarget)
                         RUNTIME DESTINATION bin
                         )
     endif()
+
+    if (AddTarget_FH)
+        AddStaticCheckTarget(TARGET_NAME ${name} SOURCE_DIR ${subdir})
+    endif()
 endfunction()
 
 function(AddTargetInterface)
@@ -359,4 +364,5 @@ function(AddTargetHeaderOnly)
     foreach (dep ${AddTarget_DEPS_FH})
         target_link_libraries(${name} PUBLIC ${FH_PREFIX}${dep})
     endforeach()
+    AddStaticCheckTarget(TARGET_NAME ${name} SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${AddTarget_INCLUDES})
 endfunction()

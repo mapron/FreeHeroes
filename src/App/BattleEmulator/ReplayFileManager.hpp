@@ -11,12 +11,12 @@
 
 namespace FreeHeroes::BattleEmulator {
 
-class ReplayFileManager : public QAbstractListModel
-{
+class ReplayFileManager : public QAbstractListModel {
     Core::std_path m_replayRoot;
+
 public:
     struct Record {
-        QString displayName;
+        QString        displayName;
         Core::std_path battleReplay;
     };
     std::vector<Record> m_records;
@@ -26,13 +26,13 @@ public:
     void clearAll();
 
     QString makeNewUniqueName() const;
-    Record makeNewUnique() const;
-    void add(const Record & rec);
-    void deleteFile(const Record & rec);
+    Record  makeNewUnique() const;
+    void    add(const Record& rec);
+    void    deleteFile(const Record& rec);
 
-    int rowCount(const QModelIndex &) const override;
-    QVariant data(const QModelIndex & index, int role) const override;
-    void renameCurrent(int index, QString s);
+    int      rowCount(const QModelIndex&) const override;
+    QVariant data(const QModelIndex& index, int role) const override;
+    void     renameCurrent(int index, QString s);
 };
 
 }

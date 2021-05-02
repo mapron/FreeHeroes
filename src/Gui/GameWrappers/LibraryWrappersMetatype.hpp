@@ -5,7 +5,6 @@
  */
 #pragma once
 
-
 #include "LibraryWrappers.hpp"
 
 #include "LibraryArtifact.hpp"

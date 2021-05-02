@@ -15,12 +15,13 @@
 
 #include "ResizePixmap.hpp"
 
-namespace FreeHeroes::Gui
-{
+namespace FreeHeroes::Gui {
 using namespace Core;
 
 HeroBagEditModel::HeroBagEditModel(ArtifactsModel* artifacts, Core::AdventureHeroMutablePtr source, QObject* parent)
-    : QAbstractTableModel(parent), m_artifacts(artifacts), m_source(source)
+    : QAbstractTableModel(parent)
+    , m_artifacts(artifacts)
+    , m_source(source)
 {
     m_filter = new ArtifactsFilterModel(this);
     m_filter->setSourceModel(m_artifacts);
@@ -31,11 +32,10 @@ HeroBagEditModel::~HeroBagEditModel() = default;
 
 void HeroBagEditModel::refresh()
 {
-    emit dataChanged(this->index(0,1), this->index(this->rowCount() - 1, 1));
+    emit dataChanged(this->index(0, 1), this->index(this->rowCount() - 1, 1));
 }
 
-
-int HeroBagEditModel::rowCount(const QModelIndex& ) const
+int HeroBagEditModel::rowCount(const QModelIndex&) const
 {
     return m_filter->rowCount();
 }
@@ -50,7 +50,7 @@ QVariant HeroBagEditModel::data(const QModelIndex& index, int role) const
     if (index.column() == 0) {
         QVariant srcData = m_filter->data(m_filter->index(index.row(), index.column()), role);
         if (role == Qt::DecorationRole) {
-            return resizePixmap( srcData.value<QPixmap>(), QSize(33, 33), true);
+            return resizePixmap(srcData.value<QPixmap>(), QSize(33, 33), true);
         }
         return srcData;
     }
@@ -70,7 +70,7 @@ QVariant HeroBagEditModel::data(const QModelIndex& index, int role) const
 
 Qt::ItemFlags HeroBagEditModel::flags(const QModelIndex& index) const
 {
-    Qt::ItemFlags f = Qt::ItemIsSelectable  | Qt::ItemIsEnabled;
+    Qt::ItemFlags f = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
     if (index.column() == 1)
         f |= Qt::ItemIsEditable;
     return f;
@@ -79,7 +79,6 @@ Qt::ItemFlags HeroBagEditModel::flags(const QModelIndex& index) const
 bool HeroBagEditModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     if (index.column() == 1 && role == Qt::EditRole) {
-
         auto art = m_filter->data(m_filter->index(index.row(), 0), ArtifactsModel::SourceObject).value<Core::LibraryArtifactConstPtr>();
 
         m_source->artifactsBag[art] = value.toInt();
@@ -92,7 +91,7 @@ bool HeroBagEditModel::setData(const QModelIndex& index, const QVariant& value, 
 QVariant HeroBagEditModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role == Qt::DisplayRole && orientation == Qt::Horizontal) {
-        return QStringList{tr("Artifact"), tr("Count")}.value(section);
+        return QStringList{ tr("Artifact"), tr("Count") }.value(section);
     }
     return QVariant();
 }
@@ -101,16 +100,18 @@ struct HeroWearingEditModel::Impl {
     struct SlotInfo {
         ArtifactSlotType compatSlot;
         ArtifactSlotType wearingSlot;
-        QString name;
-
+        QString          name;
     };
     QList<SlotInfo> m_slots;
 };
 
-
 HeroWearingEditModel::HeroWearingEditModel(ArtifactsModel* artifacts, Core::AdventureHeroMutablePtr source, QObject* parent)
-    : QAbstractTableModel(parent), m_artifacts(artifacts), m_source(source), m_impl(std::make_unique<Impl>())
+    : QAbstractTableModel(parent)
+    , m_artifacts(artifacts)
+    , m_source(source)
+    , m_impl(std::make_unique<Impl>())
 {
+    // clang-format off
     m_impl->m_slots = {
         {   ArtifactSlotType::Sword  ,  ArtifactSlotType::Sword   , tr("Sword:") },
         {   ArtifactSlotType::Shield ,  ArtifactSlotType::Shield  , tr("Shield:") },
@@ -130,20 +131,21 @@ HeroWearingEditModel::HeroWearingEditModel(ArtifactsModel* artifacts, Core::Adve
         {   ArtifactSlotType::BmAmmo ,  ArtifactSlotType::BmAmmo  , tr("Ammo cart:") },
         {   ArtifactSlotType::BmTent ,  ArtifactSlotType::BmTent  , tr("Tent:") },
     };
+    // clang-format on
 }
 
 HeroWearingEditModel::~HeroWearingEditModel() = default;
 void HeroWearingEditModel::refresh()
 {
-    emit dataChanged(this->index(0,1), this->index(this->rowCount() - 1, 1));
+    emit dataChanged(this->index(0, 1), this->index(this->rowCount() - 1, 1));
 }
 
-int HeroWearingEditModel::rowCount(const QModelIndex& ) const
+int HeroWearingEditModel::rowCount(const QModelIndex&) const
 {
     return m_impl->m_slots.size();
 }
 
-int HeroWearingEditModel::columnCount(const QModelIndex& ) const
+int HeroWearingEditModel::columnCount(const QModelIndex&) const
 {
     return 2;
 }
@@ -153,16 +155,12 @@ QVariant HeroWearingEditModel::data(const QModelIndex& index, int role) const
     if (index.column() == 0 && role == Qt::DisplayRole) {
         int r = index.row();
         return m_impl->m_slots.value(r).name;
-
     }
-    if (index.column() == 1 && (role == Qt::DisplayRole
-                                || role == Qt::DecorationRole
-                                || role == Qt::UserRole
-                                || role == Qt::UserRole + 1)) {
-        int r = index.row();
-        const auto & slotInfo = m_impl->m_slots[r];
-        auto wearingSlot = slotInfo.wearingSlot;
-        auto wearingArt = m_source->getArtifact(wearingSlot);
+    if (index.column() == 1 && (role == Qt::DisplayRole || role == Qt::DecorationRole || role == Qt::UserRole || role == Qt::UserRole + 1)) {
+        int         r           = index.row();
+        const auto& slotInfo    = m_impl->m_slots[r];
+        auto        wearingSlot = slotInfo.wearingSlot;
+        auto        wearingArt  = m_source->getArtifact(wearingSlot);
         if (role == Qt::DisplayRole) {
             if (!wearingArt)
                 return tr("-- Empty -- ");
@@ -170,8 +168,8 @@ QVariant HeroWearingEditModel::data(const QModelIndex& index, int role) const
         } else if (role == Qt::DecorationRole) {
             if (!wearingArt)
                 return QVariant();
-            return resizePixmap( m_artifacts->find(wearingArt)->getIconStash(), QSize(33, 33), true);
-        }  else if (role == Qt::UserRole) {
+            return resizePixmap(m_artifacts->find(wearingArt)->getIconStash(), QSize(33, 33), true);
+        } else if (role == Qt::UserRole) {
             return static_cast<int>(slotInfo.compatSlot);
         } else if (role == Qt::UserRole + 1) {
             return QVariant::fromValue(wearingArt);
@@ -182,7 +180,7 @@ QVariant HeroWearingEditModel::data(const QModelIndex& index, int role) const
 
 Qt::ItemFlags HeroWearingEditModel::flags(const QModelIndex& index) const
 {
-    Qt::ItemFlags f = Qt::ItemIsSelectable  | Qt::ItemIsEnabled;
+    Qt::ItemFlags f = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
     if (index.column() == 1)
         f |= Qt::ItemIsEditable;
     return f;
@@ -191,10 +189,10 @@ Qt::ItemFlags HeroWearingEditModel::flags(const QModelIndex& index) const
 bool HeroWearingEditModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     if (role == Qt::UserRole + 1 && index.column() == 1) {
-        int r = index.row();
-        const auto & slotInfo = m_impl->m_slots[r];
-        auto wearingSlot = slotInfo.wearingSlot;
-        auto wearingArt = value.value<LibraryArtifactConstPtr>();
+        int         r                      = index.row();
+        const auto& slotInfo               = m_impl->m_slots[r];
+        auto        wearingSlot            = slotInfo.wearingSlot;
+        auto        wearingArt             = value.value<LibraryArtifactConstPtr>();
         m_source->artifactsOn[wearingSlot] = wearingArt;
         emit dataChanged(index, index);
         return true;
@@ -205,24 +203,23 @@ bool HeroWearingEditModel::setData(const QModelIndex& index, const QVariant& val
 QVariant HeroWearingEditModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role == Qt::DisplayRole && orientation == Qt::Horizontal) {
-        return QStringList{tr("Slot"), tr("Artifact")}.value(section);
+        return QStringList{ tr("Slot"), tr("Artifact") }.value(section);
     }
     return QVariant();
 }
 
-
-
 HeroSkillsEditModel::HeroSkillsEditModel(SkillsModel* skillsModel, AdventureHeroMutablePtr source, QObject* parent)
-    : QAbstractTableModel(parent), m_skills(skillsModel), m_source(source)
+    : QAbstractTableModel(parent)
+    , m_skills(skillsModel)
+    , m_source(source)
 {
-
 }
 
 HeroSkillsEditModel::~HeroSkillsEditModel() = default;
 
 void HeroSkillsEditModel::refresh()
 {
-    emit dataChanged(this->index(0,0), this->index(this->rowCount() - 1, 1));
+    emit dataChanged(this->index(0, 0), this->index(this->rowCount() - 1, 1));
 }
 
 int HeroSkillsEditModel::rowCount(const QModelIndex& parent) const
@@ -237,10 +234,10 @@ int HeroSkillsEditModel::columnCount(const QModelIndex& parent) const
 
 QVariant HeroSkillsEditModel::data(const QModelIndex& index, int role) const
 {
-    int r = index.row();
-    int level = -1;
+    int                           r     = index.row();
+    int                           level = -1;
     LibrarySecondarySkillConstPtr skill = nullptr;
-    if (r < (int)m_source->secondarySkills.size()) {
+    if (r < (int) m_source->secondarySkills.size()) {
         skill = m_source->secondarySkills[r].skill;
         level = m_source->secondarySkills[r].level;
     }
@@ -277,14 +274,14 @@ QVariant HeroSkillsEditModel::data(const QModelIndex& index, int role) const
 
 Qt::ItemFlags HeroSkillsEditModel::flags(const QModelIndex& index) const
 {
-    Qt::ItemFlags f = Qt::ItemIsEnabled;
-    int r = index.row();
+    Qt::ItemFlags                 f     = Qt::ItemIsEnabled;
+    int                           r     = index.row();
     LibrarySecondarySkillConstPtr skill = nullptr;
-    if (r < (int)m_source->secondarySkills.size()) {
+    if (r < (int) m_source->secondarySkills.size()) {
         skill = m_source->secondarySkills[r].skill;
     }
     if (index.column() == 0 || (index.column() == 1 && skill))
-       f |= Qt::ItemIsEditable;
+        f |= Qt::ItemIsEditable;
     return f;
 }
 
@@ -292,8 +289,8 @@ bool HeroSkillsEditModel::setData(const QModelIndex& index, const QVariant& valu
 {
     if (index.column() == 0 && role == SkillsModel::SourceObject) {
         auto skill = value.value<LibrarySecondarySkillConstPtr>();
-        int r = index.row();
-        if (r < (int)m_source->secondarySkills.size()) {
+        int  r     = index.row();
+        if (r < (int) m_source->secondarySkills.size()) {
             m_source->secondarySkills[r].skill = skill;
             if (!skill) {
                 m_source->secondarySkills.erase(m_source->secondarySkills.begin() + r);
@@ -301,14 +298,14 @@ bool HeroSkillsEditModel::setData(const QModelIndex& index, const QVariant& valu
         } else if (skill) {
             if (m_source->getSkillLevel(skill) != -1) // @todo: the best is just exclude skill from select list.
                 return false;
-            m_source->secondarySkills.push_back({skill, 0});
+            m_source->secondarySkills.push_back({ skill, 0 });
         }
 
         refresh();
         return true;
     }
     if (index.column() == 1 && role == Qt::EditRole) {
-        int r = index.row();
+        int r                              = index.row();
         m_source->secondarySkills[r].level = value.toInt();
         emit dataChanged(this->index(index.row(), 0), index);
         return true;
@@ -319,13 +316,15 @@ bool HeroSkillsEditModel::setData(const QModelIndex& index, const QVariant& valu
 QVariant HeroSkillsEditModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role == Qt::DisplayRole && orientation == Qt::Horizontal) {
-        return QStringList{tr("Skill"), tr("Level")}.value(section);
+        return QStringList{ tr("Skill"), tr("Level") }.value(section);
     }
     return QVariant();
 }
 
 HeroSpellbookEditModel::HeroSpellbookEditModel(SpellsModel* spellsModel, AdventureHeroMutablePtr source, QObject* parent)
-    : QAbstractListModel(parent), m_spellsModel(spellsModel), m_source(source)
+    : QAbstractListModel(parent)
+    , m_spellsModel(spellsModel)
+    , m_source(source)
 {
     m_filter = new SpellsFilterModel(this);
     m_filter->setSourceModel(spellsModel);
@@ -334,10 +333,10 @@ HeroSpellbookEditModel::~HeroSpellbookEditModel() = default;
 
 void HeroSpellbookEditModel::refresh()
 {
-    emit dataChanged(this->index(0,0), this->index(this->rowCount() - 1, 0));
+    emit dataChanged(this->index(0, 0), this->index(this->rowCount() - 1, 0));
 }
 
-int HeroSpellbookEditModel::rowCount(const QModelIndex& ) const
+int HeroSpellbookEditModel::rowCount(const QModelIndex&) const
 {
     return m_filter->rowCount();
 }
@@ -350,14 +349,14 @@ QVariant HeroSpellbookEditModel::data(const QModelIndex& index, int role) const
     }
     QVariant filterData = m_filter->data(m_filter->index(index.row(), index.column()), role);
     if (role == Qt::DecorationRole && filterData.isValid()) {
-        return resizePixmap( filterData.value<QPixmap>(), QSize(33, 33), true);
+        return resizePixmap(filterData.value<QPixmap>(), QSize(33, 33), true);
     }
     return filterData;
 }
 
-Qt::ItemFlags HeroSpellbookEditModel::flags(const QModelIndex& ) const
+Qt::ItemFlags HeroSpellbookEditModel::flags(const QModelIndex&) const
 {
-    Qt::ItemFlags f =  Qt::ItemIsEnabled | Qt::ItemIsUserCheckable;
+    Qt::ItemFlags f = Qt::ItemIsEnabled | Qt::ItemIsUserCheckable;
     return f;
 }
 
@@ -376,6 +375,5 @@ bool HeroSpellbookEditModel::setData(const QModelIndex& index, const QVariant& v
     }
     return false;
 }
-
 
 }

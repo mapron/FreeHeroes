@@ -17,24 +17,23 @@ namespace FreeHeroes::Gui {
 class UnitsComboModel;
 class UnitsFilterModel;
 class GuiAdventureStack;
-class StackSelectorWidget : public QWidget
-{
+class StackSelectorWidget : public QWidget {
     Q_OBJECT
 public:
-    StackSelectorWidget(QWidget * parent = nullptr);
+    StackSelectorWidget(QWidget* parent = nullptr);
     ~StackSelectorWidget();
 
 public:
-    void setUnitsModel(QAbstractItemModel * unitRootModel);
-    void setSource(GuiAdventureStack * unit);
+    void setUnitsModel(QAbstractItemModel* unitRootModel);
+    void setSource(GuiAdventureStack* unit);
 
 private:
-    GuiAdventureStack * m_unit = nullptr;
-    UnitsComboModel * m_model = nullptr;
-    UnitsFilterModel * m_filter = nullptr;
+    GuiAdventureStack* m_unit   = nullptr;
+    UnitsComboModel*   m_model  = nullptr;
+    UnitsFilterModel*  m_filter = nullptr;
 
-    QComboBox * m_selectId = nullptr;
-    QSpinBox * m_count = nullptr;
+    QComboBox* m_selectId = nullptr;
+    QSpinBox*  m_count    = nullptr;
 };
 
 }

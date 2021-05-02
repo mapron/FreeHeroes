@@ -12,6 +12,7 @@
 
 #include <rttr/registration>
 
+// clang-format off
 using namespace rttr;
 
 #define ref policy::prop::as_reference_wrapper

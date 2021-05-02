@@ -16,25 +16,23 @@
 #include <unordered_map>
 
 namespace FreeHeroes::Gui {
-using namespace  Core;
+using namespace Core;
 
-
-template <typename WrapperType>
+template<typename WrapperType>
 struct AbstractGuiWrapperListModel<WrapperType>::Impl {
     using SrcTypePtr = typename AbstractGuiWrapperListModel<WrapperType>::SrcTypePtr;
-    std::deque<WrapperType> m_records;
-    std::unordered_map<SrcTypePtr, size_t> m_index;
+    std::deque<WrapperType>                 m_records;
+    std::unordered_map<SrcTypePtr, size_t>  m_index;
     std::unordered_map<std::string, size_t> m_indexById;
 };
 
 template<typename T>
-AbstractGuiWrapperListModel<T>::AbstractGuiWrapperListModel(Sound::IMusicBox & musicBox, IGraphicsLibrary & graphicsLibrary, QObject* parent)
+AbstractGuiWrapperListModel<T>::AbstractGuiWrapperListModel(Sound::IMusicBox& musicBox, IGraphicsLibrary& graphicsLibrary, QObject* parent)
     : QAbstractListModel(parent)
     , m_impl(std::make_unique<Impl>())
     , m_graphicsLibrary(graphicsLibrary)
     , m_musicBox(musicBox)
 {
-
 }
 template<typename T>
 AbstractGuiWrapperListModel<T>::~AbstractGuiWrapperListModel() = default;
@@ -53,12 +51,12 @@ template<typename WrapperType>
 void AbstractGuiWrapperListModel<WrapperType>::addRecord(SrcTypePtr record)
 {
     m_impl->m_records.emplace_back(m_musicBox, m_graphicsLibrary, record);
-    m_impl->m_index[record] = m_impl->m_records.size() - 1;
+    m_impl->m_index[record]         = m_impl->m_records.size() - 1;
     m_impl->m_indexById[record->id] = m_impl->m_records.size() - 1;
 }
 template<typename WrapperType>
 typename AbstractGuiWrapperListModel<WrapperType>::WrapperTypePtr
-    AbstractGuiWrapperListModel<WrapperType>::find(SrcTypePtr record) const
+AbstractGuiWrapperListModel<WrapperType>::find(SrcTypePtr record) const
 {
     auto it = m_impl->m_index.find(record);
     if (it == m_impl->m_index.cend())
@@ -69,7 +67,7 @@ typename AbstractGuiWrapperListModel<WrapperType>::WrapperTypePtr
 
 template<typename WrapperType>
 typename AbstractGuiWrapperListModel<WrapperType>::WrapperTypePtr
-    AbstractGuiWrapperListModel<WrapperType>::find(const std::string & id) const
+AbstractGuiWrapperListModel<WrapperType>::find(const std::string& id) const
 {
     auto it = m_impl->m_indexById.find(id);
     if (it == m_impl->m_indexById.cend())
@@ -98,30 +96,29 @@ QVariant AbstractGuiWrapperListModel<WrapperType>::data(const QModelIndex& index
 }
 
 template<typename WrapperType>
-int AbstractGuiWrapperListModel<WrapperType>::rowCount(const QModelIndex& ) const
+int AbstractGuiWrapperListModel<WrapperType>::rowCount(const QModelIndex&) const
 {
     return m_impl->m_records.size();
 }
 
-
-const std::string ArtifactsModel::s_catapult = "sod.artifact.battleMachine.catapult";
+const std::string ArtifactsModel::s_catapult  = "sod.artifact.battleMachine.catapult";
 const std::string ArtifactsModel::s_spellbook = "sod.artifact.special.spellbook";
 
 ArtifactsModel::ArtifactsModel(Sound::IMusicBox& musicBox, IGraphicsLibrary& graphicsLibrary, QObject* parent)
     : Base(musicBox, graphicsLibrary, parent)
 {
-     m_lock = graphicsLibrary.getPixmapByKey({"sod.sprites.artifactsInventory", 0 , 145});
+    m_lock = graphicsLibrary.getPixmapByKey({ "sod.sprites.artifactsInventory", 0, 145 });
 }
 
-QVariant ArtifactsModel::data(const QModelIndex& index, int role) const {
-    if (role == Qt::DecorationRole || role == IconSmall || role == IconMedium  || role == IconLarge) {
-        auto artifact = Base::data(index, GuiObject).value<GuiArtifactConstPtr>();
-        QPixmap img = artifact->getIconStash();
+QVariant ArtifactsModel::data(const QModelIndex& index, int role) const
+{
+    if (role == Qt::DecorationRole || role == IconSmall || role == IconMedium || role == IconLarge) {
+        auto    artifact = Base::data(index, GuiObject).value<GuiArtifactConstPtr>();
+        QPixmap img      = artifact->getIconStash();
         return QVariant(img);
     }
     return Base::data(index, role);
 }
-
 
 ArtifactsFilterModel::ArtifactsFilterModel(QObject* parent)
     : QSortFilterProxyModel(parent)
@@ -135,11 +132,10 @@ void ArtifactsFilterModel::setFilterIndex(int filter)
     invalidateFilter();
 }
 
-
 bool ArtifactsFilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
 {
     QModelIndex index0 = sourceModel()->index(sourceRow, 0, sourceParent);
-    auto rec = index0.data(ArtifactsModel::SourceObject).value<ArtifactsModel::SrcTypePtr>();
+    auto        rec    = index0.data(ArtifactsModel::SourceObject).value<ArtifactsModel::SrcTypePtr>();
     if (!rec)
         return false;
 
@@ -160,12 +156,12 @@ bool ArtifactsFilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& so
 QVariant UnitsModel::data(const QModelIndex& index, int role) const
 {
     if (role == Qt::DecorationRole || role == IconSmall) {
-        auto unit = Base::data(index, GuiObject).value<GuiUnitConstPtr>();
-        QPixmap img = unit->getPortraitSmall();
+        auto    unit = Base::data(index, GuiObject).value<GuiUnitConstPtr>();
+        QPixmap img  = unit->getPortraitSmall();
         return QVariant(img);
     } else if (role == IconMedium || role == IconLarge) {
-        auto unit = Base::data(index, GuiObject).value<GuiUnitConstPtr>();
-        QPixmap img = unit->getPortraitLarge();
+        auto    unit = Base::data(index, GuiObject).value<GuiUnitConstPtr>();
+        QPixmap img  = unit->getPortraitLarge();
         return QVariant(img);
     }
 
@@ -175,13 +171,12 @@ QVariant UnitsModel::data(const QModelIndex& index, int role) const
 UnitsFilterModel::UnitsFilterModel(QObject* parent)
     : QSortFilterProxyModel(parent)
 {
-
 }
 
 bool UnitsFilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
 {
     QModelIndex index0 = sourceModel()->index(sourceRow, 0, sourceParent);
-    auto rec = index0.data(UnitsModel::SourceObject).value<UnitsModel::SrcTypePtr>();
+    auto        rec    = index0.data(UnitsModel::SourceObject).value<UnitsModel::SrcTypePtr>();
     if (!rec)
         return false;
 
@@ -194,12 +189,12 @@ bool UnitsFilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& source
 QVariant HeroesModel::data(const QModelIndex& index, int role) const
 {
     if (role == Qt::DecorationRole || role == IconSmall) {
-        auto hero = Base::data(index, GuiObject).value<GuiHeroConstPtr>();
-        QPixmap img = hero->getPortraitSmall();
+        auto    hero = Base::data(index, GuiObject).value<GuiHeroConstPtr>();
+        QPixmap img  = hero->getPortraitSmall();
         return QVariant(img);
     } else if (role == IconMedium || role == IconLarge) {
-        auto hero = Base::data(index, GuiObject).value<GuiHeroConstPtr>();
-        QPixmap img = hero->getPortraitLarge();
+        auto    hero = Base::data(index, GuiObject).value<GuiHeroConstPtr>();
+        QPixmap img  = hero->getPortraitLarge();
         return QVariant(img);
     }
 
@@ -209,8 +204,8 @@ QVariant HeroesModel::data(const QModelIndex& index, int role) const
 QVariant SkillsModel::data(const QModelIndex& index, int role) const
 {
     if (role == Qt::DecorationRole || role == IconSmall) {
-        auto skill = Base::data(index, GuiObject).value<GuiSkillConstPtr>();
-        QPixmap img = skill->getIconSmall(2);
+        auto    skill = Base::data(index, GuiObject).value<GuiSkillConstPtr>();
+        QPixmap img   = skill->getIconSmall(2);
         return QVariant(img);
     }
 
@@ -220,8 +215,8 @@ QVariant SkillsModel::data(const QModelIndex& index, int role) const
 QVariant SpellsModel::data(const QModelIndex& index, int role) const
 {
     if (role == Qt::DecorationRole || role == IconSmall) {
-        auto spell = Base::data(index, GuiObject).value<GuiSpellConstPtr>();
-        QPixmap img = spell->getIconInt();
+        auto    spell = Base::data(index, GuiObject).value<GuiSpellConstPtr>();
+        QPixmap img   = spell->getIconInt();
         return QVariant(img);
     }
 
@@ -231,13 +226,12 @@ QVariant SpellsModel::data(const QModelIndex& index, int role) const
 SpellsFilterModel::SpellsFilterModel(QObject* parent)
     : QSortFilterProxyModel(parent)
 {
-
 }
 
 bool SpellsFilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
 {
     QModelIndex index0 = sourceModel()->index(sourceRow, 0, sourceParent);
-    auto spell = index0.data(SpellsModel::SourceObject).value<SpellsModel::SrcTypePtr>();
+    auto        spell  = index0.data(SpellsModel::SourceObject).value<SpellsModel::SrcTypePtr>();
     if (!spell)
         return false;
 
@@ -256,8 +250,8 @@ FactionsFilterModel::FactionsFilterModel(QObject* parent)
 
 bool FactionsFilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
 {
-    QModelIndex index0 = sourceModel()->index(sourceRow, 0, sourceParent);
-    auto faction = index0.data(FactionsModel::SourceObject).value<FactionsModel::SrcTypePtr>();
+    QModelIndex index0  = sourceModel()->index(sourceRow, 0, sourceParent);
+    auto        faction = index0.data(FactionsModel::SourceObject).value<FactionsModel::SrcTypePtr>();
     if (!faction)
         return false;
 
@@ -267,8 +261,8 @@ bool FactionsFilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& sou
 QVariant TerrainsModel::data(const QModelIndex& index, int role) const
 {
     if (role == Qt::DecorationRole || role == IconSmall) {
-        auto terrain = Base::data(index, GuiObject).value<GuiTerrainConstPtr>();
-        QPixmap img = terrain->getIcon();
+        auto    terrain = Base::data(index, GuiObject).value<GuiTerrainConstPtr>();
+        QPixmap img     = terrain->getIcon();
         return QVariant(img);
     }
     return Base::data(index, role);
@@ -281,8 +275,8 @@ TerrainsFilterModel::TerrainsFilterModel(QObject* parent)
 
 bool TerrainsFilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
 {
-    QModelIndex index0 = sourceModel()->index(sourceRow, 0, sourceParent);
-    auto terrain = index0.data(TerrainsModel::SourceObject).value<TerrainsModel::SrcTypePtr>();
+    QModelIndex index0  = sourceModel()->index(sourceRow, 0, sourceParent);
+    auto        terrain = index0.data(TerrainsModel::SourceObject).value<TerrainsModel::SrcTypePtr>();
     if (!terrain)
         return false;
 
@@ -292,8 +286,8 @@ bool TerrainsFilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& sou
 QVariant MapObjectsModel::data(const QModelIndex& index, int role) const
 {
     if (role == Qt::DecorationRole || role == IconSmall) {
-        auto mapObject = Base::data(index, GuiObject).value<GuiMapObjectConstPtr>();
-        QPixmap img = mapObject->getIcon();
+        auto    mapObject = Base::data(index, GuiObject).value<GuiMapObjectConstPtr>();
+        QPixmap img       = mapObject->getIcon();
         return QVariant(img);
     }
     if (role == VaraintNames) {
@@ -303,44 +297,44 @@ QVariant MapObjectsModel::data(const QModelIndex& index, int role) const
     return Base::data(index, role);
 }
 
-LibraryModelsProvider::LibraryModelsProvider(IGameDatabase& gameDatabase,
+LibraryModelsProvider::LibraryModelsProvider(IGameDatabase&    gameDatabase,
                                              Sound::IMusicBox& musicBox,
                                              IGraphicsLibrary& graphicsLibrary,
-                                             QObject* parent)
+                                             QObject*          parent)
     : QObject(parent)
 {
-    m_artifacts = new ArtifactsModel(musicBox, graphicsLibrary, this);
-    m_units = new UnitsModel(musicBox, graphicsLibrary, this);
-    m_heroes = new HeroesModel(musicBox, graphicsLibrary, this);
-    m_skills = new SkillsModel(musicBox, graphicsLibrary, this);
-    m_spells = new SpellsModel(musicBox, graphicsLibrary, this);
-    m_factions = new FactionsModel(musicBox, graphicsLibrary, this);
-    m_terrains = new TerrainsModel(musicBox, graphicsLibrary, this);
+    m_artifacts  = new ArtifactsModel(musicBox, graphicsLibrary, this);
+    m_units      = new UnitsModel(musicBox, graphicsLibrary, this);
+    m_heroes     = new HeroesModel(musicBox, graphicsLibrary, this);
+    m_skills     = new SkillsModel(musicBox, graphicsLibrary, this);
+    m_spells     = new SpellsModel(musicBox, graphicsLibrary, this);
+    m_factions   = new FactionsModel(musicBox, graphicsLibrary, this);
+    m_terrains   = new TerrainsModel(musicBox, graphicsLibrary, this);
     m_mapObjects = new MapObjectsModel(musicBox, graphicsLibrary, this);
-    m_uiCommon = new UiCommonModel(musicBox, graphicsLibrary, this);
+    m_uiCommon   = new UiCommonModel(musicBox, graphicsLibrary, this);
 
-    for (auto * rec : gameDatabase.artifacts()->records())
+    for (auto* rec : gameDatabase.artifacts()->records())
         m_artifacts->addRecord(rec);
-    for (auto * rec : gameDatabase.units()->records())
+    for (auto* rec : gameDatabase.units()->records())
         m_units->addRecord(rec);
-    for (auto * rec : gameDatabase.heroes()->records())
+    for (auto* rec : gameDatabase.heroes()->records())
         m_heroes->addRecord(rec);
-    for (auto * rec : gameDatabase.secSkills()->records())
+    for (auto* rec : gameDatabase.secSkills()->records())
         m_skills->addRecord(rec);
-    for (auto * rec : gameDatabase.spells()->records())
+    for (auto* rec : gameDatabase.spells()->records())
         m_spells->addRecord(rec);
-    for (auto * rec : gameDatabase.factions()->records())
+    for (auto* rec : gameDatabase.factions()->records())
         m_factions->addRecord(rec);
-    for (auto * rec : gameDatabase.terrains()->records())
+    for (auto* rec : gameDatabase.terrains()->records())
         m_terrains->addRecord(rec);
-    for (auto * rec : gameDatabase.mapObjects()->records())
+    for (auto* rec : gameDatabase.mapObjects()->records())
         m_mapObjects->addRecord(rec);
 
     QMap<QString, QPixmap> resourceIcons;
-    for (auto * res : gameDatabase.resources()->records())  {
-        auto pix = graphicsLibrary.getPixmap(res->presentationParams.icon)->get();
-        m_uiCommon->resourceIcons[QString::fromStdString(res->id)] = pix;
-        m_uiCommon->resourceIconsSmall[QString::fromStdString(res->id)] = resizePixmap(pix, {24,24});
+    for (auto* res : gameDatabase.resources()->records()) {
+        auto pix                                                        = graphicsLibrary.getPixmap(res->presentationParams.icon)->get();
+        m_uiCommon->resourceIcons[QString::fromStdString(res->id)]      = pix;
+        m_uiCommon->resourceIconsSmall[QString::fromStdString(res->id)] = resizePixmap(pix, { 24, 24 });
     }
 }
 

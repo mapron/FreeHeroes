@@ -13,55 +13,101 @@ namespace FreeHeroes::Sound {
 
 class IMusicBox {
 public:
+    // clang-format off
     enum class MusicSet { None, Intro, Battle, Win, Lose };
     enum class EffectSet { None, Click , Battle};
+    // clang-format on
 
     struct EffectSettings {
         std::string resourceId;
-        EffectSet commonEffect = EffectSet::None;
+        EffectSet   commonEffect = EffectSet::None;
 
-        bool loopAround = false;
-        int fadeIn = 0;
-        int fadeOut = 0;
-        int expectedDuration = 0;
-        int delay = 0;
-        EffectSettings(const std::string & id) : resourceId(id) {}
-        EffectSettings(EffectSet e) : commonEffect(e) {}
+        bool loopAround       = false;
+        int  fadeIn           = 0;
+        int  fadeOut          = 0;
+        int  expectedDuration = 0;
+        int  delay            = 0;
+        EffectSettings(const std::string& id)
+            : resourceId(id)
+        {}
+        EffectSettings(EffectSet e)
+            : commonEffect(e)
+        {}
 
-        EffectSettings& setLoopAround(bool loopAround = true) { this->loopAround = loopAround; return *this; }
-        EffectSettings& setFadeIn(int fadeIn) { this->fadeIn = fadeIn; return *this; }
-        EffectSettings& setFadeOut(int fadeOut) { this->fadeOut = fadeOut; return *this; }
-        EffectSettings& setExpectedDuration(int expectedDuration) { this->expectedDuration = expectedDuration; return *this; }
-        EffectSettings& setDelay(int delay) { this->delay = delay; return *this; }
+        EffectSettings& setLoopAround(bool loopAround = true)
+        {
+            this->loopAround = loopAround;
+            return *this;
+        }
+        EffectSettings& setFadeIn(int fadeIn)
+        {
+            this->fadeIn = fadeIn;
+            return *this;
+        }
+        EffectSettings& setFadeOut(int fadeOut)
+        {
+            this->fadeOut = fadeOut;
+            return *this;
+        }
+        EffectSettings& setExpectedDuration(int expectedDuration)
+        {
+            this->expectedDuration = expectedDuration;
+            return *this;
+        }
+        EffectSettings& setDelay(int delay)
+        {
+            this->delay = delay;
+            return *this;
+        }
     };
 
     struct MusicSettings {
-        int delayMs = 0;
-        int fadeInMs = 2000;
-        int fadeOutMs = 2000;
-        bool loopAround = true;
-        MusicSet mSet = MusicSet::None;
+        int         delayMs    = 0;
+        int         fadeInMs   = 2000;
+        int         fadeOutMs  = 2000;
+        bool        loopAround = true;
+        MusicSet    mSet       = MusicSet::None;
         std::string resourceId;
-        MusicSettings(const std::string & id) : resourceId(id) {}
-        MusicSettings(MusicSet m) : mSet(m) {}
+        MusicSettings(const std::string& id)
+            : resourceId(id)
+        {}
+        MusicSettings(MusicSet m)
+            : mSet(m)
+        {}
 
-        MusicSettings& setLoopAround(bool loopAround = true) { this->loopAround = loopAround; return *this; }
-        MusicSettings& setFadeIn(int fadeIn) { this->fadeInMs = fadeIn; return *this; }
-        MusicSettings& setFadeOut(int fadeOut) { this->fadeOutMs = fadeOut; return *this; }
-        MusicSettings& setDelay(int delay) { this->delayMs = delay; return *this; }
+        MusicSettings& setLoopAround(bool loopAround = true)
+        {
+            this->loopAround = loopAround;
+            return *this;
+        }
+        MusicSettings& setFadeIn(int fadeIn)
+        {
+            this->fadeInMs = fadeIn;
+            return *this;
+        }
+        MusicSettings& setFadeOut(int fadeOut)
+        {
+            this->fadeOutMs = fadeOut;
+            return *this;
+        }
+        MusicSettings& setDelay(int delay)
+        {
+            this->delayMs = delay;
+            return *this;
+        }
     };
 
 public:
     virtual ~IMusicBox() = default;
 
-    virtual ISoundResourcePtr musicPrepare(const MusicSettings & music) = 0;
+    virtual ISoundResourcePtr musicPrepare(const MusicSettings& music) = 0;
 
-    virtual ISoundResourcePtr effectPrepare(const EffectSettings & effect) = 0;
+    virtual ISoundResourcePtr effectPrepare(const EffectSettings& effect) = 0;
 
-    virtual void setMusicVolume(int percent) = 0;
+    virtual void setMusicVolume(int percent)   = 0;
     virtual void setEffectsVolume(int percent) = 0;
 
-    virtual int getMusicVolume() const noexcept = 0;
+    virtual int getMusicVolume() const noexcept   = 0;
     virtual int getEffectsVolume() const noexcept = 0;
 };
 

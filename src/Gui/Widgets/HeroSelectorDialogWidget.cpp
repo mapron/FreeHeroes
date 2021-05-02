@@ -5,7 +5,6 @@
  */
 #include "HeroSelectorDialogWidget.hpp"
 
-
 namespace FreeHeroes::Gui {
 using namespace Core;
 
@@ -15,6 +14,5 @@ HeroSelectorDialogWidget::HeroSelectorDialogWidget(QWidget* parent)
 }
 
 HeroSelectorDialogWidget::~HeroSelectorDialogWidget() = default;
-
 
 }

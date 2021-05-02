@@ -11,11 +11,9 @@
 
 #include <ctime>
 
-namespace FreeHeroes
-{
+namespace FreeHeroes {
 /// Class describes time moment or time interval.
-class COREPLATFORM_EXPORT ChronoPoint
-{
+class COREPLATFORM_EXPORT ChronoPoint {
     int64_t m_us; //!< microseconds
 
 public:
@@ -30,7 +28,7 @@ public:
     ChronoPoint(double seconds);
 
     /// Checks timempoint is valid.
-    inline operator bool () const { return m_us != 0; }
+    inline operator bool() const { return m_us != 0; }
 
     /// Floored number of seconds in ChronoPoint.
     inline int64_t GetSeconds() const { return m_us / ONE_SECOND; }
@@ -48,71 +46,80 @@ public:
     std::tm GetTm() const;
 
     /// Get time struct
-    void SetTm(const std::tm & t, int ms = 0);
+    void SetTm(const std::tm& t, int ms = 0);
 
     /// Create ChronoPoint from hms
     void SetTime(int hour, int minute, int second, int ms = 0);
 
     /// Convert to ChronoPoint using system local time (for user interaction).
-    ChronoPoint& ToLocal(); // Modify self
+    ChronoPoint& ToLocal();   // Modify self
     ChronoPoint& FromLocal(); // Modify self
 
     /// Returns elapsed time from current value.
-    inline ChronoPoint GetElapsedTime (const ChronoPoint& to = ChronoPoint(true)) const {
+    inline ChronoPoint GetElapsedTime(const ChronoPoint& to = ChronoPoint(true)) const
+    {
         return (to - *this);
     }
 
     /// Arithmetics
-    inline ChronoPoint operator - (const ChronoPoint& another) const
+    inline ChronoPoint operator-(const ChronoPoint& another) const
     {
         ChronoPoint ret = *this;
         ret.m_us -= another.m_us;
         return ret;
     }
-    inline ChronoPoint operator + (const ChronoPoint& another) const
+    inline ChronoPoint operator+(const ChronoPoint& another) const
     {
         ChronoPoint ret = *this;
         ret.m_us += another.m_us;
         return ret;
     }
-    inline ChronoPoint operator * (int64_t mul) const
+    inline ChronoPoint operator*(int64_t mul) const
     {
         ChronoPoint ret = *this;
         ret.m_us *= mul;
         return ret;
     }
-    inline ChronoPoint operator / (int64_t divd) const
+    inline ChronoPoint operator/(int64_t divd) const
     {
         ChronoPoint ret = *this;
         ret.m_us /= divd;
         return ret;
     }
 
-    inline bool operator >= (const ChronoPoint& another) const {
+    inline bool operator>=(const ChronoPoint& another) const
+    {
         return this->m_us >= another.m_us;
     }
-    inline bool operator <= (const ChronoPoint& another) const {
+    inline bool operator<=(const ChronoPoint& another) const
+    {
         return this->m_us <= another.m_us;
     }
-    inline bool operator > (const ChronoPoint& another) const {
+    inline bool operator>(const ChronoPoint& another) const
+    {
         return this->m_us > another.m_us;
     }
-    inline bool operator < (const ChronoPoint& another) const {
+    inline bool operator<(const ChronoPoint& another) const
+    {
         return this->m_us < another.m_us;
     }
-    inline ChronoPoint& operator += (const ChronoPoint& another) {
+    inline ChronoPoint& operator+=(const ChronoPoint& another)
+    {
         this->m_us += another.m_us;
         return *this;
     }
-    inline ChronoPoint& operator -= (const ChronoPoint& another) {
+    inline ChronoPoint& operator-=(const ChronoPoint& another)
+    {
         this->m_us -= another.m_us;
         return *this;
     }
-    inline ChronoPoint& operator *= (int64_t mul) {
+    inline ChronoPoint& operator*=(int64_t mul)
+    {
         m_us /= mul;
         return *this;
     }
-    inline ChronoPoint& operator /= (int64_t divd) {
+    inline ChronoPoint& operator/=(int64_t divd)
+    {
         m_us /= divd;
         return *this;
     }

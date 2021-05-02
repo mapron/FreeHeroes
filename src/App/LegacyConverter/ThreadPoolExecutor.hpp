@@ -13,20 +13,18 @@
 #include <mutex>
 #include <chrono>
 
-
 namespace FreeHeroes::Conversion {
 
-class ThreadPoolExecutor : public QObject
-{
+class ThreadPoolExecutor : public QObject {
     Q_OBJECT
 public:
     using Task = std::function<void()>;
 
 public:
-    ThreadPoolExecutor(QObject * parent = nullptr);
+    ThreadPoolExecutor(QObject* parent = nullptr);
     ~ThreadPoolExecutor();
 
-    int getQueueSize() const;
+    int  getQueueSize() const;
     void add(Task task);
     void start(std::chrono::milliseconds progressInterval);
 
@@ -44,15 +42,14 @@ private:
     void onThreadFinished();
 
 private:
-    std::deque<Task> m_queue;
-    std::mutex m_queueMutex;
-    std::mutex m_threadsMutex;
-    std::vector<std::thread> m_threads;
-    std::chrono::milliseconds m_nextSendTime {0};
-    std::chrono::milliseconds m_progressInterval {0};
-    int m_done = 0;
-    size_t m_threadsLeft {0};
+    std::deque<Task>          m_queue;
+    std::mutex                m_queueMutex;
+    std::mutex                m_threadsMutex;
+    std::vector<std::thread>  m_threads;
+    std::chrono::milliseconds m_nextSendTime{ 0 };
+    std::chrono::milliseconds m_progressInterval{ 0 };
+    int                       m_done = 0;
+    size_t                    m_threadsLeft{ 0 };
 };
-
 
 }

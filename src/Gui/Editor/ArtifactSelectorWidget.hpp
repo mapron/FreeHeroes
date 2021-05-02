@@ -20,37 +20,36 @@ using LibraryArtifactConstPtr = const LibraryArtifact*;
 namespace FreeHeroes::Gui {
 class ArtifactsFilterModel;
 class ArtifactsComboModel;
-class ArtifactSelectorWidget : public ResizeableComboBox
-{
+class ArtifactSelectorWidget : public ResizeableComboBox {
     Q_OBJECT
 public:
-    ArtifactSelectorWidget(QWidget * parent = nullptr);
+    ArtifactSelectorWidget(QWidget* parent = nullptr);
     ~ArtifactSelectorWidget();
 
-
     Core::LibraryArtifactConstPtr getArtifact() const;
-    void setArtifact(Core::LibraryArtifactConstPtr artifact);
+    void                          setArtifact(Core::LibraryArtifactConstPtr artifact);
 
-    void setArtifactsModel(QAbstractItemModel * rootArtifactsModel);
+    void setArtifactsModel(QAbstractItemModel* rootArtifactsModel);
 
     void setSlotFilter(int filter);
 
-
 private:
-    ArtifactsFilterModel * m_filterModel = nullptr;
-    ArtifactsComboModel * m_finalModel = nullptr;
+    ArtifactsFilterModel* m_filterModel = nullptr;
+    ArtifactsComboModel*  m_finalModel  = nullptr;
 };
 
-class ArtifactSelectDelegate : public QStyledItemDelegate
-{
-    QAbstractItemModel * m_rootArtifactsModel = nullptr;
+class ArtifactSelectDelegate : public QStyledItemDelegate {
+    QAbstractItemModel* m_rootArtifactsModel = nullptr;
+
 public:
-    ArtifactSelectDelegate(QAbstractItemModel * rootArtifactsModel, QObject * parent)
-        : QStyledItemDelegate(parent), m_rootArtifactsModel(rootArtifactsModel) {}
+    ArtifactSelectDelegate(QAbstractItemModel* rootArtifactsModel, QObject* parent)
+        : QStyledItemDelegate(parent)
+        , m_rootArtifactsModel(rootArtifactsModel)
+    {}
 
     // QAbstractItemDelegate interface
 public:
-    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& , const QModelIndex& index) const override;
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem&, const QModelIndex& index) const override;
 
     void setEditorData(QWidget* editor, const QModelIndex& index) const override;
 

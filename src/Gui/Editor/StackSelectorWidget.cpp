@@ -33,20 +33,20 @@ StackSelectorWidget::StackSelectorWidget(QWidget* parent)
 
     m_model = new UnitsComboModel(m_filter, m_selectId);
 
-    m_selectId->setIconSize({22,22});
+    m_selectId->setIconSize({ 22, 22 });
 
     m_count = new QSpinBox(this);
     m_count->setRange(0, 65535);
 
-    QHBoxLayout * layout = new QHBoxLayout(this);
+    QHBoxLayout* layout = new QHBoxLayout(this);
     layout->setSpacing(10);
     layout->setMargin(0);
     layout->addWidget(m_selectId);
     layout->addWidget(m_count);
-    connect(m_selectId, qOverload<int>(&QComboBox::currentIndexChanged), this, [this](){
+    connect(m_selectId, qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {
         int cur = m_selectId->currentIndex();
 
-        SignalBlocker lock({m_count});
+        SignalBlocker lock({ m_count });
         if (cur == 0)
             m_count->setValue(0);
         else if (m_count->value() == 0)
@@ -58,31 +58,28 @@ StackSelectorWidget::StackSelectorWidget(QWidget* parent)
 
         m_unit->setUnit(library);
     });
-    connect(m_count, qOverload<int>(&QSpinBox::valueChanged), this, [this](){
+    connect(m_count, qOverload<int>(&QSpinBox::valueChanged), this, [this]() {
         if (!m_unit)
             return;
 
         m_unit->setCount(m_count->value());
     });
-
 }
 
-void StackSelectorWidget::setUnitsModel(QAbstractItemModel * unitRootModel)
+void StackSelectorWidget::setUnitsModel(QAbstractItemModel* unitRootModel)
 {
     m_filter->setSourceModel(unitRootModel);
     m_selectId->setModel(m_model);
 }
 
-void StackSelectorWidget::setSource(GuiAdventureStack * unit)
+void StackSelectorWidget::setSource(GuiAdventureStack* unit)
 {
-    m_unit = unit;
-    auto update = [this]{
-
-        SignalBlocker lock({m_selectId, m_count});
-        int currentIndex = 0;
-        auto guiUnit = m_unit->getGuiUnit();
+    m_unit      = unit;
+    auto update = [this] {
+        SignalBlocker lock({ m_selectId, m_count });
+        int           currentIndex = 0;
+        auto          guiUnit      = m_unit->getGuiUnit();
         for (int i = 0, cnt = m_selectId->count(); i < cnt; ++i) {
-
             // @todo: we can make map here.
             if (m_selectId->itemData(i, UnitsModel::GuiObject).value<GuiUnitConstPtr>() == guiUnit) {
                 currentIndex = i;
@@ -96,7 +93,7 @@ void StackSelectorWidget::setSource(GuiAdventureStack * unit)
         connect(m_unit, &GuiAdventureStack::dataChanged, this, update);
         update();
     } else {
-        SignalBlocker lock({m_selectId, m_count});
+        SignalBlocker lock({ m_selectId, m_count });
         m_selectId->setCurrentIndex(0);
         m_count->setValue(0);
     }

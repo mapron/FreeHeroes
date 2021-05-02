@@ -6,32 +6,49 @@
 #include "SettingsWidget.hpp"
 #include "ui_SettingsWidget.h"
 
-
 #include <QSettings>
 #include <QComboBox>
 
 #include <functional>
 
-
 namespace FreeHeroes::Gui {
 
-
 class SettingsWidget::WidgetWrapRef {
-    enum class Type { Bool, Int, StringCombo };
+    enum class Type
+    {
+        Bool,
+        Int,
+        StringCombo
+    };
 
-    Type type = Type::Bool;
-    bool * refBool = nullptr;
-    int * refInt = nullptr;
-    QString * refStr = nullptr;
-    QCheckBox * refCb = nullptr;
-    QSpinBox * refSb = nullptr;
-    QComboBox * refCombo = nullptr;
+    Type        type     = Type::Bool;
+    bool*       refBool  = nullptr;
+    int*        refInt   = nullptr;
+    QString*    refStr   = nullptr;
+    QCheckBox*  refCb    = nullptr;
+    QSpinBox*   refSb    = nullptr;
+    QComboBox*  refCombo = nullptr;
     QStringList items;
-public:
-    WidgetWrapRef(bool & value, QCheckBox * cb) : type(Type::Bool), refBool(&value), refCb(cb){}
-    WidgetWrapRef(int & value, QSpinBox * sb) : type(Type::Int), refInt(&value), refSb(sb){}
-    WidgetWrapRef(QString & value, QStringList items, QComboBox * c) : type(Type::StringCombo), refStr(&value), refCombo(c), items(items){}
 
+public:
+    WidgetWrapRef(bool& value, QCheckBox* cb)
+        : type(Type::Bool)
+        , refBool(&value)
+        , refCb(cb)
+    {}
+    WidgetWrapRef(int& value, QSpinBox* sb)
+        : type(Type::Int)
+        , refInt(&value)
+        , refSb(sb)
+    {}
+    WidgetWrapRef(QString& value, QStringList items, QComboBox* c)
+        : type(Type::StringCombo)
+        , refStr(&value)
+        , refCombo(c)
+        , items(items)
+    {}
+
+    // clang-format off
     void read() {
         if (type == Type::Bool)           refCb->setChecked(*refBool);
         if (type == Type::Int)            refSb->setValue(*refInt);
@@ -45,15 +62,17 @@ public:
         if (type == Type::Int)          *refInt    = refSb->value();
         if (type == Type::StringCombo)  *refStr    = refCombo->currentText();
     }
+    // clang-format on
 };
 
-SettingsWidget::SettingsWidget(QSettings & uiSettings, IAppSettings::AllSettings & settings, QWidget* parent)
+SettingsWidget::SettingsWidget(QSettings& uiSettings, IAppSettings::AllSettings& settings, QWidget* parent)
     : QDialog(parent)
     , m_ui(std::make_unique<Ui::SettingsWidget>())
 {
     setWindowFlag(Qt::WindowContextHelpButtonHint, false);
     m_ui->setupUi(this);
 
+    // clang-format off
     m_allRefs = {
         {settings.sound.musicVolumePercent   , m_ui->spinBoxMusicVolume},
         {settings.sound.effectsVolumePercent , m_ui->spinBoxEffectsVolume},
@@ -75,20 +94,20 @@ SettingsWidget::SettingsWidget(QSettings & uiSettings, IAppSettings::AllSettings
         { settings.ui.displayAbsMoraleLuck , m_ui->checkBoxAbsRng},
         { settings.ui.clampAbsMoraleLuck , m_ui->checkBoxClampRng},
     };
-
+    // clang-format on
 
     connect(m_ui->buttonBox, &QDialogButtonBox::accepted, this, &SettingsWidget::accept);
     connect(m_ui->buttonBox, &QDialogButtonBox::rejected, this, &SettingsWidget::reject);
 
-    auto setupSliderSpin = [this](QSlider * slider, QSpinBox * spinbox, int min, int max) {
+    auto setupSliderSpin = [this](QSlider* slider, QSpinBox* spinbox, int min, int max) {
         static const int step = 5;
         slider->setMinimum(min / step);
         spinbox->setMinimum(min);
         slider->setMaximum(max / step);
         spinbox->setMaximum(max);
-        this->connect(slider, &QSlider::sliderMoved, spinbox, [spinbox](int value){ spinbox->setValue(value * step); });
+        this->connect(slider, &QSlider::sliderMoved, spinbox, [spinbox](int value) { spinbox->setValue(value * step); });
 
-        this->connect(spinbox, qOverload<int>(&QSpinBox::valueChanged), slider, [slider](int value){ slider->setValue(value / step); });
+        this->connect(spinbox, qOverload<int>(&QSpinBox::valueChanged), slider, [slider](int value) { slider->setValue(value / step); });
     };
     setupSliderSpin(m_ui->horizontalSliderMusicVolume, m_ui->spinBoxMusicVolume, 0, 100);
     setupSliderSpin(m_ui->horizontalSliderEffectsVolume, m_ui->spinBoxEffectsVolume, 0, 100);
@@ -96,32 +115,29 @@ SettingsWidget::SettingsWidget(QSettings & uiSettings, IAppSettings::AllSettings
     setupSliderSpin(m_ui->horizontalSliderBattleMovementTime, m_ui->spinBoxBattleMovementTime, 0, 150);
     setupSliderSpin(m_ui->horizontalSliderBattleGeneralTime, m_ui->spinBoxBattleGeneralTime, 0, 150);
 
-
     uiSettings.beginGroup("SettingsWidget");
     const int tabIndex = uiSettings.value("tabIndex").toInt();
     uiSettings.endGroup();
     m_ui->tabWidget->setCurrentIndex(tabIndex);
 
-    connect(this, &QDialog::finished, this, [&uiSettings, this]{
-
+    connect(this, &QDialog::finished, this, [&uiSettings, this] {
         const int tabIndex = m_ui->tabWidget->currentIndex();
 
         uiSettings.beginGroup("SettingsWidget");
         uiSettings.setValue("tabIndex", tabIndex);
         uiSettings.endGroup();
     });
-    for (auto & wrap : m_allRefs) {
+    for (auto& wrap : m_allRefs) {
         wrap.read();
     }
 }
-
 
 SettingsWidget::~SettingsWidget() = default;
 
 void SettingsWidget::accept()
 {
     QDialog::accept();
-    for (auto & wrap : m_allRefs) {
+    for (auto& wrap : m_allRefs) {
         wrap.write();
     }
 }

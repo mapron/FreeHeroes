@@ -14,21 +14,21 @@
 
 namespace FreeHeroes::Conversion {
 
-const KnownResource * KnownResources::find(const std::string & legacyId) const {
+const KnownResource* KnownResources::find(const std::string& legacyId) const
+{
     auto it = m_index.find(legacyId);
     return it == m_index.cend() ? nullptr : it->second;
 }
 
-
 KnownResources::KnownResources(const Core::std_path& config)
 {
     std::ifstream ifs(config, std::ios::in | std::ios::binary);
-    std::string line;
+    std::string   line;
     m_resources.reserve(10000);
     std::vector<std::string> tokens;
     std::vector<std::string> params;
 
-    while(std::getline(ifs, line)) {
+    while (std::getline(ifs, line)) {
         if (line.empty())
             continue;
         tokens = Core::splitLine(line, '\t', true);
@@ -38,12 +38,11 @@ KnownResources::KnownResources(const Core::std_path& config)
             tokens.resize(6);
 
         params = Core::splitLine(tokens[5], ';', true);
-        KnownResource res{tokens[0], tokens[1], tokens[2], tokens[3], tokens[4], params};
+        KnownResource res{ tokens[0], tokens[1], tokens[2], tokens[3], tokens[4], params };
         m_resources.emplace_back(std::move(res));
     }
-    for (const auto & res : m_resources)
+    for (const auto& res : m_resources)
         m_index[res.legacyId] = &res;
 }
-
 
 }

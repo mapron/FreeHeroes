@@ -11,15 +11,14 @@ namespace FreeHeroes::Core::Reflection {
 
 void libraryReflectionStub();
 
-class IJsonTransform
-{
+class IJsonTransform {
 public:
-    virtual ~IJsonTransform() = default;
-    [[nodiscard]] virtual bool needTransform(const nlohmann::json & in) const noexcept = 0;
-    virtual bool transform(const nlohmann::json & in, nlohmann::json & out) const = 0;
+    virtual ~IJsonTransform()                                                                 = default;
+    [[nodiscard]] virtual bool needTransform(const nlohmann::json& in) const noexcept         = 0;
+    virtual bool               transform(const nlohmann::json& in, nlohmann::json& out) const = 0;
 };
 
 template<class T>
-const IJsonTransform * getJsonTransform();
+const IJsonTransform* getJsonTransform();
 
 }

@@ -22,26 +22,32 @@ namespace FreeHeroes {
 
 struct ProfilerContext::Impl {
     struct Rec {
-        int64_t us = 0;
-        int calls = 0;
-        void add(int64_t v) { us += v; calls++;}
+        int64_t us    = 0;
+        int     calls = 0;
+        void    add(int64_t v)
+        {
+            us += v;
+            calls++;
+        }
     };
 
-    void printTo(std::ostream& os) {
-        for (auto & p : all) {
-            os << p.first << "=" << (p.second.us/1000) << " #" << (p.second.calls) << "\n";
+    void printTo(std::ostream& os)
+    {
+        for (auto& p : all) {
+            os << p.first << "=" << (p.second.us / 1000) << " #" << (p.second.calls) << "\n";
         }
     }
 
-    void pushPrefix(std::string_view key) {
-
-        stackPrefix += std::string{key} + "->";
+    void pushPrefix(std::string_view key)
+    {
+        stackPrefix += std::string{ key } + "->";
         stack.push_back(stackPrefix);
 #ifdef FH_ENABLE_PROFILER_LOGGING
         Logger(Logger::Info) << stackPrefix;
 #endif
     }
-    void addRecord(std::string_view key, int64_t value) {
+    void addRecord(std::string_view key, int64_t value)
+    {
         std::string keyFull = stackPrefix + std::string(key);
         all[std::move(keyFull)].add(value);
 #ifdef FH_ENABLE_PROFILER_LOGGING
@@ -49,22 +55,21 @@ struct ProfilerContext::Impl {
 #endif
     }
 
-    void pop(std::string_view key, int64_t value) {
-
+    void pop(std::string_view key, int64_t value)
+    {
         stack.pop_back();
         stackPrefix = stack.empty() ? "" : stack.back();
         addRecord(key, value);
     }
 
     std::map<std::string, Rec> all{};
-    std::deque<std::string> stack;
-    std::string stackPrefix;
+    std::deque<std::string>    stack;
+    std::string                stackPrefix;
 };
 
 ProfilerContext::ProfilerContext()
     : m_impl(std::make_unique<ProfilerContext::Impl>())
 {
-
 }
 
 ProfilerContext::~ProfilerContext() = default;
@@ -92,40 +97,42 @@ std::string ProfilerContext::printToStr() const
     return ss.str();
 }
 
-
 namespace {
 
-int64_t curUS() {
+int64_t curUS()
+{
     return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 }
 
-ProfilerContext * defaultContext = nullptr;
+ProfilerContext* defaultContext = nullptr;
 
-ProfilerContext *  getGlobalProfilerContext() {
-#ifdef  FH_ENABLE_GLOBAL_PROFILER_CONTEXT
-    static ProfilerContext globalProfilerContext {};
+ProfilerContext* getGlobalProfilerContext()
+{
+#ifdef FH_ENABLE_GLOBAL_PROFILER_CONTEXT
+    static ProfilerContext globalProfilerContext{};
     return &globalProfilerContext;
 #else
     return nullptr;
 #endif
-
 }
 
-ProfilerContext *   getDefaultContext() {
+ProfilerContext* getDefaultContext()
+{
     return defaultContext ? defaultContext : getGlobalProfilerContext();
 }
 
 }
 
-
-ScopeTimer::ScopeTimer() : start(curUS()), out(nullptr)
+ScopeTimer::ScopeTimer()
+    : start(curUS())
+    , out(nullptr)
 {
-
 }
 
-ScopeTimer::ScopeTimer(int64_t & out) : start(curUS()), out(&out)
+ScopeTimer::ScopeTimer(int64_t& out)
+    : start(curUS())
+    , out(&out)
 {
-
 }
 
 ScopeTimer::~ScopeTimer()
@@ -140,7 +147,8 @@ int64_t ScopeTimer::elapsed() const noexcept
 }
 
 ProfilerScope::ProfilerScope(std::string_view key)
-    : key(key), context(getDefaultContext())
+    : key(key)
+    , context(getDefaultContext())
 {
     if (!context)
         return;
@@ -148,7 +156,8 @@ ProfilerScope::ProfilerScope(std::string_view key)
 }
 
 ProfilerScope::ProfilerScope(std::string_view key, ProfilerContext& customContext)
-    : key(key), context(&customContext)
+    : key(key)
+    , context(&customContext)
 {
     context->m_impl->pushPrefix(key);
 }
@@ -163,7 +172,7 @@ ProfilerScope::~ProfilerScope()
 
 void ProfilerScope::printToStdErr()
 {
-    auto * context = getDefaultContext();
+    auto* context = getDefaultContext();
     if (!context)
         return;
     context->printToStdErr();
@@ -171,7 +180,7 @@ void ProfilerScope::printToStdErr()
 
 void ProfilerScope::clearAll()
 {
-    auto * context = getDefaultContext();
+    auto* context = getDefaultContext();
     if (!context)
         return;
     context->clearAll();
@@ -179,14 +188,14 @@ void ProfilerScope::clearAll()
 
 std::string ProfilerScope::printToStr()
 {
-    auto * context = getDefaultContext();
+    auto* context = getDefaultContext();
     if (!context)
         return {};
     return context->printToStr();
 }
 void ProfilerScope::addRecord(std::string_view str, int64_t ms)
 {
-    auto * context = getDefaultContext();
+    auto* context = getDefaultContext();
     if (!context)
         return;
     context->addRecord(str, ms);
@@ -198,7 +207,7 @@ ProfilerDefaultContextSwitcher::ProfilerDefaultContextSwitcher(ProfilerContext& 
     if (isTrivial)
         return;
 
-    contextPrev = defaultContext;
+    contextPrev    = defaultContext;
     defaultContext = &customContext;
 }
 

@@ -16,6 +16,6 @@ Gui::SpritePtr loadPcx(const Core::std_path& pcxFilePath);
 
 Gui::SpritePtr loadBmp(const Core::std_path& bmpFilePath);
 
-Gui::SpritePtr postProcessSprite(Gui::SpritePtr sprite, const std::string & routine, const std::vector<std::string> &  params);
+Gui::SpritePtr postProcessSprite(Gui::SpritePtr sprite, const std::string& routine, const std::vector<std::string>& params);
 
 }

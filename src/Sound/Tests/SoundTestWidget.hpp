@@ -11,11 +11,9 @@ namespace FreeHeroes {
 namespace Sound {
 class IMusicBox;
 }
-class SoundTestWidget : public QDialog
-{
+class SoundTestWidget : public QDialog {
 public:
-    SoundTestWidget(Sound::IMusicBox & musicBox);
-
+    SoundTestWidget(Sound::IMusicBox& musicBox);
 };
 
 }

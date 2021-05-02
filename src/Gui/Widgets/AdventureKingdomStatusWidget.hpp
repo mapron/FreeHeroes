@@ -13,21 +13,19 @@
 
 #include <memory>
 
-
 namespace FreeHeroes::Gui {
 
-class GUIWIDGETS_EXPORT AdventureKingdomStatusWidget : public QWidget
-{
+class GUIWIDGETS_EXPORT AdventureKingdomStatusWidget : public QWidget {
     Q_OBJECT
 public:
-    AdventureKingdomStatusWidget(QWidget * parent);
+    AdventureKingdomStatusWidget(QWidget* parent);
     ~AdventureKingdomStatusWidget();
 
-    void setResourceIcons(const QMap<QString, QPixmap> & icons);
-    void update(const Core::AdventureKingdom & kingdom);
+    void setResourceIcons(const QMap<QString, QPixmap>& icons);
+    void update(const Core::AdventureKingdom& kingdom);
 
 private:
-    void paintEvent(QPaintEvent *event) override;
+    void paintEvent(QPaintEvent* event) override;
 
 private:
     struct Impl;

@@ -9,10 +9,10 @@ namespace FreeHeroes::Gui {
 
 SpritePtr Sprite::fromPixmap(QPixmap pixmap)
 {
-    auto seq = std::make_shared<SpriteSequence>();
+    auto        seq = std::make_shared<SpriteSequence>();
     SpriteFrame f;
-    f.frame = pixmap;
-    f.paddingLeftTop = {0, 0};
+    f.frame          = pixmap;
+    f.paddingLeftTop = { 0, 0 };
     seq->frames << f;
 
     seq->boundarySize = pixmap.size();
@@ -22,7 +22,8 @@ SpritePtr Sprite::fromPixmap(QPixmap pixmap)
     return std::make_shared<Sprite>(std::move(result));
 }
 
-void Sprite::addGroup(int groupId, SpriteSequencePtr seq) {
+void Sprite::addGroup(int groupId, SpriteSequencePtr seq)
+{
     m_groups[groupId] = seq;
 }
 

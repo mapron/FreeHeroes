@@ -13,15 +13,17 @@ namespace {
 
 const int pulseDurationMs = 1500;
 
-QVector<QPointF> getOpaqueRegionBorder(const QImage & img, QPointF offset) {
+QVector<QPointF> getOpaqueRegionBorder(const QImage& img, QPointF offset)
+{
     auto getImageOpaque = [&img](int w, int h) {
-        return (w >= 0 && h >= 0 && w < img.width() && h < img.height()) ? img.pixelColor(w , h ).alpha() == 255 : false;
+        return (w >= 0 && h >= 0 && w < img.width() && h < img.height()) ? img.pixelColor(w, h).alpha() == 255 : false;
     };
     QVector<QPointF> points;
     for (int h = -1; h < img.height() + 1; ++h) {
         for (int w = -1; w < img.width() + 1; ++w) {
             if (getImageOpaque(w, h))
                 continue;
+            // clang-format off
             const bool hasOpaqueNeighbour =
                        getImageOpaque(w - 1, h - 1)
                     || getImageOpaque(w + 0, h - 1)
@@ -31,6 +33,7 @@ QVector<QPointF> getOpaqueRegionBorder(const QImage & img, QPointF offset) {
                     || getImageOpaque(w - 1, h + 1)
                     || getImageOpaque(w + 0, h + 1)
                     || getImageOpaque(w + 1, h + 1);
+            // clang-format on
             if (hasOpaqueNeighbour)
                 points << QPointF(w, h) + offset;
         }
@@ -38,27 +41,29 @@ QVector<QPointF> getOpaqueRegionBorder(const QImage & img, QPointF offset) {
     return points;
 }
 
-int blendTwo(int start, int end, double r) {
+int blendTwo(int start, int end, double r)
+{
     return std::clamp(static_cast<int>(start * r + end * (1 - r)), 0, 255);
 }
 
-QColor blendTwo(QColor start, QColor end, double r) {
-
-    return QColor(blendTwo(start.red()  , end.red(), r),
+QColor blendTwo(QColor start, QColor end, double r)
+{
+    return QColor(blendTwo(start.red(), end.red(), r),
                   blendTwo(start.green(), end.green(), r),
-                  blendTwo(start.blue() , end.blue(), r),
+                  blendTwo(start.blue(), end.blue(), r),
                   blendTwo(start.alpha(), end.alpha(), r));
 }
 
-QColor linearPulse(QColor base, int darkenValue, int ms, int msMax) {
+QColor linearPulse(QColor base, int darkenValue, int ms, int msMax)
+{
     const QColor end(std::max(base.red() - darkenValue, 0),
-               std::max(base.green() - darkenValue, 0),
-               std::max(base.blue() - darkenValue, 0),
-               base.alpha());
-    const auto frac = double(ms % msMax);
-    const auto half = double(msMax / 2.);
-    const double r = frac <= half ? frac / half : (msMax - frac) / half;
-    QColor res = blendTwo(base, end, r);
+                     std::max(base.green() - darkenValue, 0),
+                     std::max(base.blue() - darkenValue, 0),
+                     base.alpha());
+    const auto   frac = double(ms % msMax);
+    const auto   half = double(msMax / 2.);
+    const double r    = frac <= half ? frac / half : (msMax - frac) / half;
+    QColor       res  = blendTwo(base, end, r);
     return res;
 }
 
@@ -127,9 +132,7 @@ void BattleStackSpriteItem::setCounterCompact(bool compact)
     update();
 }
 
-
-void BattleStackSpriteItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
-                                QWidget *widget)
+void BattleStackSpriteItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
 {
     Q_UNUSED(option);
     Q_UNUSED(widget);
@@ -137,21 +140,19 @@ void BattleStackSpriteItem::paint(QPainter *painter, const QStyleOptionGraphicsI
     painter->setRenderHint(QPainter::SmoothPixmapTransform, true);
 
     // debug cross
-//    {
-//        painter->setPen(Qt::SolidLine);
-//        painter->drawLine(m_boundingOrigin, QPointF(m_boundingSize.width(), m_boundingSize.height()) + m_boundingOrigin);
-//        painter->drawLine(QPointF(m_boundingSize.width(), 0) + m_boundingOrigin, QPointF(0, m_boundingSize.height()) + m_boundingOrigin);
-//    }
+    //    {
+    //        painter->setPen(Qt::SolidLine);
+    //        painter->drawLine(m_boundingOrigin, QPointF(m_boundingSize.width(), m_boundingSize.height()) + m_boundingOrigin);
+    //        painter->drawLine(QPointF(m_boundingSize.width(), 0) + m_boundingOrigin, QPointF(0, m_boundingSize.height()) + m_boundingOrigin);
+    //    }
 
-    auto t = painter->transform();
+    auto t  = painter->transform();
     auto t2 = t;
     //const qreal scaleDirect = m_currentSequence->params.scaleFactorPercent / 100.;
     const qreal scaleInverse = 100. / m_currentSequence->params.scaleFactorPercent;
     t2.scale(scaleInverse, scaleInverse);
     if (!getTmpDirectionRight()) {
-
         t2.scale(-1, 1);
-
     }
     painter->setTransform(t2);
     auto offset = m_boundingOrigin + m_pixmapPadding;
@@ -160,7 +161,7 @@ void BattleStackSpriteItem::paint(QPainter *painter, const QStyleOptionGraphicsI
     auto mainHightLight = getMainHighlight();
 
     if (mainHightLight != Highlight::No) {
-        auto img = m_pixmap.toImage();
+        auto       img    = m_pixmap.toImage();
         const auto points = getOpaqueRegionBorder(img, offset); // @todo: cache maybe
 
         const auto pulseColor = mainHightLight == Highlight::Selected ? QColor(255, 255, 0, 128) : QColor(0, 255, 255, 192);
@@ -170,46 +171,42 @@ void BattleStackSpriteItem::paint(QPainter *painter, const QStyleOptionGraphicsI
 
     painter->setTransform(t);
 
-
     if (m_counterVisible) {
-        const qreal boxWidth = 30;
+        const qreal boxWidth  = 30;
         const qreal boxHeight = 11;
         painter->setPen(QPen(QColor(255, 231, 132), 1));
-        static const QMap<CounterMode, QPair<QColor, QColor>> baseColors {
-            {CounterMode::Normal, QPair{QColor(69 , 23 , 115) , QColor(128, 42 , 214)} },
-            {CounterMode::Buff  , QPair{QColor(21 , 107, 21 ) , QColor(44 , 222, 44 )} },
-            {CounterMode::Debuff, QPair{QColor(107, 21 , 21 ) , QColor(222, 44 , 44 )} },
-            {CounterMode::Mixed , QPair{QColor(107, 107, 21 ) , QColor(222, 222, 44 )} },
+        static const QMap<CounterMode, QPair<QColor, QColor>> baseColors{
+            { CounterMode::Normal, QPair{ QColor(69, 23, 115), QColor(128, 42, 214) } },
+            { CounterMode::Buff, QPair{ QColor(21, 107, 21), QColor(44, 222, 44) } },
+            { CounterMode::Debuff, QPair{ QColor(107, 21, 21), QColor(222, 44, 44) } },
+            { CounterMode::Mixed, QPair{ QColor(107, 107, 21), QColor(222, 222, 44) } },
         };
-        static const auto stopsGray = QPair{QColor(60 , 60 , 60) , QColor(110, 110 , 110)};
-
+        static const auto stopsGray = QPair{ QColor(60, 60, 60), QColor(110, 110, 110) };
 
         const QPointF cellGroundCenter = m_boundingOrigin
                                          + QPointF(m_boundingSize.width(), m_boundingSize.height()) / 2
-                                         + QPointF{0, fromSpriteCenterToHexCenter}
-                                         ;
-        QPointF offset = cellGroundCenter;
-        const int horizontalShift =  (m_counterCompact)
-                                  ?  (m_isLarge ? +3 : -boxWidth / 2)
-                                  :  (m_isLarge ? m_hexWidth : m_hexWidth / 2 + 1);
-
+                                         + QPointF{ 0, fromSpriteCenterToHexCenter };
+        QPointF   offset          = cellGroundCenter;
+        const int horizontalShift = (m_counterCompact)
+                                        ? (m_isLarge ? +3 : -boxWidth / 2)
+                                        : (m_isLarge ? m_hexWidth : m_hexWidth / 2 + 1);
 
         if (!m_startDirectionRight) {
-            offset -= QPointF{boxWidth, m_counterCompact ? 0 : (boxHeight + 2)};
+            offset -= QPointF{ boxWidth, m_counterCompact ? 0 : (boxHeight + 2) };
             offset.rx() -= horizontalShift;
         } else {
             offset.rx() += horizontalShift;
         }
         if (m_counterCompact) {
-            offset.ry() +=  boxHeight - 2;
+            offset.ry() += boxHeight - 2;
         }
 
         QRectF rect;
         rect.setTopLeft(offset);
-        rect.setSize({boxWidth - 1, boxHeight - 1}); // bottom and right pen pixeSize not included.
+        rect.setSize({ boxWidth - 1, boxHeight - 1 }); // bottom and right pen pixeSize not included.
         {
-            const auto stops = baseColors[m_counterMode];
-            QRadialGradient grad(offset + QPointF{boxWidth/2, boxHeight-3}, boxWidth * 0.7);
+            const auto      stops = baseColors[m_counterMode];
+            QRadialGradient grad(offset + QPointF{ boxWidth / 2, boxHeight - 3 }, boxWidth * 0.7);
             grad.setColorAt(1, stops.first);
             grad.setColorAt(0, stops.second);
             painter->setBrush(QBrush(grad));
@@ -226,10 +223,9 @@ void BattleStackSpriteItem::paint(QPainter *painter, const QStyleOptionGraphicsI
         }
         painter->setPen(oldPen);
         if (m_countExtra != 0) {
-            rect.translate(0, rect.height() );
+            rect.translate(0, rect.height());
             {
-
-                QRadialGradient grad(offset + QPointF{boxWidth/2, boxHeight-3}, boxWidth * 0.7);
+                QRadialGradient grad(offset + QPointF{ boxWidth / 2, boxHeight - 3 }, boxWidth * 0.7);
                 grad.setColorAt(1, stopsGray.first);
                 grad.setColorAt(0, stopsGray.second);
                 painter->setBrush(QBrush(grad));
@@ -246,7 +242,6 @@ void BattleStackSpriteItem::paint(QPainter *painter, const QStyleOptionGraphicsI
             }
         }
     }
-
 }
 
 BattleStackSpriteItem::Highlight BattleStackSpriteItem::getMainHighlight() const

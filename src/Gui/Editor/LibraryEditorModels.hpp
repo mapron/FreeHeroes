@@ -9,7 +9,6 @@
 
 #include "LibraryModels.hpp"
 
-
 namespace FreeHeroes::Core {
 struct AdventureStack;
 struct AdventureSquad;
@@ -17,91 +16,82 @@ struct AdventureSquad;
 
 namespace FreeHeroes::Gui {
 
-class GUIEDITOR_EXPORT ZeroElementModel : public QAbstractListModel
-{
+class GUIEDITOR_EXPORT ZeroElementModel : public QAbstractListModel {
 public:
-    ZeroElementModel(QString title, QObject * parent);
+    ZeroElementModel(QString title, QObject* parent);
 
-    QVariant data(const QModelIndex &index, int role) const override;
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex& index, int role) const override;
+    int      rowCount(const QModelIndex& parent = QModelIndex()) const override;
+
 private:
     const QString m_title;
 };
 
-class GUIEDITOR_EXPORT ComboModel : public QConcatenateTablesProxyModel
-{
+class GUIEDITOR_EXPORT ComboModel : public QConcatenateTablesProxyModel {
 public:
-    ComboModel(QString emptyText, QSize maxIconSize, QAbstractItemModel * sourceModel, QObject * parent);
-    QVariant data(const QModelIndex &index, int role) const override;
+    ComboModel(QString emptyText, QSize maxIconSize, QAbstractItemModel* sourceModel, QObject* parent);
+    QVariant data(const QModelIndex& index, int role) const override;
+
 private:
-    ZeroElementModel * m_zeroModel;
-    const QSize m_maxIconSize;
+    ZeroElementModel* m_zeroModel;
+    const QSize       m_maxIconSize;
 };
 
-class GUIEDITOR_EXPORT ArtifactsComboModel : public ComboModel
-{
+class GUIEDITOR_EXPORT ArtifactsComboModel : public ComboModel {
     Q_OBJECT
 public:
-    ArtifactsComboModel(QAbstractItemModel * sourceModel, QObject * parent);
+    ArtifactsComboModel(QAbstractItemModel* sourceModel, QObject* parent);
 };
 
-class GUIEDITOR_EXPORT UnitsComboModel : public ComboModel
-{
+class GUIEDITOR_EXPORT UnitsComboModel : public ComboModel {
     Q_OBJECT
 public:
-    UnitsComboModel(QAbstractItemModel * sourceModel, QObject * parent);
+    UnitsComboModel(QAbstractItemModel* sourceModel, QObject* parent);
 };
 
-class GUIEDITOR_EXPORT HeroesComboModel : public ComboModel
-{
+class GUIEDITOR_EXPORT HeroesComboModel : public ComboModel {
     Q_OBJECT
 public:
-    HeroesComboModel(QAbstractItemModel * sourceModel, QObject * parent);
+    HeroesComboModel(QAbstractItemModel* sourceModel, QObject* parent);
 };
 
-class GUIEDITOR_EXPORT SkillsComboModel : public ComboModel
-{
+class GUIEDITOR_EXPORT SkillsComboModel : public ComboModel {
     Q_OBJECT
 public:
-    SkillsComboModel(QAbstractItemModel * sourceModel, QObject * parent);
+    SkillsComboModel(QAbstractItemModel* sourceModel, QObject* parent);
 };
 
-class GUIEDITOR_EXPORT FactionsComboModel : public ComboModel
-{
+class GUIEDITOR_EXPORT FactionsComboModel : public ComboModel {
     Q_OBJECT
 public:
-    FactionsComboModel(QAbstractItemModel * sourceModel, QObject * parent);
+    FactionsComboModel(QAbstractItemModel* sourceModel, QObject* parent);
 };
 
-class GUIEDITOR_EXPORT TerrainsComboModel : public ComboModel
-{
+class GUIEDITOR_EXPORT TerrainsComboModel : public ComboModel {
     Q_OBJECT
 public:
-    TerrainsComboModel(QAbstractItemModel * sourceModel, QObject * parent);
+    TerrainsComboModel(QAbstractItemModel* sourceModel, QObject* parent);
 };
 
-class GUIEDITOR_EXPORT MapObjectsComboModel : public ComboModel
-{
+class GUIEDITOR_EXPORT MapObjectsComboModel : public ComboModel {
     Q_OBJECT
 public:
-    MapObjectsComboModel(QAbstractItemModel * sourceModel, QObject * parent);
+    MapObjectsComboModel(QAbstractItemModel* sourceModel, QObject* parent);
 };
 
-
-class GUIEDITOR_EXPORT MapObjectsTreeModel : public QAbstractItemModel
-{
+class GUIEDITOR_EXPORT MapObjectsTreeModel : public QAbstractItemModel {
 public:
-    MapObjectsTreeModel(QAbstractItemModel * source, QObject * parent);
+    MapObjectsTreeModel(QAbstractItemModel* source, QObject* parent);
 
-    QVariant data(const QModelIndex &index, int role) const override;
-    QModelIndex index(int row, int column, const QModelIndex& parent) const override;
-    QModelIndex parent(const QModelIndex& child) const override;
-    int rowCount(const QModelIndex& parent) const override;
-    int columnCount(const QModelIndex& parent) const override;
+    QVariant      data(const QModelIndex& index, int role) const override;
+    QModelIndex   index(int row, int column, const QModelIndex& parent) const override;
+    QModelIndex   parent(const QModelIndex& child) const override;
+    int           rowCount(const QModelIndex& parent) const override;
+    int           columnCount(const QModelIndex& parent) const override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
 
 private:
-    QAbstractItemModel * m_source = nullptr;
+    QAbstractItemModel* m_source = nullptr;
 };
 
 }

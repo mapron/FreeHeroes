@@ -15,7 +15,6 @@
 
 #include <memory>
 
-
 class QTableWidgetItem;
 
 namespace FreeHeroes {
@@ -41,26 +40,25 @@ class HeroInfoWidget;
 class BattleControlPlan;
 class BattleControlWidget;
 class LibraryModelsProvider;
-class GUIBATTLE_EXPORT BattleWidget : public QDialog, public Core::BattleNotifyEmpty
-{
+class GUIBATTLE_EXPORT BattleWidget : public QDialog
+    , public Core::BattleNotifyEmpty {
     Q_OBJECT
 
 public:
-    explicit BattleWidget(Core::IBattleView & battleView,
-                          Core::IBattleControl & battleControl,
-                          Core::IAIFactory & aiFactory,
-                          LibraryModelsProvider & modelsProvider,
-                          const Core::BattleFieldGeometry & battleGeometry,
+    explicit BattleWidget(Core::IBattleView&               battleView,
+                          Core::IBattleControl&            battleControl,
+                          Core::IAIFactory&                aiFactory,
+                          LibraryModelsProvider&           modelsProvider,
+                          const Core::BattleFieldGeometry& battleGeometry,
 
-                          Gui::IAppSettings & appSettings,
-                          QWidget * parent = 0);
+                          Gui::IAppSettings& appSettings,
+                          QWidget*           parent = 0);
     ~BattleWidget();
 
     void setBackground(QPixmap back);
 
     void setAI(bool attacker, bool defender);
-    void setReplay(Core::IReplayHandle * replayHandle);
-
+    void setReplay(Core::IReplayHandle* replayHandle);
 
     void showSettingsDialog();
 
@@ -68,7 +66,7 @@ public:
 protected:
     void keyPressEvent(QKeyEvent* event) override;
     void keyReleaseEvent(QKeyEvent* event) override;
-    void showEvent(QShowEvent *event) override;
+    void showEvent(QShowEvent* event) override;
 
     // IBattleNotifiers interface
 protected:
@@ -79,32 +77,30 @@ protected:
     void heroInfoShow(bool attacker, bool defender);
 
 private:
-    BattleControlPlan * m_controlPlan = nullptr;
+    BattleControlPlan* m_controlPlan = nullptr;
 
-    ICursorLibrary      & m_cursorLibrary;
-    Sound::IMusicBox    & m_musicBox;
+    ICursorLibrary&   m_cursorLibrary;
+    Sound::IMusicBox& m_musicBox;
 
-    Core::IBattleView & m_battleView;
-    Core::IBattleControl & m_battleControl;
-    LibraryModelsProvider & m_modelsProvider;
-    Core::IReplayHandle * m_replayHandle = nullptr;
+    Core::IBattleView&     m_battleView;
+    Core::IBattleControl&  m_battleControl;
+    LibraryModelsProvider& m_modelsProvider;
+    Core::IReplayHandle*   m_replayHandle = nullptr;
 
-    Gui::IAppSettings & m_appSettings;
+    Gui::IAppSettings& m_appSettings;
 
-    std::unique_ptr<GridScene> m_scene;
+    std::unique_ptr<GridScene>       m_scene;
     std::unique_ptr<BattleFieldItem> m_battlefield;
 
     QTimer m_animationTimer;
 
     bool m_battleFinished = false;
 
-    std::unique_ptr<QWidget> m_infoWidget;
+    std::unique_ptr<QWidget>        m_infoWidget;
     std::unique_ptr<HeroInfoWidget> m_heroInfoWidgetAttacker;
     std::unique_ptr<HeroInfoWidget> m_heroInfoWidgetDefender;
 
-    Gui::BattleControlWidget *m_battleControlWidget = nullptr;
-
-
+    Gui::BattleControlWidget* m_battleControlWidget = nullptr;
 };
 
 }

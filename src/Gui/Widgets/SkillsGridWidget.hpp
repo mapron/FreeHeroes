@@ -13,7 +13,6 @@
 #include <memory>
 #include <functional>
 
-
 namespace FreeHeroes {
 namespace Core {
 struct AdventureHero;
@@ -23,22 +22,21 @@ namespace Gui {
 class DarkFrameLabelIcon;
 class HoverHelper;
 class GuiAdventureHero;
-class GUIWIDGETS_EXPORT SkillsGridWidget : public QWidget
-{
+class GUIWIDGETS_EXPORT SkillsGridWidget : public QWidget {
     Q_OBJECT
 public:
     SkillsGridWidget(QWidget* parent = nullptr);
     ~SkillsGridWidget();
 
-    void setParams(const GuiAdventureHero * hero);
+    void setParams(const GuiAdventureHero* hero);
 
-    void setHoverLabel(QLabel * hoverLabel);
+    void setHoverLabel(QLabel* hoverLabel);
+
 private:
-    QList<DarkFrameLabelIcon*> m_icons;
-    QList<QLabel *> m_txts;
+    QList<DarkFrameLabelIcon*>   m_icons;
+    QList<QLabel*>               m_txts;
     std::unique_ptr<HoverHelper> m_hoverHelper;
 };
 
 }
 }
-

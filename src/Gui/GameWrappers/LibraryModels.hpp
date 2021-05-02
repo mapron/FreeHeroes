@@ -24,23 +24,24 @@ namespace FreeHeroes::Gui {
 template<typename WrapperTypeT>
 class GUIGAMEWRAPPERS_EXPORT AbstractGuiWrapperListModel : public QAbstractListModel {
 public:
-    using WrapperType = WrapperTypeT;
-    using SrcType = typename WrapperType::SrcType;
-    using WrapperTypePtr = const WrapperType *;
-    using SrcTypePtr = const SrcType *;
+    using WrapperType    = WrapperTypeT;
+    using SrcType        = typename WrapperType::SrcType;
+    using WrapperTypePtr = const WrapperType*;
+    using SrcTypePtr     = const SrcType*;
 
-    AbstractGuiWrapperListModel(Sound::IMusicBox & musicBox, IGraphicsLibrary & graphicsLibrary, QObject * parent);
+    AbstractGuiWrapperListModel(Sound::IMusicBox& musicBox, IGraphicsLibrary& graphicsLibrary, QObject* parent);
     ~AbstractGuiWrapperListModel();
 
-    void clear();
-    void addRecord(SrcTypePtr record);
+    void           clear();
+    void           addRecord(SrcTypePtr record);
     WrapperTypePtr find(SrcTypePtr source) const;
-    WrapperTypePtr find(const std::string & id) const;
+    WrapperTypePtr find(const std::string& id) const;
 
-    QVariant data(const QModelIndex &index, int role) const override;
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex& index, int role) const override;
+    int      rowCount(const QModelIndex& parent = QModelIndex()) const override;
 
-    enum ItemDataRole {
+    enum ItemDataRole
+    {
         GuiObject = Qt::UserRole + 1, // WrapperTypePtr
         SourceObject,                 // SrcTypePtr
 
@@ -54,31 +55,30 @@ public:
 private:
     struct Impl;
     std::unique_ptr<Impl> m_impl;
-    IGraphicsLibrary & m_graphicsLibrary;
-    Sound::IMusicBox & m_musicBox;
+    IGraphicsLibrary&     m_graphicsLibrary;
+    Sound::IMusicBox&     m_musicBox;
 };
 
-class GUIGAMEWRAPPERS_EXPORT ArtifactsModel : public AbstractGuiWrapperListModel<GuiArtifact>
-{
+class GUIGAMEWRAPPERS_EXPORT ArtifactsModel : public AbstractGuiWrapperListModel<GuiArtifact> {
 public:
     using Base = AbstractGuiWrapperListModel<GuiArtifact>;
-    ArtifactsModel(Sound::IMusicBox & musicBox, IGraphicsLibrary & graphicsLibrary, QObject * parent);
+    ArtifactsModel(Sound::IMusicBox& musicBox, IGraphicsLibrary& graphicsLibrary, QObject* parent);
 
-    QVariant data(const QModelIndex &index, int role) const override;
+    QVariant data(const QModelIndex& index, int role) const override;
 
-    GuiArtifactConstPtr findCatapult() const { return this->find(s_catapult);}
-    GuiArtifactConstPtr findSpellbook() const { return this->find(s_spellbook);}
-    QPixmap getLockIcon() const { return m_lock->get(); }
+    GuiArtifactConstPtr findCatapult() const { return this->find(s_catapult); }
+    GuiArtifactConstPtr findSpellbook() const { return this->find(s_spellbook); }
+    QPixmap             getLockIcon() const { return m_lock->get(); }
+
 private:
     static const std::string s_catapult;
     static const std::string s_spellbook;
-    IAsyncPixmapPtr m_lock;
+    IAsyncPixmapPtr          m_lock;
 };
 
-class GUIGAMEWRAPPERS_EXPORT ArtifactsFilterModel  : public QSortFilterProxyModel
-{
+class GUIGAMEWRAPPERS_EXPORT ArtifactsFilterModel : public QSortFilterProxyModel {
 public:
-    ArtifactsFilterModel(QObject * parent);
+    ArtifactsFilterModel(QObject* parent);
 
     void setFilterIndex(int filter);
 
@@ -88,147 +88,139 @@ protected:
 
 private:
     int m_filter = -1;
-
 };
 
-
-
-class GUIGAMEWRAPPERS_EXPORT UnitsModel : public AbstractGuiWrapperListModel<GuiUnit>, public GuiUnitProvider
-{
+class GUIGAMEWRAPPERS_EXPORT UnitsModel : public AbstractGuiWrapperListModel<GuiUnit>
+    , public GuiUnitProvider {
 public:
     using Base = AbstractGuiWrapperListModel<GuiUnit>;
     using AbstractGuiWrapperListModel::AbstractGuiWrapperListModel;
 
-    QVariant data(const QModelIndex &index, int role) const override;
-    GuiUnitConstPtr find(Core::LibraryUnitConstPtr source) const override {
+    QVariant        data(const QModelIndex& index, int role) const override;
+    GuiUnitConstPtr find(Core::LibraryUnitConstPtr source) const override
+    {
         return Base::find(source);
     }
     using Base::find;
 };
 
-class GUIGAMEWRAPPERS_EXPORT UnitsFilterModel  : public QSortFilterProxyModel
-{
+class GUIGAMEWRAPPERS_EXPORT UnitsFilterModel : public QSortFilterProxyModel {
 public:
-    UnitsFilterModel(QObject * parent);
+    UnitsFilterModel(QObject* parent);
 
     // QSortFilterProxyModel interface
 protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
 };
 
-
-class GUIGAMEWRAPPERS_EXPORT HeroesModel : public AbstractGuiWrapperListModel<GuiHero>, public GuiHeroProvider
-{
+class GUIGAMEWRAPPERS_EXPORT HeroesModel : public AbstractGuiWrapperListModel<GuiHero>
+    , public GuiHeroProvider {
 public:
     using Base = AbstractGuiWrapperListModel<GuiHero>;
     using AbstractGuiWrapperListModel::AbstractGuiWrapperListModel;
 
-    QVariant data(const QModelIndex &index, int role) const override;
-    GuiHeroConstPtr find(Core::LibraryHeroConstPtr source) const override {
+    QVariant        data(const QModelIndex& index, int role) const override;
+    GuiHeroConstPtr find(Core::LibraryHeroConstPtr source) const override
+    {
         return Base::find(source);
     }
     using Base::find;
 };
 
-
-class GUIGAMEWRAPPERS_EXPORT SkillsModel : public AbstractGuiWrapperListModel<GuiSkill> , public GuiSkillProvider
-{
+class GUIGAMEWRAPPERS_EXPORT SkillsModel : public AbstractGuiWrapperListModel<GuiSkill>
+    , public GuiSkillProvider {
 public:
     using Base = AbstractGuiWrapperListModel<GuiSkill>;
     using AbstractGuiWrapperListModel::AbstractGuiWrapperListModel;
 
-    QVariant data(const QModelIndex &index, int role) const override;
-    GuiSkillConstPtr find(Core::LibrarySecondarySkillConstPtr source) const override {
+    QVariant         data(const QModelIndex& index, int role) const override;
+    GuiSkillConstPtr find(Core::LibrarySecondarySkillConstPtr source) const override
+    {
         return Base::find(source);
     }
     using Base::find;
 };
 
-class GUIGAMEWRAPPERS_EXPORT SpellsModel : public AbstractGuiWrapperListModel<GuiSpell> , public GuiSpellProvider
-{
+class GUIGAMEWRAPPERS_EXPORT SpellsModel : public AbstractGuiWrapperListModel<GuiSpell>
+    , public GuiSpellProvider {
 public:
     using Base = AbstractGuiWrapperListModel<GuiSpell>;
     using AbstractGuiWrapperListModel::AbstractGuiWrapperListModel;
 
-    QVariant data(const QModelIndex &index, int role) const override;
-    GuiSpellConstPtr find(Core::LibrarySpellConstPtr source) const override {
+    QVariant         data(const QModelIndex& index, int role) const override;
+    GuiSpellConstPtr find(Core::LibrarySpellConstPtr source) const override
+    {
         return Base::find(source);
     }
     using Base::find;
 };
 
-class GUIGAMEWRAPPERS_EXPORT SpellsFilterModel  : public QSortFilterProxyModel
-{
+class GUIGAMEWRAPPERS_EXPORT SpellsFilterModel : public QSortFilterProxyModel {
 public:
-    SpellsFilterModel(QObject * parent);
+    SpellsFilterModel(QObject* parent);
 
     // QSortFilterProxyModel interface
 protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
 };
 
-class GUIGAMEWRAPPERS_EXPORT FactionsModel : public AbstractGuiWrapperListModel<GuiFaction>
-{
+class GUIGAMEWRAPPERS_EXPORT FactionsModel : public AbstractGuiWrapperListModel<GuiFaction> {
 public:
     using Base = AbstractGuiWrapperListModel<GuiFaction>;
     using AbstractGuiWrapperListModel::AbstractGuiWrapperListModel;
 
-    QVariant data(const QModelIndex &index, int role) const override;
-
+    QVariant data(const QModelIndex& index, int role) const override;
 };
 
-class GUIGAMEWRAPPERS_EXPORT FactionsFilterModel  : public QSortFilterProxyModel
-{
+class GUIGAMEWRAPPERS_EXPORT FactionsFilterModel : public QSortFilterProxyModel {
 public:
-    FactionsFilterModel(QObject * parent);
+    FactionsFilterModel(QObject* parent);
 
     // QSortFilterProxyModel interface
 protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
 };
 
-class GUIGAMEWRAPPERS_EXPORT TerrainsModel : public AbstractGuiWrapperListModel<GuiTerrain>
-{
+class GUIGAMEWRAPPERS_EXPORT TerrainsModel : public AbstractGuiWrapperListModel<GuiTerrain> {
 public:
     using Base = AbstractGuiWrapperListModel<GuiTerrain>;
     using AbstractGuiWrapperListModel::AbstractGuiWrapperListModel;
 
-    QVariant data(const QModelIndex &index, int role) const override;
+    QVariant data(const QModelIndex& index, int role) const override;
 };
 
-class GUIGAMEWRAPPERS_EXPORT TerrainsFilterModel  : public QSortFilterProxyModel
-{
+class GUIGAMEWRAPPERS_EXPORT TerrainsFilterModel : public QSortFilterProxyModel {
 public:
-    TerrainsFilterModel(QObject * parent);
+    TerrainsFilterModel(QObject* parent);
 
     // QSortFilterProxyModel interface
 protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
 };
 
-class GUIGAMEWRAPPERS_EXPORT MapObjectsModel : public AbstractGuiWrapperListModel<GuiMapObject>
-{
+class GUIGAMEWRAPPERS_EXPORT MapObjectsModel : public AbstractGuiWrapperListModel<GuiMapObject> {
 public:
     using Base = AbstractGuiWrapperListModel<GuiMapObject>;
     using AbstractGuiWrapperListModel::AbstractGuiWrapperListModel;
 
-    enum MapItemDataRole {
+    enum MapItemDataRole
+    {
         VaraintNames = LastBaseRole + 1,
     };
 
-    QVariant data(const QModelIndex &index, int role) const override;
+    QVariant data(const QModelIndex& index, int role) const override;
 };
 
 class UiCommonModel;
-class GUIGAMEWRAPPERS_EXPORT LibraryModelsProvider : public QObject
-{
+class GUIGAMEWRAPPERS_EXPORT LibraryModelsProvider : public QObject {
     Q_OBJECT
 public:
-    LibraryModelsProvider(Core::IGameDatabase & gameDatabase,
-                          Sound::IMusicBox & musicBox,
-                          IGraphicsLibrary & graphicsLibrary,
-                          QObject * parent = nullptr);
+    LibraryModelsProvider(Core::IGameDatabase& gameDatabase,
+                          Sound::IMusicBox&    musicBox,
+                          IGraphicsLibrary&    graphicsLibrary,
+                          QObject*             parent = nullptr);
 
+    // clang-format off
     ArtifactsModel   * artifacts  () const noexcept { return m_artifacts;}
     UnitsModel       * units      () const noexcept { return m_units;}
     HeroesModel      * heroes     () const noexcept { return m_heroes;}
@@ -238,17 +230,18 @@ public:
     TerrainsModel    * terrains   () const noexcept { return m_terrains;}
     MapObjectsModel  * mapObjects () const noexcept { return m_mapObjects;}
     UiCommonModel    * ui         () const noexcept { return m_uiCommon;}
+    // clang-format on
 
 private:
-    ArtifactsModel    * m_artifacts;
-    UnitsModel        * m_units;
-    HeroesModel       * m_heroes;
-    SkillsModel       * m_skills;
-    SpellsModel       * m_spells;
-    FactionsModel     * m_factions;
-    TerrainsModel     * m_terrains;
-    MapObjectsModel   * m_mapObjects;
-    UiCommonModel     * m_uiCommon;
+    ArtifactsModel*  m_artifacts;
+    UnitsModel*      m_units;
+    HeroesModel*     m_heroes;
+    SkillsModel*     m_skills;
+    SpellsModel*     m_spells;
+    FactionsModel*   m_factions;
+    TerrainsModel*   m_terrains;
+    MapObjectsModel* m_mapObjects;
+    UiCommonModel*   m_uiCommon;
 };
 
 }

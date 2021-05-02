@@ -13,12 +13,10 @@
 
 namespace FreeHeroes::Gui {
 
-
-class BattleControlPlan : public QObject
-{
+class BattleControlPlan : public QObject {
     Q_OBJECT
 public:
-    BattleControlPlan(QObject * parent);
+    BattleControlPlan(QObject* parent);
     ~BattleControlPlan();
 
     void updateAlt();
@@ -36,30 +34,27 @@ signals:
 
     // @todo: no public please?
 public:
-    Core::BattlePlanMove m_planMove;
-    Core::BattlePlanMoveParams m_planMoveParams;
+    Core::BattlePlanMove         m_planMove;
+    Core::BattlePlanMoveParams   m_planMoveParams;
     Core::BattlePlanAttackParams m_planAttackParams;
-    Core::BattlePlanCast m_planCast;
-    Core::BattlePlanCastParams m_planCastParams;
+    Core::BattlePlanCast         m_planCast;
+    Core::BattlePlanCastParams   m_planCastParams;
 
-
-    Core::BattleStackConstPtr m_hoveredStack = nullptr;
+    Core::BattleStackConstPtr m_hoveredStack  = nullptr;
     Core::BattleStackConstPtr m_selectedStack = nullptr;
 
-    Qt::KeyboardModifiers currentModifiers() const { return m_currentModifiers;}
+    Qt::KeyboardModifiers                    currentModifiers() const { return m_currentModifiers; }
     Core::BattlePlanAttackParams::Alteration getAlt() const { return m_alt; }
-    Core::BattlePlanAttackParams::Alteration getAltForButtons() const { return m_altButtons;}
-
+    Core::BattlePlanAttackParams::Alteration getAltForButtons() const { return m_altButtons; }
 
     std::vector<Core::BattlePlanAttackParams::Alteration> m_currentAlternatives;
 
     bool m_humanControlAvailable = false;
+
 private:
-    Core::BattlePlanAttackParams::Alteration m_alt = Core::BattlePlanAttackParams::Alteration::None;
-    Qt::KeyboardModifiers m_currentModifiers = Qt::NoModifier;
-    Core::BattlePlanAttackParams::Alteration m_altButtons = Core::BattlePlanAttackParams::Alteration::None;
+    Core::BattlePlanAttackParams::Alteration m_alt              = Core::BattlePlanAttackParams::Alteration::None;
+    Qt::KeyboardModifiers                    m_currentModifiers = Qt::NoModifier;
+    Core::BattlePlanAttackParams::Alteration m_altButtons       = Core::BattlePlanAttackParams::Alteration::None;
 };
-
-
 
 }

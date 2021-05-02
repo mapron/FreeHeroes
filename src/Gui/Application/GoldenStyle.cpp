@@ -13,6 +13,7 @@
 
 #include <QDebug>
 
+// clang-format off
 namespace FreeHeroes::Gui {
 
 GoldenStyle::GoldenStyle() :

@@ -15,17 +15,16 @@
 namespace FreeHeroes::Gui {
 
 AnimationTree::AnimationTree()
-    : m_root{std::make_unique<QSequentialAnimationGroup>()}
+    : m_root{ std::make_unique<QSequentialAnimationGroup>() }
     , m_currentGroup{ m_root.get() }
 {
 }
 
 AnimationTree::~AnimationTree()
 {
-
 }
 
-void AnimationTree::addPropertyAnimation(QObject* target, int msecs, const QByteArray & propertyName, const QVariant & endValue)
+void AnimationTree::addPropertyAnimation(QObject* target, int msecs, const QByteArray& propertyName, const QVariant& endValue)
 {
     auto anim = new QPropertyAnimation(target, propertyName, m_currentGroup);
     anim->setDuration(msecs);
@@ -33,12 +32,14 @@ void AnimationTree::addPropertyAnimation(QObject* target, int msecs, const QByte
     m_currentGroup->addAnimation(anim);
 }
 
-void AnimationTree::addCallback(std::function<void ()> callback, int pauseDuration) {
+void AnimationTree::addCallback(std::function<void()> callback, int pauseDuration)
+{
     auto anim = new OneTimeCallAnimation(callback, pauseDuration, m_currentGroup);
     m_currentGroup->addAnimation(anim);
 }
 
-void AnimationTree::runSync(bool excludeInput) {
+void AnimationTree::runSync(bool excludeInput)
+{
     QEventLoop loop;
     QObject::connect(m_root.get(), &QAbstractAnimation::finished, &loop, &QEventLoop::quit);
     m_root->start();
@@ -47,34 +48,37 @@ void AnimationTree::runSync(bool excludeInput) {
 
 void AnimationTree::runAsync()
 {
-    auto * root = m_root.release();
+    auto* root = m_root.release();
     root->start(QAbstractAnimation::DeleteWhenStopped);
 
-    m_root = std::make_unique<QSequentialAnimationGroup>();
+    m_root         = std::make_unique<QSequentialAnimationGroup>();
     m_currentGroup = m_root.get();
 }
 
-void AnimationTree::beginParallel() {
-    QAnimationGroup * newGroup = new QParallelAnimationGroup(m_currentGroup);
+void AnimationTree::beginParallel()
+{
+    QAnimationGroup* newGroup = new QParallelAnimationGroup(m_currentGroup);
     m_startedGroups << m_currentGroup;
     m_currentGroup = newGroup;
 }
 
-void AnimationTree::beginSequental() {
-    QAnimationGroup * newGroup = new QSequentialAnimationGroup(m_currentGroup);
+void AnimationTree::beginSequental()
+{
+    QAnimationGroup* newGroup = new QSequentialAnimationGroup(m_currentGroup);
     m_startedGroups << m_currentGroup;
     m_currentGroup = newGroup;
 }
 
-void AnimationTree::endGroup() {
+void AnimationTree::endGroup()
+{
     m_currentGroup = m_startedGroups.takeLast();
 }
 
-void AnimationTree::pause(int msec) {
+void AnimationTree::pause(int msec)
+{
     if (msec <= 0)
         return;
     m_currentGroup->addAnimation(new QPauseAnimation(msec, m_currentGroup));
 }
-
 
 }

@@ -33,57 +33,56 @@ void CasualtiesWidget::setResultInfo(const CasualtiesWidget::Info& info)
     update();
 }
 
-void CasualtiesWidget::paintEvent(QPaintEvent* )
+void CasualtiesWidget::paintEvent(QPaintEvent*)
 {
-    QPainter p(this);
+    QPainter          p(this);
     QStyleOptionFrame opt;
     opt.initFrom(this);
     opt.frameShape = QFrame::Shape::Panel;
-    opt.rect.adjust(0,0,0,-20);
+    opt.rect.adjust(0, 0, 0, -20);
     this->style()->drawControl(QStyle::CE_ShapedFrame, &opt, &p, this);
 
-    int unitCount = m_info.units.size();
-    const int unitPixmapWidth = 32;
+    int       unitCount        = m_info.units.size();
+    const int unitPixmapWidth  = 32;
     const int unitPixmapHeight = 32;
-    const int topOffset = 3;
-    const int verticalSpacing = 4;
-    const int horSpacing = 10;
+    const int topOffset        = 3;
+    const int verticalSpacing  = 4;
+    const int horSpacing       = 10;
 
     QRect r = this->rect().adjusted(0, 0, -1, -1);
 
     if (m_info.units.isEmpty()) {
-        QString str = tr("None");
-        auto fm = QFontMetrics(this->font());
-        int numberStrWidth = fm.horizontalAdvance(str);
-        int numberStrHeight = fm.height();
+        QString str             = tr("None");
+        auto    fm              = QFontMetrics(this->font());
+        int     numberStrWidth  = fm.horizontalAdvance(str);
+        int     numberStrHeight = fm.height();
         p.setPen(Qt::white);
-        p.drawText(r.width() / 2 - numberStrWidth / 2, topOffset + unitPixmapWidth / 2 + numberStrHeight  / 2, str);
+        p.drawText(r.width() / 2 - numberStrWidth / 2, topOffset + unitPixmapWidth / 2 + numberStrHeight / 2, str);
         return;
     }
 
-    QFont f  = this->font();
+    QFont f = this->font();
     f.setPixelSize(12);
     f.setStyleStrategy(QFont::StyleStrategy(f.styleStrategy() | QFont::NoSubpixelAntialias));
     p.setFont(f);
 
     QStringList numberLabels;
-    QList<int> numberWidths;
-    int maxLabelWidth = 0;
-    const int numberStrHeight = QFontMetrics(f).height();
-    for (auto & unit : m_info.units) {
-        QString numberStr = QString::number(unit.count);
-        int numberStrWidth = QFontMetrics(f).horizontalAdvance(numberStr);
+    QList<int>  numberWidths;
+    int         maxLabelWidth   = 0;
+    const int   numberStrHeight = QFontMetrics(f).height();
+    for (auto& unit : m_info.units) {
+        QString numberStr      = QString::number(unit.count);
+        int     numberStrWidth = QFontMetrics(f).horizontalAdvance(numberStr);
         numberLabels << numberStr;
         numberWidths << numberStrWidth;
         maxLabelWidth = std::max(maxLabelWidth, numberStrWidth);
     }
-    const int unitSpace = std::max(0, maxLabelWidth - unitPixmapWidth) + horSpacing;
-    const int cellWidth = unitPixmapWidth + unitSpace;
-    const int infoWidth = unitPixmapWidth * unitCount + unitSpace * (unitCount - 1);
-    const int offsetInWidget = r.width()/2 - infoWidth / 2;
-    for (int index = 0; index < m_info.units.size(); index ++)
-    {
-        QPixmap pix = m_info.units[index].portrait;
+    const int unitSpace      = std::max(0, maxLabelWidth - unitPixmapWidth) + horSpacing;
+    const int cellWidth      = unitPixmapWidth + unitSpace;
+    const int infoWidth      = unitPixmapWidth * unitCount + unitSpace * (unitCount - 1);
+    const int offsetInWidget = r.width() / 2 - infoWidth / 2;
+    for (int index = 0; index < m_info.units.size(); index++) {
+        QPixmap   pix            = m_info.units[index].portrait;
         const int unitOffsetLeft = offsetInWidget + cellWidth * index;
         p.drawPixmap(unitOffsetLeft, topOffset, pix);
         const int labelOffsetCenter = unitOffsetLeft + pix.width() / 2;
@@ -93,6 +92,5 @@ void CasualtiesWidget::paintEvent(QPaintEvent* )
 }
 
 CasualtiesWidget::~CasualtiesWidget() = default;
-
 
 }

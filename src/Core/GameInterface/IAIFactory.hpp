@@ -15,7 +15,7 @@ class IAIFactory {
 public:
     virtual ~IAIFactory() = default;
 
-    virtual std::unique_ptr<IAI> makeAI(const IAI::AIParams & params, IBattleControl & battleControl) = 0;
+    virtual std::unique_ptr<IAI> makeAI(const IAI::AIParams& params, IBattleControl& battleControl) = 0;
 };
 
 }

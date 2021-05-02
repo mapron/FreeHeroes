@@ -8,19 +8,19 @@
 namespace FreeHeroes::Core {
 
 struct BattleStack;
-using BattleStackConstPtr = const BattleStack*;
+using BattleStackConstPtr   = const BattleStack*;
 using BattleStackMutablePtr = BattleStack*;
 
 struct BattleHero;
 using BattleHeroMutablePtr = BattleHero*;
-using BattleHeroConstPtr = const BattleHero*;
+using BattleHeroConstPtr   = const BattleHero*;
 
 struct BattleArmy;
-using BattleArmyConstPtr = const BattleArmy*;
+using BattleArmyConstPtr   = const BattleArmy*;
 using BattleArmyMutablePtr = BattleArmy*;
 
 struct BattleSquad;
-using BattleSquadConstPtr = const BattleSquad*;
+using BattleSquadConstPtr   = const BattleSquad*;
 using BattleSquadMutablePtr = BattleSquad*;
 
 }

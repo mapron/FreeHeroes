@@ -10,7 +10,6 @@
 #include <QPolygonF>
 #include <QPointF>
 
-
 namespace FreeHeroes::Gui {
 
 struct BattleFieldPaintGeometry {
@@ -23,11 +22,11 @@ struct BattleFieldPaintGeometry {
     QPointF hexCenterFromCoord(const Core::BattlePosition pos) const noexcept;
     QPointF hexCenterFromExtCoord(const Core::BattlePositionExtended pos) const noexcept;
 
-    QPolygonF getHexPolygon(const Core::BattlePosition pos, qreal scale = 1.0)  const noexcept;
+    QPolygonF getHexPolygon(const Core::BattlePosition pos, qreal scale = 1.0) const noexcept;
 
-    Core::BattlePosition coordFromPos(const QPointF pos)  const noexcept;
+    Core::BattlePosition coordFromPos(const QPointF pos) const noexcept;
 
-    Core::BattleAttackDirection attackDirectionFromRelativePoint(const QPointF posInCell, bool allowTopBottom)  const noexcept;
+    Core::BattleAttackDirection attackDirectionFromRelativePoint(const QPointF posInCell, bool allowTopBottom) const noexcept;
 };
 
 extern const BattleFieldPaintGeometry defaultGeometry;

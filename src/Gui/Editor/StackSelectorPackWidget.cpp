@@ -14,7 +14,6 @@
 
 #include "Profiler.hpp"
 
-
 namespace FreeHeroes::Gui {
 
 using namespace Core;
@@ -34,32 +33,31 @@ StackSelectorPackWidget::StackSelectorPackWidget(QWidget* parent)
                      << m_ui->stackEditor7;
 
     m_stackLabels << m_ui->label_3
-        << m_ui->label_4
-        << m_ui->label_9
-        << m_ui->label_10
-        << m_ui->label_11
-        << m_ui->label_12
-        << m_ui->label_13; // @todo: label numbers? omg.
+                  << m_ui->label_4
+                  << m_ui->label_9
+                  << m_ui->label_10
+                  << m_ui->label_11
+                  << m_ui->label_12
+                  << m_ui->label_13; // @todo: label numbers? omg.
 }
-
 
 void StackSelectorPackWidget::setUnitsModel(QAbstractItemModel* unitRootModel)
 {
-    for (auto * selector : m_stackSelectors)
+    for (auto* selector : m_stackSelectors)
         selector->setUnitsModel(unitRootModel);
 }
 
 void StackSelectorPackWidget::setSource(GuiAdventureSquad* squad)
 {
-    m_squad = squad;
+    m_squad          = squad;
     size_t squadSize = squad->getCount();
-    Q_ASSERT(m_stackSelectors.size() >= (int)squadSize);
+    Q_ASSERT(m_stackSelectors.size() >= (int) squadSize);
     for (size_t i = 0; i < squadSize; ++i) {
         m_stackSelectors[i]->setSource(m_squad->getStack(i));
         m_stackSelectors[i]->setVisible(true);
         m_stackLabels[i]->setVisible(true);
     }
-    for (int i = (int)squadSize; i < m_stackSelectors.size(); ++i) {
+    for (int i = (int) squadSize; i < m_stackSelectors.size(); ++i) {
         //m_stackSelectors[i]->setSource(nullptr);
         m_stackSelectors[i]->setVisible(false);
         m_stackLabels[i]->setVisible(false);

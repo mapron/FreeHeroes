@@ -9,17 +9,15 @@
 
 #include <QDialog>
 
-namespace Ui
-{
+namespace Ui {
 class SettingsWidget;
 }
 
 namespace FreeHeroes::Gui {
 
-class SettingsWidget : public QDialog
-{
+class SettingsWidget : public QDialog {
 public:
-    SettingsWidget(QSettings & uiSettings, IAppSettings::AllSettings & settings, QWidget * parent);
+    SettingsWidget(QSettings& uiSettings, IAppSettings::AllSettings& settings, QWidget* parent);
     ~SettingsWidget();
 
     void accept() override;

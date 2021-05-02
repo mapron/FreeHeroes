@@ -19,12 +19,11 @@ class QAbstractItemModel;
 
 namespace FreeHeroes::Gui {
 
-
 class GUIGAMEWRAPPERS_EXPORT GuiAdventureStack : public QObject {
     Q_OBJECT
 
 public:
-    GuiAdventureStack(GuiUnitProvider & unitProvider, Core::AdventureStackMutablePtr source);
+    GuiAdventureStack(GuiUnitProvider& unitProvider, Core::AdventureStackMutablePtr source);
 
     void setUnit(Core::LibraryUnitConstPtr unit);
     void setCount(int count);
@@ -36,27 +35,27 @@ public:
 
     GuiUnitConstPtr getGuiUnit() const;
 
-    Core::AdventureStackConstPtr getSource() const { return m_source;}
+    Core::AdventureStackConstPtr getSource() const { return m_source; }
 
 signals:
     void dataChanged();
 
 private:
-    GuiUnitProvider & m_unitProvider;
-    Core::AdventureStackMutablePtr m_source = nullptr;
-    GuiUnitConstPtr m_guiUnit = nullptr;
+    GuiUnitProvider&               m_unitProvider;
+    Core::AdventureStackMutablePtr m_source  = nullptr;
+    GuiUnitConstPtr                m_guiUnit = nullptr;
 };
-using GuiAdventureStackConstPtr = const GuiAdventureStack *;
+using GuiAdventureStackConstPtr = const GuiAdventureStack*;
 
 class GUIGAMEWRAPPERS_EXPORT GuiAdventureSquad : public QObject {
     Q_OBJECT
 public:
-    GuiAdventureSquad(GuiUnitProvider & unitProvider, Core::AdventureSquadMutablePtr source);
+    GuiAdventureSquad(GuiUnitProvider& unitProvider, Core::AdventureSquadMutablePtr source);
 
-    const GuiAdventureStack * getStack(size_t index) const;
-    GuiAdventureStack * getStack(size_t index);
+    const GuiAdventureStack* getStack(size_t index) const;
+    GuiAdventureStack*       getStack(size_t index);
 
-    int getStackCount(size_t index) const;
+    int                       getStackCount(size_t index) const;
     Core::LibraryUnitConstPtr getStackUnitLibrary(size_t index) const;
 
     void clearAll();
@@ -68,7 +67,7 @@ public:
 
     void setFormation(bool compact);
 
-    Core::AdventureSquadConstPtr   getSource() const { return m_source;}
+    Core::AdventureSquadConstPtr getSource() const { return m_source; }
 
 signals:
     void dataChanged();
@@ -90,33 +89,33 @@ class HeroSkillsEditModel;
 class GUIGAMEWRAPPERS_EXPORT GuiAdventureHero : public QObject {
     Q_OBJECT
 public:
-    GuiAdventureHero(GuiHeroProvider & heroProvider, Core::AdventureHeroMutablePtr source);
+    GuiAdventureHero(GuiHeroProvider& heroProvider, Core::AdventureHeroMutablePtr source);
     ~GuiAdventureHero();
 
     void setHero(Core::LibraryHeroConstPtr hero);
     void resetHeroToDefault();
 
-    void createArtifactsModelsIfNeeded(ArtifactsModel * artifacts);
+    void createArtifactsModelsIfNeeded(ArtifactsModel* artifacts);
     void refreshArtifactsModels();
 
-    void createSpellsModelsIfNeeded(SpellsModel * spellsModel);
+    void createSpellsModelsIfNeeded(SpellsModel* spellsModel);
     void refreshSpellsModels();
 
-    void createSkillsModelsIfNeeded(SkillsModel * skillsModel);
+    void createSkillsModelsIfNeeded(SkillsModel* skillsModel);
     void refreshSkillsModels();
 
     QString getName() const;
     QString getClassName() const;
 
-    Core::AdventureHeroConstPtr   getSource() const { return m_source;}
-    Core::AdventureHeroMutablePtr getSource()       { return m_source;}
+    Core::AdventureHeroConstPtr   getSource() const { return m_source; }
+    Core::AdventureHeroMutablePtr getSource() { return m_source; }
 
     GuiHeroConstPtr getGuiHero() const;
 
-    QAbstractItemModel * getBagEditModel() const;
-    QAbstractItemModel * getWearingEditModel() const;
-    QAbstractItemModel * getSpellbookEditModel() const;
-    QAbstractItemModel * getSkillsEditModel() const;
+    QAbstractItemModel* getBagEditModel() const;
+    QAbstractItemModel* getWearingEditModel() const;
+    QAbstractItemModel* getSpellbookEditModel() const;
+    QAbstractItemModel* getSkillsEditModel() const;
 
     void updateGuiState();
     void emitChanges();
@@ -126,30 +125,30 @@ signals:
     void dataChanged();
 
 private:
-    GuiHeroProvider             & m_heroProvider;
+    GuiHeroProvider&              m_heroProvider;
     Core::AdventureHeroMutablePtr m_source = nullptr;
     GuiHeroConstPtr               m_guiHero;
-    HeroBagEditModel            * m_bagEditModel = nullptr;
-    HeroWearingEditModel        * m_wearingEditModel = nullptr;
-    HeroSpellbookEditModel      * m_spellbookEditModel = nullptr;
-    HeroSkillsEditModel         * m_skillsEditModel = nullptr;
+    HeroBagEditModel*             m_bagEditModel       = nullptr;
+    HeroWearingEditModel*         m_wearingEditModel   = nullptr;
+    HeroSpellbookEditModel*       m_spellbookEditModel = nullptr;
+    HeroSkillsEditModel*          m_skillsEditModel    = nullptr;
 };
 
 class GUIGAMEWRAPPERS_EXPORT GuiAdventureArmy : public QObject {
     Q_OBJECT
 public:
-    GuiAdventureArmy(GuiUnitProvider & unitProvider,
-                     GuiHeroProvider & heroProvider,
+    GuiAdventureArmy(GuiUnitProvider&              unitProvider,
+                     GuiHeroProvider&              heroProvider,
                      Core::AdventureArmyMutablePtr source);
 
-    const GuiAdventureSquad * getSquad() const { return &m_squad; }
-          GuiAdventureSquad * getSquad()       { return &m_squad; }
+    const GuiAdventureSquad* getSquad() const { return &m_squad; }
+    GuiAdventureSquad*       getSquad() { return &m_squad; }
 
-    const GuiAdventureHero * getHero() const { return &m_hero; }
-          GuiAdventureHero * getHero()       { return &m_hero; }
+    const GuiAdventureHero* getHero() const { return &m_hero; }
+    GuiAdventureHero*       getHero() { return &m_hero; }
 
-    Core::AdventureArmyConstPtr   getSource() const { return m_source;}
-    Core::AdventureArmyMutablePtr getSource()       { return m_source;}
+    Core::AdventureArmyConstPtr   getSource() const { return m_source; }
+    Core::AdventureArmyMutablePtr getSource() { return m_source; }
 
     void updateGuiState();
     void emitChanges();

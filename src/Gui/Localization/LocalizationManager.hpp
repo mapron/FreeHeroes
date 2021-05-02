@@ -10,7 +10,6 @@
 #include "FsUtils.hpp"
 #include "IResourceLibrary.hpp"
 
-
 #include <QTranslator>
 #include <QMap>
 #include <QVector>
@@ -19,15 +18,14 @@
 
 namespace FreeHeroes::Gui {
 
-class GUILOCALIZATION_EXPORT LocalizationManager : public QTranslator
-{
+class GUILOCALIZATION_EXPORT LocalizationManager : public QTranslator {
 public:
-    LocalizationManager(QString mainLocaleId, Core::IResourceLibrary & resourceLibrary);
+    LocalizationManager(QString mainLocaleId, Core::IResourceLibrary& resourceLibrary);
 
     // QTranslator interface
 public:
     QString translate(const char* context, const char* sourceText, const char* disambiguation, int n) const override;
-    bool isEmpty() const override;
+    bool    isEmpty() const override;
 
 private:
     using KeyToPluralsMapping = QMap<std::string, std::vector<std::string>>;
@@ -38,8 +36,8 @@ private:
 
 private:
     using LocaleMap = QMap<std::string, KeyToPluralsMapping>;
-    LocaleMap m_records;
-    Core::IResourceLibrary & m_resourceLibrary;
+    LocaleMap               m_records;
+    Core::IResourceLibrary& m_resourceLibrary;
 
     std::function<int(int n, int availableSize)> m_pluralSelector;
 

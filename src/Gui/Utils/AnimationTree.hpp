@@ -13,23 +13,20 @@
 #include <functional>
 #include <memory>
 
-
 class QSequentialAnimationGroup;
 class QAnimationGroup;
 class QObject;
 
 namespace FreeHeroes::Gui {
 
-
 class GUIUTILS_EXPORT AnimationTree {
-
 public:
     AnimationTree();
     ~AnimationTree();
 
-    void addPropertyAnimation(QObject *target, int msecs, const QByteArray &propertyName, const QVariant & endValue);
+    void addPropertyAnimation(QObject* target, int msecs, const QByteArray& propertyName, const QVariant& endValue);
 
-    void addCallback (std::function<void()> callback, int pauseDuration);
+    void addCallback(std::function<void()> callback, int pauseDuration);
 
     void runSync(bool excludeInput);
     void runAsync();
@@ -40,10 +37,9 @@ public:
     void pause(int msec);
 
 private:
-
     std::unique_ptr<QSequentialAnimationGroup> m_root;
-    QAnimationGroup * m_currentGroup;
-    QList<QAnimationGroup *> m_startedGroups;
+    QAnimationGroup*                           m_currentGroup;
+    QList<QAnimationGroup*>                    m_startedGroups;
 };
 
 }

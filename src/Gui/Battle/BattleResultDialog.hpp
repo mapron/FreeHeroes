@@ -14,29 +14,28 @@
 
 namespace FreeHeroes::Gui {
 class LibraryModelsProvider;
-class GUIBATTLE_EXPORT BattleResultDialog : public QDialog
-{
+class GUIBATTLE_EXPORT BattleResultDialog : public QDialog {
     Q_OBJECT
 public:
-    BattleResultDialog(LibraryModelsProvider & modelsProvider, QWidget * parent);
+    BattleResultDialog(LibraryModelsProvider& modelsProvider, QWidget* parent);
 
     struct SideInfo {
-        QString name;
-        QPixmap portrait;
-        bool win = false;
+        QString                name;
+        QPixmap                portrait;
+        bool                   win = false;
         CasualtiesWidget::Info loss;
     };
 
     struct ResultInfo {
         SideInfo sides[2];
-        QString resultDescription;
-        bool goodResult = true;
+        QString  resultDescription;
+        bool     goodResult = true;
     };
 
-    void setResultInfo(const ResultInfo & info);
+    void setResultInfo(const ResultInfo& info);
     ~BattleResultDialog();
 
-    void showEvent(QShowEvent * ev) override;
+    void showEvent(QShowEvent* ev) override;
 
 private:
     struct Impl;
@@ -44,5 +43,3 @@ private:
 };
 
 }
-
-

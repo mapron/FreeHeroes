@@ -14,23 +14,21 @@
 #include <QVariant>
 #include <QMouseEvent>
 
-namespace  FreeHeroes::Gui {
+namespace FreeHeroes::Gui {
 
 HoverHelper::HoverHelper(QWidget* parent)
     : QObject(parent)
     , m_parent(parent)
 {
-
 }
 
 HoverHelper::~HoverHelper()
 {
-
 }
 
 void HoverHelper::addWidgets(const QList<QWidget*>& watch)
 {
-    for (auto * w : watch)
+    for (auto* w : watch)
         w->installEventFilter(this);
 }
 
@@ -48,10 +46,9 @@ void HoverHelper::setHoverLabel(QLabel* label)
 
 bool HoverHelper::eventFilter(QObject* watched, QEvent* event)
 {
-    if (event->type() == QEvent::HoverEnter || event->type() == QEvent::HoverLeave ) {
-
-        QWidget * w = qobject_cast<QWidget*>(watched);
-        w = m_aliases.value(w, w);
+    if (event->type() == QEvent::HoverEnter || event->type() == QEvent::HoverLeave) {
+        QWidget* w = qobject_cast<QWidget*>(watched);
+        w          = m_aliases.value(w, w);
         if (m_hoverLabel && w) {
             const QString text = w->property("hoverName").toString();
             if (event->type() == QEvent::HoverEnter) {
@@ -68,30 +65,31 @@ bool HoverHelper::eventFilter(QObject* watched, QEvent* event)
         }
     }
     if (event->type() == QEvent::MouseButtonPress) {
-        QMouseEvent * me = static_cast<QMouseEvent *>(event);
+        QMouseEvent* me = static_cast<QMouseEvent*>(event);
         if (me->modifiers() == Qt::NoModifier && me->button() == Qt::RightButton) {
-            QWidget * w = qobject_cast<QWidget*>(watched);
-            w = m_aliases.value(w, w);
+            QWidget* w = qobject_cast<QWidget*>(watched);
+            w          = m_aliases.value(w, w);
             return showPopup(w, false);
         }
         if (me->modifiers() == Qt::NoModifier && me->button() == Qt::LeftButton) {
-            QWidget * w = qobject_cast<QWidget*>(watched);
-            w = m_aliases.value(w, w);
+            QWidget* w = qobject_cast<QWidget*>(watched);
+            w          = m_aliases.value(w, w);
             return showPopup(w, true);
         }
     }
     if (event->type() == QEvent::MouseButtonRelease) {
-        QMouseEvent * me = static_cast<QMouseEvent *>(event);
+        QMouseEvent* me = static_cast<QMouseEvent*>(event);
         if (me->modifiers() == Qt::NoModifier && me->button() == Qt::RightButton) {
-            QWidget * w = qobject_cast<QWidget*>(watched);
-            w = m_aliases.value(w, w);
+            QWidget* w = qobject_cast<QWidget*>(watched);
+            w          = m_aliases.value(w, w);
             return hidePopup(w);
         }
     }
     return QObject::eventFilter(watched, event);
 }
 
-bool HoverHelper::showPopup(QWidget * what, bool isModal) {
+bool HoverHelper::showPopup(QWidget* what, bool isModal)
+{
     if (!what)
         return false;
     QString popupDescr = what->property("popupDescr").toString();
@@ -103,18 +101,18 @@ bool HoverHelper::showPopup(QWidget * what, bool isModal) {
             return false;
     }
 
-   // return true;
-    QPixmap popupIcon   = what->property("popupPixmap").value<QPixmap>();
-    QString popupBottom = what->property("popupBottom").toString();
-    QPoint offset       = what->property("popupOffset").value<QPoint>();
-    QString popupOffsetAnchorHor= what->property("popupOffsetAnchorHor").toString();
-    QString popupOffsetAnchorVert= what->property("popupOffsetAnchorVert").toString();
+    // return true;
+    QPixmap popupIcon             = what->property("popupPixmap").value<QPixmap>();
+    QString popupBottom           = what->property("popupBottom").toString();
+    QPoint  offset                = what->property("popupOffset").value<QPoint>();
+    QString popupOffsetAnchorHor  = what->property("popupOffsetAnchorHor").toString();
+    QString popupOffsetAnchorVert = what->property("popupOffsetAnchorVert").toString();
     if (m_dialog) {
         m_dialog->deleteLater();
     }
-    m_dialog = new GeneralPopupDialog(popupDescr, {{popupIcon, popupBottom}}, isModal, false, m_parent);
+    m_dialog = new GeneralPopupDialog(popupDescr, { { popupIcon, popupBottom } }, isModal, false, m_parent);
 
-    QSize s = m_dialog->sizeHint();
+    QSize  s         = m_dialog->sizeHint();
     QPoint globalPos = m_parent->mapToGlobal(offset);
     if (popupOffsetAnchorHor == "center")
         globalPos -= QPoint(s.width() / 2, 0);
@@ -132,7 +130,8 @@ bool HoverHelper::showPopup(QWidget * what, bool isModal) {
         m_dialog->show();
     return true;
 }
-bool HoverHelper::hidePopup(QWidget * what) {
+bool HoverHelper::hidePopup(QWidget* what)
+{
     QString popupDescr = what->property("popupDescr").toString();
     if (popupDescr.isEmpty())
         return false;

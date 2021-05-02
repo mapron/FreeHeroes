@@ -21,26 +21,28 @@ class IRandomGenerator;
 
 class CORELOGIC_EXPORT AdventureEstimation {
 public:
-    AdventureEstimation(LibraryGameRulesConstPtr rules) : m_rules(rules) {}
+    AdventureEstimation(LibraryGameRulesConstPtr rules)
+        : m_rules(rules)
+    {}
     struct LevelUpResult {
-        bool valid = false;
-        int newLevel = 0;
+        bool                                       valid    = false;
+        int                                        newLevel = 0;
         std::vector<LibrarySecondarySkillConstPtr> choices;
-        std::vector<int> choicesLevels;
-        HeroPrimaryParamType primarySkillUpdated = HeroPrimaryParamType::Attack;
+        std::vector<int>                           choicesLevels;
+        HeroPrimaryParamType                       primarySkillUpdated = HeroPrimaryParamType::Attack;
 
         bool isValid() const noexcept { return valid; }
     };
 
-    void calculateArmy(AdventureArmy & army, LibraryTerrainConstPtr terrain);
+    void calculateArmy(AdventureArmy& army, LibraryTerrainConstPtr terrain);
     void calculateDayStart(AdventureHero& hero);
 
-    void calculateHeroLevelUp(AdventureHero& hero);
-    LevelUpResult calculateHeroLevelUp(AdventureHero& hero, IRandomGenerator & rng);
-    void applyLevelUpChoice(AdventureHero& hero, LibrarySecondarySkillConstPtr skill);
+    void          calculateHeroLevelUp(AdventureHero& hero);
+    LevelUpResult calculateHeroLevelUp(AdventureHero& hero, IRandomGenerator& rng);
+    void          applyLevelUpChoice(AdventureHero& hero, LibrarySecondarySkillConstPtr skill);
 
 private:
-    void bindTypes(sol::state & lua);
+    void bindTypes(sol::state& lua);
     void calculateHeroStats(AdventureHero& hero);
     void calculateHeroStatsAfterSquad(AdventureHero& hero, const AdventureSquad& squad);
     void calculateSquad(AdventureSquad& squad, bool reduceExtraFactionsPenalty);

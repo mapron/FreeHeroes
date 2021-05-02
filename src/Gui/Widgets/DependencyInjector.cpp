@@ -11,8 +11,9 @@ namespace FreeHeroes::Gui {
 
 namespace {
 
-QVariant getTopLevelData(const char* propName) {
-    for (QWidget * topLevelWidget : QApplication::topLevelWidgets()) {
+QVariant getTopLevelData(const char* propName)
+{
+    for (QWidget* topLevelWidget : QApplication::topLevelWidgets()) {
         QVariant data = topLevelWidget->property(propName);
         if (data.isValid())
             return data;
@@ -22,7 +23,8 @@ QVariant getTopLevelData(const char* propName) {
 
 }
 
-QVariant loadDependencyData(QWidget* widget, const char* propName) {
+QVariant loadDependencyData(QWidget* widget, const char* propName)
+{
     if (!widget) {
         QVariant data = getTopLevelData(propName);
         if (data.isValid())
@@ -43,6 +45,5 @@ QVariant loadDependencyData(QWidget* widget, const char* propName) {
     throw std::runtime_error("Dependency data is not initialized:" + std::string(propName));
     return QVariant();
 }
-
 
 }

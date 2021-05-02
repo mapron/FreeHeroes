@@ -9,15 +9,14 @@
 
 namespace FreeHeroes::Core {
 
-class IReplayHandle
-{
+class IReplayHandle {
 public:
     virtual ~IReplayHandle() = default;
 
-    virtual void rewindToStart() = 0;
-    virtual size_t getSize() const = 0;
-    virtual size_t getPos() const = 0;
-    virtual bool executeCurrent() = 0;
+    virtual void   rewindToStart()  = 0;
+    virtual size_t getSize() const  = 0;
+    virtual size_t getPos() const   = 0;
+    virtual bool   executeCurrent() = 0;
 };
 
 }

@@ -13,18 +13,20 @@
 
 namespace FreeHeroes::Gui {
 
-class GUIRESOURCE_EXPORT Sprite : public ISprite
-{
+class GUIRESOURCE_EXPORT Sprite : public ISprite {
 public:
-    int getGroupsCount() const override {
+    int getGroupsCount() const override
+    {
         return m_groups.size();
     }
 
-    QList<int> getGroupsIds() const override {
+    QList<int> getGroupsIds() const override
+    {
         return m_groups.keys();
     }
 
-    SpriteSequencePtr getFramesForGroup(int group) const override {
+    SpriteSequencePtr getFramesForGroup(int group) const override
+    {
         return m_groups.value(group);
     }
 

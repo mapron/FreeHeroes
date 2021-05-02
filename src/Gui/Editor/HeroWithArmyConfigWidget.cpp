@@ -36,8 +36,6 @@ namespace FreeHeroes::Gui {
 
 using namespace Core;
 
-
-
 struct HeroWithArmyConfigWidget::Impl {
 };
 
@@ -53,17 +51,16 @@ HeroWithArmyConfigWidget::HeroWithArmyConfigWidget(QWidget* parent)
     }
     ProfilerScope scope2("remain");
 
-    QList<QSpinBox*> primarySpinBoxes{m_ui->spinBoxAttack,
-        m_ui->spinBoxDefense,
-        m_ui->spinBoxSp  ,
-        m_ui->spinBoxInt  };
+    QList<QSpinBox*> primarySpinBoxes{ m_ui->spinBoxAttack,
+                                       m_ui->spinBoxDefense,
+                                       m_ui->spinBoxSp,
+                                       m_ui->spinBoxInt };
 
-    for (auto * box : primarySpinBoxes) {
+    for (auto* box : primarySpinBoxes) {
         connect(box, qOverload<int>(&QSpinBox::valueChanged), this, &HeroWithArmyConfigWidget::primaryStatEdited);
     }
     connect(m_ui->spinBoxLevel, qOverload<int>(&QSpinBox::valueChanged), this, &HeroWithArmyConfigWidget::levelEdited);
     connect(m_ui->spinBoxExp, qOverload<int>(&QSpinBox::valueChanged), this, &HeroWithArmyConfigWidget::expEdited);
-
 
     QList<QPushButton*> modeButtons{
         m_ui->pushButtonSelectArmy,
@@ -85,10 +82,10 @@ HeroWithArmyConfigWidget::HeroWithArmyConfigWidget(QWidget* parent)
         m_ui->pageSpells,
         m_ui->pageOverview
     };
-    for (auto * modeButton : modeButtons) {
-        connect(modeButton, &QPushButton::clicked, this, [this, modeButton, modeButtons, modePages](){
+    for (auto* modeButton : modeButtons) {
+        connect(modeButton, &QPushButton::clicked, this, [this, modeButton, modeButtons, modePages]() {
             const int index = modeButtons.indexOf(qobject_cast<QPushButton*>(sender()));
-            for (auto * modeButtonOther : modeButtons) {
+            for (auto* modeButtonOther : modeButtons) {
                 modeButtonOther->setChecked(modeButtonOther == modeButton);
             }
             this->m_ui->stackedWidget->setCurrentWidget(modePages[index]);
@@ -96,22 +93,20 @@ HeroWithArmyConfigWidget::HeroWithArmyConfigWidget(QWidget* parent)
     }
     m_ui->stackedWidget->setCurrentWidget(m_ui->pageArmy);
 
-
     connect(m_ui->pushButtonShowHeroDialog, &QPushButton::clicked, this, &HeroWithArmyConfigWidget::showHeroDialog);
 
-    connect(m_ui->pushButtonAddAllArtifacts  , &QPushButton::clicked, this, &HeroWithArmyConfigWidget::makeAllArtifacts);
+    connect(m_ui->pushButtonAddAllArtifacts, &QPushButton::clicked, this, &HeroWithArmyConfigWidget::makeAllArtifacts);
     connect(m_ui->pushButtonClearArtifactsBag, &QPushButton::clicked, this, &HeroWithArmyConfigWidget::makeNoArtifacts);
 
     connect(m_ui->pushButtonSelectAllSpells, &QPushButton::clicked, this, &HeroWithArmyConfigWidget::makeAllSpells);
     connect(m_ui->pushButtonSelectNoneSpells, &QPushButton::clicked, this, &HeroWithArmyConfigWidget::makeNoSpells);
-    connect(m_ui->checkBoxHasSpellbook, &QCheckBox::clicked, this, [this](){
-        const bool state = m_ui->checkBoxHasSpellbook->isChecked();
+    connect(m_ui->checkBoxHasSpellbook, &QCheckBox::clicked, this, [this]() {
+        const bool state                  = m_ui->checkBoxHasSpellbook->isChecked();
         m_hero->getSource()->hasSpellBook = state;
         m_hero->emitChanges();
     });
     connect(m_ui->pushButtonResetHero, &QPushButton::clicked, this, &HeroWithArmyConfigWidget::resetHero);
-    connect(m_ui->comboBoxHeroIdentity, qOverload<int>(&QComboBox::currentIndexChanged),
-            this, &HeroWithArmyConfigWidget::heroIndexChanged);
+    connect(m_ui->comboBoxHeroIdentity, qOverload<int>(&QComboBox::currentIndexChanged), this, &HeroWithArmyConfigWidget::heroIndexChanged);
 
     {
         QList<QPushButton*> tsButtons{
@@ -125,7 +120,7 @@ HeroWithArmyConfigWidget::HeroWithArmyConfigWidget(QWidget* parent)
             m_ui->pushButtonTSScroll,
             m_ui->pushButtonTSSpecial
         };
-        QList<LibraryArtifact::TreasureClass> tc {
+        QList<LibraryArtifact::TreasureClass> tc{
             LibraryArtifact::TreasureClass::Treasure,
             LibraryArtifact::TreasureClass::Minor,
             LibraryArtifact::TreasureClass::Major,
@@ -135,19 +130,19 @@ HeroWithArmyConfigWidget::HeroWithArmyConfigWidget(QWidget* parent)
             LibraryArtifact::TreasureClass::Scroll,
             LibraryArtifact::TreasureClass::Special
         };
-        QButtonGroup * tsGroup = new QButtonGroup(this);
+        QButtonGroup* tsGroup = new QButtonGroup(this);
         tsGroup->setExclusive(true);
         for (int i = 0; i < tsButtons.size(); i++) {
             tsGroup->addButton(tsButtons[i]);
             tsButtons[i]->setContentsMargins(1, 2, 1, 2);
 
-            connect(tsButtons[i], &QPushButton::clicked, this, [this, i, tc]{
+            connect(tsButtons[i], &QPushButton::clicked, this, [this, i, tc] {
                 if (!m_artifactsFilter)
                     return;
                 if (i == 0)
                     m_artifactsFilter->resetTreasureClassFilter();
                 else
-                    m_artifactsFilter->setTreasureClassFilter(tc[i-1]);
+                    m_artifactsFilter->setTreasureClassFilter(tc[i - 1]);
             });
         }
     }
@@ -160,26 +155,26 @@ HeroWithArmyConfigWidget::HeroWithArmyConfigWidget(QWidget* parent)
             m_ui->pushButtonOCIncome,
             m_ui->pushButtonOCMisc
         };
-        QList<LibraryArtifact::OrderCategory> oc {
+        QList<LibraryArtifact::OrderCategory> oc{
             LibraryArtifact::OrderCategory::Stats,
             LibraryArtifact::OrderCategory::Skills,
             LibraryArtifact::OrderCategory::Magic,
             LibraryArtifact::OrderCategory::Income,
             LibraryArtifact::OrderCategory::Misc
         };
-        QButtonGroup * ocGroup = new QButtonGroup(this);
+        QButtonGroup* ocGroup = new QButtonGroup(this);
         ocGroup->setExclusive(true);
         for (int i = 0; i < ocButtons.size(); i++) {
             ocGroup->addButton(ocButtons[i]);
             ocButtons[i]->setContentsMargins(1, 2, 1, 2);
 
-            connect(ocButtons[i], &QPushButton::clicked, this, [this, i, oc]{
+            connect(ocButtons[i], &QPushButton::clicked, this, [this, i, oc] {
                 if (!m_artifactsFilter)
                     return;
                 if (i == 0)
                     m_artifactsFilter->resetOrderCategoryFilter();
                 else
-                    m_artifactsFilter->setOrderCategoryFilter(oc[i-1]);
+                    m_artifactsFilter->setOrderCategoryFilter(oc[i - 1]);
             });
         }
     }
@@ -200,26 +195,24 @@ void HeroWithArmyConfigWidget::refresh()
     }
 }
 
-void HeroWithArmyConfigWidget::setModels(LibraryModelsProvider& modelProvider, Core::IRandomGenerator * randomGenerator)
+void HeroWithArmyConfigWidget::setModels(LibraryModelsProvider& modelProvider, Core::IRandomGenerator* randomGenerator)
 {
-
     m_ui->stackEditorPack->setUnitsModel(modelProvider.units());
 
-    m_modelProvider = &modelProvider;
+    m_modelProvider   = &modelProvider;
     m_randomGenerator = randomGenerator;
 
-    m_ui->comboBoxHeroIdentity->setIconSize({48, 32});
+    m_ui->comboBoxHeroIdentity->setIconSize({ 48, 32 });
 
-    HeroesComboModel * comboModel = new HeroesComboModel(modelProvider.heroes(), m_ui->comboBoxHeroIdentity);
+    HeroesComboModel* comboModel = new HeroesComboModel(modelProvider.heroes(), m_ui->comboBoxHeroIdentity);
 
     m_ui->comboBoxHeroIdentity->setModel(comboModel);
-
 }
 
 void HeroWithArmyConfigWidget::setSource(GuiAdventureArmy* adventureArmy)
 {
     m_adventureArmy = adventureArmy;
-    m_hero = adventureArmy->getHero();
+    m_hero          = adventureArmy->getHero();
     m_ui->currentStatsWidget->setSource(m_hero->getSource());
 
     m_ui->stackEditorPack->setSource(adventureArmy->getSquad());
@@ -241,12 +234,12 @@ void HeroWithArmyConfigWidget::setSource(GuiAdventureArmy* adventureArmy)
     m_ui->tableViewWearing->setColumnWidth(0, 100);
     m_ui->tableViewWearing->setColumnWidth(1, 200);
     {
-        QHeaderView *verticalHeader = m_ui->tableViewWearing->verticalHeader();
+        QHeaderView* verticalHeader = m_ui->tableViewWearing->verticalHeader();
         verticalHeader->setSectionResizeMode(QHeaderView::Fixed);
         verticalHeader->setDefaultSectionSize(32);
     }
     {
-        QHeaderView *verticalHeader = m_ui->tableViewBag->verticalHeader();
+        QHeaderView* verticalHeader = m_ui->tableViewBag->verticalHeader();
         verticalHeader->setSectionResizeMode(QHeaderView::Fixed);
         verticalHeader->setDefaultSectionSize(32);
     }
@@ -256,9 +249,7 @@ void HeroWithArmyConfigWidget::setSource(GuiAdventureArmy* adventureArmy)
     m_ui->tableViewSecondarySkills->setItemDelegate(new SkillSelectDelegate(m_modelProvider->skills(), this));
     m_ui->tableViewSecondarySkills->setColumnWidth(0, 150);
     m_ui->tableViewSecondarySkills->setColumnWidth(1, 150);
-
 }
-
 
 void HeroWithArmyConfigWidget::initHero()
 {
@@ -272,12 +263,12 @@ void HeroWithArmyConfigWidget::initHero()
 }
 void HeroWithArmyConfigWidget::primaryStatEdited()
 {
-    auto hero = m_hero->getSource();
-    auto old = hero->currentBasePrimary;
-    hero->currentBasePrimary.ad.attack            = m_ui->spinBoxAttack->value();
-    hero->currentBasePrimary.ad.defense           = m_ui->spinBoxDefense->value();
-    hero->currentBasePrimary.magic.spellPower     = m_ui->spinBoxSp->value();
-    hero->currentBasePrimary.magic.intelligence   = m_ui->spinBoxInt->value();
+    auto hero                                   = m_hero->getSource();
+    auto old                                    = hero->currentBasePrimary;
+    hero->currentBasePrimary.ad.attack          = m_ui->spinBoxAttack->value();
+    hero->currentBasePrimary.ad.defense         = m_ui->spinBoxDefense->value();
+    hero->currentBasePrimary.magic.spellPower   = m_ui->spinBoxSp->value();
+    hero->currentBasePrimary.magic.intelligence = m_ui->spinBoxInt->value();
 
     if (old != hero->currentBasePrimary)
         m_hero->emitChanges();
@@ -285,24 +276,24 @@ void HeroWithArmyConfigWidget::primaryStatEdited()
 
 void HeroWithArmyConfigWidget::expEdited()
 {
-    auto hero = m_hero->getSource();
+    auto       hero    = m_hero->getSource();
     const bool changed = hero->experience != m_ui->spinBoxExp->value();
     if (!changed)
         return;
 
-    hero->experience = m_ui->spinBoxExp->value();
+    hero->experience                = m_ui->spinBoxExp->value();
     hero->editorParams.levelIsDirty = true;
     m_hero->emitChanges();
 }
 
 void HeroWithArmyConfigWidget::levelEdited()
 {
-    auto hero = m_hero->getSource();
+    auto       hero    = m_hero->getSource();
     const bool changed = hero->level != m_ui->spinBoxLevel->value();
     if (!changed)
         return;
 
-    hero->level = m_ui->spinBoxLevel->value();
+    hero->level                   = m_ui->spinBoxLevel->value();
     hero->editorParams.expIsDirty = true;
     m_hero->emitChanges();
 }
@@ -318,27 +309,28 @@ void HeroWithArmyConfigWidget::heroIndexChanged()
 void HeroWithArmyConfigWidget::displayHeroPrimary()
 {
     SignalBlocker lock({
-       m_ui->spinBoxAttack  ,
-       m_ui->spinBoxDefense ,
-       m_ui->spinBoxSp      ,
-       m_ui->spinBoxInt     ,
-       m_ui->spinBoxLevel   ,
-       m_ui->spinBoxExp     ,
+        m_ui->spinBoxAttack,
+        m_ui->spinBoxDefense,
+        m_ui->spinBoxSp,
+        m_ui->spinBoxInt,
+        m_ui->spinBoxLevel,
+        m_ui->spinBoxExp,
     });
-    auto hero = m_hero->getSource();
+    auto          hero = m_hero->getSource();
+    // clang-format off
     m_ui->spinBoxAttack ->setValue(hero->currentBasePrimary.ad.attack);
     m_ui->spinBoxDefense->setValue(hero->currentBasePrimary.ad.defense);
     m_ui->spinBoxSp     ->setValue(hero->currentBasePrimary.magic.spellPower);
     m_ui->spinBoxInt    ->setValue(hero->currentBasePrimary.magic.intelligence);
     m_ui->spinBoxLevel  ->setValue(hero->level);
     m_ui->spinBoxExp    ->setValue(hero->experience);
+    // clang-format on
 }
 
 void HeroWithArmyConfigWidget::displayHeroSummary()
 {
     m_ui->labelExperienceMin->setText(FormatUtils::formatLargeInt(m_hero->getSource()->estimated.experienceStartLevel));
     m_ui->labelExperienceMax->setText(FormatUtils::formatLargeInt(m_hero->getSource()->estimated.experienceNextLevel - 1));
-
 }
 
 void HeroWithArmyConfigWidget::displayHeroAppearence()
@@ -351,7 +343,7 @@ void HeroWithArmyConfigWidget::displayHeroAppearence()
 
     m_ui->labelSpecialityText->setText(m_hero->getGuiHero()->getSpecName());
 
-    for (int i = 0; i< m_ui->comboBoxHeroIdentity->count(); ++i) {
+    for (int i = 0; i < m_ui->comboBoxHeroIdentity->count(); ++i) {
         if (m_ui->comboBoxHeroIdentity->itemData(i, HeroesModel::GuiObject).value<HeroesModel::WrapperTypePtr>() == m_hero->getGuiHero()) {
             m_ui->comboBoxHeroIdentity->blockSignals(true);
             m_ui->comboBoxHeroIdentity->setCurrentIndex(i);
@@ -359,7 +351,6 @@ void HeroWithArmyConfigWidget::displayHeroAppearence()
             break;
         }
     }
-
 }
 
 void HeroWithArmyConfigWidget::displayHeroArtifacts()
@@ -392,11 +383,11 @@ void HeroWithArmyConfigWidget::useHeroDefaultArmy()
     m_adventureArmy->getSquad()->clearAll();
 
     int index = 0;
-    for (size_t i=0; i < libraryHero->startStacks.size(); ++i) {
-        auto unit = libraryHero->startStacks[i];
-        auto sizeParams = advHero->getExpectedStackSize(i);
-        const int from   = sizeParams.min;
-        const int spread =  sizeParams.max - sizeParams.min;
+    for (size_t i = 0; i < libraryHero->startStacks.size(); ++i) {
+        auto      unit       = libraryHero->startStacks[i];
+        auto      sizeParams = advHero->getExpectedStackSize(i);
+        const int from       = sizeParams.min;
+        const int spread     = sizeParams.max - sizeParams.min;
         if (unit.unit->faction->alignment == LibraryFaction::Alignment::Special) {
             auto art = unit.unit->battleMachineArtifact;
             Q_ASSERT(art);
@@ -414,9 +405,9 @@ void HeroWithArmyConfigWidget::makeAllSpells()
     if (!m_ui->checkBoxHasSpellbook->isChecked()) {
         m_ui->checkBoxHasSpellbook->click();
     }
-    auto * spellModel = m_hero->getSpellbookEditModel();
+    auto* spellModel = m_hero->getSpellbookEditModel();
     for (int row = 0; row < spellModel->rowCount(); row++) {
-        auto * spell = spellModel->index(row, 0).data(SpellsModel::SourceObject).value<LibrarySpellConstPtr>();
+        auto* spell = spellModel->index(row, 0).data(SpellsModel::SourceObject).value<LibrarySpellConstPtr>();
         m_hero->getSource()->spellbook.insert(spell);
     }
     m_hero->emitChanges();
@@ -430,9 +421,9 @@ void HeroWithArmyConfigWidget::makeNoSpells()
 
 void HeroWithArmyConfigWidget::makeAllArtifacts()
 {
-    auto * bagModel = m_artifactsFilter;
+    auto* bagModel = m_artifactsFilter;
     for (int row = 0; row < bagModel->rowCount(); row++) {
-        auto * art = bagModel->index(row, 0).data(ArtifactsModel::SourceObject).value<LibraryArtifactConstPtr>();
+        auto* art                              = bagModel->index(row, 0).data(ArtifactsModel::SourceObject).value<LibraryArtifactConstPtr>();
         m_hero->getSource()->artifactsBag[art] = 1;
     }
     m_hero->refreshArtifactsModels();
@@ -441,9 +432,9 @@ void HeroWithArmyConfigWidget::makeAllArtifacts()
 
 void HeroWithArmyConfigWidget::makeNoArtifacts()
 {
-    auto * bagModel = m_artifactsFilter;
+    auto* bagModel = m_artifactsFilter;
     for (int row = 0; row < bagModel->rowCount(); row++) {
-        auto * art = bagModel->index(row, 0).data(ArtifactsModel::SourceObject).value<LibraryArtifactConstPtr>();
+        auto* art = bagModel->index(row, 0).data(ArtifactsModel::SourceObject).value<LibraryArtifactConstPtr>();
         m_hero->getSource()->artifactsBag.erase(art);
     }
     m_hero->refreshArtifactsModels();
@@ -458,4 +449,3 @@ void HeroWithArmyConfigWidget::resetHero()
 }
 
 }
-

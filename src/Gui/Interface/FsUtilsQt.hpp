@@ -12,13 +12,15 @@
 namespace FreeHeroes::Gui {
 
 namespace std_fs = Core::std_fs;
-using std_path =  Core::std_path;
+using std_path   = Core::std_path;
 
-inline QString stdPath2QString(const std_path& path) {
+inline QString stdPath2QString(const std_path& path)
+{
     return QString::fromStdString(Core::path2string(path));
 }
 
-inline std_path QString2stdPath(const QString& path) {
+inline std_path QString2stdPath(const QString& path)
+{
     return Core::string2path(path.toStdString());
 }
 

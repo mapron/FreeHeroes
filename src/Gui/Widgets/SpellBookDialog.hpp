@@ -16,17 +16,16 @@
 namespace FreeHeroes::Gui {
 class SpellsModel;
 class UiCommonModel;
-class GUIWIDGETS_EXPORT SpellBookDialog : public QDialog
-{
+class GUIWIDGETS_EXPORT SpellBookDialog : public QDialog {
     Q_OBJECT
 public:
-    SpellBookDialog(const Core::AdventureHero::SpellList & spellList,
-                    const SpellsModel * spellsModel,
-                    const UiCommonModel * ui,
-                    int mana,
-                    bool allowAdventureCast,
-                    bool allowBattleCast,
-                    QWidget * parent);
+    SpellBookDialog(const Core::AdventureHero::SpellList& spellList,
+                    const SpellsModel*                    spellsModel,
+                    const UiCommonModel*                  ui,
+                    int                                   mana,
+                    bool                                  allowAdventureCast,
+                    bool                                  allowBattleCast,
+                    QWidget*                              parent);
     ~SpellBookDialog();
 
     Core::LibrarySpellConstPtr getSelectedSpell() const;
@@ -39,8 +38,8 @@ protected:
     void changeCurrentTab(int index);
     void fillCurrentPage();
     void onSpellClick(Core::LibrarySpellConstPtr spell);
-private:
 
+private:
     struct Impl;
     std::unique_ptr<Impl> m_impl;
 };

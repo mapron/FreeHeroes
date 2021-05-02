@@ -11,10 +11,9 @@
 
 namespace FreeHeroes::Gui {
 
-class ArtifactQuickFilterModel  : public QSortFilterProxyModel
-{
+class ArtifactQuickFilterModel : public QSortFilterProxyModel {
 public:
-    ArtifactQuickFilterModel(QObject * parent);
+    ArtifactQuickFilterModel(QObject* parent);
 
     void setTreasureClassFilter(Core::LibraryArtifact::TreasureClass treasureClass);
     void setOrderCategoryFilter(Core::LibraryArtifact::OrderCategory orderCategory);
@@ -25,11 +24,10 @@ protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
 
 private:
-    bool m_treasureClassEnable = false;
-    bool m_orderCategoryEnable = false;
-    Core::LibraryArtifact::TreasureClass m_treasureClass = Core::LibraryArtifact::TreasureClass::Special;
-    Core::LibraryArtifact::OrderCategory m_orderCategory = Core::LibraryArtifact::OrderCategory::Special;
-
+    bool                                 m_treasureClassEnable = false;
+    bool                                 m_orderCategoryEnable = false;
+    Core::LibraryArtifact::TreasureClass m_treasureClass       = Core::LibraryArtifact::TreasureClass::Special;
+    Core::LibraryArtifact::OrderCategory m_orderCategory       = Core::LibraryArtifact::OrderCategory::Special;
 };
 
 }

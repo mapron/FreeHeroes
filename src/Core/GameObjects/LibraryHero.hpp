@@ -18,28 +18,36 @@ namespace FreeHeroes::Core {
 
 struct SkillHeroItem {
     LibrarySecondarySkillConstPtr skill = nullptr;
-    int level = 0; // 0 = basic.
-    SkillHeroItem() = default;
-    SkillHeroItem(LibrarySecondarySkillConstPtr skillPtr, int level): skill(skillPtr), level(level) {}
+    int                           level = 0; // 0 = basic.
+    SkillHeroItem()                     = default;
+    SkillHeroItem(LibrarySecondarySkillConstPtr skillPtr, int level)
+        : skill(skillPtr)
+        , level(level)
+    {}
 
-    constexpr auto asTuple() const noexcept { return std::tie(skill, level);}
-    constexpr auto asTuple() noexcept       { return std::tie(skill, level);}
+    constexpr auto asTuple() const noexcept { return std::tie(skill, level); }
+    constexpr auto asTuple() noexcept { return std::tie(skill, level); }
 
-    friend constexpr bool operator ==(const SkillHeroItem& lh, const SkillHeroItem& rh) noexcept { return lh.asTuple() == rh.asTuple(); }
-    friend constexpr bool operator !=(const SkillHeroItem& lh, const SkillHeroItem& rh) noexcept { return !(lh == rh); }
+    friend constexpr bool operator==(const SkillHeroItem& lh, const SkillHeroItem& rh) noexcept { return lh.asTuple() == rh.asTuple(); }
+    friend constexpr bool operator!=(const SkillHeroItem& lh, const SkillHeroItem& rh) noexcept { return !(lh == rh); }
 };
 using HeroSkillsList = std::vector<SkillHeroItem>;
 
 struct LibraryHero {
     struct StartStack {
-        LibraryUnitConstPtr unit = nullptr;
+        LibraryUnitConstPtr        unit = nullptr;
         LibraryUnit::HeroStackSize stackSize;
     };
     using StartStacks = std::vector<StartStack>;
     struct Presentation {
-        enum class Gender { Female, Male, Unspec };
+        enum class Gender
+        {
+            Female,
+            Male,
+            Unspec
+        };
 
-        int order = 0;
+        int         order = 0;
         std::string portrait;
         std::string portraitSmall;
 
@@ -63,8 +71,8 @@ struct LibraryHero {
 
     Presentation presentationParams;
 
-
-    LibraryFactionHeroClassConstPtr heroClass() const noexcept {
+    LibraryFactionHeroClassConstPtr heroClass() const noexcept
+    {
         return isFighter ? &faction->fighterClass : &faction->mageClass;
     }
 };

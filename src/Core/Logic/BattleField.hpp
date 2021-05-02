@@ -31,26 +31,27 @@ struct CORELOGIC_EXPORT BattleFieldGeometry {
 
     using AdjacentMap = std::map<BattleDirection, BattlePosition>;
 
-    bool isValid(const BattlePosition pos) const noexcept {
+    bool isValid(const BattlePosition pos) const noexcept
+    {
         return !pos.isEmpty() && pos.x >= 0 && pos.y >= 0 && pos.x < width && pos.y < height;
     }
 
-    BattlePosition neighbour(const BattlePosition pos, BattleDirection direction) const noexcept;
-    BattlePositionSet validNeighbours(const BattlePosition pos, const std::vector<BattleDirection> & directions) const noexcept;
+    BattlePosition         neighbour(const BattlePosition pos, BattleDirection direction) const noexcept;
+    BattlePositionSet      validNeighbours(const BattlePosition pos, const std::vector<BattleDirection>& directions) const noexcept;
     BattlePositionExtended suggestPositionForAttack(BattlePositionExtended startPos, const BattlePositionExtended target, const BattlePositionExtended::Sub targetInner, BattleAttackDirection direction) const noexcept;
 
-    AdjacentMap getAdjacent(const BattlePosition pos) const;
+    AdjacentMap       getAdjacent(const BattlePosition pos) const;
     BattlePositionSet getAdjacentSet(const BattlePosition pos) const;
     BattlePositionSet getAdjacentSet(const BattlePositionExtended pos) const;
     BattlePositionSet getAllPositions() const;
     BattlePositionSet getFloodFillFrom(const BattlePosition pos, int iterations) const;
-    BattlePositionSet closestTo(const BattlePosition pos, const BattlePositionSet & candidates) const;
+    BattlePositionSet closestTo(const BattlePosition pos, const BattlePositionSet& candidates) const;
 };
 
 struct CORELOGIC_EXPORT BattleFieldPreset {
     std::vector<BattlePosition> obstacles;
-    BattleFieldGeometry field;
-    FieldLayout layout;
+    BattleFieldGeometry         field;
+    FieldLayout                 layout;
 
     BattlePosition calcPosition(bool attacker, int orderIndex, int totalCount, bool compactPositioning) const;
 };

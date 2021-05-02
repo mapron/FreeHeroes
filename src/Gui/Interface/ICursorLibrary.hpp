@@ -13,13 +13,14 @@ class ICursorLibrary {
 public:
     virtual ~ICursorLibrary() = default;
 
+    // clang-format off
     enum class Type { Stop, Walk, Fly, RangeAttack, RangeAttackBroken, HeroView, Question, PlainArrow };
     enum class BattleDirection { None = -1, TR = 0, R, BR, BL, L, TL, Top, Bottom };
+    // clang-format on
 
-    virtual QCursor getAttackCursor(BattleDirection direction) const = 0;
-    virtual QCursor getOther(Type type) const = 0;
-    virtual QList<QCursor> getCast() const = 0;
-
+    virtual QCursor        getAttackCursor(BattleDirection direction) const = 0;
+    virtual QCursor        getOther(Type type) const                        = 0;
+    virtual QList<QCursor> getCast() const                                  = 0;
 };
 
 }

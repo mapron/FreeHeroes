@@ -12,7 +12,8 @@
 
 namespace FreeHeroes::Conversion {
 
-bool executeFFMpeg(QStringList args, QString * programOut = nullptr) {
+bool executeFFMpeg(QStringList args, QString* programOut = nullptr)
+{
     QProcess ffmpeg;
     ffmpeg.start("ffmpeg", args);
     if (!ffmpeg.waitForStarted())
@@ -38,7 +39,7 @@ bool executeFFMpeg(QStringList args, QString * programOut = nullptr) {
 
 MediaConverter::MediaConverter()
 {
-    m_ffmpegFound = executeFFMpeg({"-version"}, &m_ffmpegBinary);
+    m_ffmpegFound = executeFFMpeg({ "-version" }, &m_ffmpegBinary);
 }
 
 bool MediaConverter::prepareWav(const Core::std_path& source, const Core::std_path& dest)
@@ -46,7 +47,7 @@ bool MediaConverter::prepareWav(const Core::std_path& source, const Core::std_pa
     if (!m_ffmpegFound)
         return false;
 
-    const auto success = executeFFMpeg({"-y", "-i", Gui::stdPath2QString(source), "-c:a", "pcm_s16le", Gui::stdPath2QString(dest)});
+    const auto success = executeFFMpeg({ "-y", "-i", Gui::stdPath2QString(source), "-c:a", "pcm_s16le", Gui::stdPath2QString(dest) });
     return success;
 }
 
@@ -55,15 +56,12 @@ bool MediaConverter::prepareVideo(const Core::std_path& source, const Core::std_
     if (!m_ffmpegFound)
         return false;
 
-//    const auto success = executeFFMpeg({"-y", "-i", Gui::stdPath2QString(source),
-//                                        "-threads",  "1", "-c:v", "libx264", "-c:a", "aac",
-//                                        Gui::stdPath2QString(dest)});
+    //    const auto success = executeFFMpeg({"-y", "-i", Gui::stdPath2QString(source),
+    //                                        "-threads",  "1", "-c:v", "libx264", "-c:a", "aac",
+    //                                        Gui::stdPath2QString(dest)});
 
-    const auto success = executeFFMpeg({"-y", "-i", Gui::stdPath2QString(source),
-                                        "-threads",  "1",
-                                        Gui::stdPath2QString(dest)});
+    const auto success = executeFFMpeg({ "-y", "-i", Gui::stdPath2QString(source), "-threads", "1", Gui::stdPath2QString(dest) });
     return success;
 }
-
 
 }

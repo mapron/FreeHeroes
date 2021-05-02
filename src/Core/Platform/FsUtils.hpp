@@ -10,10 +10,11 @@
 namespace FreeHeroes::Core {
 
 namespace std_fs = std::filesystem;
-using std_path = std_fs::path;
+using std_path   = std_fs::path;
 
-inline std::string path2string(const std_path & path) {
-    auto str = path.u8string();
+inline std::string path2string(const std_path& path)
+{
+    auto        str = path.u8string();
     std::string result;
     result.resize(str.size());
     for (size_t i = 0; i < result.size(); ++i) {
@@ -22,7 +23,8 @@ inline std::string path2string(const std_path & path) {
     return result;
 }
 
-inline std_path string2path(const std::string & str) {
+inline std_path string2path(const std::string& str)
+{
     std::u8string result;
     //auto str = path.u8string();
     result.resize(str.size());

@@ -14,10 +14,11 @@
 
 namespace FreeHeroes::Core {
 
-
 struct LibraryHeroSpec {
+    // clang-format off
     enum class Type {None, Income, Unit, UnitNonStd, UnitUpgrade, Skill, Spell,
                      SpecialBallista, SpecialCannon, SpecialDragons, SpecialSpeed };
+    // clang-format on
     struct Presentation {
         std::string icon;
     };
@@ -25,8 +26,7 @@ struct LibraryHeroSpec {
     std::string id;
     std::string untranslatedName;
 
-
-    Type type;
+    Type           type;
     ResourceAmount dayIncome;
 
     LibraryUnitConstPtr unit = nullptr;

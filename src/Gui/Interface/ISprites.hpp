@@ -10,38 +10,33 @@
 
 #include <memory>
 
-
 namespace FreeHeroes::Gui {
 
-struct SpriteFrame
-{
+struct SpriteFrame {
     QPixmap frame;
-    int32_t id = 0;
-    bool duplicate = false;
-    QPoint paddingLeftTop;
+    int32_t id        = 0;
+    bool    duplicate = false;
+    QPoint  paddingLeftTop;
 };
 
-struct SpriteSequenceParams
-{
-    int scaleFactorPercent = 100;
-    int animationCycleDuration = 1000;
-    int specialFrameIndex = -1;
+struct SpriteSequenceParams {
+    int    scaleFactorPercent     = 100;
+    int    animationCycleDuration = 1000;
+    int    specialFrameIndex      = -1;
     QPoint actionPoint;
 };
 
-struct SpriteSequence
-{
-    QList<SpriteFrame> frames;
-    QSize boundarySize;
+struct SpriteSequence {
+    QList<SpriteFrame>   frames;
+    QSize                boundarySize;
     SpriteSequenceParams params;
 };
 
 using SpriteSequencePtr = std::shared_ptr<const SpriteSequence>;
 
-class ISprite
-{
+class ISprite {
 public:
-    virtual ~ISprite() = default;
+    virtual ~ISprite()                 = default;
     virtual int getGroupsCount() const = 0;
 
     virtual QList<int> getGroupsIds() const = 0;

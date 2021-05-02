@@ -16,19 +16,25 @@ class IAdventureSquadControl {
 public:
     virtual ~IAdventureSquadControl() = default;
 
-    enum class StackActionType { Delete, Swap, EqualSplit, SplitOne, GroupTogether  };
+    enum class StackActionType
+    {
+        Delete,
+        Swap,
+        EqualSplit,
+        SplitOne,
+        GroupTogether
+    };
 
     struct StackAction {
-        StackActionType type;
-        AdventureStackConstPtr from = nullptr;
-        AdventureStackConstPtr to = nullptr;
-        size_t count = 0;
+        StackActionType        type;
+        AdventureStackConstPtr from  = nullptr;
+        AdventureStackConstPtr to    = nullptr;
+        size_t                 count = 0;
     };
 
     virtual void heroStackAction(StackAction action) = 0;
 
     virtual void setCompactFormation(bool enabled) = 0;
-
 };
 
 class IAdventureHeroControl {
@@ -36,9 +42,9 @@ public:
     virtual ~IAdventureHeroControl() = default;
 
     struct ArtifactPutOn {
-        ArtifactSlotType slot;
-        LibraryArtifactConstPtr bagItem = nullptr;
-        bool onlyEmpty = false;
+        ArtifactSlotType        slot;
+        LibraryArtifactConstPtr bagItem   = nullptr;
+        bool                    onlyEmpty = false;
     };
     virtual bool heroArtifactPutOn(ArtifactPutOn putOnParams) = 0;
 
@@ -56,9 +62,8 @@ public:
     struct ArtifactAssembleSet {
         ArtifactSlotType slot;
     };
-    virtual void heroArtifactAssembleSet(ArtifactAssembleSet assembleSetParams) = 0;
+    virtual void heroArtifactAssembleSet(ArtifactAssembleSet assembleSetParams)    = 0;
     virtual void heroArtifactDisassembleSet(ArtifactAssembleSet assembleSetParams) = 0;
-
 };
 
 }

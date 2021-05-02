@@ -30,14 +30,14 @@ const SpritePtr& SpriteItem::getSprite() const
     return m_sprite;
 }
 
-void SpriteItem::setAnimGroup(const AnimGroupSettings & settings)
+void SpriteItem::setAnimGroup(const AnimGroupSettings& settings)
 {
     // @todo: debug: at the moment we should not move away from death state.
     if (m_animSettings.group == 5 && settings.group != 5)
         Q_ASSERT(false);
 
     m_animSettings = settings;
-    m_inSporadic = false;
+    m_inSporadic   = false;
 
     setAnimGroupInternal();
 }
@@ -75,12 +75,12 @@ void SpriteItem::tick(int msecElapsed)
 
     //if (m_sporadic.startSporadic(this))
     //    return;
-    const AnimGroupSettings & settings = m_inSporadic ? m_sporadicSettings : m_animSettings;
+    const AnimGroupSettings& settings = m_inSporadic ? m_sporadicSettings : m_animSettings;
 
     const auto size = m_currentSequence->frames.size();
 
     const auto prevIndex = m_currentFrameIndex;
-    m_currentFrameIndex = m_frameMsTick * size / settings.durationMs;
+    m_currentFrameIndex  = m_frameMsTick * size / settings.durationMs;
 
     if (settings.repeatOnFrame >= 0 && m_currentFrameIndex >= settings.repeatOnFrame) {
         assert(!settings.loopOver);
@@ -88,9 +88,9 @@ void SpriteItem::tick(int msecElapsed)
         // origIndex  0 1 2 3 4 5 6 7 8
         // newIndex   0 1 2 2 2 3 4 5 6
         const int endRepeatFrame = settings.repeatOnFrame + settings.repeatOnFrameCount;
-        m_currentFrameIndex = m_currentFrameIndex > endRepeatFrame
-                            ? m_currentFrameIndex - settings.repeatOnFrameCount
-                            : settings.repeatOnFrame;
+        m_currentFrameIndex      = m_currentFrameIndex > endRepeatFrame
+                                       ? m_currentFrameIndex - settings.repeatOnFrameCount
+                                       : settings.repeatOnFrame;
     }
 
     if (m_currentFrameIndex >= size) {
@@ -111,19 +111,19 @@ void SpriteItem::tick(int msecElapsed)
 
 void SpriteItem::displayCurrentPixmap()
 {
-    const AnimGroupSettings & settings = m_inSporadic ? m_sporadicSettings : m_animSettings;
-    const auto size = m_currentSequence->frames.size();
-    const auto index = settings.reverse ? size - m_currentFrameIndex - 1 : m_currentFrameIndex;
-    auto & spriteFrame = m_currentSequence->frames[index];
-    m_pixmap = spriteFrame.frame;
+    const AnimGroupSettings& settings    = m_inSporadic ? m_sporadicSettings : m_animSettings;
+    const auto               size        = m_currentSequence->frames.size();
+    const auto               index       = settings.reverse ? size - m_currentFrameIndex - 1 : m_currentFrameIndex;
+    auto&                    spriteFrame = m_currentSequence->frames[index];
+    m_pixmap                             = spriteFrame.frame;
 
     m_boundingOrigin = QPointF(0, 0);
-    if (m_drawOriginH  == DrawOriginH::Right)
+    if (m_drawOriginH == DrawOriginH::Right)
         m_boundingOrigin.rx() -= m_boundingSize.width();
     if (m_drawOriginV == DrawOriginV::Bottom)
         m_boundingOrigin.ry() -= m_boundingSize.height();
 
-    if (m_drawOriginH  == DrawOriginH::Center)
+    if (m_drawOriginH == DrawOriginH::Center)
         m_boundingOrigin.rx() -= m_boundingSize.width() / 2;
     if (m_drawOriginV == DrawOriginV::Center)
         m_boundingOrigin.ry() -= m_boundingSize.height() / 2;
@@ -131,7 +131,6 @@ void SpriteItem::displayCurrentPixmap()
     m_pixmapPadding = spriteFrame.paddingLeftTop;
     update();
 }
-
 
 QRectF SpriteItem::boundingRect() const
 {
@@ -150,30 +149,29 @@ QPainterPath SpriteItem::shape() const
     return shape;
 }
 
-bool SpriteItem::contains(const QPointF &point) const
+bool SpriteItem::contains(const QPointF& point) const
 {
     return QGraphicsItem::contains(point);
 }
 
-void SpriteItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
-                                QWidget *widget)
+void SpriteItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
 {
     Q_UNUSED(option);
     Q_UNUSED(widget);
 
     painter->setRenderHint(QPainter::SmoothPixmapTransform, true);
 
-  //   debug cross
-//    {
-//        painter->setPen(Qt::SolidLine);
-//        painter->drawLine(m_boundingOrigin, QPointF(m_boundingSize.width(), m_boundingSize.height()) + m_boundingOrigin);
-//        painter->drawLine(QPointF(m_boundingSize.width(), 0) + m_boundingOrigin, QPointF(0, m_boundingSize.height()) + m_boundingOrigin);
-//    }
+    //   debug cross
+    //    {
+    //        painter->setPen(Qt::SolidLine);
+    //        painter->drawLine(m_boundingOrigin, QPointF(m_boundingSize.width(), m_boundingSize.height()) + m_boundingOrigin);
+    //        painter->drawLine(QPointF(m_boundingSize.width(), 0) + m_boundingOrigin, QPointF(0, m_boundingSize.height()) + m_boundingOrigin);
+    //    }
 
     auto oldTransform = painter->transform();
     if (m_mirrorHor || m_mirrorVert) {
         auto t2 = oldTransform;
-        t2.scale    (m_mirrorHor ? -1 : 1, m_mirrorVert ? -1 : 1);
+        t2.scale(m_mirrorHor ? -1 : 1, m_mirrorVert ? -1 : 1);
         painter->setTransform(t2);
     }
 
@@ -183,7 +181,7 @@ void SpriteItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
     painter->setTransform(oldTransform);
 }
 
-bool SpriteItem::isObscuredBy(const QGraphicsItem *item) const
+bool SpriteItem::isObscuredBy(const QGraphicsItem* item) const
 {
     return QGraphicsItem::isObscuredBy(item);
 }
@@ -200,9 +198,9 @@ int SpriteItem::type() const
 
 void SpriteItem::setAnimGroupInternal()
 {
-    const AnimGroupSettings & settings = m_inSporadic ? m_sporadicSettings : m_animSettings;
+    const AnimGroupSettings& settings = m_inSporadic ? m_sporadicSettings : m_animSettings;
     Q_ASSERT(settings.durationMs > 0);
-    m_currentSequence = m_sprite->getFramesForGroup(settings.group);
+    m_currentSequence   = m_sprite->getFramesForGroup(settings.group);
     m_currentFrameIndex = settings.startFrame;
     if (m_currentFrameIndex >= m_currentSequence->frames.size())
         m_currentFrameIndex = 0;
@@ -244,8 +242,8 @@ void SporadicHandle::runNow()
 
 bool SporadicOrchestrator::checkEventLimit(int interval, int maxCount)
 {
-    auto ms = QDateTime::currentMSecsSinceEpoch();
-    auto cleanup = ms - interval;
+    auto                            ms      = QDateTime::currentMSecsSinceEpoch();
+    auto                            cleanup = ms - interval;
     QMutableListIterator<qlonglong> i(m_timestamps);
     while (i.hasNext()) {
         if (i.next() < cleanup)

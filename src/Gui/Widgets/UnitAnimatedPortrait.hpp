@@ -13,17 +13,15 @@
 
 #include <memory>
 
-
 namespace FreeHeroes::Gui {
 
-class GUIWIDGETS_EXPORT UnitAnimatedPortrait : public QWidget
-{
+class GUIWIDGETS_EXPORT UnitAnimatedPortrait : public QWidget {
 public:
     UnitAnimatedPortrait(SpritePtr spriteUnit,
-                             SpritePtr spriteBk,
-                             int count,
-                             bool animated,
-                             QWidget * parent = nullptr);
+                         SpritePtr spriteBk,
+                         int       count,
+                         bool      animated,
+                         QWidget*  parent = nullptr);
     ~UnitAnimatedPortrait();
     void startTimer();
 

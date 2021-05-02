@@ -16,18 +16,20 @@
 
 namespace FreeHeroes::Gui {
 
-RngLabel::RngLabel(QWidget* parent) : DarkFrameLabelIcon(parent),
-    m_ui(*loadDependency<LibraryModelsProvider>(parent).ui()){
-    auto ui = loadDependency<IAppSettings>(parent).ui();
+RngLabel::RngLabel(QWidget* parent)
+    : DarkFrameLabelIcon(parent)
+    , m_ui(*loadDependency<LibraryModelsProvider>(parent).ui())
+{
+    auto ui       = loadDependency<IAppSettings>(parent).ui();
     m_displayText = ui.displayAbsMoraleLuck;
-    m_clampText = ui.clampAbsMoraleLuck;
+    m_clampText   = ui.clampAbsMoraleLuck;
 }
 
 RngLabel::~RngLabel() = default;
 
 void RngLabel::setValue(int bonusValue)
 {
-    m_value = bonusValue;
+    m_value                = bonusValue;
     const int clampedValue = std::clamp(bonusValue, -3, +3);
     //const int index = 3 + clampedValue;
     auto pix = (m_isLuck ? m_ui.luck : m_ui.morale).medium.value(clampedValue)->get();
@@ -41,13 +43,13 @@ void RngLabel::setValue(int bonusValue)
     QImage img(pix.size() + QSize(20, 0), QImage::Format_RGBA8888);
     img.fill(Qt::transparent);
     QPainter p(&img);
-    p.drawPixmap(0,0, pix);
+    p.drawPixmap(0, 0, pix);
     if (m_displayText) {
         auto f = p.font();
         f.setPointSize(11);
         QFontMetrics fm(f);
-        const int textWidth = fm.horizontalAdvance(valueStr);
-        const int textHeight = fm.height();
+        const int    textWidth  = fm.horizontalAdvance(valueStr);
+        const int    textHeight = fm.height();
         p.setFont(f);
 
         const int textX = img.width() - textWidth - 6;
@@ -57,8 +59,8 @@ void RngLabel::setValue(int bonusValue)
         myPath.addText(textX, textY, f, valueStr);
 
         QPainterPathStroker stroker;
-        stroker.setWidth( 3 );
-        const QPainterPath stroked = stroker.createStroke( myPath );
+        stroker.setWidth(3);
+        const QPainterPath stroked = stroker.createStroke(myPath);
 
         p.setBrush(Qt::black);
         p.setPen(Qt::NoPen);
@@ -66,15 +68,18 @@ void RngLabel::setValue(int bonusValue)
 
         p.setBrush(Qt::black);
         p.setPen(Qt::white);
-        p.drawText(QPoint{textX, textY}, valueStr);
+        p.drawText(QPoint{ textX, textY }, valueStr);
     }
 
     pix = QPixmap::fromImage(img);
     this->setPixmap(pix);
 }
 
-
-LuckLabel::LuckLabel(QWidget* parent) : RngLabel(parent) { m_isLuck = true;}
+LuckLabel::LuckLabel(QWidget* parent)
+    : RngLabel(parent)
+{
+    m_isLuck = true;
+}
 
 void LuckLabel::setDetails(const Core::LuckDetails& details)
 {
@@ -101,7 +106,11 @@ void LuckLabel::setDetails(const Core::LuckDetails& details)
     setProperty("popupAllowModal", true);
 }
 
-MoraleLabel::MoraleLabel(QWidget* parent) : RngLabel(parent) { m_isLuck = false;}
+MoraleLabel::MoraleLabel(QWidget* parent)
+    : RngLabel(parent)
+{
+    m_isLuck = false;
+}
 
 void MoraleLabel::setDetails(const Core::MoraleDetails& details)
 {
@@ -127,6 +136,5 @@ void MoraleLabel::setDetails(const Core::MoraleDetails& details)
     setProperty("hoverName", tr("Show details about morale"));
     setProperty("popupAllowModal", true);
 }
-
 
 }

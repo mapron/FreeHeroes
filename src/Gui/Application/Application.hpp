@@ -30,14 +30,26 @@ class IMusicBox;
 class IAppSettings;
 class LibraryModelsProvider;
 
-class GUIAPPLICATION_EXPORT Application
-{
+class GUIAPPLICATION_EXPORT Application {
 public:
     Application();
     ~Application();
 
-    enum class Option { QtTranslations, Translations, ResourceLibrary, GameDatabase, RNG, GraphicsLibrary, MusicBox, CursorLibrary, LibraryModels, AppStyle };
+    enum class Option
+    {
+        QtTranslations,
+        Translations,
+        ResourceLibrary,
+        GameDatabase,
+        RNG,
+        GraphicsLibrary,
+        MusicBox,
+        CursorLibrary,
+        LibraryModels,
+        AppStyle
+    };
 
+    // clang-format off
     void load(const std::string & moduleName = "", std::set<Option> options = std::set<Option>{
                                                                       Option::QtTranslations,
                                                                       Option::Translations,
@@ -50,42 +62,51 @@ public:
                                                                       Option::LibraryModels,
                                                                       Option::AppStyle
                                                                     });
+    // clang-format on
 
-    Core::IResourceLibrary & getResourceLibrary() const {
+    Core::IResourceLibrary& getResourceLibrary() const
+    {
         return *m_resourceLibrary;
     }
-    Core::IGameDatabase & getGameDatabase() const {
+    Core::IGameDatabase& getGameDatabase() const
+    {
         return *m_gameDatabase;
     }
-    Core::IRandomGeneratorFactory & getRandomGeneratorFactory() const {
+    Core::IRandomGeneratorFactory& getRandomGeneratorFactory() const
+    {
         return *m_randomGeneratorFactory;
     }
-    IGraphicsLibrary & getGraphicsLibrary() const {
+    IGraphicsLibrary& getGraphicsLibrary() const
+    {
         return *m_graphicsLibrary;
     }
-    Sound::IMusicBox & getMusicBox() const {
+    Sound::IMusicBox& getMusicBox() const
+    {
         return *m_musicBox;
     }
-    ICursorLibrary & getCursorLibrary() const {
+    ICursorLibrary& getCursorLibrary() const
+    {
         return *m_cursorLibrary;
     }
-    LibraryModelsProvider & getModelsProvider() const {
+    LibraryModelsProvider& getModelsProvider() const
+    {
         return *m_modelsProvider;
     }
-    Gui::IAppSettings & getAppSettings();
+    Gui::IAppSettings& getAppSettings();
+
 private:
     struct Impl;
     std::unique_ptr<Impl> m_impl;
 
-    std::shared_ptr<Core::IResourceLibrary> m_resourceLibrary;
-    std::shared_ptr<Core::IGameDatabase> m_gameDatabase;
+    std::shared_ptr<Core::IResourceLibrary>        m_resourceLibrary;
+    std::shared_ptr<Core::IGameDatabase>           m_gameDatabase;
     std::shared_ptr<Core::IRandomGeneratorFactory> m_randomGeneratorFactory;
-    std::shared_ptr<Core::IRandomGenerator> m_randomGeneratorUi;
+    std::shared_ptr<Core::IRandomGenerator>        m_randomGeneratorUi;
 
     std::shared_ptr<Sound::IMusicBox> m_musicBox;
 
-    std::shared_ptr<IGraphicsLibrary> m_graphicsLibrary;
-    std::shared_ptr<ICursorLibrary> m_cursorLibrary;
+    std::shared_ptr<IGraphicsLibrary>      m_graphicsLibrary;
+    std::shared_ptr<ICursorLibrary>        m_cursorLibrary;
     std::shared_ptr<LibraryModelsProvider> m_modelsProvider;
 };
 

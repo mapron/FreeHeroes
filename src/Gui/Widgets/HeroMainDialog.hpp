@@ -14,8 +14,7 @@
 #include <memory>
 #include <functional>
 
-namespace Ui
-{
+namespace Ui {
 class HeroMainDialog;
 }
 
@@ -33,8 +32,7 @@ class GuiAdventureHero;
 class GuiAdventureStack;
 class LibraryModelsProvider;
 
-class GUIWIDGETS_EXPORT HeroMainDialog : public QDialog
-{
+class GUIWIDGETS_EXPORT HeroMainDialog : public QDialog {
     Q_OBJECT
 public:
     HeroMainDialog(QWidget* parent = nullptr);
@@ -43,28 +41,28 @@ public:
 public:
     void refresh();
 
-    void setSource(const GuiAdventureArmy * heroArmy,
-                   Core::IAdventureSquadControl * adventureSquadControl,
-                   Core::IAdventureHeroControl * adventureHeroControl,
-                   LibraryModelsProvider * modelsProvider);
+    void setSource(const GuiAdventureArmy*       heroArmy,
+                   Core::IAdventureSquadControl* adventureSquadControl,
+                   Core::IAdventureHeroControl*  adventureHeroControl,
+                   LibraryModelsProvider*        modelsProvider);
+
 private:
     void updateHeroAppearence();
 
     void deleteStack(Core::AdventureStackConstPtr stack);
-    void showInfo(const GuiAdventureStack * stack, bool modal);
+    void showInfo(const GuiAdventureStack* stack, bool modal);
     void hideInfo();
     void openSpellBook();
     void updateGraphics();
 
 private:
-
     std::unique_ptr<Ui::HeroMainDialog> m_ui;
 
-    const GuiAdventureArmy * m_heroArmy = nullptr;
-    const GuiAdventureHero * m_hero = nullptr;
-    Core::IAdventureSquadControl * m_adventureSquadControl = nullptr;
-    Core::IAdventureHeroControl  * m_adventureHeroControl  = nullptr;
-    LibraryModelsProvider * m_modelsProvider = nullptr;
+    const GuiAdventureArmy*       m_heroArmy              = nullptr;
+    const GuiAdventureHero*       m_hero                  = nullptr;
+    Core::IAdventureSquadControl* m_adventureSquadControl = nullptr;
+    Core::IAdventureHeroControl*  m_adventureHeroControl  = nullptr;
+    LibraryModelsProvider*        m_modelsProvider        = nullptr;
 
     std::unique_ptr<UnitInfoWidget> m_infoWidget;
 
@@ -73,4 +71,3 @@ private:
 
 }
 }
-

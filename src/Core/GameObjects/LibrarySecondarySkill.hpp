@@ -11,7 +11,6 @@
 
 namespace FreeHeroes::Core {
 
-
 struct LibrarySecondarySkill {
     struct Presentation {
         struct LevelParams {
@@ -20,17 +19,23 @@ struct LibrarySecondarySkill {
             std::string iconLarge;
         };
         std::array<LevelParams, 3> levels;
-        int order = 0;
+        int                        order = 0;
     };
 
     std::string id;
     std::string untranslatedName;
 
     int frequencyFighter = 0;
-    int frequencyMage = 0;
+    int frequencyMage    = 0;
 
-    enum class HandlerType {Special, Stat, School, Wisdom };
-    HandlerType handler = HandlerType::Special;
+    enum class HandlerType
+    {
+        Special,
+        Stat,
+        School,
+        Wisdom
+    };
+    HandlerType              handler = HandlerType::Special;
     std::vector<std::string> calc;
 
     Presentation presentationParams;

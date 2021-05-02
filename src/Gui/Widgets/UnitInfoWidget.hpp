@@ -23,15 +23,14 @@ using BattleStackConstPtr = const BattleStack*;
 
 namespace FreeHeroes::Gui {
 class LibraryModelsProvider;
-class GUIWIDGETS_EXPORT UnitInfoWidget : public QDialog
-{
+class GUIWIDGETS_EXPORT UnitInfoWidget : public QDialog {
     Q_OBJECT
 public:
-    UnitInfoWidget(Core::BattleStackConstPtr battle,
+    UnitInfoWidget(Core::BattleStackConstPtr    battle,
                    Core::AdventureStackConstPtr adventure,
-                   LibraryModelsProvider * modelsProvider,
-                   bool showModal,
-                   QWidget * parent = nullptr);
+                   LibraryModelsProvider*       modelsProvider,
+                   bool                         showModal,
+                   QWidget*                     parent = nullptr);
     ~UnitInfoWidget();
     bool isShowModal() const;
 
@@ -42,17 +41,15 @@ private:
     QStringList abilitiesText(Core::LibraryUnitConstPtr unit) const;
     QStringList abilitiesTextExtra(Core::AdventureStackConstPtr adventure) const;
     QStringList retaliationsDescription(int countMax) const;
-    QStringList resistInfo(const Core::MagicReduce & reduce, const Core::BonusRatio & successRate) const;
-    QStringList immuneInfo(const Core::SpellFilter & immunes) const;
+    QStringList resistInfo(const Core::MagicReduce& reduce, const Core::BonusRatio& successRate) const;
+    QStringList immuneInfo(const Core::SpellFilter& immunes) const;
     QStringList vulnerabilityInfo(Core::LibraryUnitConstPtr unit) const;
-    QStringList castsInfo(Core::BattleStackConstPtr battle,
+    QStringList castsInfo(Core::BattleStackConstPtr    battle,
                           Core::AdventureStackConstPtr adventure) const;
 
 private:
-
     struct Impl;
     std::unique_ptr<Impl> m_impl;
-
 };
 
 }

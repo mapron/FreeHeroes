@@ -25,6 +25,7 @@
 
 #include <iostream>
 
+// clang-format off
 using namespace rttr;
 
 template<typename T>

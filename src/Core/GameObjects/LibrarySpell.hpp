@@ -14,16 +14,17 @@
 #include <set>
 #include <iterator>
 
-
 namespace FreeHeroes::Core {
 
 struct LibrarySpell {
+    // clang-format off
     enum class Type        { Temp, Offensive, Special, Summon, Rising, Adventure };
     enum class Qualify     { None, Good, Bad };
     enum class TargetClass { Units, Land, Immediate, None };
     enum class Range       { Single, R1, R1NoCenter, R2, R3, Obstacle2, Obstacle3, Chain4, Chain5, All };
     enum class Tag         { Mind, Vision, Ice, Lightning, AirElem, FireElem };
     enum class EndCondition{ Time, GetHit, MakingAttack };
+    // clang-format on
 
     struct Presentation {
         std::string iconBonus;
@@ -36,17 +37,16 @@ struct LibrarySpell {
 
         std::string bottomAnimation;
         std::string projectile;
-        bool bottomPosition = false;
-        bool animationOnMainPosition = false;
-        bool tile = false;
+        bool        bottomPosition          = false;
+        bool        animationOnMainPosition = false;
+        bool        tile                    = false;
 
         int configOrder = 0;
-        int order = 0;
+        int order       = 0;
     };
 
     std::string id;
     std::string untranslatedName;
-
 
     // Teachable means spell is obtainable from the Mage Guild, scrolls, etc.
     // Otherwise it can be only on a unit or an artifact.
@@ -62,18 +62,18 @@ struct LibrarySpell {
 
     std::vector<Tag> tags;
 
-    int level = 0;
+    int level    = 0;
     int manaCost = 0;
 
     bool indistinctive = false;
 
-    std::vector<std::string> calcScript;
-    std::vector<std::string> filterScript;
-    std::vector<Range> rangeByLevel;
+    std::vector<std::string>  calcScript;
+    std::vector<std::string>  filterScript;
+    std::vector<Range>        rangeByLevel;
     std::vector<EndCondition> endConditions;
 
     std::vector<LibrarySpellConstPtr> counterSpells;
-    std::vector<BonusRatio> retaliationWhenCancel;
+    std::vector<BonusRatio>           retaliationWhenCancel;
 
     Presentation presentationParams;
 
@@ -81,11 +81,11 @@ struct LibrarySpell {
 };
 
 struct SpellCastParams {
-    LibrarySpellConstPtr spell = nullptr;
-    int spellPower = 1;
-    int skillLevel = 0; // 0-3
-    int durationBonus = 0;
-    int heroSpecLevel = -1;
+    LibrarySpellConstPtr spell         = nullptr;
+    int                  spellPower    = 1;
+    int                  skillLevel    = 0; // 0-3
+    int                  durationBonus = 0;
+    int                  heroSpecLevel = -1;
 
     // reference only
     LibraryArtifactConstPtr art = nullptr;
@@ -95,23 +95,25 @@ using SpellCastParamsList = std::vector<SpellCastParams>;
 struct SpellFilter {
     std::vector<LibrarySpellConstPtr> onlySpells;
     std::vector<LibrarySpellConstPtr> notSpells;
-    std::vector<int> levels;
-    std::vector<MagicSchool> schools;
-    std::vector<LibrarySpell::Tag> tags;
-    bool teachableOnly = false;
-    bool all = false;
+    std::vector<int>                  levels;
+    std::vector<MagicSchool>          schools;
+    std::vector<LibrarySpell::Tag>    tags;
+    bool                              teachableOnly = false;
+    bool                              all           = false;
 
-    bool isDefault() const {
-        return onlySpells.empty() &&
-                notSpells.empty() &&
-                levels.empty() &&
-                tags.empty()  &&
-                schools.empty() &&
-                !teachableOnly &&
-                !all;
+    bool isDefault() const
+    {
+        return onlySpells.empty()
+               && notSpells.empty()
+               && levels.empty()
+               && tags.empty()
+               && schools.empty()
+               && !teachableOnly
+               && !all;
     }
 
-    bool contains(LibrarySpellConstPtr spell) const {
+    bool contains(LibrarySpellConstPtr spell) const
+    {
         if (isDefault())
             return false;
 
@@ -148,7 +150,8 @@ struct SpellFilter {
         return result;
     }
 
-    bool containsAll() const {
+    bool containsAll() const
+    {
         if (isDefault())
             return false;
 
@@ -158,20 +161,21 @@ struct SpellFilter {
         if (!levels.empty()) {
             auto levelsTmp = levels;
             std::sort(levelsTmp.begin(), levelsTmp.end());
-            if (levelsTmp == std::vector{1,2,3,4,5})
+            if (levelsTmp == std::vector{ 1, 2, 3, 4, 5 })
                 return true;
         }
         if (!schools.empty()) {
             auto schoolsTmp = schools;
             std::sort(schoolsTmp.begin(), schoolsTmp.end());
-            if (schoolsTmp == std::vector{Core::MagicSchool::Air, Core::MagicSchool::Earth, Core::MagicSchool::Fire, Core::MagicSchool::Water})
+            if (schoolsTmp == std::vector{ Core::MagicSchool::Air, Core::MagicSchool::Earth, Core::MagicSchool::Fire, Core::MagicSchool::Water })
                 return true;
         }
 
         return false;
     }
 
-    bool containsMind() const {
+    bool containsMind() const
+    {
         if (isDefault())
             return false;
         if (containsAll())
@@ -182,14 +186,16 @@ struct SpellFilter {
         return false;
     }
 
-    bool contains(MagicSchool school) const {
+    bool contains(MagicSchool school) const
+    {
         if (containsAll())
             return true;
 
         return std::find(schools.cbegin(), schools.cend(), school) != schools.cend();
     }
 
-    std::set<LibrarySpellConstPtr> filterPossible(const std::vector<LibrarySpell*> & allPossibleSpells) {
+    std::set<LibrarySpellConstPtr> filterPossible(const std::vector<LibrarySpell*>& allPossibleSpells)
+    {
         if (isDefault())
             return {};
 
@@ -201,34 +207,35 @@ struct SpellFilter {
         return populatedFilter;
     }
 
-    void makeUnion(const SpellFilter & another) {
+    void makeUnion(const SpellFilter& another)
+    {
         if (another.isDefault())
             return;
 
         all = all || another.all;
 
         for (auto spell : another.onlySpells) {
-           if (std::find(onlySpells.cbegin(), onlySpells.cend(), spell) == onlySpells.cend())
-               onlySpells.push_back(spell);
+            if (std::find(onlySpells.cbegin(), onlySpells.cend(), spell) == onlySpells.cend())
+                onlySpells.push_back(spell);
         }
         auto tmp = notSpells;
         for (auto spell : tmp) {
-           if (another.contains(spell))
-               notSpells.erase(std::find(notSpells.cbegin(), notSpells.cend(), spell));
+            if (another.contains(spell))
+                notSpells.erase(std::find(notSpells.cbegin(), notSpells.cend(), spell));
         }
         for (auto level : another.levels) {
-           if (std::find(levels.cbegin(), levels.cend(), level) == levels.cend())
-               levels.push_back(level);
+            if (std::find(levels.cbegin(), levels.cend(), level) == levels.cend())
+                levels.push_back(level);
         }
         std::sort(levels.begin(), levels.end());
         for (auto school : another.schools) {
-           if (std::find(schools.cbegin(), schools.cend(), school) == schools.cend())
-               schools.push_back(school);
+            if (std::find(schools.cbegin(), schools.cend(), school) == schools.cend())
+                schools.push_back(school);
         }
         std::sort(schools.begin(), schools.end());
         for (auto tag : another.tags) {
-           if (std::find(tags.cbegin(), tags.cend(), tag) == tags.cend())
-               tags.push_back(tag);
+            if (std::find(tags.cbegin(), tags.cend(), tag) == tags.cend())
+                tags.push_back(tag);
         }
 
         auto onlySpellsCopy = onlySpells;

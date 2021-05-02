@@ -9,6 +9,6 @@
 
 namespace FreeHeroes::Conversion {
 
-int zlibUncompressFromBuffer(const char* sourceData, size_t remainSize, std::ostream & dest);
+int zlibUncompressFromBuffer(const char* sourceData, size_t remainSize, std::ostream& dest);
 
 }

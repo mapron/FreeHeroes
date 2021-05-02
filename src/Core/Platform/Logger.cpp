@@ -15,12 +15,11 @@
 
 #include <cstdio>
 
-namespace FreeHeroes
-{
+namespace FreeHeroes {
 
 std::unique_ptr<ILoggerBackend> g_loggerBackend(new LoggerBackendConsole(Logger::Notice, false, false, false, LoggerBackendConsole::Type::Cout));
 
-void Logger::SetLoggerBackend(std::unique_ptr<ILoggerBackend> && backend)
+void Logger::SetLoggerBackend(std::unique_ptr<ILoggerBackend>&& backend)
 {
     g_loggerBackend = std::move(backend);
 }
@@ -37,13 +36,12 @@ Logger::Logger(int logLevel)
         m_stream = std::make_unique<std::ostringstream>();
 }
 
-Logger::Logger(const std::string &context, int logLevel)
+Logger::Logger(const std::string& context, int logLevel)
 {
-    if (g_loggerBackend->LogEnabled(logLevel))
-    {
+    if (g_loggerBackend->LogEnabled(logLevel)) {
         m_stream = std::make_unique<std::ostringstream>();
         if (!context.empty())
-           *m_stream << "{" << context << "} ";
+            *m_stream << "{" << context << "} ";
     }
 }
 
@@ -53,40 +51,35 @@ Logger::~Logger()
         g_loggerBackend->FlushMessage(m_stream->str(), m_logLevel);
 }
 
-Logger::operator bool () const
+Logger::operator bool() const
 {
     return !!m_stream;
 }
 
-Logger& Logger::operator << (const char *str)
+Logger& Logger::operator<<(const char* str)
 {
-    if (m_stream)
-    {
+    if (m_stream) {
         *m_stream << str;
     }
     return *this;
 }
-Logger &Logger::operator <<(const Binary& SizeHolder)
+Logger& Logger::operator<<(const Binary& SizeHolder)
 {
-    if (m_stream)
-    {
+    if (m_stream) {
         *m_stream << "[" << SizeHolder.m_size << "] ";
         *m_stream << std::hex << std::setfill('0');
         const size_t outputSize = std::min(SizeHolder.m_size, SizeHolder.m_outputMax);
 
-        if (SizeHolder.m_size <= SizeHolder.m_outputMax)
-        {
-            for( size_t i = 0; i < outputSize; ++i )
+        if (SizeHolder.m_size <= SizeHolder.m_outputMax) {
+            for (size_t i = 0; i < outputSize; ++i)
                 *m_stream << std::setw(2) << int(SizeHolder.m_data[i]) << ' ';
-        }
-        else
-        {
-            for( size_t i = 0; i < outputSize / 2; ++i )
+        } else {
+            for (size_t i = 0; i < outputSize / 2; ++i)
                 *m_stream << std::setw(2) << int(SizeHolder.m_data[i]) << ' ';
 
             *m_stream << "... ";
 
-            for( size_t i = 0; i < outputSize / 2; ++i )
+            for (size_t i = 0; i < outputSize / 2; ++i)
                 *m_stream << std::setw(2) << int(SizeHolder.m_data[SizeHolder.m_size - outputSize / 2 + i]) << ' ';
         }
         *m_stream << std::dec;
@@ -94,29 +87,34 @@ Logger &Logger::operator <<(const Binary& SizeHolder)
     return *this;
 }
 
-Logger::Binary::Binary(const void *data, size_t size, size_t outputMax)
-    : m_data((const unsigned char *)data), m_size(size), m_outputMax(outputMax)
+Logger::Binary::Binary(const void* data, size_t size, size_t outputMax)
+    : m_data((const unsigned char*) data)
+    , m_size(size)
+    , m_outputMax(outputMax)
 {
 }
 
-Logger::Binary::Binary(const char *data, size_t size, size_t outputMax)
-     : m_data((const unsigned char *)data), m_size(size), m_outputMax(outputMax)
+Logger::Binary::Binary(const char* data, size_t size, size_t outputMax)
+    : m_data((const unsigned char*) data)
+    , m_size(size)
+    , m_outputMax(outputMax)
 {
 }
 
-Logger::Binary::Binary(const unsigned char *data, size_t size, size_t outputMax)
-     : m_data((const unsigned char *)data), m_size(size), m_outputMax(outputMax)
+Logger::Binary::Binary(const unsigned char* data, size_t size, size_t outputMax)
+    : m_data((const unsigned char*) data)
+    , m_size(size)
+    , m_outputMax(outputMax)
 {
-
 }
 
-LoggerBackendFiles::LoggerBackendFiles(int maxLogLevel,
-                                       bool duplicateInStderr,
-                                       bool outputLoglevel,
-                                       bool outputTimestamp,
-                                       bool outputTimeoffsets,
-                                       size_t maxFilesInDir,
-                                       size_t maxMessagesInFile,
+LoggerBackendFiles::LoggerBackendFiles(int            maxLogLevel,
+                                       bool           duplicateInStderr,
+                                       bool           outputLoglevel,
+                                       bool           outputTimestamp,
+                                       bool           outputTimeoffsets,
+                                       size_t         maxFilesInDir,
+                                       size_t         maxMessagesInFile,
                                        Core::std_path dir)
     : AbstractLoggerBackend(maxLogLevel, outputLoglevel, outputTimestamp, outputTimeoffsets, true)
     , m_duplicateInStderr(duplicateInStderr)
@@ -132,7 +130,7 @@ LoggerBackendFiles::~LoggerBackendFiles()
     CloseFile();
 }
 
-void LoggerBackendFiles::FlushMessageInternal(const std::string &message, int) const
+void LoggerBackendFiles::FlushMessageInternal(const std::string& message, int) const
 {
     std::lock_guard<std::mutex> lock(m_mutex);
     if (!m_currentFile.is_open())
@@ -150,8 +148,7 @@ void LoggerBackendFiles::FlushMessageInternal(const std::string &message, int) c
 
     m_currentFile.flush();
 
-    if (++m_counter > m_maxMessagesInFile)
-    {
+    if (++m_counter > m_maxMessagesInFile) {
         m_counter = 0;
         CloseFile();
     }
@@ -164,7 +161,7 @@ void LoggerBackendFiles::OpenNextFile() const
     CleanupDir();
 
     std::string timeString = ChronoPoint(true).ToString(true, true);
-    std::replace( timeString.begin(), timeString.end(), ' ', '_');
+    std::replace(timeString.begin(), timeString.end(), ' ', '_');
     timeString.erase(std::remove(timeString.begin(), timeString.end(), '-'), timeString.end());
     timeString.erase(std::remove(timeString.begin(), timeString.end(), ':'), timeString.end());
 
@@ -188,11 +185,9 @@ void LoggerBackendFiles::CleanupDir() const
             contents.push_back(Core::path2string(it.path().filename()));
     }
     std::sort(contents.begin(), contents.end());
-    if (contents.size() > m_maxFilesInDir - 1)
-    {
-        contents.erase(contents.end() - (m_maxFilesInDir - 1) , contents.end() );
-        for (const auto & file : contents)
-        {
+    if (contents.size() > m_maxFilesInDir - 1) {
+        contents.erase(contents.end() - (m_maxFilesInDir - 1), contents.end());
+        for (const auto& file : contents) {
             Core::std_fs::remove(m_dir / file);
         }
     }

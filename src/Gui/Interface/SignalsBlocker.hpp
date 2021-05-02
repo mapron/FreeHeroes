@@ -13,11 +13,12 @@ class QSignalBlocker;
 
 namespace FreeHeroes::Gui {
 
-class SignalBlocker
-{
+class SignalBlocker {
     std::vector<QSignalBlocker> blockers;
+
 public:
-    SignalBlocker (const std::vector<QObject*> & objects) {
+    SignalBlocker(const std::vector<QObject*>& objects)
+    {
         for (QObject* o : objects)
             blockers.emplace_back(o);
     }

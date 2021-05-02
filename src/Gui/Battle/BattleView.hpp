@@ -9,16 +9,15 @@
 
 namespace FreeHeroes::Gui {
 
-class BattleView : public QGraphicsView
-{
+class BattleView : public QGraphicsView {
     Q_OBJECT
 public:
-    explicit BattleView(QWidget *parent = 0);
+    explicit BattleView(QWidget* parent = 0);
 
 protected:
-    void wheelEvent(QWheelEvent *event);
+    void wheelEvent(QWheelEvent* event);
 
-    void keyPressEvent(QKeyEvent *event);
+    void keyPressEvent(QKeyEvent* event);
 };
 
 }

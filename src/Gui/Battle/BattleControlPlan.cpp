@@ -10,13 +10,12 @@ namespace FreeHeroes::Gui {
 BattleControlPlan::BattleControlPlan(QObject* parent)
     : QObject(parent)
 {
-
 }
 
 void BattleControlPlan::updateAlt()
 {
-    auto old  = m_alt;
-    m_alt = m_altButtons;
+    auto old = m_alt;
+    m_alt    = m_altButtons;
     if (m_currentModifiers.testFlag(Qt::AltModifier) && !m_currentAlternatives.empty()) {
         m_alt = m_currentAlternatives[0];
     }
@@ -47,14 +46,13 @@ void BattleControlPlan::setButtonsAltIndex(Core::BattlePlanAttackParams::Alterat
     updateAlt();
 }
 
-
 void BattleControlPlan::setHeroSpell(Core::LibrarySpellConstPtr spell)
 {
     bool isHeroCast = !!spell;
     if (m_planCastParams.m_spell == spell && m_planCastParams.m_isHeroCast == isHeroCast)
         return;
 
-    m_planCastParams.m_spell = spell;
+    m_planCastParams.m_spell      = spell;
     m_planCastParams.m_isHeroCast = isHeroCast;
 
     emit spellChanged();

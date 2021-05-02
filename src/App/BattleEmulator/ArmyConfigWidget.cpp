@@ -6,7 +6,6 @@
 #include "ArmyConfigWidget.hpp"
 #include "ui_ArmyConfigWidget.h"
 
-
 #include "AdventureControl.hpp"
 
 // Gui
@@ -26,7 +25,6 @@
 // Platform
 #include "Profiler.hpp"
 
-
 namespace FreeHeroes::BattleEmulator {
 using namespace Core;
 using namespace Gui;
@@ -41,9 +39,9 @@ ArmyConfigWidget::ArmyConfigWidget(QWidget* parent)
 
     connect(m_ui->pushButtonGenerateArmy, &QPushButton::clicked, this, &ArmyConfigWidget::generate);
 
-    QList<QRadioButton*> modeSelectors{m_ui->radioButtonSquad, m_ui->radioButtonHero};
-    for (auto * selector : modeSelectors) {
-        connect(selector, &QRadioButton::clicked, this, [this]{
+    QList<QRadioButton*> modeSelectors{ m_ui->radioButtonSquad, m_ui->radioButtonHero };
+    for (auto* selector : modeSelectors) {
+        connect(selector, &QRadioButton::clicked, this, [this] {
             const bool useHero = m_ui->radioButtonHero == sender();
             const bool changed = m_army->getHero()->getSource()->isValid() != useHero;
             if (!changed)
@@ -52,7 +50,6 @@ ArmyConfigWidget::ArmyConfigWidget(QWidget* parent)
                 m_army->getHero()->setHero(nullptr);
             else
                 m_ui->heroWithArmyConfigWidget->initHero();
-
         });
     }
     connect(m_ui->heroWithArmyConfigWidget, &HeroWithArmyConfigWidget::showHeroDialog, this, &ArmyConfigWidget::showHeroDialog);
@@ -74,10 +71,10 @@ bool ArmyConfigWidget::isAIControl() const
 
 void ArmyConfigWidget::initFromMapObject(LibraryMapObjectConstPtr mapObject, int variant)
 {
-    auto & guards = mapObject->variants[variant].guards;
-    for (size_t i = 0 ; i < m_army->getSquad()->getCount(); ++i) {
+    auto& guards = mapObject->variants[variant].guards;
+    for (size_t i = 0; i < m_army->getSquad()->getCount(); ++i) {
         if (i < guards.size()) {
-            m_army->getSquad()->getStack(i)->setParams(guards[i].unit,  guards[i].count);
+            m_army->getSquad()->getStack(i)->setParams(guards[i].unit, guards[i].count);
         } else {
             m_army->getSquad()->getStack(i)->setCount(0);
         }
@@ -87,7 +84,7 @@ void ArmyConfigWidget::initFromMapObject(LibraryMapObjectConstPtr mapObject, int
 void ArmyConfigWidget::refresh()
 {
     const bool heroExists = m_army->getHero()->getSource()->isValid();
-    m_ui->radioButtonHero ->setChecked(heroExists);
+    m_ui->radioButtonHero->setChecked(heroExists);
     m_ui->radioButtonSquad->setChecked(!heroExists);
     m_ui->stackedWidget->setCurrentIndex(heroExists ? 0 : 1);
     if (heroExists)
@@ -97,25 +94,23 @@ void ArmyConfigWidget::refresh()
         m_tmpRefresh();
 }
 
-void ArmyConfigWidget::setModels(LibraryModelsProvider& modelProvider, Core::IRandomGenerator * randomGenerator)
+void ArmyConfigWidget::setModels(LibraryModelsProvider& modelProvider, Core::IRandomGenerator* randomGenerator)
 {
     m_ui->heroWithArmyConfigWidget->setModels(modelProvider, randomGenerator);
     m_ui->monsterSquadConfigWidget->setModels(modelProvider);
-    m_modelProvider = &modelProvider;
+    m_modelProvider   = &modelProvider;
     m_randomGenerator = randomGenerator;
 
     m_unitsFilter = new UnitsFilterModel(this);
     m_unitsFilter->setSourceModel(m_modelProvider->units());
 
-    FactionsFilterModel * factionsFilter = new FactionsFilterModel(this);
+    FactionsFilterModel* factionsFilter = new FactionsFilterModel(this);
     factionsFilter->setSourceModel(modelProvider.factions());
-    FactionsComboModel * factionsCombo = new FactionsComboModel(factionsFilter, this);
+    FactionsComboModel* factionsCombo = new FactionsComboModel(factionsFilter, this);
     m_ui->comboBoxFactionSelect->setModel(factionsCombo);
-
 }
 
-
-void ArmyConfigWidget::setSource(Gui::GuiAdventureArmy * army)
+void ArmyConfigWidget::setSource(Gui::GuiAdventureArmy* army)
 {
     m_army = army;
     Q_ASSERT(m_modelProvider);
@@ -133,45 +128,44 @@ void ArmyConfigWidget::initHero()
 
 void ArmyConfigWidget::generate()
 {
-    using namespace  Core;
-    const auto faction = m_ui->comboBoxFactionSelect->currentData(FactionsModel::SourceObject).value<Core::LibraryFactionConstPtr>();
-    auto generateRandomStack = [this, faction](int minLevel, int maxLevel, int & value) -> AdventureStack {
+    using namespace Core;
+    const auto faction             = m_ui->comboBoxFactionSelect->currentData(FactionsModel::SourceObject).value<Core::LibraryFactionConstPtr>();
+    auto       generateRandomStack = [this, faction](int minLevel, int maxLevel, int& value) -> AdventureStack {
         QList<AdventureStack> alternatives;
         for (int row = 0; row < m_unitsFilter->rowCount(); ++row) {
             auto unit = m_unitsFilter->index(row, 0).data(UnitsModel::SourceObject).value<LibraryUnitConstPtr>();
             if (unit->level < minLevel
-               || unit->level > maxLevel
-               || (!!faction && unit->faction != faction))
+                || unit->level > maxLevel
+                || (!!faction && unit->faction != faction))
                 continue;
             if (unit->value > value)
                 continue;
 
-            const int count =  value / unit->value;
-            alternatives << AdventureStack{unit,  count};
+            const int count = value / unit->value;
+            alternatives << AdventureStack{ unit, count };
         }
-        auto r = alternatives.value(m_randomGenerator->gen( alternatives.size() - 1));
+        auto r = alternatives.value(m_randomGenerator->gen(alternatives.size() - 1));
         if (r.library)
             value -= r.count * r.library->value;
         return r;
     };
     int level = 70;
 
-    int totalValue = m_ui->spinBoxArmyValue->value();
-    QList<int> denominators = {9, 9, 9, 8, 7, 5, 5};
-    int  remainingValue = 0;
-    for (size_t i = 0 ; i < m_army->getSquad()->getCount(); ++i) {
+    int        totalValue     = m_ui->spinBoxArmyValue->value();
+    QList<int> denominators   = { 9, 9, 9, 8, 7, 5, 5 };
+    int        remainingValue = 0;
+    for (size_t i = 0; i < m_army->getSquad()->getCount(); ++i) {
         remainingValue += totalValue / denominators.value(i);
         auto advStack = generateRandomStack(level, level + 9, remainingValue);
         m_army->getSquad()->getStack(m_army->getSquad()->getCount() - i - 1)->setParams(advStack.library, advStack.count);
         level -= 10;
     }
-
 }
 
 void ArmyConfigWidget::showHeroDialog()
 {
-    HeroMainDialog dlg (this);
-    m_tmpRefresh = [&dlg]{
+    HeroMainDialog dlg(this);
+    m_tmpRefresh = [&dlg] {
         dlg.refresh();
     };
     dlg.setSource(m_army, m_adventureControl.get(), m_adventureControl.get(), m_modelProvider);
@@ -187,9 +181,7 @@ void ArmyConfigWidget::makeLevelupInternal()
         return;
     const int levelUps = m_ui->spinBoxLevelUpsCount->value();
     const int newLevel = std::min(m_army->getHero()->getSource()->level + levelUps, 75);
-    emit makeLevelup(newLevel);
+    emit      makeLevelup(newLevel);
 }
-
-
 
 }

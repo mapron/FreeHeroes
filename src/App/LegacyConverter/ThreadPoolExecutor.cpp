@@ -8,12 +8,13 @@
 namespace FreeHeroes::Conversion {
 
 namespace {
-std::chrono::milliseconds curMS() {
+std::chrono::milliseconds curMS()
+{
     return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch());
 }
 }
 
-ThreadPoolExecutor::ThreadPoolExecutor(QObject * parent)
+ThreadPoolExecutor::ThreadPoolExecutor(QObject* parent)
     : QObject(parent)
 {
     connect(this, &ThreadPoolExecutor::finishedInternal, this, &ThreadPoolExecutor::finished, Qt::QueuedConnection);
@@ -40,12 +41,12 @@ void ThreadPoolExecutor::add(ThreadPoolExecutor::Task task)
 void ThreadPoolExecutor::start(std::chrono::milliseconds progressInterval)
 {
     //clear();
-    m_progressInterval = progressInterval;
-    m_nextSendTime = std::chrono::milliseconds{0};
+    m_progressInterval       = progressInterval;
+    m_nextSendTime           = std::chrono::milliseconds{ 0 };
     const size_t threadCount = std::thread::hardware_concurrency();
-    m_threadsLeft = threadCount;
-    for (size_t i=0; i< threadCount; ++i) {
-        m_threads.emplace_back([this]{ threadFunc(); });
+    m_threadsLeft            = threadCount;
+    for (size_t i = 0; i < threadCount; ++i) {
+        m_threads.emplace_back([this] { threadFunc(); });
     }
 }
 
@@ -67,7 +68,7 @@ void ThreadPoolExecutor::clear()
         m_queue.clear();
         m_done = 0;
     }
-    for (auto & thread : m_threads) {
+    for (auto& thread : m_threads) {
         if (thread.joinable())
             thread.join();
     }

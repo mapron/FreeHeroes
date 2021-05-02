@@ -11,6 +11,6 @@
 
 namespace FreeHeroes::Core::Reflection {
 class LibraryIdResolver;
-void deserializeFromJson(LibraryIdResolver & idResolver, rttr::instance obj, const nlohmann::json & jsonObject);
+void deserializeFromJson(LibraryIdResolver& idResolver, rttr::instance obj, const nlohmann::json& jsonObject);
 
 }

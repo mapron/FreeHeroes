@@ -14,18 +14,17 @@ namespace FreeHeroes::Core {
 
 struct LibraryTerrain {
     struct Presentation {
-
-        int order = 0;
-        std::string music;
+        int                      order = 0;
+        std::string              music;
         std::vector<std::string> backgroundsBattle;
-        std::string icon;
+        std::string              icon;
     };
 
     std::string id;
     std::string untranslatedName;
-    int moveCost = 100;
-    bool isObstacle = false;
-    bool extraLayer = false;
+    int         moveCost   = 100;
+    bool        isObstacle = false;
+    bool        extraLayer = false;
 
     Presentation presentationParams;
 };

@@ -12,19 +12,17 @@
 namespace FreeHeroes::Core {
 
 struct LibraryResource {
-
     struct Presentation {
-        int orderKingdom = 0;
-        int orderCommon  = 0;
+        int         orderKingdom = 0;
+        int         orderCommon  = 0;
         std::string icon;
         std::string iconLarge;
         std::string iconTrade;
     };
 
-    std::string id;
-    std::string untranslatedName;
+    std::string  id;
+    std::string  untranslatedName;
     Presentation presentationParams;
 };
-
 
 }

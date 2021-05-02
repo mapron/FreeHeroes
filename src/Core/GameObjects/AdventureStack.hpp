@@ -11,46 +11,48 @@
 
 namespace FreeHeroes::Core {
 
-
 struct AdventureStack {
     AdventureStack() = default;
     AdventureStack(LibraryUnitConstPtr library, int count)
-        : library(library), count(count) { if (!library) this->count = 0;  }
+        : library(library)
+        , count(count)
+    {
+        if (!library)
+            this->count = 0;
+    }
 
     bool isValid() const { return count > 0 && library; }
 
     // main params
     LibraryUnitConstPtr library = nullptr;
-    int count = 0;
+    int                 count   = 0;
 
-    bool isEqualTo(const AdventureStack & another) const noexcept { return library == another.library && count == another.count;}
+    bool isEqualTo(const AdventureStack& another) const noexcept { return library == another.library && count == another.count; }
 
     // estimation input:
     struct ArmyParams {
-        int                      indexInArmy      = 0; // that's error-prone, probably, need to sure indeces are unique. Whatever.
-        int                      indexInArmyValid = 0; // same.
+        int indexInArmy      = 0; // that's error-prone, probably, need to sure indeces are unique. Whatever.
+        int indexInArmyValid = 0; // same.
     };
     ArmyParams armyParams;
 
     // estimated params:
     struct EstimatedParams {
-        UnitPrimaryParams        primary;    // library->primary + hero->primary.
-        PrimaryRngParams         rngParams;  // (if hero) hero(skills+artifacts) + squad(abilities,factions,undead)
-        bool                     hasMorale = false;
-        MoraleDetails            moraleDetails;
-        LuckDetails              luckDetails;
-        MagicReduce              magicReduce;
-        BonusRatio               magicOppSuccessChance = {1,1};
-        SpellFilter              immunes;
-        SpellFilter              immunesWithoutBreakable;
-        std::set<RangeAttackPenalty> disabledPenalties;
-        bool                     regenerate = false;
+        UnitPrimaryParams                  primary;   // library->primary + hero->primary.
+        PrimaryRngParams                   rngParams; // (if hero) hero(skills+artifacts) + squad(abilities,factions,undead)
+        bool                               hasMorale = false;
+        MoraleDetails                      moraleDetails;
+        LuckDetails                        luckDetails;
+        MagicReduce                        magicReduce;
+        BonusRatio                         magicOppSuccessChance = { 1, 1 };
+        SpellFilter                        immunes;
+        SpellFilter                        immunesWithoutBreakable;
+        std::set<RangeAttackPenalty>       disabledPenalties;
+        bool                               regenerate = false;
         LibraryUnit::Abilities::CastsOnHit castsOnHit;
-        LibraryUnit::Abilities::FixedCast fixedCast;
+        LibraryUnit::Abilities::FixedCast  fixedCast;
     };
     EstimatedParams estimated;
-
 };
-
 
 }

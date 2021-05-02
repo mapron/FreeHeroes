@@ -12,9 +12,7 @@
 #include <memory>
 #include <functional>
 
-
-namespace Ui
-{
+namespace Ui {
 class MonsterSquadConfigWidget;
 }
 
@@ -24,19 +22,15 @@ namespace Gui {
 class LibraryModelsProvider;
 class GuiAdventureArmy;
 
-class GUIEDITOR_EXPORT MonsterSquadConfigWidget : public QWidget
-{
+class GUIEDITOR_EXPORT MonsterSquadConfigWidget : public QWidget {
     Q_OBJECT
 public:
-    MonsterSquadConfigWidget(QWidget * parent = nullptr);
+    MonsterSquadConfigWidget(QWidget* parent = nullptr);
     ~MonsterSquadConfigWidget();
 
-
 public:
-
-    void setModels(LibraryModelsProvider & modelProvider);
+    void setModels(LibraryModelsProvider& modelProvider);
     void setSource(GuiAdventureArmy* adventureArmy);
-
 
 private:
     std::unique_ptr<Ui::MonsterSquadConfigWidget> m_ui;
@@ -44,4 +38,3 @@ private:
 
 }
 }
-

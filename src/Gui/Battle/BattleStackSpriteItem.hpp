@@ -9,15 +9,16 @@
 
 namespace FreeHeroes::Gui {
 
-class BattleStackSpriteItem : public SpriteItemObj
-{
+class BattleStackSpriteItem : public SpriteItemObj {
 public:
+    // clang-format off
     enum class Highlight { Selected, Hovered, Possible, No };
     enum class CounterMode { Normal, Buff, Debuff, Mixed };
+    // clang-format on
 
     static constexpr int fromSpriteCenterToHexCenter = 40;
-public:
 
+public:
     BattleStackSpriteItem(const SpritePtr& frames, qreal hexWidth, QGraphicsItem* parent = nullptr);
 
     void setStartDirectionRight(bool right);
@@ -35,26 +36,26 @@ public:
     bool getHighlight(Highlight highlight) const { return m_highlights.value(highlight, false); }
 
 protected:
-
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
 protected:
     Highlight getMainHighlight() const;
-protected:
-    const qreal m_hexWidth;
-    QPointF m_mirrorShift;
-    QMap<Highlight, bool> m_highlights;
-    bool m_startDirectionRight = true;
-    bool m_isLarge = false;
 
-    int m_count = 0;
-    int m_countExtra = 0;
-    bool m_counterVisible = true;
-    CounterMode m_counterMode = CounterMode::Normal;
-    bool m_counterCompact = false;
+protected:
+    const qreal           m_hexWidth;
+    QPointF               m_mirrorShift;
+    QMap<Highlight, bool> m_highlights;
+    bool                  m_startDirectionRight = true;
+    bool                  m_isLarge             = false;
+
+    int         m_count          = 0;
+    int         m_countExtra     = 0;
+    bool        m_counterVisible = true;
+    CounterMode m_counterMode    = CounterMode::Normal;
+    bool        m_counterCompact = false;
 };
 
-using BattleStackSpriteItemPtr = BattleStackSpriteItem*;
+using BattleStackSpriteItemPtr      = BattleStackSpriteItem*;
 using BattleStackSpriteItemConstPtr = const BattleStackSpriteItem*;
 
 }

@@ -9,20 +9,18 @@
 
 #include "ConverterDialog.hpp"
 
-
-int main(int argc, char * argv[])
+int main(int argc, char* argv[])
 {
     using namespace FreeHeroes;
     using namespace Conversion;
 
     Gui::Application fhApp;
-    QApplication app(argc, argv);
+    QApplication     app(argc, argv);
 
-    fhApp.load("LegacyConverter", {Gui::Application::Option::QtTranslations});
+    fhApp.load("LegacyConverter", { Gui::Application::Option::QtTranslations });
 
     ConverterDialog dlg;
     dlg.show();
 
     return app.exec();
 }
-

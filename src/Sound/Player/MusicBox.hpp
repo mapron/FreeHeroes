@@ -16,19 +16,19 @@
 
 namespace FreeHeroes::Sound {
 
-class SOUNDPLAYER_EXPORT MusicBox : public IMusicBox, public QObject
-{
+class SOUNDPLAYER_EXPORT MusicBox : public IMusicBox
+    , public QObject {
 public:
-    MusicBox(Core::IRandomGenerator & rng, Core::IResourceLibrary & resourceLibrary);
+    MusicBox(Core::IRandomGenerator& rng, Core::IResourceLibrary& resourceLibrary);
     ~MusicBox();
 
 public:
-    ISoundResourcePtr musicPrepare(const MusicSettings & music) override;
+    ISoundResourcePtr musicPrepare(const MusicSettings& music) override;
 
-    ISoundResourcePtr effectPrepare(const EffectSettings & effect) override;
+    ISoundResourcePtr effectPrepare(const EffectSettings& effect) override;
 
-    void musicPlay(const MusicSettings & music);
-    void effectPlay(const EffectSettings & effect);
+    void musicPlay(const MusicSettings& music);
+    void effectPlay(const EffectSettings& effect);
 
     void setMusicVolume(int percent) override;
     void setEffectsVolume(int percent) override;
@@ -37,12 +37,11 @@ public:
     int getEffectsVolume() const noexcept override;
 
 private:
-
 private:
     struct Impl;
-    std::unique_ptr<Impl> m_impl;
-    Core::IRandomGenerator & m_rng;
-    Core::IResourceLibrary & m_resourceLibrary;
+    std::unique_ptr<Impl>   m_impl;
+    Core::IRandomGenerator& m_rng;
+    Core::IResourceLibrary& m_resourceLibrary;
 };
 
 }

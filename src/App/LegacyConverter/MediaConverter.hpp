@@ -12,18 +12,17 @@
 namespace FreeHeroes::Conversion {
 
 class MediaConverter {
-
 public:
     MediaConverter();
 
-    bool ffmpegFound() const { return m_ffmpegFound; }
+    bool    ffmpegFound() const { return m_ffmpegFound; }
     QString ffmpegBinary() const { return m_ffmpegBinary; }
 
-    bool prepareWav(const Core::std_path & source, const Core::std_path & dest);
-    bool prepareVideo(const Core::std_path & source, const Core::std_path & dest);
+    bool prepareWav(const Core::std_path& source, const Core::std_path& dest);
+    bool prepareVideo(const Core::std_path& source, const Core::std_path& dest);
 
 private:
-    bool m_ffmpegFound = false;
+    bool    m_ffmpegFound = false;
     QString m_ffmpegBinary;
 };
 

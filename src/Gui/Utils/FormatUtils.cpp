@@ -12,12 +12,12 @@ namespace FreeHeroes::Gui {
 QString FormatUtils::prepareDescription(QString description)
 {
     const QString formatTitleBegin = QString("<font color=\"#EDD57A\">");
-    const QString formatTitleEnd = QString("</font>");
+    const QString formatTitleEnd   = QString("</font>");
     if (description.startsWith("\""))
         description = description.mid(1);
 
     if (description.endsWith("\""))
-        description = description.mid(0, description.size() -1);
+        description = description.mid(0, description.size() - 1);
 
     description.replace("\\n", "<br>");
     description.replace("{", formatTitleBegin);
@@ -47,7 +47,8 @@ QString FormatUtils::battleSidePrefix(bool attacker)
         return QString("<font color=\"#3A35A0\"><b>") + tr("D") + QString("⮞") + "</b></font> ";
 }
 
-QString FormatUtils::formatSequenceStr(QString base, QString start, QString cur) {
+QString FormatUtils::formatSequenceStr(QString base, QString start, QString cur)
+{
     if (base == start && start == cur)
         return QString("%1").arg(cur);
 
@@ -57,11 +58,13 @@ QString FormatUtils::formatSequenceStr(QString base, QString start, QString cur)
     return QString("<font color=\"#696969\">%1 ⮞</font> %2").arg(base).arg(cur);
 }
 
-QString FormatUtils::formatSequenceInt(int base, int start, int cur){
+QString FormatUtils::formatSequenceInt(int base, int start, int cur)
+{
     return formatSequenceStr(QString("%1").arg(base), QString("%1").arg(start), QString("%1").arg(cur));
 }
 
-QString FormatUtils::formatSequenceDmg(Core::DamageDesc base, Core::DamageDesc start, Core::DamageDesc cur) {
+QString FormatUtils::formatSequenceDmg(Core::DamageDesc base, Core::DamageDesc start, Core::DamageDesc cur)
+{
     auto formatDmg = [](Core::DamageDesc desc) {
         if (desc.minDamage == desc.maxDamage)
             return QString("%1").arg(desc.minDamage);
@@ -72,7 +75,8 @@ QString FormatUtils::formatSequenceDmg(Core::DamageDesc base, Core::DamageDesc s
                              formatDmg(cur));
 }
 
-QString FormatUtils::formatLargeInt(int64_t value) {
+QString FormatUtils::formatLargeInt(int64_t value)
+{
     QString suffix = "";
     if (value > 20000) {
         suffix = "K";
@@ -87,13 +91,12 @@ QString FormatUtils::formatLargeInt(int64_t value) {
 
 QString FormatUtils::formatBonus(const Core::BonusRatio& bonus, bool plus, int digits)
 {
-   const double value = double(bonus.num() * 100) / bonus.denom();
-   QString str = QString("%1%").arg(value, 0, 'f', digits);
-   if (plus && value > 0.) {
-       str = "+" + str;
-   }
-   return str;
+    const double value = double(bonus.num() * 100) / bonus.denom();
+    QString      str   = QString("%1%").arg(value, 0, 'f', digits);
+    if (plus && value > 0.) {
+        str = "+" + str;
+    }
+    return str;
 }
-
 
 }

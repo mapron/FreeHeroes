@@ -15,8 +15,7 @@
 #include <QObject>
 #include <QMap>
 
-namespace FreeHeroes::Sound
-{
+namespace FreeHeroes::Sound {
 class IMusicBox;
 }
 
@@ -24,24 +23,27 @@ namespace FreeHeroes::Gui {
 class IGraphicsLibrary;
 
 /// @todo: not really a model! Need to prettify this.
-class GUIGAMEWRAPPERS_EXPORT UiCommonModel : public QObject
-{
+class GUIGAMEWRAPPERS_EXPORT UiCommonModel : public QObject {
     Q_OBJECT
 public:
-    UiCommonModel(Sound::IMusicBox & musicBox,
-                  IGraphicsLibrary & graphicsLibrary,
-                  QObject * parent);
+    UiCommonModel(Sound::IMusicBox& musicBox,
+                  IGraphicsLibrary& graphicsLibrary,
+                  QObject*          parent);
     ~UiCommonModel();
 
-    enum class UIString { Close, Cancel };
+    enum class UIString
+    {
+        Close,
+        Cancel
+    };
     QString getCommonString(UIString common) const;
 
-    QStringList getLuckDescription(const Core::LuckDetails & details) const;
-    QStringList getMoraleDescription(const Core::MoraleDetails & details) const;
+    QStringList getLuckDescription(const Core::LuckDetails& details) const;
+    QStringList getMoraleDescription(const Core::MoraleDetails& details) const;
 
     struct PrimarySkillInfo {
-        QString name;
-        QString descr;
+        QString         name;
+        QString         descr;
         IAsyncPixmapPtr iconSmall;
         IAsyncPixmapPtr iconMedium;
         IAsyncPixmapPtr iconLarge;
@@ -49,9 +51,9 @@ public:
     QMap<Core::HeroPrimaryParamType, PrimarySkillInfo> skillInfo;
 
     struct Spellbook {
-        IAsyncPixmapPtr background;
-        IAsyncPixmapPtr prevPage;
-        IAsyncPixmapPtr nextPage;
+        IAsyncPixmapPtr        background;
+        IAsyncPixmapPtr        prevPage;
+        IAsyncPixmapPtr        nextPage;
         QList<IAsyncPixmapPtr> spelltabs;
         QList<IAsyncPixmapPtr> spellTitles;
     };
@@ -92,7 +94,7 @@ public:
     RngIcons morale;
 
     struct BattleResult {
-        IAsyncMoviePtr anim;
+        IAsyncMoviePtr           anim;
         Sound::ISoundResourcePtr music;
     };
     BattleResult win;

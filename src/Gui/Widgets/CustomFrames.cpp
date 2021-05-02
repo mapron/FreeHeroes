@@ -15,7 +15,6 @@
 
 namespace FreeHeroes::Gui {
 
-
 FlatButton::FlatButton(QWidget* parent)
     : QPushButton(parent)
 {
@@ -39,7 +38,7 @@ void FlatButton::setBorderWidth(int borderWidth, bool adjustSize)
     m_borderWidth = borderWidth;
     if (adjustSize) {
         int b = borderWidth - m_borderWidth;
-        this->setFixedSize(this->size().width() + b * 2, this->size().height()  + b * 2);
+        this->setFixedSize(this->size().width() + b * 2, this->size().height() + b * 2);
     }
     update();
 }
@@ -49,9 +48,9 @@ void FlatButton::setAdditionalCheckedHighlight(bool state)
     m_additionalCheckedHighlight = state;
 }
 
-void FlatButton::paintEvent(QPaintEvent* )
+void FlatButton::paintEvent(QPaintEvent*)
 {
-    QIcon icn = this->icon();
+    QIcon   icn = this->icon();
     QPixmap pix;
     // normal, pressed, disabled, hovered.
     // normal    = QIcon::Off +  QIcon::Normal
@@ -59,8 +58,8 @@ void FlatButton::paintEvent(QPaintEvent* )
     // disabled  = QIcon::Off +  QIcon::Disabled
     // hovered   = QIcon::Off +  QIcon::Selected
     QRect boundingRect = this->rect();
-    QRect pixmapRect = boundingRect.adjusted(m_borderWidth, m_borderWidth, -m_borderWidth, -m_borderWidth);
-    bool isPressed = m_isPressed || (this->isCheckable() && this->isChecked());
+    QRect pixmapRect   = boundingRect.adjusted(m_borderWidth, m_borderWidth, -m_borderWidth, -m_borderWidth);
+    bool  isPressed    = m_isPressed || (this->isCheckable() && this->isChecked());
     if (!this->isEnabled()) {
         pix = icn.pixmap(pixmapRect.size(), QIcon::Disabled, QIcon::Off);
     } else if (isPressed) {
@@ -76,21 +75,20 @@ void FlatButton::paintEvent(QPaintEvent* )
 
     if (isEnabled() && !isChecked() && m_additionalCheckedHighlight) {
         p.setPen(Qt::NoPen);
-        p.setBrush(QBrush(QColor(0,0,0,30)));
-        p.drawRect(pixmapRect.adjusted(0,0,-1,-1));
+        p.setBrush(QBrush(QColor(0, 0, 0, 30)));
+        p.drawRect(pixmapRect.adjusted(0, 0, -1, -1));
     }
     if (isEnabled() && ((m_isHovered && !m_isPressed) || (isChecked() && m_additionalCheckedHighlight))) {
-        QRect rDraw = pixmapRect.adjusted(0,0,-1,-1);
-        const qreal boxWidth  = rDraw.width();
-        const qreal boxHeight = rDraw.height();
-        qreal thick = 4;
-        QList<QPointF> startPoints {QPointF{0, 0}, QPointF{0, 0}, QPointF{boxWidth  , boxHeight}, QPointF{boxWidth, boxHeight}};
-        QList<QPointF>   endPoints {QPointF{0, thick}, QPointF{thick, 0}, QPointF{boxWidth-thick, boxHeight}, QPointF{boxWidth, boxHeight-thick}};
-        for (int i=0; i < 4; i++)
-        {
-            QLinearGradient grad( startPoints[i], endPoints[i]);
-            grad.setColorAt(0, QColor(255,255,255,50));
-            grad.setColorAt(1, QColor(255,255,255,0));
+        QRect          rDraw     = pixmapRect.adjusted(0, 0, -1, -1);
+        const qreal    boxWidth  = rDraw.width();
+        const qreal    boxHeight = rDraw.height();
+        qreal          thick     = 4;
+        QList<QPointF> startPoints{ QPointF{ 0, 0 }, QPointF{ 0, 0 }, QPointF{ boxWidth, boxHeight }, QPointF{ boxWidth, boxHeight } };
+        QList<QPointF> endPoints{ QPointF{ 0, thick }, QPointF{ thick, 0 }, QPointF{ boxWidth - thick, boxHeight }, QPointF{ boxWidth, boxHeight - thick } };
+        for (int i = 0; i < 4; i++) {
+            QLinearGradient grad(startPoints[i], endPoints[i]);
+            grad.setColorAt(0, QColor(255, 255, 255, 50));
+            grad.setColorAt(1, QColor(255, 255, 255, 0));
             p.setPen(Qt::NoPen);
             p.setBrush(QBrush(grad));
             p.drawRect(rDraw);
@@ -99,7 +97,7 @@ void FlatButton::paintEvent(QPaintEvent* )
     if (m_borderWidth && this->hasFocus()) {
         p.setPen(QPen(m_focusActiveColor, m_borderWidth));
         p.setBrush(Qt::NoBrush);
-        p.drawRect(boundingRect.adjusted(0,0,-1,-1));
+        p.drawRect(boundingRect.adjusted(0, 0, -1, -1));
     }
 }
 
@@ -127,9 +125,9 @@ bool FlatButton::event(QEvent* ev)
 {
     auto res = QPushButton::event(ev);
     if (m_hoverEnabled) {
-        if (ev->type()==QEvent::Enter)
+        if (ev->type() == QEvent::Enter)
             m_isHovered = true;
-        else if (ev->type()==QEvent::Leave)
+        else if (ev->type() == QEvent::Leave)
             m_isHovered = false;
         else
             return res;
@@ -149,7 +147,7 @@ ResizeableComboBox::ResizeableComboBox(QWidget* parent)
 
 void ResizeableComboBox::showPopup()
 {
-    this->view()->setMinimumWidth(calculateMaxModelWidth()  + this->iconSize().width() + 20);
+    this->view()->setMinimumWidth(calculateMaxModelWidth() + this->iconSize().width() + 20);
     QComboBox::showPopup();
 }
 
@@ -157,12 +155,12 @@ int ResizeableComboBox::calculateMaxModelWidth() const
 {
     auto srcModel = this->model();
     Q_ASSERT(srcModel);
-    int rc = srcModel->rowCount();
-    int maxWidth = 0;
-    QFontMetrics fm = this->fontMetrics();
-    for (int i =0; i< rc; ++i) {
+    int          rc       = srcModel->rowCount();
+    int          maxWidth = 0;
+    QFontMetrics fm       = this->fontMetrics();
+    for (int i = 0; i < rc; ++i) {
         const QString text = srcModel->data(srcModel->index(i, 0)).toString();
-        maxWidth = std::max(maxWidth, fm.horizontalAdvance(text));
+        maxWidth           = std::max(maxWidth, fm.horizontalAdvance(text));
     }
     return maxWidth;
 }
@@ -192,23 +190,22 @@ void TreeComboBox::selectIndex(const QModelIndex& index)
 {
     setRootModelIndex(index.parent());
     setCurrentIndex(index.row());
-    m_view->setCurrentIndex( index );
+    m_view->setCurrentIndex(index);
 }
 
 void TreeComboBox::showPopup()
 {
     setRootModelIndex(QModelIndex());
     // @todo: calculateMaxModelWidth not accurate here, it does not walk recursive.
-    this->view()->setMinimumWidth(calculateMaxModelWidth()  + this->iconSize().width() * 2 + 50);
+    this->view()->setMinimumWidth(calculateMaxModelWidth() + this->iconSize().width() * 2 + 50);
     QComboBox::showPopup();
 }
 
 void TreeComboBox::hidePopup()
 {
     setRootModelIndex(m_view->currentIndex().parent());
-    setCurrentIndex  (m_view->currentIndex().row());
+    setCurrentIndex(m_view->currentIndex().row());
     ResizeableComboBox::hidePopup();
 }
-
 
 }

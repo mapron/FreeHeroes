@@ -24,17 +24,14 @@ public:
     static QString formatBattleLog(QString text, bool infoIsWhite);
     static QString battleSidePrefix(bool attacker);
 
-
     static QString formatSequenceStr(QString base, QString start, QString cur);
-
 
     static QString formatSequenceInt(int base, int start, int cur);
     static QString formatSequenceDmg(Core::DamageDesc base, Core::DamageDesc start, Core::DamageDesc cur);
 
     static QString formatLargeInt(int64_t value);
 
-    static QString formatBonus(const Core::BonusRatio & bonus, bool plus = true, int digits = 0);
-
+    static QString formatBonus(const Core::BonusRatio& bonus, bool plus = true, int digits = 0);
 };
 
 }

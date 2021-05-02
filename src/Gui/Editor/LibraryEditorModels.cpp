@@ -7,13 +7,12 @@
 
 #include "ResizePixmap.hpp"
 
-
 namespace FreeHeroes::Gui {
 
 ZeroElementModel::ZeroElementModel(QString title, QObject* parent)
-    : QAbstractListModel(parent), m_title(title)
+    : QAbstractListModel(parent)
+    , m_title(title)
 {
-
 }
 
 QVariant ZeroElementModel::data(const QModelIndex& index, int role) const
@@ -27,7 +26,7 @@ QVariant ZeroElementModel::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-int ZeroElementModel::rowCount(const QModelIndex& ) const
+int ZeroElementModel::rowCount(const QModelIndex&) const
 {
     return 1;
 }
@@ -57,51 +56,45 @@ QVariant ComboModel::data(const QModelIndex& index, int role) const
     return QConcatenateTablesProxyModel::data(index, role);
 }
 
-ArtifactsComboModel::ArtifactsComboModel(QAbstractItemModel * sourceModel, QObject* parent)
-    : ComboModel(tr("-- Select artifact -- "), {22, 22},  sourceModel, parent)
+ArtifactsComboModel::ArtifactsComboModel(QAbstractItemModel* sourceModel, QObject* parent)
+    : ComboModel(tr("-- Select artifact -- "), { 22, 22 }, sourceModel, parent)
 {
 }
 
 UnitsComboModel::UnitsComboModel(QAbstractItemModel* sourceModel, QObject* parent)
-    : ComboModel(tr("-- Empty -- "), {22, 22}, sourceModel, parent)
+    : ComboModel(tr("-- Empty -- "), { 22, 22 }, sourceModel, parent)
 {
-
 }
 
 HeroesComboModel::HeroesComboModel(QAbstractItemModel* sourceModel, QObject* parent)
-    : ComboModel("", {48, 32}, sourceModel, parent)
+    : ComboModel("", { 48, 32 }, sourceModel, parent)
 {
 }
 
 SkillsComboModel::SkillsComboModel(QAbstractItemModel* sourceModel, QObject* parent)
-    : ComboModel(tr("-- Select skill -- "), {22, 22},  sourceModel, parent)
+    : ComboModel(tr("-- Select skill -- "), { 22, 22 }, sourceModel, parent)
 {
-
 }
 
 FactionsComboModel::FactionsComboModel(QAbstractItemModel* sourceModel, QObject* parent)
-    : ComboModel(tr("-- Any faction -- "), {},  sourceModel, parent)
+    : ComboModel(tr("-- Any faction -- "), {}, sourceModel, parent)
 {
-
 }
 
 TerrainsComboModel::TerrainsComboModel(QAbstractItemModel* sourceModel, QObject* parent)
-    : ComboModel("", {32, 32}, sourceModel, parent)
+    : ComboModel("", { 32, 32 }, sourceModel, parent)
 {
-
 }
 
 MapObjectsComboModel::MapObjectsComboModel(QAbstractItemModel* sourceModel, QObject* parent)
-    : ComboModel(tr("-- No creature bank --"), {32, 24}, sourceModel, parent)
+    : ComboModel(tr("-- No creature bank --"), { 32, 24 }, sourceModel, parent)
 {
-
 }
 
-
 MapObjectsTreeModel::MapObjectsTreeModel(QAbstractItemModel* source, QObject* parent)
-    : QAbstractItemModel(parent), m_source(source)
+    : QAbstractItemModel(parent)
+    , m_source(source)
 {
-
 }
 
 QVariant MapObjectsTreeModel::data(const QModelIndex& index, int role) const
@@ -110,9 +103,9 @@ QVariant MapObjectsTreeModel::data(const QModelIndex& index, int role) const
         return m_source->data(m_source->index(index.row(), 0), role);
     }
     if (role == Qt::DisplayRole) {
-        auto parentIndex = m_source->index(index.parent().row(), 0);
-        QString baseName = m_source->data(parentIndex, Qt::DisplayRole).toString();
-        QStringList children = m_source->data(parentIndex, MapObjectsModel::VaraintNames).toStringList();
+        auto        parentIndex = m_source->index(index.parent().row(), 0);
+        QString     baseName    = m_source->data(parentIndex, Qt::DisplayRole).toString();
+        QStringList children    = m_source->data(parentIndex, MapObjectsModel::VaraintNames).toStringList();
         return baseName + " " + children.value(index.row());
     }
     if (role == Qt::DecorationRole || role == MapObjectsModel::SourceObject) {
@@ -127,7 +120,7 @@ QModelIndex MapObjectsTreeModel::index(int row, int column, const QModelIndex& p
     if (!hasIndex(row, column, parent))
         return QModelIndex();
 
-    auto parentRow = parent.isValid() ? (quintptr)parent.row() : quintptr(-1);
+    auto parentRow = parent.isValid() ? (quintptr) parent.row() : quintptr(-1);
 
     return createIndex(row, column, parentRow);
 }
@@ -141,7 +134,7 @@ QModelIndex MapObjectsTreeModel::parent(const QModelIndex& child) const
     if (parentRow == quintptr(-1))
         return QModelIndex();
 
-    return createIndex((int)parentRow, 0, quintptr(-1));
+    return createIndex((int) parentRow, 0, quintptr(-1));
 }
 
 int MapObjectsTreeModel::rowCount(const QModelIndex& parent) const
@@ -153,7 +146,7 @@ int MapObjectsTreeModel::rowCount(const QModelIndex& parent) const
     return children;
 }
 
-int MapObjectsTreeModel::columnCount(const QModelIndex& ) const
+int MapObjectsTreeModel::columnCount(const QModelIndex&) const
 {
     return 1;
 }
@@ -168,6 +161,5 @@ Qt::ItemFlags MapObjectsTreeModel::flags(const QModelIndex& index) const
     }
     return Qt::ItemIsEnabled;
 }
-
 
 }

@@ -28,43 +28,44 @@ struct MusicBox::Impl {
      */
     struct EffectCache {
         QList<QSoundEffect*> m_effects;
-        int m_lastIndex = 0;
+        int                  m_lastIndex = 0;
     };
     QMap<std::string, EffectCache> m_effectsCache;
 
-    QMediaPlayer m_player;
+    QMediaPlayer   m_player;
     QMediaPlaylist m_playlist;
-    int m_musicVolumeLog = 100;
-    qreal m_musicVolumeLinearBase = 1.;
-    int m_musicVolumeFinal = 100;
+    int            m_musicVolumeLog        = 100;
+    qreal          m_musicVolumeLinearBase = 1.;
+    int            m_musicVolumeFinal      = 100;
     //qreal m_musicVolumeFade = 1.0;
 
-    int m_efectsVolumeLog = 100;
+    int   m_efectsVolumeLog        = 100;
     qreal m_efectsVolumeLinearBase = 1.0;
 
-    void setMusicVolumeLog(int logVolume) {
-        m_musicVolumeLog = logVolume;
+    void setMusicVolumeLog(int logVolume)
+    {
+        m_musicVolumeLog        = logVolume;
         m_musicVolumeLinearBase = QAudio::convertVolume(m_musicVolumeLog / qreal(100),
-                                                   QAudio::LogarithmicVolumeScale,
-                                                   QAudio::LinearVolumeScale);
-        qreal approxVolume = 100. * m_musicVolumeLinearBase;
-        m_musicVolumeFinal = static_cast<int>(approxVolume);
+                                                        QAudio::LogarithmicVolumeScale,
+                                                        QAudio::LinearVolumeScale);
+        qreal approxVolume      = 100. * m_musicVolumeLinearBase;
+        m_musicVolumeFinal      = static_cast<int>(approxVolume);
         if (m_musicVolumeFinal < 1 && m_musicVolumeLog > 0)
             m_musicVolumeFinal = 1;
         Logger(Logger::Notice) << "setMusicVolume=" << m_musicVolumeLog << " / " << m_musicVolumeFinal;
-
     }
-    void setEffectsVolumeLog(int logVolume) {
-        m_efectsVolumeLog = logVolume;
+    void setEffectsVolumeLog(int logVolume)
+    {
+        m_efectsVolumeLog        = logVolume;
         m_efectsVolumeLinearBase = QAudio::convertVolume(m_efectsVolumeLog / qreal(100),
-                                                   QAudio::LogarithmicVolumeScale,
-                                                   QAudio::LinearVolumeScale);
+                                                         QAudio::LogarithmicVolumeScale,
+                                                         QAudio::LinearVolumeScale);
         Logger(Logger::Notice) << "setEffectsVolume=" << m_efectsVolumeLog << " / " << m_efectsVolumeLinearBase * 100;
-
     }
 
-    QSoundEffect* getEffect(const std::string & key, int maxLimit, QObject * parent) {
-        auto & cacheRecord = m_effectsCache[key];
+    QSoundEffect* getEffect(const std::string& key, int maxLimit, QObject* parent)
+    {
+        auto& cacheRecord = m_effectsCache[key];
         if (cacheRecord.m_effects.size() < maxLimit) {
             QSoundEffect* eff = new QSoundEffect(parent);
             cacheRecord.m_effects << eff;
@@ -78,50 +79,60 @@ struct MusicBox::Impl {
         }
     }
 
-
-    Impl(){
+    Impl()
+    {
         m_player.setVolume(0);
     }
 };
 
 class MusicResource : public ISoundResource {
 public:
-    MusicResource(MusicBox & parent, const IMusicBox::MusicSettings & settings)
-        : m_parent(parent), m_settings(settings) {}
+    MusicResource(MusicBox& parent, const IMusicBox::MusicSettings& settings)
+        : m_parent(parent)
+        , m_settings(settings)
+    {}
 
-    void play() const override {
+    void play() const override
+    {
         m_parent.musicPlay(m_settings);
     }
-    void playFor(int) const override {
+    void playFor(int) const override
+    {
         m_parent.musicPlay(m_settings);
     }
+
 private:
-    MusicBox & m_parent;
+    MusicBox&                m_parent;
     IMusicBox::MusicSettings m_settings;
 };
 class EffectResource : public ISoundResource {
 public:
-    EffectResource(MusicBox & parent, const IMusicBox::EffectSettings & settings)
-        : m_parent(parent), m_settings(settings) {}
+    EffectResource(MusicBox& parent, const IMusicBox::EffectSettings& settings)
+        : m_parent(parent)
+        , m_settings(settings)
+    {}
 
-    void play() const override {
+    void play() const override
+    {
         m_parent.effectPlay(m_settings);
     }
-    void playFor(int expectedDurationMS) const override {
+    void playFor(int expectedDurationMS) const override
+    {
         auto settings = m_settings;
         m_parent.effectPlay(settings.setExpectedDuration(expectedDurationMS));
     }
+
 private:
-    MusicBox & m_parent;
+    MusicBox&                 m_parent;
     IMusicBox::EffectSettings m_settings;
 };
 
-MusicBox::MusicBox(Core::IRandomGenerator & rng, Core::IResourceLibrary & resourceLibrary)
+MusicBox::MusicBox(Core::IRandomGenerator& rng, Core::IResourceLibrary& resourceLibrary)
     : m_impl(std::make_unique<Impl>())
     , m_rng(rng)
     , m_resourceLibrary(resourceLibrary)
 {
-     m_impl->m_player.setPlaylist(&m_impl->m_playlist);
+    m_impl->m_player.setPlaylist(&m_impl->m_playlist);
 }
 
 MusicBox::~MusicBox()
@@ -142,24 +153,31 @@ void MusicBox::musicPlay(const IMusicBox::MusicSettings& music)
 {
     std::string id = music.resourceId;
     if (id.empty()) {
-        static const std::vector<std::string> varsCombat{"01", "02", "03", "04"};
-        uint8_t combatSize = varsCombat.size()-1;
+        static const std::vector<std::string> varsCombat{ "01", "02", "03", "04" };
+        uint8_t                               combatSize = varsCombat.size() - 1;
         switch (music.mSet) {
-            case MusicSet::Battle:{
+            case MusicSet::Battle:
+            {
                 uint8_t index = m_rng.genSmall(combatSize);
-                id = "combat" + varsCombat[index];
-            }break;
-            case MusicSet::Intro: id = "mainmenu"; break;
-            case MusicSet::Win: id = "win battle"; break;
-            case MusicSet::Lose: id = "losecombat"; break;
+                id            = "combat" + varsCombat[index];
+            } break;
+            case MusicSet::Intro:
+                id = "mainmenu";
+                break;
+            case MusicSet::Win:
+                id = "win battle";
+                break;
+            case MusicSet::Lose:
+                id = "losecombat";
+                break;
             default:
-            break;
+                break;
         }
     }
     if (!m_resourceLibrary.mediaExists(Core::ResourceMedia::Type::Music, id))
         return;
 
-    auto record = m_resourceLibrary.getMedia(Core::ResourceMedia::Type::Music, id);
+    auto                 record   = m_resourceLibrary.getMedia(Core::ResourceMedia::Type::Music, id);
     const Core::std_path fullPath = record.getFullPath();
     if (fullPath.empty())
         return;
@@ -171,20 +189,19 @@ void MusicBox::musicPlay(const IMusicBox::MusicSettings& music)
     m_impl->m_playlist.addMedia(QMediaContent(QUrl::fromLocalFile(path)));
     m_impl->m_playlist.setPlaybackMode(music.loopAround ? QMediaPlaylist::Loop : QMediaPlaylist::CurrentItemOnce);
     m_impl->m_player.play();
-    QPropertyAnimation * volumeAnim = new QPropertyAnimation(&m_impl->m_player, "volume", this);
+    QPropertyAnimation* volumeAnim = new QPropertyAnimation(&m_impl->m_player, "volume", this);
     volumeAnim->setEndValue(m_impl->m_musicVolumeFinal);
     volumeAnim->setDuration(std::max(music.fadeInMs, 1));
 
     volumeAnim->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
-
-void MusicBox::effectPlay(const EffectSettings & effect)
+void MusicBox::effectPlay(const EffectSettings& effect)
 {
     std::string id = effect.resourceId;
     if (id.empty()) {
         if (effect.commonEffect == EffectSet::Battle) {
-            std::vector<std::string> suffixes {"00","01","02","03","04","05","06","07"};
+            std::vector<std::string> suffixes{ "00", "01", "02", "03", "04", "05", "06", "07" };
             id = "battle" + suffixes[m_rng.genSmall(suffixes.size() - 1)];
         } else if (effect.commonEffect == EffectSet::Click) {
             id = "button";
@@ -193,29 +210,29 @@ void MusicBox::effectPlay(const EffectSettings & effect)
     if (!m_resourceLibrary.mediaExists(Core::ResourceMedia::Type::Sound, id))
         return;
 
-    auto record = m_resourceLibrary.getMedia(Core::ResourceMedia::Type::Sound, id);
+    auto                 record   = m_resourceLibrary.getMedia(Core::ResourceMedia::Type::Sound, id);
     const Core::std_path fullPath = record.getFullPath();
     if (fullPath.empty())
         return;
 
-    const QString path = QString::fromStdString(Core::path2string(fullPath));
-    const int maxSimultaneousEffects = 3;
-    QSoundEffect * qeffect = m_impl->getEffect(id, maxSimultaneousEffects, this);
+    const QString path                   = QString::fromStdString(Core::path2string(fullPath));
+    const int     maxSimultaneousEffects = 3;
+    QSoundEffect* qeffect                = m_impl->getEffect(id, maxSimultaneousEffects, this);
     qeffect->disconnect();
     qeffect->setSource(QUrl::fromLocalFile(path));
-    const int fadeIn = effect.fadeIn;
-    qreal targetVolume = m_impl->m_efectsVolumeLinearBase;
+    const int fadeIn       = effect.fadeIn;
+    qreal     targetVolume = m_impl->m_efectsVolumeLinearBase;
     qeffect->setVolume(fadeIn > 0 ? 0 : targetVolume);
     if (effect.loopAround)
         qeffect->setLoopCount(QSoundEffect::Infinite);
 
     const int delay = std::max(1, effect.delay);
 
-    QTimer::singleShot(delay, [qeffect, fadeIn, targetVolume]{
+    QTimer::singleShot(delay, [qeffect, fadeIn, targetVolume] {
         qeffect->play();
         qeffect->setMuted(false);
         if (fadeIn > 0) {
-            QPropertyAnimation * volumeAnim = new QPropertyAnimation(qeffect, "volume", qeffect);
+            QPropertyAnimation* volumeAnim = new QPropertyAnimation(qeffect, "volume", qeffect);
             volumeAnim->setEndValue(targetVolume);
             volumeAnim->setDuration(fadeIn);
             volumeAnim->start(QAbstractAnimation::DeleteWhenStopped);
@@ -224,21 +241,20 @@ void MusicBox::effectPlay(const EffectSettings & effect)
 
     if (effect.expectedDuration > 0) {
         const int defaultFadeout = 100;
-        const int fadeoutLength = effect.fadeOut ?  effect.fadeOut : defaultFadeout;
-        const int stopAfter = effect.expectedDuration + delay;
-        const int startFadeout = stopAfter - fadeoutLength;
-        QTimer::singleShot(startFadeout, this, [qeffect, fadeoutLength]{
-            QPropertyAnimation * volumeAnim = new QPropertyAnimation(qeffect, "volume", qeffect);
+        const int fadeoutLength  = effect.fadeOut ? effect.fadeOut : defaultFadeout;
+        const int stopAfter      = effect.expectedDuration + delay;
+        const int startFadeout   = stopAfter - fadeoutLength;
+        QTimer::singleShot(startFadeout, this, [qeffect, fadeoutLength] {
+            QPropertyAnimation* volumeAnim = new QPropertyAnimation(qeffect, "volume", qeffect);
             volumeAnim->setEndValue(0);
             volumeAnim->setDuration(fadeoutLength);
             volumeAnim->start(QAbstractAnimation::DeleteWhenStopped);
         });
-        QTimer::singleShot(stopAfter, this, [qeffect]{
+        QTimer::singleShot(stopAfter, this, [qeffect] {
             qeffect->setMuted(true);
         });
     }
 }
-
 
 void MusicBox::setMusicVolume(int percent)
 {
@@ -253,12 +269,12 @@ void MusicBox::setEffectsVolume(int percent)
 
 int MusicBox::getMusicVolume() const noexcept
 {
-    return  m_impl->m_musicVolumeLog;
+    return m_impl->m_musicVolumeLog;
 }
 
 int MusicBox::getEffectsVolume() const noexcept
 {
-    return  m_impl->m_efectsVolumeLog;
+    return m_impl->m_efectsVolumeLog;
 }
 
 }

@@ -9,19 +9,17 @@
 
 #include "SoundTestWidget.hpp"
 
-
-int main(int argc, char * argv[])
+int main(int argc, char* argv[])
 {
     using namespace FreeHeroes;
 
     Gui::Application fhApp;
-    QApplication app(argc, argv);
+    QApplication     app(argc, argv);
 
-    fhApp.load("", {Gui::Application::Option::ResourceLibrary, Gui::Application::Option::MusicBox});
-    auto & musicBox = fhApp.getMusicBox();
+    fhApp.load("", { Gui::Application::Option::ResourceLibrary, Gui::Application::Option::MusicBox });
+    auto&           musicBox = fhApp.getMusicBox();
     SoundTestWidget dlg(musicBox);
     dlg.show();
 
     return app.exec();
 }
-

@@ -14,13 +14,15 @@
 namespace FreeHeroes::Gui {
 using namespace Core;
 
-const BattleFieldPaintGeometry defaultGeometry {
+const BattleFieldPaintGeometry defaultGeometry{
     22,
     16,
     26,
 };
 
-QPolygonF BattleFieldPaintGeometry::getHexPolygon(const QPointF centerOffset, qreal scale)  const noexcept {
+QPolygonF BattleFieldPaintGeometry::getHexPolygon(const QPointF centerOffset, qreal scale) const noexcept
+{
+    // clang-format off
     const QVector<QPointF> pointsHex {
         {-hexW1 * scale, -hexH1 * scale},
         {0             , -hexH2 * scale},
@@ -29,17 +31,18 @@ QPolygonF BattleFieldPaintGeometry::getHexPolygon(const QPointF centerOffset, qr
         {0             ,  hexH2 * scale},
         {-hexW1 * scale,  hexH1 * scale},
     };
-    const QPolygonF poly { pointsHex };
+    // clang-format on
+    const QPolygonF poly{ pointsHex };
     return poly.translated(centerOffset);
 }
 
-QPointF BattleFieldPaintGeometry::hexCenterFromCoord(const BattlePosition pos)  const noexcept {
-
-    QPointF result{0, 0};
+QPointF BattleFieldPaintGeometry::hexCenterFromCoord(const BattlePosition pos) const noexcept
+{
+    QPointF result{ 0, 0 };
     if (pos.y % 2 == 0) {
-        result -= QPointF{-hexW1, 0.};
+        result -= QPointF{ -hexW1, 0. };
     }
-    result += QPointF{ hexW1 * 2 * pos.x, (hexH1 + hexH2) * pos.y};
+    result += QPointF{ hexW1 * 2 * pos.x, (hexH1 + hexH2) * pos.y };
     return result;
 }
 
@@ -48,40 +51,36 @@ QPointF BattleFieldPaintGeometry::hexCenterFromExtCoord(const BattlePositionExte
     return (hexCenterFromCoord(pos.leftPos()) + hexCenterFromCoord(pos.rightPos())) / 2;
 }
 
-QPolygonF BattleFieldPaintGeometry::getHexPolygon(const BattlePosition pos, qreal scale)  const noexcept {
+QPolygonF BattleFieldPaintGeometry::getHexPolygon(const BattlePosition pos, qreal scale) const noexcept
+{
     return getHexPolygon(hexCenterFromCoord(pos), scale);
 }
 
-BattlePosition BattleFieldPaintGeometry::coordFromPos(const QPointF pos)  const noexcept {
+BattlePosition BattleFieldPaintGeometry::coordFromPos(const QPointF pos) const noexcept
+{
     const int aproxX = pos.x() / (hexW1 * 2);
     const int aproxY = pos.y() / (hexH1 + hexH2);
 
-    auto poly1 = getHexPolygon(BattlePosition{aproxX, aproxY});
+    auto poly1 = getHexPolygon(BattlePosition{ aproxX, aproxY });
     if (poly1.containsPoint(pos, Qt::OddEvenFill)) {
-        return {aproxX, aproxY};
+        return { aproxX, aproxY };
     }
     for (int dx = -1; dx <= 1; ++dx) {
         for (int dy = -1; dy <= 1; ++dy) {
-            if (getHexPolygon(BattlePosition{aproxX + dx, aproxY + dy}).containsPoint(pos, Qt::OddEvenFill)) {
-                return {aproxX + dx, aproxY + dy};
+            if (getHexPolygon(BattlePosition{ aproxX + dx, aproxY + dy }).containsPoint(pos, Qt::OddEvenFill)) {
+                return { aproxX + dx, aproxY + dy };
             }
         }
     }
 
-    return {-1, -1};
+    return { -1, -1 };
 }
 
-/*
-
-
-
- */
-
-
-BattleAttackDirection BattleFieldPaintGeometry::attackDirectionFromRelativePoint(const QPointF posInCell, bool allowTopBottom)  const noexcept{
-    auto directonInRad = qAtan2(posInCell.x(), posInCell.y());
-    int rotationDegree = static_cast<int>(directonInRad * 180 / M_PI);
-    rotationDegree = -rotationDegree;
+BattleAttackDirection BattleFieldPaintGeometry::attackDirectionFromRelativePoint(const QPointF posInCell, bool allowTopBottom) const noexcept
+{
+    auto directonInRad  = qAtan2(posInCell.x(), posInCell.y());
+    int  rotationDegree = static_cast<int>(directonInRad * 180 / M_PI);
+    rotationDegree      = -rotationDegree;
 
     while (rotationDegree < 0)
         rotationDegree += 360;
@@ -94,9 +93,8 @@ BattleAttackDirection BattleFieldPaintGeometry::attackDirectionFromRelativePoint
     }
     rotationDegree /= 60;
 
-    static const std::vector<BattleAttackDirection> dirs {BattleAttackDirection::TR, BattleAttackDirection::R, BattleAttackDirection::BR,
-                BattleAttackDirection::BL, BattleAttackDirection::L, BattleAttackDirection::TL};
-    const BattleAttackDirection direction = dirs[rotationDegree];
+    static const std::vector<BattleAttackDirection> dirs{ BattleAttackDirection::TR, BattleAttackDirection::R, BattleAttackDirection::BR, BattleAttackDirection::BL, BattleAttackDirection::L, BattleAttackDirection::TL };
+    const BattleAttackDirection                     direction = dirs[rotationDegree];
     return direction;
 }
 

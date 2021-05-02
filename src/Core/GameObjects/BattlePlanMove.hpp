@@ -16,33 +16,43 @@ struct BattlePlanMoveParams {
     BattlePositionExtended m_moveFrom; // debug.
 
     bool m_calculateUnlimitedPath = false; // used by AI.
-    bool m_noMoveCalculation = false; // used by AI.
+    bool m_noMoveCalculation      = false; // used by AI.
     void clear() noexcept { m_movePos = {}; }
     bool isActive() const noexcept { return !m_movePos.isEmpty(); }
 };
 
 struct BattlePlanAttackParams {
-    enum class Alteration { None, ForceMelee, FreeAttack };
-    BattlePosition m_attackTarget;
+    enum class Alteration
+    {
+        None,
+        ForceMelee,
+        FreeAttack
+    };
+    BattlePosition        m_attackTarget;
     BattleAttackDirection m_attackDirection = BattleAttackDirection::None;
-    Alteration m_alteration = Alteration::None;
+    Alteration            m_alteration      = Alteration::None;
 
     void clear() noexcept { m_attackTarget = {}; }
     bool isActive() const noexcept { return !m_attackTarget.isEmpty(); }
 };
 
 struct BattlePlanMove {
-    enum class Attack { No, Melee, Ranged };
+    enum class Attack
+    {
+        No,
+        Melee,
+        Ranged
+    };
 
-    bool m_isValid = false;
-    bool m_freeAttack = false;
-    Attack m_attackMode = Attack::No;
-    BattlePosition m_attackTarget;
+    bool                   m_isValid    = false;
+    bool                   m_freeAttack = false;
+    Attack                 m_attackMode = Attack::No;
+    BattlePosition         m_attackTarget;
     BattlePositionExtended m_moveFrom;
     BattlePositionExtended m_moveTo;
-    BattlePositionPath m_walkPath;
-    BattleAttackDirection m_attackDirection = BattleAttackDirection::None;
-    int64_t m_rangedAttackDenominator = 1; // 1, 2, 4
+    BattlePositionPath     m_walkPath;
+    BattleAttackDirection  m_attackDirection         = BattleAttackDirection::None;
+    int64_t                m_rangedAttackDenominator = 1; // 1, 2, 4
 
     BattleStackConstPtr m_attacker = nullptr;
     BattleStackConstPtr m_defender = nullptr;
@@ -50,18 +60,17 @@ struct BattlePlanMove {
     DamageEstimate m_mainDamage;
     DamageEstimate m_retaliationDamage;
 
-    struct Target{
+    struct Target {
         BattleStackConstPtr stack = nullptr;
-        DamageEstimate damage;
+        DamageEstimate      damage;
     };
     std::vector<Target> m_extraAffectedTargets;
     std::vector<Target> m_extraRetaliationAffectedTargets;
-    BattlePositionSet m_splashPositions;
-    BattlePositionSet m_splashRetaliationPositions;
+    BattlePositionSet   m_splashPositions;
+    BattlePositionSet   m_splashRetaliationPositions;
 
     void clear() { *this = BattlePlanMove{}; }
     bool isValid() const noexcept { return m_isValid; }
 };
-
 
 }

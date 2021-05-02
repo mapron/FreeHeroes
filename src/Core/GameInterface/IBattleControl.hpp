@@ -10,16 +10,14 @@
 
 namespace FreeHeroes::Core {
 
-class IBattleControl
-{
+class IBattleControl {
 public:
     virtual ~IBattleControl() = default;
 
-    virtual bool doGuard() = 0;
-    virtual bool doWait() = 0;
+    virtual bool doGuard()                                                                          = 0;
+    virtual bool doWait()                                                                           = 0;
     virtual bool doMoveAttack(BattlePlanMoveParams moveParams, BattlePlanAttackParams attackParams) = 0;
-    virtual bool doCast(BattlePlanCastParams planParams) = 0;
-
+    virtual bool doCast(BattlePlanCastParams planParams)                                            = 0;
 };
 
 }

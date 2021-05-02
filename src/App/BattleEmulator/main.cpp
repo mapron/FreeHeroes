@@ -17,10 +17,8 @@
 #include <iostream>
 #include <set>
 
-
-int main(int argc, char * argv[])
+int main(int argc, char* argv[])
 {
-
     using namespace FreeHeroes;
     using namespace Core;
     using namespace Gui;
@@ -36,18 +34,19 @@ int main(int argc, char * argv[])
             ProfilerScope scope("UI Construction");
 
             w = std::make_unique<BattleEmulator::EmulatorMainWidget>(fhApp.getGraphicsLibrary(),
-                                                 fhApp.getCursorLibrary(),
-                                                 fhApp.getGameDatabase(),
-                                                 fhApp.getRandomGeneratorFactory(),
-                                                 fhApp.getMusicBox(),
-                                                 fhApp.getAppSettings(),
-                                                 fhApp.getModelsProvider());
+                                                                     fhApp.getCursorLibrary(),
+                                                                     fhApp.getGameDatabase(),
+                                                                     fhApp.getRandomGeneratorFactory(),
+                                                                     fhApp.getMusicBox(),
+                                                                     fhApp.getAppSettings(),
+                                                                     fhApp.getModelsProvider());
             w->show();
             Logger(Logger::Info) << "End of UI construct";
         }
 
         return app.exec();
-    } catch(std::exception & e) {
+    }
+    catch (std::exception& e) {
         Logger(Logger::Err) << e.what();
         return 1;
     }

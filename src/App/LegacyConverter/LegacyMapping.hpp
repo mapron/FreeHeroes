@@ -10,17 +10,19 @@
 
 namespace FreeHeroes::Conversion {
 
+// clang-format off
 enum Version { VersionSod, VersionHota };
+// clang-format on
 extern const std::vector<std::string> unitIds[2];
 
-extern const std::vector<std::string> artifactIds[2] ;
+extern const std::vector<std::string> artifactIds[2];
 
-extern const std::vector<std::string> heroesIds[2] ;
+extern const std::vector<std::string> heroesIds[2];
 
-extern const std::vector<std::string> skillsIds[2] ;
+extern const std::vector<std::string> skillsIds[2];
 
-extern const std::vector<std::string> spellIds[2] ;
+extern const std::vector<std::string> spellIds[2];
 
-extern const std::vector<std::string> classIds[2] ;
+extern const std::vector<std::string> classIds[2];
 
 }
