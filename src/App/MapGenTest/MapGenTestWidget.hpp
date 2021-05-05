@@ -15,6 +15,7 @@ namespace FreeHeroes {
 class AdventureMap;
 namespace Core {
 class IGameDatabase;
+struct AdventureArmy;
 }
 namespace Gui {
 class IGraphicsLibrary;
@@ -40,7 +41,8 @@ private:
     Gui::LibraryModelsProvider& m_modelsProvider;
 
     //std::unique_ptr<MapMatrix> m_matrix;
-    std::unique_ptr<AdventureMap> m_adventureMap;
+    std::unique_ptr<AdventureMap>        m_adventureMap;
+    std::unique_ptr<Core::AdventureArmy> m_hero;
 };
 
 }

@@ -39,13 +39,16 @@ MapGenTestWidget::MapGenTestWidget(Gui::IGraphicsLibrary&      graphicsLibrary,
     layoutTop->addWidget(testPB);
     layoutTop->addStretch();
 
-    const int width  = 32;
-    const int height = 32;
+    const int width  = 20;
+    const int height = 20;
 
     m_scene = new QGraphicsScene(0, 0, width * 32, height * 32, this);
     m_view  = new QGraphicsView(this);
     m_view->setScene(m_scene);
     layout->addWidget(m_view);
+
+    m_hero = std::make_unique<Core::AdventureArmy>();
+    m_hero->hero.reset(m_gameDatabase.heroes()->find("sod.hero.castle.kn000"));
 
     m_adventureMap = std::make_unique<AdventureMap>(width, height, 1);
     generateMap();
@@ -96,8 +99,9 @@ void MapGenTestWidget::generateMap()
     }
 
     AdventureMapHero h;
-    h.m_pos = { 10, 10, 0 };
-    h.m_army.hero.reset(m_gameDatabase.heroes()->find("sod.hero.castle.kn000"));
+    h.m_pos       = { 5, 2, 0 };
+    h.m_army      = m_hero.get();
+    h.m_direction = HeroDirection::BR;
 
     m_adventureMap->m_heroes.push_back(h);
 

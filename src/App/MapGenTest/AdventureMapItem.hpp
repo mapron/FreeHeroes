@@ -32,12 +32,10 @@ public:
     void   paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
 private:
-    const AdventureMap& m_adventureMap;
-    //Gui::IGraphicsLibrary& m_graphicsLibrary;
+    const AdventureMap&         m_adventureMap;
     Gui::LibraryModelsProvider& m_modelsProvider;
-    static constexpr qreal      tileWidth = 32.;
-    //  static constexpr QSizeF tileSize {tileWidth, tileWidth};
-    int m_currentDepth = 0;
+    static constexpr qreal      tileWidth      = 32.;
+    int                         m_currentDepth = 0;
 };
 
 }

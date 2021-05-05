@@ -24,7 +24,11 @@ void generateTerrainPlane(TerrainPlane& plane)
     const int                      area        = plane.width() * plane.height();
     const int                      regionCount = 5;
     const int                      regionArea  = area / regionCount;
-    std::vector<TerrainPlanePoint> startPoints{ TerrainPlanePoint{ 0, 0 }, TerrainPlanePoint{ 15, 15 }, TerrainPlanePoint{ 24, 2 }, TerrainPlanePoint{ 2, 24 }, TerrainPlanePoint{ 30, 30 } };
+    std::vector<TerrainPlanePoint> startPoints{ TerrainPlanePoint{ 0, 0 },
+                                                TerrainPlanePoint{ plane.width() / 2, plane.height() / 2 },
+                                                TerrainPlanePoint{ plane.width() * 2 / 3, 2 },
+                                                TerrainPlanePoint{ 2, plane.height() * 2 / 3 },
+                                                TerrainPlanePoint{ plane.width() - 2, plane.height() - 2 } };
 
     auto growRegion = [&plane](TerrainPlanePoint start, int remainArea, int value) {
         MapRegion edge;

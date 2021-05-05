@@ -26,9 +26,14 @@ struct AdventureMapPoint {
     constexpr auto operator<=>(const AdventureMapPoint&) const = default;
 };
 
+// clang-format off
+enum class HeroDirection { T, TR, R, BR, B, BL, L, TL, Default = R };
+// clang-format on
+
 struct AdventureMapHero {
-    Core::AdventureArmy m_army;
-    AdventureMapPoint   m_pos;
+    Core::AdventureArmyConstPtr m_army;
+    AdventureMapPoint           m_pos;
+    HeroDirection               m_direction = HeroDirection::Default;
 };
 
 class AdventureMap {
@@ -61,9 +66,10 @@ public:
 
 private:
     std::vector<std::vector<std::vector<AdventureMapTile>>> m_data;
-    const int                                               m_width;
-    const int                                               m_height;
-    const int                                               m_depth;
+
+    const int m_width;
+    const int m_height;
+    const int m_depth;
 };
 
 }
