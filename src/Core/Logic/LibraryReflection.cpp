@@ -185,8 +185,10 @@ RTTR_REGISTRATION
     //  -----------------------------------------------------------------------------
     registration::class_<LibraryFactionHeroClass::Presentation>("LibraryFactionHeroClassPres")
         .constructor<>()
-        .property("battleSpriteMale"  , &LibraryFactionHeroClass::Presentation::battleSpriteMale)
-        .property("battleSpriteFemale", &LibraryFactionHeroClass::Presentation::battleSpriteFemale)
+        .property("battleSpriteMale"     , &LibraryFactionHeroClass::Presentation::battleSpriteMale)
+        .property("battleSpriteFemale"   , &LibraryFactionHeroClass::Presentation::battleSpriteFemale)
+        .property("adventureSpriteMale"  , &LibraryFactionHeroClass::Presentation::adventureSpriteMale)
+        .property("adventureSpriteFemale", &LibraryFactionHeroClass::Presentation::adventureSpriteFemale)
         ;
 
     registration::class_<LibraryFactionHeroClass>("LibraryFactionHeroClass")

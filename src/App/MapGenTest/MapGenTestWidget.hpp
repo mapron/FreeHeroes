@@ -18,11 +18,14 @@ class IGameDatabase;
 }
 namespace Gui {
 class IGraphicsLibrary;
+class LibraryModelsProvider;
 }
 
 class MapGenTestWidget : public QDialog {
 public:
-    MapGenTestWidget(Gui::IGraphicsLibrary& graphicsLibrary, Core::IGameDatabase& gameDatabase);
+    MapGenTestWidget(Gui::IGraphicsLibrary&      graphicsLibrary,
+                     Core::IGameDatabase&        gameDatabase,
+                     Gui::LibraryModelsProvider& modelsProvider);
     ~MapGenTestWidget();
 
 private:
@@ -32,8 +35,9 @@ private:
     QGraphicsView*  m_view  = nullptr;
     QGraphicsScene* m_scene = nullptr;
 
-    Gui::IGraphicsLibrary& m_graphicsLibrary;
-    Core::IGameDatabase&   m_gameDatabase;
+    Gui::IGraphicsLibrary&      m_graphicsLibrary;
+    Core::IGameDatabase&        m_gameDatabase;
+    Gui::LibraryModelsProvider& m_modelsProvider;
 
     //std::unique_ptr<MapMatrix> m_matrix;
     std::unique_ptr<AdventureMap> m_adventureMap;

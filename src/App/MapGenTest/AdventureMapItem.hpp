@@ -14,15 +14,15 @@
 namespace FreeHeroes {
 
 namespace Gui {
-class IGraphicsLibrary;
+class LibraryModelsProvider;
 }
 
 class AdventureMap;
 class AdventureMapItem : public QGraphicsItem {
 public:
-    AdventureMapItem(AdventureMap& adventureMap, Gui::IGraphicsLibrary& graphicsLibrary)
+    AdventureMapItem(AdventureMap& adventureMap, Gui::LibraryModelsProvider& modelsProvider)
         : m_adventureMap(adventureMap)
-        , m_graphicsLibrary(graphicsLibrary)
+        , m_modelsProvider(modelsProvider)
     {
     }
 
@@ -32,9 +32,10 @@ public:
     void   paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
 private:
-    const AdventureMap&    m_adventureMap;
-    Gui::IGraphicsLibrary& m_graphicsLibrary;
-    static constexpr qreal tileWidth = 32.;
+    const AdventureMap& m_adventureMap;
+    //Gui::IGraphicsLibrary& m_graphicsLibrary;
+    Gui::LibraryModelsProvider& m_modelsProvider;
+    static constexpr qreal      tileWidth = 32.;
     //  static constexpr QSizeF tileSize {tileWidth, tileWidth};
     int m_currentDepth = 0;
 };

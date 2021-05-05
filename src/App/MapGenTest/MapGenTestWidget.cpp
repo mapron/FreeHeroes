@@ -24,9 +24,12 @@
 
 namespace FreeHeroes {
 
-MapGenTestWidget::MapGenTestWidget(Gui::IGraphicsLibrary& graphicsLibrary, Core::IGameDatabase& gameDatabase)
+MapGenTestWidget::MapGenTestWidget(Gui::IGraphicsLibrary&      graphicsLibrary,
+                                   Core::IGameDatabase&        gameDatabase,
+                                   Gui::LibraryModelsProvider& modelsProvider)
     : m_graphicsLibrary(graphicsLibrary)
     , m_gameDatabase(gameDatabase)
+    , m_modelsProvider(modelsProvider)
 {
     QVBoxLayout* layout    = new QVBoxLayout(this);
     QHBoxLayout* layoutTop = new QHBoxLayout();
@@ -47,7 +50,7 @@ MapGenTestWidget::MapGenTestWidget(Gui::IGraphicsLibrary& graphicsLibrary, Core:
     m_adventureMap = std::make_unique<AdventureMap>(width, height, 1);
     generateMap();
 
-    AdventureMapItem* item = new AdventureMapItem(*m_adventureMap, m_graphicsLibrary);
+    AdventureMapItem* item = new AdventureMapItem(*m_adventureMap, m_modelsProvider);
 
     m_scene->addItem(item);
     //
@@ -91,6 +94,12 @@ void MapGenTestWidget::generateMap()
                 tile.m_terrainVariant = rand() % 8;
         }
     }
+
+    AdventureMapHero h;
+    h.m_pos = { 10, 10, 0 };
+    h.m_army.hero.reset(m_gameDatabase.heroes()->find("sod.hero.castle.kn000"));
+
+    m_adventureMap->m_heroes.push_back(h);
 
     m_scene->update();
 }

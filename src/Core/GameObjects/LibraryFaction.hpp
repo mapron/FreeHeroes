@@ -20,6 +20,8 @@ struct LibraryFactionHeroClass {
     struct Presentation {
         std::string battleSpriteMale;
         std::string battleSpriteFemale;
+        std::string adventureSpriteMale;
+        std::string adventureSpriteFemale;
     };
 
     std::string       id;

@@ -18,7 +18,7 @@ int main(int argc, char* argv[])
 
     fhApp.load("MapGenTest");
 
-    MapGenTestWidget dlg(fhApp.getGraphicsLibrary(), fhApp.getGameDatabase());
+    MapGenTestWidget dlg(fhApp.getGraphicsLibrary(), fhApp.getGameDatabase(), fhApp.getModelsProvider());
     dlg.show();
 
     return app.exec();

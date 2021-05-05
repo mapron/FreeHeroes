@@ -7,6 +7,8 @@
 
 #include "LibraryFwd.hpp"
 
+#include "AdventureArmy.hpp"
+
 #include <compare>
 #include <vector>
 
@@ -22,6 +24,11 @@ struct AdventureMapPoint {
     int            y;
     int            z;
     constexpr auto operator<=>(const AdventureMapPoint&) const = default;
+};
+
+struct AdventureMapHero {
+    Core::AdventureArmy m_army;
+    AdventureMapPoint   m_pos;
 };
 
 class AdventureMap {
@@ -49,6 +56,8 @@ public:
     int width() const { return m_width; }
     int height() const { return m_height; }
     int depth() const { return m_depth; }
+
+    std::vector<AdventureMapHero> m_heroes;
 
 private:
     std::vector<std::vector<std::vector<AdventureMapTile>>> m_data;
