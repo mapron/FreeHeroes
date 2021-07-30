@@ -225,7 +225,7 @@ GameDatabase::GameDatabase(const std::string& dataBaseId, const IResourceLibrary
     std::vector<std_path>   files;
     const ResourceDatabase& desc = resourceLibrary.getDatabase(dataBaseId);
     for (auto& f : desc.filesFullPathsWithDeps) {
-        files.push_back(f);
+        files.push_back(string2path(f));
     }
     load(files); // @todo: exception throw??
 
@@ -296,16 +296,19 @@ LibraryGameRulesConstPtr GameDatabase::gameRules() const
 
 bool GameDatabase::load(const std::vector<std_path>& files)
 {
+    Logger(Logger::Info) << "Preparing to load GameDatabase, total files:" << files.size();
     json recordObjectMaps = json::object();
     for (const auto& filename : files) {
         std::ifstream ifsMain(filename);
-        if (!ifsMain)
-            return false;
+        if (!ifsMain) {
+            Logger(Logger::Warning) << "Skipped file not found:" << path2string(filename) << " (" << std_fs::exists(filename) << ")";
+            continue;
+        }
         json main;
         ifsMain >> main;
 
         const int totalRecordsFound = addJsonObjectToIndex(recordObjectMaps, main);
-        Logger(Logger::Info) << "Database JSON parsing finished: " << filename << ", total records:" << totalRecordsFound;
+        Logger(Logger::Info) << "Database JSON parsing finished: " << path2string(filename) << ", total records:" << totalRecordsFound;
     }
 
     // clang-format off

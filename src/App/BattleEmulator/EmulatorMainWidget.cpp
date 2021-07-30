@@ -308,7 +308,7 @@ void EmulatorMainWidget::makeManaRegen()
 void EmulatorMainWidget::onTerrainChanged()
 {
     auto terrain = m_ui->comboBoxTerrain->currentData(TerrainsModel::SourceObject).value<TerrainsModel::SrcTypePtr>();
-    assert(terrain);
+    Q_ASSERT(terrain);
     m_adventureState->m_terrain = terrain;
     onAttDataChanged(true);
     onDefDataChanged(true);
