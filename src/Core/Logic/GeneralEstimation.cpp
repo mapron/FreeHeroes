@@ -193,7 +193,7 @@ BonusRatio GeneralEstimation::calculatePhysicalBase(DamageDesc dmg, int count, D
 BonusRatio GeneralEstimation::estimateMoraleRoll(int moraleValue, const RngChanceParams& chanceModifiers)
 {
     if (m_rules->morale.positiveChances.empty())
-        return {1, 10};
+        return { 1, 10 };
     moraleValue                     = std::clamp(moraleValue, m_rules->morale.minEffectiveValue, m_rules->morale.maxEffectiveValue);
     const int        moraleValueAbs = std::abs(moraleValue);
     const BonusRatio baseChance     = moraleValue >= 0 ? m_rules->morale.positiveChances[moraleValueAbs] : m_rules->morale.negativeChances[moraleValueAbs];
@@ -204,7 +204,7 @@ BonusRatio GeneralEstimation::estimateMoraleRoll(int moraleValue, const RngChanc
 BonusRatio GeneralEstimation::estimateLuckRoll(int luckValue, const RngChanceParams& chanceModifiers)
 {
     if (m_rules->luck.positiveChances.empty())
-        return {1, 10};
+        return { 1, 10 };
     luckValue                     = std::clamp(luckValue, m_rules->luck.minEffectiveValue, m_rules->luck.maxEffectiveValue);
     const int        luckValueAbs = std::abs(luckValue);
     const BonusRatio baseChance   = luckValue >= 0 ? m_rules->luck.positiveChances[luckValueAbs] : m_rules->luck.negativeChances[luckValueAbs];
