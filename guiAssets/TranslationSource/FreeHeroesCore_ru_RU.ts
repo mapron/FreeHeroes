@@ -771,7 +771,7 @@
     <message>
         <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="187"/>
         <source>Minimal level for Great Library</source>
-        <translation>Минимальный уровень для посещения Библиотеки</translation>
+        <translation>Минимальный уровень&lt;br&gt;для посещения Библиотеки</translation>
     </message>
     <message>
         <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="188"/>
