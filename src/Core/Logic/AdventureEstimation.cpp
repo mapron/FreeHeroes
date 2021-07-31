@@ -694,6 +694,7 @@ void calculateUnitStats(LibraryGameRulesConstPtr rules, AdventureStack& unit, co
     }
     if (currentTerrain && unit.library->faction->nativeTerrain == currentTerrain) {
         cur.primary.battleSpeed += 1;
+        cur.primary.ad.incAll(1);
     }
     cur.magicReduce             = unit.library->abilities.magicReduce;
     cur.magicOppSuccessChance   = unit.library->abilities.magicOppSuccessChance;
