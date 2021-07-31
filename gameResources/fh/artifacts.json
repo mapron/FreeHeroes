@@ -196,7 +196,7 @@
 
 "sod.artifact.complex.allStat"              : {"class":"complex"  , "value":84000,  "untranslatedName": "Complex Stat"             ,"slot":"sword"  ,
     "parts": ["sod.artifact.torso.all1", "sod.artifact.boots.all2", "sod.artifact.neck.all3", "sod.artifact.shield.all4" , "sod.artifact.sword.all5", "sod.artifact.helm.all6"], "special": "factionsAlliance",
-    "spellCasts":[{"spell":"sod.spell.prayer", "sp":50, "level":3}]},
+    "spellCasts":[{"spell":"sod.spell.prayer", "sp":10, "level":3}]},
 "sod.artifact.complex.necro"                : {"class":"complex"  , "value":12000,  "untranslatedName": "Complex Necro"            ,"slot":"cape"   , "special": "extendedNecromancy",
     "parts": ["sod.artifact.neck.necr1", "sod.artifact.cape.necr1" ,"sod.artifact.boots.necr1" ]},
 "sod.artifact.complex.life"                 : {"class":"complex"  , "value":20000,  "untranslatedName": "Complex Extra Life"       ,"slot":"misc"   ,
