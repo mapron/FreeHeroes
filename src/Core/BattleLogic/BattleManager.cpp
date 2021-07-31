@@ -476,7 +476,10 @@ BattlePlanCast BattleManager::findPlanCast(const BattlePlanCastParams& castParam
     for (BattleStackConstPtr targetStack : affectedStackCandidates) {
         BattlePlanCast::Target target;
         target.stack = targetStack;
-        target.magicSuccessChance *= targetStack->current.magicOppSuccessChance;
+        if (result.m_spell->type == LibrarySpell::Type::Offensive
+            || (result.m_spell->type == LibrarySpell::Type::Temp && result.m_spell->qualify == LibrarySpell::Qualify::Bad))
+            target.magicSuccessChance *= targetStack->current.magicOppSuccessChance;
+
         if (result.m_spell->type == LibrarySpell::Type::Offensive) {
             const int        level           = targetStack->library->level / 10;
             const int        baseSpellDamage = std::max(1, GeneralEstimation(m_rules).spellBaseDamage(level, result.m_power, static_cast<int>(affectedIndex)));
