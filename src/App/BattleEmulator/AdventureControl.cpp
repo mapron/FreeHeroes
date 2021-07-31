@@ -134,9 +134,9 @@ void AdventureControl::heroArtifactTakeOff(ArtifactTakeOff takeOffParams)
 {
     auto hero = m_army.getHero()->getSource();
 
-    auto& from = hero->artifactsOn[takeOffParams.slot];
+    auto from = hero->artifactsOn[takeOffParams.slot];
     hero->artifactsBag[from]++;
-    from = nullptr;
+    hero->artifactsOn.erase(takeOffParams.slot);
     m_army.getHero()->refreshArtifactsModels();
     m_army.getHero()->emitChanges();
 }

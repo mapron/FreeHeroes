@@ -194,6 +194,8 @@ bool HeroWearingEditModel::setData(const QModelIndex& index, const QVariant& val
         auto        wearingSlot            = slotInfo.wearingSlot;
         auto        wearingArt             = value.value<LibraryArtifactConstPtr>();
         m_source->artifactsOn[wearingSlot] = wearingArt;
+        if (!wearingArt)
+            m_source->artifactsOn.erase(wearingSlot);
         emit dataChanged(index, index);
         return true;
     }
