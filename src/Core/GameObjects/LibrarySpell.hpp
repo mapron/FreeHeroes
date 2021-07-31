@@ -114,6 +114,9 @@ struct SpellFilter {
 
     bool contains(LibrarySpellConstPtr spell) const
     {
+        if (!spell)
+            return false;
+
         if (isDefault())
             return false;
 
