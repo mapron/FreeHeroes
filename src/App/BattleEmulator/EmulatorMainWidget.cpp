@@ -602,58 +602,63 @@ int EmulatorMainWidget::execBattle(bool isReplay, bool isQuick)
 
 void EmulatorMainWidget::checkForHeroLevelUps(bool fromDebugWidget)
 {
-    if (m_adventureState->m_att.hasHero()) {
-        AdventureEstimation::LevelUpResult result;
-        auto&                              hero       = m_adventureState->m_att.hero;
-        auto                               guiAdvHero = m_guiAdventureArmyAtt->getHero();
+    auto levelUpRoutine = [this](AdventureArmy& army, Gui::GuiAdventureArmy& guiArmy) {
+        if (army.hasHero()) {
+            AdventureEstimation::LevelUpResult result;
+            auto&                              hero       = army.hero;
+            auto                               guiAdvHero = guiArmy.getHero();
 
-        HeroLevelupDialog::LevelUpDecision decision;
-        decision.heroHame     = guiAdvHero->getName();
-        decision.heroClass    = guiAdvHero->getClassName();
-        decision.heroPortrait = guiAdvHero->getGuiHero()->getPortraitLarge();
-        decision.expIcon      = m_modelsProvider.ui()->skillInfo[HeroPrimaryParamType::Experience].iconLarge->get();
-        auto rng              = m_randomGeneratorFactory.create();
-        rng->makeGoodSeed();
-        HeroLevelupDialog   dlg(this);
-        AdventureEstimation estimation(m_gameDatabase.gameRules());
+            HeroLevelupDialog::LevelUpDecision decision;
+            decision.heroHame     = guiAdvHero->getName();
+            decision.heroClass    = guiAdvHero->getClassName();
+            decision.heroPortrait = guiAdvHero->getGuiHero()->getPortraitLarge();
+            decision.expIcon      = m_modelsProvider.ui()->skillInfo[HeroPrimaryParamType::Experience].iconLarge->get();
+            auto rng              = m_randomGeneratorFactory.create();
+            rng->makeGoodSeed();
+            HeroLevelupDialog   dlg(this);
+            AdventureEstimation estimation(m_gameDatabase.gameRules());
 
-        while ((result = estimation.calculateHeroLevelUp(hero, *rng)).isValid()) {
-            decision.choices.clear();
-            const auto& statInfo     = m_modelsProvider.ui()->skillInfo[result.primarySkillUpdated];
-            decision.primaryStatName = statInfo.name;
-            decision.primaryStatIcon = statInfo.iconMedium->get();
-            decision.level           = result.newLevel;
+            while ((result = estimation.calculateHeroLevelUp(hero, *rng)).isValid()) {
+                decision.choices.clear();
+                const auto& statInfo     = m_modelsProvider.ui()->skillInfo[result.primarySkillUpdated];
+                decision.primaryStatName = statInfo.name;
+                decision.primaryStatIcon = statInfo.iconMedium->get();
+                decision.level           = result.newLevel;
 
-            for (size_t i = 0; i < result.choices.size(); ++i) {
-                auto                      choice     = result.choices[i];
-                int                       skillLevel = result.choicesLevels[i];
-                HeroLevelupDialog::Choice guiChoice;
-                auto                      guiSkill = m_modelsProvider.skills()->find(choice);
-                guiChoice.icon                     = guiSkill->getIconMedium(skillLevel);
-                guiChoice.skillLevelName           = GuiSkill::getSkillLevelName(skillLevel);
-                guiChoice.skillName                = guiSkill->getName();
-                decision.choices << guiChoice;
+                for (size_t i = 0; i < result.choices.size(); ++i) {
+                    auto                      choice     = result.choices[i];
+                    int                       skillLevel = result.choicesLevels[i];
+                    HeroLevelupDialog::Choice guiChoice;
+                    auto                      guiSkill = m_modelsProvider.skills()->find(choice);
+                    guiChoice.icon                     = guiSkill->getIconMedium(skillLevel);
+                    guiChoice.skillLevelName           = GuiSkill::getSkillLevelName(skillLevel);
+                    guiChoice.skillName                = guiSkill->getName();
+                    decision.choices << guiChoice;
+                }
+
+                dlg.setInfo(decision);
+                dlg.show();
+                m_musicBox.effectPrepare({ "nwherolv" })->play();
+
+                QEventLoop loop;
+                connect(&dlg, &QDialog::accepted, &loop, &QEventLoop::quit);
+                connect(&dlg, &QDialog::rejected, &loop, &QEventLoop::quit);
+                loop.exec();
+
+                const int                     index  = dlg.getChoiceIndex();
+                LibrarySecondarySkillConstPtr choice = nullptr;
+                if (index >= 0 && result.choices.size() > 0)
+                    choice = result.choices[index];
+
+                estimation.applyLevelUpChoice(army.hero, choice);
+
+                estimation.calculateArmy(army, m_adventureState->m_terrain);
             }
-
-            dlg.setInfo(decision);
-            dlg.show();
-            m_musicBox.effectPrepare({ "nwherolv" })->play();
-
-            QEventLoop loop;
-            connect(&dlg, &QDialog::accepted, &loop, &QEventLoop::quit);
-            connect(&dlg, &QDialog::rejected, &loop, &QEventLoop::quit);
-            loop.exec();
-
-            const int                     index  = dlg.getChoiceIndex();
-            LibrarySecondarySkillConstPtr choice = nullptr;
-            if (index >= 0 && result.choices.size() > 0)
-                choice = result.choices[index];
-
-            estimation.applyLevelUpChoice(m_adventureState->m_att.hero, choice);
-
-            estimation.calculateArmy(m_adventureState->m_att, m_adventureState->m_terrain);
         }
-    }
+    };
+    levelUpRoutine(m_adventureState->m_att, *m_guiAdventureArmyAtt);
+    levelUpRoutine(m_adventureState->m_def, *m_guiAdventureArmyDef);
+
     if (fromDebugWidget) {
         onAttDataChanged(true);
         onDefDataChanged(true);
