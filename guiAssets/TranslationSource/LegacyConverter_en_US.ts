@@ -87,62 +87,62 @@
 <context>
     <name>FreeHeroes::Conversion::ConverterDialog</name>
     <message>
-        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="75"/>
+        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="76"/>
         <source>Resource converter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="96"/>
+        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="97"/>
         <source>FFmpeg not in the PATH, no effect and video will be converted.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="102"/>
+        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="103"/>
         <source>Open HotA installation root</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="271"/>
+        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="256"/>
         <source>Extracting files...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="291"/>
+        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="278"/>
         <source>Preparing conversion list...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="301"/>
+        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="288"/>
         <source>Conversion of media...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="316"/>
+        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="302"/>
         <source>Translation generation...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="346"/>
+        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="328"/>
         <source>Done in %1 seconds.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="353"/>
+        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="335"/>
         <source>Removing folder contents</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="353"/>
+        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="335"/>
         <source>Are you sure?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="364"/>
+        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="345"/>
         <source>Files are removing...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="383"/>
+        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="364"/>
         <source>Cleanup done.</source>
         <translation type="unfinished"></translation>
     </message>

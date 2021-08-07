@@ -142,77 +142,77 @@ adventure mode</source>
 <context>
     <name>FreeHeroes::BattleEmulator::EmulatorMainWidget</name>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="145"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="141"/>
         <source>Empty field</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="155"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="150"/>
         <source>Standard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="156"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="151"/>
         <source>Map object common</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="157"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="152"/>
         <source>Churchyard 1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="158"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="153"/>
         <source>Churchyard 2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="159"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="154"/>
         <source>Ruins</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="160"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="155"/>
         <source>Spit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="185"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="178"/>
         <source>Renaming replay</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="185"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="178"/>
         <source>Enter new name:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="203"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="195"/>
         <source>Battle emulator</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="438"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="429"/>
         <source> and </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="441"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="432"/>
         <source>%1 is no problem anymore, and %2 now in your hands.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="540"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="521"/>
         <source>AI reached step limit: that probably an error.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="597"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="575"/>
         <source>Glorious victory!&lt;br&gt;For the valor in the battle, %1 recieves %2 experience</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="598"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="575"/>
         <source>Your forces have suffered a crushing defeat, and %1 now leaves you</source>
         <translation type="unfinished"></translation>
     </message>
