@@ -113,6 +113,7 @@ private:
                                           BonusRatio          extraReduce,
                                           LuckRoll            luckFactor = LuckRoll::None) const;
     DamageResult::Loss damageLoss(BattleStackConstPtr defender, int damage) const;
+    DamageResult::Loss risingLoss(BattleStackConstPtr target, int health) const;
 
     BattleFieldPathFinder setupFinder(BattleStackConstPtr stack) const;
     BattlePositionSet     getSpellArea(BattlePosition pos, LibrarySpell::Range range) const;
@@ -141,7 +142,7 @@ private:
     LuckRoll makeLuckRoll(BattleStackConstPtr attacker);
 
     void recalcStack(BattleStackMutablePtr stack);
-    void applyLoss(BattleStackMutablePtr stack, const DamageResult::Loss& loss);
+    void applyLoss(BattleStackMutablePtr stack, const DamageResult::Loss& loss, bool isRising = false);
 
 private:
     BattleArmy&                        m_att;

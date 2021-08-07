@@ -31,6 +31,10 @@ QString FormatUtils::formatBattleLog(QString text, bool infoIsWhite)
     text.replace("</d>", "</b></font>");
     text.replace("<k>", "<font color=\"#E08282\"><b>");
     text.replace("</k>", "</b></font>");
+    text.replace("<h>", "<font color=\"#0C7A0E\"><b>");
+    text.replace("</h>", "</b></font>");
+    text.replace("<r>", "<font color=\"#14CE1A\"><b>");
+    text.replace("</r>", "</b></font>");
     if (infoIsWhite)
         text.replace("<i>", "<font color=\"#ffffff\"><b>");
     else

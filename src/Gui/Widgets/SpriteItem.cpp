@@ -32,10 +32,6 @@ const SpritePtr& SpriteItem::getSprite() const
 
 void SpriteItem::setAnimGroup(const AnimGroupSettings& settings)
 {
-    // @todo: debug: at the moment we should not move away from death state.
-    if (m_animSettings.group == 5 && settings.group != 5)
-        Q_ASSERT(false);
-
     m_animSettings = settings;
     m_inSporadic   = false;
 

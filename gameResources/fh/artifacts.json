@@ -153,7 +153,7 @@
 
 "sod.artifact.misc.noDispell"         : {"class":"major"   , "value": 7500 , "untranslatedName": "Charm No Dispel"          , "slot":"misc"  , "protectSpells": {"onlySpells": ["sod.spell.dispel", "sod.spell.dispelHelpful" ] }},
 "sod.artifact.misc.noImmune"          : {"class":"relic"   , "value":25000 , "untranslatedName": "Immune Breaker"           , "slot":"misc"  , "special": "breakImmunities" },
-"hota.artifact.ring.noResurrect"      : {"class":"major"   , "value": 7500 , "untranslatedName": "Ring of Permadeath"       , "slot":"ring"  , "special": "permanentDeath"},
+"hota.artifact.ring.noResurrect"      : {"class":"major"   , "value": 7500 , "untranslatedName": "Ring of Permadeath"       , "slot":"ring"  , "forbidSpells":{"onlySpells": ["sod.spell.resurrection", "sod.spell.animateDead", "sod.spell.sacrifice" ]}, "special": "permanentDeath"},
 
 "sod.artifact.neck.protectSpellBers"        : {"class":"treasure", "value": 1000 , "untranslatedName": "Protect from Berserk"      ,"slot":"neck"  , "protectSpells": {"onlySpells": ["sod.spell.berserk"      ] } },
 "sod.artifact.neck.protectSpellBlind"       : {"class":"major"   , "value": 5000 , "untranslatedName": "Protect from Blind"        ,"slot":"neck"  , "protectSpells": {"onlySpells": ["sod.spell.blind"        ] } },

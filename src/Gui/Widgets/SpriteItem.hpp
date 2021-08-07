@@ -174,6 +174,7 @@ class GUIWIDGETS_EXPORT SpriteItemObj : public QObject
     Q_OBJECT
     Q_PROPERTY(QPointF pos READ pos WRITE setPos)
     Q_PROPERTY(qreal zValue READ zValue WRITE setZValue)
+    Q_PROPERTY(qreal opacity READ opacity WRITE setOpacity)
 public:
     using SpriteItem::SpriteItem;
 

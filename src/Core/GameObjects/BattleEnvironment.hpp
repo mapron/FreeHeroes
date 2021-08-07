@@ -12,6 +12,7 @@ namespace FreeHeroes::Core {
 struct BattleEnvironment {
     SpellFilter         forbidSpells;
     RngChanceMultiplier rngMult;
+    bool                permanentDeath = false;
 };
 
 }

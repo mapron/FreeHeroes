@@ -590,7 +590,7 @@ void BattleFieldItem::beforeAttackMelee(BattleStackConstPtr stack, const Affecte
     auto*                  defMainHandle = sequencer->addHandle(mainDefender, target);
     for (const auto& affectedTarget : affected.getAll()) {
         BattleStackSpriteItem* itemDefender = m_unitGraphics[affectedTarget.stack].spriteItem;
-        auto                   damage       = affectedTarget.damage;
+        const auto&            damage       = affectedTarget.damage;
         auto*                  defHandle    = (affectedTarget.stack == target) ? defMainHandle : sequencer->addHandle(itemDefender, affectedTarget.stack);
         const auto             defAnim      = damage.isKilled() ? BattleAnimation::Death : BattleAnimation::PainMelee;
 
@@ -611,7 +611,7 @@ void BattleFieldItem::beforeAttackMelee(BattleStackConstPtr stack, const Affecte
             if (!damage.isKilled()) {
                 defHandle->queueChangeAnim(BattleAnimation::StandStill, 1);
             } else {
-                defHandle->addPropertyAnimation(1, "zValue", 1.);
+                defHandle->addDeathPropertyAnimations(damage.loss.permanent);
             }
         }
         sequencer->endGroup(); // sequental
@@ -698,7 +698,8 @@ void BattleFieldItem::beforeAttackRanged(BattleStackConstPtr stack, const Affect
         for (const auto& affectedTarget : affected.getAll()) {
             BattleStackSpriteItem* itemDefender = m_unitGraphics[affectedTarget.stack].spriteItem;
             auto*                  defHandle    = sequencer->addHandle(itemDefender, affectedTarget.stack);
-            const auto             animationDef = affectedTarget.damage.isKilled() ? BattleAnimation::Death : BattleAnimation::PainRanged;
+            const auto&            damage       = affectedTarget.damage;
+            const auto             animationDef = damage.isKilled() ? BattleAnimation::Death : BattleAnimation::PainRanged;
             const auto             defDuration  = defHandle->getAnimDuration(animationDef);
             maxDefDuration                      = std::max(maxDefDuration, defDuration);
 
@@ -711,10 +712,10 @@ void BattleFieldItem::beforeAttackRanged(BattleStackConstPtr stack, const Affect
                     defHandle->queuePlayEffect(animationDef, defDuration, 1);
                 }
                 sequencer->endGroup(); // parallel
-                if (!affectedTarget.damage.isKilled()) {
+                if (!damage.isKilled()) {
                     defHandle->queueChangeAnim(BattleAnimation::StandStill, 1);
                 } else {
-                    defHandle->addPropertyAnimation(1, "zValue", 1.);
+                    defHandle->addDeathPropertyAnimations(damage.loss.permanent);
                 }
             }
             sequencer->endGroup(); // sequental
@@ -972,29 +973,30 @@ void BattleFieldItem::onCastInternal(const Caster& caster, const AffectedMagic& 
 
         sequencer->beginParallel();
         for (const auto& target : affected.targets) {
-            if (target.loss.damageTotal <= 0)
+            if (target.loss.damageTotal == 0 || (target.loss.deaths < 0 && target.loss.remainCount != -target.loss.deaths))
                 continue;
 
             auto                   affectedBattleStack = target.stack;
             BattleStackSpriteItem* itemDefender        = m_unitGraphics[affectedBattleStack].spriteItem;
             auto*                  defHandle           = sequencer->addHandle(itemDefender, affectedBattleStack);
             const bool             isKilled            = target.loss.remainCount == 0;
-            const auto             animationDef        = isKilled ? BattleAnimation::Death : BattleAnimation::PainRanged;
+            const bool             isResurrect         = target.loss.deaths < 0;
+            const auto             animationDef        = isResurrect ? BattleAnimation::Death : (isKilled ? BattleAnimation::Death : BattleAnimation::PainRanged);
             const auto             defDuration         = defHandle->getAnimDuration(animationDef);
-            //const QString audioId = QString::fromStdString(affectedBattleStack->library->pres.soundId) + (isKilled ? "kill" : "wnce");
             sequencer->beginSequental();
             {
                 sequencer->pause(animationDuration / 2);
                 sequencer->beginParallel();
                 {
-                    defHandle->queueChangeAnim(animationDef);
-                    defHandle->queuePlayEffect(animationDef, defDuration, 1);
+                    defHandle->queueChangeAnim(animationDef, -1, isResurrect);
+                    if (!isResurrect)
+                        defHandle->queuePlayEffect(animationDef, defDuration, 1);
                 }
                 sequencer->endGroup(); // parallel
                 if (!isKilled) {
                     defHandle->queueChangeAnim(BattleAnimation::StandStill, 1);
                 } else {
-                    defHandle->addPropertyAnimation(1, "zValue", 1.);
+                    defHandle->addDeathPropertyAnimations(target.loss.permanent);
                 }
             }
             sequencer->endGroup(); // sequental

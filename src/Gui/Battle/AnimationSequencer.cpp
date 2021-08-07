@@ -104,13 +104,13 @@ void AnimationSequencer::AnimationSequencerHandle::playEffect(BattleAnimation ty
     parent->m_musicBox.effectPrepare(eff)->play();
 }
 
-void AnimationSequencer::AnimationSequencerHandle::queueChangeAnim(BattleAnimation type, int pauseDuration)
+void AnimationSequencer::AnimationSequencerHandle::queueChangeAnim(BattleAnimation type, int pauseDuration, bool reverse)
 {
     if (pauseDuration < 0)
         pauseDuration = getAnimDuration(type);
 
-    parent->addCallback([this, type] {
-        changeAnim(type);
+    parent->addCallback([this, type, reverse] {
+        changeAnim(type, reverse);
     },
                         pauseDuration);
 }
@@ -153,6 +153,15 @@ void AnimationSequencer::AnimationSequencerHandle::addPosTeleport(QPointF endVal
         item->setPos(endValue);
     },
                         1);
+}
+
+void AnimationSequencer::AnimationSequencerHandle::addDeathPropertyAnimations(bool permanent)
+{
+    addPropertyAnimation(1, "zValue", 1.);
+    if (permanent) {
+        const int deathMs = getAnimDuration(BattleAnimation::Death);
+        addPropertyAnimation(deathMs, "opacity", 0.);
+    }
 }
 
 void AnimationSequencer::AnimationSequencerHandle::addTurning(bool fullAnimation, bool toRight)

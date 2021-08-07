@@ -96,7 +96,7 @@ BattleControlWidget::BattleControlWidget(Core::IBattleView&     battleView,
     });
     auto& bcIcons = m_modelsProvider.ui()->battleControl;
     // clang-format off
-    QMap<FlatButton*, IAsyncIconPtr> res {
+    const QHash<FlatButton*, IAsyncIconPtr> res {
         {m_ui->pushButtonWait     , bcIcons.wait},
         {m_ui->pushButtonGuard    , bcIcons.guard},
         {m_ui->pushButtonSpellBook, bcIcons.spellBook},
@@ -237,34 +237,34 @@ void BattleControlWidget::beforeMove(BattleStackConstPtr stack, const BattlePosi
     if (!m_appSettings.battle().logMoves)
         return;
     addLog(tr("%1 %2 from %3 to %4")
-               .arg(localizedNameWithCount(stack))
-               .arg(tr("moving", "", stack->count))
-               .arg(posToStr(stack->pos.mainPos()))
-               .arg(posToStr(path.back())));
+               .arg(localizedNameWithCount(stack),
+                    tr("moving", "", stack->count),
+                    posToStr(stack->pos.mainPos()),
+                    posToStr(path.back())));
 }
 
 void BattleControlWidget::beforeAttackMelee(BattleStackConstPtr stack, const AffectedPhysical& affected, bool isRetaliation)
 {
     const QString damageStr = tr("%1 %2 total damage (N * %3 * %4)")
-                                  .arg(tr("dealing", "", stack->count))
-                                  .arg(wrapDmg(affected.main.damage.loss.damageTotal))
-                                  .arg(wrapInfo(qreal(affected.main.damage.damageBaseRoll) / stack->count))
-                                  .arg(wrapInfo(QString::number(affected.main.damage.damagePercent) + "%"));
+                                  .arg(tr("dealing", "", stack->count),
+                                       wrapDmg(affected.main.damage.loss.damageTotal),
+                                       wrapInfo(qreal(affected.main.damage.damageBaseRoll) / stack->count),
+                                       wrapInfo(QString::number(affected.main.damage.damagePercent) + "%"));
 
     const QString deathsStr = (affected.main.damage.isKilled()) ? tr(", killing all %1 creatures")
                                                                       .arg(wrapDeaths(affected.main.damage.loss.deaths))
                               : (affected.main.damage.loss.deaths > 0) ? tr(", deaths %1 (remain %2)")
-                                                                             .arg(wrapDeaths(affected.main.damage.loss.deaths))
-                                                                             .arg(wrapInfo(affected.main.damage.loss.remainCount))
+                                                                             .arg(wrapDeaths(affected.main.damage.loss.deaths),
+                                                                                  wrapInfo(affected.main.damage.loss.remainCount))
                                                                        : "";
 
     const QString attackDescrStr = (isRetaliation ? tr("retaliate on", "", stack->count) : tr("attack", "", stack->count));
 
     QString msg;
     if (affected.main.stack)
-        msg = tr("%1 %2 %3, %4 %5").arg(localizedNameWithCount(stack)).arg(attackDescrStr).arg(localizedNameWithCount(affected.main.stack, true)).arg(damageStr).arg(deathsStr);
+        msg = tr("%1 %2 %3, %4 %5").arg(localizedNameWithCount(stack), attackDescrStr, localizedNameWithCount(affected.main.stack, true), damageStr, deathsStr);
     else
-        msg = tr("%1 %2").arg(localizedNameWithCount(stack)).arg(attackDescrStr);
+        msg = tr("%1 %2").arg(localizedNameWithCount(stack), attackDescrStr);
 
     if (!affected.extra.empty())
         msg += tr(", splash has done damage to: ");
@@ -277,14 +277,14 @@ void BattleControlWidget::beforeAttackMelee(BattleStackConstPtr stack, const Aff
             msg += ", ";
         if (loss.remainCount && loss.deaths)
             msg += tr("%1 - dmg. %2, deaths %3 (remain %4) ")
-                       .arg(name)
-                       .arg(wrapDmg(loss.damageTotal))
-                       .arg(wrapDeaths(loss.deaths))
-                       .arg(wrapInfo(loss.remainCount));
+                       .arg(name,
+                            wrapDmg(loss.damageTotal),
+                            wrapDeaths(loss.deaths),
+                            wrapInfo(loss.remainCount));
         else if (!loss.deaths)
-            msg += tr("%1 - dmg. %2").arg(name).arg(wrapDmg(loss.damageTotal));
+            msg += tr("%1 - dmg. %2").arg(name, wrapDmg(loss.damageTotal));
         else
-            msg += tr("%1 - dmg. %2, killing all %3").arg(name).arg(wrapDmg(loss.damageTotal)).arg(wrapDeaths(loss.deaths));
+            msg += tr("%1 - dmg. %2, killing all %3").arg(name, wrapDmg(loss.damageTotal), wrapDeaths(loss.deaths));
     }
 
     addLog(msg);
@@ -395,14 +395,27 @@ void BattleControlWidget::onCast(const Caster& caster, const AffectedMagic& affe
                 msg += ", ";
             if (loss.remainCount && loss.deaths)
                 msg += tr("%1 - dmg. %2, deaths %3 (remain %4)")
-                           .arg(name)
-                           .arg(wrapDmg(loss.damageTotal))
-                           .arg(wrapDeaths(loss.deaths))
-                           .arg(wrapInfo(loss.remainCount));
+                           .arg(name,
+                                wrapDmg(loss.damageTotal),
+                                wrapDeaths(loss.deaths),
+                                wrapInfo(loss.remainCount));
             else if (!loss.deaths)
-                msg += tr("%1 - dmg. %2").arg(name).arg(wrapDmg(loss.damageTotal));
+                msg += tr("%1 - dmg. %2").arg(name, wrapDmg(loss.damageTotal));
             else
-                msg += tr("%1 - dmg. %2, killing all %3").arg(name).arg(wrapDmg(loss.damageTotal)).arg(wrapDeaths(loss.deaths));
+                msg += tr("%1 - dmg. %2, killing all %3").arg(name, wrapDmg(loss.damageTotal), wrapDeaths(loss.deaths));
+        }
+    } else if (spell->type == LibrarySpell::Type::Rising) {
+        msg += tr(", as a result:");
+        for (size_t i = 0; i < affected.targets.size(); i++) {
+            auto loss  = affected.targets[i].loss;
+            auto stack = affected.targets[i].stack;
+            auto name  = m_modelsProvider.units()->find(stack->library)->getName();
+            if (i > 0)
+                msg += ", ";
+            msg += tr("%1 - restored %2 units (up to %3)")
+                       .arg(name,
+                            QString("<r>%1</r>").arg(-loss.deaths),
+                            wrapInfo(loss.remainCount));
         }
     }
 
@@ -507,9 +520,10 @@ void BattleControlWidget::planUpdate()
             hint = tr("Move to %1").arg(posToStr(movePlan.m_moveTo.mainPos()));
         }
     } else if (castPlan.isValid()) {
-        const bool isOffensive = castPlan.m_spell->type == LibrarySpell::Type::Offensive;
-        hint                   = tr("Cast %1").arg(m_modelsProvider.spells()->find(castPlan.m_spell)->getName());
-        if (castPlan.m_targeted.size() > 3 || castPlan.m_spell->type == LibrarySpell::Type::Temp) {
+        const bool isOffensive     = castPlan.m_spell->type == LibrarySpell::Type::Offensive;
+        const int  affectedTargets = castPlan.m_targeted.size();
+        hint                       = tr("Cast %1").arg(m_modelsProvider.spells()->find(castPlan.m_spell)->getName());
+        if (affectedTargets > 3 || castPlan.m_spell->type == LibrarySpell::Type::Temp) {
             if (isOffensive) {
                 hint += " - " + tr("total damage %1, deaths %2").arg(formatDamageRollSingle(castPlan.lossTotal.damageTotal, false)).arg(formatDamageRollSingle(castPlan.lossTotal.deaths, true));
             }
@@ -537,7 +551,15 @@ void BattleControlWidget::planUpdate()
             else if (magicSuccessChanceMax != magicSuccessChanceMin)
                 hint += QString(" (<i>%1..%2%</i> ").arg(formatResist(magicSuccessChanceMin)).arg(formatResist(magicSuccessChanceMax)) + tr("succ. ch.") + ")";
 
-        } else if (castPlan.m_targeted.size() > 0) {
+        } else if (castPlan.m_spell->type == LibrarySpell::Type::Rising && affectedTargets > 0) {
+            hint += " - ";
+            for (auto& target : castPlan.m_targeted) {
+                auto loss  = target.loss;
+                auto stack = target.stack;
+                auto name  = m_modelsProvider.units()->find(stack->library)->getName();
+                hint += tr("%1 - rise %2 (%3 hp)").arg(name, QString("<r>%1</r>").arg(-loss.deaths), QString("<h>%1</h>").arg(-loss.damageTotal));
+            }
+        } else if (affectedTargets > 0) {
             hint += " - ";
             hint += tr("total damage %1, deaths %2")
                         .arg(formatDamageRollSingle(castPlan.lossTotal.damageTotal, false))
@@ -553,21 +575,21 @@ void BattleControlWidget::planUpdate()
                     auto name   = m_modelsProvider.units()->find(stack->library)->getName();
                     if (i > 0)
                         hint += ", ";
-                    hint += tr("%1 - damage %2, deaths %3").arg(name).arg(formatDamageRollSingle(loss.damageTotal, false)).arg(formatDamageRollSingle(loss.deaths, true));
+                    hint += tr("%1 - damage %2, deaths %3").arg(name, formatDamageRollSingle(loss.damageTotal, false), formatDamageRollSingle(loss.deaths, true));
                     if (succ != BonusRatio{ 1, 1 })
-                        hint += " " + tr("(<i>%1%</i> %2)").arg(formatResist(succ)).arg(tr("succ. ch."));
+                        hint += " " + tr("(<i>%1%</i> %2)").arg(formatResist(succ), tr("succ. ch."));
 
                     if (reduce != BonusRatio{ 1, 1 })
-                        hint += " " + tr("(<i>%1%</i> %2)").arg(formatResist(reduce)).arg(tr("of base"));
+                        hint += " " + tr("(<i>%1%</i> %2)").arg(formatResist(reduce), tr("of base"));
                 }
             } else if (castPlan.m_targeted.size() == 1) {
                 auto succ   = castPlan.m_targeted[0].magicSuccessChance;
                 auto reduce = castPlan.m_targeted[0].totalFactor;
                 if (succ != BonusRatio{ 1, 1 })
-                    hint += " " + tr("(<i>%1%</i> %2)").arg(formatResist(succ)).arg(tr("succ. ch."));
+                    hint += " " + tr("(<i>%1%</i> %2)").arg(formatResist(succ), tr("succ. ch."));
 
                 if (reduce != BonusRatio{ 1, 1 })
-                    hint += " " + tr("(<i>%1%</i> %2)").arg(formatResist(reduce)).arg(tr("of base"));
+                    hint += " " + tr("(<i>%1%</i> %2)").arg(formatResist(reduce), tr("of base"));
             }
         }
     } else if (hoveredStack) {
@@ -638,7 +660,6 @@ void BattleControlWidget::showPopupLogs()
     bottomButtons->addSpacing(50);
     bottomButtons->addStretch();
     dlg.updateGeometry();
-    // dlg.resize(dlg.sizeHint());
     dlg.exec();
 }
 

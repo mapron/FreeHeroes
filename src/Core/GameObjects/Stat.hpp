@@ -224,10 +224,11 @@ struct DamageResult {
     int damagePercent  = 0;
     //int damageTotal = 0;
     struct Loss {
-        int damageTotal          = 0;
-        int deaths               = 0;
-        int remainCount          = 0;
-        int remainTopStackHealth = 0;
+        int  damageTotal          = 0;
+        int  deaths               = 0;
+        int  remainCount          = 0;
+        int  remainTopStackHealth = 0;
+        bool permanent            = false;
     };
     Loss loss;
 

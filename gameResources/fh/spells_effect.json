@@ -556,10 +556,29 @@
 
     },
     "sod.spell.resurrection" : {
-
+        "filter" : [
+            "if type ~= CType.Living then result=false end"
+        ],
+        "rangeByLevel": ["single","single","single","single"],
+        "calc": [
+            "damage = spellPower * 50 + 40 ",
+            "if level >= 2 then damage = damage + 40 end ",
+            "if level == 3 then damage = damage + 80 end ",
+            "if isSpec then damage = damage + math.ceil(damage * heroLevel * 3 / (unitLevel * 100)) end "
+        ]
     },
     "sod.spell.animateDead" : {
-
+        "filter" : [
+            "if type ~= CType.NonLiving then result=false end",
+            "if type ~= NLType.Undead then result=false end"
+        ],
+        "rangeByLevel": ["single","single","single","single"],
+        "calc": [
+            "damage = spellPower * 50 + 30 ",
+            "if level >= 2 then damage = damage + 30 end ",
+            "if level == 3 then damage = damage + 100 end ",
+            "if isSpec then damage = damage + math.ceil(damage * heroLevel * 3 / (unitLevel * 100)) end "
+        ]
     },
     "sod.spell.sacrifice" : {
 

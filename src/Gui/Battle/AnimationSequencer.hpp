@@ -73,7 +73,7 @@ public:
         void changeAnim(BattleAnimation type, bool reverse = false);
         void playEffect(BattleAnimation type, int expectedDuration = -1);
 
-        void queueChangeAnim(BattleAnimation type, int pauseDuration = -1);
+        void queueChangeAnim(BattleAnimation type, int pauseDuration = -1, bool reverse = false);
         void queuePlayEffect(BattleAnimation type, int expectedDuration = -1, int pauseDuration = -1);
 
         bool addOptionalAnim(BattleAnimation type);
@@ -81,6 +81,7 @@ public:
         void addPropertyAnimation(int msecs, const QByteArray& propertyName, const QVariant& endValue);
         void addPosAnimation(int msecs, QPointF endValue);
         void addPosTeleport(QPointF endValue);
+        void addDeathPropertyAnimations(bool permanent);
 
         void addTurning(bool fullAnimation, bool toRight);
 

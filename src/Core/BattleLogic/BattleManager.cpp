@@ -187,6 +187,11 @@ std::vector<BattlePosition> BattleManager::getObstacles() const
 
 BattleStackConstPtr BattleManager::findStack(const BattlePosition pos, bool onlyAlive) const
 {
+    if (!onlyAlive) {
+        auto aliveStack = findStack(pos, true);
+        if (aliveStack)
+            return aliveStack;
+    }
     const std::vector<BattleStackMutablePtr>& pointers = onlyAlive ? m_alive : m_all;
 
     auto it = std::find_if(pointers.begin(), pointers.end(), [&pos](auto* stack) { return stack->pos.contains(pos); });
@@ -451,7 +456,7 @@ BattlePlanCast BattleManager::findPlanCast(const BattlePlanCastParams& castParam
         result.m_affectedArea = getSpellArea(castParams.m_target, range);
         std::set<BattleStackConstPtr> alreadyCovered;
         for (auto pos : result.m_affectedArea) {
-            BattleStackConstPtr targetStack = findStack(pos, true);
+            BattleStackConstPtr targetStack = findStack(pos, result.m_spell->type != LibrarySpell::Type::Rising);
             if (!targetStack || alreadyCovered.contains(targetStack))
                 continue;
 
@@ -497,6 +502,16 @@ BattlePlanCast BattleManager::findPlanCast(const BattlePlanCastParams& castParam
 
             target.loss        = loss;
             target.totalFactor = spellDamage / spellDamageInit;
+            result.lossTotal.damageTotal += loss.damageTotal;
+            result.lossTotal.deaths += loss.deaths;
+        } else if (result.m_spell->type == LibrarySpell::Type::Rising) {
+            const int          level           = targetStack->library->level / 10;
+            const int          baseSpellHealth = std::max(1, GeneralEstimation(m_rules).spellBaseDamage(level, result.m_power, static_cast<int>(affectedIndex)));
+            DamageResult::Loss loss            = risingLoss(targetStack, baseSpellHealth);
+            if (loss.deaths >= 0) // we need to resurrect at least 1 unit to succeed
+                continue;
+
+            target.loss = loss;
             result.lossTotal.damageTotal += loss.damageTotal;
             result.lossTotal.deaths += loss.deaths;
         }
@@ -734,6 +749,14 @@ bool BattleManager::doCast(BattlePlanCastParams planParams)
                     continue;
                 }
             }
+            affected.targets.push_back({ target.stack, loss });
+
+            applyLoss(targetStack, loss);
+        }
+    } else if (plan.m_spell->type == LibrarySpell::Type::Rising) {
+        for (auto& target : plan.m_targeted) {
+            auto targetStack = findStackNonConst(target.stack);
+            auto loss        = target.loss;
             affected.targets.push_back({ target.stack, loss });
 
             applyLoss(targetStack, loss);
@@ -1099,16 +1122,32 @@ DamageResult BattleManager::fullDamageEstimate(const BonusRatio    baseRoll,
     return damageResult;
 }
 
-DamageResult::Loss BattleManager::damageLoss(BattleStackConstPtr defender, int damage) const
+DamageResult::Loss BattleManager::damageLoss(BattleStackConstPtr target, int damage) const
 {
     DamageResult::Loss loss;
-    const int          defenderMaxHealth = defender->current.primary.maxHealth;
-    const int          effectiveHealth   = defender->health + (defender->count - 1) * defenderMaxHealth;
-    const int          remainEffHealth   = effectiveHealth - damage;
-    loss.remainCount                     = remainEffHealth <= 0 ? 0 : ((remainEffHealth - 1) / defenderMaxHealth) + 1;
-    loss.remainTopStackHealth            = remainEffHealth - (loss.remainCount - 1) * defenderMaxHealth;
-    loss.deaths                          = defender->count - loss.remainCount;
-    loss.damageTotal                     = damage;
+    const int          targetMaxHealth = target->current.primary.maxHealth;
+    const int          effectiveHealth = target->health + (target->count - 1) * targetMaxHealth;
+    const int          remainEffHealth = effectiveHealth - damage;
+    loss.remainCount                   = remainEffHealth <= 0 ? 0 : ((remainEffHealth - 1) / targetMaxHealth) + 1;
+    loss.remainTopStackHealth          = remainEffHealth - (loss.remainCount - 1) * targetMaxHealth;
+    loss.deaths                        = target->count - loss.remainCount;
+    loss.damageTotal                   = damage;
+    loss.permanent                     = m_env.permanentDeath;
+    return loss;
+}
+
+DamageResult::Loss BattleManager::risingLoss(BattleStackConstPtr target, int health) const
+{
+    DamageResult::Loss loss;
+    const int          maxCount           = target->adventure->count;
+    const int          targetMaxHealth    = target->current.primary.maxHealth;
+    const int          effectiveHealth    = target->health + (target->count - 1) * targetMaxHealth;
+    const int          maxEffectiveHealth = maxCount * targetMaxHealth;
+    const int          remainEffHealth    = std::min(maxEffectiveHealth, effectiveHealth + health);
+    loss.remainCount                      = ((remainEffHealth - 1) / targetMaxHealth) + 1;
+    loss.remainTopStackHealth             = remainEffHealth - (loss.remainCount - 1) * targetMaxHealth;
+    loss.deaths                           = target->count - loss.remainCount;
+    loss.damageTotal                      = -health;
     return loss;
 }
 
@@ -1477,12 +1516,12 @@ void BattleManager::recalcStack(BattleStackMutablePtr stack)
     }
 }
 
-void BattleManager::applyLoss(BattleStackMutablePtr stack, const DamageResult::Loss& loss)
+void BattleManager::applyLoss(BattleStackMutablePtr stack, const DamageResult::Loss& loss, bool isRising)
 {
     stack->count  = loss.remainCount;
     stack->health = loss.remainCount > 0 ? loss.remainTopStackHealth : 0;
     BonusRatio retaliationPower{ 1, 1 };
-    {
+    if (!isRising) {
         BattleStack::EffectList effectsTmp;
         for (auto& effect : stack->appliedEffects) {
             if (effect.power.spell->hasEndCondition(LibrarySpell::EndCondition::GetHit)) {
@@ -1498,7 +1537,8 @@ void BattleManager::applyLoss(BattleStackMutablePtr stack, const DamageResult::L
 
     recalcStack(stack);
 
-    stack->current.retaliationPower = retaliationPower;
+    if (!isRising)
+        stack->current.retaliationPower = retaliationPower;
 }
 
 BattleManager::ControlGuard::ControlGuard(BattleManager* parent)

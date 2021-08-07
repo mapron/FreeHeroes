@@ -162,6 +162,9 @@ bool BattleEstimation::checkSpellTarget(const BattleStack& possibleTarget, Libra
         lua.script(calc);
 
     bool result = lua["result"];
+    if (spell->type == LibrarySpell::Type::Rising) {
+        result = result && possibleTarget.count < possibleTarget.adventure->count;
+    }
     return result;
 }
 
@@ -254,13 +257,12 @@ void BattleEstimation::calculateUnitStatsStartBattle(BattleStack& unit, const Ba
 
 void BattleEstimation::calculateEnvironmentOnBattleStart(BattleEnvironment& battleEnvironment, const BattleArmy& att, const BattleArmy& def)
 {
-    if (att.battleHero.isValid()) {
-        battleEnvironment.forbidSpells.makeUnion(att.battleHero.adventure->estimated.forbidSpells);
-        battleEnvironment.rngMult *= att.battleHero.adventure->estimated.rngMult;
-    }
-    if (def.battleHero.isValid()) {
-        battleEnvironment.forbidSpells.makeUnion(def.battleHero.adventure->estimated.forbidSpells);
-        battleEnvironment.rngMult *= def.battleHero.adventure->estimated.rngMult;
+    for (const BattleArmy* army : { &att, &def }) {
+        if (army->battleHero.isValid()) {
+            battleEnvironment.forbidSpells.makeUnion(army->battleHero.adventure->estimated.forbidSpells);
+            battleEnvironment.rngMult *= army->battleHero.adventure->estimated.rngMult;
+            battleEnvironment.permanentDeath = battleEnvironment.permanentDeath || army->battleHero.adventure->estimated.specialArtifactEffects.contains(LibraryArtifact::SpecialEffect::PermanentDeath);
+        }
     }
 }
 
