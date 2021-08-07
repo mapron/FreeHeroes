@@ -34,10 +34,10 @@ struct LibraryUnit {
             bool                             isEmpty() const noexcept { return enemies.empty() || damageBonus == BonusRatio{ 0, 1 }; }
         };
         struct StatBonus {
-            int             morale   = 0;
-            int             luck     = 0;
-            int             manaCost = 0;
-            RngChanceParams chances;
+            int                 morale   = 0;
+            int                 luck     = 0;
+            int                 manaCost = 0;
+            RngChanceMultiplier rngMult;
         };
 
         struct CastOnHit {
@@ -80,8 +80,8 @@ struct LibraryUnit {
 
         //int doubleDamageChance = 0;
 
-        int minimalMoraleLevel = -3;
-        int minimalLuckLevel   = -3;
+        int minimalMoraleLevel = -99;
+        int minimalLuckLevel   = -99;
 
         //int manaStealPercent = 0;
 

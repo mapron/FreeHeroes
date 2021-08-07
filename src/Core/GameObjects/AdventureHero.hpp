@@ -205,10 +205,10 @@ struct AdventureHero {
         int64_t experienceStartLevel = 0;
         int64_t experienceNextLevel  = 0;
 
-        HeroPrimaryParams primary;              // skills + artifacts
-        PrimaryRngParams  rngParams;            // skills + artifacts
-        PrimaryRngParams  rngParamsForOpponent; // artifacts
-        PrimaryRngParams  rngMax;               // artifacts: 0 morale, 0  luck
+        HeroPrimaryParams   primary;              // skills + artifacts
+        PrimaryRngParams    rngParams;            // skills + artifacts
+        PrimaryRngParams    rngParamsForOpponent; // artifacts
+        RngChanceMultiplier rngMult;              // artifacts: 0 morale, 0  luck
 
         BonusRatio meleeAttack  = { 0, 1 }; // skills
         BonusRatio rangedAttack = { 0, 1 }; // skills

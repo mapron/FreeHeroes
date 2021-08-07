@@ -45,7 +45,7 @@ private:
     void bindTypes(sol::state& lua);
     void calculateHeroStats(AdventureHero& hero);
     void calculateHeroStatsAfterSquad(AdventureHero& hero, const AdventureSquad& squad);
-    void calculateSquad(AdventureSquad& squad, bool reduceExtraFactionsPenalty);
+    void calculateSquad(AdventureSquad& squad, bool reduceExtraFactionsPenalty, LibraryTerrainConstPtr terrain);
     void calculateSquadHeroRng(AdventureSquad& squad, const AdventureHero& hero);
     void calculateSquadSpeed(AdventureSquad& squad);
 

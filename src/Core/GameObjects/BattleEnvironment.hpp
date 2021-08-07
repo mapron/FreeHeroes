@@ -10,7 +10,8 @@
 namespace FreeHeroes::Core {
 
 struct BattleEnvironment {
-    SpellFilter forbidSpells;
+    SpellFilter         forbidSpells;
+    RngChanceMultiplier rngMult;
 };
 
 }

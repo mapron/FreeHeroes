@@ -176,25 +176,30 @@ QString UiCommonModel::getCommonString(UiCommonModel::UIString common) const
 QStringList UiCommonModel::getLuckDescription(const Core::LuckDetails& details) const
 {
     QStringList mods;
+    int         value = details.total;
     if (details.unitBonus)
         mods << tr("Creatures present who adds luck: +%1").arg(details.unitBonus);
     if (details.skills)
         mods << tr("Luck skill bonus: +%1").arg(details.skills);
     if (details.artifacts)
         mods << tr("Artifacts: +%1").arg(details.artifacts);
-    if (details.minimalLuckLevel > -3 && details.total < details.minimalLuckLevel)
+    if (details.minimalLuckLevel > 0 && value < details.minimalLuckLevel)
         mods << tr("Creature minimal luck is +%1, increasing total luck from %2 to +%1")
                     .arg(details.minimalLuckLevel)
-                    .arg(details.total);
-    if (details.neutralizedPositive)
-        mods << tr("Positive luck was neutralized by artifact");
+                    .arg(value);
     if (mods.empty())
         mods << tr("No modificators");
 
-    if (details.total > 0)
+    value = std::max(value, details.minimalLuckLevel);
+    if (value > 0) {
         mods << tr("Chance of positive luck: %1").arg(FormatUtils::formatBonus(details.rollChance, false, 1));
-    else if (details.total < 0)
+        if (details.rollChance.num() == 0)
+            mods << tr("Positive luck was neutralized by artifact or terrain");
+    } else if (value < 0) {
         mods << tr("Chance of negative luck: %1").arg(FormatUtils::formatBonus(details.rollChance, false, 1));
+        if (details.rollChance.num() == 0)
+            mods << tr("Negative luck was neutralized by artifact or terrain");
+    }
 
     return mods;
 }
@@ -202,6 +207,7 @@ QStringList UiCommonModel::getLuckDescription(const Core::LuckDetails& details) 
 QStringList UiCommonModel::getMoraleDescription(const Core::MoraleDetails& details) const
 {
     QStringList mods;
+    int         value = details.total;
     if (details.undead)
         mods << tr("Army has undead: -1");
     if (details.factionsPenalty == 1)
@@ -216,19 +222,23 @@ QStringList UiCommonModel::getMoraleDescription(const Core::MoraleDetails& detai
         mods << tr("Artifacts: +%1").arg(details.artifacts);
     if (details.unaffected)
         mods << tr("Creature is unaffected by morale");
-    if (details.minimalMoraleLevel > -3 && details.total < details.minimalMoraleLevel)
+    if (details.minimalMoraleLevel > 0 && value < details.minimalMoraleLevel)
         mods << tr("Creature minimal morale is +%1, increasing total morale from %2 to +%1")
                     .arg(details.minimalMoraleLevel)
-                    .arg(details.total);
-    if (details.neutralizedPositive)
-        mods << tr("Positive morale was neutralized by artifact");
+                    .arg(value);
     if (mods.empty())
         mods << tr("No modificators");
 
-    if (details.total > 0)
+    value = std::max(value, details.minimalMoraleLevel);
+    if (value > 0) {
         mods << tr("Chance of positive morale: %1").arg(FormatUtils::formatBonus(details.rollChance, false, 1));
-    else if (details.total < 0)
+        if (details.rollChance.num() == 0)
+            mods << tr("Positive morale was neutralized by artifact or terrain");
+    } else if (value < 0) {
         mods << tr("Chance of negative morale: %1").arg(FormatUtils::formatBonus(details.rollChance, false, 1));
+        if (details.rollChance.num() == 0)
+            mods << tr("Negative morale was neutralized by artifact or terrain");
+    }
 
     return mods;
 }

@@ -9,6 +9,7 @@
 #include "LibrarySecondarySkill.hpp"
 #include "LibraryHeroSpec.hpp"
 #include "LibraryGameRules.hpp"
+#include "LibraryTerrain.hpp"
 
 #include "IRandomGenerator.hpp"
 
@@ -82,7 +83,7 @@ void AdventureEstimation::bindTypes(sol::state& lua)
         "mpIncrease"            , &AdventureHero::EstimatedParams::mpIncrease,
         "mpWaterIncrease"       , &AdventureHero::EstimatedParams::mpWaterIncrease,
 
-        "rngMax"                , &AdventureHero::EstimatedParams::rngMax,
+        "rngMult"               , &AdventureHero::EstimatedParams::rngMult,
 
         "unitSpeedAbs"          , &AdventureHero::EstimatedParams::unitBattleSpeedAbs,
         "unitLifeAbs"           , &AdventureHero::EstimatedParams::unitLifeAbs,
@@ -344,11 +345,9 @@ void AdventureEstimation::calculateHeroStats(AdventureHero& hero)
         return;
 
     // reset
-    hero.estimated               = {};
-    hero.estimated.primary       = hero.currentBasePrimary;
-    hero.estimated.rngMax.luck   = 3;
-    hero.estimated.rngMax.morale = 3;
-    auto spellbook               = hero.spellbook;
+    hero.estimated         = {};
+    hero.estimated.primary = hero.currentBasePrimary;
+    auto spellbook         = hero.spellbook;
 
     // Set level and Exp.
     if (hero.editorParams.expIsDirty) {
@@ -542,10 +541,22 @@ void AdventureEstimation::calculateHeroStatsAfterSquad(AdventureHero& hero, cons
     hero.estimatedFromSquad.luckDetails          = squad.estimated.luckDetails;
 }
 
-void AdventureEstimation::calculateSquad(AdventureSquad& squad, bool reduceExtraFactionsPenalty)
+void AdventureEstimation::calculateSquad(AdventureSquad& squad, bool reduceExtraFactionsPenalty, LibraryTerrainConstPtr terrain)
 {
     std::set<LibraryFactionConstPtr> factions;
+    std::set<LibraryUnitConstPtr>    units;
+
+    auto isUniqueUnit = [&units](LibraryUnitConstPtr unit) {
+        if (units.contains(unit->baseUpgrade))
+            return false;
+
+        units.insert(unit->baseUpgrade);
+        return true;
+    };
     squad.estimated = {};
+    if (terrain) {
+        squad.estimated.squadBonus.rngMult *= terrain->bonusAll.rngMult;
+    }
 
     for (auto& stack : squad.stacks) {
         if (!stack.isValid())
@@ -562,26 +573,20 @@ void AdventureEstimation::calculateSquad(AdventureSquad& squad, bool reduceExtra
 
         auto& squadEst     = squad.estimated.squadBonus.rngParams;
         auto& oppEst       = squad.estimated.oppBonus.rngParams;
-        auto& squadChances = squad.estimated.squadBonus.rngChance;
-        auto& oppChances   = squad.estimated.oppBonus.rngChance;
+        auto& squadChances = squad.estimated.squadBonus.rngMult;
+        auto& oppChances   = squad.estimated.oppBonus.rngMult;
 
-        // clang-format off
-        squadEst.luck              = std::max(squadEst.luck  , squadBonus.luck);
-        squadEst.morale            = std::max(squadEst.morale, squadBonus.morale);
+        // getting the maximum positive effect of all stacks for our army, and the minimum negative.
+        // for the opponent bonus - doing the opposite
+        squadEst.luck   = std::max(squadEst.luck, squadBonus.luck);
+        squadEst.morale = std::max(squadEst.morale, squadBonus.morale);
+        oppEst.luck     = std::min(oppEst.luck, oppBonus.luck);
+        oppEst.morale   = std::min(oppEst.morale, oppBonus.morale);
 
-        squadChances.luck          = std::max(squadChances.luck     , squadBonus.chances.luck);
-        squadChances.morale        = std::max(squadChances.morale   , squadBonus.chances.morale);
-        squadChances.unluck        = std::min(squadChances.unluck   , squadBonus.chances.unluck);
-        squadChances.dismorale     = std::min(squadChances.dismorale, squadBonus.chances.dismorale);
-
-        oppEst.luck                = std::min(oppEst.luck    , oppBonus.luck);
-        oppEst.morale              = std::min(oppEst.morale  , oppBonus.morale);
-
-        oppChances.luck          = std::min(oppChances.luck     , oppBonus.chances.luck);
-        oppChances.morale        = std::min(oppChances.morale   , oppBonus.chances.morale);
-        oppChances.unluck        = std::max(oppChances.unluck   , oppBonus.chances.unluck);
-        oppChances.dismorale     = std::max(oppChances.dismorale, oppBonus.chances.dismorale);
-        // clang-format on
+        if (isUniqueUnit(stack.library)) {
+            squadChances *= squadBonus.rngMult;
+            oppChances *= oppBonus.rngMult;
+        }
 
         squad.estimated.squadBonus.manaCost = std::min(squad.estimated.squadBonus.manaCost, squadBonus.manaCost);
         squad.estimated.oppBonus.manaCost   = std::max(squad.estimated.oppBonus.manaCost, oppBonus.manaCost);
@@ -608,14 +613,12 @@ void AdventureEstimation::calculateSquad(AdventureSquad& squad, bool reduceExtra
     squad.estimated.moraleDetails.factionsPenalty       = 1 - totalExtraFactionsCount;
     squad.estimated.squadBonus.rngParams.morale += squad.estimated.moraleDetails.factionsPenalty;
     squad.estimated.squadBonus.rngParams.morale += squad.estimated.moraleDetails.undead;
-    squad.estimated.rngMax.luck   = 3;
-    squad.estimated.rngMax.morale = 3;
 
     squad.estimated.moraleDetails.total = squad.estimated.squadBonus.rngParams.morale;
     squad.estimated.luckDetails.total   = squad.estimated.squadBonus.rngParams.luck;
 
-    squad.estimated.moraleDetails.rollChance = GeneralEstimation(m_rules).estimateMoraleRoll(squad.estimated.squadBonus.rngParams.morale, squad.estimated.squadBonus.rngChance);
-    squad.estimated.luckDetails.rollChance   = GeneralEstimation(m_rules).estimateLuckRoll(squad.estimated.squadBonus.rngParams.luck, squad.estimated.squadBonus.rngChance);
+    squad.estimated.moraleDetails.rollChance = GeneralEstimation(m_rules).estimateMoraleRoll(squad.estimated.squadBonus.rngParams.morale, squad.estimated.squadBonus.rngMult);
+    squad.estimated.luckDetails.rollChance   = GeneralEstimation(m_rules).estimateLuckRoll(squad.estimated.squadBonus.rngParams.luck, squad.estimated.squadBonus.rngMult);
 }
 
 void AdventureEstimation::calculateSquadHeroRng(AdventureSquad& squad, const AdventureHero& hero)
@@ -628,13 +631,15 @@ void AdventureEstimation::calculateSquadHeroRng(AdventureSquad& squad, const Adv
 
     squad.estimated.squadBonus.rngParams += hero.estimated.rngParams;
     squad.estimated.oppBonus.rngParams += hero.estimated.rngParamsForOpponent;
-    squad.estimated.rngMax = hero.estimated.rngMax;
+    // we assume now hero has no chance affecting artifacts that affects only one side.
+    // like no 'double morale chance for me' kind ones.
+    squad.estimated.squadBonus.rngMult *= hero.estimated.rngMult;
 
     squad.estimated.moraleDetails.total = squad.estimated.squadBonus.rngParams.morale;
     squad.estimated.luckDetails.total   = squad.estimated.squadBonus.rngParams.luck;
 
-    squad.estimated.moraleDetails.rollChance = GeneralEstimation(m_rules).estimateMoraleRoll(squad.estimated.squadBonus.rngParams.morale, squad.estimated.squadBonus.rngChance);
-    squad.estimated.luckDetails.rollChance   = GeneralEstimation(m_rules).estimateLuckRoll(squad.estimated.squadBonus.rngParams.luck, squad.estimated.squadBonus.rngChance);
+    squad.estimated.moraleDetails.rollChance = GeneralEstimation(m_rules).estimateMoraleRoll(squad.estimated.squadBonus.rngParams.morale, squad.estimated.squadBonus.rngMult);
+    squad.estimated.luckDetails.rollChance   = GeneralEstimation(m_rules).estimateLuckRoll(squad.estimated.squadBonus.rngParams.luck, squad.estimated.squadBonus.rngMult);
 }
 
 void AdventureEstimation::calculateSquadSpeed(AdventureSquad& squad)
@@ -673,10 +678,13 @@ void calculateUnitStats(LibraryGameRulesConstPtr rules, AdventureStack& unit, co
         cur.moraleDetails            = {};
         cur.moraleDetails.unaffected = true;
     }
-    cur.moraleDetails.total      = cur.rngParams.morale;
-    cur.luckDetails.total        = cur.rngParams.luck;
-    cur.moraleDetails.rollChance = GeneralEstimation(rules).estimateMoraleRoll(cur.moraleDetails.total, squad.estimated.squadBonus.rngChance);
-    cur.luckDetails.rollChance   = GeneralEstimation(rules).estimateLuckRoll(cur.luckDetails.total, squad.estimated.squadBonus.rngChance);
+    cur.moraleDetails.total = cur.rngParams.morale;
+    cur.luckDetails.total   = cur.rngParams.luck;
+
+    cur.rngMult = squad.estimated.squadBonus.rngMult;
+    if (currentTerrain) {
+        // @todo: evil/good specific bonuses.
+    }
 
     cur.moraleDetails.minimalMoraleLevel = unit.library->abilities.minimalMoraleLevel;
     cur.luckDetails.minimalLuckLevel     = unit.library->abilities.minimalLuckLevel;
@@ -684,14 +692,9 @@ void calculateUnitStats(LibraryGameRulesConstPtr rules, AdventureStack& unit, co
     cur.rngParams.morale = std::max(cur.rngParams.morale, cur.moraleDetails.minimalMoraleLevel);
     cur.rngParams.luck   = std::max(cur.rngParams.luck, cur.luckDetails.minimalLuckLevel);
 
-    if (squad.estimated.rngMax.morale < 3 && cur.rngParams.morale > squad.estimated.rngMax.morale) {
-        cur.moraleDetails.neutralizedPositive = true;
-        cur.rngParams.morale                  = squad.estimated.rngMax.morale;
-    }
-    if (squad.estimated.rngMax.luck < 3 && cur.rngParams.luck > squad.estimated.rngMax.luck) {
-        cur.luckDetails.neutralizedPositive = true;
-        cur.rngParams.luck                  = squad.estimated.rngMax.luck;
-    }
+    cur.moraleDetails.rollChance = GeneralEstimation(rules).estimateMoraleRoll(cur.rngParams.morale, cur.rngMult);
+    cur.luckDetails.rollChance   = GeneralEstimation(rules).estimateLuckRoll(cur.rngParams.luck, cur.rngMult);
+
     if (currentTerrain && unit.library->faction->nativeTerrain == currentTerrain) {
         cur.primary.battleSpeed += 1;
         cur.primary.ad.incAll(1);
@@ -781,7 +784,8 @@ void AdventureEstimation::calculateArmy(AdventureArmy& army, LibraryTerrainConst
     if (army.hasHero())
         calculateHeroStats(army.hero);
 
-    calculateSquad(army.squad, army.hasHero() ? army.hero.estimated.specialArtifactEffects.contains(LibraryArtifact::SpecialEffect::FactionsAlliance) : false);
+    const bool factionPenalty = army.hasHero() ? army.hero.estimated.specialArtifactEffects.contains(LibraryArtifact::SpecialEffect::FactionsAlliance) : false;
+    calculateSquad(army.squad, factionPenalty, terrain);
 
     if (army.hasHero())
         calculateSquadHeroRng(army.squad, army.hero);

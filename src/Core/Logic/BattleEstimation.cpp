@@ -49,17 +49,9 @@ void BattleEstimation::calculateUnitStats(BattleStack& unit)
 
     unit.current = unit.estimatedOnStart;
     auto& cur    = unit.current;
-    if (cur.rngMax.morale < 3)
-        cur.rngParams.morale = std::min(cur.rngParams.morale, cur.rngMax.morale);
-    if (cur.rngMax.luck < 3)
-        cur.rngParams.luck = std::min(cur.rngParams.luck, cur.rngMax.luck);
 
     if (unit.current.fixedCast.count > 0)
         unit.current.fixedCast.count -= unit.castsDone;
-
-    //    Logger(Logger::Info) << "start stack:" << unit.library->id
-    //            << ", maxRetaliations=" << cur.maxRetaliations
-    //                            ;
 
     sol::state lua;
 
@@ -146,8 +138,11 @@ void BattleEstimation::calculateUnitStats(BattleStack& unit)
     cur.primary.ad.attack  = std::clamp(cur.primary.ad.attack, 0, m_rules->limits.maxUnitAd.attack);
     cur.primary.ad.defense = std::clamp(cur.primary.ad.defense, 0, m_rules->limits.maxUnitAd.defense);
 
-    cur.moraleChance = GeneralEstimation(m_rules).estimateMoraleRoll(cur.rngParams.morale, cur.rngChances);
-    cur.luckChance   = GeneralEstimation(m_rules).estimateLuckRoll(cur.rngParams.luck, cur.rngChances);
+    cur.rngParams.luck   = std::max(cur.rngParams.luck, unit.library->abilities.minimalLuckLevel);
+    cur.rngParams.morale = std::max(cur.rngParams.morale, unit.library->abilities.minimalMoraleLevel);
+
+    cur.moraleChance = GeneralEstimation(m_rules).estimateMoraleRoll(cur.rngParams.morale, cur.rngMult);
+    cur.luckChance   = GeneralEstimation(m_rules).estimateLuckRoll(cur.rngParams.luck, cur.rngMult);
 }
 
 bool BattleEstimation::checkSpellTarget(const BattleStack& possibleTarget, LibrarySpellConstPtr spell)
@@ -217,8 +212,7 @@ void BattleEstimation::calculateUnitStatsStartBattle(BattleStack& unit, const Ba
     unit.estimatedOnStart.primary               = unit.adventure->estimated.primary;   // library + hero ad/speed/life bonus
     unit.estimatedOnStart.rngParams             = unit.adventure->estimated.rngParams; // hero + own squad
     unit.estimatedOnStart.hasMorale             = unit.adventure->estimated.hasMorale;
-    unit.estimatedOnStart.rngMax                = squad.adventure->estimated.rngMax;
-    unit.estimatedOnStart.rngChances            = squad.adventure->estimated.squadBonus.rngChance;
+    unit.estimatedOnStart.rngMult               = unit.adventure->estimated.rngMult;
     unit.estimatedOnStart.magicOppSuccessChance = unit.adventure->estimated.magicOppSuccessChance;
     unit.estimatedOnStart.magicReduce           = unit.adventure->estimated.magicReduce;
     unit.estimatedOnStart.immunes               = unit.adventure->estimated.immunes;
@@ -235,17 +229,10 @@ void BattleEstimation::calculateUnitStatsStartBattle(BattleStack& unit, const Ba
 
     const auto& oppEstim = opponent.squad->adventure->estimated;
     unit.estimatedOnStart.rngParams += oppEstim.oppBonus.rngParams;
-    unit.estimatedOnStart.rngMax.luck   = std::min(unit.estimatedOnStart.rngMax.luck, oppEstim.rngMax.luck);
-    unit.estimatedOnStart.rngMax.morale = std::min(unit.estimatedOnStart.rngMax.morale, oppEstim.rngMax.morale);
+    unit.estimatedOnStart.rngMult *= oppEstim.oppBonus.rngMult;
+    unit.estimatedOnStart.rngMult *= battleEnvironment.rngMult;
     if (!unit.estimatedOnStart.hasMorale)
         unit.estimatedOnStart.rngParams.morale = 0;
-
-    // clang-format off
-    unit.estimatedOnStart.rngChances.luck      *= oppEstim.oppBonus.rngChance.luck;
-    unit.estimatedOnStart.rngChances.morale    *= oppEstim.oppBonus.rngChance.morale;
-    unit.estimatedOnStart.rngChances.unluck    *= oppEstim.oppBonus.rngChance.unluck;
-    unit.estimatedOnStart.rngChances.dismorale *= oppEstim.oppBonus.rngChance.dismorale;
-    // clang-format on
 
     unit.estimatedOnStart.maxAttacksMelee = 1; // @todo: ballista. ?
     if (unit.library->traits.rangeAttack)
@@ -269,9 +256,11 @@ void BattleEstimation::calculateEnvironmentOnBattleStart(BattleEnvironment& batt
 {
     if (att.battleHero.isValid()) {
         battleEnvironment.forbidSpells.makeUnion(att.battleHero.adventure->estimated.forbidSpells);
+        battleEnvironment.rngMult *= att.battleHero.adventure->estimated.rngMult;
     }
     if (def.battleHero.isValid()) {
         battleEnvironment.forbidSpells.makeUnion(def.battleHero.adventure->estimated.forbidSpells);
+        battleEnvironment.rngMult *= def.battleHero.adventure->estimated.rngMult;
     }
 }
 

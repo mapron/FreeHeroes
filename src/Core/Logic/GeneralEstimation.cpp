@@ -74,6 +74,12 @@ void GeneralEstimation::bindTypes(sol::state& lua)
         "incMorale", &PrimaryRngParams::incMorale,
         "incAll"   , &PrimaryRngParams::incAll
     );
+    lua.new_usertype<RngChanceMultiplier>( "RngChanceMultiplier",
+       "moralePositive"   , &RngChanceMultiplier::moralePositive,
+       "moraleNegative"   , &RngChanceMultiplier::moraleNegative,
+       "luckPositive"     , &RngChanceMultiplier::luckPositive,
+       "luckNegative"     , &RngChanceMultiplier::luckNegative
+    );
     lua.new_usertype<PrimaryAttackParams>( "PrimaryAttackParams",
         "att"      , &PrimaryAttackParams::attack,
         "def"      , &PrimaryAttackParams::defense,
@@ -190,25 +196,25 @@ BonusRatio GeneralEstimation::calculatePhysicalBase(DamageDesc dmg, int count, D
     return BonusRatio(damageBaseRoll, 1);
 }
 
-BonusRatio GeneralEstimation::estimateMoraleRoll(int moraleValue, const RngChanceParams& chanceModifiers)
+BonusRatio GeneralEstimation::estimateMoraleRoll(int moraleValue, const RngChanceMultiplier& chanceMult)
 {
     if (m_rules->morale.positiveChances.empty())
         return { 1, 10 };
     moraleValue                     = std::clamp(moraleValue, m_rules->morale.minEffectiveValue, m_rules->morale.maxEffectiveValue);
     const int        moraleValueAbs = std::abs(moraleValue);
     const BonusRatio baseChance     = moraleValue >= 0 ? m_rules->morale.positiveChances[moraleValueAbs] : m_rules->morale.negativeChances[moraleValueAbs];
-    const BonusRatio result         = baseChance * (moraleValue >= 0 ? chanceModifiers.morale : chanceModifiers.dismorale);
+    const BonusRatio result         = baseChance * (moraleValue >= 0 ? chanceMult.moralePositive : chanceMult.moraleNegative);
     return result;
 }
 
-BonusRatio GeneralEstimation::estimateLuckRoll(int luckValue, const RngChanceParams& chanceModifiers)
+BonusRatio GeneralEstimation::estimateLuckRoll(int luckValue, const RngChanceMultiplier& chanceMult)
 {
     if (m_rules->luck.positiveChances.empty())
         return { 1, 10 };
     luckValue                     = std::clamp(luckValue, m_rules->luck.minEffectiveValue, m_rules->luck.maxEffectiveValue);
     const int        luckValueAbs = std::abs(luckValue);
     const BonusRatio baseChance   = luckValue >= 0 ? m_rules->luck.positiveChances[luckValueAbs] : m_rules->luck.negativeChances[luckValueAbs];
-    const BonusRatio result       = baseChance * (luckValue >= 0 ? chanceModifiers.luck : chanceModifiers.unluck);
+    const BonusRatio result       = baseChance * (luckValue >= 0 ? chanceMult.luckPositive : chanceMult.luckNegative);
     return result;
 }
 

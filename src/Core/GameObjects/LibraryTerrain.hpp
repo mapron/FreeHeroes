@@ -6,6 +6,7 @@
 #pragma once
 
 #include "LibraryFwd.hpp"
+#include "Stat.hpp"
 
 #include <string>
 #include <vector>
@@ -19,12 +20,16 @@ struct LibraryTerrain {
         std::vector<std::string> backgroundsBattle;
         std::string              icon;
     };
+    struct Bonus {
+        RngChanceMultiplier rngMult;
+    };
 
     std::string id;
     std::string untranslatedName;
     int         moveCost   = 100;
     bool        isObstacle = false;
     bool        extraLayer = false;
+    Bonus       bonusAll;
 
     Presentation presentationParams;
 };

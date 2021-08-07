@@ -180,7 +180,7 @@
 "sod.unit.crystalDragon"       : {"abilities": {"magicOppSuccessChance": "80/100", "weekIncome":"crystal=3"                                                            } },
 "sod.unit.azureDragon"         : {"abilities": {"splash":"dragon", "splashFriendlyFire":true, "immunes": {"levels": [1,2,3]    }                                                               }, "spells":{"TODO_FEAR":1} },
 
-"hota.unit.leprechaun"         : {"abilities": { "fixedCast": {"params":{"spell":"sod.spell.fortune", "sp":3, "level":2}, "count": 3 }, "squadBonus":{"chances": {"luck": "200/100"} } }  },
+"hota.unit.leprechaun"         : {"abilities": { "fixedCast": {"params":{"spell":"sod.spell.fortune", "sp":3, "level":2}, "count": 3 }, "squadBonus":{"rngMult": {"luckPositive": "200/100"} } }  },
 "hota.unit.satyr"              : {"abilities": { "fixedCast": {"params":{"spell":"sod.spell.mirth"  , "sp":3, "level":2}, "count": 3 }                                                 } },
 "hota.unit.fangarm"            : {"abilities": {"retaliations": -1, "immunes": {"tags": ["mind"]    }                                                                    }, "spells":{"TODO_HYPNO":1} },
 "hota.unit.steelGolem"         : {"abilities": {"type":"nonLiving", "nonLivingType":"golem", "magicReduce":{"all": "20/100"}                                           } },

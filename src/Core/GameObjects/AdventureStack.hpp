@@ -40,6 +40,7 @@ struct AdventureStack {
     struct EstimatedParams {
         UnitPrimaryParams                  primary;   // library->primary + hero->primary.
         PrimaryRngParams                   rngParams; // (if hero) hero(skills+artifacts) + squad(abilities,factions,undead)
+        RngChanceMultiplier                rngMult;
         bool                               hasMorale = false;
         MoraleDetails                      moraleDetails;
         LuckDetails                        luckDetails;

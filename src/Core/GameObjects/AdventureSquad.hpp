@@ -49,19 +49,18 @@ struct AdventureSquad {
 
     struct EstimatedParams {
         struct Bonus {
-            PrimaryRngParams rngParams;
-            int              manaCost = 0;
-            RngChanceParams  rngChance;
+            PrimaryRngParams    rngParams;
+            int                 manaCost = 0;
+            RngChanceMultiplier rngMult;
         };
 
-        Bonus            squadBonus;             // undead + factions + abilities  + (if)hero(skills+artifacts)
-        Bonus            oppBonus;               // abilities                      + (if)hero(skills+artifacts)
-        PrimaryRngParams rngMax;                 // hero artifacts.
-        int              armySpeed          = 0; // min(unit.armySpeed)
-        int              fastestBattleSpeed = 0; // max(unit.battleSpeed)
-        MoraleDetails    moraleDetails;
-        LuckDetails      luckDetails;
-        ResourceAmount   weekIncomeMax;
+        Bonus          squadBonus;             // undead + factions + abilities  + (if)hero(skills+artifacts) + terrain
+        Bonus          oppBonus;               // abilities                      + (if)hero(skills+artifacts)
+        int            armySpeed          = 0; // min(unit.armySpeed)
+        int            fastestBattleSpeed = 0; // max(unit.battleSpeed)
+        MoraleDetails  moraleDetails;
+        LuckDetails    luckDetails;
+        ResourceAmount weekIncomeMax;
     };
     EstimatedParams estimated;
 };

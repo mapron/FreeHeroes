@@ -32,6 +32,11 @@ constexpr void subTuples(std::tuple<T...>&& t1, const T2& t2)
 {
     opTuplesImpl<std::minus>(t1, t2, std::index_sequence_for<T...>{});
 }
+template<typename... T, typename T2>
+constexpr void multTuples(std::tuple<T...>&& t1, const T2& t2)
+{
+    opTuplesImpl<std::multiplies>(t1, t2, std::index_sequence_for<T...>{});
+}
 
 /// I need badly Herb's Metaclasses: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0707r3.pdf
 /// Then instead of
@@ -93,14 +98,20 @@ struct PrimaryRngParams : public internal::MakeAggregate<PrimaryRngParams> {
     constexpr auto asTuple() noexcept { return std::tie(luck, morale); }
 };
 
-struct RngChanceParams : public internal::MakeAggregate<RngChanceParams> {
-    BonusRatio luck{ 1, 1 };
-    BonusRatio morale{ 1, 1 };
-    BonusRatio unluck{ 1, 1 };
-    BonusRatio dismorale{ 1, 1 };
+struct RngChanceMultiplier : public internal::MakeAggregate<RngChanceMultiplier> {
+    BonusRatio moralePositive{ 1, 1 };
+    BonusRatio moraleNegative{ 1, 1 };
+    BonusRatio luckPositive{ 1, 1 };
+    BonusRatio luckNegative{ 1, 1 };
 
-    constexpr auto asTuple() const noexcept { return std::tie(luck, morale, unluck, dismorale); }
-    constexpr auto asTuple() noexcept { return std::tie(luck, morale, unluck, dismorale); }
+    constexpr auto asTuple() const noexcept { return std::tie(moralePositive, moraleNegative, luckPositive, luckNegative); }
+    constexpr auto asTuple() noexcept { return std::tie(moralePositive, moraleNegative, luckPositive, luckNegative); }
+
+    constexpr RngChanceMultiplier& operator*=(const RngChanceMultiplier& rh) noexcept
+    {
+        internal::multTuples(self().asTuple(), rh.asTuple());
+        return self();
+    }
 };
 
 struct PrimaryAttackParams : public internal::MakeAggregate<PrimaryAttackParams> {
@@ -184,9 +195,7 @@ struct MoraleDetails : public internal::MakeAggregate<MoraleDetails> {
     bool unaffected = false;
 
     int total              = 0;
-    int minimalMoraleLevel = -3;
-
-    bool neutralizedPositive = false;
+    int minimalMoraleLevel = -99;
 
     BonusRatio rollChance{ 0, 1 };
 
@@ -201,9 +210,7 @@ struct LuckDetails : public internal::MakeAggregate<LuckDetails> {
     int artifacts = 0;
 
     int total            = 0;
-    int minimalLuckLevel = -3;
-
-    bool neutralizedPositive = false;
+    int minimalLuckLevel = -99;
 
     BonusRatio rollChance{ 0, 1 };
 

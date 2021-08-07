@@ -131,12 +131,12 @@ RTTR_REGISTRATION
         .property("fire"     , &MagicIncrease::fire  )
         .property("water"    , &MagicIncrease::water )
         ;
-    registration::class_<RngChanceParams>("RngChanceParams")
+    registration::class_<RngChanceMultiplier>("RngChanceMultiplier")
         .constructor<>()
-        .property("luck"       , &RngChanceParams::luck)
-        .property("morale"     , &RngChanceParams::morale)
-        .property("unluck"     , &RngChanceParams::unluck)
-        .property("dismorale"  , &RngChanceParams::dismorale)
+        .property("luckPositive"       , &RngChanceMultiplier::luckPositive)
+        .property("moralePositive"     , &RngChanceMultiplier::moralePositive)
+        .property("luckNegative"       , &RngChanceMultiplier::luckNegative)
+        .property("moraleNegative"     , &RngChanceMultiplier::moraleNegative)
         ;
 
     // ------------------------------------------------------------------------------------------
@@ -147,12 +147,17 @@ RTTR_REGISTRATION
         .property("order"              , &LibraryTerrain::Presentation::order)
         .property("icon"               , &LibraryTerrain::Presentation::icon)
         ;
+    registration::class_<LibraryTerrain::Bonus>("LibraryTerrainBonus")
+        .constructor<>()
+        .property("rngMult"            , &LibraryTerrain::Bonus::rngMult)(ref)
+        ;
     registration::class_<LibraryTerrain>("LibraryTerrain")
         .constructor<>()
         .property("untranslatedName"   , &LibraryTerrain::untranslatedName)
         .property("moveCost"           , &LibraryTerrain::moveCost)
         .property("isObstacle"         , &LibraryTerrain::isObstacle)
         .property("extraLayer"         , &LibraryTerrain::extraLayer)
+        .property("bonusAll"           , &LibraryTerrain::bonusAll)(ref)
         .property("pres"               , &LibraryTerrain::presentationParams)(ref)
         ;
     // ------------------------------------------------------------------------------------------
@@ -312,7 +317,7 @@ RTTR_REGISTRATION
         .property("morale"           , &LibraryUnit::Abilities::StatBonus::morale)
         .property("luck"             , &LibraryUnit::Abilities::StatBonus::luck)
         .property("manaCost"         , &LibraryUnit::Abilities::StatBonus::manaCost)
-        .property("chances"          , &LibraryUnit::Abilities::StatBonus::chances)(ref)
+        .property("rngMult"          , &LibraryUnit::Abilities::StatBonus::rngMult)(ref)
         ;
 
     registration::class_<LibraryUnit::Abilities::ExtraDamage>("LibraryUnitAbilitiesExtraDamage")

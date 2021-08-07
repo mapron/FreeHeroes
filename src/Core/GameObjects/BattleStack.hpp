@@ -46,8 +46,7 @@ struct BattleStack {
         PrimaryAttackParams adMelee;
         PrimaryAttackParams adRanged;
         PrimaryRngParams    rngParams;
-        PrimaryRngParams    rngMax;
-        RngChanceParams     rngChances;
+        RngChanceMultiplier rngMult;
         bool                hasMorale        = false;
         int                 maxRetaliations  = 0;
         int                 maxAttacksMelee  = 0;

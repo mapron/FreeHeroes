@@ -117,7 +117,13 @@
 "sod.terrain.cursedGround" :
 {
     "untranslatedName": "Cursed ground",
-    "extraLayer": true
+    "extraLayer": true,
+    "bonusAll":{"rngMult": {
+        "luckPositive"  :"0/1",
+        "moralePositive":"0/1",
+        "luckNegative"  :"0/1",
+        "moraleNegative":"0/1"
+        }}
 },
 "hota.terrain.crackedIce" :
 {

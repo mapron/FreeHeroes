@@ -44,8 +44,8 @@ struct CORELOGIC_EXPORT GeneralEstimation {
 
     BonusRatio calculatePhysicalBase(DamageDesc dmg, int count, DamageRollMode rollMode, IRandomGenerator& randomGenerator);
 
-    BonusRatio estimateMoraleRoll(int moraleValue, const RngChanceParams& chanceModifiers);
-    BonusRatio estimateLuckRoll(int luckValue, const RngChanceParams& chanceModifiers);
+    BonusRatio estimateMoraleRoll(int moraleValue, const RngChanceMultiplier& chanceMult);
+    BonusRatio estimateLuckRoll(int luckValue, const RngChanceMultiplier& chanceMult);
 
 private:
     LibraryGameRulesConstPtr m_rules;

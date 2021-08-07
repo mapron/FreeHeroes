@@ -405,8 +405,8 @@ QStringList UnitInfoWidget::abilitiesText(Core::LibraryUnitConstPtr unit) const
         parts << tr("+%1 to army morale").arg(a.squadBonus.morale);
     if (a.squadBonus.manaCost)
         parts << tr("Reduces spell cost %1 mana").arg(a.squadBonus.manaCost);
-    if (a.squadBonus.chances.luck != BonusRatio{ 1, 1 })
-        parts << tr("Increases luck chance %1").arg(toString(a.squadBonus.chances.luck - BonusRatio{ 1, 1 }, true));
+    if (a.squadBonus.rngMult.luckPositive != BonusRatio{ 1, 1 })
+        parts << tr("Increases luck chance %1").arg(toString(a.squadBonus.rngMult.luckPositive - BonusRatio{ 1, 1 }, true));
     if (a.opponentBonus.luck)
         parts << tr("%1 to enemy luck").arg(a.opponentBonus.luck);
     if (a.opponentBonus.morale)
