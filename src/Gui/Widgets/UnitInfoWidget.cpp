@@ -311,7 +311,7 @@ UnitInfoWidget::UnitInfoWidget(Core::BattleStackConstPtr    battle,
     abilsText << retaliationsDescription(battle ? battle->current.maxRetaliations : adventure->library->abilities.maxRetaliations);
     auto resistInfo = this->resistInfo(battle ? battle->current.magicReduce : adventure->estimated.magicReduce,
                                        battle ? battle->current.magicOppSuccessChance : adventure->estimated.magicOppSuccessChance);
-    resistInfo += this->immuneInfo(battle ? battle->current.immunes : adventure->estimated.immunes);
+    resistInfo += this->immuneInfo(battle ? battle->current.immunities.general : adventure->estimated.immunities.general);
     resistInfo += this->vulnerabilityInfo(adventure->library);
 
     auto abilsTextStr = abilsText.join(". ");

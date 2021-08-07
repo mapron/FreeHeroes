@@ -183,7 +183,7 @@ struct LibraryArtifact {
     enum class TreasureClass { Treasure, Minor, Major, Relic, Unique, Complex, BattleMachine, Scroll, Special };
     enum class OrderCategory  { Special, Stats, Skills, Magic, Income , Misc, Complex, Scrolls  };
     enum class SpecialEffect { None, NeutralDiplomacy, FactionsAlliance, AlwaysFly, AlwaysWaterWalk, ResurrectFangarms,
-                               ExtendedNecromancy, DragonsBuffs, DisableSurrender, NoDamageWhirl, NoTerrainPenalty, DisableImmunes, PermanentDeath };
+                               ExtendedNecromancy, DragonsBuffs, DisableSurrender, NoDamageWhirl, NoTerrainPenalty, BreakImmunities, PermanentDeath };
     // clang-format on
 
     struct Presentation {

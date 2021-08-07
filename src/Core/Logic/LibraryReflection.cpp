@@ -476,7 +476,7 @@ RTTR_REGISTRATION
         value( "disableSurrender"   ,  LibraryArtifact::SpecialEffect::DisableSurrender   ),
         value( "noDamageWhirl"      ,  LibraryArtifact::SpecialEffect::NoDamageWhirl      ),
         value( "noTerrainPenalty"   ,  LibraryArtifact::SpecialEffect::NoTerrainPenalty   ),
-        value( "disableImmunes"     ,  LibraryArtifact::SpecialEffect::DisableImmunes     ),
+        value( "breakImmunities"    ,  LibraryArtifact::SpecialEffect::BreakImmunities    ),
         value( "permanentDeath"     ,  LibraryArtifact::SpecialEffect::PermanentDeath     )
         );
 

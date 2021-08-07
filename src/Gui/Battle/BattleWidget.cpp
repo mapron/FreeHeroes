@@ -196,7 +196,7 @@ public:
         setFixedSize(75, 200);
     }
 
-    void updateInfo(BattleHeroConstPtr hero)
+    void updateInfo(BattleHeroConstPtr hero, const IAppSettings::UI& uiSettings)
     {
         m_portrait->setPixmap(m_modelsProvider.heroes()->find(hero->library)->getPortraitLarge());
         const int currentSP = hero->estimated.primary.magic.spellPower;
@@ -207,11 +207,17 @@ public:
         m_primaryStats[2]->setText(FormatUtils::formatSequenceInt(advSP, advSP, currentSP));
         m_primaryStats[3]->setText(QString("%1").arg(hero->estimated.primary.magic.intelligence));
 
-        m_rngStats[0]->setText(QString("%1").arg(hero->estimated.squadRngParams.morale));
-        m_rngStats[1]->setText(QString("%1").arg(hero->estimated.squadRngParams.luck));
+        const int morale        = hero->estimated.squadRngParams.morale;
+        const int luck          = hero->estimated.squadRngParams.luck;
+        const int moraleClamped = std::clamp(morale, -3, 3);
+        const int luckClamped   = std::clamp(luck, -3, 3);
+        const int moraleDisplay = uiSettings.clampAbsMoraleLuck ? moraleClamped : morale;
+        const int luckDisplay   = uiSettings.clampAbsMoraleLuck ? luckClamped : luck;
 
-        const int moraleClamped = std::clamp(hero->estimated.squadRngParams.morale, -3, 3);
-        const int luckClamped   = std::clamp(hero->estimated.squadRngParams.luck, -3, 3);
+        if (uiSettings.displayAbsMoraleLuck) {
+            m_rngStats[0]->setText(QString("%1").arg(moraleDisplay));
+            m_rngStats[1]->setText(QString("%1").arg(luckDisplay));
+        }
 
         m_rngStatsIcons[0]->setPixmap(m_modelsProvider.ui()->morale.small[moraleClamped]->get());
         m_rngStatsIcons[1]->setPixmap(m_modelsProvider.ui()->luck.small[luckClamped]->get());
@@ -419,7 +425,7 @@ void BattleWidget::heroInfoShow(bool attacker, bool defender)
 {
     if (attacker) {
         auto hero = m_battleView.getHero(BattleStack::Side::Attacker);
-        m_heroInfoWidgetAttacker->updateInfo(hero);
+        m_heroInfoWidgetAttacker->updateInfo(hero, m_appSettings.ui());
         m_heroInfoWidgetAttacker->move(this->mapToGlobal({ -m_heroInfoWidgetAttacker->sizeHint().width() - 2, 0 }));
         m_heroInfoWidgetAttacker->show();
     } else {
@@ -428,7 +434,7 @@ void BattleWidget::heroInfoShow(bool attacker, bool defender)
 
     if (defender) {
         auto hero = m_battleView.getHero(BattleStack::Side::Defender);
-        m_heroInfoWidgetDefender->updateInfo(hero);
+        m_heroInfoWidgetDefender->updateInfo(hero, m_appSettings.ui());
         m_heroInfoWidgetDefender->move(this->mapToGlobal({ this->sizeHint().width() + 2, 0 }));
         m_heroInfoWidgetDefender->show();
     } else {

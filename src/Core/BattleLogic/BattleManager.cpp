@@ -1080,10 +1080,10 @@ DamageResult BattleManager::fullDamageEstimate(const BonusRatio    baseRoll,
         totalBaseFactor += defender->library->abilities.vulnerableBonus;
 
     static const std::set<UnitNonLivingType> s_mindImmunes{ UnitNonLivingType::Golem, UnitNonLivingType::Elemental, UnitNonLivingType::Undead };
-    if (awe == LibraryUnit::Abilities::AttackWithElement::Magic && defender->current.immunes.containsAll())
+    if (awe == LibraryUnit::Abilities::AttackWithElement::Magic && defender->current.immunities.determine(false).containsAll())
         totalReduceFactor *= BonusRatio{ 1, 2 };
     else if (awe == LibraryUnit::Abilities::AttackWithElement::Mind
-             && (defender->current.immunes.containsMind()
+             && (defender->current.immunities.determine(false).containsMind()
                  || s_mindImmunes.contains(defender->library->abilities.nonLivingType)))
         totalReduceFactor *= BonusRatio{ 1, 2 };
 

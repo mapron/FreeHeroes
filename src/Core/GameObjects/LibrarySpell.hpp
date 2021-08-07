@@ -254,4 +254,39 @@ struct SpellFilter {
     }
 };
 
+struct ImmunitiesParams {
+    SpellFilter general;
+    SpellFilter withoutBreakable;
+    bool        brokenGeneral  = false;
+    bool        brokenPositive = false;
+
+    const SpellFilter& determine(bool positive) const
+    {
+        if (positive) {
+            if (brokenPositive)
+                return withoutBreakable;
+            else
+                return general;
+        }
+        if (brokenGeneral)
+            return withoutBreakable;
+        else
+            return general;
+    }
+
+    bool immuneTo(LibrarySpellConstPtr spell) const
+    {
+        if (!spell)
+            return false;
+
+        const bool positive = spell->qualify == LibrarySpell::Qualify::Good;
+        return determine(positive).contains(spell);
+    }
+
+    bool immuneTo(MagicSchool school, bool positive) const
+    {
+        return determine(positive).contains(school);
+    }
+};
+
 }

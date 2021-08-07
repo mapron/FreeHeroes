@@ -66,7 +66,7 @@ struct BattleStack {
 
         MagicReduce                        magicReduce;
         BonusRatio                         magicOppSuccessChance = { 1, 1 }; // 1 - resist chance.
-        SpellFilter                        immunes;                          // common or without breakable
+        ImmunitiesParams                   immunities;
         LibraryUnit::Abilities::CastsOnHit castsOnHit;
         LibraryUnit::Abilities::FixedCast  fixedCast;
 

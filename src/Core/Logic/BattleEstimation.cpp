@@ -147,7 +147,7 @@ void BattleEstimation::calculateUnitStats(BattleStack& unit)
 
 bool BattleEstimation::checkSpellTarget(const BattleStack& possibleTarget, LibrarySpellConstPtr spell)
 {
-    if (possibleTarget.current.immunes.contains(spell))
+    if (possibleTarget.current.immunities.immuneTo(spell))
         return false;
 
     sol::state lua;
@@ -168,7 +168,7 @@ bool BattleEstimation::checkSpellTarget(const BattleStack& possibleTarget, Libra
 bool BattleEstimation::checkAttackElementPossibility(const BattleStack& possibleTarget, LibraryUnit::Abilities::AttackWithElement element)
 {
     if (element == LibraryUnit::Abilities::AttackWithElement::Fire) {
-        if (possibleTarget.current.immunes.contains(MagicSchool::Fire))
+        if (possibleTarget.current.immunities.immuneTo(MagicSchool::Fire, false))
             return false;
     }
     if (element == LibraryUnit::Abilities::AttackWithElement::Undead) {
@@ -215,10 +215,10 @@ void BattleEstimation::calculateUnitStatsStartBattle(BattleStack& unit, const Ba
     unit.estimatedOnStart.rngMult               = unit.adventure->estimated.rngMult;
     unit.estimatedOnStart.magicOppSuccessChance = unit.adventure->estimated.magicOppSuccessChance;
     unit.estimatedOnStart.magicReduce           = unit.adventure->estimated.magicReduce;
-    unit.estimatedOnStart.immunes               = unit.adventure->estimated.immunes;
+    unit.estimatedOnStart.immunities            = unit.adventure->estimated.immunities;
 
-    if (0) { // @todo: black sphere
-        unit.estimatedOnStart.immunes = unit.adventure->estimated.immunesWithoutBreakable;
+    if (opponent.battleHero.isValid() && opponent.battleHero.adventure->estimated.specialArtifactEffects.contains(LibraryArtifact::SpecialEffect::BreakImmunities)) {
+        unit.estimatedOnStart.immunities.brokenGeneral = true;
     }
     for (auto& cast : unit.adventure->estimated.castsOnHit) {
         if (!battleEnvironment.forbidSpells.contains(cast.params.spell))

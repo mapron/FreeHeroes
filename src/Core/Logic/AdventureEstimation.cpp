@@ -448,7 +448,7 @@ void AdventureEstimation::calculateHeroStats(AdventureHero& hero)
                 spellbook.insert(spell);
             if (art->scrollSpell)
                 spellbook.insert(art->scrollSpell);
-            hero.estimated.immunes.makeUnion(art->protectSpells);
+            hero.estimated.immunities.makeUnion(art->protectSpells);
             hero.estimated.forbidSpells.makeUnion(art->forbidSpells);
             for (auto penalty : art->disabledPenalties)
                 hero.estimated.disabledPenalties.insert(penalty);
@@ -699,12 +699,12 @@ void calculateUnitStats(LibraryGameRulesConstPtr rules, AdventureStack& unit, co
         cur.primary.battleSpeed += 1;
         cur.primary.ad.incAll(1);
     }
-    cur.magicReduce             = unit.library->abilities.magicReduce;
-    cur.magicOppSuccessChance   = unit.library->abilities.magicOppSuccessChance;
-    cur.immunes                 = unit.library->abilities.immunes;
-    cur.immunesWithoutBreakable = {};
+    cur.magicReduce           = unit.library->abilities.magicReduce;
+    cur.magicOppSuccessChance = unit.library->abilities.magicOppSuccessChance;
+    cur.immunities            = {};
+    cur.immunities.general    = unit.library->abilities.immunes;
     if (!unit.library->abilities.immuneBreakable)
-        cur.immunesWithoutBreakable = cur.immunes;
+        cur.immunities.withoutBreakable = cur.immunities.general;
 
     cur.regenerate = unit.library->abilities.regenerate;
     for (auto penalty : unit.library->abilities.disabledPenalties)
@@ -740,8 +740,10 @@ void calculateUnitStats(LibraryGameRulesConstPtr rules, AdventureStack& unit, co
     cur.primary.ad.attack  = std::clamp(cur.primary.ad.attack, 0, rules->limits.maxUnitAd.attack);
     cur.primary.ad.defense = std::clamp(cur.primary.ad.defense, 0, rules->limits.maxUnitAd.defense);
 
-    cur.immunes.makeUnion(heroEstimate.immunes);
-    cur.immunesWithoutBreakable.makeUnion(heroEstimate.immunes);
+    cur.immunities.general.makeUnion(heroEstimate.immunities);
+    cur.immunities.withoutBreakable.makeUnion(heroEstimate.immunities);
+    cur.immunities.brokenGeneral  = heroEstimate.specialArtifactEffects.contains(LibraryArtifact::SpecialEffect::BreakImmunities);
+    cur.immunities.brokenPositive = cur.immunities.brokenGeneral;
 
     for (auto penalty : heroEstimate.disabledPenalties)
         cur.disabledPenalties.insert(penalty);

@@ -46,8 +46,7 @@ struct AdventureStack {
         LuckDetails                        luckDetails;
         MagicReduce                        magicReduce;
         BonusRatio                         magicOppSuccessChance = { 1, 1 };
-        SpellFilter                        immunes;
-        SpellFilter                        immunesWithoutBreakable;
+        ImmunitiesParams                   immunities;
         std::set<RangeAttackPenalty>       disabledPenalties;
         bool                               regenerate = false;
         LibraryUnit::Abilities::CastsOnHit castsOnHit;
