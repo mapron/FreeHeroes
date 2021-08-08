@@ -16,7 +16,7 @@
 "sod.unit.cavalier"            : {"abilities": {"chargeAttack": true                                                                                       } } ,
 "sod.unit.champion"            : {"abilities": {"chargeAttack": true                                                                                       } } ,
 "sod.unit.angel"               : {"abilities": {"squadBonus":{"morale": 1}, "extraDamage":{"enemies":["sod.unit.devil", "sod.unit.archDevil" ], "bonus":"50/100"}, "giantLevel":2  } } ,
-"sod.unit.archangel"           : {"abilities": {"squadBonus":{"morale": 1}, "extraDamage":{"enemies":["sod.unit.devil", "sod.unit.archDevil" ], "bonus":"50/100"}, "giantLevel":2  }, "spells":{"TODO_RESURRECT":1} } ,
+"sod.unit.archangel"           : {"abilities": {"squadBonus":{"morale": 1}, "extraDamage":{"enemies":["sod.unit.devil", "sod.unit.archDevil" ], "bonus":"50/100"}, "giantLevel":2, "fixedCast": {"params":{"spell":"sod.spell.resurrection", "sp":1, "level":2, "spPerUnit":true}, "count": 1 }  } } ,
 
 
 "sod.unit.centaur"             : {"abilities": {                                                                                                           } } ,

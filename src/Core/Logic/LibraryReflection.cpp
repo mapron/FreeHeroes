@@ -683,6 +683,7 @@ RTTR_REGISTRATION
         .property("spell"       , &SpellCastParams::spell)
         .property("sp"          , &SpellCastParams::spellPower)
         .property("level"       , &SpellCastParams::skillLevel)
+        .property("spPerUnit"   , &SpellCastParams::spPerUnit)
         ;
     registration::class_<SpellFilter>("SpellFilter")
         .constructor<>()

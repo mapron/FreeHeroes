@@ -564,7 +564,8 @@
             "damage = spellPower * 50 + 40 ",
             "if level >= 2 then damage = damage + 40 end ",
             "if level == 3 then damage = damage + 80 end ",
-            "if isSpec then damage = damage + math.ceil(damage * heroLevel * 3 / (unitLevel * 100)) end "
+            "if isSpec then damage = damage + math.ceil(damage * heroLevel * 3 / (unitLevel * 100)) end ",
+            "if isUnitCast then damage = spellPower * 100 end"
         ]
     },
     "sod.spell.animateDead" : {

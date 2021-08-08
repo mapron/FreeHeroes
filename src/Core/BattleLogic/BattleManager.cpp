@@ -396,6 +396,8 @@ BattlePlanCast BattleManager::findPlanCast(const BattlePlanCastParams& castParam
         }
 
         result.m_power = stack->current.fixedCast.params;
+        if (result.m_power.spPerUnit)
+            result.m_power.spellPower = stack->count;
         result.m_spell = result.m_power.spell;
     } else {
         return {};
@@ -487,7 +489,7 @@ BattlePlanCast BattleManager::findPlanCast(const BattlePlanCastParams& castParam
 
         if (result.m_spell->type == LibrarySpell::Type::Offensive) {
             const int        level           = targetStack->library->level / 10;
-            const int        baseSpellDamage = std::max(1, GeneralEstimation(m_rules).spellBaseDamage(level, result.m_power, static_cast<int>(affectedIndex)));
+            const int        baseSpellDamage = std::max(1, GeneralEstimation(m_rules).spellBaseDamage(level, result.m_power, static_cast<int>(affectedIndex), castParams.m_isUnitCast));
             BonusRatio       spellDamage(baseSpellDamage, 1);
             const BonusRatio spellDamageInit = spellDamage;
             spellDamage += spellDamageInit * spellHeroIncreaseFactor;
@@ -506,7 +508,7 @@ BattlePlanCast BattleManager::findPlanCast(const BattlePlanCastParams& castParam
             result.lossTotal.deaths += loss.deaths;
         } else if (result.m_spell->type == LibrarySpell::Type::Rising) {
             const int          level           = targetStack->library->level / 10;
-            const int          baseSpellHealth = std::max(1, GeneralEstimation(m_rules).spellBaseDamage(level, result.m_power, static_cast<int>(affectedIndex)));
+            const int          baseSpellHealth = std::max(1, GeneralEstimation(m_rules).spellBaseDamage(level, result.m_power, static_cast<int>(affectedIndex), castParams.m_isUnitCast));
             DamageResult::Loss loss            = risingLoss(targetStack, baseSpellHealth);
             if (loss.deaths >= 0) // we need to resurrect at least 1 unit to succeed
                 continue;
@@ -1148,6 +1150,8 @@ DamageResult::Loss BattleManager::risingLoss(BattleStackConstPtr target, int hea
     loss.remainTopStackHealth             = remainEffHealth - (loss.remainCount - 1) * targetMaxHealth;
     loss.deaths                           = target->count - loss.remainCount;
     loss.damageTotal                      = -health;
+    if (health < targetMaxHealth)
+        loss.deaths = 0;
     return loss;
 }
 

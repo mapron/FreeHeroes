@@ -86,6 +86,7 @@ struct SpellCastParams {
     int                  skillLevel    = 0; // 0-3
     int                  durationBonus = 0;
     int                  heroSpecLevel = -1;
+    bool                 spPerUnit     = false;
 
     // reference only
     LibraryArtifactConstPtr art = nullptr;

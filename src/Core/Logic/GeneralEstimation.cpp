@@ -218,7 +218,7 @@ BonusRatio GeneralEstimation::estimateLuckRoll(int luckValue, const RngChanceMul
     return result;
 }
 
-int GeneralEstimation::spellBaseDamage(int targetUnitLevel, const SpellCastParams& castParams, int targetIndex)
+int GeneralEstimation::spellBaseDamage(int targetUnitLevel, const SpellCastParams& castParams, int targetIndex, bool isUnitCast)
 {
     sol::state lua;
 
@@ -228,6 +228,7 @@ int GeneralEstimation::spellBaseDamage(int targetUnitLevel, const SpellCastParam
     lua["spellPower"] = castParams.spellPower;
     lua["level"]      = castParams.skillLevel;
     lua["isSpec"]     = castParams.heroSpecLevel != -1;
+    lua["isUnitCast"] = isUnitCast;
     lua["unitLevel"]  = targetUnitLevel;
     lua["heroLevel"]  = castParams.heroSpecLevel;
     lua["index"]      = targetIndex;

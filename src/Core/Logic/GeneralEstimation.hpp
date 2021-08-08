@@ -29,7 +29,7 @@ struct CORELOGIC_EXPORT GeneralEstimation {
 
     void bindTypes(sol::state& lua);
 
-    int spellBaseDamage(int targetUnitLevel, const SpellCastParams& castParams, int targetIndex);
+    int spellBaseDamage(int targetUnitLevel, const SpellCastParams& castParams, int targetIndex, bool isUnitCast);
 
     int64_t getExperienceForLevel(int level);
     int     getLevelByExperience(int64_t experience);
