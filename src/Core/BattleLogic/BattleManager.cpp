@@ -86,6 +86,11 @@ public:
         for (auto* child : m_children)
             child->onCast(caster, affected, spell);
     }
+    void onSummon(const Caster& caster, LibrarySpellConstPtr spell, BattleStackConstPtr stack) override
+    {
+        for (auto* child : m_children)
+            child->onSummon(caster, spell, stack);
+    }
 
     void onPositionReset(BattleStackConstPtr stack) override
     {
@@ -118,7 +123,12 @@ BattleManager::~BattleManager()
 {
 }
 
-BattleManager::BattleManager(BattleArmy& attArmy, BattleArmy& defArmy, const BattleFieldPreset& fieldPreset, const std::shared_ptr<IRandomGenerator>& randomGenerator, LibraryGameRulesConstPtr rules)
+BattleManager::BattleManager(BattleArmy&                              attArmy,
+                             BattleArmy&                              defArmy,
+                             const BattleFieldPreset&                 fieldPreset,
+                             const std::shared_ptr<IRandomGenerator>& randomGenerator,
+                             LibraryGameRulesConstPtr                 rules,
+                             BattleCallbackSummon                     battleCallbackSummon)
     : m_att(attArmy)
     , m_def(defArmy)
     , m_obstacles(fieldPreset.obstacles)
@@ -127,6 +137,7 @@ BattleManager::BattleManager(BattleArmy& attArmy, BattleArmy& defArmy, const Bat
     , m_notifiers(new BattleNotifyEach)
     , m_randomGenerator(randomGenerator)
     , m_rules(rules)
+    , m_battleCallbackSummon(std::move(battleCallbackSummon))
 {
     makePositions(fieldPreset);
 
@@ -454,6 +465,12 @@ BattlePlanCast BattleManager::findPlanCast(const BattlePlanCastParams& castParam
             result.m_affectedArea.insert(stack->pos.mainPos());
             result.m_affectedArea.insert(stack->pos.secondaryPos());
         }
+    } else if (result.m_spell->type == LibrarySpell::Type::Summon) {
+        result.m_affectedArea          = getSummonArea(getCurrentSide(), result.m_spell->summonUnit->traits.large);
+        result.m_isValid               = !result.m_affectedArea.empty();
+        const int summonLevel          = result.m_spell->summonUnit->level / 10;
+        const int summonCount          = std::max(1, GeneralEstimation(m_rules).spellBaseDamage(summonLevel, result.m_power, 0, castParams.m_isUnitCast));
+        result.m_lossTotal.remainCount = summonCount;
     } else {
         result.m_affectedArea = getSpellArea(castParams.m_target, range);
         std::set<BattleStackConstPtr> alreadyCovered;
@@ -504,8 +521,8 @@ BattlePlanCast BattleManager::findPlanCast(const BattlePlanCastParams& castParam
 
             target.loss        = loss;
             target.totalFactor = spellDamage / spellDamageInit;
-            result.lossTotal.damageTotal += loss.damageTotal;
-            result.lossTotal.deaths += loss.deaths;
+            result.m_lossTotal.damageTotal += loss.damageTotal;
+            result.m_lossTotal.deaths += loss.deaths;
         } else if (result.m_spell->type == LibrarySpell::Type::Rising) {
             const int          level           = targetStack->library->level / 10;
             const int          baseSpellHealth = std::max(1, GeneralEstimation(m_rules).spellBaseDamage(level, result.m_power, static_cast<int>(affectedIndex), castParams.m_isUnitCast));
@@ -514,8 +531,8 @@ BattlePlanCast BattleManager::findPlanCast(const BattlePlanCastParams& castParam
                 continue;
 
             target.loss = loss;
-            result.lossTotal.damageTotal += loss.damageTotal;
-            result.lossTotal.deaths += loss.deaths;
+            result.m_lossTotal.damageTotal += loss.damageTotal;
+            result.m_lossTotal.deaths += loss.deaths;
         }
         result.m_targeted.push_back(target);
         affectedIndex++;
@@ -763,13 +780,30 @@ bool BattleManager::doCast(BattlePlanCastParams planParams)
 
             applyLoss(targetStack, loss);
         }
+    } else if (plan.m_spell->type == LibrarySpell::Type::Summon) {
+        const std::vector      possiblePos(plan.m_affectedArea.cbegin(), plan.m_affectedArea.cend());
+        const auto             pos      = possiblePos[m_randomGenerator->gen(possiblePos.size() - 1)];
+        const auto             side     = getCurrentSide();
+        AdventureStackConstPtr advStack = m_battleCallbackSummon(side, plan.m_spell->summonUnit, plan.m_lossTotal.remainCount);
+        BattleArmy&            army     = side == BattleStack::Side::Attacker ? m_att : m_def;
+        BattleStackMutablePtr  stack    = army.squad->summon(advStack, army.battleHero.isValid() ? &army.battleHero : nullptr, side);
+        stack->pos.setMainPos(pos);
+        m_all.push_back(stack);
+
+        BattleEstimation(m_rules).calculateArmySummon(m_att, m_def, m_env, stack);
+
+        stack->pos.setLarge(stack->adventure->library->traits.large);
+        stack->pos.setSight(stack->side == BattleStack::Side::Attacker ? BattlePositionExtended::Sight::ToRight : BattlePositionExtended::Sight::ToLeft);
+
+        recalcStack(stack);
+        m_notifiers->onSummon(caster, plan.m_spell, stack);
     } else {
         assert(!"Unsupported");
     }
     affected.mainPosition = planParams.m_target;
     affected.area         = std::vector<BattlePosition>(plan.m_affectedArea.cbegin(), plan.m_affectedArea.cend());
 
-    if (!affected.targets.empty())
+    if (!affected.targets.empty() && plan.m_spell->type != LibrarySpell::Type::Summon)
         m_notifiers->onCast(caster, affected, plan.m_spell);
 
     if (!planParams.m_isHeroCast) {
@@ -1155,16 +1189,14 @@ DamageResult::Loss BattleManager::risingLoss(BattleStackConstPtr target, int hea
     return loss;
 }
 
-BattleFieldPathFinder BattleManager::setupFinder(BattleStackConstPtr stack) const
+BattlePositionSet BattleManager::getObstaclePositions(BattleStackConstPtr excludeStack,
+                                                      const bool          mirrored,
+                                                      const bool          large) const
 {
-    BattleFieldPathFinder finder(m_field);
-    finder.setGoThroughObstacles(stack->library->traits.fly || stack->library->traits.teleport);
-    const bool                  mirrored = stack->side == BattleStack::Side::Defender;
-    const bool                  large    = stack->library->traits.large;
     BattlePositionSet           finderObstacles;
     std::vector<BattlePosition> battleObstacles = this->m_obstacles;
     for (auto* stackAlive : m_alive) {
-        if (stackAlive != stack) {
+        if (stackAlive != excludeStack) {
             battleObstacles.push_back(stackAlive->pos.leftPos());
             battleObstacles.push_back(stackAlive->pos.rightPos());
         }
@@ -1179,6 +1211,17 @@ BattleFieldPathFinder BattleManager::setupFinder(BattleStackConstPtr stack) cons
         for (int h = 0; h < m_field.height; ++h)
             finderObstacles.insert({ mirrored ? 0 : m_field.width - 1, h });
     }
+    return finderObstacles;
+}
+
+BattleFieldPathFinder BattleManager::setupFinder(BattleStackConstPtr stack) const
+{
+    BattleFieldPathFinder finder(m_field);
+    finder.setGoThroughObstacles(stack->library->traits.fly || stack->library->traits.teleport);
+    const bool mirrored = stack->side == BattleStack::Side::Defender;
+    const bool large    = stack->library->traits.large;
+
+    const BattlePositionSet finderObstacles = getObstaclePositions(stack, mirrored, large);
     finder.setObstacles(finderObstacles);
     finder.floodFill(stack->pos.mainPos());
     return finder;
@@ -1210,6 +1253,37 @@ BattlePositionSet BattleManager::getSpellArea(BattlePosition pos, LibrarySpell::
         result.erase(ob);
     if (range == LibrarySpell::Range::R1NoCenter) {
         result.erase(pos);
+    }
+    return result;
+}
+
+BattlePositionSet BattleManager::getSummonArea(BattleStack::Side side, bool large) const
+{
+    const BattlePositionSet finderObstacles   = getObstaclePositions(nullptr, side == BattleStack::Side::Defender, large);
+    const int               maxSummonDistance = 7;
+
+    BattlePositionSet result;
+
+    auto fillColumn = [&result, &finderObstacles, this](int x) {
+        for (int y = 0; y < m_field.height; ++y) {
+            if (finderObstacles.contains({ x, y }))
+                continue;
+
+            result.insert({ x, y });
+        }
+    };
+    if (side == BattleStack::Side::Attacker) {
+        for (int x = 0; x < maxSummonDistance; ++x) {
+            fillColumn(x);
+            if (!result.empty())
+                break;
+        }
+    } else {
+        for (int x = m_field.width - 1; x >= m_field.width - maxSummonDistance; --x) {
+            fillColumn(x);
+            if (!result.empty())
+                break;
+        }
     }
     return result;
 }

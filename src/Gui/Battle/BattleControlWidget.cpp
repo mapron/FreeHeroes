@@ -374,14 +374,8 @@ void BattleControlWidget::onStackUnderEffect(BattleStackConstPtr stack, Effect e
 
 void BattleControlWidget::onCast(const Caster& caster, const AffectedMagic& affected, LibrarySpellConstPtr spell)
 {
-    QString casterName;
-    if (caster.hero)
-        casterName = m_modelsProvider.heroes()->find(caster.hero->library)->getName();
-    else if (caster.unit)
-        casterName = m_modelsProvider.units()->find(caster.unit->library)->getName();
-    else if (caster.artifact)
-        casterName = m_modelsProvider.artifacts()->find(caster.artifact)->getName();
-    QString msg = tr("casting %1").arg(wrapInfo(m_modelsProvider.spells()->find(spell)->getName()));
+    const QString casterName = makeCasterName(caster);
+    QString       msg        = tr("casting %1").arg(wrapInfo(m_modelsProvider.spells()->find(spell)->getName()));
     if (!casterName.isEmpty())
         msg = casterName + ": " + msg;
 
@@ -419,6 +413,13 @@ void BattleControlWidget::onCast(const Caster& caster, const AffectedMagic& affe
         }
     }
 
+    addLog(msg);
+}
+
+void BattleControlWidget::onSummon(const Caster& caster, LibrarySpellConstPtr, BattleStackConstPtr stack)
+{
+    const QString casterName = makeCasterName(caster);
+    const QString msg        = casterName + ": " + tr("summoning %1").arg(localizedNameWithCount(stack));
     addLog(msg);
 }
 
@@ -525,7 +526,7 @@ void BattleControlWidget::planUpdate()
         hint                       = tr("Cast %1").arg(m_modelsProvider.spells()->find(castPlan.m_spell)->getName());
         if (affectedTargets > 3 || castPlan.m_spell->type == LibrarySpell::Type::Temp) {
             if (isOffensive) {
-                hint += " - " + tr("total damage %1, deaths %2").arg(formatDamageRollSingle(castPlan.lossTotal.damageTotal, false)).arg(formatDamageRollSingle(castPlan.lossTotal.deaths, true));
+                hint += " - " + tr("total damage %1, deaths %2").arg(formatDamageRollSingle(castPlan.m_lossTotal.damageTotal, false)).arg(formatDamageRollSingle(castPlan.m_lossTotal.deaths, true));
             }
             BonusRatio magicSuccessChanceMin{ 1, 1 };
             BonusRatio magicSuccessChanceMax{ 1, 100 };
@@ -562,8 +563,8 @@ void BattleControlWidget::planUpdate()
         } else if (affectedTargets > 0) {
             hint += " - ";
             hint += tr("total damage %1, deaths %2")
-                        .arg(formatDamageRollSingle(castPlan.lossTotal.damageTotal, false))
-                        .arg(formatDamageRollSingle(castPlan.lossTotal.deaths, true));
+                        .arg(formatDamageRollSingle(castPlan.m_lossTotal.damageTotal, false))
+                        .arg(formatDamageRollSingle(castPlan.m_lossTotal.deaths, true));
 
             if (m_appSettings.battle().massDamageHint && castPlan.m_targeted.size() > 1) {
                 hint += tr(", affected: ");
@@ -591,6 +592,10 @@ void BattleControlWidget::planUpdate()
                 if (reduce != BonusRatio{ 1, 1 })
                     hint += " " + tr("(<i>%1%</i> %2)").arg(formatResist(reduce), tr("of base"));
             }
+        } else if (castPlan.m_spell->type == LibrarySpell::Type::Summon) {
+            hint += " - ";
+            const auto name = m_modelsProvider.units()->find(castPlan.m_spell->summonUnit)->getName(castPlan.m_lossTotal.remainCount);
+            hint += " " + tr("<i>%1</i> %2").arg(castPlan.m_lossTotal.remainCount).arg(name);
         }
     } else if (hoveredStack) {
         hint = localizedNameWithCount(hoveredStack);
@@ -672,6 +677,18 @@ void BattleControlWidget::updateTurnFlags()
 QString BattleControlWidget::localizedNameWithCount(BattleControlWidget::BattleStackConstPtr stack, bool asTarget) const
 {
     return m_modelsProvider.units()->find(stack->library)->getNameWithCount(stack->count, asTarget ? GuiUnit::Variation::AsTarget : GuiUnit::Variation::Normal);
+}
+
+QString BattleControlWidget::makeCasterName(const Caster& caster) const
+{
+    QString casterName;
+    if (caster.hero)
+        casterName = m_modelsProvider.heroes()->find(caster.hero->library)->getName();
+    else if (caster.unit)
+        casterName = m_modelsProvider.units()->find(caster.unit->library)->getName();
+    else if (caster.artifact)
+        casterName = m_modelsProvider.artifacts()->find(caster.artifact)->getName();
+    return casterName;
 }
 
 void BattleControlWidget::autoPlay()

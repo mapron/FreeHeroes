@@ -9,6 +9,7 @@
 
 #include "IBattleView.hpp"
 #include "IBattleControl.hpp"
+#include "IBattleCallback.hpp"
 #include "IAIFactory.hpp"
 
 #include "BattleField.hpp"
@@ -33,7 +34,8 @@ public:
                   BattleArmy&                              defArmy,
                   const BattleFieldPreset&                 fieldPreset,
                   const std::shared_ptr<IRandomGenerator>& randomGenerator,
-                  LibraryGameRulesConstPtr                 rules);
+                  LibraryGameRulesConstPtr                 rules,
+                  BattleCallbackSummon                     battleCallbackSummon);
 
     void start();
 
@@ -115,8 +117,12 @@ private:
     DamageResult::Loss damageLoss(BattleStackConstPtr defender, int damage) const;
     DamageResult::Loss risingLoss(BattleStackConstPtr target, int health) const;
 
+    BattlePositionSet     getObstaclePositions(BattleStackConstPtr excludeStack,
+                                               const bool          mirrored,
+                                               const bool          large) const;
     BattleFieldPathFinder setupFinder(BattleStackConstPtr stack) const;
     BattlePositionSet     getSpellArea(BattlePosition pos, LibrarySpell::Range range) const;
+    BattlePositionSet     getSummonArea(BattleStack::Side side, bool large) const;
     BattlePositionSet     getSplashExtraTargets(LibraryUnit::Abilities::SplashAttack splash,
                                                 BattlePositionExtended               from,
                                                 BattleAttackDirection                direction) const;
@@ -164,6 +170,7 @@ private:
     std::unique_ptr<BattleNotifyEach> m_notifiers;
     std::shared_ptr<IRandomGenerator> m_randomGenerator;
     LibraryGameRulesConstPtr          m_rules = nullptr;
+    BattleCallbackSummon              m_battleCallbackSummon;
 
     struct ControlGuard {
         ControlGuard(BattleManager* parent);

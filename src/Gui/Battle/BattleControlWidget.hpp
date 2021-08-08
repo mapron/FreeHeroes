@@ -63,6 +63,8 @@ public:
     void onStartRound(int round) override;
     void onStackUnderEffect(BattleStackConstPtr stack, Effect effect) override;
     void onCast(const Caster& caster, const AffectedMagic& affected, LibrarySpellConstPtr spell) override;
+    void onSummon(const Caster& caster, LibrarySpellConstPtr spell, BattleStackConstPtr stack) override;
+
     void onControlAvailableChanged(bool controlAvailable) override;
     void onBattleFinished(Core::BattleResult) override;
 
@@ -82,6 +84,7 @@ private: /* slots */
 
 private:
     QString localizedNameWithCount(BattleStackConstPtr stack, bool asTarget = false) const;
+    QString makeCasterName(const Caster& caster) const;
 
     void addLog(QString msg, bool appendSide = true);
     void aiCheckTick();

@@ -74,6 +74,7 @@ struct LibrarySpell {
 
     std::vector<LibrarySpellConstPtr> counterSpells;
     std::vector<BonusRatio>           retaliationWhenCancel;
+    LibraryUnitConstPtr               summonUnit = nullptr;
 
     Presentation presentationParams;
 

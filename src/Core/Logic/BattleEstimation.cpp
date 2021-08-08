@@ -182,6 +182,11 @@ bool BattleEstimation::checkAttackElementPossibility(const BattleStack& possible
     return true;
 }
 
+void BattleEstimation::calculateArmySummon(const BattleArmy& army, const BattleArmy& opponent, const BattleEnvironment& battleEnvironment, BattleStackMutablePtr stack)
+{
+    calculateUnitStatsStartBattle(*stack, *army.squad, opponent, battleEnvironment);
+}
+
 void BattleEstimation::calculateHeroStatsStartBattle(BattleHero& hero, const BattleSquad& squad, const BattleArmy& opponent, const BattleEnvironment& battleEnvironment)
 {
     if (!hero.isValid())
@@ -284,6 +289,19 @@ void BattleEstimation::calculateArmyOnRoundStart(BattleArmy& army)
     // decrement effects (and remove them)
 
     for (auto& stack : army.squad->stacks) {
+        if (!stack.isAlive())
+            continue;
+
+        stack.roundState = {};
+
+        for (auto& eff : stack.appliedEffects) {
+            if (eff.power.spell->hasEndCondition(LibrarySpell::EndCondition::Time))
+                eff.roundsRemain--;
+        }
+
+        calculateUnitStats(stack);
+    }
+    for (auto& stack : army.squad->stacksSummon) {
         if (!stack.isAlive())
             continue;
 

@@ -594,19 +594,37 @@
 
     },
     "sod.spell.fireElemental" : {
-
+        "summonUnit": "sod.unit.fireElemental",
+        "calc": [
+            "damage = spellPower * 2",
+            "if level >= 2 then damage = spellPower * 3 end ",
+            "if level == 3 then damage = spellPower * 4 end "
+        ]
     },
     "sod.spell.earthElemental" : {
-
+        "summonUnit": "sod.unit.earthElemental",
+        "calc": [
+            "damage = spellPower * 2",
+            "if level >= 2 then damage = spellPower * 3 end ",
+            "if level == 3 then damage = spellPower * 4 end "
+        ]
     },
     "sod.spell.waterElemental" : {
-
+        "summonUnit": "sod.unit.waterElemental",
+        "calc": [
+            "damage = spellPower * 2",
+            "if level >= 2 then damage = spellPower * 3 end ",
+            "if level == 3 then damage = spellPower * 4 end "
+        ]
     },
     "sod.spell.airElemental" : {
-
+        "summonUnit": "sod.unit.airElemental",
+        "calc": [
+            "damage = spellPower * 2",
+            "if level >= 2 then damage = spellPower * 3 end ",
+            "if level == 3 then damage = spellPower * 4 end "
+        ]
     },
-
-
 
 
     "sod.spell.stoneGaze" : {

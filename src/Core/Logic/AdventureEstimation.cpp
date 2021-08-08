@@ -321,16 +321,6 @@ AdventureEstimation::LevelUpResult AdventureEstimation::calculateHeroLevelUp(Adv
     return result;
 }
 
-void AdventureEstimation::calculateDayStart(AdventureHero& hero)
-{
-    const int needRegenMana = std::max(hero.estimated.maxMana - hero.mana, 0);
-
-    hero.mana = hero.mana + std::min(needRegenMana, hero.estimated.manaRegenAbs);
-
-    hero.movePointsRemain  = hero.estimated.nextDayMovePoints;
-    hero.thisDayMovePoints = hero.movePointsRemain;
-}
-
 void AdventureEstimation::applyLevelUpChoice(AdventureHero& hero, LibrarySecondarySkillConstPtr skill)
 {
     if (!skill)
@@ -805,6 +795,21 @@ void AdventureEstimation::calculateArmy(AdventureArmy& army, LibraryTerrainConst
     army.estimated.weekIncomeMax = army.squad.estimated.weekIncomeMax;
     if (army.hasHero())
         army.estimated.dayIncome = army.hero.estimated.dayIncome;
+}
+
+void AdventureEstimation::calculateDayStart(AdventureHero& hero)
+{
+    const int needRegenMana = std::max(hero.estimated.maxMana - hero.mana, 0);
+
+    hero.mana = hero.mana + std::min(needRegenMana, hero.estimated.manaRegenAbs);
+
+    hero.movePointsRemain  = hero.estimated.nextDayMovePoints;
+    hero.thisDayMovePoints = hero.movePointsRemain;
+}
+
+void AdventureEstimation::calculateArmySummon(const AdventureArmy& army, LibraryTerrainConstPtr terrain, AdventureStackMutablePtr stack)
+{
+    calculateUnitStats(m_rules, *stack, army.squad, terrain, army.hasHero() ? army.hero : AdventureHero());
 }
 
 }

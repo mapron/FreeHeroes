@@ -78,6 +78,7 @@ public:
 
     void onStackUnderEffect(BattleStackConstPtr stack, Effect effect) override;
     void onCast(const Caster& caster, const AffectedMagic& affected, LibrarySpellConstPtr spell) override;
+    void onSummon(const Caster& caster, LibrarySpellConstPtr spell, BattleStackConstPtr stack) override;
 
     void onPositionReset(BattleStackConstPtr stack) override;
     void onControlAvailableChanged(bool controlAvailable) override;
@@ -107,6 +108,8 @@ private:
     void updateUnitHighlights();
 
     std::unique_ptr<AnimationSequencer> makeSequencer();
+
+    void addSpriteForBattleStack(BattleStackConstPtr stack);
 
 private:
     ICursorLibrary&        m_cursorLibrary;
@@ -139,6 +142,8 @@ private:
     bool m_showAvailableForHovered = false;
 
     bool m_controlAvailable = true;
+
+    QGraphicsItemGroup* m_unitGroup = nullptr;
 
     SpriteItemObj*        m_projectileItem = nullptr;
     QList<SpriteItemObj*> m_stackEffects;

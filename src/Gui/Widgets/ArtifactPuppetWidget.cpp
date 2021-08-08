@@ -242,8 +242,8 @@ public:
         while (m_shift > (int) m_allBag.size())
             m_shift -= m_allBag.size();
     }
-    void scrollLeft() { scroll(1); }
-    void scrollRight() { scroll(-1); }
+    void scrollLeft() { scroll(-1); }
+    void scrollRight() { scroll(1); }
 
     int getBagCount() const
     {

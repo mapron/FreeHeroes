@@ -19,7 +19,7 @@ struct BattlePlanCast {
     LibrarySpellConstPtr m_spell   = nullptr;
     bool                 m_isValid = false;
 
-    DamageResult::Loss lossTotal;
+    DamageResult::Loss m_lossTotal;
 
     std::set<BattlePosition> m_affectedArea;
     struct Target {

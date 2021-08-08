@@ -676,6 +676,7 @@ RTTR_REGISTRATION
         .property("rangeByLevel"          , &LibrarySpell::rangeByLevel)(ref)
         .property("endConditions"         , &LibrarySpell::endConditions)(ref)
         .property("retaliationWhenCancel" , &LibrarySpell::retaliationWhenCancel)(ref)
+        .property("summonUnit"            , &LibrarySpell::summonUnit)(metadata("optional", true))
         .property("pres"                  , &LibrarySpell::presentationParams)(ref)
         ;
     registration::class_<SpellCastParams>("SpellCastParams")

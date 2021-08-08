@@ -36,6 +36,7 @@ public:
 
     void calculateArmy(AdventureArmy& army, LibraryTerrainConstPtr terrain);
     void calculateDayStart(AdventureHero& hero);
+    void calculateArmySummon(const AdventureArmy& army, LibraryTerrainConstPtr terrain, AdventureStackMutablePtr stack);
 
     void          calculateHeroLevelUp(AdventureHero& hero);
     LevelUpResult calculateHeroLevelUp(AdventureHero& hero, IRandomGenerator& rng);

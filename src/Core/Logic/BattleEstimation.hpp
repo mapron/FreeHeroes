@@ -34,6 +34,8 @@ public:
     bool checkSpellTarget(const BattleStack& possibleTarget, LibrarySpellConstPtr spell);
     bool checkAttackElementPossibility(const BattleStack& possibleTarget, LibraryUnit::Abilities::AttackWithElement element);
 
+    void calculateArmySummon(const BattleArmy& army, const BattleArmy& opponent, const BattleEnvironment& battleEnvironment, BattleStackMutablePtr stack);
+
 private:
     void bindTypes(sol::state& lua);
     void calculateUnitStatsStartBattle(BattleStack& unit, const BattleSquad& squad, const BattleArmy& opponent, const BattleEnvironment& battleEnvironment);

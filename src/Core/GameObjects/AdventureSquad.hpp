@@ -10,11 +10,13 @@
 #include "LibraryResource.hpp"
 
 #include <vector>
+#include <deque>
 
 namespace FreeHeroes::Core {
 
 struct AdventureSquad {
     std::vector<AdventureStack> stacks;
+    std::deque<AdventureStack>  stacksSummoned;
     bool                        useCompactFormation = false;
 
     bool isEqualTo(const AdventureSquad& another) const noexcept
@@ -45,6 +47,12 @@ struct AdventureSquad {
             }
         }
         return false;
+    }
+
+    AdventureStackMutablePtr summon(LibraryUnitConstPtr unit, int count)
+    {
+        stacksSummoned.push_back(AdventureStack(unit, count));
+        return &stacksSummoned.back();
     }
 
     struct EstimatedParams {

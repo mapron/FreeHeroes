@@ -103,45 +103,15 @@ BattleFieldItem::BattleFieldItem(ICursorLibrary&        cursorLibrary,
     , m_appSettings(appSettings)
 
 {
-    QGraphicsItemGroup* unitGroup = new QGraphicsItemGroup(this);
+    m_unitGroup = new QGraphicsItemGroup(this);
     {
         // empyric offset from sprite Center point.
         const QPointF extraSpritePadding{ 0, -BattleStackSpriteItem::fromSpriteCenterToHexCenter };
-        unitGroup->setPos(extraSpritePadding);
+        m_unitGroup->setPos(extraSpritePadding);
     }
 
-    auto itemAdd = [this, unitGroup](BattleStackConstPtr stack) -> BattleStackSpriteItem* {
-        auto guiUnit = m_modelsProvider.units()->find(stack->library);
-
-        auto sprite = guiUnit->getBattleSprite();
-        Q_ASSERT(sprite);
-
-        SpritePtr projectileSprite;
-        if (!stack->library->presentationParams.spriteProjectile.empty()) {
-            projectileSprite = guiUnit->getProjectileSprite();
-            Q_ASSERT(projectileSprite);
-        }
-
-        BattleStackSpriteItem* item = new BattleStackSpriteItem(sprite, defaultGeometry.hexW1 * 2, unitGroup);
-        auto                   seq  = makeSequencer();
-        auto*                  h    = seq->addHandle(item, stack);
-        h->changeAnim(BattleAnimation::StandStill);
-        auto pos = stack->pos.mainPos();
-        item->setZValue(zValueForPosAlive(pos));
-        item->setIsLarge(stack->library->traits.large);
-        item->setStartDirectionRight(stack->side == BattleStack::Side::Attacker);
-        item->setAcceptedMouseButtons(Qt::MouseButtons());
-        item->setAnimGroupSporadic(h->getAnimSettings(BattleAnimation::Nervous));
-
-        m_unitGraphics[stack] = { item, projectileSprite, SporadicHandle{ { true, 4000, 4000, [item] { item->triggerSporadic(); }, [&]() -> bool { return m_sporadicOrchestrator.checkEventLimit(10000, 5); } } } };
-
-        return item;
-    };
-
     for (auto* stack : m_battleView.getAllStacks(false)) {
-        BattleStackSpriteItem* item = itemAdd(stack);
-        QPointF                pos  = defaultGeometry.hexCenterFromExtCoord(stack->pos);
-        item->setPos(pos);
+        addSpriteForBattleStack(stack);
     }
 
     auto makeHeroSpriteObj = [this](BattleHeroConstPtr hero, const QPointF& pos) -> SpriteItemObj* {
@@ -828,6 +798,34 @@ void BattleFieldItem::onCast(const Caster& caster, const AffectedMagic& affected
     m_controlPlan.m_planCast = {};
 }
 
+void BattleFieldItem::onSummon(const Caster&, LibrarySpellConstPtr spell, BattleStackConstPtr stack)
+{
+    addSpriteForBattleStack(stack);
+    BattleStackSpriteItem* item = m_unitGraphics[stack].spriteItem;
+    item->setOpacity(0);
+
+    auto* guiSpell = m_modelsProvider.spells()->find(spell);
+
+    const int animationDuration       = std::max(1, 1500 * m_appSettings.battle().otherTimePercent / 100);
+    const int animationDurationExtend = animationDuration + 2000;
+    const int soundDurationMax        = std::min(1500, animationDurationExtend);
+
+    auto  sequencer   = makeSequencer();
+    auto* itemHandle  = sequencer->addHandle(item, stack);
+    auto  soundHandle = guiSpell->getSound();
+    sequencer->beginParallel();
+    {
+        sequencer->addCallback([soundHandle, soundDurationMax]() {
+            soundHandle->playFor(soundDurationMax);
+        },
+                               1);
+        itemHandle->addPropertyAnimation(animationDuration, "opacity", 1.);
+    }
+    this->update();
+    sequencer->runSync(false);
+    refreshCounters();
+}
+
 void BattleFieldItem::onPositionReset(BattleStackConstPtr stack)
 {
     auto                   sequencer = makeSequencer();
@@ -1151,6 +1149,36 @@ std::unique_ptr<AnimationSequencer> BattleFieldItem::makeSequencer()
     auto sequencer = std::make_unique<AnimationSequencer>(m_appSettings.battle(), m_musicBox);
     sequencer->enableSuperSpeed(m_superspeed);
     return sequencer;
+}
+
+void BattleFieldItem::addSpriteForBattleStack(BattleStackConstPtr stack)
+{
+    auto guiUnit = m_modelsProvider.units()->find(stack->library);
+
+    auto sprite = guiUnit->getBattleSprite();
+    Q_ASSERT(sprite);
+
+    SpritePtr projectileSprite;
+    if (!stack->library->presentationParams.spriteProjectile.empty()) {
+        projectileSprite = guiUnit->getProjectileSprite();
+        Q_ASSERT(projectileSprite);
+    }
+
+    BattleStackSpriteItem* item = new BattleStackSpriteItem(sprite, defaultGeometry.hexW1 * 2, m_unitGroup);
+    auto                   seq  = makeSequencer();
+    auto*                  h    = seq->addHandle(item, stack);
+    h->changeAnim(BattleAnimation::StandStill);
+    auto pos = stack->pos.mainPos();
+    item->setZValue(zValueForPosAlive(pos));
+    item->setIsLarge(stack->library->traits.large);
+    item->setStartDirectionRight(stack->side == BattleStack::Side::Attacker);
+    item->setAcceptedMouseButtons(Qt::MouseButtons());
+    item->setAnimGroupSporadic(h->getAnimSettings(BattleAnimation::Nervous));
+
+    m_unitGraphics[stack] = { item, projectileSprite, SporadicHandle{ { true, 4000, 4000, [item] { item->triggerSporadic(); }, [&]() -> bool { return m_sporadicOrchestrator.checkEventLimit(10000, 5); } } } };
+
+    const QPointF posf = defaultGeometry.hexCenterFromExtCoord(stack->pos);
+    item->setPos(posf);
 }
 
 }

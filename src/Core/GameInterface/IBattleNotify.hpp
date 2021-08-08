@@ -75,6 +75,7 @@ public:
     };
 
     virtual void onCast(const Caster& caster, const AffectedMagic& affected, LibrarySpellConstPtr spell) = 0;
+    virtual void onSummon(const Caster& caster, LibrarySpellConstPtr spell, BattleStackConstPtr stack)   = 0;
 
     virtual void onPositionReset(BattleStackConstPtr stack)       = 0;
     virtual void onStartRound(int round)                          = 0;
@@ -93,6 +94,7 @@ public:
 
     void onStackUnderEffect(BattleStackConstPtr, Effect) override {}
     void onCast(const Caster&, const AffectedMagic&, LibrarySpellConstPtr) override {}
+    void onSummon(const Caster&, LibrarySpellConstPtr, BattleStackConstPtr) override {}
 
     void onPositionReset(BattleStackConstPtr) override {}
     void onStartRound(int) override {}
