@@ -209,7 +209,7 @@ BattlePosition BattleFieldPreset::calcPosition(bool attacker, int orderIndex, in
 {
     assert(orderIndex >= 0);
     // clang-format off
-    static const std::vector<BattlePosition> objAtt {
+    static const std::vector<BattlePosition> objAttackCircle {
         BattlePosition{5, 3},
         BattlePosition{9, 3},
         BattlePosition{4, 5},
@@ -318,7 +318,7 @@ BattlePosition BattleFieldPreset::calcPosition(bool attacker, int orderIndex, in
             const int y = calcDefaultY(orderIndex, totalCount, compactPositioning);
             pos         = { 0, y };
         } else {
-            pos = objAtt.at(orderIndex);
+            pos = objAttackCircle.at(orderIndex);
         }
         pos = calcRealPos(pos);
 
@@ -337,6 +337,16 @@ BattlePosition BattleFieldPreset::calcPosition(bool attacker, int orderIndex, in
     }
 
     return pos;
+}
+
+BattlePosition BattleFieldPreset::calcBM(bool attacker, ArtifactSlotType bmSlot) const
+{
+    if (layout == FieldLayout::Standard) {
+        if (bmSlot == ArtifactSlotType::BmShoot) {
+            return BattlePosition{ attacker ? 0 : field.width - 1, 3 };
+        }
+    }
+    return BattlePosition();
 }
 
 }

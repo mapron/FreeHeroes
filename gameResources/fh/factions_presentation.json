@@ -162,6 +162,7 @@
     "pres": { "unitBackground":"crbkgneu" }
 },
 "sod.faction.special" : {
+    "pres": { "unitBackground":"crbkgneu" },
     "untranslatedName" : "Special Objects",
     "alignment":"special"
 }

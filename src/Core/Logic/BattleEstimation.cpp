@@ -58,9 +58,9 @@ void BattleEstimation::calculateUnitStats(BattleStack& unit)
     bool hasBuff   = false;
     bool hasDebuff = false;
 
-    cur.canMove         = true;
+    cur.canMove         = !unit.library->battleMachineArtifact;
     cur.canCast         = unit.current.fixedCast.count > 0;
-    cur.canAttackMelee  = true;
+    cur.canAttackMelee  = !unit.library->battleMachineArtifact;
     cur.canAttackRanged = unit.library->traits.rangeAttack && unit.remainingShoots > 0;
 
     // bindings
@@ -279,40 +279,32 @@ void BattleEstimation::calculateArmyOnBattleStart(BattleArmy& army, const Battle
     for (auto& stack : army.squad->stacks) {
         calculateUnitStatsStartBattle(stack, *army.squad, opponent, battleEnvironment);
     }
+    if (army.machineShoot)
+        calculateUnitStatsStartBattle(*army.machineShoot, *army.squad, opponent, battleEnvironment);
 }
 
 void BattleEstimation::calculateArmyOnRoundStart(BattleArmy& army)
 {
-    // apply healing for trolls
+    std::deque<BattleStack*> stacks;
+    for (auto& stack : army.squad->stacks)
+        stacks.push_back(&stack);
+    for (auto& stack : army.stacksSummon)
+        stacks.push_back(&stack);
+    if (army.machineShoot)
+        stacks.push_back(army.machineShoot.get());
 
-    // reset abilities
-    // decrement effects (and remove them)
-
-    for (auto& stack : army.squad->stacks) {
-        if (!stack.isAlive())
+    for (auto* stack : stacks) {
+        if (!stack->isAlive())
             continue;
 
-        stack.roundState = {};
+        stack->roundState = {};
 
-        for (auto& eff : stack.appliedEffects) {
+        for (auto& eff : stack->appliedEffects) {
             if (eff.power.spell->hasEndCondition(LibrarySpell::EndCondition::Time))
                 eff.roundsRemain--;
         }
 
-        calculateUnitStats(stack);
-    }
-    for (auto& stack : army.squad->stacksSummon) {
-        if (!stack.isAlive())
-            continue;
-
-        stack.roundState = {};
-
-        for (auto& eff : stack.appliedEffects) {
-            if (eff.power.spell->hasEndCondition(LibrarySpell::EndCondition::Time))
-                eff.roundsRemain--;
-        }
-
-        calculateUnitStats(stack);
+        calculateUnitStats(*stack);
     }
 
     if (army.battleHero.isValid())

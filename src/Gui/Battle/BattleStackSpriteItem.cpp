@@ -120,6 +120,11 @@ void BattleStackSpriteItem::setCounterVisible(bool visible)
     update();
 }
 
+void BattleStackSpriteItem::setCounterVisibleGlobal(bool visible)
+{
+    m_counterVisibleGlobal = visible;
+}
+
 void BattleStackSpriteItem::setCounterMode(BattleStackSpriteItem::CounterMode counterMode)
 {
     m_counterMode = counterMode;
@@ -171,7 +176,7 @@ void BattleStackSpriteItem::paint(QPainter* painter, const QStyleOptionGraphicsI
 
     painter->setTransform(t);
 
-    if (m_counterVisible) {
+    if (m_counterVisible && m_counterVisibleGlobal) {
         const qreal boxWidth  = 30;
         const qreal boxHeight = 11;
         painter->setPen(QPen(QColor(255, 231, 132), 1));

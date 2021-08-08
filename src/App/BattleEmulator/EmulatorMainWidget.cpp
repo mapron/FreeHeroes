@@ -458,6 +458,25 @@ int EmulatorMainWidget::execBattle(bool isReplay, bool isQuick)
     if (att.isEmpty() || def.isEmpty())
         return QDialog::Rejected;
 
+    for (BattleArmy* army : { &att, &def }) {
+        const auto bmSlot = ArtifactSlotType::BmShoot;
+        if (!army->battleHero.isValid())
+            continue;
+
+        auto shootArt = army->battleHero.adventure->getArtifact(bmSlot);
+        if (!shootArt)
+            continue;
+        const bool isAttacker = army->side == BattleStack::Side::Attacker;
+        if (replayData.m_adv.m_field.calcBM(isAttacker, bmSlot).isEmpty())
+            continue;
+
+        auto& armyAdv = isAttacker ? replayData.m_adv.m_att : replayData.m_adv.m_def;
+
+        AdventureStackMutablePtr bm = armyAdv.squad.addHidden(shootArt->battleMachineUnit, 1);
+        AdventureEstimation(m_gameDatabase.gameRules()).calculateArmySummon(armyAdv, replayData.m_adv.m_terrain, bm);
+        army->createMachineShoot(bm);
+    }
+
     auto rng = m_randomGeneratorFactory.create();
     rng->setSeed(replayData.m_adv.m_seed);
 
@@ -468,7 +487,7 @@ int EmulatorMainWidget::execBattle(bool isReplay, bool isQuick)
                          m_gameDatabase.gameRules(),
                          [&replayData, this](BattleStack::Side side, LibraryUnitConstPtr unit, int count) -> AdventureStackConstPtr {
                              auto&                    army   = side == BattleStack::Side::Attacker ? replayData.m_adv.m_att : replayData.m_adv.m_def;
-                             AdventureStackMutablePtr result = army.squad.summon(unit, count);
+                             AdventureStackMutablePtr result = army.squad.addHidden(unit, count);
                              AdventureEstimation(m_gameDatabase.gameRules()).calculateArmySummon(army, replayData.m_adv.m_terrain, result);
                              return result;
                          });

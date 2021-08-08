@@ -1168,16 +1168,22 @@ void BattleFieldItem::addSpriteForBattleStack(BattleStackConstPtr stack)
     auto                   seq  = makeSequencer();
     auto*                  h    = seq->addHandle(item, stack);
     h->changeAnim(BattleAnimation::StandStill);
-    auto pos = stack->pos.mainPos();
+    auto       pos        = stack->pos.mainPos();
+    const bool isAttacker = stack->side == BattleStack::Side::Attacker;
     item->setZValue(zValueForPosAlive(pos));
     item->setIsLarge(stack->library->traits.large);
-    item->setStartDirectionRight(stack->side == BattleStack::Side::Attacker);
+    item->setStartDirectionRight(isAttacker);
     item->setAcceptedMouseButtons(Qt::MouseButtons());
-    item->setAnimGroupSporadic(h->getAnimSettings(BattleAnimation::Nervous));
+    if (sprite->getGroupsIds().contains(static_cast<int>(BattleAnimation::Nervous)))
+        item->setAnimGroupSporadic(h->getAnimSettings(BattleAnimation::Nervous));
 
     m_unitGraphics[stack] = { item, projectileSprite, SporadicHandle{ { true, 4000, 4000, [item] { item->triggerSporadic(); }, [&]() -> bool { return m_sporadicOrchestrator.checkEventLimit(10000, 5); } } } };
 
-    const QPointF posf = defaultGeometry.hexCenterFromExtCoord(stack->pos);
+    QPointF posf = defaultGeometry.hexCenterFromExtCoord(stack->pos);
+    if (stack->library->battleMachineArtifact) {
+        posf += QPointF{ isAttacker ? -15. : 15., -11. }; // @todo: move to LegacyConverter sprite offsetting!
+        item->setCounterVisibleGlobal(false);
+    }
     item->setPos(posf);
 }
 

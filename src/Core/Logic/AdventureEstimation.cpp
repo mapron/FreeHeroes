@@ -710,6 +710,11 @@ void calculateUnitStats(LibraryGameRulesConstPtr rules, AdventureStack& unit, co
     cur.primary.ad += heroEstimate.primary.ad;
     cur.primary.battleSpeed += heroEstimate.unitBattleSpeedAbs;
 
+    if (unit.library->battleMachineArtifact) {
+        cur.primary.dmg.minDamage *= (heroEstimate.primary.ad.attack + 1);
+        cur.primary.dmg.maxDamage *= (heroEstimate.primary.ad.attack + 1);
+    }
+
     // clang-format off
     cur.magicReduce.allMagic  *= heroEstimate.magicReduce.allMagic;
     cur.magicReduce.air       *= heroEstimate.magicReduce.air     ;

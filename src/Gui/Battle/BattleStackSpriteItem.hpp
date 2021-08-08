@@ -29,6 +29,7 @@ public:
     void setCounter(int count);
     void setCounterExtra(int count);
     void setCounterVisible(bool visible);
+    void setCounterVisibleGlobal(bool visible);
     void setCounterMode(CounterMode counterMode);
     void setCounterCompact(bool compact);
 
@@ -48,11 +49,12 @@ protected:
     bool                  m_startDirectionRight = true;
     bool                  m_isLarge             = false;
 
-    int         m_count          = 0;
-    int         m_countExtra     = 0;
-    bool        m_counterVisible = true;
-    CounterMode m_counterMode    = CounterMode::Normal;
-    bool        m_counterCompact = false;
+    int         m_count                = 0;
+    int         m_countExtra           = 0;
+    bool        m_counterVisible       = true;
+    bool        m_counterVisibleGlobal = true;
+    CounterMode m_counterMode          = CounterMode::Normal;
+    bool        m_counterCompact       = false;
 };
 
 using BattleStackSpriteItemPtr      = BattleStackSpriteItem*;

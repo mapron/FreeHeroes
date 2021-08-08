@@ -54,6 +54,7 @@ struct CORELOGIC_EXPORT BattleFieldPreset {
     FieldLayout                 layout;
 
     BattlePosition calcPosition(bool attacker, int orderIndex, int totalCount, bool compactPositioning) const;
+    BattlePosition calcBM(bool attacker, ArtifactSlotType bmSlot) const;
 };
 
 }

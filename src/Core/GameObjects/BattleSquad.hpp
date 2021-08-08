@@ -82,18 +82,9 @@ struct BattleSquad {
         return info;
     }
 
-    BattleStackMutablePtr summon(AdventureStackConstPtr advStack,
-                                 BattleHeroConstPtr     battleHero,
-                                 BattleStack::Side      side)
-    {
-        stacksSummon.emplace_back(advStack, battleHero, side);
-        return &stacksSummon.back();
-    }
-
     AdventureSquadConstPtr adventure = nullptr;
 
     std::vector<BattleStack> stacks;
-    std::deque<BattleStack>  stacksSummon;
 };
 
 }

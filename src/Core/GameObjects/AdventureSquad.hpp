@@ -15,8 +15,25 @@
 namespace FreeHeroes::Core {
 
 struct AdventureSquad {
+    struct EstimatedParams {
+        struct Bonus {
+            PrimaryRngParams    rngParams;
+            int                 manaCost = 0;
+            RngChanceMultiplier rngMult;
+        };
+
+        Bonus          squadBonus;             // undead + factions + abilities  + (if)hero(skills+artifacts) + terrain
+        Bonus          oppBonus;               // abilities                      + (if)hero(skills+artifacts)
+        int            armySpeed          = 0; // min(unit.armySpeed)
+        int            fastestBattleSpeed = 0; // max(unit.battleSpeed)
+        MoraleDetails  moraleDetails;
+        LuckDetails    luckDetails;
+        ResourceAmount weekIncomeMax;
+    };
+    EstimatedParams estimated;
+
     std::vector<AdventureStack> stacks;
-    std::deque<AdventureStack>  stacksSummoned;
+    std::deque<AdventureStack>  stacksHidden;
     bool                        useCompactFormation = false;
 
     bool isEqualTo(const AdventureSquad& another) const noexcept
@@ -49,28 +66,11 @@ struct AdventureSquad {
         return false;
     }
 
-    AdventureStackMutablePtr summon(LibraryUnitConstPtr unit, int count)
+    AdventureStackMutablePtr addHidden(LibraryUnitConstPtr unit, int count)
     {
-        stacksSummoned.push_back(AdventureStack(unit, count));
-        return &stacksSummoned.back();
+        stacksHidden.push_back(AdventureStack(unit, count));
+        return &stacksHidden.back();
     }
-
-    struct EstimatedParams {
-        struct Bonus {
-            PrimaryRngParams    rngParams;
-            int                 manaCost = 0;
-            RngChanceMultiplier rngMult;
-        };
-
-        Bonus          squadBonus;             // undead + factions + abilities  + (if)hero(skills+artifacts) + terrain
-        Bonus          oppBonus;               // abilities                      + (if)hero(skills+artifacts)
-        int            armySpeed          = 0; // min(unit.armySpeed)
-        int            fastestBattleSpeed = 0; // max(unit.battleSpeed)
-        MoraleDetails  moraleDetails;
-        LuckDetails    luckDetails;
-        ResourceAmount weekIncomeMax;
-    };
-    EstimatedParams estimated;
 };
 
 }

@@ -15,10 +15,9 @@
 namespace FreeHeroes::Core {
 
 struct BattleArmy {
-    BattleArmy() = default;
-
     explicit BattleArmy(AdventureArmyConstPtr adventure, BattleStack::Side side)
         : adventure(adventure)
+        , side(side)
     {
         if (adventure->hasHero()) {
             battleHero = BattleHero(&adventure->hero);
@@ -44,10 +43,25 @@ struct BattleArmy {
         }
         return false;
     }
-    AdventureArmyConstPtr adventure = nullptr;
+    BattleStackMutablePtr summon(AdventureStackConstPtr advStack)
+    {
+        stacksSummon.emplace_back(advStack, battleHero.isValid() ? &battleHero : nullptr, side);
+        return &stacksSummon.back();
+    }
+    BattleStackMutablePtr createMachineShoot(AdventureStackConstPtr stack)
+    {
+        machineShoot = std::make_unique<BattleStack>(stack, battleHero.isValid() ? &battleHero : nullptr, side);
+        return machineShoot.get();
+    }
+
+    AdventureArmyConstPtr   adventure = nullptr;
+    const BattleStack::Side side;
 
     std::unique_ptr<BattleSquad> squad;
     BattleHero                   battleHero;
+
+    std::deque<BattleStack>      stacksSummon;
+    std::unique_ptr<BattleStack> machineShoot;
 };
 
 }

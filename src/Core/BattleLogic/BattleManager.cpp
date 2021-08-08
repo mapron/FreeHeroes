@@ -161,8 +161,8 @@ IBattleView::AvailableActions BattleManager::getAvailableActions() const
     auto currentStack   = m_current;
     auto hero           = currentHero();
     result.heroCast     = hero && !hero->castedInRound && hero->adventure->hasSpellBook && !hero->estimated.availableSpells.empty();
-    result.move         = currentStack->current.canMove;        // @todo: battle machine, arrow tower
-    result.meleeAttack  = currentStack->current.canAttackMelee; // @todo: battle machine
+    result.move         = currentStack->current.canMove; // @todo: arrow tower
+    result.meleeAttack  = currentStack->current.canAttackMelee;
     result.rangeAttack  = currentStack->current.canAttackRanged && !currentStack->current.rangeAttackIsBlocked;
     result.splashAttack = currentStack->current.canAttackFreeSplash && !currentStack->current.rangeAttackIsBlocked;
     result.cast         = currentStack->current.canCast;
@@ -181,11 +181,10 @@ IBattleView::AvailableActions BattleManager::getAvailableActions() const
 
 std::vector<BattleStackConstPtr> BattleManager::getAllStacks(bool alive) const
 {
-    std::vector<BattleStackConstPtr> result(alive ? this->m_alive.size() : m_all.size());
-    if (alive)
-        std::copy(this->m_alive.cbegin(), this->m_alive.cend(), result.begin());
-    else
-        std::copy(this->m_all.cbegin(), this->m_all.cend(), result.begin());
+    auto& source = alive ? m_alive : m_all;
+    // need mutable-to-const conversion here.
+    std::vector<BattleStackConstPtr> result(source.size());
+    std::copy(source.cbegin(), source.cend(), result.begin());
     return result;
 }
 
@@ -193,8 +192,6 @@ std::vector<BattlePosition> BattleManager::getObstacles() const
 {
     return m_obstacles;
 }
-
-//const BattleField& BattleManager::getField() const { return m_field; }
 
 BattleStackConstPtr BattleManager::findStack(const BattlePosition pos, bool onlyAlive) const
 {
@@ -786,7 +783,7 @@ bool BattleManager::doCast(BattlePlanCastParams planParams)
         const auto             side     = getCurrentSide();
         AdventureStackConstPtr advStack = m_battleCallbackSummon(side, plan.m_spell->summonUnit, plan.m_lossTotal.remainCount);
         BattleArmy&            army     = side == BattleStack::Side::Attacker ? m_att : m_def;
-        BattleStackMutablePtr  stack    = army.squad->summon(advStack, army.battleHero.isValid() ? &army.battleHero : nullptr, side);
+        BattleStackMutablePtr  stack    = army.summon(advStack);
         stack->pos.setMainPos(pos);
         m_all.push_back(stack);
 
@@ -1293,44 +1290,46 @@ BattlePositionSet BattleManager::getSplashExtraTargets(LibraryUnit::Abilities::S
                                                        BattleAttackDirection                direction) const
 {
     BattlePositionSet result;
+    using AttackDir = BattleAttackDirection;
+    using Dir       = BattleDirection;
     // clang-format off
     if (splash == LibraryUnit::Abilities::SplashAttack::Sides) {
-        if (direction == BattleAttackDirection::R)  result = m_field.validNeighbours(from.rightPos(), {BattleDirection::BR, BattleDirection::TR});
-        if (direction == BattleAttackDirection::TR) result = m_field.validNeighbours(from.rightPos(), {BattleDirection::TL, BattleDirection::R});
-        if (direction == BattleAttackDirection::BR) result = m_field.validNeighbours(from.rightPos(), {BattleDirection::BL, BattleDirection::R});
+        if (direction == AttackDir::R)     result = m_field.validNeighbours(from.rightPos(), {Dir::BR, Dir::TR});
+        if (direction == AttackDir::TR)    result = m_field.validNeighbours(from.rightPos(), {Dir::TL, Dir::R});
+        if (direction == AttackDir::BR)    result = m_field.validNeighbours(from.rightPos(), {Dir::BL, Dir::R});
 
-        if (direction == BattleAttackDirection::L) result = m_field.validNeighbours(from.leftPos(), {BattleDirection::BL, BattleDirection::TL});
-        if (direction == BattleAttackDirection::TL)result = m_field.validNeighbours(from.leftPos(), {BattleDirection::TR, BattleDirection::L});
-        if (direction == BattleAttackDirection::BL)result = m_field.validNeighbours(from.leftPos(), {BattleDirection::BR, BattleDirection::L});
+        if (direction == AttackDir::L)     result = m_field.validNeighbours(from.leftPos(), {Dir::BL, Dir::TL});
+        if (direction == AttackDir::TL)    result = m_field.validNeighbours(from.leftPos(), {Dir::TR, Dir::L});
+        if (direction == AttackDir::BL)    result = m_field.validNeighbours(from.leftPos(), {Dir::BR, Dir::L});
 
         if (from.sightDirection() == BattlePositionExtended::Sight::ToRight) {
-            if (direction == BattleAttackDirection::T) result = m_field.validNeighbours(from.rightPos(), {BattleDirection::TR});
-            if (direction == BattleAttackDirection::B) result = m_field.validNeighbours(from.rightPos(), {BattleDirection::BR});
+            if (direction == AttackDir::T) result = m_field.validNeighbours(from.rightPos(), {Dir::TR});
+            if (direction == AttackDir::B) result = m_field.validNeighbours(from.rightPos(), {Dir::BR});
         }
         if (from.sightDirection() == BattlePositionExtended::Sight::ToLeft) {
-            if (direction == BattleAttackDirection::T) result = m_field.validNeighbours(from.leftPos(), {BattleDirection::TL});
-            if (direction == BattleAttackDirection::B) result = m_field.validNeighbours(from.leftPos(), {BattleDirection::BL});
+            if (direction == AttackDir::T) result = m_field.validNeighbours(from.leftPos(), {Dir::TL});
+            if (direction == AttackDir::B) result = m_field.validNeighbours(from.leftPos(), {Dir::BL});
         }
     }
     if (splash == LibraryUnit::Abilities::SplashAttack::Neighbours) {
         result = m_field.getAdjacentSet(from);
     }
     if (splash == LibraryUnit::Abilities::SplashAttack::Dragon) {
-        if (direction == BattleAttackDirection::R)  result = m_field.validNeighbours(m_field.neighbour(from.rightPos(), BattleDirection::R ), {BattleDirection::R});
-        if (direction == BattleAttackDirection::TR) result = m_field.validNeighbours(m_field.neighbour(from.rightPos(), BattleDirection::TR), {BattleDirection::TR});
-        if (direction == BattleAttackDirection::BR) result = m_field.validNeighbours(m_field.neighbour(from.rightPos(), BattleDirection::BR), {BattleDirection::BR});
+        if (direction == AttackDir::R)     result = m_field.validNeighbours(m_field.neighbour(from.rightPos(), Dir::R ), {Dir::R});
+        if (direction == AttackDir::TR)    result = m_field.validNeighbours(m_field.neighbour(from.rightPos(), Dir::TR), {Dir::TR});
+        if (direction == AttackDir::BR)    result = m_field.validNeighbours(m_field.neighbour(from.rightPos(), Dir::BR), {Dir::BR});
 
-        if (direction == BattleAttackDirection::L)  result = m_field.validNeighbours(m_field.neighbour(from.leftPos(), BattleDirection::L ), {BattleDirection::L});
-        if (direction == BattleAttackDirection::TL) result = m_field.validNeighbours(m_field.neighbour(from.leftPos(), BattleDirection::TL), {BattleDirection::TL});
-        if (direction == BattleAttackDirection::BL) result = m_field.validNeighbours(m_field.neighbour(from.leftPos(), BattleDirection::BL), {BattleDirection::BL});
+        if (direction == AttackDir::L)     result = m_field.validNeighbours(m_field.neighbour(from.leftPos(), Dir::L ), {Dir::L});
+        if (direction == AttackDir::TL)    result = m_field.validNeighbours(m_field.neighbour(from.leftPos(), Dir::TL), {Dir::TL});
+        if (direction == AttackDir::BL)    result = m_field.validNeighbours(m_field.neighbour(from.leftPos(), Dir::BL), {Dir::BL});
 
         if (from.sightDirection() == BattlePositionExtended::Sight::ToRight) {
-            if (direction == BattleAttackDirection::T) result = m_field.validNeighbours(m_field.neighbour(from.rightPos(), BattleDirection::TL), {BattleDirection::TL});
-            if (direction == BattleAttackDirection::B) result = m_field.validNeighbours(m_field.neighbour(from.rightPos(), BattleDirection::BL), {BattleDirection::BL});
+            if (direction == AttackDir::T) result = m_field.validNeighbours(m_field.neighbour(from.rightPos(), Dir::TL), {Dir::TL});
+            if (direction == AttackDir::B) result = m_field.validNeighbours(m_field.neighbour(from.rightPos(), Dir::BL), {Dir::BL});
         }
         if (from.sightDirection() == BattlePositionExtended::Sight::ToLeft) {
-            if (direction == BattleAttackDirection::T) result = m_field.validNeighbours(m_field.neighbour(from.leftPos(), BattleDirection::TR), {BattleDirection::TR});
-            if (direction == BattleAttackDirection::B) result = m_field.validNeighbours(m_field.neighbour(from.leftPos(), BattleDirection::BR), {BattleDirection::BR});
+            if (direction == AttackDir::T) result = m_field.validNeighbours(m_field.neighbour(from.leftPos(), Dir::TR), {Dir::TR});
+            if (direction == AttackDir::B) result = m_field.validNeighbours(m_field.neighbour(from.leftPos(), Dir::BR), {Dir::BR});
         }
     }
     // clang-format on
@@ -1342,26 +1341,26 @@ BattlePositionSet BattleManager::getSplashExtraTargets(LibraryUnit::Abilities::S
 
 void BattleManager::makePositions(const BattleFieldPreset& fieldPreset)
 {
-    for (auto& stack : m_att.squad->stacks) {
-        m_all.push_back(&stack);
-        BattlePosition pos = fieldPreset.calcPosition(true,
-                                                      stack.adventure->armyParams.indexInArmyValid,
-                                                      m_att.squad->stacks.size(),
-                                                      m_att.squad->adventure->useCompactFormation);
-        stack.pos.setMainPos(pos);
-    }
-
-    for (auto& stack : m_def.squad->stacks) {
-        m_all.push_back(&stack);
-        BattlePosition pos = fieldPreset.calcPosition(false,
-                                                      stack.adventure->armyParams.indexInArmyValid,
-                                                      m_def.squad->stacks.size(),
-                                                      m_def.squad->adventure->useCompactFormation);
-        if (pos.isEmpty()) { // that meant that provided stack do not fits into positions layout. Make it dead for now.
-            stack.count = 0;
-            Logger(Logger::Warning) << "Removing non-fitting stack" << stack.library->id << " from defender army";
+    for (BattleArmy* army : { &m_att, &m_def }) {
+        const bool isAttacker = army->side == BattleStack::Side::Attacker;
+        for (auto& stack : army->squad->stacks) {
+            m_all.push_back(&stack);
+            const BattlePosition pos = fieldPreset.calcPosition(isAttacker,
+                                                                stack.adventure->armyParams.indexInArmyValid,
+                                                                army->squad->stacks.size(),
+                                                                army->squad->adventure->useCompactFormation);
+            if (pos.isEmpty()) { // that meant that provided stack do not fits into positions layout. Make it dead for now.
+                stack.count = 0;
+                Logger(Logger::Warning) << "Removing non-fitting stack" << stack.library->id << " from defender army";
+            }
+            stack.pos.setMainPos(pos);
         }
-        stack.pos.setMainPos(pos);
+        if (army->machineShoot) {
+            m_all.push_back(army->machineShoot.get());
+            const BattlePosition pos = fieldPreset.calcBM(isAttacker, army->machineShoot->library->battleMachineArtifact->slot);
+
+            army->machineShoot->pos.setMainPos(pos);
+        }
     }
 }
 
