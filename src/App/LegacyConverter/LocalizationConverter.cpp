@@ -76,6 +76,9 @@ void LocalizationConverter::extractSOD(const std_path& txtSubdir)
     } else if (crtraits[2][0].startsWith("\xCA\xEE\xEF\xE5")) { // "Копе" in Russian Win1251
         localeId = "ru_RU";
         encoding = "Windows-1251";
+    } else if (crtraits[2][0] == "Pikenier") {
+        localeId = "de_DE";
+        encoding = "Windows-1252";
     } else {
         localeId = "en_US"; // no idea of sane fallback.
     }
@@ -212,6 +215,8 @@ void LocalizationConverter::extractHOTA(const std_path& jsonSubdir)
     const QByteArray encoding = "utf-8";
     if (locTable[0][1].startsWith("\xD0\x9F\xD1\x83\xD1\x88")) // "Пуш", Russian, utf-8
         localeId = "ru_RU";
+    else if (locTable[0][1].startsWith("Kanone")) // German
+        localeId = "de_DE";
 
     TranscodedFile outFile(m_resources, encoding);
     outFile.setLocale(localeId);

@@ -188,7 +188,8 @@ void Application::load(const std::string& moduleName, std::set<Option> options)
 
     if (options.contains(Option::Translations)) {
         m_impl->appConfig->globalMutable().localeItems << "en_US"
-                                                       << "ru_RU";
+                                                       << "ru_RU"
+                                                       << "de_DE";
         QString       currentLocale = m_impl->appConfig->global().localeId;
         ProfilerScope scope("localization");
 
