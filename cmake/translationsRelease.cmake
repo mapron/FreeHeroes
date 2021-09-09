@@ -84,7 +84,7 @@ endfunction()
 
 UpdateLocales(
     LANGUAGES
-        en_US ru_RU
+        en_US ru_RU de_DE
     MODULES
         [ FreeHeroesCore     DIRS Gui ]
         [ BattleEmulator     DIRS App/BattleEmulator  ]
