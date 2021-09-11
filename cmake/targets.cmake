@@ -141,6 +141,7 @@ function(GenerateQrcFromAssets resourceFolder )
     set(destDir ${CMAKE_BINARY_DIR}/assetsCompiled/${resourceFolder})
     set(qrcName ${CMAKE_BINARY_DIR}/assetsCompiled/${resourceFolder}.qrc)
     set(rccName ${CMAKE_BINARY_DIR}/assetsCompiled/${resourceFolder}.rcc)
+    file(MAKE_DIRECTORY "${destDir}")
 
     set(QRC_PREFIX ${resourceFolder}) # name is important for .in file
     set(QRC_FILES)                    # name is important for .in file
@@ -164,6 +165,7 @@ function(GenerateQrcWithTranslations resourceFolder translationsRoot)
     set(destDir ${CMAKE_BINARY_DIR}/assetsCompiled/${resourceFolder})
     set(qrcName ${CMAKE_BINARY_DIR}/assetsCompiled/${resourceFolder}.qrc)
     set(rccName ${CMAKE_BINARY_DIR}/assetsCompiled/${resourceFolder}.rcc)
+    file(MAKE_DIRECTORY "${destDir}")
     set(masks ${srcDir}/*.ts)
     file(GLOB_RECURSE fileListAbsSrc   ${masks})
 
