@@ -9,9 +9,13 @@
 
 using namespace FreeHeroes::Core;
 
+namespace FreeHeroes::Core {
+
 std::ostream& operator<<(std::ostream& os, const BattlePosition& pos)
 {
     return os << "(" << pos.x << ", " << pos.y << ")"; // whatever needed to print bar to os
+}
+
 }
 
 class PathFindTest : public ::testing::Test {
