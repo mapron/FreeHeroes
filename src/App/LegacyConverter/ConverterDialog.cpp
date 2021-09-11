@@ -192,8 +192,13 @@ void ConverterDialog::run()
                                    "H3bitmap.lod",
                                    baseExtractSOD,
                                    sodLibrary.get() });
+
+        // workaround: sometimes folder called 'Mp3' in the distribution.
+        auto mp3path = m_hotaInstallDir / "MP3";
+        if (!std_fs::exists(mp3path))
+            mp3path = m_hotaInstallDir / "Mp3";
         extractionList.push_back({ ArchiveParser::TaskType::MusicCopy,
-                                   m_hotaInstallDir / "MP3",
+                                   mp3path,
                                    "",
                                    baseExtractSOD,
                                    sodLibrary.get() });
