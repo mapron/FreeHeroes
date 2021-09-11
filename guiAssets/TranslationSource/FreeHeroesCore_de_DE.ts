@@ -5,13 +5,11 @@
     <name>BattleControlWidget</name>
     <message>
         <location filename="../../src/Gui/Battle/BattleControlWidget.ui" line="14"/>
-        <location filename="../../src/Gui/Battle/ui_BattleControlWidget.h" line="268"/>
         <source>Form</source>
         <translation type="unfinished">Form</translation>
     </message>
     <message>
         <location filename="../../src/Gui/Battle/BattleControlWidget.ui" line="191"/>
-        <location filename="../../src/Gui/Battle/ui_BattleControlWidget.h" line="271"/>
         <source>Hint displayed here</source>
         <translation>Hier angezeigter Hinweis</translation>
     </message>
@@ -84,7 +82,7 @@
     <message>
         <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="267"/>
         <source>%1 %2</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">%1 %2</translation>
     </message>
     <message>
         <location filename="../../src/Gui/Battle/BattleControlWidget.cpp" line="270"/>
@@ -822,7 +820,7 @@
     <message>
         <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="201"/>
         <source>Speed</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Geschwindigkeit</translation>
     </message>
     <message>
         <location filename="../../src/Gui/Widgets/HeroParameterWidget.cpp" line="203"/>
@@ -983,7 +981,7 @@
     <message>
         <location filename="../../src/Gui/GameWrappers/AdventureModels.cpp" line="166"/>
         <source>-- Empty -- </source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">-- Leer -- </translation>
     </message>
     <message>
         <location filename="../../src/Gui/GameWrappers/AdventureModels.cpp" line="208"/>
@@ -993,7 +991,7 @@
     <message>
         <location filename="../../src/Gui/GameWrappers/AdventureModels.cpp" line="208"/>
         <source>Artifact</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Artefakt</translation>
     </message>
 </context>
 <context>
@@ -1148,17 +1146,17 @@
     <message>
         <location filename="../../src/Gui/Editor/SkillSelectorWidget.cpp" line="66"/>
         <source>Basic</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Basis</translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/SkillSelectorWidget.cpp" line="66"/>
         <source>Advanced</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Fortgeschritten</translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/SkillSelectorWidget.cpp" line="66"/>
         <source>Expert</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Experte</translation>
     </message>
 </context>
 <context>
@@ -1441,7 +1439,7 @@
     <message>
         <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="220"/>
         <source>Speed</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Geschwindigkeit</translation>
     </message>
     <message>
         <location filename="../../src/Gui/Widgets/UnitInfoWidget.cpp" line="291"/>
@@ -1839,21 +1837,17 @@
     <name>HeroMainDialog</name>
     <message>
         <location filename="../../src/Gui/Widgets/HeroMainDialog.ui" line="41"/>
-        <location filename="../../src/Gui/Widgets/ui_HeroMainDialog.h" line="507"/>
         <source>main</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Widgets/HeroMainDialog.ui" line="112"/>
-        <location filename="../../src/Gui/Widgets/ui_HeroMainDialog.h" line="508"/>
         <source>wide</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Widgets/HeroMainDialog.ui" line="628"/>
         <location filename="../../src/Gui/Widgets/HeroMainDialog.ui" line="824"/>
-        <location filename="../../src/Gui/Widgets/ui_HeroMainDialog.h" line="522"/>
-        <location filename="../../src/Gui/Widgets/ui_HeroMainDialog.h" line="528"/>
         <source>common</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1862,127 +1856,107 @@
     <name>HeroWithArmyConfigWidget</name>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="48"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="904"/>
         <source>Army</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="67"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="905"/>
         <source>Primary
 parameters</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="84"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="907"/>
         <source>Appearence</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="100"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="908"/>
         <source>Secondary
 skills</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="117"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="910"/>
         <source>Artifacts
 on hero</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="134"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="912"/>
         <source>Artifacts
 in the bag</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="151"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="914"/>
         <source>Spells</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="167"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="915"/>
         <source>Stats
 overview</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="184"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="917"/>
         <source>View in
 hero dialog</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="224"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="919"/>
         <source>commonDark</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="249"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="920"/>
         <source>Display name:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="258"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="921"/>
         <source>Use default name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="270"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="922"/>
         <source>Portraits:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="348"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="925"/>
         <source>Speciality:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="395"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="928"/>
         <source>Biography:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="402"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="929"/>
         <source>Default biography</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="418"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="930"/>
         <source>Use default army</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="487"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="931"/>
         <source>Add all artifacts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="494"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="932"/>
         <source>Clear artifacts bag</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="527"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="933"/>
         <source>Treasure
 Class</source>
         <translation type="unfinished"></translation>
@@ -1990,194 +1964,161 @@ Class</source>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="557"/>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="770"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="935"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="945"/>
         <source>Any</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="576"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="936"/>
         <source>Treasure</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="592"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="937"/>
         <source>Minor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="608"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="938"/>
         <source>Major</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="634"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="939"/>
         <source>Relic</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="650"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="940"/>
         <source>Unique</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="666"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="941"/>
         <source>Complex</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="682"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="942"/>
         <source>Scroll</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="698"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="943"/>
         <source>Special</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="741"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="944"/>
         <source>Category</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="789"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="946"/>
         <source>Stats</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="805"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="947"/>
         <source>Skills</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="831"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="948"/>
         <source>Magic</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="847"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="949"/>
         <source>Income</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="863"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="950"/>
         <source>Misc</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="932"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="952"/>
         <source>Current stats:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="948"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="953"/>
         <source>Hero identity:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="1070"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="960"/>
         <source>Primary stats:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="1079"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="961"/>
         <source>Attack</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="1089"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="962"/>
         <source>Defense</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="1099"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="963"/>
         <source>Spell power</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="1113"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="964"/>
         <source>Intelligence</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="958"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="954"/>
         <source>Level:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="1023"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="956"/>
         <source>Exp. range:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="1039"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="958"/>
         <source> - </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="992"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="955"/>
         <source>Experience:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="916"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="951"/>
         <source>Hero has book of spells</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="1147"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="965"/>
         <source>Reset hero stats and artifacts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="1191"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="966"/>
         <source>Use default skills</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="1210"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="967"/>
         <source>Use default spells</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="1225"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="968"/>
         <source>All spells</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/HeroWithArmyConfigWidget.ui" line="1232"/>
-        <location filename="../../src/Gui/Editor/ui_HeroWithArmyConfigWidget.h" line="969"/>
         <source>No spells</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2186,13 +2127,11 @@ Class</source>
     <name>MonsterSquadConfigWidget</name>
     <message>
         <location filename="../../src/Gui/Editor/MonsterSquadConfigWidget.ui" line="48"/>
-        <location filename="../../src/Gui/Editor/ui_MonsterSquadConfigWidget.h" line="129"/>
         <source>Army</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/MonsterSquadConfigWidget.ui" line="93"/>
-        <location filename="../../src/Gui/Editor/ui_MonsterSquadConfigWidget.h" line="130"/>
         <source>commonDark</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2214,133 +2153,111 @@ Class</source>
     <name>SettingsWidget</name>
     <message>
         <location filename="../../src/Gui/Application/SettingsWidget.ui" line="14"/>
-        <location filename="../../src/Gui/Application/ui_SettingsWidget.h" line="361"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
         <location filename="../../src/Gui/Application/SettingsWidget.ui" line="48"/>
-        <location filename="../../src/Gui/Application/ui_SettingsWidget.h" line="362"/>
         <source>Music volume:</source>
         <translation>Musiklautstärke:</translation>
     </message>
     <message>
         <location filename="../../src/Gui/Application/SettingsWidget.ui" line="75"/>
-        <location filename="../../src/Gui/Application/ui_SettingsWidget.h" line="363"/>
         <source>Effects volume:</source>
         <translation>Effektlautstärke:</translation>
     </message>
     <message>
         <location filename="../../src/Gui/Application/SettingsWidget.ui" line="156"/>
-        <location filename="../../src/Gui/Application/ui_SettingsWidget.h" line="367"/>
         <source>Reduce time holding SHIFT::</source>
         <translation>Reduziere die UMSCHALT-Haltezeit::</translation>
     </message>
     <message>
         <location filename="../../src/Gui/Application/SettingsWidget.ui" line="97"/>
-        <location filename="../../src/Gui/Application/ui_SettingsWidget.h" line="374"/>
         <source>Battle View</source>
         <translation>Kampfansicht</translation>
     </message>
     <message>
         <location filename="../../src/Gui/Application/SettingsWidget.ui" line="39"/>
-        <location filename="../../src/Gui/Application/ui_SettingsWidget.h" line="364"/>
         <source>Sound</source>
         <translation>Sound</translation>
     </message>
     <message>
         <location filename="../../src/Gui/Application/SettingsWidget.ui" line="114"/>
-        <location filename="../../src/Gui/Application/ui_SettingsWidget.h" line="365"/>
         <source>Battle movement time %:</source>
         <translation>Kampfbewegungszeit:</translation>
     </message>
     <message>
         <location filename="../../src/Gui/Application/SettingsWidget.ui" line="135"/>
-        <location filename="../../src/Gui/Application/ui_SettingsWidget.h" line="366"/>
         <source>Battle general anim. time %:</source>
         <translation>Generelle Kampfanimationszeit:</translation>
     </message>
     <message>
         <location filename="../../src/Gui/Application/SettingsWidget.ui" line="184"/>
-        <location filename="../../src/Gui/Application/ui_SettingsWidget.h" line="368"/>
         <source>Display grid</source>
         <translation>Zeige Gitter</translation>
     </message>
     <message>
         <location filename="../../src/Gui/Application/SettingsWidget.ui" line="191"/>
-        <location filename="../../src/Gui/Application/ui_SettingsWidget.h" line="369"/>
         <source>Display path</source>
         <translation>Zeige Pfad</translation>
     </message>
     <message>
         <location filename="../../src/Gui/Application/SettingsWidget.ui" line="198"/>
-        <location filename="../../src/Gui/Application/ui_SettingsWidget.h" line="370"/>
         <source>Log moves</source>
         <translation>Zeichne Bewegungen auf</translation>
     </message>
     <message>
         <location filename="../../src/Gui/Application/SettingsWidget.ui" line="205"/>
-        <location filename="../../src/Gui/Application/ui_SettingsWidget.h" line="371"/>
         <source>Retaliation hints</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Application/SettingsWidget.ui" line="212"/>
-        <location filename="../../src/Gui/Application/ui_SettingsWidget.h" line="372"/>
         <source>Massive damage hints</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Application/SettingsWidget.ui" line="219"/>
-        <location filename="../../src/Gui/Application/ui_SettingsWidget.h" line="373"/>
         <source>Display death hints in counters</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Application/SettingsWidget.ui" line="229"/>
-        <location filename="../../src/Gui/Application/ui_SettingsWidget.h" line="379"/>
         <source>App global</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Gui/Application/SettingsWidget.ui" line="235"/>
-        <location filename="../../src/Gui/Application/ui_SettingsWidget.h" line="375"/>
         <source>&lt;b&gt;Warning&lt;/b&gt;: all these require application restart!</source>
         <translation>&lt;b&gt;Warnung&lt;/b&gt;: alle diese Dinge erfordern einen Neustart der Anwendung!</translation>
     </message>
     <message>
         <location filename="../../src/Gui/Application/SettingsWidget.ui" line="247"/>
-        <location filename="../../src/Gui/Application/ui_SettingsWidget.h" line="376"/>
         <source>Log level:</source>
         <translation>Log-Level:</translation>
     </message>
     <message>
         <location filename="../../src/Gui/Application/SettingsWidget.ui" line="264"/>
-        <location filename="../../src/Gui/Application/ui_SettingsWidget.h" line="377"/>
         <source>Language:</source>
         <translation>Sprache:</translation>
     </message>
     <message>
         <location filename="../../src/Gui/Application/SettingsWidget.ui" line="274"/>
-        <location filename="../../src/Gui/Application/ui_SettingsWidget.h" line="378"/>
         <source>Game database:</source>
         <translation>Spieldatenbank:</translation>
     </message>
     <message>
         <location filename="../../src/Gui/Application/SettingsWidget.ui" line="300"/>
-        <location filename="../../src/Gui/Application/ui_SettingsWidget.h" line="382"/>
         <source>User interface</source>
         <translation>Userinterface</translation>
     </message>
     <message>
         <location filename="../../src/Gui/Application/SettingsWidget.ui" line="306"/>
-        <location filename="../../src/Gui/Application/ui_SettingsWidget.h" line="380"/>
         <source>Show absolute value in Morale/Luck</source>
         <translation>Zeige absoluten Moral/Glück-Wert</translation>
     </message>
     <message>
         <location filename="../../src/Gui/Application/SettingsWidget.ui" line="313"/>
-        <location filename="../../src/Gui/Application/ui_SettingsWidget.h" line="381"/>
         <source>Clamp Morale/Luck to efffective numbers</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2349,43 +2266,36 @@ Class</source>
     <name>StackSelectorPackWidget</name>
     <message>
         <location filename="../../src/Gui/Editor/StackSelectorPackWidget.ui" line="26"/>
-        <location filename="../../src/Gui/Editor/ui_StackSelectorPackWidget.h" line="135"/>
         <source>Slot 1:</source>
         <translation>Slot 1:</translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/StackSelectorPackWidget.ui" line="43"/>
-        <location filename="../../src/Gui/Editor/ui_StackSelectorPackWidget.h" line="136"/>
         <source>Slot 2:</source>
         <translation>Slot 2:</translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/StackSelectorPackWidget.ui" line="60"/>
-        <location filename="../../src/Gui/Editor/ui_StackSelectorPackWidget.h" line="137"/>
         <source>Slot 3:</source>
         <translation>Slot 3:</translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/StackSelectorPackWidget.ui" line="77"/>
-        <location filename="../../src/Gui/Editor/ui_StackSelectorPackWidget.h" line="138"/>
         <source>Slot 4:</source>
         <translation>Slot 4:</translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/StackSelectorPackWidget.ui" line="94"/>
-        <location filename="../../src/Gui/Editor/ui_StackSelectorPackWidget.h" line="139"/>
         <source>Slot 5:</source>
         <translation>Slot 5:</translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/StackSelectorPackWidget.ui" line="111"/>
-        <location filename="../../src/Gui/Editor/ui_StackSelectorPackWidget.h" line="140"/>
         <source>Slot 6:</source>
         <translation>Slot 6:</translation>
     </message>
     <message>
         <location filename="../../src/Gui/Editor/StackSelectorPackWidget.ui" line="128"/>
-        <location filename="../../src/Gui/Editor/ui_StackSelectorPackWidget.h" line="141"/>
         <source>Slot 7:</source>
         <translation>Slot 7:</translation>
     </message>

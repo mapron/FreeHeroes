@@ -102,47 +102,47 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="256"/>
+        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="261"/>
         <source>Extracting files...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="278"/>
+        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="283"/>
         <source>Preparing conversion list...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="288"/>
+        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="293"/>
         <source>Conversion of media...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="302"/>
+        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="307"/>
         <source>Translation generation...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="328"/>
+        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="333"/>
         <source>Done in %1 seconds.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="335"/>
+        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="340"/>
         <source>Removing folder contents</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="335"/>
+        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="340"/>
         <source>Are you sure?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="345"/>
+        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="350"/>
         <source>Files are removing...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="364"/>
+        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="369"/>
         <source>Cleanup done.</source>
         <translation type="unfinished"></translation>
     </message>

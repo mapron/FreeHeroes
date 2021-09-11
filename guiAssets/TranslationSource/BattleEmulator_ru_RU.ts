@@ -205,17 +205,17 @@ adventure mode</source>
         <translation>%1 - больше не помеха, и %2 теперь у вас в руках.</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="531"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="550"/>
         <source>AI reached step limit: that probably an error.</source>
         <translation>ИИ достиг лимита шагов; это возможно ошибка.</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="585"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="604"/>
         <source>Glorious victory!&lt;br&gt;For the valor in the battle, %1 recieves %2 experience</source>
         <translation>Славная победа!&lt;br&gt;За доблесть в боюю %1 получает %2 опыта</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="585"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="604"/>
         <source>Your forces have suffered a crushing defeat, and %1 now leaves you</source>
         <translation>Ваши войска потерпели сокрушительное поражение, и %1 теперь покидает вас</translation>
     </message>

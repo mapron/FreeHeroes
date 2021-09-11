@@ -202,17 +202,17 @@ adventure mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="531"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="550"/>
         <source>AI reached step limit: that probably an error.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="585"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="604"/>
         <source>Glorious victory!&lt;br&gt;For the valor in the battle, %1 recieves %2 experience</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="585"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="604"/>
         <source>Your forces have suffered a crushing defeat, and %1 now leaves you</source>
         <translation type="unfinished"></translation>
     </message>
