@@ -725,7 +725,7 @@ Class</string>
                </layout>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_11" stretch="0,0,1">
+               <layout class="QHBoxLayout" name="horizontalLayout_111" stretch="0,0,1">
                 <property name="spacing">
                  <number>0</number>
                 </property>
