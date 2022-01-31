@@ -45,6 +45,7 @@ private:
     void swapItems(Core::AdventureStackConstPtr first, Core::AdventureStackConstPtr second);
     void equalSplit(Core::AdventureStackConstPtr active);
     void splitOneUnit(Core::AdventureStackConstPtr active);
+    void splitOnesFill(Core::AdventureStackConstPtr active);
     void groupTogether(Core::AdventureStackConstPtr active);
     void clearState();
 

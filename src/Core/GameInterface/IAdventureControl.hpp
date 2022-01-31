@@ -22,6 +22,7 @@ public:
         Swap,
         EqualSplit,
         SplitOne,
+        SplitOnesFilling,
         GroupTogether
     };
 

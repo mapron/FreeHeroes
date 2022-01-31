@@ -15,10 +15,9 @@ namespace Gui {
 class GuiAdventureArmy;
 }
 
-class AdventureControl : public QObject
-    , public Core::IAdventureHeroControl
+class AdventureControl
+    : public Core::IAdventureHeroControl
     , public Core::IAdventureSquadControl {
-    Q_OBJECT
 public:
     AdventureControl(Gui::GuiAdventureArmy& army);
 

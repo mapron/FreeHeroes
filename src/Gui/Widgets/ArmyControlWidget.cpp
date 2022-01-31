@@ -159,8 +159,7 @@ void ArmyControlWidget::paintEvent(QPaintEvent* e)
 
 void ArmyControlWidget::swapItems(AdventureStackConstPtr first, AdventureStackConstPtr second)
 {
-    IAdventureSquadControl::StackAction act;
-    act.type = IAdventureSquadControl::StackActionType::Swap;
+    IAdventureSquadControl::StackAction act{ IAdventureSquadControl::StackActionType::Swap };
     act.from = first;
     act.to   = second;
     m_impl->m_adventureSquadControl->heroStackAction(act);
@@ -168,16 +167,21 @@ void ArmyControlWidget::swapItems(AdventureStackConstPtr first, AdventureStackCo
 
 void ArmyControlWidget::equalSplit(AdventureStackConstPtr active)
 {
-    IAdventureSquadControl::StackAction act;
-    act.type = IAdventureSquadControl::StackActionType::EqualSplit;
+    IAdventureSquadControl::StackAction act{ IAdventureSquadControl::StackActionType::EqualSplit };
     act.from = active;
     m_impl->m_adventureSquadControl->heroStackAction(act);
 }
 
 void ArmyControlWidget::splitOneUnit(AdventureStackConstPtr active)
 {
-    IAdventureSquadControl::StackAction act;
-    act.type = IAdventureSquadControl::StackActionType::SplitOne;
+    IAdventureSquadControl::StackAction act{ IAdventureSquadControl::StackActionType::SplitOne };
+    act.from = active;
+    m_impl->m_adventureSquadControl->heroStackAction(act);
+}
+
+void ArmyControlWidget::splitOnesFill(Core::AdventureStackConstPtr active)
+{
+    IAdventureSquadControl::StackAction act{ IAdventureSquadControl::StackActionType::SplitOnesFilling };
     act.from = active;
     m_impl->m_adventureSquadControl->heroStackAction(act);
 }
@@ -202,10 +206,11 @@ void ArmyControlWidget::UnitButton::mousePressEvent(QMouseEvent* e)
 {
     DarkFrameLabel::mousePressEvent(e);
 
-    const bool noMods     = e->modifiers() == Qt::NoModifier;
-    const bool shiftMod   = e->modifiers() == Qt::ShiftModifier;
-    const bool controlMod = e->modifiers() == Qt::ControlModifier;
-    const bool altMod     = e->modifiers() == Qt::AltModifier;
+    const bool noMods       = e->modifiers() == Qt::NoModifier;
+    const bool shiftMod     = e->modifiers() == Qt::ShiftModifier;
+    const bool controlMod   = e->modifiers() == Qt::ControlModifier;
+    const bool altMod       = e->modifiers() == Qt::AltModifier;
+    const bool shiftCtrlMod = e->modifiers() == (Qt::ShiftModifier | Qt::ControlModifier);
 
     if (e->button() == Qt::RightButton) {
         if (m_stack->isValid())
@@ -249,7 +254,9 @@ void ArmyControlWidget::UnitButton::mousePressEvent(QMouseEvent* e)
         return;
     }
 
-    if (shiftMod) {
+    if (shiftCtrlMod) {
+        m_parent->splitOnesFill(m_stack->getSource());
+    } else if (shiftMod) {
         m_parent->equalSplit(m_stack->getSource());
     } else if (controlMod) {
         m_parent->splitOneUnit(m_stack->getSource());

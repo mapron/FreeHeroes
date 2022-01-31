@@ -75,6 +75,16 @@ void AdventureControl::heroStackAction(StackAction action)
                 return;
             }
         }
+    } else if (action.type == StackActionType::SplitOnesFilling) {
+        for (size_t i = 0; i < guiSquad->getCount(); ++i) {
+            if (fromCount < 2)
+                break;
+            if (!guiSquad->getStackUnitLibrary(i)) {
+                guiSquad->getStack(i)->setParams(fromLibrary, 1);
+                fromCount--;
+            }
+        }
+        stackFrom->setCount(fromCount);
     } else if (action.type == StackActionType::GroupTogether) {
         for (size_t i = 0; i < guiSquad->getCount(); ++i) {
             if ((int) i == action.from->armyParams.indexInArmy)
