@@ -5,12 +5,13 @@
  */
 #pragma once
 
-#include <json_fwd.hpp>
-
 #include <rttr/type>
 
+namespace FreeHeroes {
+class PropertyTree;
+}
 namespace FreeHeroes::Core::Reflection {
 
-nlohmann::json serializeToJson(rttr::instance obj);
+PropertyTree serializeToJson(rttr::instance obj);
 
 }

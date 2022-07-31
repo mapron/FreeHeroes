@@ -5,17 +5,19 @@
  */
 #pragma once
 
-#include <json_fwd.hpp>
+namespace FreeHeroes {
+class PropertyTree;
+}
 
 namespace FreeHeroes::Core::Reflection {
 
-void libraryReflectionStub();
+void libraryReflectionInit();
 
 class IJsonTransform {
 public:
-    virtual ~IJsonTransform()                                                                 = default;
-    [[nodiscard]] virtual bool needTransform(const nlohmann::json& in) const noexcept         = 0;
-    virtual bool               transform(const nlohmann::json& in, nlohmann::json& out) const = 0;
+    virtual ~IJsonTransform()                                                             = default;
+    [[nodiscard]] virtual bool needTransform(const PropertyTree& in) const noexcept       = 0;
+    virtual bool               transform(const PropertyTree& in, PropertyTree& out) const = 0;
 };
 
 template<class T>

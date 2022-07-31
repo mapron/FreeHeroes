@@ -7,6 +7,6 @@
 
 namespace FreeHeroes::Core::Reflection {
 
-void adventureReflectionStub();
+void adventureReflectionInit();
 
 }

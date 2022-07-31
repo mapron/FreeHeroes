@@ -23,27 +23,25 @@
 
 #include "StringUtils.hpp"
 
-#include <json.hpp>
+#include "PropertyTree.hpp"
 
 #include <cassert>
 
 namespace FreeHeroes::Core::Reflection {
 
-using namespace nlohmann;
-
-bool deserialize(LibraryIdResolver& idResolver, LibraryFaction& faction, const json& jsonObj)
+bool deserialize(LibraryIdResolver& idResolver, LibraryFaction& faction, const PropertyTree& jsonObj)
 {
     deserializeFromJson(idResolver, faction, jsonObj);
     return true;
 }
 
-bool deserialize(LibraryIdResolver& idResolver, LibrarySecondarySkill& skill, const json& jsonObj)
+bool deserialize(LibraryIdResolver& idResolver, LibrarySecondarySkill& skill, const PropertyTree& jsonObj)
 {
     deserializeFromJson(idResolver, skill, jsonObj);
     return true;
 }
 
-bool deserialize(LibraryIdResolver& idResolver, LibraryUnit& unit, const json& jsonObj)
+bool deserialize(LibraryIdResolver& idResolver, LibraryUnit& unit, const PropertyTree& jsonObj)
 {
     using namespace FreeHeroes::Core;
 
@@ -59,61 +57,61 @@ bool deserialize(LibraryIdResolver& idResolver, LibraryUnit& unit, const json& j
     return true;
 }
 
-bool deserialize(LibraryIdResolver& idResolver, LibraryHeroSpec& spec, const json& jsonObj)
+bool deserialize(LibraryIdResolver& idResolver, LibraryHeroSpec& spec, const PropertyTree& jsonObj)
 {
     deserializeFromJson(idResolver, spec, jsonObj);
     return true;
 }
 
-bool deserialize(LibraryIdResolver& idResolver, LibraryArtifact& artifact, const json& jsonObj)
+bool deserialize(LibraryIdResolver& idResolver, LibraryArtifact& artifact, const PropertyTree& jsonObj)
 {
     deserializeFromJson(idResolver, artifact, jsonObj);
     return true;
 }
 
-bool deserialize(LibraryIdResolver& idResolver, LibraryHero& hero, const json& jsonObj)
+bool deserialize(LibraryIdResolver& idResolver, LibraryHero& hero, const PropertyTree& jsonObj)
 {
     deserializeFromJson(idResolver, hero, jsonObj);
     return true;
 }
 
-bool deserialize(LibraryIdResolver& idResolver, LibrarySpell& spell, const json& jsonObj)
+bool deserialize(LibraryIdResolver& idResolver, LibrarySpell& spell, const PropertyTree& jsonObj)
 {
     deserializeFromJson(idResolver, spell, jsonObj);
     return true;
 }
 
-bool deserialize(LibraryIdResolver& idResolver, LibraryResource& obj, const json& jsonObj)
+bool deserialize(LibraryIdResolver& idResolver, LibraryResource& obj, const PropertyTree& jsonObj)
 {
     deserializeFromJson(idResolver, obj, jsonObj);
     return true;
 }
 
-bool deserialize(LibraryIdResolver& idResolver, LibraryTerrain& obj, const json& jsonObj)
+bool deserialize(LibraryIdResolver& idResolver, LibraryTerrain& obj, const PropertyTree& jsonObj)
 {
     deserializeFromJson(idResolver, obj, jsonObj);
     return true;
 }
 
-bool deserialize(LibraryIdResolver& idResolver, LibraryMapObject& obj, const json& jsonObj)
+bool deserialize(LibraryIdResolver& idResolver, LibraryMapObject& obj, const PropertyTree& jsonObj)
 {
     deserializeFromJson(idResolver, obj, jsonObj);
 
     return true;
 }
 
-bool deserialize(LibraryIdResolver& idResolver, SkillHeroItem& obj, const json& jsonObj)
+bool deserialize(LibraryIdResolver& idResolver, SkillHeroItem& obj, const PropertyTree& jsonObj)
 {
     deserializeFromJson(idResolver, obj, jsonObj);
     return true;
 }
-bool deserialize(LibraryIdResolver& idResolver, LibraryGameRules& obj, const json& jsonObj)
+bool deserialize(LibraryIdResolver& idResolver, LibraryGameRules& obj, const PropertyTree& jsonObj)
 {
     deserializeFromJson(idResolver, obj, jsonObj);
     return true;
 }
 
-bool serialize(const SkillHeroItem& obj, json& jsonObj)
+bool serialize(const SkillHeroItem& obj, PropertyTree& jsonObj)
 {
     jsonObj = serializeToJson(obj);
     return true;
@@ -122,32 +120,32 @@ bool serialize(const SkillHeroItem& obj, json& jsonObj)
 namespace {
 class AbstractStringTransform : public IJsonTransform {
 public:
-    bool needTransform(const json& in) const noexcept override
+    bool needTransform(const PropertyTree& in) const noexcept override
     {
-        return in.type() == json::value_t::string;
+        return in.isScalar() && in.getScalar().isString();
     }
 };
 
 class TraitsTransform : public IJsonTransform {
 public:
-    bool transform(const json& in, json& out) const override
+    bool transform(const PropertyTree& in, PropertyTree& out) const override
     {
-        for (const auto& elem : in)
-            out[std::string(elem)] = true;
+        for (const auto& elem : in.getList())
+            out[std::string(elem.getScalar().toString())] = PropertyTreeScalar(true);
         return true;
     }
-    bool needTransform(const json& in) const noexcept override
+    bool needTransform(const PropertyTree& in) const noexcept override
     {
-        return in.type() == json::value_t::array;
+        return in.isList();
     }
 };
 
 class ResourceAmountTransform : public AbstractStringTransform {
 public:
-    bool transform(const json& in, json& out) const override
+    bool transform(const PropertyTree& in, PropertyTree& out) const override
     {
-        out = json(json::value_t::object);
-        std::string value(in);
+        out.convertToMap();
+        std::string value(in.getScalar().toString());
 
         if (value.empty() || value == "0") {
             return true;
@@ -158,7 +156,7 @@ public:
             const auto& str     = parts[i];
             auto        partsEq = splitLine(str, '=', true);
             if (partsEq.size() == 1 && !hasGold) {
-                out["gold"] = partsEq[0];
+                out["gold"] = PropertyTreeScalar(partsEq[0]);
                 hasGold     = true;
                 continue;
             }
@@ -169,37 +167,37 @@ public:
             if (!value)
                 return false;
 
-            out[partsEq[0]] = value;
+            out[partsEq[0]] = PropertyTreeScalar(value);
         }
         return true;
     }
 };
 class ArtifactRewardAmountTransform : public AbstractStringTransform {
 public:
-    bool transform(const json& in, json& out) const override
+    bool transform(const PropertyTree& in, PropertyTree& out) const override
     {
-        out = json(json::value_t::object);
-        std::string value(in);
+        out.convertToMap();
+        std::string value(in.getScalar().toString());
 
         if (value.empty()) {
             return true;
         }
         auto  parts     = splitLine(value, ',', true);
         auto& resources = out["artifacts"];
-        resources       = json(json::value_t::array);
+        resources.convertToList();
         for (size_t i = 0; i < parts.size(); ++i) {
-            json        res;
-            const auto& str     = parts[i];
-            auto        partsEq = splitLine(str, '=', true);
+            PropertyTree res;
+            const auto&  str     = parts[i];
+            auto         partsEq = splitLine(str, '=', true);
             if (partsEq.size() != 2 || partsEq[0].empty()) {
                 return {};
             }
             int value = std::atoi(partsEq[1].c_str());
             if (!value)
                 return false;
-            res["class"] = partsEq[0];
-            res["n"]     = value;
-            resources.push_back(res);
+            res["class"] = PropertyTreeScalar(partsEq[0]);
+            res["n"]     = PropertyTreeScalar(value);
+            resources.append(res);
         }
         return true;
     }
@@ -207,13 +205,13 @@ public:
 
 class UnitWithCountTransform : public AbstractStringTransform {
 public:
-    bool transform(const json& in, json& out) const override
+    bool transform(const PropertyTree& in, PropertyTree& out) const override
     {
         //outArray = json(json::value_t::array);
         //for (const auto & in : inArray) {
-        out = json(json::value_t::object);
+        out.convertToMap();
 
-        std::string value(in);
+        std::string value(in.getScalar().toString());
         if (value.empty()) {
             return false;
         }
@@ -224,8 +222,8 @@ public:
         if (count <= 0)
             return false;
 
-        out["id"] = parts[0];
-        out["n"]  = count;
+        out["id"] = PropertyTreeScalar(parts[0]);
+        out["n"]  = PropertyTreeScalar(count);
         // outArray.push_back(out);
         //}
         return true;
@@ -233,14 +231,14 @@ public:
 };
 class StartUnitTransform : public AbstractStringTransform {
 public:
-    bool transform(const json& in, json& out) const override
+    bool transform(const PropertyTree& in, PropertyTree& out) const override
     {
-        std::string value(in);
+        std::string value(in.getScalar().toString());
         auto        parts = splitLine(value, '=', true);
         if (parts.size() != 1 && parts.size() != 2)
             return false;
 
-        out["id"] = parts[0];
+        out["id"] = PropertyTreeScalar(parts[0]);
         if (parts.size() == 1)
             return true;
 
@@ -253,25 +251,25 @@ public:
         if (min <= 0 || max <= 0)
             return false;
 
-        out["stackSize"]["min"] = min;
-        out["stackSize"]["max"] = max;
+        out["stackSize"]["min"] = PropertyTreeScalar(min);
+        out["stackSize"]["max"] = PropertyTreeScalar(max);
         return true;
     }
 };
 class ClassWeightsTransform : public IJsonTransform {
 public:
-    bool needTransform(const json& in) const noexcept override
+    bool needTransform(const PropertyTree& in) const noexcept override
     {
-        return in.type() == json::value_t::object;
+        return in.isMap();
     }
-    bool transform(const json& in, json& out) const override
+    bool transform(const PropertyTree& in, PropertyTree& out) const override
     {
-        out = json(json::value_t::array);
-        for (auto it = in.begin(); it != in.end(); ++it) {
-            json pair;
-            pair["key"]   = it.key();
-            pair["value"] = it.value();
-            out.push_back(pair);
+        out.convertToList();
+        for (auto it = in.getMap().cbegin(); it != in.getMap().cend(); ++it) {
+            PropertyTreeMap pair;
+            pair["key"]   = PropertyTreeScalar(it->first);
+            pair["value"] = it->second;
+            out.append(pair);
         }
         return true;
     }

@@ -11,36 +11,37 @@
 #include "IGameDatabase.hpp"
 #include "LibraryTerrain.hpp"
 #include "LibraryIdResolver.hpp"
-
-#include <json.hpp>
-
-#include <fstream>
+#include "PropertyTree.hpp"
+#include "FileFormatJson.hpp"
+#include "FileIOUtils.hpp"
 
 namespace FreeHeroes::Core {
-using namespace nlohmann;
 
 bool AdventureReplayData::load(const std_path& filename, IGameDatabase& gameDatabase)
 {
-    std::ifstream ifs(filename);
-    if (!ifs)
+    std::string buffer;
+    if (!readFileIntoBuffer(filename, buffer))
         return false;
-    json main;
-    ifs >> main;
+    PropertyTree main;
+    if (!readJsonFromBuffer(buffer, main))
+        return false;
 
-    const json&                   jsonBattle  = main["bat"];
-    const json&                   jsonRecords = jsonBattle["records"];
+    const PropertyTree&           jsonBattle  = main["bat"];
+    const PropertyTree&           jsonRecords = jsonBattle["records"];
     Reflection::LibraryIdResolver idResolver(gameDatabase);
-    for (const json& jsonRecord : jsonRecords) {
-        m_bat.m_records.push_back({});
-        BattleReplayData::EventRecord& event = m_bat.m_records.back();
-        Reflection::deserializeFromJson(idResolver, event, jsonRecord);
-        if (event.type == BattleReplayData::EventRecord::Type::MoveAttack)
-            assert(!event.moveParams.m_movePos.mainPos().isEmpty());
+    if (jsonRecords.isList()) {
+        for (const PropertyTree& jsonRecord : jsonRecords.getList()) {
+            m_bat.m_records.push_back({});
+            BattleReplayData::EventRecord& event = m_bat.m_records.back();
+            Reflection::deserializeFromJson(idResolver, event, jsonRecord);
+            if (event.type == BattleReplayData::EventRecord::Type::MoveAttack)
+                assert(!event.moveParams.m_movePos.mainPos().isEmpty());
+        }
     }
-    const json& jsonAdventure = main["adv"];
-    m_adv.m_seed              = jsonAdventure["seed"];
-    auto terrainId            = static_cast<std::string>(jsonAdventure["terrain"]);
-    m_adv.m_terrain           = gameDatabase.terrains()->find(terrainId);
+    const PropertyTree& jsonAdventure = main["adv"];
+    m_adv.m_seed                      = jsonAdventure["seed"].getScalar().toInt();
+    auto terrainId                    = jsonAdventure["terrain"].getScalar().toString();
+    m_adv.m_terrain                   = gameDatabase.terrains()->find(terrainId);
     assert(m_adv.m_terrain);
     Reflection::deserializeFromJson(idResolver, m_adv.m_field, jsonAdventure["field"]);
     Reflection::deserializeFromJson(idResolver, m_adv.m_att, jsonAdventure["att"]);
@@ -51,25 +52,22 @@ bool AdventureReplayData::load(const std_path& filename, IGameDatabase& gameData
 
 bool AdventureReplayData::save(const std_path& filename) const
 {
-    std::ofstream ofs(filename);
-    if (!ofs)
-        return false;
-
-    json  main;
-    json& jsonBattle  = main["bat"];
-    json& jsonRecords = jsonBattle["records"];
+    PropertyTree  main;
+    PropertyTree& jsonBattle  = main["bat"];
+    PropertyTree& jsonRecords = jsonBattle["records"];
     for (const auto& record : m_bat.m_records) {
-        json row = Reflection::serializeToJson(record);
-        jsonRecords.push_back(std::move(row));
+        PropertyTree row = Reflection::serializeToJson(record);
+        jsonRecords.append(std::move(row));
     }
-    json& jsonAdventure      = main["adv"];
-    jsonAdventure["seed"]    = m_adv.m_seed;
-    jsonAdventure["terrain"] = m_adv.m_terrain->id;
-    jsonAdventure["field"]   = Reflection::serializeToJson(m_adv.m_field);
-    jsonAdventure["att"]     = Reflection::serializeToJson(m_adv.m_att);
-    jsonAdventure["def"]     = Reflection::serializeToJson(m_adv.m_def);
-    ofs << main;
-    return true;
+    PropertyTree& jsonAdventure = main["adv"];
+    jsonAdventure["seed"]       = PropertyTreeScalar(m_adv.m_seed);
+    jsonAdventure["terrain"]    = PropertyTreeScalar(m_adv.m_terrain->id);
+    jsonAdventure["field"]      = Reflection::serializeToJson(m_adv.m_field);
+    jsonAdventure["att"]        = Reflection::serializeToJson(m_adv.m_att);
+    jsonAdventure["def"]        = Reflection::serializeToJson(m_adv.m_def);
+
+    std::string buffer;
+    return writeJsonToBuffer(buffer, main) && writeFileFromBuffer(filename, buffer);
 }
 
 }

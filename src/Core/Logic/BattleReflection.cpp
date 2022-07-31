@@ -17,18 +17,11 @@ using namespace rttr;
 
 #define ref policy::prop::as_reference_wrapper
 
-RTTR_REGISTRATION
+namespace FreeHeroes::Core::Reflection {
+
+void battleReflectionInit()
 {
     using namespace FreeHeroes::Core;
-    registration::enumeration<FieldLayout>("FieldLayout")
-        (
-        value("std"          ,   FieldLayout::Standard),
-        value("obj"          ,   FieldLayout::Object),
-        value("churchyard1"  ,   FieldLayout::Churchyard1),
-        value("churchyard2"  ,   FieldLayout::Churchyard2),
-        value("ruins"        ,   FieldLayout::Ruins),
-        value("spit"         ,   FieldLayout::Spit)
-        );
 
     registration::enumeration<BattleDirection>("BattleDirection")
         (
@@ -116,13 +109,6 @@ RTTR_REGISTRATION
         .property("isUnitCast", &BattlePlanCastParams::m_isUnitCast)
         ;
 
-}
-
-
-namespace FreeHeroes::Core::Reflection {
-
-void battleReflectionStub() {
-// make linker happy
 }
 
 }

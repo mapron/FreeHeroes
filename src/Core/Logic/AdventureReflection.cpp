@@ -14,7 +14,9 @@ using namespace rttr;
 
 #define ref policy::prop::as_reference_wrapper
 
-RTTR_REGISTRATION
+namespace FreeHeroes::Core::Reflection {
+
+void adventureReflectionInit()
 {
     using namespace FreeHeroes::Core;
 
@@ -54,13 +56,6 @@ RTTR_REGISTRATION
         .property("squad"          , &AdventureArmy::squad)(ref)
         ;
 
-
-}
-
-namespace FreeHeroes::Core::Reflection {
-
-void adventureReflectionStub() {
-// make linker happy
 }
 
 }

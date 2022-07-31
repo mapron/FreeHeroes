@@ -81,8 +81,8 @@ else()
 endif()
 
 # nlohmann Json
-AddTargetInterface(NAME nlohmann_json INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/nlohmann_json)
-
+AddTargetInterface(NAME nlohmann_json INCLUDES 3rdparty/nlohmann_json)
+AddTargetInterface(NAME rapidjson INCLUDES 3rdparty)
 
 # Lua and Sol
 set(LUA_DEFINITIONS)
@@ -138,7 +138,8 @@ AddTargetHeaderOnly(FH  NAME GuiInt             INCLUDES src/Gui/Interface  DEPS
 AddTargetHeaderOnly(FH  NAME SoundInt           INCLUDES src/Sound/Interface DEPS Qt5::Widgets)
 
 # Core
-AddTarget          (FH  NAME CorePlatform  TYPE shared   ROOT src/Core/Platform )
+AddTarget          (FH  NAME CorePlatform  TYPE shared   ROOT src/Core/Platform
+	DEPS    rapidjson )
 
 AddTarget(FH TYPE shared NAME CoreRng ROOT src/Core/Rng
     DEPS_FH CorePlatform
@@ -146,12 +147,11 @@ AddTarget(FH TYPE shared NAME CoreRng ROOT src/Core/Rng
 
 AddTarget(FH TYPE shared NAME CoreResource ROOT src/Core/Resource
     DEPS_FH CorePlatform
-    DEPS  nlohmann_json
     )
 
 AddTarget(FH TYPE shared NAME CoreLogic ROOT src/Core/Logic
     DEPS_FH CoreResource CorePlatform GameObjects GameInt
-    DEPS  nlohmann_json sol rttr
+    DEPS sol rttr
     )
 
 AddTarget(FH TYPE shared NAME BattleLogic ROOT src/Core/BattleLogic

@@ -27,6 +27,8 @@
 #include "LibraryIdResolver.hpp"
 
 #include "LibrarySerialize.hpp"
+#include "FileFormatJson.hpp"
+#include "FileIOUtils.hpp"
 
 #include "IResourceLibrary.hpp"
 
@@ -36,8 +38,6 @@
 #include <deque>
 #include <unordered_map>
 #include <cstddef>
-
-using namespace nlohmann;
 
 namespace FreeHeroes::Core {
 namespace {
@@ -98,15 +98,15 @@ struct GameDatabase::Impl {
             return insertObject(id, {});
         }
 
-        bool loadRecordList(Reflection::LibraryIdResolver& idResolver, const json& recordListMap)
+        bool loadRecordList(Reflection::LibraryIdResolver& idResolver, const PropertyTree& recordListMap)
         {
             if (!recordListMap.contains(LibraryContainerKey<T>::scopeName))
                 return true;
-            const json& recordList = recordListMap[LibraryContainerKey<T>::scopeName];
+            const PropertyTreeMap& recordList = recordListMap[LibraryContainerKey<T>::scopeName].getMap();
             for (auto it = recordList.cbegin(); it != recordList.cend(); ++it) {
-                const std::string& id      = it.key();
-                const auto&        jsonObj = it.value();
-                if (jsonObj.type() == json::value_t::null)
+                const std::string& id      = it->first;
+                const auto&        jsonObj = it->second;
+                if (jsonObj.isNull())
                     continue;
 
                 auto* objRecord = findMutable(id);
@@ -118,21 +118,21 @@ struct GameDatabase::Impl {
             return true;
         }
 
-        void prepareObjectKeys(const json& recordListMap)
+        void prepareObjectKeys(const PropertyTree& recordListMap)
         {
             if (!recordListMap.contains(LibraryContainerKey<T>::scopeName))
                 return;
 
-            const json& recordList = recordListMap[LibraryContainerKey<T>::scopeName];
+            const PropertyTreeMap& recordList = recordListMap[LibraryContainerKey<T>::scopeName].getMap();
             m_index.clear();
             m_objects.clear();
             m_unsorted.clear();
             m_sorted.clear();
             for (auto it = recordList.cbegin(); it != recordList.cend(); ++it) {
-                const std::string& id      = it.key();
-                const auto&        jsonObj = it.value();
+                const std::string& id      = it->first;
+                const auto&        jsonObj = it->second;
 
-                if (jsonObj.type() == json::value_t::null)
+                if (jsonObj.isNull())
                     continue;
 
                 auto& objRecord = insertObject(id);
@@ -219,20 +219,25 @@ GameDatabase::Impl::LibraryContainer<LibraryMapObject>& GameDatabase::Impl::getC
     return m_mapObjects;
 }
 
-GameDatabase::GameDatabase(const std::string& dataBaseId, const IResourceLibrary& resourceLibrary)
+GameDatabase::GameDatabase(const std::vector<Resource>& resourceFiles)
     : m_impl(std::make_unique<Impl>())
 {
-    std::vector<std_path>   files;
-    const ResourceDatabase& desc = resourceLibrary.getDatabase(dataBaseId);
-    for (auto& f : desc.filesFullPathsWithDeps) {
-        files.push_back(string2path(f));
+    {
+        static bool s_once{ true };
+        if (s_once) {
+            s_once = false;
+            Reflection::libraryReflectionInit();
+            Reflection::adventureReflectionInit();
+            Reflection::battleReflectionInit();
+        }
     }
-    load(files); // @todo: exception throw??
 
-    // just hacks to make linker happy...
-    Reflection::libraryReflectionStub();
-    Reflection::adventureReflectionStub();
-    Reflection::battleReflectionStub();
+    load(resourceFiles); // @todo: exception throw??
+}
+
+GameDatabase::GameDatabase(const std::string& dataBaseId, const IResourceLibrary& resourceLibrary)
+    : GameDatabase(loadLibrary(dataBaseId, resourceLibrary))
+{
 }
 
 GameDatabase::~GameDatabase()
@@ -294,21 +299,35 @@ LibraryGameRulesConstPtr GameDatabase::gameRules() const
     return &m_impl->m_gameRules;
 }
 
-bool GameDatabase::load(const std::vector<std_path>& files)
+std::vector<GameDatabase::Resource> GameDatabase::loadLibrary(const std::string& dataBaseId, const IResourceLibrary& resourceLibrary)
 {
-    Logger(Logger::Info) << "Preparing to load GameDatabase, total files:" << files.size();
-    json recordObjectMaps = json::object();
-    for (const auto& filename : files) {
-        std::ifstream ifsMain(filename);
-        if (!ifsMain) {
-            Logger(Logger::Warning) << "Skipped file not found:" << path2string(filename) << " (" << std_fs::exists(filename) << ")";
+    std::vector<GameDatabase::Resource> files;
+    const ResourceDatabase&             desc = resourceLibrary.getDatabase(dataBaseId);
+    for (auto& f : desc.filesFullPathsWithDeps) {
+        std::string    buffer;
+        const std_path path{ string2path(f) };
+        if (!readFileIntoBuffer(path, buffer)) {
+            Logger(Logger::Warning) << "Skipped file unable to read:" << f << " (exist:" << std_fs::exists(path) << ")";
             continue;
         }
-        json main;
-        ifsMain >> main;
+        PropertyTree tree;
+        if (!readJsonFromBuffer(buffer, tree)) {
+            Logger(Logger::Warning) << "Skipped invalid json file:" << f;
+            continue;
+        }
+        files.push_back({ tree, path2string(path.filename()) });
+    }
+    return files;
+}
 
-        const int totalRecordsFound = addJsonObjectToIndex(recordObjectMaps, main);
-        Logger(Logger::Info) << "Database JSON parsing finished: " << path2string(filename) << ", total records:" << totalRecordsFound;
+bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
+{
+    Logger(Logger::Info) << "Preparing to load GameDatabase, total files:" << resourceFiles.size();
+    PropertyTree recordObjectMaps;
+    recordObjectMaps.convertToMap();
+    for (const auto& resourceFile : resourceFiles) {
+        const int totalRecordsFound = addJsonObjectToIndex(recordObjectMaps, resourceFile.m_jsonData);
+        Logger(Logger::Info) << "Database JSON parsing finished: " << resourceFile.m_filename << ", total records:" << totalRecordsFound;
     }
 
     // clang-format off

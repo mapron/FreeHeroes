@@ -5,12 +5,14 @@
  */
 #pragma once
 
-#include <json_fwd.hpp>
-
 #include <rttr/type>
+
+namespace FreeHeroes {
+class PropertyTree;
+}
 
 namespace FreeHeroes::Core::Reflection {
 class LibraryIdResolver;
-void deserializeFromJson(LibraryIdResolver& idResolver, rttr::instance obj, const nlohmann::json& jsonObject);
+void deserializeFromJson(LibraryIdResolver& idResolver, rttr::instance obj, const PropertyTree& jsonObject);
 
 }

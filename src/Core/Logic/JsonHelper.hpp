@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include <json.hpp>
+#include "PropertyTree.hpp"
 
 namespace FreeHeroes::Core {
 
@@ -15,34 +15,34 @@ struct ColDesc {
     std::string          key;
     std::vector<ColDesc> children;
 
-    void parseChildren(const nlohmann::json& cols)
+    void parseChildren(const PropertyTreeList& cols)
     {
         children.reserve(cols.size());
         for (const auto& col : cols) {
             ColDesc child;
-            if (col.is_object()) {
-                assert(col.size() == 1);
-                auto it2  = col.cbegin();
-                child.key = it2.key();
-                child.parseChildren(it2.value());
+            if (col.isMap()) {
+                assert(col.getMap().size() == 1);
+                auto it2  = col.getMap().cbegin();
+                child.key = it2->first;
+                child.parseChildren(it2->second.getList());
             } else {
-                child.key = static_cast<std::string>(col);
+                child.key = col.getScalar().toString();
             }
             children.push_back(child);
         }
     }
 
-    void applyValue(nlohmann::json& mainRecord, const nlohmann::json& packedRecord) const
+    void applyValue(PropertyTree& mainRecord, const PropertyTree& packedRecord) const
     {
         if (!children.size()) {
             mainRecord = packedRecord;
         } else {
-            assert(children.size() >= packedRecord.size());
+            assert(children.size() >= packedRecord.getList().size());
             size_t index = 0;
             for (const auto& child : children) {
-                if (index >= packedRecord.size())
+                if (index >= packedRecord.getList().size())
                     break;
-                child.applyValue(mainRecord[child.key], packedRecord[index++]);
+                child.applyValue(mainRecord[child.key], packedRecord.getList()[index++]);
             }
         }
     }
@@ -50,24 +50,24 @@ struct ColDesc {
 
 }
 
-int addJsonObjectToIndex(nlohmann::json& index, const nlohmann::json& fileSections)
+int addJsonObjectToIndex(PropertyTree& index, const PropertyTree& fileSections)
 {
     int totalRecordsFound = 0;
-    for (const auto& section : fileSections) {
-        const std::string type            = section["scope"];
+    for (const auto& section : fileSections.getList()) {
+        const std::string type            = section["scope"].getScalar().toString();
         auto&             recordObjectMap = index[type];
         if (section.contains("compactCols")) { // compressed records.
 
-            const auto& cols = section["compactCols"];
-            const auto& rows = section["records"];
+            const auto& cols = section["compactCols"].getList();
+            const auto& rows = section["records"].getMap();
 
             details::ColDesc colDesc;
             colDesc.parseChildren(cols);
 
             for (auto it = rows.cbegin(); it != rows.cend(); ++it) {
-                const std::string& id         = it.key();
+                const std::string& id         = it->first;
                 auto&              mainRecord = recordObjectMap[id];
-                const auto&        colValues  = it.value();
+                const auto&        colValues  = it->second;
                 colDesc.applyValue(mainRecord, colValues);
                 totalRecordsFound++;
             }
@@ -76,9 +76,9 @@ int addJsonObjectToIndex(nlohmann::json& index, const nlohmann::json& fileSectio
         }
         if (section.contains("records")) { // non-compressed records.
 
-            for (auto it = section["records"].cbegin(); it != section["records"].cend(); ++it) {
-                const std::string& id = it.key();
-                recordObjectMap[id].merge_patch(it.value());
+            for (auto it = section["records"].getMap().cbegin(); it != section["records"].getMap().cend(); ++it) {
+                const std::string& id = it->first;
+                recordObjectMap[id].mergePatch(it->second);
                 totalRecordsFound++;
             }
             continue;

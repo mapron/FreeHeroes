@@ -48,7 +48,10 @@ void registerConverters()
 
 }
 #define ref policy::prop::as_reference_wrapper
-RTTR_REGISTRATION
+
+namespace FreeHeroes::Core::Reflection {
+
+void libraryReflectionInit()
 {
     using namespace FreeHeroes::Core;
     registration::class_<PrimaryRngParams>("PrimaryRngParams")
@@ -760,6 +763,16 @@ RTTR_REGISTRATION
         .property("limits"          , &LibraryGameRules::limits)(ref)
         ;
 
+    registration::enumeration<FieldLayout>("FieldLayout")
+        (
+        value("std"          ,   FieldLayout::Standard),
+        value("obj"          ,   FieldLayout::Object),
+        value("churchyard1"  ,   FieldLayout::Churchyard1),
+        value("churchyard2"  ,   FieldLayout::Churchyard2),
+        value("ruins"        ,   FieldLayout::Ruins),
+        value("spit"         ,   FieldLayout::Spit)
+        );
+    
     // ------------------------------------------------------------------------------------------
 
     registerConverters<LibraryUnit>();
@@ -773,12 +786,5 @@ RTTR_REGISTRATION
     registerConverters<LibraryMapObject>();
     registerConverters<LibraryHeroSpec>();
 }
-
-namespace FreeHeroes::Core::Reflection {
-
-void libraryReflectionStub() {
-// just to make linker happy and not throw away registration.
-}
-
 
 }

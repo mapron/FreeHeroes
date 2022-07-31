@@ -9,65 +9,65 @@
 
 #include "Logger.hpp"
 
-#include <json.hpp>
+#include "PropertyTree.hpp"
 
 namespace FreeHeroes::Core::Reflection {
 
-using namespace nlohmann;
 using namespace rttr;
 
-void serializeToJson(const instance& obj, json& data);
+void serializeToJson(const instance& obj, PropertyTree& data);
 
-void reflectionVariantToJson(const variant& var, json& data);
+void reflectionVariantToJson(const variant& var, PropertyTree& data);
 
-bool scalarToJson(const type& t, const variant& var, json& data)
+bool scalarToJson(const type& t, const variant& var, PropertyTree& data)
 {
     if (t.is_arithmetic()) {
         // clang-format off
-        if (t == type::get<bool>())          data = (var.to_bool());
-        else if (t == type::get<char>())     data = (var.to_bool());
-        else if (t == type::get<int8_t>())   data = (var.to_int8());
-        else if (t == type::get<int16_t>())  data = (var.to_int16());
-        else if (t == type::get<int32_t>())  data = (var.to_int32());
-        else if (t == type::get<int64_t>())  data = (var.to_int64());
-        else if (t == type::get<uint8_t>())  data = (var.to_uint8());
-        else if (t == type::get<uint16_t>()) data = (var.to_uint16());
-        else if (t == type::get<uint32_t>()) data = (var.to_uint32());
-        else if (t == type::get<uint64_t>()) data = (var.to_uint64());
-        else if (t == type::get<float>())    data = (var.to_double());
-        else if (t == type::get<double>())   data = (var.to_double());
+        if (t == type::get<bool>())          data = PropertyTreeScalar(var.to_bool());
+        else if (t == type::get<char>())     data = PropertyTreeScalar(var.to_bool());
+        else if (t == type::get<int8_t>())   data = PropertyTreeScalar(var.to_int8());
+        else if (t == type::get<int16_t>())  data = PropertyTreeScalar(var.to_int16());
+        else if (t == type::get<int32_t>())  data = PropertyTreeScalar(var.to_int32());
+        else if (t == type::get<int64_t>())  data = PropertyTreeScalar(var.to_int64());
+        else if (t == type::get<uint8_t>())  data = PropertyTreeScalar(var.to_uint8());
+        else if (t == type::get<uint16_t>()) data = PropertyTreeScalar(var.to_uint16());
+        else if (t == type::get<uint32_t>()) data = PropertyTreeScalar(var.to_uint32());
+        else if (t == type::get<uint64_t>()) data = PropertyTreeScalar(var.to_uint64());
+        else if (t == type::get<float>())    data = PropertyTreeScalar(var.to_double());
+        else if (t == type::get<double>())   data = PropertyTreeScalar(var.to_double());
         // clang-format on
         return true;
     } else if (t.is_enumeration()) {
         bool ok     = false;
         auto result = var.to_string(&ok);
         if (ok) {
-            data = (var.to_string());
+            data = PropertyTreeScalar(var.to_string());
         } else {
             ok         = false;
             auto value = var.to_uint64(&ok);
             if (ok)
-                data = (value);
+                data = PropertyTreeScalar(value);
             else
-                data = json(json::value_t::null);
+                data = PropertyTreeScalar{};
         }
 
         return true;
     } else if (t == type::get<std::string>()) {
-        data = (var.to_string());
+        data = PropertyTreeScalar(var.to_string());
         return true;
     } else if (LibraryIdResolver::hasResolver(t)) {
-        data = (var.to_string()); // converter function will do all magic.
+        data = PropertyTreeScalar(var.to_string()); // converter function will do all magic.
         return true;
     }
 
     return false;
 }
 
-static void reflectionSequenceToJson(const variant_sequential_view& view, json& data)
+static void reflectionSequenceToJson(const variant_sequential_view& view, PropertyTree& data)
 {
+    data.convertToList();
     for (const auto& item : view) {
-        json element;
+        PropertyTree element;
         if (item.is_sequential_container()) {
             reflectionSequenceToJson(item.create_sequential_view(), element);
         } else {
@@ -76,32 +76,34 @@ static void reflectionSequenceToJson(const variant_sequential_view& view, json& 
             if (!scalarToJson(valueType, wrappedVar, element))
                 serializeToJson(wrappedVar, element);
         }
-        data.push_back(std::move(element));
+        data.append(std::move(element));
     }
 }
 
-static void reflectionMapToJson(const variant_associative_view& view, json& data)
+static void reflectionMapToJson(const variant_associative_view& view, PropertyTree& data)
 {
     if (view.is_key_only_type()) {
         for (auto& item : view) {
-            json element;
+            PropertyTree element;
             reflectionVariantToJson(item.first, element);
-            data.push_back(element);
+            data.append(element);
         }
     } else {
         for (auto& item : view) {
-            json keyValue;
+            PropertyTree keyValue;
             reflectionVariantToJson(item.first, keyValue);
 
-            json valueValue;
+            PropertyTree valueValue;
             reflectionVariantToJson(item.second, valueValue);
-            assert(keyValue.is_string());
-            data.push_back(json{ { "key", keyValue }, { "value", valueValue } });
+            assert(keyValue.isScalar() && keyValue.getScalar().isString());
+            PropertyTree keyValuePair;
+
+            data.append(PropertyTreeMap{ { "key", keyValue }, { "value", valueValue } });
         }
     }
 }
 
-void reflectionVariantToJson(const variant& var, json& data)
+void reflectionVariantToJson(const variant& var, PropertyTree& data)
 {
     auto valueType   = var.get_type();
     auto wrappedType = valueType.is_wrapper() ? valueType.get_wrapped_type() : valueType;
@@ -121,7 +123,7 @@ void reflectionVariantToJson(const variant& var, json& data)
     }
 }
 
-void serializeToJson(const instance& obj2, json& data)
+void serializeToJson(const instance& obj2, PropertyTree& data)
 {
     instance obj = obj2.get_type().get_raw_type().is_wrapper() ? obj2.get_wrapped_instance() : obj2;
 
@@ -134,20 +136,20 @@ void serializeToJson(const instance& obj2, json& data)
         if (!prop_value)
             continue; // cannot serialize, because we cannot retrieve the value
 
-        const auto name = prop.get_name();
-        json       value;
+        const auto   name = prop.get_name();
+        PropertyTree value;
         reflectionVariantToJson(prop_value, value);
 
         data[name.to_string()] = std::move(value);
     }
 }
 
-json serializeToJson(instance obj)
+PropertyTree serializeToJson(instance obj)
 {
     if (!obj.is_valid())
-        return json();
+        return {};
 
-    json j;
+    PropertyTree j;
     serializeToJson(obj, j);
     return j;
 }
