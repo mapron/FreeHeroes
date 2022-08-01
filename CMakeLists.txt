@@ -84,6 +84,9 @@ endif()
 AddTargetInterface(NAME nlohmann_json INCLUDES 3rdparty/nlohmann_json)
 AddTargetInterface(NAME rapidjson INCLUDES 3rdparty)
 
+# frozen 
+AddTargetInterface(NAME frozen INCLUDES 3rdparty/frozen/include)
+
 # Lua and Sol
 set(LUA_DEFINITIONS)
 if(UNIX)
@@ -151,7 +154,7 @@ AddTarget(FH TYPE shared NAME CoreResource ROOT src/Core/Resource
 
 AddTarget(FH TYPE shared NAME CoreLogic ROOT src/Core/Logic
     DEPS_FH CoreResource CorePlatform GameObjects GameInt
-    DEPS sol rttr
+    DEPS sol rttr frozen
     )
 
 AddTarget(FH TYPE shared NAME BattleLogic ROOT src/Core/BattleLogic
