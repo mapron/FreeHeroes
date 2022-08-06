@@ -56,8 +56,8 @@ FreeHeroes - это исполняемый файл (exe), который мож
 # Стороннее ПО, поставляемое вместе с исходным кодом проекта:
 1. Googletest, https://github.com/google/googletest, [ BSD-3-Clause License ](https://github.com/google/googletest/blob/master/LICENSE)
 2. Lua interpreter, https://www.lua.org/ , [MIT License](https://www.lua.org/license.html)
-3. nlohmann json, https://github.com/nlohmann/json, [MIT License](https://github.com/nlohmann/json/blob/develop/LICENSE.MIT)
-4. RTTR, https://github.com/rttrorg/rttr, [MIT License](https://github.com/rttrorg/rttr/blob/master/LICENSE.txt)
+3. Rapidjson, https://github.com/Tencent/rapidjson, [MIT License/BSD license](https://github.com/Tencent/rapidjson/blob/master/license.txt)
+4. Frozen, https://github.com/serge-sans-paille/frozen, [APACHE 2 License](https://github.com/serge-sans-paille/frozen/blob/master/LICENSE)
 5. SOL, https://github.com/ThePhD/sol2, [MIT License](https://github.com/ThePhD/sol2/blob/develop/LICENSE.txt)
 6. ZLib, https://github.com/madler/zlib, [ZLib license](https://opensource.org/licenses/Zlib)  
 
