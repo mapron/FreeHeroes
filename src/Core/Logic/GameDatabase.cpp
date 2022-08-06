@@ -20,12 +20,6 @@
 #include "LibraryMapObject.hpp"
 #include "LibraryGameRules.hpp"
 
-#include "LibraryReflection.hpp"
-#include "AdventureReflection.hpp"
-#include "BattleReflection.hpp"
-
-#include "LibraryIdResolver.hpp"
-
 #include "LibrarySerialize.hpp"
 #include "FileFormatJson.hpp"
 #include "FileIOUtils.hpp"
@@ -98,7 +92,7 @@ struct GameDatabase::Impl {
             return insertObject(id, {});
         }
 
-        bool loadRecordList(Reflection::LibraryIdResolver& idResolver, const PropertyTree& recordListMap)
+        bool loadRecordList(IGameDatabase& idResolver, const PropertyTree& recordListMap)
         {
             if (!recordListMap.contains(LibraryContainerKey<T>::scopeName))
                 return true;
@@ -222,16 +216,6 @@ GameDatabase::Impl::LibraryContainer<LibraryMapObject>& GameDatabase::Impl::getC
 GameDatabase::GameDatabase(const std::vector<Resource>& resourceFiles)
     : m_impl(std::make_unique<Impl>())
 {
-    {
-        static bool s_once{ true };
-        if (s_once) {
-            s_once = false;
-            Reflection::libraryReflectionInit();
-            Reflection::adventureReflectionInit();
-            Reflection::battleReflectionInit();
-        }
-    }
-
     load(resourceFiles); // @todo: exception throw??
 }
 
@@ -343,27 +327,25 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
     m_impl->m_mapObjects .prepareObjectKeys(recordObjectMaps);
     // clang-format on
 
-    Reflection::LibraryIdResolver idResolver(*this);
-
     // clang-format off
     const bool result =
-               m_impl->m_terrains   .loadRecordList(idResolver, recordObjectMaps)
-            && m_impl->m_resources  .loadRecordList(idResolver, recordObjectMaps)
-            && m_impl->m_factions   .loadRecordList(idResolver, recordObjectMaps)
-            && m_impl->m_skills     .loadRecordList(idResolver, recordObjectMaps)
-            && m_impl->m_spells     .loadRecordList(idResolver, recordObjectMaps)
-            && m_impl->m_units      .loadRecordList(idResolver, recordObjectMaps)
-            && m_impl->m_specs      .loadRecordList(idResolver, recordObjectMaps)
-            && m_impl->m_artifacts  .loadRecordList(idResolver, recordObjectMaps)
-            && m_impl->m_heroes     .loadRecordList(idResolver, recordObjectMaps)
-            && m_impl->m_mapObjects .loadRecordList(idResolver, recordObjectMaps)
+               m_impl->m_terrains   .loadRecordList(*this, recordObjectMaps)
+            && m_impl->m_resources  .loadRecordList(*this, recordObjectMaps)
+            && m_impl->m_factions   .loadRecordList(*this, recordObjectMaps)
+            && m_impl->m_skills     .loadRecordList(*this, recordObjectMaps)
+            && m_impl->m_spells     .loadRecordList(*this, recordObjectMaps)
+            && m_impl->m_units      .loadRecordList(*this, recordObjectMaps)
+            && m_impl->m_specs      .loadRecordList(*this, recordObjectMaps)
+            && m_impl->m_artifacts  .loadRecordList(*this, recordObjectMaps)
+            && m_impl->m_heroes     .loadRecordList(*this, recordObjectMaps)
+            && m_impl->m_mapObjects .loadRecordList(*this, recordObjectMaps)
             ;
     // clang-format on
 
     if (!result)
         return false;
 
-    if (!Reflection::deserialize(idResolver, m_impl->m_gameRules, recordObjectMaps["gameRules"][""]))
+    if (!Reflection::deserialize(*this, m_impl->m_gameRules, recordObjectMaps["gameRules"][""]))
         return false;
 
     // making object links.

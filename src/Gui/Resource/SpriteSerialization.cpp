@@ -7,7 +7,8 @@
 
 #include <QPainter>
 
-#include <json.hpp>
+#include "FileFormatJson.hpp"
+#include "FileIOUtils.hpp"
 
 #include <fstream>
 
@@ -61,9 +62,8 @@ bool saveSprite(const SpritePtr& spriteSet, const std_path& jsonFilePath, const 
 
     int totalWidth  = 0;
     int totalHeight = 0;
-    using namespace nlohmann;
 
-    json               groupsMap;
+    PropertyTree       groupsMap;
     QMap<int, QPixmap> framesMap;
     QMap<int, int>     groupIdToHeight;
 
@@ -75,38 +75,38 @@ bool saveSprite(const SpritePtr& spriteSet, const std_path& jsonFilePath, const 
         int       maxFrameHeight     = 0;
         int       totalFrameWidth    = 0;
 
-        json group;
-        group["boundarySizeWidth"]  = boundarySizeWidth;
-        group["boundarySizeHeight"] = boundarySizeHeight;
+        PropertyTree group;
+        group["boundarySizeWidth"]  = PropertyTreeScalar(boundarySizeWidth);
+        group["boundarySizeHeight"] = PropertyTreeScalar(boundarySizeHeight);
         {
-            json&                       extraObj = group["extra"];
+            PropertyTree&               extraObj = group["extra"];
             const SpriteSequenceParams& p        = pg->params;
             if (p.scaleFactorPercent != 100)
-                extraObj["scaleFactorPercent"] = p.scaleFactorPercent;
+                extraObj["scaleFactorPercent"] = PropertyTreeScalar(p.scaleFactorPercent);
             if (p.animationCycleDuration != 1000)
-                extraObj["animationCycleDuration"] = p.animationCycleDuration;
+                extraObj["animationCycleDuration"] = PropertyTreeScalar(p.animationCycleDuration);
             if (p.specialFrameIndex != -1)
-                extraObj["specialFrameIndex"] = p.specialFrameIndex;
+                extraObj["specialFrameIndex"] = PropertyTreeScalar(p.specialFrameIndex);
             if (!p.actionPoint.isNull()) {
-                extraObj["actionPointX"] = p.actionPoint.x();
-                extraObj["actionPointY"] = p.actionPoint.y();
+                extraObj["actionPointX"] = PropertyTreeScalar(p.actionPoint.x());
+                extraObj["actionPointY"] = PropertyTreeScalar(p.actionPoint.y());
             }
         }
 
-        group["pixHeightOffset"] = totalHeight;
-        json framesJson;
+        group["pixHeightOffset"] = PropertyTreeScalar(totalHeight);
+        PropertyTree framesJson;
         for (const SpriteFrame& frame : pg->frames) {
-            json       frameJson;
-            const bool dup       = frame.duplicate && options.removeDuplicateFrames;
-            frameJson["id"]      = frame.id;
-            frameJson["dup"]     = dup;
-            frameJson["padLeft"] = frame.paddingLeftTop.x();
-            frameJson["padTop"]  = frame.paddingLeftTop.y();
+            PropertyTree frameJson;
+            const bool   dup     = frame.duplicate && options.removeDuplicateFrames;
+            frameJson["id"]      = PropertyTreeScalar(frame.id);
+            frameJson["dup"]     = PropertyTreeScalar(dup);
+            frameJson["padLeft"] = PropertyTreeScalar(frame.paddingLeftTop.x());
+            frameJson["padTop"]  = PropertyTreeScalar(frame.paddingLeftTop.y());
             if (!dup && !options.splitIntoPngFiles) {
-                frameJson["w"] = frame.frame.width();
-                frameJson["h"] = frame.frame.height();
+                frameJson["w"] = PropertyTreeScalar(frame.frame.width());
+                frameJson["h"] = PropertyTreeScalar(frame.frame.height());
             }
-            framesJson.push_back(frameJson);
+            framesJson.append(frameJson);
             if (dup)
                 continue;
 
@@ -166,19 +166,14 @@ bool saveSprite(const SpritePtr& spriteSet, const std_path& jsonFilePath, const 
             return false;
     }
 
-    std::ofstream ofs(jsonFilePath, std::ios_base::out | std::ios_base::trunc);
-    if (!ofs)
-        return false;
+    PropertyTree root;
+    std::string  buffer;
 
-    json root;
-
-    root["version"]       = "1.0";
+    root["version"]       = PropertyTreeScalar("1.0");
     root["groups"]        = std::move(groupsMap);
-    root["splitToFolder"] = options.splitIntoPngFiles;
+    root["splitToFolder"] = PropertyTreeScalar(options.splitIntoPngFiles);
 
-    ofs << std::setw(4) << root;
-
-    return true;
+    return Core::writeJsonToBuffer(buffer, root) && Core::writeFileFromBuffer(jsonFilePath, buffer);
 }
 
 namespace {
@@ -197,18 +192,18 @@ SpritePtr loadSprite(const std_path& jsonFilePath)
     const std_path    folder       = jsonFilePath.parent_path();
     const std::string resourceName = Core::path2string(jsonFilePath.filename().stem().stem());
 
-    std::ifstream ifs(jsonFilePath);
-    if (!ifs)
+    std::string buffer;
+    if (!Core::readFileIntoBuffer(jsonFilePath, buffer))
         return {};
 
-    using namespace nlohmann;
-    json root;
-    ifs >> root;
+    PropertyTree root;
+    if (!Core::readJsonFromBuffer(buffer, root))
+        return {};
 
     QMap<int, QPair<QPixmap, QPoint>> pixes;
 
     const auto& groupsObjList = root["groups"];
-    const bool  usePngSplit   = root["splitToFolder"];
+    const bool  usePngSplit   = root["splitToFolder"].getScalar().toBool();
     QPixmap     inPix;
     if (!usePngSplit) {
         auto   pngFilename = folder / (std_path(resourceName).concat(imageExtension));
@@ -218,37 +213,35 @@ SpritePtr loadSprite(const std_path& jsonFilePath)
 
     QVector<GroupOffsetList> allTasks;
 
-    for (auto it = groupsObjList.begin(); it != groupsObjList.end(); ++it) {
-        const int   groupId     = std::atoi(it.key().c_str());
-        const auto& groupsObj   = it.value();
+    for (const auto& [groupsObjKey, groupsObj] : groupsObjList.getMap()) {
+        const int   groupId     = std::atoi(groupsObjKey.c_str());
         const auto& framesArray = groupsObj["frames"];
 
         GroupOffsetList groupTasks;
 
-        const int pixHeightOffset    = groupsObj.contains("pixHeightOffset") ? (int) groupsObj["pixHeightOffset"] : 0;
-        const int boundarySizeWidth  = groupsObj["boundarySizeWidth"];
-        const int boundarySizeHeight = groupsObj["boundarySizeHeight"];
+        const int pixHeightOffset    = groupsObj.contains("pixHeightOffset") ? groupsObj["pixHeightOffset"].getScalar().toInt() : 0;
+        const int boundarySizeWidth  = groupsObj["boundarySizeWidth"].getScalar().toInt();
+        const int boundarySizeHeight = groupsObj["boundarySizeHeight"].getScalar().toInt();
         groupTasks.boundarySize      = { boundarySizeWidth, boundarySizeHeight };
-        if (groupsObj.contains("extra") && groupsObj["extra"].is_object()) {
+        if (groupsObj.contains("extra") && groupsObj["extra"].isMap()) {
             const auto& extraObj                    = groupsObj["extra"];
-            groupTasks.extra.scaleFactorPercent     = extraObj.value("scaleFactorPercent", 100);
-            groupTasks.extra.specialFrameIndex      = extraObj.value("specialFrameIndex", -1);
-            groupTasks.extra.animationCycleDuration = extraObj.value("animationCycleDuration", 1000);
+            groupTasks.extra.scaleFactorPercent     = extraObj.value("scaleFactorPercent", PropertyTreeScalar(100)).toInt();
+            groupTasks.extra.specialFrameIndex      = extraObj.value("specialFrameIndex", PropertyTreeScalar(-1)).toInt();
+            groupTasks.extra.animationCycleDuration = extraObj.value("animationCycleDuration", PropertyTreeScalar(1000)).toInt();
 
-            groupTasks.extra.actionPoint = extraObj.contains("actionPointX") ? QPoint{ extraObj.value("actionPointX", 0), extraObj.value("actionPointY", 0) } : QPoint{};
+            groupTasks.extra.actionPoint = extraObj.contains("actionPointX") ? QPoint{ (int) extraObj.value("actionPointX", PropertyTreeScalar(0)).toInt(), (int) extraObj.value("actionPointY", PropertyTreeScalar(0)).toInt() } : QPoint{};
         }
 
         groupTasks.groupId = groupId;
 
         int xOffset = 0;
-        for (size_t frameIndex = 0; frameIndex < framesArray.size(); ++frameIndex) {
-            const auto& frameObj = framesArray[frameIndex];
-            const int   id       = frameObj["id"];
-            const bool  dup      = frameObj["dup"];
-            const int   padLeft  = frameObj["padLeft"];
-            const int   padTop   = frameObj["padTop"];
-            const int   w        = frameObj.value("w", 0);
-            const int   h        = frameObj.value("h", 0);
+        for (const auto& frameObj : framesArray.getList()) {
+            const int  id      = frameObj["id"].getScalar().toInt();
+            const bool dup     = frameObj["dup"].getScalar().toInt();
+            const int  padLeft = frameObj["padLeft"].getScalar().toInt();
+            const int  padTop  = frameObj["padTop"].getScalar().toInt();
+            const int  w       = frameObj.value("w", PropertyTreeScalar(0)).toInt();
+            const int  h       = frameObj.value("h", PropertyTreeScalar(0)).toInt();
 
             groupTasks.frameIds << id;
 

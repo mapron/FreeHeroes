@@ -13,28 +13,23 @@
 #include <map>
 #include <cassert>
 #include <iosfwd>
+#include <concepts>
 
 namespace FreeHeroes {
+
+template<class T>
+concept PropertyTreeScalarHeld = std::integral<T> || std::floating_point<T> || std::is_same_v<T, std::string>;
 
 class COREPLATFORM_EXPORT PropertyTreeScalar {
 public:
     PropertyTreeScalar() = default;
-    PropertyTreeScalar(bool value)
-        : m_data(value)
-    {}
-    PropertyTreeScalar(int64_t value)
-        : m_data(value)
-    {}
-    PropertyTreeScalar(int32_t value)
+    PropertyTreeScalar(std::integral auto value)
         : m_data(value)
     {}
     PropertyTreeScalar(uint64_t value)
         : m_data(static_cast<int32_t>(value))
     {}
-    PropertyTreeScalar(uint32_t value)
-        : m_data(value)
-    {}
-    PropertyTreeScalar(double value)
+    PropertyTreeScalar(std::floating_point auto value)
         : m_data(value)
     {}
     PropertyTreeScalar(std::string value)
@@ -44,11 +39,30 @@ public:
     bool operator==(const PropertyTreeScalar& rh) const noexcept { return m_data == rh.m_data; }
 
     // convert value to standard scalar types. If conversion cannot be made, returns default value.
-    bool        toBool() const noexcept;
-    std::string toString() const noexcept;
-    const char* toCString() const noexcept;
-    int64_t     toInt() const noexcept;
-    double      toDouble() const noexcept;
+    bool               toBool() const noexcept;
+    const std::string& toString() const noexcept;
+    const char*        toCString() const noexcept;
+    int64_t            toInt() const noexcept;
+    double             toDouble() const noexcept;
+
+    template<std::integral T>
+    void convertTo(T& value) const noexcept
+    {
+        value = static_cast<T>(toInt());
+    }
+    void convertTo(bool& value) const noexcept
+    {
+        value = toBool();
+    }
+    template<std::floating_point T>
+    void convertTo(T& value) const noexcept
+    {
+        value = static_cast<T>(toDouble());
+    }
+    void convertTo(std::string& value) const noexcept
+    {
+        value = toString();
+    }
 
     // print any possible value as a string.
     std::string dump() const noexcept;

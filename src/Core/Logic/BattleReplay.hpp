@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: MIT
  * See LICENSE file for details.
  */
+#pragma once
 #include "CoreLogicExport.hpp"
 
 #include "IBattleControl.hpp"
@@ -11,7 +12,6 @@
 #include "AdventureArmy.hpp"
 #include "LibraryFwd.hpp"
 #include "BattleField.hpp"
-#include "FsUtils.hpp"
 
 #include <memory>
 #include <deque>

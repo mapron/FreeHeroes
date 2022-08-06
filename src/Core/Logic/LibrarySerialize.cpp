@@ -6,20 +6,10 @@
 #include "LibrarySerialize.hpp"
 #include "LibraryReflection.hpp"
 
-#include "JsonRTTRDeserialize.hpp"
-#include "JsonRTTRSerialize.hpp"
+#include "Reflection/PropertyTreeReader.hpp"
+#include "Reflection/PropertyTreeWriter.hpp"
 
-#include "LibraryFaction.hpp"
-#include "LibrarySecondarySkill.hpp"
-#include "LibraryUnit.hpp"
-#include "LibraryHeroSpec.hpp"
-#include "LibraryArtifact.hpp"
-#include "LibraryHero.hpp"
-#include "LibrarySpell.hpp"
-#include "LibraryTerrain.hpp"
-#include "LibraryResource.hpp"
-#include "LibraryMapObject.hpp"
-#include "LibraryGameRules.hpp"
+#include "IGameDatabase.hpp"
 
 #include "StringUtils.hpp"
 
@@ -29,23 +19,26 @@
 
 namespace FreeHeroes::Core::Reflection {
 
-bool deserialize(LibraryIdResolver& idResolver, LibraryFaction& faction, const PropertyTree& jsonObj)
+bool deserialize(IGameDatabase& gameDatabase, LibraryFaction& faction, const PropertyTree& jsonObj)
 {
-    deserializeFromJson(idResolver, faction, jsonObj);
+    PropertyTreeReader reader(gameDatabase);
+    reader.jsonToValue(jsonObj, faction);
     return true;
 }
 
-bool deserialize(LibraryIdResolver& idResolver, LibrarySecondarySkill& skill, const PropertyTree& jsonObj)
+bool deserialize(IGameDatabase& gameDatabase, LibrarySecondarySkill& skill, const PropertyTree& jsonObj)
 {
-    deserializeFromJson(idResolver, skill, jsonObj);
+    PropertyTreeReader reader(gameDatabase);
+    reader.jsonToValue(jsonObj, skill);
     return true;
 }
 
-bool deserialize(LibraryIdResolver& idResolver, LibraryUnit& unit, const PropertyTree& jsonObj)
+bool deserialize(IGameDatabase& gameDatabase, LibraryUnit& unit, const PropertyTree& jsonObj)
 {
     using namespace FreeHeroes::Core;
 
-    deserializeFromJson(idResolver, unit, jsonObj);
+    PropertyTreeReader reader(gameDatabase);
+    reader.jsonToValue(jsonObj, unit);
     if (unit.primary.armySpeed == 0)
         unit.primary.armySpeed = unit.primary.battleSpeed;
 
@@ -57,261 +50,214 @@ bool deserialize(LibraryIdResolver& idResolver, LibraryUnit& unit, const Propert
     return true;
 }
 
-bool deserialize(LibraryIdResolver& idResolver, LibraryHeroSpec& spec, const PropertyTree& jsonObj)
+bool deserialize(IGameDatabase& gameDatabase, LibraryHeroSpec& spec, const PropertyTree& jsonObj)
 {
-    deserializeFromJson(idResolver, spec, jsonObj);
+    PropertyTreeReader reader(gameDatabase);
+    reader.jsonToValue(jsonObj, spec);
     return true;
 }
 
-bool deserialize(LibraryIdResolver& idResolver, LibraryArtifact& artifact, const PropertyTree& jsonObj)
+bool deserialize(IGameDatabase& gameDatabase, LibraryArtifact& artifact, const PropertyTree& jsonObj)
 {
-    deserializeFromJson(idResolver, artifact, jsonObj);
+    PropertyTreeReader reader(gameDatabase);
+    reader.jsonToValue(jsonObj, artifact);
     return true;
 }
 
-bool deserialize(LibraryIdResolver& idResolver, LibraryHero& hero, const PropertyTree& jsonObj)
+bool deserialize(IGameDatabase& gameDatabase, LibraryHero& hero, const PropertyTree& jsonObj)
 {
-    deserializeFromJson(idResolver, hero, jsonObj);
+    PropertyTreeReader reader(gameDatabase);
+    reader.jsonToValue(jsonObj, hero);
     return true;
 }
 
-bool deserialize(LibraryIdResolver& idResolver, LibrarySpell& spell, const PropertyTree& jsonObj)
+bool deserialize(IGameDatabase& gameDatabase, LibrarySpell& spell, const PropertyTree& jsonObj)
 {
-    deserializeFromJson(idResolver, spell, jsonObj);
+    PropertyTreeReader reader(gameDatabase);
+    reader.jsonToValue(jsonObj, spell);
     return true;
 }
 
-bool deserialize(LibraryIdResolver& idResolver, LibraryResource& obj, const PropertyTree& jsonObj)
+bool deserialize(IGameDatabase& gameDatabase, LibraryResource& obj, const PropertyTree& jsonObj)
 {
-    deserializeFromJson(idResolver, obj, jsonObj);
+    PropertyTreeReader reader(gameDatabase);
+    reader.jsonToValue(jsonObj, obj);
     return true;
 }
 
-bool deserialize(LibraryIdResolver& idResolver, LibraryTerrain& obj, const PropertyTree& jsonObj)
+bool deserialize(IGameDatabase& gameDatabase, LibraryTerrain& obj, const PropertyTree& jsonObj)
 {
-    deserializeFromJson(idResolver, obj, jsonObj);
+    PropertyTreeReader reader(gameDatabase);
+    reader.jsonToValue(jsonObj, obj);
     return true;
 }
 
-bool deserialize(LibraryIdResolver& idResolver, LibraryMapObject& obj, const PropertyTree& jsonObj)
+bool deserialize(IGameDatabase& gameDatabase, LibraryMapObject& obj, const PropertyTree& jsonObj)
 {
-    deserializeFromJson(idResolver, obj, jsonObj);
+    PropertyTreeReader reader(gameDatabase);
+    reader.jsonToValue(jsonObj, obj);
 
     return true;
 }
 
-bool deserialize(LibraryIdResolver& idResolver, SkillHeroItem& obj, const PropertyTree& jsonObj)
+bool deserialize(IGameDatabase& gameDatabase, SkillHeroItem& obj, const PropertyTree& jsonObj)
 {
-    deserializeFromJson(idResolver, obj, jsonObj);
+    PropertyTreeReader reader(gameDatabase);
+    reader.jsonToValue(jsonObj, obj);
     return true;
 }
-bool deserialize(LibraryIdResolver& idResolver, LibraryGameRules& obj, const PropertyTree& jsonObj)
+bool deserialize(IGameDatabase& gameDatabase, LibraryGameRules& obj, const PropertyTree& jsonObj)
 {
-    deserializeFromJson(idResolver, obj, jsonObj);
+    PropertyTreeReader reader(gameDatabase);
+    reader.jsonToValue(jsonObj, obj);
     return true;
 }
 
 bool serialize(const SkillHeroItem& obj, PropertyTree& jsonObj)
 {
-    jsonObj = serializeToJson(obj);
+    PropertyTreeWriter writer;
+    jsonObj = writer.valueToJson(obj);
     return true;
 }
 
-namespace {
-class AbstractStringTransform : public IJsonTransform {
-public:
-    bool needTransform(const PropertyTree& in) const noexcept override
-    {
-        return in.isScalar() && in.getScalar().isString();
+template<>
+BonusRatio MetaInfo::fromString(const std::string& value)
+{
+    auto parts = splitLine(value, '/', true);
+    if (parts.size() == 2) {
+        int n = std::atoi(parts[0].c_str());
+        int d = std::atoi(parts[1].c_str());
+        if (d != 0)
+            return { n, d };
     }
-};
-
-class TraitsTransform : public IJsonTransform {
-public:
-    bool transform(const PropertyTree& in, PropertyTree& out) const override
-    {
-        for (const auto& elem : in.getList())
-            out[std::string(elem.getScalar().toString())] = PropertyTreeScalar(true);
-        return true;
-    }
-    bool needTransform(const PropertyTree& in) const noexcept override
-    {
-        return in.isList();
-    }
-};
-
-class ResourceAmountTransform : public AbstractStringTransform {
-public:
-    bool transform(const PropertyTree& in, PropertyTree& out) const override
-    {
-        out.convertToMap();
-        std::string value(in.getScalar().toString());
-
-        if (value.empty() || value == "0") {
-            return true;
-        }
-        auto parts   = splitLine(value, ',', true);
-        bool hasGold = false;
-        for (size_t i = 0; i < parts.size(); ++i) {
-            const auto& str     = parts[i];
-            auto        partsEq = splitLine(str, '=', true);
-            if (partsEq.size() == 1 && !hasGold) {
-                out["gold"] = PropertyTreeScalar(partsEq[0]);
-                hasGold     = true;
-                continue;
-            }
-            if (partsEq.size() != 2 || partsEq[0].empty()) {
-                return {};
-            }
-            int value = std::atoi(partsEq[1].c_str());
-            if (!value)
-                return false;
-
-            out[partsEq[0]] = PropertyTreeScalar(value);
-        }
-        return true;
-    }
-};
-class ArtifactRewardAmountTransform : public AbstractStringTransform {
-public:
-    bool transform(const PropertyTree& in, PropertyTree& out) const override
-    {
-        out.convertToMap();
-        std::string value(in.getScalar().toString());
-
-        if (value.empty()) {
-            return true;
-        }
-        auto  parts     = splitLine(value, ',', true);
-        auto& resources = out["artifacts"];
-        resources.convertToList();
-        for (size_t i = 0; i < parts.size(); ++i) {
-            PropertyTree res;
-            const auto&  str     = parts[i];
-            auto         partsEq = splitLine(str, '=', true);
-            if (partsEq.size() != 2 || partsEq[0].empty()) {
-                return {};
-            }
-            int value = std::atoi(partsEq[1].c_str());
-            if (!value)
-                return false;
-            res["class"] = PropertyTreeScalar(partsEq[0]);
-            res["n"]     = PropertyTreeScalar(value);
-            resources.append(res);
-        }
-        return true;
-    }
-};
-
-class UnitWithCountTransform : public AbstractStringTransform {
-public:
-    bool transform(const PropertyTree& in, PropertyTree& out) const override
-    {
-        //outArray = json(json::value_t::array);
-        //for (const auto & in : inArray) {
-        out.convertToMap();
-
-        std::string value(in.getScalar().toString());
-        if (value.empty()) {
-            return false;
-        }
-        auto parts = splitLine(value, '=', true);
-        if (parts.size() != 2)
-            return false;
-        const int count = std::atoi(parts[1].c_str());
-        if (count <= 0)
-            return false;
-
-        out["id"] = PropertyTreeScalar(parts[0]);
-        out["n"]  = PropertyTreeScalar(count);
-        // outArray.push_back(out);
-        //}
-        return true;
-    }
-};
-class StartUnitTransform : public AbstractStringTransform {
-public:
-    bool transform(const PropertyTree& in, PropertyTree& out) const override
-    {
-        std::string value(in.getScalar().toString());
-        auto        parts = splitLine(value, '=', true);
-        if (parts.size() != 1 && parts.size() != 2)
-            return false;
-
-        out["id"] = PropertyTreeScalar(parts[0]);
-        if (parts.size() == 1)
-            return true;
-
-        auto partsRange = splitLine(parts[1], '-', true);
-        if (partsRange.size() != 2)
-            return false;
-
-        const int min = std::atoi(partsRange[0].c_str());
-        const int max = std::atoi(partsRange[1].c_str());
-        if (min <= 0 || max <= 0)
-            return false;
-
-        out["stackSize"]["min"] = PropertyTreeScalar(min);
-        out["stackSize"]["max"] = PropertyTreeScalar(max);
-        return true;
-    }
-};
-class ClassWeightsTransform : public IJsonTransform {
-public:
-    bool needTransform(const PropertyTree& in) const noexcept override
-    {
-        return in.isMap();
-    }
-    bool transform(const PropertyTree& in, PropertyTree& out) const override
-    {
-        out.convertToList();
-        for (auto it = in.getMap().cbegin(); it != in.getMap().cend(); ++it) {
-            PropertyTreeMap pair;
-            pair["key"]   = PropertyTreeScalar(it->first);
-            pair["value"] = it->second;
-            out.append(pair);
-        }
-        return true;
-    }
-};
+    return {};
 }
 template<>
-const IJsonTransform* getJsonTransform<UnitWithCount>()
+bool MetaInfo::transformTree<LibraryUnit::Traits>(const PropertyTree& treeIn, PropertyTree& treeOut)
 {
-    static const UnitWithCountTransform transform;
-    return &transform;
-}
-template<>
-const IJsonTransform* getJsonTransform<LibraryUnit::Traits>()
-{
-    static const TraitsTransform transform;
-    return &transform;
+    if (!treeIn.isList())
+        return false;
+    treeOut.convertToMap();
+    for (const auto& elem : treeIn.getList())
+        treeOut[std::string(elem.getScalar().toString())] = PropertyTreeScalar(true);
+    return true;
 }
 
 template<>
-const IJsonTransform* getJsonTransform<LibraryHero::StartStack>()
+bool MetaInfo::transformTree<ResourceAmount>(const PropertyTree& treeIn, PropertyTree& treeOut)
 {
-    static const StartUnitTransform transform;
-    return &transform;
+    if (!treeIn.isScalar())
+        return false;
+
+    treeOut.convertToMap();
+    std::string value(treeIn.getScalar().toString());
+
+    if (value.empty() || value == "0") {
+        return true;
+    }
+    auto parts   = splitLine(value, ',', true);
+    bool hasGold = false;
+    for (size_t i = 0; i < parts.size(); ++i) {
+        const auto& str     = parts[i];
+        auto        partsEq = splitLine(str, '=', true);
+        if (partsEq.size() == 1 && !hasGold) {
+            treeOut["gold"] = PropertyTreeScalar(partsEq[0]);
+            hasGold         = true;
+            continue;
+        }
+        if (partsEq.size() != 2 || partsEq[0].empty()) {
+            return {};
+        }
+        int value = std::atoi(partsEq[1].c_str());
+        if (!value)
+            return false;
+
+        treeOut[partsEq[0]] = PropertyTreeScalar(value);
+    }
+    return true;
 }
 
 template<>
-const IJsonTransform* getJsonTransform<ResourceAmount>()
+bool MetaInfo::transformTree<ArtifactRewardAmount>(const PropertyTree& treeIn, PropertyTree& treeOut)
 {
-    static const ResourceAmountTransform transform;
-    return &transform;
+    if (!treeIn.isScalar())
+        return false;
+
+    treeOut.convertToMap();
+    std::string value(treeIn.getScalar().toString());
+
+    if (value.empty()) {
+        return true;
+    }
+    auto  parts     = splitLine(value, ',', true);
+    auto& resources = treeOut["artifacts"];
+    resources.convertToList();
+    for (size_t i = 0; i < parts.size(); ++i) {
+        PropertyTree res;
+        const auto&  str     = parts[i];
+        auto         partsEq = splitLine(str, '=', true);
+        if (partsEq.size() != 2 || partsEq[0].empty()) {
+            return {};
+        }
+        int value = std::atoi(partsEq[1].c_str());
+        if (!value)
+            return false;
+        res["class"] = PropertyTreeScalar(partsEq[0]);
+        res["n"]     = PropertyTreeScalar(value);
+        resources.append(res);
+    }
+    return true;
 }
 template<>
-const IJsonTransform* getJsonTransform<ArtifactRewardAmount>()
+bool MetaInfo::transformTree<UnitWithCount>(const PropertyTree& treeIn, PropertyTree& treeOut)
 {
-    static const ArtifactRewardAmountTransform transform;
-    return &transform;
+    if (!treeIn.isScalar())
+        return false;
+
+    treeOut.convertToMap();
+
+    std::string value(treeIn.getScalar().toString());
+    if (value.empty()) {
+        return false;
+    }
+    auto parts = splitLine(value, '=', true);
+    if (parts.size() != 2)
+        return false;
+    const int count = std::atoi(parts[1].c_str());
+    if (count <= 0)
+        return false;
+
+    treeOut["id"] = PropertyTreeScalar(parts[0]);
+    treeOut["n"]  = PropertyTreeScalar(count);
+
+    return true;
 }
 template<>
-const IJsonTransform* getJsonTransform<LibraryFactionHeroClass::SkillWeights>()
+bool MetaInfo::transformTree<LibraryHero::StartStack>(const PropertyTree& treeIn, PropertyTree& treeOut)
 {
-    static const ClassWeightsTransform transform;
-    return &transform;
+    if (!treeIn.isScalar())
+        return false;
+    std::string value(treeIn.getScalar().toString());
+    auto        parts = splitLine(value, '=', true);
+    if (parts.size() != 1 && parts.size() != 2)
+        return false;
+
+    treeOut["id"] = PropertyTreeScalar(parts[0]);
+    if (parts.size() == 1)
+        return true;
+
+    auto partsRange = splitLine(parts[1], '-', true);
+    if (partsRange.size() != 2)
+        return false;
+
+    const int min = std::atoi(partsRange[0].c_str());
+    const int max = std::atoi(partsRange[1].c_str());
+    if (min <= 0 || max <= 0)
+        return false;
+
+    treeOut["stackSize"]["min"] = PropertyTreeScalar(min);
+    treeOut["stackSize"]["max"] = PropertyTreeScalar(max);
+    return true;
 }
 
 }

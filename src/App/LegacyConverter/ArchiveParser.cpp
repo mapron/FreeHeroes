@@ -12,12 +12,13 @@
 #include "CompressionUtils.hpp"
 #include "MediaConverter.hpp"
 
+#include "FileFormatJson.hpp"
+#include "FileIOUtils.hpp"
+
 #include "Logger.hpp"
 
 #include <QTextCodec>
 #include <QDataStream>
-
-#include <json.hpp>
 
 #include <fstream>
 #include <iostream>
@@ -446,23 +447,24 @@ bool ArchiveParser::extractHDAT(const ExtractionTask& task, CallbackInserter& co
         }
         m_extractCallbackInc();
 
-        std::ofstream ofs(p, std::ios_base::out | std::ios_base::trunc);
-        if (!ofs)
-            return false;
-
-        using namespace nlohmann;
-        json root;
-        json strings, intParams;
+        std::string  buffer;
+        PropertyTree root;
+        PropertyTree strings, intParams;
+        strings.convertToList();
+        intParams.convertToList();
         for (const auto& val : rec.strList)
-            strings.push_back(val.toStdString());
+            strings.append(PropertyTreeScalar(val.toStdString()));
         for (const auto& val : rec.addParams)
-            intParams.push_back((int) val);
+            intParams.append(PropertyTreeScalar(val));
 
-        root["strings"]   = strings;
-        root["intParams"] = intParams;
-        root["binData"]   = rec.data.toHex().toStdString();
+        root["strings"]   = std::move(strings);
+        root["intParams"] = std::move(intParams);
+        root["binData"]   = PropertyTreeScalar(rec.data.toHex().toStdString());
 
-        ofs << std::setw(4) << root;
+        if (!Core::writeJsonToBuffer(buffer, root))
+            return false;
+        if (!Core::writeFileFromBuffer(p, buffer))
+            return false;
 
         task.resources->registerResource({ ResourceMedia::Type::Other, rec.fname.toStdString(), "json/", outFileName, {} });
     }

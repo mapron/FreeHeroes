@@ -148,6 +148,7 @@ struct AdventureHero {
     ArtifactsBagMap                artifactsBag;
     HeroSkillsList                 secondarySkills;
     std::set<LibrarySpellConstPtr> spellbook;
+    LibrarySpell::Type             someSpell    = LibrarySpell::Type::Offensive;
     bool                           hasSpellBook = false;
 
     int     level                 = 0;

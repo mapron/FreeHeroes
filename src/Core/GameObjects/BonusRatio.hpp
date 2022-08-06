@@ -188,7 +188,7 @@ public:
         return value;
     }
 
-private:
+    //private:
     int64_t m_num   = 0;
     int64_t m_denom = 0;
 };

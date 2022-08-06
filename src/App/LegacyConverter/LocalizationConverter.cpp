@@ -8,20 +8,18 @@
 
 #include "FsUtilsQt.hpp"
 
+#include "FileFormatJson.hpp"
+#include "FileIOUtils.hpp"
+
 #include <QFile>
 #include <QTextCodec>
 
-#include <json.hpp>
-
 #include <fstream>
-
-using namespace nlohmann;
 
 namespace FreeHeroes::Conversion {
 using namespace Core;
 
 class LocalizationConverter::TranscodedFile {
-    //QFile outFile;
     QTextCodec*             m_inputCodec = nullptr;
     std::string             m_localeId;
     std::string             m_contextId;
@@ -187,15 +185,17 @@ void LocalizationConverter::extractHOTA(const std_path& jsonSubdir)
         std::vector<std::string> res;
         auto                     filename = m_root / jsonSubdir / (prefix + std::to_string(index) + ".json");
 
-        std::ifstream monJson(filename);
-        if (!monJson)
-            return res;
+        std::string buffer;
+        if (!Core::readFileIntoBuffer(filename, buffer))
+            return {};
 
-        json monJsonObj;
-        monJson >> monJsonObj;
-        auto& strings = monJsonObj["strings"];
-        for (size_t i = 0; i < strings.size(); ++i)
-            res.push_back(static_cast<std::string>(strings[i]));
+        PropertyTree root;
+        if (!Core::readJsonFromBuffer(buffer, root))
+            return {};
+
+        const auto& strings = root["strings"].getList();
+        for (const auto& str : strings)
+            res.push_back(str.getScalar().toString());
         return res;
     };
 

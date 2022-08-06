@@ -12,23 +12,23 @@ class PropertyTree;
 }
 namespace FreeHeroes::Core {
 struct SkillHeroItem;
+class IGameDatabase;
 }
 namespace FreeHeroes::Core::Reflection {
 
 // wrapper functions to hide RTTR details.
-class LibraryIdResolver;
-bool deserialize(LibraryIdResolver& idResolver, LibraryFaction& faction, const PropertyTree& jsonObj);
-bool deserialize(LibraryIdResolver& idResolver, LibrarySecondarySkill& skill, const PropertyTree& jsonObj);
-bool deserialize(LibraryIdResolver& idResolver, LibraryUnit& unit, const PropertyTree& jsonObj);
-bool deserialize(LibraryIdResolver& idResolver, LibraryHeroSpec& spec, const PropertyTree& jsonObj);
-bool deserialize(LibraryIdResolver& idResolver, LibraryArtifact& artifact, const PropertyTree& jsonObj);
-bool deserialize(LibraryIdResolver& idResolver, LibraryHero& hero, const PropertyTree& jsonObj);
-bool deserialize(LibraryIdResolver& idResolver, LibrarySpell& spell, const PropertyTree& jsonObj);
-bool deserialize(LibraryIdResolver& idResolver, LibraryResource& obj, const PropertyTree& jsonObj);
-bool deserialize(LibraryIdResolver& idResolver, LibraryTerrain& obj, const PropertyTree& jsonObj);
-bool deserialize(LibraryIdResolver& idResolver, LibraryMapObject& obj, const PropertyTree& jsonObj);
-bool deserialize(LibraryIdResolver& idResolver, SkillHeroItem& obj, const PropertyTree& jsonObj);
-bool deserialize(LibraryIdResolver& idResolver, LibraryGameRules& obj, const PropertyTree& jsonObj);
+bool deserialize(IGameDatabase& idResolver, LibraryFaction& faction, const PropertyTree& jsonObj);
+bool deserialize(IGameDatabase& idResolver, LibrarySecondarySkill& skill, const PropertyTree& jsonObj);
+bool deserialize(IGameDatabase& idResolver, LibraryUnit& unit, const PropertyTree& jsonObj);
+bool deserialize(IGameDatabase& idResolver, LibraryHeroSpec& spec, const PropertyTree& jsonObj);
+bool deserialize(IGameDatabase& idResolver, LibraryArtifact& artifact, const PropertyTree& jsonObj);
+bool deserialize(IGameDatabase& idResolver, LibraryHero& hero, const PropertyTree& jsonObj);
+bool deserialize(IGameDatabase& idResolver, LibrarySpell& spell, const PropertyTree& jsonObj);
+bool deserialize(IGameDatabase& idResolver, LibraryResource& obj, const PropertyTree& jsonObj);
+bool deserialize(IGameDatabase& idResolver, LibraryTerrain& obj, const PropertyTree& jsonObj);
+bool deserialize(IGameDatabase& idResolver, LibraryMapObject& obj, const PropertyTree& jsonObj);
+bool deserialize(IGameDatabase& idResolver, SkillHeroItem& obj, const PropertyTree& jsonObj);
+bool deserialize(IGameDatabase& idResolver, LibraryGameRules& obj, const PropertyTree& jsonObj);
 
 bool serialize(const SkillHeroItem& obj, PropertyTree& jsonObj);
 

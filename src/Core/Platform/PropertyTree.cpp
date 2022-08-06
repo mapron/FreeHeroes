@@ -9,6 +9,10 @@
 
 namespace FreeHeroes {
 
+namespace {
+static const std::string s_empty;
+}
+
 bool PropertyTreeScalar::toBool() const noexcept
 {
     if (const auto* bval = std::get_if<bool>(&m_data); bval)
@@ -20,11 +24,11 @@ bool PropertyTreeScalar::toBool() const noexcept
     return false;
 }
 
-std::string PropertyTreeScalar::toString() const noexcept
+const std::string& PropertyTreeScalar::toString() const noexcept
 {
     if (const auto* sval = std::get_if<std::string>(&m_data); sval)
         return *sval;
-    return {};
+    return s_empty;
 }
 
 const char* PropertyTreeScalar::toCString() const noexcept

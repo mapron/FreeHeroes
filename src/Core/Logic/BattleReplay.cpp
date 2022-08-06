@@ -4,33 +4,8 @@
  * See LICENSE file for details.
  */
 #include "BattleReplay.hpp"
-#include "LibrarySpell.hpp"
 
-#include <rttr/registration>
-
-using namespace rttr;
-
-RTTR_REGISTRATION
-{
-    using namespace FreeHeroes::Core;
-    using EventRecord = BattleReplayData::EventRecord;
-    // clang-format off
-    registration::enumeration<EventRecord::Type>("BattleReplayDataEventRecordType")
-        (
-            value("guard"       ,   EventRecord::Type::Guard),
-            value("wait"        ,   EventRecord::Type::Wait),
-            value("move"        ,   EventRecord::Type::MoveAttack),
-            value("cast"        ,   EventRecord::Type::Cast)
-    );
-    registration::class_<EventRecord>("BattleReplayDataEventRecord")
-         .constructor<>()
-         .property("type"    , &EventRecord::type)
-         .property("move"    , &EventRecord::moveParams  )(policy::prop::as_reference_wrapper)
-         .property("attack"  , &EventRecord::attackParams)(policy::prop::as_reference_wrapper)
-         .property("cast"    , &EventRecord::castParams  )(policy::prop::as_reference_wrapper)
-         ;
-    // clang-format on
-}
+#include <stdexcept>
 
 namespace FreeHeroes::Core {
 BattleReplayPlayer::BattleReplayPlayer(IBattleControl&   sourceControl,

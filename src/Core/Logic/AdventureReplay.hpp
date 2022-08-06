@@ -6,7 +6,7 @@
 #pragma once
 
 #include "BattleReplay.hpp"
-#include "AdventureSquad.hpp"
+#include "FsUtils.hpp"
 
 #include "CoreLogicExport.hpp"
 

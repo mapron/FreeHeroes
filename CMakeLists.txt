@@ -80,8 +80,7 @@ else()
     set(COMPRESSION_LIBS -lz)
 endif()
 
-# nlohmann Json
-AddTargetInterface(NAME nlohmann_json INCLUDES 3rdparty/nlohmann_json)
+# Json
 AddTargetInterface(NAME rapidjson INCLUDES 3rdparty)
 
 # frozen 
@@ -101,27 +100,6 @@ AddTarget(NO_DEFAULT_GLOB TYPE static NAME lua_static ROOT 3rdparty/lua/src
 target_include_directories(lua_static INTERFACE 3rdparty/lua/include)
 
 AddTargetInterface(NAME sol INCLUDES 3rdparty/sol/include DEPS lua_static)
-
-
-# RTTR
-
-function(AddRTTR)
-    set(RTTR_VERSION_MAJOR 0)
-    set(RTTR_VERSION_MINOR 9)
-    set(RTTR_VERSION_PATCH 7)
-    set(RTTR_VERSION ${RTTR_VERSION_MAJOR}.${RTTR_VERSION_MINOR}.${RTTR_VERSION_PATCH})
-    set(RTTR_VERSION_STR "${RTTR_VERSION_MAJOR}.${RTTR_VERSION_MINOR}.${RTTR_VERSION_PATCH}")
-    set(root ${CMAKE_CURRENT_LIST_DIR}/3rdparty/rttr)
-    configure_file(${root}/rttr/detail/base/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/rttr/detail/base/version.h)
-    include(${root}/rttr/rttr.cmake)
-    set(src)
-    foreach(file ${HEADER_FILES} ${SOURCE_FILES})
-        list(APPEND src ${root}/rttr/${file})
-    endforeach()
-    add_library(rttr STATIC ${src})
-    target_include_directories(rttr PUBLIC ${root} ${CMAKE_CURRENT_BINARY_DIR})
-endfunction()
-AddRTTR()
 
 # Google Test
 set(BUILD_GMOCK OFF)
@@ -154,7 +132,7 @@ AddTarget(FH TYPE shared NAME CoreResource ROOT src/Core/Resource
 
 AddTarget(FH TYPE shared NAME CoreLogic ROOT src/Core/Logic
     DEPS_FH CoreResource CorePlatform GameObjects GameInt
-    DEPS sol rttr frozen
+    DEPS sol frozen
     )
 
 AddTarget(FH TYPE shared NAME BattleLogic ROOT src/Core/BattleLogic
@@ -175,7 +153,7 @@ AddTarget(FH QT TYPE shared NAME GuiResource ROOT src/Gui/Resource
     DEPS_FH
         GuiInt CorePlatform
     DEPS
-        Qt5::Widgets nlohmann_json
+        Qt5::Widgets
     )
 
 AddTarget(FH QT TYPE shared NAME GuiLocalization ROOT src/Gui/Localization
@@ -248,7 +226,7 @@ AddTarget(FH QT TYPE shared NAME GuiApplication ROOT src/Gui/Application
         GuiLocalization
         GuiGameWrappers
         SoundPlayer
-    DEPS  Qt5::Widgets nlohmann_json
+    DEPS  Qt5::Widgets
     )
 
 # App
@@ -263,7 +241,7 @@ AddTarget(FH QT  TYPE app NAME LegacyConverter ROOT src/App/LegacyConverter
     GuiApplication
     GuiResource
 
-    DEPS Qt5::Widgets nlohmann_json ${COMPRESSION_LIBS} ${PTHREAD}
+    DEPS Qt5::Widgets ${COMPRESSION_LIBS} ${PTHREAD}
     )
 AddTarget(FH QT TYPE app NAME BattleEmulator
     ROOT src/App/BattleEmulator

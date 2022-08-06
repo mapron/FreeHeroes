@@ -5,14 +5,30 @@
  */
 #pragma once
 
-#include "FsUtils.hpp"
-
 #include "LibraryFwd.hpp"
 
 #include <vector>
 #include <string>
+#include <concepts>
 
 namespace FreeHeroes::Core {
+
+template<class _Ty, class... _Types>
+concept is_any_of = std::disjunction_v<std::is_same<_Ty, _Types>...>;
+
+template<class T>
+concept GameDatabaseObject = is_any_of<T,
+                                       LibraryArtifact,
+                                       LibraryUnit,
+                                       LibraryFaction,
+                                       LibraryHeroSpec,
+                                       LibraryHero,
+                                       LibrarySecondarySkill,
+                                       LibrarySpell,
+                                       LibraryTerrain,
+                                       LibraryResource,
+                                       LibraryMapObject,
+                                       LibraryGameRules>;
 
 class IGameDatabase {
 public:
