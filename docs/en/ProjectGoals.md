@@ -1,5 +1,5 @@
 # Problems the project is trying to solve
-1. Lack of a free engine that is being developed and used for a large group of players on a daily basis. There is VCMI, but it is stable, not under active development.
+1. Lack of a free engine that is being developed and used for a large group of players on a daily basis. VCMI is a great project, but it's focused on offline experience a bit more than online competitive play.
 2. Development of HotA lags behind the expectations of the community:  
 2.1. The pace of development for the HotA add-on is much lower than expected: releases are essentially once a year.  
 2.2. Proprietary development of both HotA and HD Mod. The development is completely closed. Lack of public "test" builds of HotA. If the project is closed, no one will be able to "pick up" it and continue what has been gained over the years.  
