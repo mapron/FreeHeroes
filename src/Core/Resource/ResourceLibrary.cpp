@@ -204,7 +204,6 @@ std::shared_ptr<ResourceLibrary> ResourceLibrary::makeMergedLibrary(const Resour
     ProfilerScope scope("makeMergedLibrary");
     auto          result = std::make_shared<ResourceLibrary>();
     {
-        ProfilerScope scopeEx("start");
         for (const auto& rec : pathList.records) {
             ResourceLibrary tmp(rec.id);
             tmp.setIndexFolder(rec.path);
@@ -215,10 +214,8 @@ std::shared_ptr<ResourceLibrary> ResourceLibrary::makeMergedLibrary(const Resour
         }
     }
     {
-        ProfilerScope scopeEx("end");
-        Graph         g;
+        Graph g;
         {
-            ProfilerScope scopeEx("g.sort");
             for (const auto& dbPair : result->m_databases) {
                 DepList depList;
                 if (!dbPair.second.baseId.empty())
@@ -256,7 +253,6 @@ void ResourceLibrary::addDep(std::string dep, ResourceLibrary::DepsRequire requi
 
 bool ResourceLibrary::loadIndex(bool onlyMeta)
 {
-    ProfilerScope scope("loadIndex");
     // using txt format is 10 times faster in debug mode as json/cbor/etc.
     // For release mode it is unnoticeable, but I'd like to have fast startup times in debug - event +0.5s is frustrating.
     // also, i think it's a bit more readable and editable that json.
@@ -504,7 +500,6 @@ void ResourceLibrary::registerResource(ResourceDatabase desc)
 
 void ResourceLibrary::mergeWith(ResourceLibrary& newData)
 {
-    ProfilerScope scope("mergeWith");
     m_storages.insert(m_storages.end(),
                       std::make_move_iterator(newData.m_storages.begin()),
                       std::make_move_iterator(newData.m_storages.end()));
@@ -512,7 +507,6 @@ void ResourceLibrary::mergeWith(ResourceLibrary& newData)
     newData.m_storages.erase(newData.m_storages.begin(), newData.m_storages.end());
 
     {
-        ProfilerScope scope("media");
         for (const auto& pair1 : newData.m_media) {
             const ResourceMedia::Type type      = pair1.first;
             auto&                     idMapping = m_media[type];
@@ -523,7 +517,6 @@ void ResourceLibrary::mergeWith(ResourceLibrary& newData)
         }
     }
     {
-        ProfilerScope scope("translations");
         for (const auto& pair1 : newData.m_translations) {
             const auto& key1     = pair1.first;
             auto&       mapping1 = m_translations[key1];

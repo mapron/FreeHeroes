@@ -38,35 +38,56 @@ private:
 
 void jsonToPropery(PropertyTree& data, rapidjson::Value& input)
 {
-    if (input.IsObject()) {
-        data.convertToMap();
-        for (auto keyIt = input.MemberBegin(); keyIt != input.MemberEnd(); ++keyIt) {
-            std::string key(keyIt->name.GetString());
-            jsonToPropery(data[key], keyIt->value);
-        }
-    } else if (input.IsArray()) {
-        data.convertToList();
-        data.getList().reserve(std::distance(input.Begin(), input.End()));
-        for (auto nodeIt = input.Begin(); nodeIt != input.End(); ++nodeIt) {
-            PropertyTree child;
-            jsonToPropery(child, *nodeIt);
-            data.append(std::move(child));
-        }
-    } else if (input.IsBool())
-        data = PropertyTreeScalar(input.GetBool());
-    else if (input.IsDouble())
-        data = PropertyTreeScalar(input.GetDouble());
-    else if (input.IsInt())
-        data = PropertyTreeScalar(std::int64_t(input.GetInt()));
-    else if (input.IsInt64())
-        data = PropertyTreeScalar(std::int64_t(input.GetInt64()));
-    else if (input.IsUint())
-        data = PropertyTreeScalar(std::int64_t(input.GetUint()));
-    else if (input.IsUint64())
-        data = PropertyTreeScalar(std::int64_t(input.GetUint64()));
-    else if (input.IsString()) {
-        std::string inputString(input.GetString(), input.GetStringLength());
-        data = PropertyTreeScalar(std::move(inputString));
+    switch (input.GetType()) {
+        case rapidjson::kNullType:
+        {
+            data = {};
+        } break;
+        case rapidjson::kFalseType:
+        {
+            data = PropertyTreeScalar(false);
+        } break;
+        case rapidjson::kTrueType:
+        {
+            data = PropertyTreeScalar(true);
+        } break;
+        case rapidjson::kObjectType:
+        {
+            data.convertToMap();
+            auto& m = data.getMap();
+            for (auto keyIt = input.MemberBegin(); keyIt != input.MemberEnd(); ++keyIt) {
+                std::string key(keyIt->name.GetString(), keyIt->name.GetStringLength());
+                jsonToPropery(m[key], keyIt->value);
+            }
+        } break;
+        case rapidjson::kArrayType:
+        {
+            data.convertToList();
+            auto& l = data.getList();
+            l.resize(std::distance(input.Begin(), input.End()));
+            size_t index = 0;
+            for (auto nodeIt = input.Begin(); nodeIt != input.End(); ++nodeIt) {
+                jsonToPropery(l[index++], *nodeIt);
+            }
+        } break;
+        case rapidjson::kStringType:
+        {
+            std::string inputString(input.GetString(), input.GetStringLength());
+            data = PropertyTreeScalar(std::move(inputString));
+        } break;
+        case rapidjson::kNumberType:
+        {
+            if (input.IsDouble())
+                data = PropertyTreeScalar(input.GetDouble());
+            else if (input.IsInt())
+                data = PropertyTreeScalar(std::int64_t(input.GetInt()));
+            else if (input.IsInt64())
+                data = PropertyTreeScalar(std::int64_t(input.GetInt64()));
+            else if (input.IsUint())
+                data = PropertyTreeScalar(std::int64_t(input.GetUint()));
+            else if (input.IsUint64())
+                data = PropertyTreeScalar(std::int64_t(input.GetUint64()));
+        } break;
     }
 }
 
@@ -110,23 +131,17 @@ bool readJsonFromBuffer(const std::string& buffer, PropertyTree& data)
     if (buffer.starts_with(std::string_view("\xef\xbb\xbf", 3)))
         dataPtr += 3;
 
-    {
-        ProfilerScope scope("rapidjson::Parse");
-        auto&         res = input.Parse<0>(dataPtr);
-        if (res.HasParseError()) {
-            Logger(Logger::Err) << res.GetParseError() << " (" << res.GetErrorOffset() << ")";
-            return false;
-        }
+    auto& res = input.Parse<0>(dataPtr);
+    if (res.HasParseError()) {
+        Logger(Logger::Err) << res.GetParseError() << " (" << res.GetErrorOffset() << ")";
+        return false;
     }
 
     if (!input.IsObject() && !input.IsArray())
         return false;
 
     data = PropertyTree{};
-    {
-        ProfilerScope scope("rapidjson::jsonToPropery");
-        jsonToPropery(data, input);
-    }
+    jsonToPropery(data, input);
 
     return true;
 }

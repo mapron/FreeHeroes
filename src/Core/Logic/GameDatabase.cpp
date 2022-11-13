@@ -312,7 +312,6 @@ std::vector<GameDatabase::Resource> GameDatabase::loadLibrary(const std::string&
         std::string    buffer;
         const std_path path{ string2path(f) };
         {
-            ProfilerScope scope("readFileIntoBuffer");
             if (!readFileIntoBuffer(path, buffer)) {
                 Logger(Logger::Warning) << "Skipped file unable to read:" << f << " (exist:" << std_fs::exists(path) << ")";
                 continue;
@@ -320,7 +319,6 @@ std::vector<GameDatabase::Resource> GameDatabase::loadLibrary(const std::string&
         }
         PropertyTree tree;
         {
-            ProfilerScope scope("readJsonFromBuffer");
             if (!readJsonFromBuffer(buffer, tree)) {
                 Logger(Logger::Warning) << "Skipped invalid json file:" << f;
                 continue;

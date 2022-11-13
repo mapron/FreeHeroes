@@ -47,13 +47,14 @@ public:
 class COREPLATFORM_EXPORT ProfilerScope {
     ScopeTimer       timer;
     std::string_view key;
+    bool             nested;
     ProfilerContext* context = nullptr;
 
 public:
     // construct in global context (if this is enabled by macro, otherwise do nothing)
-    explicit ProfilerScope(std::string_view key);
+    ProfilerScope(std::string_view key, bool nested = true);
     // write data in user provided statistic context
-    ProfilerScope(std::string_view key, ProfilerContext& customContext);
+    ProfilerScope(std::string_view key, ProfilerContext& customContext, bool nested = true);
 
     ~ProfilerScope();
 

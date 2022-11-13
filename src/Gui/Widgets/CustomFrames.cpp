@@ -5,13 +5,15 @@
  */
 #include "CustomFrames.hpp"
 
-#include <QStyleOption>
-#include <QStylePainter>
 #include <QAbstractItemView>
 #include <QEvent>
-#include <QPainter>
-#include <QTreeView>
 #include <QHeaderView>
+#include <QListView>
+#include <QPainter>
+#include <QStandardItemModel>
+#include <QStyleOption>
+#include <QStylePainter>
+#include <QTreeView>
 
 namespace FreeHeroes::Gui {
 
@@ -169,6 +171,10 @@ TreeComboBox::TreeComboBox(QWidget* parent)
     : ResizeableComboBox(parent)
 {
     m_view = new QTreeView(parent);
+
+    QStandardItemModel* smodel = new QStandardItemModel(this);
+    setModel(smodel);
+    m_view->setModel(smodel);
 
     m_view->setFrameShape(QFrame::NoFrame);
     m_view->setEditTriggers(QTreeView::NoEditTriggers);

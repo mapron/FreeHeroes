@@ -94,9 +94,12 @@ EmulatorMainWidget::EmulatorMainWidget(IGraphicsLibrary&              graphicsLi
         m_adventureState->m_seed = rng->getSeed();
     }
 
-    m_ui->setupUi(this);
+    {
+        ProfilerScope scope("setupUI");
+        m_ui->setupUi(this);
+    }
 
-    ProfilerScope scope1("EmulatorMainWidget() - after setupUI");
+    ProfilerScope scope1("after setupUI");
 
     connect(m_ui->pushButtonStart, &QPushButton::clicked, this, &EmulatorMainWidget::startBattle);
     connect(m_ui->pushButtonSettings, &QPushButton::clicked, this, &EmulatorMainWidget::showSettings);

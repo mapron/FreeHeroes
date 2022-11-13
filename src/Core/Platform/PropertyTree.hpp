@@ -22,7 +22,13 @@ concept PropertyTreeScalarHeld = std::integral<T> || std::floating_point<T> || s
 
 class COREPLATFORM_EXPORT PropertyTreeScalar {
 public:
-    PropertyTreeScalar() = default;
+    PropertyTreeScalar()                          = default;
+    PropertyTreeScalar(const PropertyTreeScalar&) = default;
+    PropertyTreeScalar& operator=(const PropertyTreeScalar&) = default;
+
+    PropertyTreeScalar(PropertyTreeScalar&&) noexcept = default;
+    PropertyTreeScalar& operator=(PropertyTreeScalar&& rh) noexcept = default;
+
     PropertyTreeScalar(std::integral auto value)
         : m_data(value)
     {}
@@ -87,6 +93,10 @@ class COREPLATFORM_EXPORT PropertyTree {
 public:
     PropertyTree()                    = default;
     PropertyTree(const PropertyTree&) = default;
+    PropertyTree& operator=(const PropertyTree&) = default;
+
+    PropertyTree(PropertyTree&&) noexcept = default;
+    PropertyTree& operator=(PropertyTree&& rh) noexcept = default;
 
     PropertyTree(PropertyTreeScalar scalar)
         : m_data(std::move(scalar))

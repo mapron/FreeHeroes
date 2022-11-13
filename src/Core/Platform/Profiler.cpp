@@ -146,20 +146,22 @@ int64_t ScopeTimer::elapsed() const noexcept
     return curUS() - start;
 }
 
-ProfilerScope::ProfilerScope(std::string_view key)
+ProfilerScope::ProfilerScope(std::string_view key, bool nested)
     : key(key)
+    , nested(nested)
     , context(getDefaultContext())
 {
-    if (!context)
+    if (!context || !nested)
         return;
     context->m_impl->pushPrefix(key);
 }
 
-ProfilerScope::ProfilerScope(std::string_view key, ProfilerContext& customContext)
+ProfilerScope::ProfilerScope(std::string_view key, ProfilerContext& customContext, bool nested)
     : key(key)
     , context(&customContext)
 {
-    context->m_impl->pushPrefix(key);
+    if (nested)
+        context->m_impl->pushPrefix(key);
 }
 
 ProfilerScope::~ProfilerScope()
@@ -167,7 +169,10 @@ ProfilerScope::~ProfilerScope()
     if (!context)
         return;
 
-    context->m_impl->pop(key, timer.elapsed());
+    if (nested)
+        context->m_impl->pop(key, timer.elapsed());
+    else
+        context->m_impl->addRecord(key, timer.elapsed());
 }
 
 void ProfilerScope::printToStdErr()
