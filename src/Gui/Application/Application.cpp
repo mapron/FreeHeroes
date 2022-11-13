@@ -15,11 +15,8 @@
 #include "LibraryModels.hpp"
 
 // Core
-#include "FsUtilsQt.hpp"
-#include "ResourceLibrary.hpp"
-#include "GameDatabase.hpp"
-#include "RandomGenerator.hpp"
-#include "Logger_details.hpp"
+#include "CoreApplication.hpp"
+#include "Logger.hpp"
 
 // Sound
 #include "MusicBox.hpp"
@@ -41,7 +38,6 @@ namespace FreeHeroes::Gui {
 using namespace Core;
 
 namespace {
-constexpr const char* FHFolderName = "FreeHeroes";
 
 void loggerQtOutput(QtMsgType type, const QMessageLogContext& context, const QString& msg)
 {
@@ -72,13 +68,14 @@ void loggerQtOutput(QtMsgType type, const QMessageLogContext& context, const QSt
 }
 
 struct Application::Impl {
+    CoreApplication*                          coreApp;
     std::unique_ptr<LocalizationManager>      locEn;
     std::unique_ptr<LocalizationManager>      locMain;
     std::vector<std::unique_ptr<QTranslator>> translators;
-    std_path                                  localDataRoot;
-    std_path                                  appBinRoot;
-    QString                                   appConfigIniPath;
-    std::unique_ptr<AppSettings>              appConfig;
+
+    QString                      appConfigIniPath;
+    std::unique_ptr<AppSettings> appConfig;
+    QString                      extraTs;
 
     void addTranslator(const QString& qmPath)
     {
@@ -89,16 +86,18 @@ struct Application::Impl {
     }
 };
 
-Application::Application()
+Application::Application(CoreApplication*   coreApp,
+                         std::set<Option>   options,
+                         const std::string& tsExtraModule)
     : m_impl(new Impl)
+    , m_options(std::move(options))
 {
-    QApplication::setApplicationName(QString::fromUtf8(FHFolderName));
-    const QString dataLocation = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
-    m_impl->localDataRoot      = QString2stdPath(dataLocation);
-    m_impl->appConfigIniPath   = dataLocation + "/AppConfig.ini";
-    m_impl->appConfig          = std::make_unique<Gui::AppSettings>(m_impl->appConfigIniPath);
-    if (!std_fs::exists(m_impl->localDataRoot))
-        std_fs::create_directories(m_impl->localDataRoot);
+    m_impl->coreApp = coreApp;
+    m_impl->extraTs = QString::fromStdString(tsExtraModule);
+    QApplication::setApplicationName(QString::fromUtf8(CoreApplication::getAppFolder()));
+
+    m_impl->appConfigIniPath = QString::fromStdString(path2string(coreApp->getLocations().getAppdataDir() / "AppConfig.ini"));
+    m_impl->appConfig        = std::make_unique<Gui::AppSettings>(m_impl->appConfigIniPath);
 
     m_impl->appConfig->load();
     QString currentLocale = m_impl->appConfig->global().localeId;
@@ -108,19 +107,7 @@ Application::Application()
     // to make user happy just edit values, not to guess keys. Do it earlier in case of crash later.
     m_impl->appConfig->save();
 
-    Logger::SetLoggerBackend(std::make_unique<LoggerBackendFiles>(
-        m_impl->appConfig->global().logLevel,
-        true,  /*duplicateInStderr*/
-        true,  /*outputLoglevel   */
-        false, /*outputTimestamp  */
-        true,  /*outputTimeoffsets*/
-        10,
-        50000,
-        m_impl->localDataRoot / "Logs"));
-    qInstallMessageHandler(loggerQtOutput);
-    Logger(Logger::Notice) << "Application started. Log level is " << m_impl->appConfig->global().logLevel;
-
-    qWarning() << "checking Qt logs";
+    m_impl->appConfig->globalMutable().databaseItems << g_database_HOTA << g_database_SOD;
 }
 
 Application::~Application()
@@ -128,52 +115,41 @@ Application::~Application()
     m_impl->appConfig->save();
 }
 
-void Application::load(const std::string& moduleName, std::set<Option> options)
+void Application::load()
 {
+    {
+        m_impl->coreApp->initLogger(m_impl->appConfig->global().logLevel);
+        qInstallMessageHandler(loggerQtOutput);
+        Logger(Logger::Notice) << "Application started. Log level is " << m_impl->appConfig->global().logLevel;
+        qWarning() << "checking Qt logs";
+    }
+
+    m_impl->coreApp->load();
+    if (m_impl->coreApp->hasDatabases())
+        m_gameDatabaseUi = m_impl->coreApp->getDatabaseContainer()->getDatabase(m_impl->appConfig->global().databaseId.toStdString());
+
     Logger(Logger::Info) << "Application::load - start";
-    const QString appBin = QApplication::applicationDirPath();
-    m_impl->appBinRoot   = QString2stdPath(appBin);
+    QString       binDir = QString::fromStdString(path2string(m_impl->coreApp->getLocations().getBinDir()));
     ProfilerScope scopeAll("Application::load");
-    if (options.contains(Option::QtTranslations)) {
+    if (m_options.contains(Option::QtTranslations)) {
         ProfilerScope scope("Qt init resource");
         QStringList   qrc{ "Application", "Battle", "Translations" };
         for (QString qrcName : qrc) {
-            [[maybe_unused]] bool registered = QResource::registerResource(QString("%1/assetsCompiled/%2.rcc").arg(appBin).arg(qrcName));
+            [[maybe_unused]] bool registered = QResource::registerResource(QString("%1/assetsCompiled/%2.rcc").arg(binDir).arg(qrcName));
             assert(registered);
         }
     }
 
-    if (options.contains(Option::ResourceLibrary)) {
-        ResourceLibrary::ResourceLibraryPathList pathList;
-        {
-            ProfilerScope scope("ResourceLibrary search");
-            pathList     = ResourceLibrary::searchIndexInFolderRecursive(m_impl->localDataRoot / "Resources");
-            auto listCfg = ResourceLibrary::searchIndexInFolderRecursive(m_impl->appBinRoot / "gameResources");
-            pathList.append(listCfg);
-            pathList.topoSort();
-        }
-        {
-            ProfilerScope scope("ResourceLibrary load");
-            m_resourceLibrary = ResourceLibrary::makeMergedLibrary(pathList);
-            auto dbIds        = m_resourceLibrary->getDatabaseIds();
-            for (auto id : dbIds)
-                m_impl->appConfig->globalMutable().databaseItems << QString::fromStdString(id);
-        }
-    }
-    if (options.contains(Option::RNG) || options.contains(Option::MusicBox)) {
-        m_randomGeneratorFactory = std::make_shared<RandomGeneratorFactory>();
-        m_randomGeneratorUi      = m_randomGeneratorFactory->create();
-        m_randomGeneratorUi->makeGoodSeed();
-    }
+    if (m_options.contains(Option::GraphicsLibrary))
+        m_graphicsLibrary = std::make_shared<GraphicsLibrary>(m_impl->coreApp->getResourceLibrary());
 
-    if (options.contains(Option::GraphicsLibrary))
-        m_graphicsLibrary = std::make_shared<GraphicsLibrary>(*m_resourceLibrary);
-
-    if (options.contains(Option::CursorLibrary))
+    if (m_options.contains(Option::CursorLibrary))
         m_cursorLibrary = std::make_shared<CursorLibrary>(*m_graphicsLibrary);
 
-    if (options.contains(Option::MusicBox)) {
-        auto box   = std::make_shared<Sound::MusicBox>(*m_randomGeneratorUi, *m_resourceLibrary);
+    if (m_options.contains(Option::MusicBox)) {
+        auto randomGeneratorUi = m_impl->coreApp->getRandomGeneratorFactory()->create();
+        randomGeneratorUi->makeGoodSeed();
+        auto box   = std::make_shared<Sound::MusicBox>(std::move(randomGeneratorUi), m_impl->coreApp->getResourceLibrary());
         m_musicBox = box;
         m_musicBox->setMusicVolume(m_impl->appConfig->sound().musicVolumePercent);
         m_musicBox->setEffectsVolume(m_impl->appConfig->sound().effectsVolumePercent);
@@ -181,23 +157,18 @@ void Application::load(const std::string& moduleName, std::set<Option> options)
         QObject::connect(m_impl->appConfig.get(), &AppSettings::setEffectsVolume, box.get(), &Sound::MusicBox::setEffectsVolume);
     }
 
-    if (options.contains(Option::GameDatabase)) {
-        ProfilerScope scope("GameDatabase load");
-        m_gameDatabase = std::make_shared<Core::GameDatabase>(m_impl->appConfig->global().databaseId.toStdString(), *m_resourceLibrary);
-    }
-
-    if (options.contains(Option::Translations)) {
+    if (m_options.contains(Option::Translations)) {
         m_impl->appConfig->globalMutable().localeItems << "en_US"
                                                        << "ru_RU"
                                                        << "de_DE";
         QString       currentLocale = m_impl->appConfig->global().localeId;
         ProfilerScope scope("localization");
 
-        m_impl->locEn.reset(new LocalizationManager("en_US", *m_resourceLibrary));
+        m_impl->locEn.reset(new LocalizationManager("en_US", m_impl->coreApp->getResourceLibrary()));
         QApplication::installTranslator(m_impl->locEn.get());
 
         if (currentLocale != "en_US") {
-            m_impl->locMain.reset(new LocalizationManager(currentLocale, *m_resourceLibrary));
+            m_impl->locMain.reset(new LocalizationManager(currentLocale, m_impl->coreApp->getResourceLibrary()));
             QApplication::installTranslator(m_impl->locMain.get());
         }
     }
@@ -209,22 +180,22 @@ void Application::load(const std::string& moduleName, std::set<Option> options)
     }
 #endif
 
-    if (options.contains(Option::QtTranslations)) {
+    if (m_options.contains(Option::QtTranslations)) {
         QStringList moduleNames;
-        if (!moduleName.empty())
-            moduleNames << QString::fromStdString(moduleName);
+        if (!m_impl->extraTs.isEmpty())
+            moduleNames << m_impl->extraTs;
         moduleNames << "FreeHeroesCore";
         QString currentLocale = m_impl->appConfig->global().localeId;
         for (const auto& name : moduleNames)
             m_impl->addTranslator(QString(":/Translations/%1_%2.qm").arg(name).arg(currentLocale));
     }
 
-    if (options.contains(Option::LibraryModels)) {
+    if (m_options.contains(Option::LibraryModels)) {
         ProfilerScope scope("LibraryModels load");
-        m_modelsProvider = std::make_shared<LibraryModelsProvider>(*m_gameDatabase, *m_musicBox, *m_graphicsLibrary);
+        m_modelsProvider = std::make_shared<LibraryModelsProvider>(m_gameDatabaseUi, *m_musicBox, *m_graphicsLibrary);
     }
 
-    if (options.contains(Option::AppStyle)) {
+    if (m_options.contains(Option::AppStyle)) {
         qApp->setStyle(new GoldenStyle);
         QApplication::setPalette(QApplication::style()->standardPalette());
     }

@@ -6,6 +6,7 @@
 #include "EmulatorMainWidget.hpp"
 
 #include "Application.hpp"
+#include "CoreApplication.hpp"
 
 // Platform
 #include "Profiler.hpp"
@@ -23,11 +24,17 @@ int main(int argc, char* argv[])
     using namespace Core;
     using namespace Gui;
 
-    Application fhApp;
+    Core::CoreApplication fhCoreApp({ Core::CoreApplication::Option::ResourceLibraryApp,
+                                      Core::CoreApplication::Option::ResourceLibraryLocalData,
+                                      Core::CoreApplication::Option::GameDatabase,
+                                      Core::CoreApplication::Option::RNG },
+                                    "BattleEmulator");
+
+    Application fhApp(&fhCoreApp, "BattleEmulator");
 
     try {
         QApplication app(argc, argv);
-        fhApp.load("BattleEmulator");
+        fhApp.load();
         std::unique_ptr<BattleEmulator::EmulatorMainWidget> w;
         {
             Logger(Logger::Info) << "Start UI construct";
@@ -36,13 +43,14 @@ int main(int argc, char* argv[])
             w = std::make_unique<BattleEmulator::EmulatorMainWidget>(fhApp.getGraphicsLibrary(),
                                                                      fhApp.getCursorLibrary(),
                                                                      fhApp.getGameDatabase(),
-                                                                     fhApp.getRandomGeneratorFactory(),
+                                                                     fhCoreApp.getRandomGeneratorFactory(),
                                                                      fhApp.getMusicBox(),
                                                                      fhApp.getAppSettings(),
                                                                      fhApp.getModelsProvider());
             w->show();
             Logger(Logger::Info) << "End of UI construct";
         }
+        //ProfilerScope::printToStdErr();
 
         return app.exec();
     }

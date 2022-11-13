@@ -20,7 +20,7 @@ namespace FreeHeroes::Gui {
 
 class GUILOCALIZATION_EXPORT LocalizationManager : public QTranslator {
 public:
-    LocalizationManager(QString mainLocaleId, Core::IResourceLibrary& resourceLibrary);
+    LocalizationManager(QString mainLocaleId, const Core::IResourceLibrary* resourceLibrary);
 
     // QTranslator interface
 public:
@@ -36,8 +36,8 @@ private:
 
 private:
     using LocaleMap = QMap<std::string, KeyToPluralsMapping>;
-    LocaleMap               m_records;
-    Core::IResourceLibrary& m_resourceLibrary;
+    LocaleMap                     m_records;
+    const Core::IResourceLibrary* m_resourceLibrary;
 
     std::function<int(int n, int availableSize)> m_pluralSelector;
 

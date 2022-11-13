@@ -37,10 +37,12 @@ template<typename T>
 concept IsStdArray = details::is_array<T>::value;
 
 template<typename T>
-concept IsSequentalContainer = std::same_as<T, std::vector<typename T::value_type, typename T::allocator_type>> //
-    || std::same_as<T, std::list<typename T::value_type, typename T::allocator_type>>                           //
-    || std::same_as<T, std::deque<typename T::value_type, typename T::allocator_type>>                          //
-    || IsStdArray<T>;
+concept IsStdVector = std::same_as<T, std::vector<typename T::value_type, typename T::allocator_type>>;
+
+template<typename T>
+concept IsSequentalContainer = std::same_as<T, std::deque<typename T::value_type, typename T::allocator_type>> //
+    || std::same_as<T, std::list<typename T::value_type, typename T::allocator_type>>                          //
+    || IsStdVector<T> || IsStdArray<T>;
 
 template<typename T>
 concept NonAssociative = IsSequentalContainer<T> || IsSet<T>;
@@ -53,17 +55,21 @@ struct MetaInfo {
             , m_f(f)
         {}
 
-        constexpr FieldType create() const noexcept
+        struct ValueWriter {
+            const Field& m_field;
+
+            Parent& m_parent;
+
+            constexpr FieldType& getRef() { return m_parent.*(m_field.m_f); }
+        };
+
+        constexpr ValueWriter makeValueWriter(Parent& parent) const noexcept
         {
-            return {};
+            return { *this, parent };
         }
         constexpr const FieldType& get(const Parent& parent) const noexcept
         {
             return parent.*m_f;
-        }
-        constexpr void set(Parent& parent, FieldType value) const noexcept
-        {
-            (parent.*m_f) = std::move(value);
         }
 
         [[nodiscard]] std::string name() const noexcept
@@ -85,10 +91,24 @@ struct MetaInfo {
             , m_getter(getter)
         {}
 
-        constexpr FieldType create() const noexcept
+        struct ValueWriter {
+            const SetGet& m_field;
+            Parent&       m_parent;
+            FieldType     m_tmp{};
+
+            constexpr FieldType& getRef() { return m_tmp; }
+
+            constexpr ~ValueWriter()
+            {
+                m_field.set(m_parent, std::move(m_tmp));
+            }
+        };
+
+        constexpr ValueWriter makeValueWriter(Parent& parent) const noexcept
         {
-            return {};
+            return { *this, parent };
         }
+
         constexpr ArgTypeGetter get(const Parent& parent) const noexcept
         {
             return (parent.*m_getter)();

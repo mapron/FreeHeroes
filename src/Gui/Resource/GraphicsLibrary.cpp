@@ -89,11 +89,11 @@ public:
 };
 
 struct GraphicsLibrary::Impl {
-    Core::IResourceLibrary&      m_resourceLibrary;
-    QMap<std::string, SpritePtr> m_spriteCache;
-    QMap<std::string, QImage>    m_imageCache;
-    QMap<PixmapKey, QPixmap>     m_pixmapCache;
-    QMap<PixmapKeyList, QIcon>   m_iconCache;
+    const Core::IResourceLibrary* m_resourceLibrary;
+    QMap<std::string, SpritePtr>  m_spriteCache;
+    QMap<std::string, QImage>     m_imageCache;
+    QMap<PixmapKey, QPixmap>      m_pixmapCache;
+    QMap<PixmapKeyList, QIcon>    m_iconCache;
 
     SpritePtr getSyncObjectAnimation(const std::string& resourceName);
     QPixmap   getSyncPixmapByKey(const PixmapKey& resourceCode);
@@ -102,20 +102,20 @@ struct GraphicsLibrary::Impl {
 
     bool isSpriteResourceExists(const std::string& resourceName) const
     {
-        return m_resourceLibrary.mediaExists(ResourceMedia::Type::Sprite, resourceName);
+        return m_resourceLibrary->mediaExists(ResourceMedia::Type::Sprite, resourceName);
     }
     bool isVideoResourceExists(const std::string& resourceName)
     {
-        return m_resourceLibrary.mediaExists(ResourceMedia::Type::Video, resourceName);
+        return m_resourceLibrary->mediaExists(ResourceMedia::Type::Video, resourceName);
     }
 
-    Impl(Core::IResourceLibrary& resourceLibrary)
+    Impl(const Core::IResourceLibrary* resourceLibrary)
         : m_resourceLibrary(resourceLibrary)
     {
     }
 };
 
-GraphicsLibrary::GraphicsLibrary(Core::IResourceLibrary& resourceLibrary)
+GraphicsLibrary::GraphicsLibrary(const Core::IResourceLibrary* resourceLibrary)
     : m_impl(std::make_unique<Impl>(resourceLibrary))
 {
 }
@@ -166,10 +166,10 @@ SpritePtr GraphicsLibrary::Impl::getSyncObjectAnimation(const std::string& resou
         return m_spriteCache[resourceName];
     }
     auto& sprite = m_spriteCache[resourceName];
-    if (!m_resourceLibrary.mediaExists(ResourceMedia::Type::Sprite, resourceName))
+    if (!m_resourceLibrary->mediaExists(ResourceMedia::Type::Sprite, resourceName))
         return sprite;
 
-    const auto& resource = m_resourceLibrary.getMedia(ResourceMedia::Type::Sprite, resourceName);
+    const auto& resource = m_resourceLibrary->getMedia(ResourceMedia::Type::Sprite, resourceName);
     sprite               = loadSprite(resource.getFullPath());
     Q_ASSERT(sprite && sprite->getGroupsCount() > 0);
     if (sprite->getGroupsCount() == 0)
@@ -208,7 +208,7 @@ QPixmap GraphicsLibrary::Impl::getSyncPixmapByKey(const PixmapKey& resourceCode)
 
 QMovie* GraphicsLibrary::Impl::getSyncVideo(const std::string& resourceName, QObject* parent)
 {
-    const auto& resource = m_resourceLibrary.getMedia(ResourceMedia::Type::Video, resourceName);
+    const auto& resource = m_resourceLibrary->getMedia(ResourceMedia::Type::Video, resourceName);
     QString     path     = stdPath2QString(resource.getFullPath());
     QMovie*     movie    = new QMovie(path, QByteArray(), parent);
     return movie;

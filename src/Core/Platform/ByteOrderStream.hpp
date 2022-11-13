@@ -1,0 +1,502 @@
+/*
+ * Copyright (C) 2022 Smirnov Vladimir / mapron1@gmail.com
+ * SPDX-License-Identifier: MIT
+ * See LICENSE file for details.
+ */
+#pragma once
+
+#include "ByteOrderStream_macro.hpp"
+#include "ByteOrderBuffer.hpp"
+
+#include <deque>
+#include <map>
+#include <type_traits>
+
+namespace FreeHeroes {
+class ByteOrderDataStreamReader;
+class ByteOrderDataStreamWriter;
+template<class T>
+concept HasRead = requires(T t, ByteOrderDataStreamReader& reader)
+{
+    t.ReadInternal(reader);
+};
+template<class T>
+concept HasWrite = requires(T t, ByteOrderDataStreamWriter& writer)
+{
+    t.WriteInternal(writer);
+};
+
+/**
+ * @brief Data stream which can have any byte order.
+ *
+ * Operates on ByteOrderBuffer. You can specify byte order for stream in constructor.
+ *
+ * General usage:
+ *
+ * ByteOrderBuffer buffer;
+ * ByteOrderDataStreamWriter stream(buffer); // Creating stream;
+ * stream << uint32_t(42);                   // Writing scalar data;
+ * stream << std::string("Foo bar");         // Writing binary strings;
+ *
+ * buffer.begin(), buffer.size()             // retrieving serialized data.
+ */
+class ByteOrderDataStream {
+public:
+    /// Creates stream object. ProtocolMask sets actual stream byte order: for byte, words and dwords. Default is Big Endian for all.
+    inline ByteOrderDataStream(ByteOrderBuffer& buf, uint_fast8_t ProtocolMask = CreateByteorderMask(ORDER_BE, ORDER_BE, ORDER_BE))
+        : m_buf(buf)
+    {
+        SetMask(ProtocolMask);
+    }
+
+    inline ByteOrderBuffer&       GetBuffer() { return m_buf; }
+    inline const ByteOrderBuffer& GetBuffer() const { return m_buf; }
+
+    /// Set byteorder settings for stream. To create actual value, use CreateByteorderMask.
+    inline void SetMask(uint_fast8_t protocolMask)
+    {
+        protocolMask &= 7;
+        m_maskInt64  = (HOST_BYTE_ORDER_INT | HOST_WORD_ORDER_INT << 1 | HOST_DWORD_ORDER_INT64 << 2) ^ protocolMask;
+        m_maskDouble = (HOST_BYTE_ORDER_FLOAT | HOST_WORD_ORDER_FLOAT << 1 | HOST_DWORD_ORDER_DOUBLE << 2) ^ protocolMask;
+        m_maskInt32  = m_maskInt64 & 3;
+        m_maskInt16  = m_maskInt32 & 1;
+        m_maskInt8   = 0;
+        m_maskFloat  = m_maskDouble & 3;
+    }
+    /// Creating mask description of byteorder. endiannes8 - byte order in word, endiannes16 - word order in dword, endiannes32 - dword order in qword.
+    static inline uint_fast8_t CreateByteorderMask(uint_fast8_t endiannes8, uint_fast8_t endiannes16, uint_fast8_t endiannes32)
+    {
+        return endiannes8 | (endiannes16 << 1) | (endiannes32 << 2);
+    }
+    template<typename T>
+    inline uint_fast8_t GetTypeMask() const
+    {
+        return 0;
+    }
+
+    struct SizeGuard {
+        ByteOrderDataStream* m_parent   = nullptr;
+        uint_fast8_t         m_prevSize = 0;
+        ~SizeGuard() { m_parent->m_containerSizeBytes = m_prevSize; }
+    };
+
+    SizeGuard SetContainerSizeBytesGuarded(uint_fast8_t size)
+    {
+        auto prev            = m_containerSizeBytes;
+        m_containerSizeBytes = size;
+        return { this, prev };
+    }
+
+protected:
+    ByteOrderDataStream(const ByteOrderDataStream& another) = delete;
+    ByteOrderDataStream(ByteOrderDataStream&& another)      = delete;
+
+    ByteOrderDataStream& operator=(const ByteOrderDataStream& another) = delete;
+    ByteOrderDataStream& operator=(ByteOrderDataStream&& another) = delete;
+
+    ByteOrderBuffer& m_buf;
+    uint_fast8_t     m_maskInt8;
+    uint_fast8_t     m_maskInt16;
+    uint_fast8_t     m_maskInt32;
+    uint_fast8_t     m_maskInt64;
+    uint_fast8_t     m_maskFloat;
+    uint_fast8_t     m_maskDouble;
+    uint_fast8_t     m_containerSizeBytes{ 4 };
+};
+
+class ByteOrderDataStreamReader : public ByteOrderDataStream {
+public:
+    using ByteOrderDataStream::ByteOrderDataStream;
+
+    inline bool EofRead() const { return m_buf.EofRead(); }
+
+    template<typename T>
+    inline ByteOrderDataStreamReader& operator>>(T& data)
+    {
+        constexpr size_t size = sizeof(T);
+        static_assert(std::is_arithmetic<T>::value, "Only scalar data streaming is allowed.");
+        const uint8_t* bufferP = m_buf.PosRead(size);
+        if (!bufferP)
+            return *this;
+
+        read<size>(reinterpret_cast<uint8_t*>(&data), bufferP, this->GetTypeMask<T>());
+        m_buf.MarkRead(size);
+        return *this;
+    }
+    template<class T>
+    inline T ReadScalar()
+    {
+        T ret = T();
+        *this >> ret;
+        return ret;
+    }
+
+    inline ByteOrderDataStreamReader& operator>>(HasRead auto& data)
+    {
+        data.ReadInternal(*this);
+        return *this;
+    }
+
+    template<typename T>
+    inline ByteOrderDataStreamReader& operator>>(std::vector<T>& data)
+    {
+        auto size = readSize();
+        data.resize(size);
+        for (auto& element : data)
+            *this >> element;
+        return *this;
+    }
+
+    template<typename T>
+    inline ByteOrderDataStreamReader& operator>>(std::deque<T>& data)
+    {
+        auto size = readSize();
+        data.resize(size);
+        for (auto& element : data)
+            *this >> element;
+        return *this;
+    }
+
+    template<typename K, typename V>
+    inline ByteOrderDataStreamReader& operator>>(std::map<K, V>& data)
+    {
+        auto size = readSize();
+        for (uint32_t i = 0; i < size; ++i) {
+            K key;
+            V value;
+            *this >> key >> value;
+            data[key] = value;
+        }
+
+        return *this;
+    }
+
+    std::string ReadPascalString()
+    {
+        auto size = readSize();
+        if (this->EofRead())
+            return {};
+
+        std::string str;
+        str.resize(size);
+        readBlock((uint8_t*) str.data(), size);
+
+        return EofRead() ? std::string{} : str;
+    }
+    void readBlock(uint8_t* data, ptrdiff_t size)
+    {
+        const uint8_t* start = m_buf.PosRead(size);
+
+        memcpy(data, start, size);
+        m_buf.MarkRead(size);
+        m_buf.CheckRemain(0);
+    }
+    void zeroPadding(ptrdiff_t size)
+    {
+        m_buf.MarkRead(size);
+        m_buf.CheckRemain(0);
+    }
+
+    void readBits(std::vector<uint8_t>& bitArray, bool invert = false)
+    {
+        const uint8_t invertByte = invert;
+        const size_t  bitCount   = bitArray.size();
+        const size_t  byteCount  = (bitCount + 7) / 8;
+        for (size_t byte = 0; byte < byteCount; ++byte) {
+            const size_t  bitOffset      = byte * 8;
+            const size_t  bitCountInByte = std::min(size_t(8), bitCount - bitOffset);
+            const uint8_t mask           = this->ReadScalar<uint8_t>();
+            for (size_t bit = 0; bit < bitCountInByte; ++bit) {
+                const uint8_t flag        = static_cast<bool>(mask & (1 << bit));
+                bitArray[bitOffset + bit] = flag ^ invertByte;
+            }
+        }
+    }
+
+    size_t readSize()
+    {
+        size_t size = [this]() -> size_t {
+            switch (m_containerSizeBytes) {
+                case 1:
+                    return ReadScalar<uint8_t>();
+                case 2:
+                    return ReadScalar<uint16_t>();
+                case 4:
+                    return ReadScalar<uint32_t>();
+                case 8:
+                    return static_cast<size_t>(ReadScalar<uint64_t>());
+                default:
+                    throw std::runtime_error("Invalid sizeof size is set:" + std::to_string(m_containerSizeBytes));
+                    break;
+            }
+        }();
+        if (size > (size_t) GetBuffer().GetRemainRead())
+            throw std::runtime_error("Got size that exceedes remaining buffer!");
+        return size;
+    }
+
+private:
+    template<size_t bytes>
+    inline void read(uint8_t*, const uint8_t*, uint_fast8_t) const
+    {
+        static_assert(bytes <= 8, "Unknown size");
+    }
+};
+
+class ByteOrderDataStreamWriter : public ByteOrderDataStream {
+public:
+    using ByteOrderDataStream::ByteOrderDataStream;
+
+    template<typename T>
+    inline ByteOrderDataStreamWriter& operator<<(const T& data)
+    {
+        constexpr size_t size = sizeof(T);
+        static_assert(std::is_arithmetic<T>::value, "Only scalar data streaming is allowed.");
+
+        uint8_t* bufferP = m_buf.PosWrite(size);
+
+        write<size>(reinterpret_cast<const uint8_t*>(&data), bufferP, this->GetTypeMask<T>());
+        m_buf.MarkWrite(size);
+        return *this;
+    }
+
+    template<typename T>
+    inline ByteOrderDataStreamWriter& operator<<(const std::vector<T>& data)
+    {
+        writeSize(data.size());
+        for (const auto& element : data)
+            *this << element;
+        return *this;
+    }
+    template<typename T>
+    inline ByteOrderDataStreamWriter& operator<<(const std::deque<T>& data)
+    {
+        writeSize(data.size());
+        for (const auto& element : data)
+            *this << element;
+        return *this;
+    }
+
+    template<typename K, typename V>
+    inline ByteOrderDataStreamWriter& operator<<(const std::map<K, V>& data)
+    {
+        writeSize(data.size());
+        for (const auto& elementPair : data)
+            *this << elementPair.first << elementPair.second;
+        return *this;
+    }
+
+    inline ByteOrderDataStreamWriter& operator<<(const HasWrite auto& data)
+    {
+        data.WriteInternal(*this);
+        return *this;
+    }
+
+    template<typename T>
+    inline void WriteToOffset(const T& data, ptrdiff_t writeOffset);
+
+    /// Read/write strings with size.
+    void writePascalString(const std::string& str)
+    {
+        writeSize(str.size());
+
+        writeBlock(reinterpret_cast<const uint8_t*>(str.data()), str.size());
+    }
+    /// Read/write raw data blocks.
+    void writeBlock(const uint8_t* data, ptrdiff_t size)
+    {
+        uint8_t* start = m_buf.PosWrite(size);
+
+        memcpy(start, data, size);
+        m_buf.MarkWrite(size);
+        m_buf.CheckRemain(0);
+    }
+    void zeroPadding(size_t count)
+    {
+        uint8_t* start = m_buf.PosWrite(count);
+        if (!start)
+            return;
+        std::memset(start, 0, count);
+        m_buf.MarkWrite(count);
+        m_buf.CheckRemain(0);
+    }
+
+    void writeBits(const std::vector<uint8_t>& bitArray, bool invert = false)
+    {
+        const uint8_t invertByte = invert;
+        const size_t  bitCount   = bitArray.size();
+        const size_t  byteCount  = (bitCount + 7) / 8;
+        for (size_t byte = 0; byte < byteCount; ++byte) {
+            const size_t bitOffset      = byte * 8;
+            const size_t bitCountInByte = std::min(size_t(8), bitCount - bitOffset);
+            uint8_t      mask           = 0;
+            for (size_t bit = 0; bit < bitCountInByte; ++bit) {
+                const uint8_t flag = bitArray[bitOffset + bit] ^ invertByte;
+                if (flag)
+                    mask |= (1 << bit);
+            }
+            *this << mask;
+        }
+    }
+
+    void writeSize(size_t size)
+    {
+        switch (m_containerSizeBytes) {
+            case 1:
+                if (size > std::numeric_limits<uint8_t>::max())
+                    throw std::runtime_error("Container is too large:" + std::to_string(size));
+                *this << static_cast<uint8_t>(size);
+                return;
+            case 2:
+                if (size > std::numeric_limits<uint16_t>::max())
+                    throw std::runtime_error("Container is too large:" + std::to_string(size));
+                *this << static_cast<uint16_t>(size);
+                return;
+            case 4:
+                if (size > std::numeric_limits<uint32_t>::max())
+                    throw std::runtime_error("Container is too large:" + std::to_string(size));
+                *this << static_cast<uint32_t>(size);
+                return;
+            case 8:
+                *this << static_cast<uint64_t>(size);
+                return;
+            default:
+                break;
+        }
+        throw std::runtime_error("Invalid sizeof size is set:" + std::to_string(m_containerSizeBytes));
+    }
+
+private:
+    template<size_t bytes>
+    inline void write(const uint8_t*, uint8_t*, uint_fast8_t) const
+    {
+        static_assert(bytes <= 8, "Unknown size");
+    }
+};
+
+template<>
+inline uint_fast8_t ByteOrderDataStream::GetTypeMask<uint64_t>() const
+{
+    return m_maskInt64;
+}
+template<>
+inline uint_fast8_t ByteOrderDataStream::GetTypeMask<int64_t>() const
+{
+    return m_maskInt64;
+}
+template<>
+inline uint_fast8_t ByteOrderDataStream::GetTypeMask<uint32_t>() const
+{
+    return m_maskInt32;
+}
+template<>
+inline uint_fast8_t ByteOrderDataStream::GetTypeMask<int32_t>() const
+{
+    return m_maskInt32;
+}
+template<>
+inline uint_fast8_t ByteOrderDataStream::GetTypeMask<uint16_t>() const
+{
+    return m_maskInt16;
+}
+template<>
+inline uint_fast8_t ByteOrderDataStream::GetTypeMask<int16_t>() const
+{
+    return m_maskInt16;
+}
+template<>
+inline uint_fast8_t ByteOrderDataStream::GetTypeMask<double>() const
+{
+    return m_maskDouble;
+}
+template<>
+inline uint_fast8_t ByteOrderDataStream::GetTypeMask<float>() const
+{
+    return m_maskFloat;
+}
+
+template<>
+inline void ByteOrderDataStreamReader::read<8>(uint8_t* data, const uint8_t* buffer, uint_fast8_t mask) const
+{
+    data[mask ^ 0] = *buffer++;
+    data[mask ^ 1] = *buffer++;
+    data[mask ^ 2] = *buffer++;
+    data[mask ^ 3] = *buffer++;
+    data[mask ^ 4] = *buffer++;
+    data[mask ^ 5] = *buffer++;
+    data[mask ^ 6] = *buffer++;
+    data[mask ^ 7] = *buffer++;
+}
+
+template<>
+inline void ByteOrderDataStreamReader::read<4>(uint8_t* data, const uint8_t* buffer, uint_fast8_t mask) const
+{
+    data[mask ^ 0] = *buffer++;
+    data[mask ^ 1] = *buffer++;
+    data[mask ^ 2] = *buffer++;
+    data[mask ^ 3] = *buffer++;
+}
+template<>
+inline void ByteOrderDataStreamReader::read<2>(uint8_t* data, const uint8_t* buffer, uint_fast8_t mask) const
+{
+    data[mask ^ 0] = *buffer++;
+    data[mask ^ 1] = *buffer++;
+}
+template<>
+inline void ByteOrderDataStreamReader::read<1>(uint8_t* data, const uint8_t* buffer, uint_fast8_t mask) const
+{
+    data[mask ^ 0] = *buffer++;
+}
+
+template<>
+inline void ByteOrderDataStreamWriter::write<8>(const uint8_t* data, uint8_t* buffer, uint_fast8_t mask) const
+{
+    *buffer++ = data[mask ^ 0];
+    *buffer++ = data[mask ^ 1];
+    *buffer++ = data[mask ^ 2];
+    *buffer++ = data[mask ^ 3];
+    *buffer++ = data[mask ^ 4];
+    *buffer++ = data[mask ^ 5];
+    *buffer++ = data[mask ^ 6];
+    *buffer++ = data[mask ^ 7];
+}
+template<>
+inline void ByteOrderDataStreamWriter::write<4>(const uint8_t* data, uint8_t* buffer, uint_fast8_t mask) const
+{
+    *buffer++ = data[mask ^ 0];
+    *buffer++ = data[mask ^ 1];
+    *buffer++ = data[mask ^ 2];
+    *buffer++ = data[mask ^ 3];
+}
+template<>
+inline void ByteOrderDataStreamWriter::write<2>(const uint8_t* data, uint8_t* buffer, uint_fast8_t mask) const
+{
+    *buffer++ = data[mask ^ 0];
+    *buffer++ = data[mask ^ 1];
+}
+template<>
+inline void ByteOrderDataStreamWriter::write<1>(const uint8_t* data, uint8_t* buffer, uint_fast8_t mask) const
+{
+    *buffer++ = data[mask ^ 0];
+}
+
+template<>
+inline ByteOrderDataStreamReader& ByteOrderDataStreamReader::operator>>(std::string& data)
+{
+    data = ReadPascalString();
+    return *this;
+}
+template<>
+inline ByteOrderDataStreamWriter& ByteOrderDataStreamWriter::operator<<(const std::string& data)
+{
+    writePascalString(data);
+    return *this;
+}
+
+template<typename T>
+void ByteOrderDataStreamWriter::WriteToOffset(const T& data, ptrdiff_t writeOffset)
+{
+    write<sizeof(T)>(reinterpret_cast<const uint8_t*>(&data), m_buf.begin() + writeOffset, this->GetTypeMask<T>());
+}
+
+}

@@ -8,6 +8,8 @@
 #include <QString>
 #include <QSettings>
 
+#include "GameConstants.hpp"
+
 class QWidget;
 
 namespace FreeHeroes::Gui {
@@ -37,7 +39,7 @@ public:
         int         logLevel = 6;
         QString     localeId = "";
         QStringList localeItems;
-        QString     databaseId = "FH_HotA";
+        QString     databaseId = Core::g_database_HOTA;
         QStringList databaseItems;
     };
 

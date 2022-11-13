@@ -20,6 +20,8 @@ struct LibraryFactionHeroClass {
     struct Presentation {
         std::string battleSpriteMale;
         std::string battleSpriteFemale;
+        std::string adventureSpriteMale;
+        std::string adventureSpriteFemale;
     };
 
     std::string       id;
@@ -42,15 +44,27 @@ struct LibraryFaction {
         Special
     };
     struct Presentation {
+        enum class TownIndex
+        {
+            Village,
+            Fort,
+            Citadel,
+            Castle,
+            Capitol,
+        };
+
         std::string unitBackground;
         std::string goesAfterId;
+
+        std::vector<std::string> townAnimations;
     };
 
     std::string             id;
     std::string             untranslatedName;
+    int                     legacyId       = -1;
     Alignment               alignment      = Alignment::Neutral;
     int                     generatedOrder = 0;
-    LibraryFactionHeroClass fighterClass;
+    LibraryFactionHeroClass warriorClass;
     LibraryFactionHeroClass mageClass;
     LibraryTerrainConstPtr  nativeTerrain = nullptr;
 

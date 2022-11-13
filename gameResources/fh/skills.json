@@ -3,72 +3,72 @@
 
 "records" : {
 
-"sod.skill.offense"         : { "untranslatedName":"Offense", "frequencyFighter": 8 , "frequencyMage": 3, "handler": "stat", "calc": [
+"sod.skill.offense"         : { "untranslatedName":"Offense", "frequencyWarrior": 8 , "frequencyMage": 3, "handler": "stat", "calc": [
     "values = { 10, 20, 30 } ",
     "bonus = values[skillLevel + 1] ",
     "if isSpec then bonus = bonus + math.ceil(bonus * heroLevel / 20) end ",
     "h.meleeAttack:set(bonus, 100)"
 ]},
-"sod.skill.armourer"        : { "untranslatedName":"Armourer", "frequencyFighter": 6 , "frequencyMage": 3, "handler": "stat", "calc": [
+"sod.skill.armourer"        : { "untranslatedName":"Armourer", "frequencyWarrior": 6 , "frequencyMage": 3, "handler": "stat", "calc": [
     "values = { 5, 10, 15 } ",
     "bonus =  values[skillLevel + 1]",
     "if isSpec then bonus = bonus + math.ceil(bonus * heroLevel / 20) end",
     "h.defense:set(bonus, 100)"
 ]},
-"sod.skill.archery"             : { "untranslatedName":"Archery", "frequencyFighter": 7 , "frequencyMage": 3, "handler": "stat", "calc": [
+"sod.skill.archery"             : { "untranslatedName":"Archery", "frequencyWarrior": 7 , "frequencyMage": 3, "handler": "stat", "calc": [
     "values = { 10, 25, 50 } ",
     "bonus = values[skillLevel + 1] ",
     "if isSpec then bonus = bonus + math.ceil(bonus * heroLevel / 20) end ",
     "h.rangedAttack:set(bonus, 100)"
 ]},
 
-"sod.skill.leadership"             : { "untranslatedName":"Leadership", "frequencyFighter": 5 , "frequencyMage": 2, "handler": "stat", "calc": [
+"sod.skill.leadership"             : { "untranslatedName":"Leadership", "frequencyWarrior": 5 , "frequencyMage": 2, "handler": "stat", "calc": [
     "h.rngParams.morale = h.rngParams.morale + skillLevel + 1"
 ] },
-"sod.skill.luck"               : { "untranslatedName":"Luck", "frequencyFighter": 2 , "frequencyMage": 3, "handler": "stat", "calc": [
+"sod.skill.luck"               : { "untranslatedName":"Luck", "frequencyWarrior": 2 , "frequencyMage": 3, "handler": "stat", "calc": [
     "h.rngParams.luck = h.rngParams.luck + skillLevel + 1"
 ]},
-"sod.skill.intelligence"      : { "untranslatedName":"Intelligence", "frequencyFighter": 2 , "frequencyMage": 7, "handler": "stat", "calc": [
+"sod.skill.intelligence"      : { "untranslatedName":"Intelligence", "frequencyWarrior": 2 , "frequencyMage": 7, "handler": "stat", "calc": [
     "values = { 20, 35, 50 } ",
     "bonus = values[skillLevel + 1] ",
     "if isSpec then bonus = bonus + math.ceil(bonus * heroLevel / 20) end ",
     "h.manaIncrease:set(bonus, 100)"
 ]},
 
-"sod.skill.magicAir"        : { "untranslatedName":"Air Magic", "frequencyFighter": 2 , "frequencyMage": 3, "handler": "school", "calc": [
+"sod.skill.magicAir"        : { "untranslatedName":"Air Magic", "frequencyWarrior": 2 , "frequencyMage": 3, "handler": "school", "calc": [
     "h.schoolLevels.air = skillLevel + 1"
 ]},
-"sod.skill.magicEarth"        : { "untranslatedName":"Earth Magic", "frequencyFighter": 3 , "frequencyMage": 4, "handler": "school", "calc": [
+"sod.skill.magicEarth"        : { "untranslatedName":"Earth Magic", "frequencyWarrior": 3 , "frequencyMage": 4, "handler": "school", "calc": [
     "h.schoolLevels.earth = skillLevel + 1"
 ]},
-"sod.skill.magicFire"        : { "untranslatedName":"Fire Magic", "frequencyFighter": 2 , "frequencyMage": 3, "handler": "school", "calc": [
+"sod.skill.magicFire"        : { "untranslatedName":"Fire Magic", "frequencyWarrior": 2 , "frequencyMage": 3, "handler": "school", "calc": [
     "h.schoolLevels.fire = skillLevel + 1"
 ]},
 
-"sod.skill.magicWater"        : { "untranslatedName":"Water Magic", "frequencyFighter": 2 , "frequencyMage": 3, "handler": "school", "calc": [
+"sod.skill.magicWater"        : { "untranslatedName":"Water Magic", "frequencyWarrior": 2 , "frequencyMage": 3, "handler": "school", "calc": [
     "h.schoolLevels.water = skillLevel + 1"
 ]},
 
-"sod.skill.pathfind"             : { "untranslatedName":"Pathfind", "frequencyFighter": 6 , "frequencyMage": 3},
-"sod.skill.logistics"             : { "untranslatedName":"Logistics", "frequencyFighter": 7 , "frequencyMage": 3, "handler": "stat", "calc": [
+"sod.skill.pathfind"             : { "untranslatedName":"Pathfind", "frequencyWarrior": 6 , "frequencyMage": 3},
+"sod.skill.logistics"             : { "untranslatedName":"Logistics", "frequencyWarrior": 7 , "frequencyMage": 3, "handler": "stat", "calc": [
     "values = { 5, 10, 20 } ",
     "bonus = values[skillLevel + 1] ",
     "if isSpec then bonus = bonus + math.ceil(bonus * heroLevel / 20) end ",
     "h.mpIncrease:set(bonus, 100)"
 ]},
-"sod.skill.navigation"             : { "untranslatedName":"Navigation", "frequencyFighter": 5 , "frequencyMage": 4, "handler": "stat", "calc": [
+"sod.skill.navigation"             : { "untranslatedName":"Navigation", "frequencyWarrior": 5 , "frequencyMage": 4, "handler": "stat", "calc": [
     "values = { 50, 100, 150 } ",
     "bonus = values[skillLevel + 1] ",
     "if isSpec then bonus = bonus + math.ceil(bonus * heroLevel / 20) end ",
     "h.mpWaterIncrease:set(bonus, 100)"
 ]},
-"sod.skill.scouting"             : { "untranslatedName":"Scouting", "frequencyFighter": 5 , "frequencyMage": 2, "handler": "stat", "calc": [
+"sod.skill.scouting"             : { "untranslatedName":"Scouting", "frequencyWarrior": 5 , "frequencyMage": 2, "handler": "stat", "calc": [
     "values = { 1, 3, 5 } ",
     "bonus = values[skillLevel + 1] ",
     "if isSpec then bonus = bonus + math.floor(heroLevel / 6) end ",
     "h.scoutingRadius = h.scoutingRadius + bonus"
 ]},
-"sod.skill.diplomacy"             : { "untranslatedName":"Diplomacy", "frequencyFighter": 3 , "frequencyMage": 4, "handler": "stat","calc": [
+"sod.skill.diplomacy"             : { "untranslatedName":"Diplomacy", "frequencyWarrior": 3 , "frequencyMage": 4, "handler": "stat","calc": [
     "surrenderDiscounts = { 20, 40, 60 } ",
     "h.surrenderDiscount:set( surrenderDiscounts[skillLevel + 1], 100)",
     "neutralJoinChances = { 10, 20, 30 } ",
@@ -77,60 +77,60 @@
     "h.greatLibraryVisitLevel = greatLibraryVisitLevels[skillLevel + 1]"
 ] },
 
-"sod.skill.wisdom"             : { "untranslatedName":"Wisdom", "frequencyFighter": 3 , "frequencyMage": 8, "handler": "wisdom", "calc": [
+"sod.skill.wisdom"             : { "untranslatedName":"Wisdom", "frequencyWarrior": 3 , "frequencyMage": 8, "handler": "wisdom", "calc": [
     "h.maxLearningSpell = skillLevel + 3"
 ]},
-"sod.skill.mysticism"          : { "untranslatedName":"Mysticism", "frequencyFighter": 3 , "frequencyMage": 7, "handler": "stat", "calc": [
+"sod.skill.mysticism"          : { "untranslatedName":"Mysticism", "frequencyWarrior": 3 , "frequencyMage": 7, "handler": "stat", "calc": [
     "values = { 5, 10, 15 } ",
     "bonus = values[skillLevel + 1] ",
     "if isSpec then bonus = bonus + math.ceil(bonus * heroLevel / 20) end ",
     "h.manaRegenAbs = bonus"
 ]},
 
-"sod.skill.ballistics"        : { "untranslatedName":"Ballistics", "frequencyFighter": 7 , "frequencyMage": 5 },
-"sod.skill.eagleEye"          : { "untranslatedName":"Eagle Eye", "frequencyFighter": 2 , "frequencyMage": 7, "handler": "stat","calc":[
+"sod.skill.ballistics"        : { "untranslatedName":"Ballistics", "frequencyWarrior": 7 , "frequencyMage": 5 },
+"sod.skill.eagleEye"          : { "untranslatedName":"Eagle Eye", "frequencyWarrior": 2 , "frequencyMage": 7, "handler": "stat","calc":[
     "values = { 40, 50, 60 } ",
     "bonus = values[skillLevel + 1] ",
     "if isSpec then bonus = bonus + math.ceil(bonus * heroLevel / 20) end ",
     "h.eagleEyeChance:add(bonus, 100)"
 ] },
-"sod.skill.necromancy"        : { "untranslatedName":"Necromancy", "frequencyFighter": 0 , "frequencyMage": 0,  "handler": "stat", "calc":[
+"sod.skill.necromancy"        : { "untranslatedName":"Necromancy", "frequencyWarrior": 0 , "frequencyMage": 0,  "handler": "stat", "calc":[
     "values = { 50, 100, 150 } ",
     "bonus = values[skillLevel + 1] ",
     "if isSpec then bonus = bonus + math.ceil(bonus * heroLevel / 20) end ",
     "h.necromancy:add(bonus, 1000)"
 ] },
-"sod.skill.estates"           : { "untranslatedName":"Estates", "frequencyFighter": 3 , "frequencyMage": 3, "handler":"stat", "calc":[
+"sod.skill.estates"           : { "untranslatedName":"Estates", "frequencyWarrior": 3 , "frequencyMage": 3, "handler":"stat", "calc":[
     "values = { 250, 500, 1000 } ",
     "bonus = values[skillLevel + 1] ",
     "if isSpec then bonus = bonus + math.ceil(bonus * heroLevel / 20) end ",
     "h.dayIncome.gold = h.dayIncome.gold + bonus"
 ]},
-"sod.skill.scholar"           : { "untranslatedName":"Scholar", "frequencyFighter": 1 , "frequencyMage": 7, "handler":"stat", "calc":[
+"sod.skill.scholar"           : { "untranslatedName":"Scholar", "frequencyWarrior": 1 , "frequencyMage": 7, "handler":"stat", "calc":[
     "h.maxTeachingSpell = skillLevel + 2"
 ]},
-"sod.skill.tactics"        : { "untranslatedName":"Tactics", "frequencyFighter": 6 , "frequencyMage": 2 },
-"sod.skill.artillery"        : { "untranslatedName":"Artillery", "frequencyFighter": 6 , "frequencyMage": 1 },
-"sod.skill.learning"        : { "untranslatedName":"Learning", "frequencyFighter": 4 , "frequencyMage": 4, "handler":"stat", "calc":[
+"sod.skill.tactics"        : { "untranslatedName":"Tactics", "frequencyWarrior": 6 , "frequencyMage": 2 },
+"sod.skill.artillery"        : { "untranslatedName":"Artillery", "frequencyWarrior": 6 , "frequencyMage": 1 },
+"sod.skill.learning"        : { "untranslatedName":"Learning", "frequencyWarrior": 4 , "frequencyMage": 4, "handler":"stat", "calc":[
     "values = { 5, 10, 15 } ",
     "bonus = values[skillLevel + 1] ",
     "if isSpec then bonus = bonus * 2 end ",
     "h.bonusExperience:set(bonus, 100)"
 ] },
-"sod.skill.sorcery"           : { "untranslatedName":"Sorcery", "frequencyFighter": 2 , "frequencyMage": 6, "handler": "stat", "calc": [
+"sod.skill.sorcery"           : { "untranslatedName":"Sorcery", "frequencyWarrior": 2 , "frequencyMage": 6, "handler": "stat", "calc": [
     "values = { 5, 10, 15 } ",
     "bonus = values[skillLevel + 1] ",
     "if isSpec then bonus = bonus + math.ceil(bonus * heroLevel / 20) end ",
     "h.magicIncrease.all:add(bonus, 100)"
 ]},
-"sod.skill.resistance"        : { "untranslatedName":"Resistance", "frequencyFighter": 5 , "frequencyMage": 1, "handler": "stat", "calc": [
+"sod.skill.resistance"        : { "untranslatedName":"Resistance", "frequencyWarrior": 5 , "frequencyMage": 1, "handler": "stat", "calc": [
     "values = { 10, 20, 30 } ",
     "bonus = values[skillLevel + 1] ",
     "if isSpec then bonus = bonus + math.ceil(bonus * heroLevel / 20) end ",
     "h.magicResistChance:add(bonus, 100)"
 ]},
-"sod.skill.firstAid"        : { "untranslatedName":"First Aid", "frequencyFighter": 2 , "frequencyMage": 6 },
-"hota.skill.interfere"        : { "untranslatedName":"Interference", "frequencyFighter": 5 , "frequencyMage": 0, "handler": "stat", "calc": [
+"sod.skill.firstAid"        : { "untranslatedName":"First Aid", "frequencyWarrior": 2 , "frequencyMage": 6 },
+"hota.skill.interfere"        : { "untranslatedName":"Interference", "frequencyWarrior": 5 , "frequencyMage": 0, "handler": "stat", "calc": [
     "values = { 10, 20, 30 } ",
     "bonus = values[skillLevel + 1] ",
     "if isSpec then bonus = bonus + math.ceil(bonus * heroLevel / 20) end ",

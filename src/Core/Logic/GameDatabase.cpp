@@ -7,6 +7,7 @@
 
 #include "JsonHelper.hpp"
 #include "Logger.hpp"
+#include "Profiler.hpp"
 
 #include "LibraryFaction.hpp"
 #include "LibrarySecondarySkill.hpp"
@@ -76,6 +77,25 @@ struct GameDatabase::Impl {
         {
             return m_sorted;
         }
+        std::vector<std::string> legacyOrderedIds() const override
+        {
+            std::map<int, std::string> resultMap;
+            int                        maxId = 0;
+            for (const T* obj : m_sorted) {
+                if (obj->legacyId < 0)
+                    continue;
+                if (!resultMap[obj->legacyId].empty()) {
+                    assert(0);
+                    throw std::runtime_error("all legacyIds must be unique");
+                }
+                resultMap[obj->legacyId] = obj->id;
+                maxId                    = std::max(maxId, obj->legacyId);
+            }
+            std::vector<std::string> result(maxId + 1);
+            for (auto& [key, id] : resultMap)
+                result[key] = id;
+            return result;
+        }
 
         T& insertObject(std::string id, T&& value)
         {
@@ -92,7 +112,7 @@ struct GameDatabase::Impl {
             return insertObject(id, {});
         }
 
-        bool loadRecordList(IGameDatabase& idResolver, const PropertyTree& recordListMap)
+        bool loadRecordList(const IGameDatabase* idResolver, const PropertyTree& recordListMap)
         {
             if (!recordListMap.contains(LibraryContainerKey<T>::scopeName))
                 return true;
@@ -219,7 +239,7 @@ GameDatabase::GameDatabase(const std::vector<Resource>& resourceFiles)
     load(resourceFiles); // @todo: exception throw??
 }
 
-GameDatabase::GameDatabase(const std::string& dataBaseId, const IResourceLibrary& resourceLibrary)
+GameDatabase::GameDatabase(const std::string& dataBaseId, const IResourceLibrary* resourceLibrary)
     : GameDatabase(loadLibrary(dataBaseId, resourceLibrary))
 {
 }
@@ -283,23 +303,30 @@ LibraryGameRulesConstPtr GameDatabase::gameRules() const
     return &m_impl->m_gameRules;
 }
 
-std::vector<GameDatabase::Resource> GameDatabase::loadLibrary(const std::string& dataBaseId, const IResourceLibrary& resourceLibrary)
+std::vector<GameDatabase::Resource> GameDatabase::loadLibrary(const std::string& dataBaseId, const IResourceLibrary* resourceLibrary)
 {
+    ProfilerScope                       scope("GameDatabase::loadLibrary");
     std::vector<GameDatabase::Resource> files;
-    const ResourceDatabase&             desc = resourceLibrary.getDatabase(dataBaseId);
+    const ResourceDatabase&             desc = resourceLibrary->getDatabase(dataBaseId);
     for (auto& f : desc.filesFullPathsWithDeps) {
         std::string    buffer;
         const std_path path{ string2path(f) };
-        if (!readFileIntoBuffer(path, buffer)) {
-            Logger(Logger::Warning) << "Skipped file unable to read:" << f << " (exist:" << std_fs::exists(path) << ")";
-            continue;
+        {
+            ProfilerScope scope("readFileIntoBuffer");
+            if (!readFileIntoBuffer(path, buffer)) {
+                Logger(Logger::Warning) << "Skipped file unable to read:" << f << " (exist:" << std_fs::exists(path) << ")";
+                continue;
+            }
         }
         PropertyTree tree;
-        if (!readJsonFromBuffer(buffer, tree)) {
-            Logger(Logger::Warning) << "Skipped invalid json file:" << f;
-            continue;
+        {
+            ProfilerScope scope("readJsonFromBuffer");
+            if (!readJsonFromBuffer(buffer, tree)) {
+                Logger(Logger::Warning) << "Skipped invalid json file:" << f;
+                continue;
+            }
         }
-        files.push_back({ tree, path2string(path.filename()) });
+        files.push_back({ std::move(tree), path2string(path.filename()) });
     }
     return files;
 }
@@ -329,23 +356,23 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
 
     // clang-format off
     const bool result =
-               m_impl->m_terrains   .loadRecordList(*this, recordObjectMaps)
-            && m_impl->m_resources  .loadRecordList(*this, recordObjectMaps)
-            && m_impl->m_factions   .loadRecordList(*this, recordObjectMaps)
-            && m_impl->m_skills     .loadRecordList(*this, recordObjectMaps)
-            && m_impl->m_spells     .loadRecordList(*this, recordObjectMaps)
-            && m_impl->m_units      .loadRecordList(*this, recordObjectMaps)
-            && m_impl->m_specs      .loadRecordList(*this, recordObjectMaps)
-            && m_impl->m_artifacts  .loadRecordList(*this, recordObjectMaps)
-            && m_impl->m_heroes     .loadRecordList(*this, recordObjectMaps)
-            && m_impl->m_mapObjects .loadRecordList(*this, recordObjectMaps)
+               m_impl->m_terrains   .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_resources  .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_factions   .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_skills     .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_spells     .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_units      .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_specs      .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_artifacts  .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_heroes     .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_mapObjects .loadRecordList(this, recordObjectMaps)
             ;
     // clang-format on
 
     if (!result)
         return false;
 
-    if (!Reflection::deserialize(*this, m_impl->m_gameRules, recordObjectMaps["gameRules"][""]))
+    if (!Reflection::deserialize(this, m_impl->m_gameRules, recordObjectMaps["gameRules"][""]))
         return false;
 
     // making object links.
@@ -416,20 +443,20 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
             assert(skill);
             if (!faction->mageClass.secondarySkillWeights.contains(skill))
                 faction->mageClass.secondarySkillWeights[skill] = 0;
-            if (!faction->fighterClass.secondarySkillWeights.contains(skill))
-                faction->fighterClass.secondarySkillWeights[skill] = 0;
+            if (!faction->warriorClass.secondarySkillWeights.contains(skill))
+                faction->warriorClass.secondarySkillWeights[skill] = 0;
         }
         // @todo: WTF? it contains nullptr!
         if (faction->mageClass.secondarySkillWeights.contains(nullptr))
             faction->mageClass.secondarySkillWeights.erase(nullptr);
-        if (faction->fighterClass.secondarySkillWeights.contains(nullptr))
-            faction->fighterClass.secondarySkillWeights.erase(nullptr);
+        if (faction->warriorClass.secondarySkillWeights.contains(nullptr))
+            faction->warriorClass.secondarySkillWeights.erase(nullptr);
 
         if (faction->alignment != LibraryFaction::Alignment::Special) {
             assert(!faction->mageClass.lowLevelIncrease.empty());
             assert(!faction->mageClass.highLevelIncrease.empty());
-            assert(!faction->fighterClass.lowLevelIncrease.empty());
-            assert(!faction->fighterClass.highLevelIncrease.empty());
+            assert(!faction->warriorClass.lowLevelIncrease.empty());
+            assert(!faction->warriorClass.highLevelIncrease.empty());
         }
 
         m_impl->m_factions.m_sorted.push_back(faction);
@@ -527,8 +554,8 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
         if (l->faction != r->faction)
             return l->faction->generatedOrder < r->faction->generatedOrder;
 
-        if (l->isFighter != r->isFighter)
-            return l->isFighter > r->isFighter;
+        if (l->isWarrior != r->isWarrior)
+            return l->isWarrior > r->isWarrior;
         return l->presentationParams.order < r->presentationParams.order;
     });
     for (auto* hero : m_impl->m_heroes.m_unsorted) {

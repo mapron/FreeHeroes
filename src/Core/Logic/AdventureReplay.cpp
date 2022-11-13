@@ -18,7 +18,7 @@
 
 namespace FreeHeroes::Core {
 
-bool AdventureReplayData::load(const std_path& filename, IGameDatabase& gameDatabase)
+bool AdventureReplayData::load(const std_path& filename, const IGameDatabase* gameDatabase)
 {
     std::string buffer;
     if (!readFileIntoBuffer(filename, buffer))
@@ -42,7 +42,7 @@ bool AdventureReplayData::load(const std_path& filename, IGameDatabase& gameData
     const PropertyTree& jsonAdventure = main["adv"];
     m_adv.m_seed                      = jsonAdventure["seed"].getScalar().toInt();
     auto terrainId                    = jsonAdventure["terrain"].getScalar().toString();
-    m_adv.m_terrain                   = gameDatabase.terrains()->find(terrainId);
+    m_adv.m_terrain                   = gameDatabase->terrains()->find(terrainId);
     assert(m_adv.m_terrain);
     reader.jsonToValue(jsonAdventure["field"], m_adv.m_field);
     reader.jsonToValue(jsonAdventure["att"], m_adv.m_att);
@@ -59,15 +59,16 @@ bool AdventureReplayData::save(const std_path& filename) const
 
     Reflection::PropertyTreeWriter writer;
     for (const auto& record : m_bat.m_records) {
-        PropertyTree row = writer.valueToJson(record);
+        PropertyTree row;
+        writer.valueToJson(record, row);
         jsonRecords.append(std::move(row));
     }
     PropertyTree& jsonAdventure = main["adv"];
     jsonAdventure["seed"]       = PropertyTreeScalar(m_adv.m_seed);
     jsonAdventure["terrain"]    = PropertyTreeScalar(m_adv.m_terrain->id);
-    jsonAdventure["field"]      = writer.valueToJson(m_adv.m_field);
-    jsonAdventure["att"]        = writer.valueToJson(m_adv.m_att);
-    jsonAdventure["def"]        = writer.valueToJson(m_adv.m_def);
+    writer.valueToJson(m_adv.m_field, jsonAdventure["field"]);
+    writer.valueToJson(m_adv.m_att, jsonAdventure["att"]);
+    writer.valueToJson(m_adv.m_def, jsonAdventure["def"]);
 
     std::string buffer;
     return writeJsonToBuffer(buffer, main) && writeFileFromBuffer(filename, buffer);

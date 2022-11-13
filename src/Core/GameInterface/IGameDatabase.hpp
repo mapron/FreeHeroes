@@ -6,10 +6,12 @@
 #pragma once
 
 #include "LibraryFwd.hpp"
+#include "GameConstants.hpp"
 
-#include <vector>
-#include <string>
 #include <concepts>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace FreeHeroes::Core {
 
@@ -43,6 +45,7 @@ public:
         virtual ~ContainerInterface()                                          = default;
         virtual ConstPtr                     find(const std::string& id) const = 0;
         virtual const std::vector<ConstPtr>& records() const                   = 0;
+        virtual std::vector<std::string>     legacyOrderedIds() const          = 0;
     };
 
     using LibraryUnitContainerPtr           = const ContainerInterface<LibraryUnit>*;
@@ -88,4 +91,20 @@ template <> inline IGameDatabase::LibraryTerrainContainerPtr        IGameDatabas
 template <> inline IGameDatabase::LibraryMapObjectContainerPtr      IGameDatabase::container() const { return mapObjects();}
 template <> inline IGameDatabase::LibraryHeroSpecContainerPtr       IGameDatabase::container() const { return heroSpecs();}
 // clang-format on
+
+class IGameDatabaseContainer {
+public:
+    virtual ~IGameDatabaseContainer() = default;
+
+    [[nodiscard]] virtual const IGameDatabase* getDatabase(GameVersion version) const = 0;
+    [[nodiscard]] virtual const IGameDatabase* getDatabase(const std::string& version) const
+    {
+        if (version == g_database_HOTA)
+            return getDatabase(GameVersion::HOTA);
+        if (version == g_database_SOD)
+            return getDatabase(GameVersion::SOD);
+        return nullptr;
+    }
+};
+
 }

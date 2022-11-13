@@ -3,7 +3,7 @@
 "scope": "skills",
 "records" : {
 
-"sod.skill.resistance" : { "frequencyFighter": 0 , "frequencyMage": 0 }
+"sod.skill.resistance" : { "frequencyWarrior": 0 , "frequencyMage": 0 }
 
 }
 },
@@ -13,43 +13,43 @@
 "records" : {
 "sod.faction.castle"             : {
     "mageClass"   : { "skills" :{ "sod.skill.resistance": null } },
-    "fighterClass": { "skills" :{ "sod.skill.resistance": null } }
+    "warriorClass": { "skills" :{ "sod.skill.resistance": null } }
 },
 "sod.faction.rampart"             : {
     "mageClass"   : { "skills" :{ "sod.skill.resistance": null } },
-    "fighterClass": { "skills" :{ "sod.skill.resistance": null } }
+    "warriorClass": { "skills" :{ "sod.skill.resistance": null } }
 },
 "sod.faction.tower"             : {
     "mageClass"   : { "skills" :{ "sod.skill.resistance": null } },
-    "fighterClass": { "skills" :{ "sod.skill.resistance": null } }
+    "warriorClass": { "skills" :{ "sod.skill.resistance": null } }
 },
 "sod.faction.inferno"             : {
     "mageClass"   : { "skills" :{ "sod.skill.resistance": null } },
-    "fighterClass": { "skills" :{ "sod.skill.resistance": null } }
+    "warriorClass": { "skills" :{ "sod.skill.resistance": null } }
 },
 "sod.faction.necropolis"             : {
     "mageClass"   : { "skills" :{ "sod.skill.resistance": null } },
-    "fighterClass": { "skills" :{ "sod.skill.resistance": null } }
+    "warriorClass": { "skills" :{ "sod.skill.resistance": null } }
 },
 "sod.faction.dungeon"             : {
     "mageClass"   : { "skills" :{ "sod.skill.resistance": null } },
-    "fighterClass": { "skills" :{ "sod.skill.resistance": null } }
+    "warriorClass": { "skills" :{ "sod.skill.resistance": null } }
 },
 "sod.faction.stronghold"             : {
     "mageClass"   : { "skills" :{ "sod.skill.resistance": null } },
-    "fighterClass": { "skills" :{ "sod.skill.resistance": null } }
+    "warriorClass": { "skills" :{ "sod.skill.resistance": null } }
 },
 "sod.faction.fortress"             : {
     "mageClass"   : { "skills" :{ "sod.skill.resistance": null } },
-    "fighterClass": { "skills" :{ "sod.skill.resistance": null } }
+    "warriorClass": { "skills" :{ "sod.skill.resistance": null } }
 },
 "sod.faction.conflux"             : {
     "mageClass"   : { "skills" :{ "sod.skill.resistance": null } },
-    "fighterClass": { "skills" :{ "sod.skill.resistance": null } }
+    "warriorClass": { "skills" :{ "sod.skill.resistance": null } }
 },
 "hota.faction.cove" : {
     "mageClass"   : { "skills" :{ "sod.skill.resistance": null } },
-    "fighterClass": { "skills" :{ "sod.skill.resistance": null } }
+    "warriorClass": { "skills" :{ "sod.skill.resistance": null } }
 }
 
 }

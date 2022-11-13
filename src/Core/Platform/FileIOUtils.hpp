@@ -7,6 +7,7 @@
 
 #include "CorePlatformExport.hpp"
 #include "FsUtils.hpp"
+#include "ByteBuffer.hpp"
 
 #include <filesystem>
 
@@ -14,5 +15,8 @@ namespace FreeHeroes::Core {
 
 COREPLATFORM_EXPORT bool readFileIntoBuffer(const std_path& filename, std::string& buffer);
 COREPLATFORM_EXPORT bool writeFileFromBuffer(const std_path& filename, const std::string& buffer);
+
+COREPLATFORM_EXPORT bool readFileIntoBuffer(const std_path& filename, ByteArrayHolder& holder);
+COREPLATFORM_EXPORT bool writeFileFromBuffer(const std_path& filename, const ByteArrayHolder& holder);
 
 }

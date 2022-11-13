@@ -6,8 +6,8 @@
     "untranslatedName" : "Castle",
     "alignment":"good",
     "nativeTerrain": "sod.terrain.grass",
-    "fighterClass": {
-    "id": "sod.class.castleF",
+    "warriorClass": {
+    "id": "sod.faction.castle.warrior",
     "untranslatedName": "Knight",
     "startParams": {"ad":{"attack":2, "defense":2}, "magic":{"sp":1, "int":1}},
     "lowLevelIncrease" : {"attack":35, "defense":45, "sp":10, "int":10},
@@ -40,7 +40,7 @@
     },
 
     "mageClass": {
-    "id": "sod.class.castleM",
+    "id": "sod.faction.castle.mage",
     "untranslatedName": "Cleric",
     "startParams": {"ad":{"attack":1, "defense":0}, "magic":{"sp":2, "int":2}},
     "lowLevelIncrease" : {"attack":20, "defense":15, "sp":30, "int":35},
@@ -78,8 +78,8 @@
     "untranslatedName" : "Rampart",
     "alignment":"good",
     "nativeTerrain": "sod.terrain.grass",
-    "fighterClass": {
-    "id": "sod.class.rampartF",
+    "warriorClass": {
+    "id": "sod.faction.rampart.warrior",
     "untranslatedName": "Ranger",
     "startParams": {"ad":{"attack":1, "defense":3}, "magic":{"sp":1, "int":1}},
     "lowLevelIncrease" : {"attack":35, "defense":45, "sp":10, "int":10},
@@ -108,7 +108,7 @@
     }
     },
     "mageClass": {
-    "id": "sod.class.rampartM",
+    "id": "sod.faction.rampart.mage",
     "untranslatedName": "Druid",
     "startParams": {"ad":{"attack":0, "defense":2}, "magic":{"sp":1, "int":2}},
     "lowLevelIncrease" : {"attack":10, "defense":20, "sp":35, "int":35},
@@ -139,8 +139,8 @@
     "untranslatedName" : "Tower",
     "alignment":"good",
     "nativeTerrain": "sod.terrain.snow",
-    "fighterClass": {
-    "id": "sod.class.towerF",
+    "warriorClass": {
+    "id": "sod.faction.tower.warrior",
     "untranslatedName": "Alchemist",
     "startParams": {"ad":{"attack":1, "defense":1}, "magic":{"sp":2, "int":2}},
     "lowLevelIncrease" : {"attack":30, "defense":30, "sp":20, "int":20},
@@ -171,7 +171,7 @@
     }
     },
     "mageClass": {
-    "id": "sod.class.towerM",
+    "id": "sod.faction.tower.mage",
     "untranslatedName": "Wizard",
     "startParams": {"ad":{"attack":0, "defense":0}, "magic":{"sp":2, "int":3}},
     "lowLevelIncrease" : {"attack":10, "defense":10, "sp":40, "int":40},
@@ -208,8 +208,8 @@
     "untranslatedName" : "Inferno",
     "alignment":"evil",
     "nativeTerrain": "sod.terrain.lava",
-    "fighterClass": {
-    "id": "sod.class.infernoF",
+    "warriorClass": {
+    "id": "sod.faction.inferno.warrior",
     "untranslatedName": "Demoniac",
     "startParams": {"ad":{"attack":2, "defense":2}, "magic":{"sp":1, "int":1}},
     "lowLevelIncrease" : {"attack":35, "defense":35, "sp":15, "int":15},
@@ -236,7 +236,7 @@
     }
     },
     "mageClass": {
-    "id": "sod.class.infernoM",
+    "id": "sod.faction.inferno.mage",
     "untranslatedName": "Heretic",
     "startParams": {"ad":{"attack":1, "defense":1}, "magic":{"sp":2, "int":1}},
     "lowLevelIncrease" : {"attack":15, "defense":15, "sp":35, "int":35},
@@ -271,8 +271,8 @@
     "untranslatedName" : "Necropolis",
     "alignment":"evil",
     "nativeTerrain": "sod.terrain.dirt",
-    "fighterClass": {
-    "id": "sod.class.necropolisF",
+    "warriorClass": {
+    "id": "sod.faction.necropolis.warrior",
     "untranslatedName": "DeathKnight",
     "startParams": {"ad":{"attack":1, "defense":2}, "magic":{"sp":2, "int":1}},
     "lowLevelIncrease" : {"attack":30, "defense":25, "sp":20, "int":25},
@@ -306,7 +306,7 @@
     }
     },
     "mageClass": {
-    "id": "sod.class.necropolisM",
+    "id": "sod.faction.necropolis.mage",
     "untranslatedName": "Necromancer",
     "startParams": {"ad":{"attack":1, "defense":0}, "magic":{"sp":2, "int":2}},
     "lowLevelIncrease" : {"attack":15, "defense":15, "sp":35, "int":35},
@@ -337,8 +337,8 @@
     "untranslatedName" : "Dungeon",
     "alignment":"evil",
     "nativeTerrain": "sod.terrain.subterra",
-    "fighterClass": {
-    "id": "sod.class.dungeonF",
+    "warriorClass": {
+    "id": "sod.faction.dungeon.warrior",
     "untranslatedName": "Overlord",
     "startParams": {"ad":{"attack":2, "defense":2}, "magic":{"sp":1, "int":1}},
     "lowLevelIncrease" : {"attack":35, "defense":35, "sp":15, "int":15},
@@ -363,7 +363,7 @@
     }
     },
     "mageClass": {
-    "id": "sod.class.dungeonM",
+    "id": "sod.faction.dungeon.mage",
     "untranslatedName": "Warlock",
     "startParams": {"ad":{"attack":0, "defense":0}, "magic":{"sp":3, "int":2}},
     "lowLevelIncrease" : {"attack":10, "defense":10, "sp":50, "int":30},
@@ -400,8 +400,8 @@
 "sod.faction.stronghold"             : {
     "untranslatedName" : "Stronghold",
     "nativeTerrain": "sod.terrain.rough",
-    "fighterClass": {
-    "id": "sod.class.strongholdF",
+    "warriorClass": {
+    "id": "sod.faction.stronghold.warrior",
     "untranslatedName": "Barbarian",
     "startParams": {"ad":{"attack":4, "defense":0}, "magic":{"sp":1, "int":1}},
     "lowLevelIncrease" : {"attack":55, "defense":35, "sp":5 , "int":5},
@@ -429,7 +429,7 @@
     }
     },
     "mageClass": {
-    "id": "sod.class.strongholdM",
+    "id": "sod.faction.stronghold.mage",
     "untranslatedName": "BattleMage",
     "startParams": {"ad":{"attack":2, "defense":1}, "magic":{"sp":1, "int":1}},
     "lowLevelIncrease" : {"attack":30, "defense":20, "sp":25, "int":25},
@@ -468,8 +468,8 @@
 "sod.faction.fortress"             : {
     "untranslatedName" : "Fortress",
     "nativeTerrain": "sod.terrain.swamp",
-    "fighterClass": {
-    "id": "sod.class.fortressF",
+    "warriorClass": {
+    "id": "sod.faction.fortress.warrior",
     "untranslatedName": "Beastmaster",
     "startParams": {"ad":{"attack":0, "defense":4}, "magic":{"sp":1, "int":1}},
     "lowLevelIncrease" : {"attack":30, "defense":50, "sp":10, "int":10},
@@ -496,7 +496,7 @@
     }
     },
     "mageClass": {
-    "id": "sod.class.fortressM",
+    "id": "sod.faction.fortress.mage",
     "untranslatedName": "Witch",
     "startParams": {"ad":{"attack":0, "defense":1}, "magic":{"sp":2, "int":2}},
     "lowLevelIncrease" : {"attack":5 , "defense":15, "sp":40, "int":40},
@@ -528,8 +528,8 @@
 "sod.faction.conflux"             : {
     "untranslatedName" : "Conflux",
     "nativeTerrain": "hota.terrain.highland",
-    "fighterClass": {
-    "id": "sod.class.confluxF",
+    "warriorClass": {
+    "id": "sod.faction.conflux.warrior",
     "untranslatedName": "Planeswalker",
     "startParams": {"ad":{"attack":3, "defense":1}, "magic":{"sp":1, "int":1}},
     "lowLevelIncrease" : {"attack":45, "defense":25, "sp":15, "int":15},
@@ -557,7 +557,7 @@
     }
     },
     "mageClass": {
-    "id": "sod.class.confluxM",
+    "id": "sod.faction.conflux.mage",
     "untranslatedName": "Elementalist",
     "startParams": {"ad":{"attack":0, "defense":0}, "magic":{"sp":3, "int":3}},
     "lowLevelIncrease" : {"attack":15, "defense":15, "sp":35, "int":35},
@@ -592,8 +592,8 @@
 "hota.faction.cove"             : {
     "untranslatedName" : "Cove",
     "nativeTerrain": "sod.terrain.swamp",
-    "fighterClass": {
-    "id": "hota.class.coveF",
+    "warriorClass": {
+    "id": "hota.faction.cove.warrior",
     "untranslatedName": "Captain",
     "startParams": {"ad":{"attack":3, "defense":0}, "magic":{"sp":2, "int":1}},
     "lowLevelIncrease" : {"attack":45, "defense":25, "sp":20, "int":10},
@@ -625,7 +625,7 @@
     }
     },
     "mageClass": {
-    "id": "hota.class.coveM",
+    "id": "hota.faction.cove.mage",
     "untranslatedName": "Navigator",
     "startParams": {"ad":{"attack":2, "defense":0}, "magic":{"sp":1, "int":2}},
     "lowLevelIncrease" : {"attack":15, "defense":10, "sp":40, "int":35},
@@ -660,15 +660,15 @@
 "sod.faction.neutral" : {
     "untranslatedName" : "Neutral",
     "alignment":"independent",
-    "fighterClass": {
-    "id": "sod.class.neutralF",
+    "warriorClass": {
+    "id": "sod.faction.neutral.warrior",
     "startParams": {"ad":{"attack":0, "defense":0}, "magic":{"sp":1, "int":1}},
     "lowLevelIncrease" : {"attack":25, "defense":25, "sp":25, "int":25},
     "highLevelIncrease": {"attack":25, "defense":25, "sp":25, "int":25},
     "skills" :{}
     },
     "mageClass": {
-    "id": "sod.class.neutralM",
+    "id": "sod.faction.neutral.mage",
     "startParams": {"ad":{"attack":0, "defense":0}, "magic":{"sp":1, "int":1}},
     "lowLevelIncrease" : {"attack":25, "defense":25, "sp":25, "int":25},
     "highLevelIncrease": {"attack":25, "defense":25, "sp":25, "int":25},

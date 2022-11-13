@@ -5,6 +5,7 @@
  */
 #include <QApplication>
 
+#include "CoreApplication.hpp"
 #include "Application.hpp"
 
 #include "ConverterDialog.hpp"
@@ -14,12 +15,14 @@ int main(int argc, char* argv[])
     using namespace FreeHeroes;
     using namespace Conversion;
 
-    Gui::Application fhApp;
+    Core::CoreApplication fhCoreApp;
+
+    Gui::Application fhApp(&fhCoreApp, { Gui::Application::Option::QtTranslations });
     QApplication     app(argc, argv);
 
-    fhApp.load("LegacyConverter", { Gui::Application::Option::QtTranslations });
+    fhApp.load();
 
-    ConverterDialog dlg;
+    ConverterDialog dlg(fhCoreApp.getDatabaseContainer());
     dlg.show();
 
     return app.exec();

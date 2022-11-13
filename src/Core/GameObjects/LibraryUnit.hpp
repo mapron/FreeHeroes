@@ -136,6 +136,7 @@ struct LibraryUnit {
 
     std::string id;
     std::string untranslatedName;
+    int         legacyId = -1;
 
     UnitPrimaryParams primary;
 

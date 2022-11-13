@@ -4,157 +4,207 @@
 "records" : {
 
 "sod.faction.castle"             : {
-    "fighterClass": { "pres": {
-        "battleSpriteMale": "ch00",
-        "battleSpriteFemale": "ch00b"
+    "warriorClass": { "pres": {
+        "battleSpriteMale"     : "ch00",
+        "battleSpriteFemale"   : "ch00b",
+        "adventureSpriteMale"  : "ah00_",
+        "adventureSpriteFemale": "ah00b_"
         }
     },
 
     "mageClass": { "pres": {
-        "battleSpriteMale": "ch01b",
-        "battleSpriteFemale": "ch01"
+        "battleSpriteMale"     : "ch01b",
+        "battleSpriteFemale"   : "ch01",
+        "adventureSpriteMale"  : "ah01_",
+        "adventureSpriteFemale": "ah01b_"
         }
     },
-    "pres": {"unitBackground": "crbkgcas"}
+    "pres": {"unitBackground": "crbkgcas", 
+		"townAnimations" : ["avccast0", "avccasf0", "avccasc0", "avccasx0", "avccasz0"] }
 },
 
 "sod.faction.rampart"             : {
 
-    "fighterClass": { "pres": {
-        "battleSpriteMale": "ch02",
-        "battleSpriteFemale": "ch02b"
+    "warriorClass": { "pres": {
+        "battleSpriteMale"     : "ch02",
+        "battleSpriteFemale"   : "ch02b",
+        "adventureSpriteMale"  : "ah02_",
+        "adventureSpriteFemale": "ah02b_"
         }
     },
     "mageClass": { "pres": {
-        "battleSpriteMale": "ch03b",
-        "battleSpriteFemale": "ch03"
+        "battleSpriteMale"     : "ch03b",
+        "battleSpriteFemale"   : "ch03",
+        "adventureSpriteMale"  : "ah03_",
+        "adventureSpriteFemale": "ah03b_"
         }
     },
-    "pres": { "unitBackground": "crbkgram",
+    "pres": { "unitBackground": "crbkgram", 
+		"townAnimations" : ["avcramp0", "avcramf0", "avcramc0", "avcramx0", "avcramz0"],
         "goesAfterId":"sod.faction.castle"}
 
 },
 
 "sod.faction.tower"             : {
-    "fighterClass": { "pres": {
-        "battleSpriteMale": "ch04b",
-        "battleSpriteFemale": "ch04"
+    "warriorClass": { "pres": {
+        "battleSpriteMale"     : "ch04b",
+        "battleSpriteFemale"   : "ch04",
+        "adventureSpriteMale"  : "ah04_",
+        "adventureSpriteFemale": "ah04b_"
         }
     },
     "mageClass": { "pres": {
-        "battleSpriteMale": "ch05",
-        "battleSpriteFemale": "ch05b"
+        "battleSpriteMale"     : "ch05",
+        "battleSpriteFemale"   : "ch05b",
+        "adventureSpriteMale"  : "ah05_",
+        "adventureSpriteFemale": "ah05b_"
         }
     },
-    "pres": {"unitBackground":"crbkgtow",
+    "pres": {"unitBackground":"crbkgtow", 
+		"townAnimations" : ["avctowr0", "avctowf0", "avctowc0", "avctowx0", "avctowz0"],
         "goesAfterId":"sod.faction.rampart"}
 },
 
 "sod.faction.inferno"             : {
-    "fighterClass": { "pres": {
-        "battleSpriteMale": "ch06",
-        "battleSpriteFemale": "ch06b"
+    "warriorClass": { "pres": {
+        "battleSpriteMale"     : "ch06",
+        "battleSpriteFemale"   : "ch06b",
+        "adventureSpriteMale"  : "ah06_",
+        "adventureSpriteFemale": "ah06b_"
         }
     },
     "mageClass": { "pres": {
-        "battleSpriteMale": "ch07b",
-        "battleSpriteFemale": "ch07"
+        "battleSpriteMale"     : "ch07b",
+        "battleSpriteFemale"   : "ch07",
+        "adventureSpriteMale"  : "ah07_",
+        "adventureSpriteFemale": "ah07b_"
         }
     },
-    "pres": { "unitBackground":"crbkginf"}
+    "pres": { "unitBackground":"crbkginf", 
+	"townAnimations" : ["avcinft0", "avcinff0", "avcinfc0", "avcinfx0", "avcinfz0"]}
 },
 
 "sod.faction.necropolis"             : {
-    "fighterClass": {"pres": {
-        "battleSpriteMale": "ch08",
-        "battleSpriteFemale": "ch08b"
+    "warriorClass": { "pres": {
+        "battleSpriteMale"     : "ch08",
+        "battleSpriteFemale"   : "ch08b",
+        "adventureSpriteMale"  : "ah08_",
+        "adventureSpriteFemale": "ah08b_"
         }
     },
     "mageClass": { "pres": {
-        "battleSpriteMale": "ch09b",
-        "battleSpriteFemale": "ch09"
+        "battleSpriteMale"     : "ch09b",
+        "battleSpriteFemale"   : "ch09",
+        "adventureSpriteMale"  : "ah09_",
+        "adventureSpriteFemale": "ah09b_"
         }
     },
     "pres": {"unitBackground":"crbkgnec" ,
+		"townAnimations" : ["avcnecr0", "avcnecf0", "avcnecc0", "avcnecx0", "avcnecz0"],
         "goesAfterId":"sod.faction.inferno"}
 
 },
 
 "sod.faction.dungeon"             : {
-    "fighterClass": { "pres": {
-        "battleSpriteMale": "ch010",
-        "battleSpriteFemale": "ch010b"
+    "warriorClass": { "pres": {
+        "battleSpriteMale"     : "ch010",
+        "battleSpriteFemale"   : "ch010b",
+        "adventureSpriteMale"  : "ah10_",
+        "adventureSpriteFemale": "ah10b_"
         }
     },
     "mageClass": { "pres": {
-        "battleSpriteMale": "ch011b",
-        "battleSpriteFemale": "ch11"
+        "battleSpriteMale"     : "ch011b",
+        "battleSpriteFemale"   : "ch11",
+        "adventureSpriteMale"  : "ah11_",
+        "adventureSpriteFemale": "ah11b_"
         }
     },
     "pres": {"unitBackground":"crbkgdun",
+		"townAnimations" : ["avcdung0", "avcdunf0", "avcdunc0", "avcdunx0", "avcdunz0"],
         "goesAfterId":"sod.faction.necropolis"}
 },
 
 "sod.faction.stronghold"             : {
-    "fighterClass": { "pres": {
-        "battleSpriteMale": "ch013",
-        "battleSpriteFemale": "ch012"
+    "warriorClass": { "pres": {
+        "battleSpriteMale"     : "ch013",
+        "battleSpriteFemale"   : "ch012",
+        "adventureSpriteMale"  : "ah13_",
+        "adventureSpriteFemale": "ah12_"
         }
     },
     "mageClass": { "pres": {
-        "battleSpriteMale": "ch013b",
-        "battleSpriteFemale": "ch012b"
+        "battleSpriteMale"     : "ch013b",
+        "battleSpriteFemale"   : "ch012b",
+        "adventureSpriteMale"  : "ah13b_",
+        "adventureSpriteFemale": "ah12b_"
         }
     },
-    "pres": { "unitBackground":"crbkgstr"}
+    "pres": { "unitBackground":"crbkgstr",
+		"townAnimations" : ["avcstro0", "avcstrf0", "avcstrc0", "avcstrx0", "avcstrz0"] }
 },
 
 "sod.faction.fortress"             : {
     "untranslatedName" : "Fortress",
     "nativeTerrain": "sod.terrain.swamp",
     "goesAfterId":"sod.faction.stronghold",
-    "fighterClass": { "pres": {
-        "battleSpriteMale": "ch014",
-        "battleSpriteFemale": "ch014"
+    "warriorClass": { "pres": {
+        "battleSpriteMale"     : "ch014",
+        "battleSpriteFemale"   : "ch014",
+        "adventureSpriteMale"  : "ah14_",
+        "adventureSpriteFemale": "ah14_"
         }
     },
     "mageClass": { "pres": {
-        "battleSpriteMale": "ch015",
-        "battleSpriteFemale": "ch015"
+        "battleSpriteMale"     : "ch015",
+        "battleSpriteFemale"   : "ch015",
+        "adventureSpriteMale"  : "ah15_",
+        "adventureSpriteFemale": "ah15_"
         }
     },
     "pres": { "unitBackground":"crbkgfor",
+		"townAnimations" : ["avcftrt0", "avcftrf0", "avcftrc0", "avcftrx0", "avcftrz0"],
         "goesAfterId":"sod.faction.stronghold"}
 },
 
 "sod.faction.conflux"             : {
-    "fighterClass": { "pres": {
-        "battleSpriteMale": "ch16",
-        "battleSpriteFemale": "ch16b"
+    "warriorClass": { "pres": {
+        "battleSpriteMale"     : "ch16",
+        "battleSpriteFemale"   : "ch16b",
+        "adventureSpriteMale"  : "ah16_",
+        "adventureSpriteFemale": "ah16b_"
         }
     },
     "mageClass": { "pres": {
-        "battleSpriteMale": "ch17",
-        "battleSpriteFemale": "ch17b"
+        "battleSpriteMale"     : "ch17",
+        "battleSpriteFemale"   : "ch17b",
+        "adventureSpriteMale"  : "ah17_",
+        "adventureSpriteFemale": "ah17b_"
         }
     },
     "pres": { "unitBackground":"crbkgele",
+		"townAnimations" : ["avchfor0", "avchfoc0", "avchfof0", "avchforx", "avchforz"],
         "goesAfterId":"sod.faction.fortress"}
 
 },
 
 "hota.faction.cove"             : {
-    "fighterClass": { "pres": {
-        "battleSpriteMale": "ch18b",
-        "battleSpriteFemale": "ch18"
+    "warriorClass": { "pres": {
+        "battleSpriteMale"     : "ch18b",
+        "battleSpriteFemale"   : "ch18",
+        "adventureSpriteMale"  : "ah18b_",
+        "adventureSpriteFemale": "ah18_"
         }
     },
     "mageClass": { "pres": {
-        "battleSpriteMale": "ch19",
-        "battleSpriteFemale": "ch19b"
+        "battleSpriteMale"     : "ch19",
+        "battleSpriteFemale"   : "ch19b",
+        "adventureSpriteMale"  : "ah19_",
+        "adventureSpriteFemale": "ah19b_"
         }
     },
     "pres": { "unitBackground":"crbkgcov",
+		"townAnimations" : ["avccove0", "avccovf0", "avccovc0", "avccovx0", "avccovz0"],
         "goesAfterId":"sod.faction.conflux" }
 },
 

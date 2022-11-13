@@ -24,8 +24,9 @@ struct LibrarySecondarySkill {
 
     std::string id;
     std::string untranslatedName;
+    int         legacyId = -1;
 
-    int frequencyFighter = 0;
+    int frequencyWarrior = 0;
     int frequencyMage    = 0;
 
     enum class HandlerType

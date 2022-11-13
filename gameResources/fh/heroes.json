@@ -1,7 +1,7 @@
 [{
 "scope": "heroes",
 
-"compactCols":                       ["untranslatedName" , "factionId"              , "fighter", "specId"                              , "startSpellId"                  , "startStacks"                                                                              , "flags" ],
+"compactCols":                       ["untranslatedName" , "factionId"              , "isWarrior", "specId"                              , "startSpellId"                  , "startStacks"                                                                              , "flags" ],
 "records": {
 
 "sod.hero.castle.kn000"            : [ "Knight  1"       , "sod.faction.castle"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],

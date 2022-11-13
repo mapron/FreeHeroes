@@ -19,7 +19,7 @@ namespace FreeHeroes::Sound {
 class SOUNDPLAYER_EXPORT MusicBox : public IMusicBox
     , public QObject {
 public:
-    MusicBox(Core::IRandomGenerator& rng, Core::IResourceLibrary& resourceLibrary);
+    MusicBox(Core::IRandomGeneratorPtr rng, const Core::IResourceLibrary* resourceLibrary);
     ~MusicBox();
 
 public:
@@ -39,9 +39,9 @@ public:
 private:
 private:
     struct Impl;
-    std::unique_ptr<Impl>   m_impl;
-    Core::IRandomGenerator& m_rng;
-    Core::IResourceLibrary& m_resourceLibrary;
+    std::unique_ptr<Impl>         m_impl;
+    Core::IRandomGeneratorPtr     m_rng;
+    const Core::IResourceLibrary* m_resourceLibrary;
 };
 
 }

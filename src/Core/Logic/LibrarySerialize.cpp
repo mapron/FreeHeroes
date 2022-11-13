@@ -19,21 +19,21 @@
 
 namespace FreeHeroes::Core::Reflection {
 
-bool deserialize(IGameDatabase& gameDatabase, LibraryFaction& faction, const PropertyTree& jsonObj)
+bool deserialize(const IGameDatabase* gameDatabase, LibraryFaction& faction, const PropertyTree& jsonObj)
 {
     PropertyTreeReader reader(gameDatabase);
     reader.jsonToValue(jsonObj, faction);
     return true;
 }
 
-bool deserialize(IGameDatabase& gameDatabase, LibrarySecondarySkill& skill, const PropertyTree& jsonObj)
+bool deserialize(const IGameDatabase* gameDatabase, LibrarySecondarySkill& skill, const PropertyTree& jsonObj)
 {
     PropertyTreeReader reader(gameDatabase);
     reader.jsonToValue(jsonObj, skill);
     return true;
 }
 
-bool deserialize(IGameDatabase& gameDatabase, LibraryUnit& unit, const PropertyTree& jsonObj)
+bool deserialize(const IGameDatabase* gameDatabase, LibraryUnit& unit, const PropertyTree& jsonObj)
 {
     using namespace FreeHeroes::Core;
 
@@ -50,49 +50,49 @@ bool deserialize(IGameDatabase& gameDatabase, LibraryUnit& unit, const PropertyT
     return true;
 }
 
-bool deserialize(IGameDatabase& gameDatabase, LibraryHeroSpec& spec, const PropertyTree& jsonObj)
+bool deserialize(const IGameDatabase* gameDatabase, LibraryHeroSpec& spec, const PropertyTree& jsonObj)
 {
     PropertyTreeReader reader(gameDatabase);
     reader.jsonToValue(jsonObj, spec);
     return true;
 }
 
-bool deserialize(IGameDatabase& gameDatabase, LibraryArtifact& artifact, const PropertyTree& jsonObj)
+bool deserialize(const IGameDatabase* gameDatabase, LibraryArtifact& artifact, const PropertyTree& jsonObj)
 {
     PropertyTreeReader reader(gameDatabase);
     reader.jsonToValue(jsonObj, artifact);
     return true;
 }
 
-bool deserialize(IGameDatabase& gameDatabase, LibraryHero& hero, const PropertyTree& jsonObj)
+bool deserialize(const IGameDatabase* gameDatabase, LibraryHero& hero, const PropertyTree& jsonObj)
 {
     PropertyTreeReader reader(gameDatabase);
     reader.jsonToValue(jsonObj, hero);
     return true;
 }
 
-bool deserialize(IGameDatabase& gameDatabase, LibrarySpell& spell, const PropertyTree& jsonObj)
+bool deserialize(const IGameDatabase* gameDatabase, LibrarySpell& spell, const PropertyTree& jsonObj)
 {
     PropertyTreeReader reader(gameDatabase);
     reader.jsonToValue(jsonObj, spell);
     return true;
 }
 
-bool deserialize(IGameDatabase& gameDatabase, LibraryResource& obj, const PropertyTree& jsonObj)
+bool deserialize(const IGameDatabase* gameDatabase, LibraryResource& obj, const PropertyTree& jsonObj)
 {
     PropertyTreeReader reader(gameDatabase);
     reader.jsonToValue(jsonObj, obj);
     return true;
 }
 
-bool deserialize(IGameDatabase& gameDatabase, LibraryTerrain& obj, const PropertyTree& jsonObj)
+bool deserialize(const IGameDatabase* gameDatabase, LibraryTerrain& obj, const PropertyTree& jsonObj)
 {
     PropertyTreeReader reader(gameDatabase);
     reader.jsonToValue(jsonObj, obj);
     return true;
 }
 
-bool deserialize(IGameDatabase& gameDatabase, LibraryMapObject& obj, const PropertyTree& jsonObj)
+bool deserialize(const IGameDatabase* gameDatabase, LibraryMapObject& obj, const PropertyTree& jsonObj)
 {
     PropertyTreeReader reader(gameDatabase);
     reader.jsonToValue(jsonObj, obj);
@@ -100,13 +100,13 @@ bool deserialize(IGameDatabase& gameDatabase, LibraryMapObject& obj, const Prope
     return true;
 }
 
-bool deserialize(IGameDatabase& gameDatabase, SkillHeroItem& obj, const PropertyTree& jsonObj)
+bool deserialize(const IGameDatabase* gameDatabase, SkillHeroItem& obj, const PropertyTree& jsonObj)
 {
     PropertyTreeReader reader(gameDatabase);
     reader.jsonToValue(jsonObj, obj);
     return true;
 }
-bool deserialize(IGameDatabase& gameDatabase, LibraryGameRules& obj, const PropertyTree& jsonObj)
+bool deserialize(const IGameDatabase* gameDatabase, LibraryGameRules& obj, const PropertyTree& jsonObj)
 {
     PropertyTreeReader reader(gameDatabase);
     reader.jsonToValue(jsonObj, obj);
@@ -116,7 +116,7 @@ bool deserialize(IGameDatabase& gameDatabase, LibraryGameRules& obj, const Prope
 bool serialize(const SkillHeroItem& obj, PropertyTree& jsonObj)
 {
     PropertyTreeWriter writer;
-    jsonObj = writer.valueToJson(obj);
+    writer.valueToJson(obj, jsonObj);
     return true;
 }
 

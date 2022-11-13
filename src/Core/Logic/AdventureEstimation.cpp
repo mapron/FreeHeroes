@@ -143,7 +143,7 @@ void AdventureEstimation::calculateHeroLevelUp(AdventureHero& hero)
 
     SkillWeights allSkillWeights = heroClass->secondarySkillWeights;
     for (auto& p : allSkillWeights) {
-        p.second += hero.library->isFighter ? p.first->frequencyFighter : p.first->frequencyMage;
+        p.second += hero.library->isWarrior ? p.first->frequencyWarrior : p.first->frequencyMage;
     }
     SkillWeights                            skillWeightsForUpgrade, schoolWeightsForUpgrade;
     std::set<LibrarySecondarySkillConstPtr> heroExisting;
@@ -181,8 +181,8 @@ void AdventureEstimation::calculateHeroLevelUp(AdventureHero& hero)
         specialParams.suggestEveryLevel     = suggestEveryLevel;
     };
 
-    const int suggestSchoolEveryLevel = hero.library->isFighter ? 4 : 3;
-    const int suggestWisdomEveryLevel = hero.library->isFighter ? 6 : 3;
+    const int suggestSchoolEveryLevel = hero.library->isWarrior ? 4 : 3;
+    const int suggestWisdomEveryLevel = hero.library->isWarrior ? 6 : 3;
     processSpecial(levelupParams.wisdom, hasWisdom, suggestWisdomEveryLevel, hero.levelupsWithoutWisdom);
     processSpecial(levelupParams.school, hasSchool, suggestSchoolEveryLevel, hero.levelupsWithoutSchool);
 

@@ -6,8 +6,10 @@
 #include "FileFormatJson.hpp"
 
 #include "Logger.hpp"
+#include "Profiler.hpp"
 
 #include <sstream>
+#include <iterator>
 
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>
@@ -44,6 +46,7 @@ void jsonToPropery(PropertyTree& data, rapidjson::Value& input)
         }
     } else if (input.IsArray()) {
         data.convertToList();
+        data.getList().reserve(std::distance(input.Begin(), input.End()));
         for (auto nodeIt = input.Begin(); nodeIt != input.End(); ++nodeIt) {
             PropertyTree child;
             jsonToPropery(child, *nodeIt);
@@ -106,16 +109,24 @@ bool readJsonFromBuffer(const std::string& buffer, PropertyTree& data)
     const char*         dataPtr = buffer.data();
     if (buffer.starts_with(std::string_view("\xef\xbb\xbf", 3)))
         dataPtr += 3;
-    auto& res = input.Parse<0>(dataPtr);
-    if (res.HasParseError()) {
-        Logger(Logger::Err) << res.GetParseError() << " (" << res.GetErrorOffset() << ")";
-        return false;
+
+    {
+        ProfilerScope scope("rapidjson::Parse");
+        auto&         res = input.Parse<0>(dataPtr);
+        if (res.HasParseError()) {
+            Logger(Logger::Err) << res.GetParseError() << " (" << res.GetErrorOffset() << ")";
+            return false;
+        }
     }
 
     if (!input.IsObject() && !input.IsArray())
         return false;
 
-    jsonToPropery(data, input);
+    data = PropertyTree{};
+    {
+        ProfilerScope scope("rapidjson::jsonToPropery");
+        jsonToPropery(data, input);
+    }
 
     return true;
 }

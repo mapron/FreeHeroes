@@ -114,6 +114,8 @@ inline constexpr const std::tuple MetaInfo::s_fields<LibraryTerrain::Presentatio
     Field("backgroundsBattle"  , &LibraryTerrain::Presentation::backgroundsBattle),
     Field("order"              , &LibraryTerrain::Presentation::order),
     Field("icon"               , &LibraryTerrain::Presentation::icon),
+    Field("centerTiles"        , &LibraryTerrain::Presentation::centerTiles),
+    Field("centerTilesOffset"  , &LibraryTerrain::Presentation::centerTilesOffset),
 };
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<LibraryTerrain::Bonus>{
@@ -122,8 +124,8 @@ inline constexpr const std::tuple MetaInfo::s_fields<LibraryTerrain::Bonus>{
 };
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<LibraryTerrain>{
-    
     Field("untranslatedName"   , &LibraryTerrain::untranslatedName),
+    Field("legacyId"           , &LibraryTerrain::legacyId),
     Field("moveCost"           , &LibraryTerrain::moveCost),
     Field("isObstacle"         , &LibraryTerrain::isObstacle),
     Field("extraLayer"         , &LibraryTerrain::extraLayer),
@@ -144,6 +146,7 @@ template<>
 inline constexpr const std::tuple MetaInfo::s_fields<LibraryResource>{
     
     Field("untranslatedName" , &LibraryResource::untranslatedName),
+    Field("legacyId"         , &LibraryResource::legacyId),
     Field("pres"             , &LibraryResource::presentationParams),
 };
 
@@ -165,6 +168,8 @@ inline constexpr const std::tuple MetaInfo::s_fields<LibraryFactionHeroClass::Pr
     
     Field("battleSpriteMale"  , &LibraryFactionHeroClass::Presentation::battleSpriteMale),
     Field("battleSpriteFemale", &LibraryFactionHeroClass::Presentation::battleSpriteFemale),
+    Field("adventureSpriteMale"  , &LibraryFactionHeroClass::Presentation::adventureSpriteMale),
+    Field("adventureSpriteFemale", &LibraryFactionHeroClass::Presentation::adventureSpriteFemale),
 };
 
 template<>
@@ -192,13 +197,15 @@ inline constexpr const std::tuple MetaInfo::s_fields<LibraryFaction::Presentatio
     
     Field("goesAfterId"       , &LibraryFaction::Presentation::goesAfterId),
     Field("unitBackground" , &LibraryFaction::Presentation::unitBackground),
+    Field("townAnimations" , &LibraryFaction::Presentation::townAnimations),
 };
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<LibraryFaction>{
     
     Field("alignment"         , &LibraryFaction::alignment),
     Field("untranslatedName"  , &LibraryFaction::untranslatedName),
-    Field("fighterClass"      , &LibraryFaction::fighterClass),
+    Field("legacyId"          , &LibraryFaction::legacyId),
+    Field("warriorClass"      , &LibraryFaction::warriorClass),
     Field("mageClass"         , &LibraryFaction::mageClass),
     Field("nativeTerrain"     , &LibraryFaction::nativeTerrain),
     Field("pres"              , &LibraryFaction::presentationParams),
@@ -227,7 +234,8 @@ inline constexpr const std::tuple MetaInfo::s_fields<LibrarySecondarySkill::Pres
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<LibrarySecondarySkill>{
     Field("untranslatedName"  , &LibrarySecondarySkill::untranslatedName),
-    Field("frequencyFighter"  , &LibrarySecondarySkill::frequencyFighter),
+    Field("legacyId"          , &LibrarySecondarySkill::legacyId),
+    Field("frequencyWarrior"  , &LibrarySecondarySkill::frequencyWarrior),
     Field("frequencyMage"     , &LibrarySecondarySkill::frequencyMage),
     Field("handler"           , &LibrarySecondarySkill::handler),
     Field("calc"              , &LibrarySecondarySkill::calc),
@@ -387,7 +395,8 @@ inline constexpr const std::tuple MetaInfo::s_fields<LibraryUnit::Presentation>{
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<LibraryUnit>{
     Field("untranslatedName"     , &LibraryUnit::untranslatedName),
-    Field("primary"              , &LibraryUnit::primary),  
+    Field("legacyId"             , &LibraryUnit::legacyId),
+    Field("primary"              , &LibraryUnit::primary),
     Field("factionId"            , &LibraryUnit::faction),
     Field("level"                , &LibraryUnit::level),
     Field("growth"               , &LibraryUnit::growth),
@@ -485,6 +494,7 @@ inline constexpr const std::tuple MetaInfo::s_fields<LibraryArtifact>{
     Field("special"         , &LibraryArtifact::special),
     Field("calc"            , &LibraryArtifact::calc),
     Field("untranslatedName", &LibraryArtifact::untranslatedName),
+    Field("legacyId"        , &LibraryArtifact::legacyId),
     Field("value"           , &LibraryArtifact::value),
     Field("provideSpells"   , &LibraryArtifact::provideSpells),
     Field("protectSpells"   , &LibraryArtifact::protectSpells),
@@ -568,8 +578,9 @@ inline constexpr const std::tuple MetaInfo::s_fields<LibraryHero::Presentation>{
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<LibraryHero>{
     Field("untranslatedName"  , &LibraryHero::untranslatedName),
+    Field("legacyId"          , &LibraryHero::legacyId),
     Field("factionId"         , &LibraryHero::faction),
-    Field("fighter"           , &LibraryHero::isFighter),
+    Field("isWarrior"         , &LibraryHero::isWarrior),
     Field("specId"            , &LibraryHero::spec),
     Field("secondarySkills"   , &LibraryHero::secondarySkills), 
     Field("startSpellId"      , &LibraryHero::startSpell), //(metadata("optional", true))
@@ -662,6 +673,7 @@ inline constexpr const std::tuple MetaInfo::s_fields<LibrarySpell::Presentation>
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<LibrarySpell>{
     Field("untranslatedName"      , &LibrarySpell::untranslatedName),
+    Field("legacyId"              , &LibrarySpell::legacyId),
     Field("isTeachable"           , &LibrarySpell::isTeachable),
     Field("type"                  , &LibrarySpell::type),
     Field("qualify"               , &LibrarySpell::qualify),
@@ -726,6 +738,7 @@ inline constexpr const std::tuple MetaInfo::s_fields<LibraryMapObject::Presentat
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<LibraryMapObject>{
     Field("untranslatedName"    , &LibraryMapObject::untranslatedName),
+    Field("legacyId"            , &LibraryMapObject::legacyId),
     Field("variants"            , &LibraryMapObject::variants),
     Field("rewards"             , &LibraryMapObject::rewards),
     Field("pres"                , &LibraryMapObject::presentationParams),

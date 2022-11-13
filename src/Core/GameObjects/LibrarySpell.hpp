@@ -47,6 +47,7 @@ struct LibrarySpell {
 
     std::string id;
     std::string untranslatedName;
+    int         legacyId = -1;
 
     // Teachable means spell is obtainable from the Mage Guild, scrolls, etc.
     // Otherwise it can be only on a unit or an artifact.

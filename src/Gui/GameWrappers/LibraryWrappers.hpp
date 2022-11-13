@@ -117,6 +117,7 @@ public:
     QPixmap getSpecIcon() const { return m_specIcon->get(); }
 
     SpritePtr getBattleSprite() const { return m_battleSprite->get(); }
+    SpritePtr getAdventureSprite() const { return m_adventureSprite->get(); }
 
     QString getClassName() const;
     QString getBio() const;
@@ -127,6 +128,7 @@ private:
     IAsyncPixmapPtr m_portraitLarge;
     IAsyncPixmapPtr m_specIcon;
     IAsyncSpritePtr m_battleSprite;
+    IAsyncSpritePtr m_adventureSprite;
 };
 using GuiHeroConstPtr = const GuiHero*;
 class GuiHeroProvider {
@@ -238,9 +240,11 @@ public:
     GuiTerrain(Sound::IMusicBox& musicBox, IGraphicsLibrary& graphicsLibrary, Core::LibraryTerrainConstPtr source);
 
     QPixmap getIcon() const { return m_icon->get(); }
+    QPixmap getTile(int variant) const;
 
 private:
-    IAsyncPixmapPtr m_icon;
+    IAsyncPixmapPtr   m_icon;
+    IGraphicsLibrary& m_graphicsLibrary;
 };
 using GuiTerrainConstPtr = const GuiTerrain*;
 class GuiTerrainProvider {

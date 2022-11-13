@@ -36,14 +36,14 @@ class ReplayFileManager;
 class EmulatorMainWidget : public QWidget {
     Q_OBJECT
 public:
-    EmulatorMainWidget(Gui::IGraphicsLibrary&         graphicsLibrary,
-                       Gui::ICursorLibrary&           cursorLibrary,
-                       Core::IGameDatabase&           gameDatabase,
-                       Core::IRandomGeneratorFactory& randomGeneratorFactory,
-                       Sound::IMusicBox&              musicBox,
-                       Gui::IAppSettings&             appSettings,
-                       Gui::LibraryModelsProvider&    modelsProvider,
-                       QWidget*                       parent = nullptr);
+    EmulatorMainWidget(Gui::IGraphicsLibrary&               graphicsLibrary,
+                       Gui::ICursorLibrary&                 cursorLibrary,
+                       const Core::IGameDatabase*           gameDatabase,
+                       const Core::IRandomGeneratorFactory* randomGeneratorFactory,
+                       Sound::IMusicBox&                    musicBox,
+                       Gui::IAppSettings&                   appSettings,
+                       Gui::LibraryModelsProvider&          modelsProvider,
+                       QWidget*                             parent = nullptr);
     ~EmulatorMainWidget();
 
     void startBattle();
@@ -70,13 +70,13 @@ private:
 private:
     std::unique_ptr<Ui::EmulatorMainWidget> m_ui;
 
-    Gui::IGraphicsLibrary&         m_graphicsLibrary;
-    Gui::ICursorLibrary&           m_cursorLibrary;
-    Core::IGameDatabase&           m_gameDatabase;
-    Core::IRandomGeneratorFactory& m_randomGeneratorFactory;
-    Sound::IMusicBox&              m_musicBox;
-    Gui::IAppSettings&             m_appSettings;
-    Gui::LibraryModelsProvider&    m_modelsProvider;
+    Gui::IGraphicsLibrary&               m_graphicsLibrary;
+    Gui::ICursorLibrary&                 m_cursorLibrary;
+    const Core::IGameDatabase*           m_gameDatabase;
+    const Core::IRandomGeneratorFactory* m_randomGeneratorFactory;
+    Sound::IMusicBox&                    m_musicBox;
+    Gui::IAppSettings&                   m_appSettings;
+    Gui::LibraryModelsProvider&          m_modelsProvider;
 
     std::unique_ptr<Core::AdventureState>   m_adventureState;
     std::unique_ptr<Core::AdventureState>   m_adventureStatePrev;

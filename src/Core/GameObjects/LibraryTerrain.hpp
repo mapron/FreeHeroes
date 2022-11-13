@@ -19,6 +19,9 @@ struct LibraryTerrain {
         std::string              music;
         std::vector<std::string> backgroundsBattle;
         std::string              icon;
+        //std::string tileset;
+        int                      centerTilesOffset = 0;
+        std::vector<std::string> centerTiles;
     };
     struct Bonus {
         RngChanceMultiplier rngMult;
@@ -26,6 +29,7 @@ struct LibraryTerrain {
 
     std::string id;
     std::string untranslatedName;
+    int         legacyId   = -1;
     int         moveCost   = 100;
     bool        isObstacle = false;
     bool        extraLayer = false;

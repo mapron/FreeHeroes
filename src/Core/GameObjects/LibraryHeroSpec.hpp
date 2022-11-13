@@ -25,6 +25,7 @@ struct LibraryHeroSpec {
 
     std::string id;
     std::string untranslatedName;
+    int         legacyId = -1;
 
     Type           type;
     ResourceAmount dayIncome;

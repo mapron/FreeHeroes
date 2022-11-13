@@ -17,12 +17,16 @@ namespace Ui {
 class ConverterDialog;
 }
 
+namespace FreeHeroes::Core {
+class IGameDatabaseContainer;
+}
+
 namespace FreeHeroes::Conversion {
 
 class ConverterDialog : public QDialog {
     Q_OBJECT
 public:
-    ConverterDialog(QWidget* parent = nullptr);
+    ConverterDialog(const Core::IGameDatabaseContainer* databaseContainer, QWidget* parent = nullptr);
     ~ConverterDialog();
 
 private:
@@ -33,9 +37,10 @@ private:
     void statusUpdate(QString txt);
 
 private:
-    std::unique_ptr<Ui::ConverterDialog> m_ui;
-    Core::std_path                       m_hotaInstallDir;
-    QSettings                            m_converterSettings;
+    std::unique_ptr<Ui::ConverterDialog>      m_ui;
+    Core::std_path                            m_hotaInstallDir;
+    QSettings                                 m_converterSettings;
+    const Core::IGameDatabaseContainer* const m_databaseContainer;
 };
 
 }

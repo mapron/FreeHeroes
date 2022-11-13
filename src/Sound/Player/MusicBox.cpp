@@ -127,9 +127,9 @@ private:
     IMusicBox::EffectSettings m_settings;
 };
 
-MusicBox::MusicBox(Core::IRandomGenerator& rng, Core::IResourceLibrary& resourceLibrary)
+MusicBox::MusicBox(Core::IRandomGeneratorPtr rng, const Core::IResourceLibrary* resourceLibrary)
     : m_impl(std::make_unique<Impl>())
-    , m_rng(rng)
+    , m_rng(std::move(rng))
     , m_resourceLibrary(resourceLibrary)
 {
     m_impl->m_player.setPlaylist(&m_impl->m_playlist);
@@ -158,7 +158,7 @@ void MusicBox::musicPlay(const IMusicBox::MusicSettings& music)
         switch (music.mSet) {
             case MusicSet::Battle:
             {
-                uint8_t index = m_rng.genSmall(combatSize);
+                uint8_t index = m_rng->genSmall(combatSize);
                 id            = "combat" + varsCombat[index];
             } break;
             case MusicSet::Intro:
@@ -174,10 +174,10 @@ void MusicBox::musicPlay(const IMusicBox::MusicSettings& music)
                 break;
         }
     }
-    if (!m_resourceLibrary.mediaExists(Core::ResourceMedia::Type::Music, id))
+    if (!m_resourceLibrary->mediaExists(Core::ResourceMedia::Type::Music, id))
         return;
 
-    auto                 record   = m_resourceLibrary.getMedia(Core::ResourceMedia::Type::Music, id);
+    auto                 record   = m_resourceLibrary->getMedia(Core::ResourceMedia::Type::Music, id);
     const Core::std_path fullPath = record.getFullPath();
     if (fullPath.empty())
         return;
@@ -202,15 +202,15 @@ void MusicBox::effectPlay(const EffectSettings& effect)
     if (id.empty()) {
         if (effect.commonEffect == EffectSet::Battle) {
             std::vector<std::string> suffixes{ "00", "01", "02", "03", "04", "05", "06", "07" };
-            id = "battle" + suffixes[m_rng.genSmall(suffixes.size() - 1)];
+            id = "battle" + suffixes[m_rng->genSmall(suffixes.size() - 1)];
         } else if (effect.commonEffect == EffectSet::Click) {
             id = "button";
         }
     }
-    if (!m_resourceLibrary.mediaExists(Core::ResourceMedia::Type::Sound, id))
+    if (!m_resourceLibrary->mediaExists(Core::ResourceMedia::Type::Sound, id))
         return;
 
-    auto                 record   = m_resourceLibrary.getMedia(Core::ResourceMedia::Type::Sound, id);
+    auto                 record   = m_resourceLibrary->getMedia(Core::ResourceMedia::Type::Sound, id);
     const Core::std_path fullPath = record.getFullPath();
     if (fullPath.empty())
         return;

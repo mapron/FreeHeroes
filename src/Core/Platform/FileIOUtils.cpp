@@ -38,4 +38,22 @@ bool writeFileFromBuffer(const std_path& filename, const std::string& buffer)
     return true;
 }
 
+bool readFileIntoBuffer(const std_path& filename, ByteArrayHolder& holder)
+{
+    std::string buffer;
+    if (!readFileIntoBuffer(filename, buffer))
+        return false;
+    holder.resize(buffer.size());
+    memcpy(holder.data(), buffer.data(), holder.size());
+    return true;
+}
+
+bool writeFileFromBuffer(const std_path& filename, const ByteArrayHolder& holder)
+{
+    std::string buffer;
+    buffer.resize(holder.size());
+    memcpy(buffer.data(), holder.data(), holder.size());
+    return writeFileFromBuffer(filename, buffer);
+}
+
 }

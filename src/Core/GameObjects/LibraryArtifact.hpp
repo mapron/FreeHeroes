@@ -200,6 +200,7 @@ struct LibraryArtifact {
     TreasureClass            treasureClass = TreasureClass::Special;
     SpecialEffect            special       = SpecialEffect::None;
     std::string              untranslatedName;
+    int                      legacyId = -1;
 
     int                             value       = 0;
     LibrarySpellConstPtr            scrollSpell = nullptr;

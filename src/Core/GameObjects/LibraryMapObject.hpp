@@ -6,7 +6,6 @@
 #pragma once
 
 #include "LibraryFwd.hpp"
-#include "LibraryResource.hpp"
 #include "LibraryArtifact.hpp"
 
 #include <string>
@@ -26,8 +25,9 @@ struct UnitWithCount {
 
 struct LibraryMapObject {
     std::string id;
-
     std::string untranslatedName;
+    int         legacyId = -1;
+
     FieldLayout fieldLayout = FieldLayout::Object;
 
     struct Reward {

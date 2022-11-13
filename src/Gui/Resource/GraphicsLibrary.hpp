@@ -14,7 +14,7 @@ namespace FreeHeroes::Gui {
 
 class GUIRESOURCE_EXPORT GraphicsLibrary : public IGraphicsLibrary {
 public:
-    GraphicsLibrary(Core::IResourceLibrary& resourceLibrary);
+    GraphicsLibrary(const Core::IResourceLibrary* resourceLibrary);
     ~GraphicsLibrary();
 
     IAsyncSpritePtr getObjectAnimation(const std::string& resourceName) override;

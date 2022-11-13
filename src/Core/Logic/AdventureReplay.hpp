@@ -17,7 +17,7 @@ struct CORELOGIC_EXPORT AdventureReplayData {
     BattleReplayData m_bat;
     AdventureState   m_adv;
 
-    bool load(const std_path& filename, IGameDatabase& gameDatabase);
+    bool load(const std_path& filename, const Core::IGameDatabase* gameDatabase);
     bool save(const std_path& filename) const;
 };
 

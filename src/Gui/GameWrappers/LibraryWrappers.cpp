@@ -185,13 +185,16 @@ GuiHero::GuiHero(Sound::IMusicBox&, IGraphicsLibrary& graphicsLibrary, Core::Lib
     , m_portraitLarge(graphicsLibrary.getPixmap(source->presentationParams.portrait))
     , m_specIcon(graphicsLibrary.getPixmap(source->spec->presentationParams.icon))
 {
-    auto hClass    = source->heroClass();
-    auto resName   = source->presentationParams.gender == Core::LibraryHero::Presentation::Gender::Male ? hClass->presentationParams.battleSpriteMale : hClass->presentationParams.battleSpriteFemale;
-    m_battleSprite = graphicsLibrary.getObjectAnimation(resName);
+    auto hClass        = source->heroClass();
+    auto resNameBattle = source->presentationParams.gender == Core::LibraryHero::Presentation::Gender::Male ? hClass->presentationParams.battleSpriteMale : hClass->presentationParams.battleSpriteFemale;
+    auto resNameAdv    = source->presentationParams.gender == Core::LibraryHero::Presentation::Gender::Male ? hClass->presentationParams.adventureSpriteMale : hClass->presentationParams.adventureSpriteFemale;
+    m_battleSprite     = graphicsLibrary.getObjectAnimation(resNameBattle);
     if (!m_battleSprite->exists()) {
         m_battleSprite = graphicsLibrary.getObjectAnimation("stubs.hero");
         Q_ASSERT(m_battleSprite->exists());
     }
+    m_adventureSprite = graphicsLibrary.getObjectAnimation(resNameAdv);
+    Q_ASSERT(m_adventureSprite->exists());
 }
 
 QString GuiHero::getClassName() const
@@ -322,7 +325,17 @@ GuiTerrain::GuiTerrain(Sound::IMusicBox&, IGraphicsLibrary& graphicsLibrary, Cor
     : QObject(nullptr)
     , Base(source)
     , m_icon(graphicsLibrary.getPixmap(source->presentationParams.icon))
+    , m_graphicsLibrary(graphicsLibrary)
 {
+}
+
+QPixmap GuiTerrain::getTile(int variant) const
+{
+    const auto& variantSet      = getSource()->presentationParams.centerTiles;
+    auto        terrainPixAsync = m_graphicsLibrary.getPixmap(variantSet[variant % variantSet.size()]);
+    assert(terrainPixAsync && terrainPixAsync->exists());
+    auto pix = terrainPixAsync->get();
+    return pix;
 }
 
 GuiMapObject::GuiMapObject(Sound::IMusicBox&, IGraphicsLibrary& graphicsLibrary, Core::LibraryMapObjectConstPtr source)

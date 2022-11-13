@@ -24,7 +24,7 @@ public:
 
 public:
     GameDatabase(const std::vector<Resource>& resourceFiles);
-    GameDatabase(const std::string& dataBaseId, const IResourceLibrary& resourceLibrary);
+    GameDatabase(const std::string& dataBaseId, const IResourceLibrary* resourceLibrary);
     ~GameDatabase();
 
     LibraryUnitContainerPtr           units() const override;
@@ -41,7 +41,7 @@ public:
     LibraryGameRulesConstPtr gameRules() const override;
 
 private:
-    static std::vector<Resource> loadLibrary(const std::string& dataBaseId, const IResourceLibrary& resourceLibrary);
+    static std::vector<Resource> loadLibrary(const std::string& dataBaseId, const IResourceLibrary* resourceLibrary);
     bool                         load(const std::vector<Resource>& resourceFiles);
 
 private:

@@ -14,79 +14,74 @@ namespace FreeHeroes::Core::Reflection {
 class PropertyTreeWriter {
 public:
     template<HasFields T>
-    PropertyTree valueToJson(const T& value)
+    void valueToJson(const T& value, PropertyTree& result)
     {
-        PropertyTree result;
+        result = {};
         result.convertToMap();
         auto& jsonMap = result.getMap();
 
         auto visitor = [&value, &jsonMap, this](auto&& field) {
-            jsonMap[field.name()] = this->valueToJson(field.get(value));
+            this->valueToJson(field.get(value), jsonMap[field.name()]);
         };
 
         std::apply([&visitor](auto&&... field) { ((visitor(field)), ...); }, MetaInfo::s_fields<T>);
-
-        return result;
     }
 
-    PropertyTree valueToJson(const PropertyTreeScalarHeld auto& value)
+    void valueToJson(const PropertyTreeScalarHeld auto& value, PropertyTree& result)
     {
-        return PropertyTreeScalar(value);
+        result = PropertyTreeScalar(value);
     }
 
     template<GameDatabaseObject T>
-    PropertyTree valueToJson(const T* value)
+    void valueToJson(const T* value, PropertyTree& result)
     {
-        PropertyTreeScalar result(value ? value->id : std::string());
-        return result;
+        result = PropertyTreeScalar(value ? value->id : std::string());
     }
 
-    PropertyTree valueToJson(const IsEnum auto& value)
+    void valueToJson(const IsEnum auto& value, PropertyTree& result)
     {
         const auto str = EnumTraits::enumToString(value);
-        return PropertyTreeScalar(std::string(str.begin(), str.end()));
+        result         = PropertyTreeScalar(std::string(str.begin(), str.end()));
     }
 
     template<NonAssociative Container>
-    PropertyTree valueToJson(const Container& container)
+    void valueToJson(const Container& container, PropertyTree& result)
     {
-        PropertyTree result;
+        result = {};
         result.convertToList();
+        result.getList().resize(std::size(container));
+        size_t i = 0;
         for (const auto& value : container) {
-            PropertyTree child = valueToJson(value);
-            result.append(std::move(child));
+            PropertyTree& child = result.getList()[i++];
+            valueToJson(value, child);
         }
-        return result;
     }
 
     template<IsMap Container>
-    PropertyTree valueToJson(const Container& container)
+    void valueToJson(const Container& container, PropertyTree& result)
     {
-        PropertyTree result;
+        result = {};
         result.convertToList();
         for (const auto& [key, value] : container) {
-            PropertyTree childKey   = valueToJson(key);
-            PropertyTree childValue = valueToJson(value);
             PropertyTree pair;
-            pair["key"]   = std::move(childKey);
-            pair["value"] = std::move(childValue);
+            valueToJson(key, pair["key"]);
+            valueToJson(value, pair["value"]);
             result.append(std::move(pair));
         }
-        return result;
     }
 
     template<IsStringMap Container>
-    PropertyTree valueToJson(const Container& container)
+    void valueToJson(const Container& container, PropertyTree& result)
     {
-        PropertyTree result;
+        result = {};
         result.convertToMap();
         for (const auto& [key, value] : container) {
-            PropertyTree childKey   = valueToJson(key);
-            PropertyTree childValue = valueToJson(value);
+            PropertyTree childKey;
+            valueToJson(key, childKey);
             assert(childKey.isScalar() && childKey.getScalar().isString());
-            result[childKey.getScalar().toString()] = std::move(childValue);
+
+            valueToJson(value, result[childKey.getScalar().toString()]);
         }
-        return result;
     }
 };
 

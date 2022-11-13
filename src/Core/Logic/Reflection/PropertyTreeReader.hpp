@@ -13,7 +13,7 @@ namespace FreeHeroes::Core::Reflection {
 
 class PropertyTreeReader {
 public:
-    PropertyTreeReader(IGameDatabase& gameDatabase)
+    PropertyTreeReader(const IGameDatabase* gameDatabase = nullptr)
         : m_gameDatabase(gameDatabase)
     {}
 
@@ -24,9 +24,8 @@ public:
 
         auto visitor = [&value, &jsonMap, this](auto&& field) {
             if (jsonMap.contains(field.name())) {
-                auto tmp = field.create();
-                this->jsonToValue(jsonMap.at(field.name()), tmp);
-                field.set(value, std::move(tmp));
+                auto writer = field.makeValueWriter(value);
+                this->jsonToValue(jsonMap.at(field.name()), writer.getRef());
             }
         };
         std::apply([&visitor](auto&&... field) { ((visitor(field)), ...); }, MetaInfo::s_fields<T>);
@@ -43,7 +42,7 @@ public:
     {
         const std::string id = json.getScalar().toString();
         using ObjectType     = std::remove_cv_t<std::remove_pointer_t<std::remove_cv_t<std::remove_reference_t<decltype(value)>>>>;
-        value                = m_gameDatabase.container<ObjectType>()->find(id);
+        value                = m_gameDatabase->container<ObjectType>()->find(id);
     }
 
     void jsonToValue(const PropertyTree& json, PropertyTreeScalarHeld auto& value)
@@ -83,6 +82,10 @@ public:
     {
         if (!json.isList())
             return;
+        container.clear();
+        if constexpr (IsStdVector<Container>) {
+            container.reserve(json.getList().size());
+        }
         auto inserter = std::inserter(container, container.end());
         for (const PropertyTree& child : json.getList()) {
             typename Container::value_type value;
@@ -137,7 +140,7 @@ public:
     }
 
 private:
-    IGameDatabase& m_gameDatabase;
+    const IGameDatabase* const m_gameDatabase = nullptr;
 };
 
 }

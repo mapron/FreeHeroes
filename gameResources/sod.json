@@ -42,7 +42,7 @@
 "records" : {
 
 "sod.faction.rampart"             : {
-    "fighterClass": {
+    "warriorClass": {
     "skills" :{
         "hota.skill.interfere": null
     }
@@ -51,7 +51,7 @@
 },
 
 "sod.faction.inferno"             : {
-    "fighterClass": {
+    "warriorClass": {
     "skills" :{
         "hota.skill.interfere": null
     }
@@ -60,7 +60,7 @@
 
 
 "sod.faction.dungeon"             : {
-    "fighterClass": {
+    "warriorClass": {
     "skills" :{
         "hota.skill.interfere": null
     }
@@ -70,7 +70,7 @@
 },
 
 "sod.faction.stronghold"             : {
-    "fighterClass": {
+    "warriorClass": {
     "skills" :{
         "hota.skill.interfere": null
     }
@@ -85,7 +85,7 @@
 
 "sod.faction.conflux"             : {
     "nativeTerrain": "sod.terrain.grass",
-    "fighterClass": {
+    "warriorClass": {
     "skills" :{
         "hota.skill.interfere": null
     }
@@ -122,7 +122,6 @@
 
 
 "sod.hero.rampart.rn017"           : { "secondarySkills": [{"skillId": "sod.skill.luck"           , "level": 0 }, {"skillId": "sod.skill.resistance"       , "level": 0 }]},
-"sod.hero.rampart.rx020"           : { "secondarySkills": [{"skillId": "sod.skill.resistance"     , "level": 1 }                                                         ], "specId": "sod.speciality.skill.resistance"},
 "sod.hero.rampart.rn022"           : { "secondarySkills": [{"skillId": "sod.skill.resistance"     , "level": 0 }, {"skillId": "sod.skill.pathfind"         , "level": 0 }]},
 "sod.hero.tower.al037"             : { "secondarySkills": [{"skillId": "sod.skill.scholar"        , "level": 0 }, {"skillId": "sod.skill.resistance"       , "level": 0 }]},
 "sod.hero.inferno.dm059"           : { "secondarySkills": [{"skillId": "sod.skill.resistance"     , "level": 0 }, {"skillId": "sod.skill.tactics"          , "level": 0 }]},
@@ -130,8 +129,11 @@
 "sod.hero.dungeon.ov083"           : { "secondarySkills": [{"skillId": "sod.skill.leadership"     , "level": 0 }, {"skillId": "sod.skill.resistance"       , "level": 0 }]},
 "sod.hero.stronghold.br101"        : { "secondarySkills": [{"skillId": "sod.skill.offense"        , "level": 0 }, {"skillId": "sod.skill.resistance"       , "level": 0 }]},
 "sod.hero.stronghold.bm111"        : { "secondarySkills": [{"skillId": "sod.skill.wisdom"         , "level": 0 }, {"skillId": "sod.skill.resistance"       , "level": 0 }]},
-"sod.hero.fortress.bs112"          : { "secondarySkills": [{"skillId": "sod.skill.armourer"       , "level": 0 }, {"skillId": "sod.skill.resistance"       , "level": 0 }]}
+"sod.hero.fortress.bs112"          : { "secondarySkills": [{"skillId": "sod.skill.armourer"       , "level": 0 }, {"skillId": "sod.skill.resistance"       , "level": 0 }]},
 
+"sod.hero.castle.kx003"         : null,
+"sod.hero.fortress.wx122"         : null,
+"sod.hero.rampart.rx020"         : null
 
 }
 
@@ -231,6 +233,187 @@
 }
 
 
+},
+
+
+{
+"scope": "factions",
+"uiOnly": true,
+"records" : {
+
+"sod.faction.castle"             : {
+    "warriorClass": { "pres": {
+        "battleSpriteMale"     : "ch00",
+        "battleSpriteFemale"   : "ch00",
+        "adventureSpriteMale"  : "ah00_",
+        "adventureSpriteFemale": "ah00_"
+        }
+    },
+
+    "mageClass": { "pres": {
+        "battleSpriteMale"     : "ch01",
+        "battleSpriteFemale"   : "ch01",
+        "adventureSpriteMale"  : "ah01_",
+        "adventureSpriteFemale": "ah01_"
+        }
+    },
+    "pres": {"townAnimations" : ["avccast0", "avccasx0", "avccasx0", "avccasx0", "avccasz0"]}
+},
+
+"sod.faction.rampart"             : {
+
+    "warriorClass": { "pres": {
+        "battleSpriteMale"     : "ch02",
+        "battleSpriteFemale"   : "ch02",
+        "adventureSpriteMale"  : "ah02_",
+        "adventureSpriteFemale": "ah02_"
+        }
+    },
+    "mageClass": { "pres": {
+        "battleSpriteMale"     : "ch03",
+        "battleSpriteFemale"   : "ch03",
+        "adventureSpriteMale"  : "ah03_",
+        "adventureSpriteFemale": "ah03_"
+        }
+    },
+    "pres": { "townAnimations" : ["avcramp0", "avcramx0", "avcramx0", "avcramx0", "avcramz0"]}
+
+},
+
+"sod.faction.tower"             : {
+    "warriorClass": { "pres": {
+        "battleSpriteMale"     : "ch04",
+        "battleSpriteFemale"   : "ch04",
+        "adventureSpriteMale"  : "ah04_",
+        "adventureSpriteFemale": "ah04_"
+        }
+    },
+    "mageClass": { "pres": {
+        "battleSpriteMale"     : "ch05",
+        "battleSpriteFemale"   : "ch05",
+        "adventureSpriteMale"  : "ah05_",
+        "adventureSpriteFemale": "ah05_"
+        }
+    },
+    "pres": {"townAnimations" : ["avctowr0", "avctowx0", "avctowx0", "avctowx0", "avctowz0"]}
+},
+
+"sod.faction.inferno"             : {
+    "warriorClass": { "pres": {
+        "battleSpriteMale"     : "ch06",
+        "battleSpriteFemale"   : "ch06",
+        "adventureSpriteMale"  : "ah06_",
+        "adventureSpriteFemale": "ah06b_"
+        }
+    },
+    "mageClass": { "pres": {
+        "battleSpriteMale"     : "ch07b",
+        "battleSpriteFemale"   : "ch07",
+        "adventureSpriteMale"  : "ah07_",
+        "adventureSpriteFemale": "ah07b_"
+        }
+    },
+    "pres": {"townAnimations" : ["avcinft0", "avcinfx0", "avcinfx0", "avcinfx0", "avcinfz0"]}
+},
+
+"sod.faction.necropolis"             : {
+    "warriorClass": { "pres": {
+        "battleSpriteMale"     : "ch08",
+        "battleSpriteFemale"   : "ch08",
+        "adventureSpriteMale"  : "ah08_",
+        "adventureSpriteFemale": "ah08b_"
+        }
+    },
+    "mageClass": { "pres": {
+        "battleSpriteMale"     : "ch09",
+        "battleSpriteFemale"   : "ch09",
+        "adventureSpriteMale"  : "ah09_",
+        "adventureSpriteFemale": "ah09_"
+        }
+    },
+    "pres": {"townAnimations" : ["avcnecr0", "avcnecx0", "avcnecx0", "avcnecx0", "avcnecz0"]}
+
+},
+
+"sod.faction.dungeon"             : {
+    "warriorClass": { "pres": {
+        "battleSpriteMale"     : "ch010",
+        "battleSpriteFemale"   : "ch010",
+        "adventureSpriteMale"  : "ah10_",
+        "adventureSpriteFemale": "ah10_"
+        }
+    },
+    "mageClass": { "pres": {
+        "battleSpriteMale"     : "ch011",
+        "battleSpriteFemale"   : "ch11",
+        "adventureSpriteMale"  : "ah11_",
+        "adventureSpriteFemale": "ah11_"
+        }
+    },
+    "pres": {"townAnimations" : ["avcdung0", "avcdunx0", "avcdunx0", "avcdunx0", "avcdunz0"]}
+},
+
+"sod.faction.stronghold"             : {
+    "warriorClass": { "pres": {
+        "battleSpriteMale"     : "ch013",
+        "battleSpriteFemale"   : "ch012",
+        "adventureSpriteMale"  : "ah13_",
+        "adventureSpriteFemale": "ah12_"
+        }
+    },
+    "mageClass": { "pres": {
+        "battleSpriteMale"     : "ch013",
+        "battleSpriteFemale"   : "ch012",
+        "adventureSpriteMale"  : "ah13_",
+        "adventureSpriteFemale": "ah12_"
+        }
+    },
+    "pres": { "townAnimations" : ["avcstro0", "avcstrx0", "avcstrx0", "avcstrx0", "avcstrz0"] }
+},
+
+"sod.faction.fortress"             : {
+    "untranslatedName" : "Fortress",
+    "nativeTerrain": "sod.terrain.swamp",
+    "goesAfterId":"sod.faction.stronghold",
+    "warriorClass": { "pres": {
+        "battleSpriteMale"     : "ch014",
+        "battleSpriteFemale"   : "ch014",
+        "adventureSpriteMale"  : "ah14_",
+        "adventureSpriteFemale": "ah14_"
+        }
+    },
+    "mageClass": { "pres": {
+        "battleSpriteMale"     : "ch015",
+        "battleSpriteFemale"   : "ch015",
+        "adventureSpriteMale"  : "ah15_",
+        "adventureSpriteFemale": "ah15_"
+        }
+    },
+    "pres": {"townAnimations" : ["avcftrt0", "avcftrx0", "avcftrx0", "avcftrx0", "avcftrz0"]}
+},
+
+"sod.faction.conflux"             : {
+    "warriorClass": { "pres": {
+        "battleSpriteMale"     : "ch16",
+        "battleSpriteFemale"   : "ch16",
+        "adventureSpriteMale"  : "ah16_",
+        "adventureSpriteFemale": "ah16_"
+        }
+    },
+    "mageClass": { "pres": {
+        "battleSpriteMale"     : "ch17",
+        "battleSpriteFemale"   : "ch17",
+        "adventureSpriteMale"  : "ah17_",
+        "adventureSpriteFemale": "ah17_"
+        }
+    },
+    "pres": { "townAnimations" : ["avchfor0", "avchforx", "avchforx", "avchforx", "avchforz"]}
+
 }
 
-]
+
+}
+}]
+
+
+

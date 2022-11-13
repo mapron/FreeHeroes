@@ -8,15 +8,15 @@
 #include "ui_ConverterDialog.h"
 
 #include "ArchiveParser.hpp"
-#include "SpriteParserLegacy.hpp"
 #include "LocalizationConverter.hpp"
 #include "ThreadPoolExecutor.hpp"
 #include "KnownResources.hpp"
 #include "ResourcePostprocess.hpp"
 #include "MediaConverter.hpp"
+#include "GameConstants.hpp"
+#include "IGameDatabase.hpp"
 
 // Gui
-#include "SpriteSerialization.hpp"
 #include "FsUtilsQt.hpp"
 #include "ResourceLibrary.hpp"
 
@@ -49,10 +49,11 @@ QString guessInstallationPath()
 }
 }
 
-ConverterDialog::ConverterDialog(QWidget* parent)
+ConverterDialog::ConverterDialog(const Core::IGameDatabaseContainer* databaseContainer, QWidget* parent)
     : QDialog(parent)
     , m_ui(std::make_unique<Ui::ConverterDialog>())
     , m_converterSettings(QStandardPaths::writableLocation(QStandardPaths::DataLocation) + "/ConverterSettings.ini", QSettings::IniFormat)
+    , m_databaseContainer(databaseContainer)
 {
     m_ui->setupUi(this);
     for (auto* cb : { m_ui->checkBoxHdFound, m_ui->checkBoxSodFound, m_ui->checkBoxHotaFound, m_ui->checkBoxFfmpegFound }) {
@@ -98,6 +99,8 @@ ConverterDialog::ConverterDialog(QWidget* parent)
     }
 }
 
+ConverterDialog::~ConverterDialog() = default;
+
 void ConverterDialog::browsePath()
 {
     QString dir = QFileDialog::getExistingDirectory(this, tr("Open HotA installation root"));
@@ -121,7 +124,6 @@ void ConverterDialog::pathChanged()
         m_converterSettings.setValue("srcPath", m_ui->srcPath->text());
     }
 }
-ConverterDialog::~ConverterDialog() = default;
 
 void ConverterDialog::run()
 {
@@ -257,6 +259,10 @@ void ConverterDialog::run()
                                    hdLibrary.get() });
     }
     int total = 0;
+    statusUpdate(tr("DB init..."));
+
+    auto* hotaDb = m_databaseContainer->getDatabase(GameVersion::HOTA);
+    auto* sodDb  = m_databaseContainer->getDatabase(GameVersion::SOD);
 
     statusUpdate(tr("Extracting files..."));
 
@@ -305,9 +311,10 @@ void ConverterDialog::run()
     Logger(Logger::Info) << "Event loop end";
 
     statusUpdate(tr("Translation generation..."));
+
     if (sodExists) {
         Logger(Logger::Info) << "SoD";
-        LocalizationConverter converter(*sodLibrary, baseExtractSOD);
+        LocalizationConverter converter(*sodLibrary, baseExtractSOD, hotaDb, sodDb);
         converter.extractSOD("txt");
 
         sodLibrary->saveIndex();
@@ -315,7 +322,7 @@ void ConverterDialog::run()
 
     if (hotaExists) {
         Logger(Logger::Info) << "HotA";
-        LocalizationConverter converter(*hotaLibrary, baseExtractHOTA);
+        LocalizationConverter converter(*hotaLibrary, baseExtractHOTA, hotaDb, sodDb);
         converter.extractSOD("txt");
         converter.extractHOTA("json");
 

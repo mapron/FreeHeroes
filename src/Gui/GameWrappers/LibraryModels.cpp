@@ -297,10 +297,10 @@ QVariant MapObjectsModel::data(const QModelIndex& index, int role) const
     return Base::data(index, role);
 }
 
-LibraryModelsProvider::LibraryModelsProvider(IGameDatabase&    gameDatabase,
-                                             Sound::IMusicBox& musicBox,
-                                             IGraphicsLibrary& graphicsLibrary,
-                                             QObject*          parent)
+LibraryModelsProvider::LibraryModelsProvider(const IGameDatabase* gameDatabase,
+                                             Sound::IMusicBox&    musicBox,
+                                             IGraphicsLibrary&    graphicsLibrary,
+                                             QObject*             parent)
     : QObject(parent)
 {
     m_artifacts  = new ArtifactsModel(musicBox, graphicsLibrary, this);
@@ -313,25 +313,25 @@ LibraryModelsProvider::LibraryModelsProvider(IGameDatabase&    gameDatabase,
     m_mapObjects = new MapObjectsModel(musicBox, graphicsLibrary, this);
     m_uiCommon   = new UiCommonModel(musicBox, graphicsLibrary, this);
 
-    for (auto* rec : gameDatabase.artifacts()->records())
+    for (auto* rec : gameDatabase->artifacts()->records())
         m_artifacts->addRecord(rec);
-    for (auto* rec : gameDatabase.units()->records())
+    for (auto* rec : gameDatabase->units()->records())
         m_units->addRecord(rec);
-    for (auto* rec : gameDatabase.heroes()->records())
+    for (auto* rec : gameDatabase->heroes()->records())
         m_heroes->addRecord(rec);
-    for (auto* rec : gameDatabase.secSkills()->records())
+    for (auto* rec : gameDatabase->secSkills()->records())
         m_skills->addRecord(rec);
-    for (auto* rec : gameDatabase.spells()->records())
+    for (auto* rec : gameDatabase->spells()->records())
         m_spells->addRecord(rec);
-    for (auto* rec : gameDatabase.factions()->records())
+    for (auto* rec : gameDatabase->factions()->records())
         m_factions->addRecord(rec);
-    for (auto* rec : gameDatabase.terrains()->records())
+    for (auto* rec : gameDatabase->terrains()->records())
         m_terrains->addRecord(rec);
-    for (auto* rec : gameDatabase.mapObjects()->records())
+    for (auto* rec : gameDatabase->mapObjects()->records())
         m_mapObjects->addRecord(rec);
 
     QMap<QString, QPixmap> resourceIcons;
-    for (auto* res : gameDatabase.resources()->records()) {
+    for (auto* res : gameDatabase->resources()->records()) {
         auto pix                                                        = graphicsLibrary.getPixmap(res->presentationParams.icon)->get();
         m_uiCommon->resourceIcons[QString::fromStdString(res->id)]      = pix;
         m_uiCommon->resourceIconsSmall[QString::fromStdString(res->id)] = resizePixmap(pix, { 24, 24 });

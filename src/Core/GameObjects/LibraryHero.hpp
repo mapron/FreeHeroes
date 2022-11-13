@@ -56,10 +56,11 @@ struct LibraryHero {
 
     std::string id;
     std::string untranslatedName;
+    int         legacyId = -1;
 
     LibraryFactionConstPtr faction = nullptr;
 
-    bool isFighter = true;
+    bool isWarrior = true;
 
     LibraryHeroSpecConstPtr spec = nullptr;
 
@@ -73,7 +74,12 @@ struct LibraryHero {
 
     LibraryFactionHeroClassConstPtr heroClass() const noexcept
     {
-        return isFighter ? &faction->fighterClass : &faction->mageClass;
+        return isWarrior ? &faction->warriorClass : &faction->mageClass;
+    }
+
+    auto getAdventureSprite() const
+    {
+        return presentationParams.gender == Presentation::Gender::Male ? heroClass()->presentationParams.adventureSpriteMale : heroClass()->presentationParams.adventureSpriteFemale;
     }
 };
 

@@ -20,8 +20,10 @@ struct LibraryResource {
         std::string iconTrade;
     };
 
-    std::string  id;
-    std::string  untranslatedName;
+    std::string id;
+    std::string untranslatedName;
+    int         legacyId = -1;
+
     Presentation presentationParams;
 };
 

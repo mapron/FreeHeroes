@@ -4,9 +4,10 @@
  * See LICENSE file for details.
  */
 #include "LocalizationConverter.hpp"
-#include "LegacyMapping.hpp"
 
 #include "FsUtilsQt.hpp"
+#include "IGameDatabase.hpp"
+#include "Logger.hpp"
 
 #include "FileFormatJson.hpp"
 #include "FileIOUtils.hpp"
@@ -51,14 +52,27 @@ public:
     };
 };
 
-LocalizationConverter::LocalizationConverter(IResourceLibrary& resources,
-                                             const std_path&   srcRoot)
+LocalizationConverter::LocalizationConverter(IResourceLibrary&          resources,
+                                             const std_path&            srcRoot,
+                                             const Core::IGameDatabase* databaseHOTA,
+                                             const Core::IGameDatabase* databaseSOD)
     : m_resources(resources)
     , m_root(srcRoot)
     , m_rootDest(srcRoot / "Translation")
 {
     if (!std_fs::exists(m_rootDest))
         std_fs::create_directories(m_rootDest);
+
+    auto fillIds = [](IdSet* idSet, const Core::IGameDatabase* database) {
+        idSet->unitIds     = database->units()->legacyOrderedIds();
+        idSet->artifactIds = database->artifacts()->legacyOrderedIds();
+        idSet->heroesIds   = database->heroes()->legacyOrderedIds();
+        idSet->skillsIds   = database->secSkills()->legacyOrderedIds();
+        idSet->spellIds    = database->spells()->legacyOrderedIds();
+        idSet->factionIds  = database->factions()->legacyOrderedIds();
+    };
+    fillIds(&m_idSetHOTA, databaseHOTA);
+    fillIds(&m_idSetSOD, databaseSOD);
 }
 
 void LocalizationConverter::extractSOD(const std_path& txtSubdir)
@@ -67,33 +81,28 @@ void LocalizationConverter::extractSOD(const std_path& txtSubdir)
     if (crtraits.isEmpty())
         return;
 
-    QString    localeId = "";
-    QByteArray encoding = "Latin-1";
-    if (crtraits[2][0] == "Pikeman") {
-        localeId = "en_US";
-    } else if (crtraits[2][0].startsWith("\xCA\xEE\xEF\xE5")) { // "Копе" in Russian Win1251
+    QString     localeId         = "en_US";
+    QByteArray  encoding         = "Latin-1";
+    const auto& pikemanLocalized = crtraits[2][0];
+    if (pikemanLocalized == "Pikeman") {
+    } else if (pikemanLocalized.startsWith("\xCA\xEE\xEF\xE5")) { // "Копе" in Russian Win1251
         localeId = "ru_RU";
         encoding = "Windows-1251";
-    } else if (crtraits[2][0] == "Pikenier") {
+    } else if (pikemanLocalized == "Pikenier") {
         localeId = "de_DE";
         encoding = "Windows-1252";
-    } else {
-        localeId = "en_US"; // no idea of sane fallback.
     }
     //units.create.en_US
     //<subjectName>.<localeId>
-    // const std::string resourceId = "sodLoc." + localeId.toStdString();
-    // const std_path mainFilename = ("translation." + localeId.toStdString() + ".txt");
-    // const std_path localizationFile = m_rootDest / mainFilename;
 
     TranscodedFile outFile(m_resources, encoding);
     outFile.setLocale(localeId.toStdString());
 
     const size_t tableOffset = 2;
-    assert(crtraits.size() - tableOffset == unitIds[VersionSod].size());
+    assert(crtraits.size() - tableOffset == m_idSetSOD.unitIds.size());
     outFile.setContext("units");
     for (size_t index = tableOffset; index < (size_t) crtraits.size(); index++) {
-        auto& id  = unitIds[VersionSod][index - tableOffset];
+        auto& id  = m_idSetSOD.unitIds[index - tableOffset];
         auto& row = crtraits[index];
         if (id.empty())
             continue;
@@ -104,9 +113,9 @@ void LocalizationConverter::extractSOD(const std_path& txtSubdir)
     {
         outFile.setContext("artifacts");
         TxtTable artraits = readTable(m_root / txtSubdir / "artraits.txt");
-        for (size_t index = 0; index < artifactIds[VersionSod].size(); index++) {
+        for (size_t index = 0; index < m_idSetSOD.artifactIds.size(); index++) {
             auto& row   = artraits[tableOffset + index];
-            auto& id    = artifactIds[VersionSod][index];
+            auto& id    = m_idSetSOD.artifactIds[index];
             auto  descr = row[row.size() - 1];
 
             auto& name = row[0];
@@ -118,12 +127,13 @@ void LocalizationConverter::extractSOD(const std_path& txtSubdir)
         outFile.setContext("heroes");
         TxtTable hotraits = readTable(m_root / txtSubdir / "hotraits.txt");
         TxtTable herobios = readTable(m_root / txtSubdir / "herobios.txt");
-        for (size_t index = 0; index < heroesIds[VersionSod].size(); index++) {
+        for (size_t index = 0; index < m_idSetSOD.heroesIds.size(); index++) {
             auto& rowHero     = hotraits[tableOffset + index];
             auto& rowHeroBios = herobios[index];
-            auto& id          = heroesIds[VersionSod][index];
+            auto& id          = m_idSetSOD.heroesIds[index];
             auto& name        = rowHero[0];
             auto& bio         = rowHeroBios[0];
+
             outFile.writeRow(id, name);
             outFile.writeRow(id + ".bio", bio);
         }
@@ -131,9 +141,9 @@ void LocalizationConverter::extractSOD(const std_path& txtSubdir)
     {
         outFile.setContext("skills");
         TxtTable sstraits = readTable(m_root / txtSubdir / "sstraits.txt");
-        for (size_t index = 0; index < skillsIds[VersionSod].size(); index++) {
+        for (size_t index = 0; index < m_idSetSOD.skillsIds.size(); index++) {
             auto& row = sstraits[tableOffset + index];
-            auto& id  = skillsIds[VersionSod][index];
+            auto& id  = m_idSetSOD.skillsIds[index];
 
             outFile.writeRow(id, row[0]);
             outFile.writeRow(id + ".basic", row[1]);
@@ -149,9 +159,9 @@ void LocalizationConverter::extractSOD(const std_path& txtSubdir)
             if (!row[1].isEmpty())
                 sptraits << row;
         }
-        for (size_t index = 0; index < spellIds[VersionSod].size(); index++) {
+        for (size_t index = 0; index < m_idSetSOD.spellIds.size(); index++) {
             auto&  row            = sptraits[1 + index];
-            auto&  id             = spellIds[VersionSod][index];
+            auto&  id             = m_idSetSOD.spellIds[index];
             size_t shortDescIndex = row.size() - 5;
             outFile.writeRow(id, row[0]);
             outFile.writeRow(id + ".short", row[1]);
@@ -167,11 +177,16 @@ void LocalizationConverter::extractSOD(const std_path& txtSubdir)
     {
         outFile.setContext("classes");
         TxtTable hctraits = readTable(m_root / txtSubdir / "hctraits.txt");
-        for (size_t index = 0; index < classIds[VersionSod].size(); index++) {
-            auto& row = hctraits[tableOffset + index];
-            auto& id  = classIds[VersionSod][index];
-
-            outFile.writeRow(id, row[0]);
+        for (size_t index = 0; index < m_idSetSOD.factionIds.size(); index++) {
+            auto& id = m_idSetSOD.factionIds[index];
+            {
+                auto& row = hctraits[tableOffset + index * 2 + 0];
+                outFile.writeRow(id + ".warrior", row[0]);
+            }
+            {
+                auto& row = hctraits[tableOffset + index * 2 + 1];
+                outFile.writeRow(id + ".mage", row[0]);
+            }
         }
     }
 
@@ -199,11 +214,11 @@ void LocalizationConverter::extractHOTA(const std_path& jsonSubdir)
         return res;
     };
 
-    for (size_t i = 0, i2 = unitIds[VersionSod].size(); i < unitIds[VersionHota].size(); ++i, ++i2) {
-        auto& id = unitIds[VersionHota][i];
+    for (size_t i = m_idSetSOD.unitIds.size(); i < m_idSetHOTA.unitIds.size(); ++i) {
+        auto& id = m_idSetHOTA.unitIds[i];
         if (id.empty())
             continue;
-        auto jsonRow = loadJsonRow("monst", i2);
+        auto jsonRow = loadJsonRow("monst", i);
         if (jsonRow.empty())
             continue;
 
@@ -218,6 +233,8 @@ void LocalizationConverter::extractHOTA(const std_path& jsonSubdir)
     else if (locTable[0][1].startsWith("Kanone")) // German
         localeId = "de_DE";
 
+    Logger() << "localeId=" << localeId;
+
     TranscodedFile outFile(m_resources, encoding);
     outFile.setLocale(localeId);
     outFile.setContext("units");
@@ -227,11 +244,11 @@ void LocalizationConverter::extractHOTA(const std_path& jsonSubdir)
 
     {
         outFile.setContext("artifacts");
-        for (size_t i = 0, i2 = artifactIds[VersionSod].size(); i < artifactIds[VersionHota].size(); ++i, ++i2) {
-            auto& id = artifactIds[VersionHota][i];
+        for (size_t i = m_idSetSOD.artifactIds.size(); i < m_idSetHOTA.artifactIds.size(); ++i) {
+            auto& id = m_idSetHOTA.artifactIds[i];
             if (id.empty())
                 continue;
-            auto jsonRow = loadJsonRow("art", i2);
+            auto jsonRow = loadJsonRow("art", i);
             if (jsonRow.empty())
                 continue;
             const std::string name       = jsonRow[1];
@@ -243,11 +260,11 @@ void LocalizationConverter::extractHOTA(const std_path& jsonSubdir)
     }
     {
         outFile.setContext("heroes");
-        for (size_t i = 0, i2 = heroesIds[VersionSod].size(); i < heroesIds[VersionHota].size(); ++i, ++i2) {
-            auto& id = heroesIds[VersionHota][i];
+        for (size_t i = m_idSetSOD.heroesIds.size(); i < m_idSetHOTA.heroesIds.size(); ++i) {
+            auto& id = m_idSetHOTA.heroesIds[i];
             if (id.empty())
                 continue;
-            auto jsonRow = loadJsonRow("hero", i2);
+            auto jsonRow = loadJsonRow("hero", i);
             if (jsonRow.empty())
                 continue;
             const std::string name = jsonRow[6];
@@ -258,11 +275,11 @@ void LocalizationConverter::extractHOTA(const std_path& jsonSubdir)
     }
     {
         outFile.setContext("skills");
-        for (size_t i = 0, i2 = skillsIds[VersionSod].size(); i < skillsIds[VersionHota].size(); ++i, ++i2) {
-            auto& id = skillsIds[VersionHota][i];
+        for (size_t i = m_idSetSOD.skillsIds.size(); i < m_idSetHOTA.skillsIds.size(); ++i) {
+            auto& id = m_idSetHOTA.skillsIds[i];
             if (id.empty())
                 continue;
-            auto jsonRow = loadJsonRow("secskill", i2);
+            auto jsonRow = loadJsonRow("secskill", i);
             if (jsonRow.empty())
                 continue;
             const std::string name  = jsonRow[1];
@@ -284,15 +301,17 @@ void LocalizationConverter::extractHOTA(const std_path& jsonSubdir)
     }
     {
         outFile.setContext("classes");
-        for (size_t i = 0, i2 = classIds[VersionSod].size(); i < classIds[VersionHota].size(); ++i, ++i2) {
-            auto& id = classIds[VersionHota][i];
-            if (id.empty())
-                continue;
-            auto jsonRow = loadJsonRow("class", i2);
-            if (jsonRow.empty())
-                continue;
-            const std::string name = jsonRow[1];
-            outFile.writeRow(id, QByteArray::fromStdString(name));
+        for (size_t i = m_idSetSOD.factionIds.size(); i < m_idSetHOTA.factionIds.size(); ++i) {
+            auto& id = m_idSetHOTA.factionIds[i];
+
+            {
+                auto jsonRow = loadJsonRow("class", i * 2 + 0);
+                outFile.writeRow(id + ".warrior", QByteArray::fromStdString(jsonRow[1]));
+            }
+            {
+                auto jsonRow = loadJsonRow("class", i * 2 + 1);
+                outFile.writeRow(id + ".mage", QByteArray::fromStdString(jsonRow[1]));
+            }
         }
     }
 }

@@ -7,17 +7,15 @@
 
 #include "GuiApplicationExport.hpp"
 
-#include "FsUtils.hpp"
-
 #include <memory>
+#include <string>
 #include <set>
 
 namespace FreeHeroes {
 namespace Core {
-class IResourceLibrary;
 class IGameDatabase;
-class IRandomGeneratorFactory;
 class IRandomGenerator;
+class CoreApplication;
 }
 namespace Sound {
 class IMusicBox;
@@ -32,16 +30,10 @@ class LibraryModelsProvider;
 
 class GUIAPPLICATION_EXPORT Application {
 public:
-    Application();
-    ~Application();
-
     enum class Option
     {
         QtTranslations,
         Translations,
-        ResourceLibrary,
-        GameDatabase,
-        RNG,
         GraphicsLibrary,
         MusicBox,
         CursorLibrary,
@@ -49,33 +41,33 @@ public:
         AppStyle
     };
 
-    // clang-format off
-    void load(const std::string & moduleName = "", std::set<Option> options = std::set<Option>{
-                                                                      Option::QtTranslations,
-                                                                      Option::Translations,
-                                                                      Option::ResourceLibrary,
-                                                                      Option::GameDatabase,
-                                                                      Option::RNG,
-                                                                      Option::GraphicsLibrary,
-                                                                      Option::MusicBox,
-                                                                      Option::CursorLibrary,
-                                                                      Option::LibraryModels,
-                                                                      Option::AppStyle
-                                                                    });
-    // clang-format on
+public:
+    Application(Core::CoreApplication* coreApp,
+                std::set<Option>       options = std::set<Option>{
+                    Option::QtTranslations,
+                    Option::Translations,
+                    Option::GraphicsLibrary,
+                    Option::MusicBox,
+                    Option::CursorLibrary,
+                    Option::LibraryModels,
+                    Option::AppStyle },
+                const std::string& tsExtraModule = "");
+    Application(Core::CoreApplication* coreApp,
+                const std::string&     tsExtraModule)
+        : Application(coreApp,
+                      std::set<Option>{ Option::QtTranslations,
+                                        Option::Translations,
+                                        Option::GraphicsLibrary,
+                                        Option::MusicBox,
+                                        Option::CursorLibrary,
+                                        Option::LibraryModels,
+                                        Option::AppStyle },
+                      tsExtraModule)
+    {}
+    ~Application();
 
-    Core::IResourceLibrary& getResourceLibrary() const
-    {
-        return *m_resourceLibrary;
-    }
-    Core::IGameDatabase& getGameDatabase() const
-    {
-        return *m_gameDatabase;
-    }
-    Core::IRandomGeneratorFactory& getRandomGeneratorFactory() const
-    {
-        return *m_randomGeneratorFactory;
-    }
+    void load();
+
     IGraphicsLibrary& getGraphicsLibrary() const
     {
         return *m_graphicsLibrary;
@@ -92,16 +84,19 @@ public:
     {
         return *m_modelsProvider;
     }
+    const Core::IGameDatabase* getGameDatabase() const
+    {
+        return m_gameDatabaseUi;
+    }
     Gui::IAppSettings& getAppSettings();
 
 private:
     struct Impl;
     std::unique_ptr<Impl> m_impl;
 
-    std::shared_ptr<Core::IResourceLibrary>        m_resourceLibrary;
-    std::shared_ptr<Core::IGameDatabase>           m_gameDatabase;
-    std::shared_ptr<Core::IRandomGeneratorFactory> m_randomGeneratorFactory;
-    std::shared_ptr<Core::IRandomGenerator>        m_randomGeneratorUi;
+    const std::set<Option> m_options;
+
+    const Core::IGameDatabase* m_gameDatabaseUi = nullptr;
 
     std::shared_ptr<Sound::IMusicBox> m_musicBox;
 

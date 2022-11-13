@@ -58,14 +58,14 @@ namespace FreeHeroes::BattleEmulator {
 using namespace Core;
 using namespace Gui;
 
-EmulatorMainWidget::EmulatorMainWidget(IGraphicsLibrary&        graphicsLibrary,
-                                       ICursorLibrary&          cursorLibrary,
-                                       IGameDatabase&           gameDatabase,
-                                       IRandomGeneratorFactory& randomGeneratorFactory,
-                                       Sound::IMusicBox&        musicBox,
-                                       IAppSettings&            appSettings,
-                                       LibraryModelsProvider&   modelsProvider,
-                                       QWidget*                 parent)
+EmulatorMainWidget::EmulatorMainWidget(IGraphicsLibrary&              graphicsLibrary,
+                                       ICursorLibrary&                cursorLibrary,
+                                       const IGameDatabase*           gameDatabase,
+                                       const IRandomGeneratorFactory* randomGeneratorFactory,
+                                       Sound::IMusicBox&              musicBox,
+                                       IAppSettings&                  appSettings,
+                                       LibraryModelsProvider&         modelsProvider,
+                                       QWidget*                       parent)
     : QWidget(parent)
     , m_ui(std::make_unique<Ui::EmulatorMainWidget>())
     , m_graphicsLibrary(graphicsLibrary)
@@ -85,11 +85,11 @@ EmulatorMainWidget::EmulatorMainWidget(IGraphicsLibrary&        graphicsLibrary,
     storeDependency(this, musicBox);
     storeDependency(this, appSettings);
 
-    m_uiRng = m_randomGeneratorFactory.create();
+    m_uiRng = m_randomGeneratorFactory->create();
     m_uiRng->makeGoodSeed();
 
     {
-        auto rng = m_randomGeneratorFactory.create();
+        auto rng = m_randomGeneratorFactory->create();
         rng->makeGoodSeed();
         m_adventureState->m_seed = rng->getSeed();
     }
@@ -103,8 +103,8 @@ EmulatorMainWidget::EmulatorMainWidget(IGraphicsLibrary&        graphicsLibrary,
     connect(m_ui->pushButtonReplayBattle, &QPushButton::clicked, this, &EmulatorMainWidget::startReplay);
     connect(m_ui->pushButtonReplayLoadAdv, &QPushButton::clicked, this, &EmulatorMainWidget::loadAdventureData);
 
-    m_adventureState->m_att.squad.stacks.resize(m_gameDatabase.gameRules()->limits.stacks);
-    m_adventureState->m_def.squad.stacks.resize(m_gameDatabase.gameRules()->limits.stacks);
+    m_adventureState->m_att.squad.stacks.resize(m_gameDatabase->gameRules()->limits.stacks);
+    m_adventureState->m_def.squad.stacks.resize(m_gameDatabase->gameRules()->limits.stacks);
 
     m_ui->armyConfigAtt->setModels(modelsProvider, m_uiRng.get());
     m_ui->armyConfigDef->setModels(modelsProvider, m_uiRng.get());
@@ -158,11 +158,11 @@ EmulatorMainWidget::EmulatorMainWidget(IGraphicsLibrary&        graphicsLibrary,
     connect(m_guiAdventureArmyDef.get(), &GuiAdventureArmy::dataChanged, this, [this] { onDefDataChanged(); });
 
     connect(m_ui->armyConfigAtt, &ArmyConfigWidget::makeLevelup, this, [this](int newLevel) {
-        m_adventureState->m_att.hero.experience = GeneralEstimation(m_gameDatabase.gameRules()).getExperienceForLevel(newLevel);
+        m_adventureState->m_att.hero.experience = GeneralEstimation(m_gameDatabase->gameRules()).getExperienceForLevel(newLevel);
         checkForHeroLevelUps();
     });
     connect(m_ui->armyConfigDef, &ArmyConfigWidget::makeLevelup, this, [this](int newLevel) {
-        m_adventureState->m_def.hero.experience = GeneralEstimation(m_gameDatabase.gameRules()).getExperienceForLevel(newLevel);
+        m_adventureState->m_def.hero.experience = GeneralEstimation(m_gameDatabase->gameRules()).getExperienceForLevel(newLevel);
         checkForHeroLevelUps();
     });
 
@@ -235,7 +235,7 @@ void EmulatorMainWidget::onAttDataChanged(bool forcedUpdate)
 
     m_adventureStatePrev->m_att = m_adventureState->m_att;
 
-    AdventureEstimation(m_gameDatabase.gameRules()).calculateArmy(m_adventureState->m_att, m_adventureState->m_terrain);
+    AdventureEstimation(m_gameDatabase->gameRules()).calculateArmy(m_adventureState->m_att, m_adventureState->m_terrain);
 
     m_adventureKingdom->dayIncome  = m_adventureState->m_att.estimated.dayIncome;
     m_adventureKingdom->weekIncome = m_adventureState->m_att.estimated.weekIncomeMax;
@@ -255,7 +255,7 @@ void EmulatorMainWidget::onDefDataChanged(bool forcedUpdate)
 
     m_adventureStatePrev->m_def = m_adventureState->m_def;
 
-    AdventureEstimation(m_gameDatabase.gameRules()).calculateArmy(m_adventureState->m_def, m_adventureState->m_terrain);
+    AdventureEstimation(m_gameDatabase->gameRules()).calculateArmy(m_adventureState->m_def, m_adventureState->m_terrain);
 
     m_ui->armyConfigDef->refresh();
 }
@@ -263,12 +263,12 @@ void EmulatorMainWidget::onDefDataChanged(bool forcedUpdate)
 void EmulatorMainWidget::makeNewDay()
 {
     if (m_adventureState->m_att.hasHero()) {
-        AdventureEstimation(m_gameDatabase.gameRules()).calculateDayStart(m_adventureState->m_att.hero);
+        AdventureEstimation(m_gameDatabase->gameRules()).calculateDayStart(m_adventureState->m_att.hero);
         m_ui->armyConfigAtt->refresh();
         onAttDataChanged(true);
     }
     if (m_adventureState->m_def.hasHero()) {
-        AdventureEstimation(m_gameDatabase.gameRules()).calculateDayStart(m_adventureState->m_def.hero);
+        AdventureEstimation(m_gameDatabase->gameRules()).calculateDayStart(m_adventureState->m_def.hero);
         m_ui->armyConfigDef->refresh();
         onDefDataChanged(true);
     }
@@ -375,13 +375,13 @@ void EmulatorMainWidget::applyCurrentObjectRewards(QString defenderName)
         assert(reward.totalItems() > 0);
         const bool isSingleReward = reward.totalItems() == 1;
 
-        auto rng = m_randomGeneratorFactory.create();
+        auto rng = m_randomGeneratorFactory->create();
         rng->makeGoodSeed();
 
         for (auto& artReward : reward.artifacts.artifacts) {
             auto                                treasureClass = artReward.treasureClass;
             std::deque<LibraryArtifactConstPtr> suggestions;
-            for (auto art : m_gameDatabase.artifacts()->records()) {
+            for (auto art : m_gameDatabase->artifacts()->records()) {
                 if (art->treasureClass == treasureClass)
                     suggestions.push_back(art);
             }
@@ -401,7 +401,7 @@ void EmulatorMainWidget::applyCurrentObjectRewards(QString defenderName)
         const auto resourceRewards = ResourceAmountHelper().trasformResourceAmount(reward.resources);
         for (auto& resReward : resourceRewards) {
             rewardDescriptionTitles << QString("%1 %2").arg(resReward.amount).arg(resReward.name);
-            auto res    = m_gameDatabase.resources()->find(resReward.id.toStdString());
+            auto res    = m_gameDatabase->resources()->find(resReward.id.toStdString());
             auto iconId = isSingleReward ? res->presentationParams.iconLarge : res->presentationParams.icon;
             auto pix    = m_graphicsLibrary.getPixmap(iconId)->get();
             items << GeneralPopupDialog::Item{ pix, QString("%1").arg(resReward.amount), false };
@@ -446,8 +446,8 @@ int EmulatorMainWidget::execBattle(bool isReplay, bool isQuick)
     if (isReplay) {
         replayRec = m_replayManager->m_records[m_ui->comboBoxReplaySelect->currentIndex()];
         replayData.load(replayRec.battleReplay, m_gameDatabase);
-        AdventureEstimation(m_gameDatabase.gameRules()).calculateArmy(replayData.m_adv.m_att, replayData.m_adv.m_terrain);
-        AdventureEstimation(m_gameDatabase.gameRules()).calculateArmy(replayData.m_adv.m_def, replayData.m_adv.m_terrain);
+        AdventureEstimation(m_gameDatabase->gameRules()).calculateArmy(replayData.m_adv.m_att, replayData.m_adv.m_terrain);
+        AdventureEstimation(m_gameDatabase->gameRules()).calculateArmy(replayData.m_adv.m_def, replayData.m_adv.m_terrain);
     } else {
         replayRec = m_replayManager->makeNewUnique();
     }
@@ -473,22 +473,22 @@ int EmulatorMainWidget::execBattle(bool isReplay, bool isQuick)
         auto& armyAdv = isAttacker ? replayData.m_adv.m_att : replayData.m_adv.m_def;
 
         AdventureStackMutablePtr bm = armyAdv.squad.addHidden(shootArt->battleMachineUnit, 1);
-        AdventureEstimation(m_gameDatabase.gameRules()).calculateArmySummon(armyAdv, replayData.m_adv.m_terrain, bm);
+        AdventureEstimation(m_gameDatabase->gameRules()).calculateArmySummon(armyAdv, replayData.m_adv.m_terrain, bm);
         army->createMachineShoot(bm);
     }
 
-    auto rng = m_randomGeneratorFactory.create();
+    auto rng = m_randomGeneratorFactory->create();
     rng->setSeed(replayData.m_adv.m_seed);
 
     BattleManager   battle(att,
                          def,
                          replayData.m_adv.m_field,
                          rng,
-                         m_gameDatabase.gameRules(),
+                         m_gameDatabase->gameRules(),
                          [&replayData, this](BattleStack::Side side, LibraryUnitConstPtr unit, int count) -> AdventureStackConstPtr {
                              auto&                    army   = side == BattleStack::Side::Attacker ? replayData.m_adv.m_att : replayData.m_adv.m_def;
                              AdventureStackMutablePtr result = army.squad.addHidden(unit, count);
-                             AdventureEstimation(m_gameDatabase.gameRules()).calculateArmySummon(army, replayData.m_adv.m_terrain, result);
+                             AdventureEstimation(m_gameDatabase->gameRules()).calculateArmySummon(army, replayData.m_adv.m_terrain, result);
                              return result;
                          });
     IBattleView*    battleView    = &battle;
@@ -642,10 +642,10 @@ void EmulatorMainWidget::checkForHeroLevelUps(bool fromDebugWidget)
             decision.heroClass    = guiAdvHero->getClassName();
             decision.heroPortrait = guiAdvHero->getGuiHero()->getPortraitLarge();
             decision.expIcon      = m_modelsProvider.ui()->skillInfo[HeroPrimaryParamType::Experience].iconLarge->get();
-            auto rng              = m_randomGeneratorFactory.create();
+            auto rng              = m_randomGeneratorFactory->create();
             rng->makeGoodSeed();
             HeroLevelupDialog   dlg(this);
-            AdventureEstimation estimation(m_gameDatabase.gameRules());
+            AdventureEstimation estimation(m_gameDatabase->gameRules());
 
             while ((result = estimation.calculateHeroLevelUp(hero, *rng)).isValid()) {
                 decision.choices.clear();

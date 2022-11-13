@@ -5,6 +5,7 @@
  */
 #include <QApplication>
 
+#include "CoreApplication.hpp"
 #include "Application.hpp"
 
 #include "SoundTestWidget.hpp"
@@ -13,10 +14,11 @@ int main(int argc, char* argv[])
 {
     using namespace FreeHeroes;
 
-    Gui::Application fhApp;
-    QApplication     app(argc, argv);
+    Core::CoreApplication fhCoreApp({ Core::CoreApplication::Option::ResourceLibraryApp, Core::CoreApplication::Option::ResourceLibraryLocalData, Core::CoreApplication::Option::RNG });
+    Gui::Application      fhApp(&fhCoreApp, { Gui::Application::Option::MusicBox });
+    QApplication          app(argc, argv);
 
-    fhApp.load("", { Gui::Application::Option::ResourceLibrary, Gui::Application::Option::MusicBox });
+    fhApp.load();
     auto&           musicBox = fhApp.getMusicBox();
     SoundTestWidget dlg(musicBox);
     dlg.show();

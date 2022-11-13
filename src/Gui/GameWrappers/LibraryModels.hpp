@@ -215,10 +215,10 @@ class UiCommonModel;
 class GUIGAMEWRAPPERS_EXPORT LibraryModelsProvider : public QObject {
     Q_OBJECT
 public:
-    LibraryModelsProvider(Core::IGameDatabase& gameDatabase,
-                          Sound::IMusicBox&    musicBox,
-                          IGraphicsLibrary&    graphicsLibrary,
-                          QObject*             parent = nullptr);
+    LibraryModelsProvider(const Core::IGameDatabase* gameDatabase,
+                          Sound::IMusicBox&          musicBox,
+                          IGraphicsLibrary&          graphicsLibrary,
+                          QObject*                   parent = nullptr);
 
     // clang-format off
     ArtifactsModel   * artifacts  () const noexcept { return m_artifacts;}

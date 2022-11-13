@@ -39,6 +39,7 @@ if (WARNING_AS_ERROR)
 endif()
 
 if (MSVC)
+	add_definitions(-D_CRT_SECURE_NO_WARNINGS -DNOMINMAX)
     add_compile_options(/W3
         /wd4267 # conversion from int to another int, possible losts of data
         /wd4251 # 'A::Impl' needs to have dll-interface to be used by clients of class 'A'
@@ -71,6 +72,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/mocWrapper.cmake.in ${CMAKE_BIN
 
 # Zlib
 
+set(COMPRESSION_DEFINES USE_ZLIB)
 if (MSVC)
     set(ZLIB_ROOT 3rdparty/zlib)
     AddTarget(TYPE static NAME zlib_static ROOT ${ZLIB_ROOT}/
@@ -115,12 +117,13 @@ add_subdirectory(3rdparty/googletest/googletest)
 # Interfaces
 AddTargetHeaderOnly(FH  NAME GameObjects        INCLUDES src/Core/GameObjects)
 AddTargetHeaderOnly(FH  NAME GameInt            INCLUDES src/Core/GameInterface DEPS_FH GameObjects CorePlatform )
-AddTargetHeaderOnly(FH  NAME GuiInt             INCLUDES src/Gui/Interface  DEPS_FH CorePlatform GameObjects DEPS Qt5::Widgets) # todo: GameObjects remove for cursors.
+AddTargetHeaderOnly(FH  NAME GuiInt             INCLUDES src/Gui/Interface  DEPS_FH CorePlatform GameObjects GameInt DEPS Qt5::Widgets) # todo: GameObjects remove for cursors.
 AddTargetHeaderOnly(FH  NAME SoundInt           INCLUDES src/Sound/Interface DEPS Qt5::Widgets)
 
 # Core
 AddTarget          (FH  NAME CorePlatform  TYPE shared   ROOT src/Core/Platform
-	DEPS    rapidjson )
+	DEFINES ${COMPRESSION_DEFINES}
+	DEPS    rapidjson ${COMPRESSION_LIBS})
 
 AddTarget(FH TYPE shared NAME CoreRng ROOT src/Core/Rng
     DEPS_FH CorePlatform
@@ -137,6 +140,17 @@ AddTarget(FH TYPE shared NAME CoreLogic ROOT src/Core/Logic
 
 AddTarget(FH TYPE shared NAME BattleLogic ROOT src/Core/BattleLogic
     DEPS_FH CorePlatform CoreLogic GameObjects GameInt
+    )
+
+AddTarget(FH TYPE shared NAME CoreApplication ROOT src/Core/Application
+    DEPS_FH
+		CorePlatform
+		GameObjects
+		GameInt
+	
+		CoreResource
+		CoreLogic
+		CoreRng
     )
 
 # Sound
@@ -217,6 +231,7 @@ AddTarget(FH QT TYPE shared NAME GuiApplication ROOT src/Gui/Application
         GameObjects
         GameInt
 
+        CoreApplication
         CoreResource
         CoreLogic
         CoreRng
@@ -235,9 +250,11 @@ AddTarget(FH QT  TYPE app NAME LegacyConverter ROOT src/App/LegacyConverter
     DEPS_FH
     CorePlatform
     GuiInt
+	GameInt
     GameObjects
 
     CoreResource
+	CoreApplication
     GuiApplication
     GuiResource
 
@@ -252,6 +269,7 @@ AddTarget(FH QT TYPE app NAME BattleEmulator
         GameObjects
         GameInt
 
+		CoreApplication
         GuiApplication
         GuiWidgets
         GuiEditor
@@ -262,7 +280,39 @@ AddTarget(FH QT TYPE app NAME BattleEmulator
     DEPS Qt5::Widgets
     )
 
+AddTarget(FH QT TYPE app NAME MapGenTest
+    ROOT src/App/MapGenTest
+    DEPS_FH
+        CorePlatform
+        GuiInt
+        SoundInt
+        GameObjects
+        GameInt
 
+		CoreApplication
+        GuiApplication
+        GuiWidgets
+        GuiEditor
+        GuiBattle
+        GuiGameWrappers
+        CoreLogic
+        BattleLogic
+    DEPS Qt5::Widgets
+    )
+
+AddTarget(FH TYPE console_app NAME MapUtils
+    ROOT src/App/MapUtils
+    DEPS_FH
+        CorePlatform
+        GameObjects
+        GameInt
+
+		CoreApplication
+        CoreLogic
+        BattleLogic
+     DEPS
+        frozen
+    )
 
 # tests
 
@@ -282,7 +332,9 @@ AddTarget(FH TYPE app NAME SoundTests OUTPUT_NAME Tests_Sound
     DEPS_FH
         CorePlatform
         SoundInt
+		GameInt
 
+		CoreApplication
         GuiApplication
     DEPS Qt5::Widgets
     )
