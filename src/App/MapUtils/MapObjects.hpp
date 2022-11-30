@@ -23,22 +23,76 @@ enum class MapFormat
     VCMI    = 0xF0,
 };
 
-struct GameConstants {
-    int F_NUMBER;
-    int ARTIFACTS_QUANTITY;
-    int HEROES_QUANTITY;
-    int SPELLS_QUANTITY;
-    int ABILITIES_QUANTITY;
-    int CREATURES_COUNT;
-    int SKILL_QUANTITY;
-    int PRIMARY_SKILLS;
-    int TERRAIN_TYPES;
-    int RESOURCE_QUANTITY;
-    int HEROES_PER_TYPE;
-    int PLAYER_LIMIT_I;
-    int STACK_SIZE;
+struct MapFormatFeatures {
+    int m_factions             = 0;
+    int m_artifactsCount       = 0;
+    int m_heroesCount          = 0;
+    int m_spellsCount          = 0;
+    int m_spellsAbilitiesCount = 0;
+    int m_spellsRegularCount   = 0;
+    int m_creaturesCount       = 0;
+    int m_primarySkillsCount   = 0;
+    int m_terrainTypes         = 0;
+    int m_resourceCount        = 0;
+    int m_players              = 0;
 
-    GameConstants(MapFormat format);
+    int m_stackSize           = 0;
+    int m_secondarySkillCount = 0;
+
+    bool m_hasQuestIdentifier         = false;
+    bool m_stackId16Bit               = false;
+    bool m_artId16Bit                 = false;
+    bool m_factions16Bit              = false;
+    bool m_creatureBanksCustomization = false;
+
+    bool m_heroHasExp          = false;
+    bool m_heroHasBio          = false;
+    bool m_heroHasCustomSpells = false;
+    bool m_heroHasOneSpell     = false;
+    bool m_heroHasPrimSkills   = false;
+
+    bool m_townHasObligatorySpells = false;
+    bool m_townHasSpellResearch    = false;
+    bool m_townHasAlignment        = false;
+
+    bool m_monsterJoinPercent = false;
+
+    bool m_creatureBankSize = false;
+
+    bool m_seerHutExtendedQuest  = false;
+    bool m_seerHutMultiQuest     = false;
+    bool m_witchHutAllowedSkills = false;
+
+    bool m_garisonRemovableUnits = false;
+
+    bool m_artifactMiscFive = false;
+
+    bool m_eventHasHumanActivate     = false;
+    bool m_townEventHasHumanAffected = false;
+
+    bool m_playerP7               = false;
+    bool m_playerGenerateHeroInfo = false;
+    bool m_playerPlaceholders     = false;
+
+    bool m_mapLevelLimit        = false;
+    bool m_mapPlaceholderHeroes = false;
+    bool m_mapDisposedHeroes    = false;
+
+    bool m_mapAllowedHeroesSized    = false;
+    bool m_mapAllowedArtifacts      = false;
+    bool m_mapAllowedArtifactsSized = false;
+    bool m_mapAllowedSpells         = false;
+    bool m_mapAllowedSecSkills      = false;
+
+    bool m_mapCustomHeroData = false;
+    bool m_mapCustomHeroSize = false;
+
+    bool m_mapEventHuman = false;
+
+    bool m_mapHotaUnknown1 = false;
+
+    MapFormatFeatures() = default;
+    MapFormatFeatures(MapFormat baseFormat, int hotaVer1);
 };
 
 enum class MapObjectType
@@ -181,6 +235,8 @@ enum class MapObjectType
     ROCKLANDS                   = 231,
 };
 
+using MapFormatFeaturesPtr = std::shared_ptr<const MapFormatFeatures>;
+
 struct IMapObject {
     virtual ~IMapObject() = default;
 
@@ -189,7 +245,7 @@ struct IMapObject {
     virtual void ToJson(PropertyTree& data) const                       = 0;
     virtual void FromJson(const PropertyTree& data)                     = 0;
 
-    static std::unique_ptr<IMapObject> Create(MapObjectType type, MapFormat format);
+    static std::unique_ptr<IMapObject> Create(MapObjectType type, MapFormatFeaturesPtr features);
 };
 
 struct StackBasicDescriptor {
@@ -198,12 +254,12 @@ struct StackBasicDescriptor {
 };
 
 struct StackSet {
-    MapFormat m_format = MapFormat::Invalid;
+    MapFormatFeaturesPtr m_features;
 
     std::vector<StackBasicDescriptor> m_stacks;
 
-    StackSet(MapFormat format)
-        : m_format(format)
+    StackSet(MapFormatFeaturesPtr features)
+        : m_features(features)
     {}
 
     void ReadInternal(ByteOrderDataStreamReader& stream)
@@ -212,7 +268,7 @@ struct StackSet {
         m_stacks.resize(stream.readSize());
 
         for (auto& stack : m_stacks) {
-            if (m_format > MapFormat::ROE)
+            if (m_features->m_stackId16Bit)
                 stream >> stack.m_id;
             else
                 stack.m_id = stream.ReadScalar<uint8_t>();
@@ -224,7 +280,7 @@ struct StackSet {
         auto lock = stream.SetContainerSizeBytesGuarded(1);
         stream.writeSize(m_stacks.size());
         for (auto& stack : m_stacks) {
-            if (m_format > MapFormat::ROE)
+            if (m_features->m_stackId16Bit)
                 stream << stack.m_id;
             else
                 stream << static_cast<uint8_t>(stack.m_id);
@@ -234,19 +290,19 @@ struct StackSet {
 };
 
 struct StackSetFixed {
-    MapFormat m_format = MapFormat::Invalid;
+    MapFormatFeaturesPtr m_features;
 
     std::vector<StackBasicDescriptor> m_stacks;
 
-    StackSetFixed(MapFormat format)
-        : m_format(format)
-        , m_stacks(GameConstants(m_format).STACK_SIZE)
+    StackSetFixed(MapFormatFeaturesPtr features)
+        : m_features(features)
+        , m_stacks(features->m_stackSize)
     {}
 
     void ReadInternal(ByteOrderDataStreamReader& stream)
     {
         for (auto& stack : m_stacks) {
-            if (m_format > MapFormat::ROE)
+            if (m_features->m_stackId16Bit)
                 stream >> stack.m_id;
             else
                 stack.m_id = stream.ReadScalar<uint8_t>();
@@ -256,7 +312,7 @@ struct StackSetFixed {
     void WriteInternal(ByteOrderDataStreamWriter& stream) const
     {
         for (auto& stack : m_stacks) {
-            if (m_format > MapFormat::ROE)
+            if (m_features->m_stackId16Bit)
                 stream << stack.m_id;
             else
                 stream << static_cast<uint8_t>(stack.m_id);
@@ -304,8 +360,8 @@ struct PrimarySkillSet {
 };
 
 struct HeroArtSet {
-    MapFormat m_format  = MapFormat::Invalid;
-    bool      m_hasArts = false;
+    MapFormatFeaturesPtr m_features;
+    bool                 m_hasArts = false;
 
     std::vector<uint16_t> m_mainSlots;
     uint16_t              m_cata  = 0;
@@ -313,9 +369,42 @@ struct HeroArtSet {
     uint16_t              m_misc5 = 0;
     std::vector<uint16_t> m_bagSlots;
 
-    HeroArtSet(MapFormat format)
-        : m_format(format)
+    HeroArtSet() = default;
+    HeroArtSet(MapFormatFeaturesPtr features)
+        : m_features(features)
     {}
+
+    void ReadInternal(ByteOrderDataStreamReader& stream);
+    void WriteInternal(ByteOrderDataStreamWriter& stream) const;
+};
+
+struct HeroSpellSet {
+    MapFormatFeaturesPtr m_features;
+    bool                 m_hasCustomSpells = false;
+    std::vector<uint8_t> m_spells;
+
+    HeroSpellSet() = default;
+    HeroSpellSet(MapFormatFeaturesPtr features)
+        : m_features(features)
+    {}
+
+    void prepareArrays() { m_spells.resize(m_features->m_spellsRegularCount); }
+
+    void ReadInternal(ByteOrderDataStreamReader& stream);
+    void WriteInternal(ByteOrderDataStreamWriter& stream) const;
+};
+
+struct HeroPrimSkillSet {
+    MapFormatFeaturesPtr m_features;
+    bool                 m_hasCustomPrimSkills = false;
+    std::vector<uint8_t> m_primSkills;
+
+    HeroPrimSkillSet() = default;
+    HeroPrimSkillSet(MapFormatFeaturesPtr features)
+        : m_features(features)
+    {}
+
+    void prepareArrays() { m_primSkills.resize(m_features->m_primarySkillsCount); }
 
     void ReadInternal(ByteOrderDataStreamReader& stream);
     void WriteInternal(ByteOrderDataStreamWriter& stream) const;
@@ -325,8 +414,8 @@ struct MapGuards {
     bool          m_hasGuards = false;
     StackSetFixed m_creatures;
 
-    MapGuards(MapFormat format)
-        : m_creatures(format)
+    MapGuards(MapFormatFeaturesPtr features)
+        : m_creatures(features)
     {}
 
     void ReadInternal(ByteOrderDataStreamReader& stream);
@@ -338,8 +427,8 @@ struct MapMessage {
     std::string m_message;
     MapGuards   m_guards;
 
-    MapMessage(MapFormat format)
-        : m_guards(format)
+    MapMessage(MapFormatFeaturesPtr features)
+        : m_guards(features)
     {}
 
     void ReadInternal(ByteOrderDataStreamReader& stream);
@@ -347,10 +436,10 @@ struct MapMessage {
 };
 
 struct MapObjectAbstract : public IMapObject {
-    MapFormat m_format = MapFormat::Invalid;
+    MapFormatFeaturesPtr m_features;
 
-    MapObjectAbstract(MapFormat format)
-        : m_format(format)
+    MapObjectAbstract(MapFormatFeaturesPtr features)
+        : m_features(features)
     {}
 };
 
@@ -367,6 +456,18 @@ struct MapObjectWithOwner : public MapObjectAbstract {
     using MapObjectAbstract::MapObjectAbstract;
 
     uint8_t m_owner = 0;
+
+    void ReadInternal(ByteOrderDataStreamReader& stream) override;
+    void WriteInternal(ByteOrderDataStreamWriter& stream) const override;
+    void ToJson(PropertyTree& data) const override;
+    void FromJson(const PropertyTree& data) override;
+};
+
+struct MapObjectCreatureBank : public MapObjectAbstract {
+    using MapObjectAbstract::MapObjectAbstract;
+
+    uint32_t m_content  = 0xffffffffU;
+    uint8_t  m_upgraded = 0xffU;
 
     void ReadInternal(ByteOrderDataStreamReader& stream) override;
     void WriteInternal(ByteOrderDataStreamWriter& stream) const override;
@@ -407,19 +508,49 @@ struct MapHero : public MapObjectAbstract {
     std::string m_bio;
     uint8_t     m_sex = 0xff;
 
-    bool m_hasCustomSpells     = false;
-    bool m_hasCustomPrimSkills = false;
+    HeroSpellSet     m_spellSet;
+    HeroPrimSkillSet m_primSkillSet;
 
-    MapHero(MapFormat format)
-        : MapObjectAbstract(format)
-        , m_garison(format)
-        , m_artSet(format)
+    MapHero(MapFormatFeaturesPtr features)
+        : MapObjectAbstract(features)
+        , m_garison(features)
+        , m_artSet(features)
+        , m_spellSet(features)
+        , m_primSkillSet(features)
     {}
+
+    void prepareArrays();
 
     void ReadInternal(ByteOrderDataStreamReader& stream) override;
     void WriteInternal(ByteOrderDataStreamWriter& stream) const override;
     void ToJson(PropertyTree& data) const override;
     void FromJson(const PropertyTree& data) override;
+};
+
+struct MapTownEvent {
+    MapFormatFeaturesPtr m_features;
+
+    std::string m_name;
+    std::string m_message;
+    ResourceSet m_resourceSet;
+    uint8_t     m_players          = 0;
+    bool        m_humanAffected    = true;
+    bool        m_computerAffected = false;
+    uint16_t    m_firstOccurence   = 0;
+    uint8_t     m_nextOccurence    = 0;
+
+    std::vector<uint8_t>  m_buildings;
+    std::vector<uint16_t> m_creaturesAmounts;
+
+    MapTownEvent() = default;
+    MapTownEvent(MapFormatFeaturesPtr features)
+        : m_features(features)
+    {}
+
+    void prepareArrays();
+
+    void ReadInternal(ByteOrderDataStreamReader& stream);
+    void WriteInternal(ByteOrderDataStreamWriter& stream) const;
 };
 
 struct MapTown : public MapObjectAbstract {
@@ -434,19 +565,23 @@ struct MapTown : public MapObjectAbstract {
 
     uint8_t m_formation = 0;
 
-    bool m_hasCustomBuildings = false;
-    // todo Buildings
-    bool m_hasFort = false;
+    bool                 m_hasCustomBuildings = false;
+    std::vector<uint8_t> m_builtBuildings;
+    std::vector<uint8_t> m_forbiddenBuildings;
+    bool                 m_hasFort = false;
 
     std::vector<uint8_t> m_obligatorySpells;
     std::vector<uint8_t> m_possibleSpells;
 
-    uint32_t m_events    = 0;
-    uint8_t  m_alignment = 0xff;
+    bool m_spellResearch = false;
 
-    MapTown(MapFormat format)
-        : MapObjectAbstract(format)
-        , m_garison(format)
+    std::vector<MapTownEvent> m_events;
+
+    uint8_t m_alignment = 0xff;
+
+    MapTown(MapFormatFeaturesPtr features)
+        : MapObjectAbstract(features)
+        , m_garison(features)
     {}
 
     void prepareArrays();
@@ -470,6 +605,8 @@ struct MapMonster : public MapObjectAbstract {
     bool        m_neverFlees     = false;
     bool        m_notGrowingTeam = false;
 
+    uint32_t m_joinPercent = 100;
+
     using MapObjectAbstract::MapObjectAbstract;
 
     void ReadInternal(ByteOrderDataStreamReader& stream) override;
@@ -482,9 +619,9 @@ struct MapResource : public MapObjectAbstract {
     MapMessage m_message;
     uint32_t   m_amount = 0;
 
-    MapResource(MapFormat format)
-        : MapObjectAbstract(format)
-        , m_message(format)
+    MapResource(MapFormatFeaturesPtr features)
+        : MapObjectAbstract(features)
+        , m_message(features)
     {}
 
     void ReadInternal(ByteOrderDataStreamReader& stream) override;
@@ -498,9 +635,9 @@ struct MapArtifact : public MapObjectAbstract {
     uint32_t   m_spellId = 0;
     bool       m_isSpell = false;
 
-    MapArtifact(MapFormat format)
-        : MapObjectAbstract(format)
-        , m_message(format)
+    MapArtifact(MapFormatFeaturesPtr features)
+        : MapObjectAbstract(features)
+        , m_message(features)
     {}
 
     void ReadInternal(ByteOrderDataStreamReader& stream) override;
@@ -545,9 +682,9 @@ struct MapQuest : public MapObjectAbstract {
     std::string m_nextVisitText;
     std::string m_completedText;
 
-    MapQuest(MapFormat format)
-        : MapObjectAbstract(format)
-        , m_6creatures(format)
+    MapQuest(MapFormatFeaturesPtr features)
+        : MapObjectAbstract(features)
+        , m_6creatures(features)
     {}
 
     void ReadInternal(ByteOrderDataStreamReader& stream) override;
@@ -581,9 +718,9 @@ struct MapSeerHut : public MapObjectAbstract {
     using Mission  = MapQuest::Mission;
     using Progress = MapQuest::Progress;
 
-    MapSeerHut(MapFormat format)
-        : MapObjectAbstract(format)
-        , m_quest(format)
+    MapSeerHut(MapFormatFeaturesPtr features)
+        : MapObjectAbstract(features)
+        , m_quest(features)
     {}
 
     void ReadInternal(ByteOrderDataStreamReader& stream) override;
@@ -634,7 +771,7 @@ struct MapScholar : public MapObjectAbstract {
 struct MapWitchHut : public MapObjectAbstract {
     std::vector<uint8_t> m_allowedSkills;
 
-    MapWitchHut(MapFormat format);
+    MapWitchHut(MapFormatFeaturesPtr features);
 
     void ReadInternal(ByteOrderDataStreamReader& stream) override;
     void WriteInternal(ByteOrderDataStreamWriter& stream) const override;
@@ -643,7 +780,7 @@ struct MapWitchHut : public MapObjectAbstract {
 };
 
 struct MapReward {
-    MapFormat m_format = MapFormat::Invalid;
+    MapFormatFeaturesPtr m_features;
 
     uint32_t m_gainedExp  = 0;
     uint32_t m_manaDiff   = 0;
@@ -657,9 +794,9 @@ struct MapReward {
     std::vector<uint8_t>      m_spells;
     StackSet                  m_creatures;
 
-    MapReward(MapFormat format)
-        : m_format(format)
-        , m_creatures(format)
+    MapReward(MapFormatFeaturesPtr features)
+        : m_features(features)
+        , m_creatures(features)
     {}
 
     void ReadInternal(ByteOrderDataStreamReader& stream);
@@ -670,10 +807,10 @@ struct MapPandora : public MapObjectAbstract {
     MapMessage m_message;
     MapReward  m_reward;
 
-    MapPandora(MapFormat format)
-        : MapObjectAbstract(format)
-        , m_message(format)
-        , m_reward(format)
+    MapPandora(MapFormatFeaturesPtr features)
+        : MapObjectAbstract(features)
+        , m_message(features)
+        , m_reward(features)
     {}
 
     void ReadInternal(ByteOrderDataStreamReader& stream) override;
@@ -687,9 +824,9 @@ struct MapGarison : public MapObjectAbstract {
     StackSetFixed m_garison;
     bool          m_removableUnits = true;
 
-    MapGarison(MapFormat format)
-        : MapObjectAbstract(format)
-        , m_garison(format)
+    MapGarison(MapFormatFeaturesPtr features)
+        : MapObjectAbstract(features)
+        , m_garison(features)
     {}
 
     void ReadInternal(ByteOrderDataStreamReader& stream) override;
@@ -716,11 +853,12 @@ struct MapEvent : public MapObjectAbstract {
     uint8_t m_availableFor     = 0;
     uint8_t m_computerActivate = 0;
     uint8_t m_removeAfterVisit = 0;
+    uint8_t m_humanActivate    = 1;
 
-    MapEvent(MapFormat format)
-        : MapObjectAbstract(format)
-        , m_message(format)
-        , m_reward(format)
+    MapEvent(MapFormatFeaturesPtr features)
+        : MapObjectAbstract(features)
+        , m_message(features)
+        , m_reward(features)
     {}
 
     void ReadInternal(ByteOrderDataStreamReader& stream) override;
@@ -738,8 +876,8 @@ struct MapDwelling : public MapObjectAbstract {
     uint8_t  m_minLevel    = 0;
     uint8_t  m_maxLevel    = 0;
 
-    MapDwelling(MapFormat format, MapObjectType objectType)
-        : MapObjectAbstract(format)
+    MapDwelling(MapFormatFeaturesPtr features, MapObjectType objectType)
+        : MapObjectAbstract(features)
         , m_objectType(objectType)
     {
     }
@@ -753,13 +891,24 @@ struct MapDwelling : public MapObjectAbstract {
 struct MapQuestGuard : public MapObjectAbstract {
     MapQuest m_quest;
 
-    MapQuestGuard(MapFormat format)
-        : MapObjectAbstract(format)
-        , m_quest(format)
+    MapQuestGuard(MapFormatFeaturesPtr features)
+        : MapObjectAbstract(features)
+        , m_quest(features)
     {}
 
     void ReadInternal(ByteOrderDataStreamReader& stream) override;
     void WriteInternal(ByteOrderDataStreamWriter& stream) const override;
+    void ToJson(PropertyTree& data) const override;
+    void FromJson(const PropertyTree& data) override;
+};
+
+struct MapGrail : public MapObjectAbstract {
+    uint32_t m_radius = 0;
+
+    using MapObjectAbstract::MapObjectAbstract;
+
+    void ReadInternal(ByteOrderDataStreamReader& stream) override { stream >> m_radius; }
+    void WriteInternal(ByteOrderDataStreamWriter& stream) const override { stream << m_radius; }
     void ToJson(PropertyTree& data) const override;
     void FromJson(const PropertyTree& data) override;
 };

@@ -199,7 +199,7 @@ struct Object {
 };
 
 struct GlobalMapEvent {
-    MapFormat m_format = MapFormat::Invalid;
+    MapFormatFeaturesPtr m_features;
 
     std::string m_name;
     std::string m_message;
@@ -214,9 +214,41 @@ struct GlobalMapEvent {
     void ReadInternal(ByteOrderDataStreamReader& stream);
     void WriteInternal(ByteOrderDataStreamWriter& stream) const;
 };
+struct CustomHeroData {
+    struct SecSkill {
+        uint8_t m_id    = 0;
+        uint8_t m_level = 0;
+    };
+
+    uint8_t m_enabled = 0;
+
+    bool     m_hasExp = false;
+    uint32_t m_exp    = 0;
+
+    bool                  m_hasSkills = false;
+    std::vector<SecSkill> m_skills;
+
+    HeroArtSet       m_artSet;
+    bool             m_hasCustomBio = false;
+    std::string      m_bio;
+    uint8_t          m_sex = 0xFF;
+    HeroSpellSet     m_spellSet;
+    HeroPrimSkillSet m_primSkillSet;
+
+    void ReadInternal(ByteOrderDataStreamReader& stream);
+    void WriteInternal(ByteOrderDataStreamWriter& stream) const;
+};
+
 struct FHMap;
 struct H3Map {
     MapFormat m_format = MapFormat::Invalid;
+    struct HotaVersion {
+        uint32_t m_ver1 = 3;
+        uint16_t m_ver2 = 0;
+        uint32_t m_ver3 = 12;
+    };
+    HotaVersion                        m_hotaVer;
+    std::shared_ptr<MapFormatFeatures> m_features;
 
     // header
     bool        m_anyPlayers = false;
@@ -250,8 +282,40 @@ struct H3Map {
         LOSSSTANDARD = 255
     };
 
-    VictoryConditionType m_victoryCondition = VictoryConditionType::WINSTANDARD;
-    LossConditionType    m_lossCondition    = LossConditionType::LOSSSTANDARD;
+    struct VictoryCondition {
+        MapFormatFeaturesPtr m_features;
+        VictoryConditionType m_type = VictoryConditionType::WINSTANDARD;
+
+        bool m_allowNormalVictory = false;
+        bool m_appliesToAI        = false;
+
+        uint16_t m_artID = 0;
+
+        uint16_t m_creatureID    = 0;
+        uint16_t m_creatureCount = 0;
+
+        uint8_t  m_resourceID     = 0;
+        uint32_t m_resourceAmount = 0;
+
+        int3    m_pos;
+        uint8_t m_hallLevel   = 0;
+        uint8_t m_castleLevel = 0;
+
+        void ReadInternal(ByteOrderDataStreamReader& stream);
+        void WriteInternal(ByteOrderDataStreamWriter& stream) const;
+    };
+    struct LossCondition {
+        MapFormatFeaturesPtr m_features;
+        LossConditionType    m_type       = LossConditionType::LOSSSTANDARD;
+        uint16_t             m_daysPassed = 0;
+        int3                 m_pos;
+
+        void ReadInternal(ByteOrderDataStreamReader& stream);
+        void WriteInternal(ByteOrderDataStreamWriter& stream) const;
+    };
+
+    VictoryCondition m_victoryCondition;
+    LossCondition    m_lossCondition;
 
     uint8_t                   m_teamCount = 0;
     std::vector<uint8_t>      m_teamSettings;
@@ -262,7 +326,16 @@ struct H3Map {
     std::vector<uint8_t>      m_allowedSpells;
     std::vector<uint8_t>      m_allowedSecSkills;
 
-    uint32_t m_rumorCount = 0;
+    struct Rumor {
+        std::string m_name;
+        std::string m_text;
+
+        void ReadInternal(ByteOrderDataStreamReader& stream) { stream >> m_name >> m_text; }
+        void WriteInternal(ByteOrderDataStreamWriter& stream) const { stream << m_name << m_text; }
+    };
+
+    std::vector<Rumor>          m_rumors;
+    std::vector<CustomHeroData> m_customHeroData;
 
     MapTileSet                  m_tiles;
     std::vector<ObjectTemplate> m_objectDefs;

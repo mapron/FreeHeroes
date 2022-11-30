@@ -15,6 +15,8 @@
 
 #include "Reflection/PropertyTreeReader.hpp"
 #include "Reflection/PropertyTreeWriter.hpp"
+#include "MapFormatReflection.hpp"
+#include "MapObjectsReflection.hpp"
 
 #include <set>
 
@@ -36,207 +38,239 @@ constexpr const int g_terrainSand = 1;
 
 }
 
-namespace Core::Reflection {
+void H3Map::VictoryCondition::ReadInternal(ByteOrderDataStreamReader& stream)
+{
+    uint8_t winCondition = 0;
+    stream >> winCondition;
+    m_type = static_cast<VictoryConditionType>(winCondition);
+    if (m_type == VictoryConditionType::WINSTANDARD)
+        return;
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<int3>{
-    Field("x", &int3::x),
-    Field("y", &int3::y),
-    Field("z", &int3::z),
-};
+    stream >> m_allowNormalVictory >> m_appliesToAI;
 
-// clang-format off
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<EAiTactic> = EnumTraits::make(
-    EAiTactic::NONE,
-    "NONE", EAiTactic::NONE,
-    "RANDOM", EAiTactic::RANDOM,
-    "WARRIOR", EAiTactic::WARRIOR,
-    "BUILDER", EAiTactic::BUILDER,
-    "EXPLORER", EAiTactic::EXPLORER
-    );
-// clang-format on
+    switch (m_type) {
+        case VictoryConditionType::WINSTANDARD:
+            assert(0);
+            break;
+        case VictoryConditionType::ARTIFACT:
+        {
+            if (m_features->m_artId16Bit)
+                stream >> m_artID;
+            else
+                m_artID = stream.ReadScalar<uint8_t>();
+            break;
+        }
+        case VictoryConditionType::GATHERTROOP:
+        {
+            if (m_features->m_stackId16Bit)
+                stream >> m_creatureID;
+            else
+                m_creatureID = stream.ReadScalar<uint8_t>();
+            stream >> m_creatureCount;
+            break;
+        }
+        case VictoryConditionType::GATHERRESOURCE:
+        {
+            stream >> m_resourceID >> m_resourceAmount;
+            break;
+        }
+        case VictoryConditionType::BUILDCITY:
+        {
+            stream >> m_pos >> m_hallLevel >> m_castleLevel;
+        }
+        case VictoryConditionType::BUILDGRAIL:
+        {
+            stream >> m_pos;
+            break;
+        }
+        case VictoryConditionType::BEATHERO:
+        {
+            stream >> m_pos;
+            break;
+        }
+        case VictoryConditionType::CAPTURECITY:
+        {
+            stream >> m_pos;
+            break;
+        }
+        case VictoryConditionType::BEATMONSTER:
+        {
+            stream >> m_pos;
+            break;
+        }
+        case VictoryConditionType::TAKEDWELLINGS:
+        {
+            break;
+        }
+        case VictoryConditionType::TAKEMINES:
+        {
+            break;
+        }
+        case VictoryConditionType::TRANSPORTITEM:
+        {
+            m_artID = stream.ReadScalar<uint8_t>();
+            stream >> m_pos;
+            break;
+        }
+    }
+}
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<SHeroName>{
-    Field("heroId", &SHeroName::heroId),
-    Field("heroName", &SHeroName::heroName),
+void H3Map::VictoryCondition::WriteInternal(ByteOrderDataStreamWriter& stream) const
+{
+    stream << static_cast<uint8_t>(m_type);
+    if (m_type == VictoryConditionType::WINSTANDARD)
+        return;
 
-};
+    stream << m_allowNormalVictory << m_appliesToAI;
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<DisposedHero>{
-    Field("heroId", &DisposedHero::heroId),
-    Field("portrait", &DisposedHero::portrait),
-    Field("name", &DisposedHero::name),
-    Field("players", &DisposedHero::players),
-};
+    switch (m_type) {
+        case VictoryConditionType::WINSTANDARD:
+            assert(0);
+            break;
+        case VictoryConditionType::ARTIFACT:
+        {
+            if (m_features->m_artId16Bit)
+                stream << m_artID;
+            else
+                stream << static_cast<uint8_t>(m_artID);
+            break;
+        }
+        case VictoryConditionType::GATHERTROOP:
+        {
+            if (m_features->m_stackId16Bit)
+                stream << m_creatureID;
+            else
+                stream << static_cast<uint8_t>(m_creatureID);
+            stream << m_creatureCount;
+            break;
+        }
+        case VictoryConditionType::GATHERRESOURCE:
+        {
+            stream << m_resourceID << m_resourceAmount;
+            break;
+        }
+        case VictoryConditionType::BUILDCITY:
+        {
+            stream << m_pos << m_hallLevel << m_castleLevel;
+        }
+        case VictoryConditionType::BUILDGRAIL:
+        {
+            stream << m_pos;
+            break;
+        }
+        case VictoryConditionType::BEATHERO:
+        {
+            stream << m_pos;
+            break;
+        }
+        case VictoryConditionType::CAPTURECITY:
+        {
+            stream << m_pos;
+            break;
+        }
+        case VictoryConditionType::BEATMONSTER:
+        {
+            stream << m_pos;
+            break;
+        }
+        case VictoryConditionType::TAKEDWELLINGS:
+        {
+            break;
+        }
+        case VictoryConditionType::TAKEMINES:
+        {
+            break;
+        }
+        case VictoryConditionType::TRANSPORTITEM:
+        {
+            stream << static_cast<uint8_t>(m_artID);
+            stream << m_pos;
+            break;
+        }
+    }
+}
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<PlayerInfo>{
-    Field("canHumanPlay", &PlayerInfo::canHumanPlay),
-    Field("canComputerPlay", &PlayerInfo::canComputerPlay),
-    Field("aiTactic", &PlayerInfo::aiTactic),
-    Field("allowedFactionsBitmask", &PlayerInfo::allowedFactionsBitmask),
-    Field("isFactionRandom", &PlayerInfo::isFactionRandom),
-    Field("mainHeroInstance", &PlayerInfo::mainHeroInstance),
-    Field("hasRandomHero", &PlayerInfo::hasRandomHero),
-    Field("mainCustomHeroPortrait", &PlayerInfo::mainCustomHeroPortrait),
-    Field("mainCustomHeroName", &PlayerInfo::mainCustomHeroName),
-    Field("mainCustomHeroId", &PlayerInfo::mainCustomHeroId),
-    Field("hasMainTown", &PlayerInfo::hasMainTown),
-    Field("generateHeroAtMainTown", &PlayerInfo::generateHeroAtMainTown),
-    Field("posOfMainTown", &PlayerInfo::posOfMainTown),
-    Field("team", &PlayerInfo::team),
-    Field("generateHero", &PlayerInfo::generateHero),
-    Field("p7", &PlayerInfo::p7),
-    Field("powerPlaceholders", &PlayerInfo::powerPlaceholders),
-    Field("heroesNames", &PlayerInfo::heroesNames),
+void H3Map::LossCondition::ReadInternal(ByteOrderDataStreamReader& stream)
+{
+    uint8_t lossCondition = 0;
+    stream >> lossCondition;
+    m_type = static_cast<LossConditionType>(lossCondition);
+    if (m_type == LossConditionType::LOSSSTANDARD)
+        return;
 
-};
+    switch (m_type) {
+        case LossConditionType::LOSSSTANDARD:
+            assert(0);
+            break;
+        case LossConditionType::LOSSCASTLE:
+        {
+            stream >> m_pos;
+            break;
+        }
+        case LossConditionType::LOSSHERO:
+        {
+            stream >> m_pos;
+            break;
+        }
+        case LossConditionType::TIMEEXPIRES:
+        {
+            stream >> m_daysPassed;
+            break;
+        }
+    }
+}
 
-// clang-format off
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<MapFormat> = EnumTraits::make(
-    MapFormat::Invalid,
-    "INVALID"  , MapFormat::Invalid,
-    "ROE"      , MapFormat::ROE,
-    "AB"       , MapFormat::AB,
-    "SOD"      , MapFormat::SOD,
-    "HOTA1"    , MapFormat::HOTA1,
-    "HOTA2"    , MapFormat::HOTA2,
-    "HOTA3"    , MapFormat::HOTA3,
-    "WOG"      , MapFormat::WOG,
-    "VCMI"     , MapFormat::VCMI
-    );
+void H3Map::LossCondition::WriteInternal(ByteOrderDataStreamWriter& stream) const
+{
+    stream << static_cast<uint8_t>(m_type);
+    if (m_type == LossConditionType::LOSSSTANDARD)
+        return;
 
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<H3Map::VictoryConditionType> = EnumTraits::make(
-    H3Map::VictoryConditionType::WINSTANDARD,
-    "ARTIFACT"       , H3Map::VictoryConditionType::ARTIFACT,
-    "GATHERTROOP"    , H3Map::VictoryConditionType::GATHERTROOP,
-    "GATHERRESOURCE" , H3Map::VictoryConditionType::GATHERRESOURCE,
-    "BUILDCITY"      , H3Map::VictoryConditionType::BUILDCITY,
-    "BUILDGRAIL"     , H3Map::VictoryConditionType::BUILDGRAIL,
-    "BEATHERO"       , H3Map::VictoryConditionType::BEATHERO,
-    "CAPTURECITY"    , H3Map::VictoryConditionType::CAPTURECITY,
-    "BEATMONSTER"    , H3Map::VictoryConditionType::BEATMONSTER,
-    "TAKEDWELLINGS"  , H3Map::VictoryConditionType::TAKEDWELLINGS,
-    "TAKEMINES"      , H3Map::VictoryConditionType::TAKEMINES,
-    "TRANSPORTITEM"  , H3Map::VictoryConditionType::TRANSPORTITEM,
-    "WINSTANDARD"    , H3Map::VictoryConditionType::WINSTANDARD
-    );
-
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<H3Map::LossConditionType> = EnumTraits::make(
-    H3Map::LossConditionType::LOSSSTANDARD,
-    "LOSSCASTLE"   , H3Map::LossConditionType::LOSSCASTLE,
-    "LOSSHERO"     , H3Map::LossConditionType::LOSSHERO,
-    "TIMEEXPIRES"  , H3Map::LossConditionType::TIMEEXPIRES,
-    "LOSSSTANDARD" , H3Map::LossConditionType::LOSSSTANDARD
-    );
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<ObjectTemplate::Type> = EnumTraits::make(
-    ObjectTemplate::Type::INVALID,
-    "INVALID"  , ObjectTemplate::Type::INVALID,
-    "COMMON"   , ObjectTemplate::Type::COMMON,
-    "CREATURE" , ObjectTemplate::Type::CREATURE,
-    "HERO"     , ObjectTemplate::Type::HERO,
-    "ARTIFACT" , ObjectTemplate::Type::ARTIFACT,
-    "RESOURCE" , ObjectTemplate::Type::RESOURCE
-    );
-// clang-format on
-
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<MapTile>{
-    Field("ex", &MapTile::extTileFlags),
-    Field("rdd", &MapTile::roadDir),
-    Field("rdt", &MapTile::roadType),
-    Field("rid", &MapTile::riverDir),
-    Field("rit", &MapTile::riverType),
-    Field("v", &MapTile::terView),
-    Field("t", &MapTile::terType),
-};
-
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<MapTileSet>{
-    Field("size", &MapTileSet::m_size),
-    Field("hasUnderground", &MapTileSet::m_hasUnderground),
-    Field("tiles", &MapTileSet::m_tiles),
-};
-
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<ObjectTemplate>{
-    Field("animationFile", &ObjectTemplate::m_animationFile),
-    Field("visitMask", &ObjectTemplate::m_visitMask),
-    Field("blockMask", &ObjectTemplate::m_blockMask),
-
-    Field("unknownFlag", &ObjectTemplate::m_unknownFlag),
-    Field("allowedTerrainMask", &ObjectTemplate::m_allowedTerrainMask),
-    Field("id", &ObjectTemplate::m_id),
-    Field("subid", &ObjectTemplate::m_subid),
-    Field("type", &ObjectTemplate::m_type),
-    Field("drawPriority", &ObjectTemplate::m_drawPriority),
-};
-
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<GlobalMapEvent>{
-    Field("name", &GlobalMapEvent::m_name),
-    Field("message", &GlobalMapEvent::m_message),
-    Field("resourceSet", &GlobalMapEvent::m_resourceSet),
-    Field("players", &GlobalMapEvent::m_players),
-    Field("humanAffected", &GlobalMapEvent::m_humanAffected),
-    Field("computerAffected", &GlobalMapEvent::m_computerAffected),
-    Field("firstOccurence", &GlobalMapEvent::m_firstOccurence),
-    Field("nextOccurence", &GlobalMapEvent::m_nextOccurence),
-};
-
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<H3Map>{
-
-    Field("format", &H3Map::m_format),
-    Field("anyPlayers", &H3Map::m_anyPlayers),
-    Field("mapName", &H3Map::m_mapName),
-    Field("mapDescr", &H3Map::m_mapDescr),
-    Field("difficulty", &H3Map::m_difficulty),
-    Field("levelLimit", &H3Map::m_levelLimit),
-
-    Field("players", &H3Map::m_players),
-    Field("victoryCondition", &H3Map::m_victoryCondition),
-    Field("lossCondition", &H3Map::m_lossCondition),
-    Field("teamCount", &H3Map::m_teamCount),
-    Field("teamSettings", &H3Map::m_teamSettings),
-    Field("allowedHeroes", &H3Map::m_allowedHeroes),
-    Field("placeholderHeroes", &H3Map::m_placeholderHeroes),
-    Field("disposedHeroes", &H3Map::m_disposedHeroes),
-    Field("allowedArtifacts", &H3Map::m_allowedArtifacts),
-    Field("allowedSpells", &H3Map::m_allowedSpells),
-    Field("allowedSecSkills", &H3Map::m_allowedSecSkills),
-
-    Field("rumors", &H3Map::m_rumorCount),
-    Field("tiles", &H3Map::m_tiles),
-    Field("objectDefs", &H3Map::m_objectDefs),
-
-    Field("events", &H3Map::m_events),
-};
-// @todo: deduplicate
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<ResourceSet>{
-    Field("resourceAmount", &ResourceSet::m_resourceAmount),
-};
+    switch (m_type) {
+        case LossConditionType::LOSSSTANDARD:
+            assert(0);
+            break;
+        case LossConditionType::LOSSCASTLE:
+        {
+            stream << m_pos;
+            break;
+        }
+        case LossConditionType::LOSSHERO:
+        {
+            stream << m_pos;
+            break;
+        }
+        case LossConditionType::TIMEEXPIRES:
+        {
+            stream << m_daysPassed;
+            break;
+        }
+    }
 }
 
 H3Map::H3Map()
 {
+    m_features                    = std::make_shared<MapFormatFeatures>();
+    m_victoryCondition.m_features = m_features;
+    m_lossCondition.m_features    = m_features;
 }
 
 void H3Map::prepareArrays()
 {
-    m_players.resize(8);
-    m_allowedHeroes.resize(GameConstants(m_format).HEROES_QUANTITY);
-    m_allowedArtifacts.resize(GameConstants(m_format).ARTIFACTS_QUANTITY);
-    m_allowedSpells.resize(GameConstants(m_format).SPELLS_QUANTITY - GameConstants(m_format).ABILITIES_QUANTITY);
-    m_allowedSecSkills.resize(GameConstants(m_format).SKILL_QUANTITY);
+    *m_features = MapFormatFeatures(m_format, m_hotaVer.m_ver1);
+
+    m_players.resize(m_features->m_players);
+    m_allowedHeroes.resize(m_features->m_heroesCount);
+    m_allowedArtifacts.resize(m_features->m_artifactsCount);
+    m_allowedSpells.resize(m_features->m_spellsRegularCount);
+    m_allowedSecSkills.resize(m_features->m_secondarySkillCount);
+    m_customHeroData.resize(m_features->m_heroesCount);
+
+    for (auto& heroData : m_customHeroData) {
+        heroData.m_artSet.m_features       = m_features;
+        heroData.m_spellSet.m_features     = m_features;
+        heroData.m_primSkillSet.m_features = m_features;
+    }
 }
 
 void H3Map::convertFromFH(const FHMap& map, const Core::IGameDatabase* database, Core::IRandomGenerator* rng)
@@ -421,7 +455,7 @@ void H3Map::convertFromFH(const FHMap& map, const Core::IGameDatabase* database,
             h3player.posOfMainTown = int3fromPos(fhTown.m_pos, -townGateOffset);
         }
 
-        auto cas1           = std::make_unique<MapTown>(m_format);
+        auto cas1           = std::make_unique<MapTown>(m_features);
         cas1->m_playerOwner = playerIndex;
         cas1->m_hasFort     = fhTown.m_hasFort;
         cas1->prepareArrays();
@@ -443,7 +477,7 @@ void H3Map::convertFromFH(const FHMap& map, const Core::IGameDatabase* database,
         if (fhHero.m_isMain)
             h3player.mainCustomHeroId = libraryHero->legacyId;
 
-        auto her1                              = std::make_unique<MapHero>(m_format);
+        auto her1                              = std::make_unique<MapHero>(m_features);
         her1->m_playerOwner                    = playerIndex;
         her1->m_subID                          = libraryHero->legacyId;
         m_allowedHeroes[libraryHero->legacyId] = 0;
@@ -476,10 +510,9 @@ void H3Map::ReadInternal(ByteOrderDataStreamReader& stream)
             throw std::runtime_error("Invalid map format:" + std::to_string(format));
     }
     if (m_format >= MapFormat::HOTA1) {
-        uint32_t unknown1; // == 3;
-        uint16_t unknown2; // == 0;
-        uint32_t unknown3; // == 12;
-        stream >> unknown1 >> unknown2 >> unknown3;
+        stream >> m_hotaVer.m_ver1 >> m_hotaVer.m_ver2;
+        if (m_hotaVer.m_ver1 == 3)
+            stream >> m_hotaVer.m_ver3;
     }
     prepareArrays();
 
@@ -488,7 +521,7 @@ void H3Map::ReadInternal(ByteOrderDataStreamReader& stream)
     stream >> m_mapDescr;
     stream >> m_difficulty;
     m_levelLimit = 0;
-    if (m_format != MapFormat::ROE)
+    if (m_features->m_mapLevelLimit)
         stream >> m_levelLimit;
 
     for (PlayerInfo& playerInfo : m_players) {
@@ -496,23 +529,23 @@ void H3Map::ReadInternal(ByteOrderDataStreamReader& stream)
 
         playerInfo.aiTactic = static_cast<EAiTactic>(stream.ReadScalar<uint8_t>());
 
-        if (m_format == MapFormat::SOD || m_format == MapFormat::WOG) {
+        if (m_features->m_playerP7) {
             stream >> playerInfo.p7;
         } else {
             playerInfo.p7 = -1;
         }
 
         // Factions this player can choose
-        if (m_format == MapFormat::ROE)
-            playerInfo.allowedFactionsBitmask = stream.ReadScalar<uint8_t>();
-        else
+        if (m_features->m_factions16Bit)
             stream >> playerInfo.allowedFactionsBitmask;
+        else
+            playerInfo.allowedFactionsBitmask = stream.ReadScalar<uint8_t>();
 
         stream >> playerInfo.isFactionRandom >> playerInfo.hasMainTown;
         if (playerInfo.hasMainTown) {
             playerInfo.generateHeroAtMainTown = true;
             playerInfo.generateHero           = false;
-            if (m_format != MapFormat::ROE)
+            if (m_features->m_playerGenerateHeroInfo)
                 stream >> playerInfo.generateHeroAtMainTown >> playerInfo.generateHero;
 
             stream >> playerInfo.posOfMainTown;
@@ -522,50 +555,40 @@ void H3Map::ReadInternal(ByteOrderDataStreamReader& stream)
 
         if (playerInfo.mainCustomHeroId != 0xff) {
             stream >> playerInfo.mainCustomHeroPortrait;
-
             stream >> playerInfo.mainCustomHeroName;
         }
 
-        if (m_format != MapFormat::ROE)
+        if (m_features->m_playerPlaceholders)
             stream >> playerInfo.powerPlaceholders >> playerInfo.heroesNames;
     }
 
-    {
-        uint8_t winCondition = 0;
-        stream >> winCondition;
-        m_victoryCondition = static_cast<VictoryConditionType>(winCondition);
-        static const std::set<VictoryConditionType> s_supportedVC{
-            VictoryConditionType::WINSTANDARD
-        };
-        if (!s_supportedVC.contains(m_victoryCondition))
-            throw std::runtime_error("Unsupported victory condition:" + std::to_string(winCondition));
-    }
-    {
-        uint8_t lossCondition = 0;
-        stream >> lossCondition;
-        m_lossCondition = static_cast<LossConditionType>(lossCondition);
-        static const std::set<LossConditionType> s_supportedLC{
-            LossConditionType::LOSSSTANDARD
-        };
-        if (!s_supportedLC.contains(m_lossCondition))
-            throw std::runtime_error("Unsupported loss condition:" + std::to_string(lossCondition));
-    }
+    stream >> m_victoryCondition >> m_lossCondition;
+
     stream >> m_teamCount;
     if (m_teamCount > 0) {
-        m_teamSettings.resize(GameConstants(m_format).PLAYER_LIMIT_I);
+        m_teamSettings.resize(m_features->m_players);
         for (auto& player : m_teamSettings)
             stream >> player;
     }
 
-    stream.readBits(m_allowedHeroes);
+    auto readBitsSized = [&stream](std::vector<uint8_t>& bitArray, bool sized) {
+        if (sized) {
+            auto s = stream.readSize();
+            if (bitArray.size() != s) {
+                throw std::runtime_error("Inconsistent bit array size, expected:" + std::to_string(bitArray.size()) + ", found:" + std::to_string(s));
+            }
+        }
+        stream.readBits(bitArray);
+    };
 
-    // Probably reserved for further heroes
-    if (m_format > MapFormat::ROE) {
+    readBitsSized(m_allowedHeroes, m_features->m_mapAllowedHeroesSized);
+
+    if (m_features->m_mapPlaceholderHeroes) {
         stream >> m_placeholderHeroes;
         stream.zeroPadding(m_placeholderHeroes);
     }
 
-    if (m_format >= MapFormat::SOD) {
+    if (m_features->m_mapDisposedHeroes) {
         const auto disp = stream.ReadScalar<uint8_t>();
         m_disposedHeroes.resize(disp);
         for (auto& hero : m_disposedHeroes)
@@ -575,24 +598,40 @@ void H3Map::ReadInternal(ByteOrderDataStreamReader& stream)
     //omitting NULLS
     stream.zeroPadding(31);
 
-    if (m_format > MapFormat::ROE)
-        stream.readBits(m_allowedArtifacts);
-
-    if (m_format >= MapFormat::SOD) {
-        stream.readBits(m_allowedSpells);
-        stream.readBits(m_allowedSecSkills);
+    if (m_features->m_mapHotaUnknown1) {
+        uint32_t unknown1; // == 1;
+        uint16_t unknown2; // == 16;
+        uint32_t unknown3; // == 0;
+        uint32_t unknown4; // == 0xffffffff;
+        stream >> unknown1 >> unknown2 >> unknown3;
+        if (m_hotaVer.m_ver1 == 3)
+            stream >> unknown4;
     }
-    stream >> m_rumorCount;
-    if (m_rumorCount > 0)
-        throw std::runtime_error("Unsupported rumorCount:" + std::to_string(m_rumorCount));
 
-    if (m_format >= MapFormat::SOD) {
-        for (int z = 0; z < GameConstants(m_format).HEROES_QUANTITY; z++) {
-            int custom = stream.ReadScalar<uint8_t>();
-            if (!custom)
-                continue;
+    if (m_features->m_mapAllowedArtifacts)
+        readBitsSized(m_allowedArtifacts, m_features->m_mapAllowedArtifactsSized);
 
-            throw std::runtime_error("Unsupported custom heroes!");
+    if (m_features->m_mapAllowedSpells)
+        stream.readBits(m_allowedSpells);
+
+    if (m_features->m_mapAllowedSecSkills)
+        stream.readBits(m_allowedSecSkills);
+
+    stream >> m_rumors;
+
+    if (m_features->m_mapCustomHeroData) {
+        if (m_features->m_mapCustomHeroSize) {
+            auto s = stream.readSize();
+            if (m_customHeroData.size() != s)
+                throw std::runtime_error("heroCount check failed for HOTA header");
+        }
+        int index = 0;
+        for (auto& hero : m_customHeroData) {
+            if (index == 12) {
+                int a = 1;
+            }
+            stream >> hero;
+            index++;
         }
     }
 
@@ -611,14 +650,19 @@ void H3Map::ReadInternal(ByteOrderDataStreamReader& stream)
         uint32_t count = 0;
         stream >> count;
         m_objects.resize(count);
-        int objCounter = 0;
+        [[maybe_unused]] int objCounter = 0; // debug
         for (auto& obj : m_objects) {
             stream >> obj.m_pos >> obj.m_defnum;
+            [[maybe_unused]] const auto offsetRead = stream.GetBuffer().GetOffsetRead(); // debug
+
+            if (objCounter == 19930) {
+                int a = 1;
+            }
 
             const ObjectTemplate& objTempl = m_objectDefs.at(obj.m_defnum);
             MapObjectType         type     = static_cast<MapObjectType>(objTempl.m_id);
             stream.zeroPadding(5);
-            obj.m_impl = IMapObject::Create(type, m_format);
+            obj.m_impl = IMapObject::Create(type, m_features);
             if (!obj.m_impl)
                 throw std::runtime_error("Unsupported map object type:" + std::to_string(objTempl.m_id));
 
@@ -629,7 +673,7 @@ void H3Map::ReadInternal(ByteOrderDataStreamReader& stream)
 
     m_events.resize(stream.readSize());
     for (auto& event : m_events) {
-        event.m_format = m_format;
+        event.m_features = m_features;
         stream >> event;
     }
 
@@ -641,11 +685,17 @@ void H3Map::WriteInternal(ByteOrderDataStreamWriter& stream) const
     const auto format = static_cast<int32_t>(m_format);
     stream << format;
 
+    if (m_format >= MapFormat::HOTA1) {
+        stream << m_hotaVer.m_ver1 << m_hotaVer.m_ver2;
+        if (m_hotaVer.m_ver1 == 3)
+            stream << m_hotaVer.m_ver3;
+    }
+
     stream << m_anyPlayers << m_tiles.m_size << m_tiles.m_hasUnderground;
     stream << m_mapName;
     stream << m_mapDescr;
     stream << m_difficulty;
-    if (m_format != MapFormat::ROE)
+    if (m_features->m_mapLevelLimit)
         stream << m_levelLimit;
 
     for (const PlayerInfo& playerInfo : m_players) {
@@ -653,19 +703,18 @@ void H3Map::WriteInternal(ByteOrderDataStreamWriter& stream) const
 
         stream << static_cast<uint8_t>(playerInfo.aiTactic);
 
-        if (m_format == MapFormat::SOD || m_format == MapFormat::WOG) {
+        if (m_features->m_playerP7) {
             stream << playerInfo.p7;
         }
 
-        // Factions this player can choose
-        if (m_format == MapFormat::ROE)
-            stream << uint8_t(playerInfo.allowedFactionsBitmask);
-        else
+        if (m_features->m_factions16Bit)
             stream << playerInfo.allowedFactionsBitmask;
+        else
+            stream << uint8_t(playerInfo.allowedFactionsBitmask);
 
         stream << playerInfo.isFactionRandom << playerInfo.hasMainTown;
         if (playerInfo.hasMainTown) {
-            if (m_format != MapFormat::ROE)
+            if (m_features->m_playerGenerateHeroInfo)
                 stream << playerInfo.generateHeroAtMainTown << playerInfo.generateHero;
 
             stream << playerInfo.posOfMainTown;
@@ -675,15 +724,15 @@ void H3Map::WriteInternal(ByteOrderDataStreamWriter& stream) const
 
         if (playerInfo.mainCustomHeroId != 0xff) {
             stream << playerInfo.mainCustomHeroPortrait;
-
             stream << playerInfo.mainCustomHeroName;
         }
 
-        if (m_format != MapFormat::ROE)
+        if (m_features->m_playerPlaceholders)
             stream << playerInfo.powerPlaceholders << playerInfo.heroesNames;
     }
 
-    stream << static_cast<uint8_t>(m_victoryCondition) << static_cast<uint8_t>(m_lossCondition);
+    stream << m_victoryCondition << m_lossCondition;
+
     stream << m_teamCount;
 
     if (m_teamCount > 0) {
@@ -691,14 +740,20 @@ void H3Map::WriteInternal(ByteOrderDataStreamWriter& stream) const
             stream << player;
     }
 
-    stream.writeBits(m_allowedHeroes);
+    auto writeBitsSized = [&stream](const std::vector<uint8_t>& bitArray, bool sized) {
+        if (sized)
+            stream.writeSize(bitArray.size());
+        stream.writeBits(bitArray);
+    };
 
-    if (m_format > MapFormat::ROE) {
+    writeBitsSized(m_allowedHeroes, m_features->m_mapAllowedHeroesSized);
+
+    if (m_features->m_mapPlaceholderHeroes) {
         stream << m_placeholderHeroes;
         stream.zeroPadding(m_placeholderHeroes);
     }
 
-    if (m_format >= MapFormat::SOD) {
+    if (m_features->m_mapDisposedHeroes) {
         stream << static_cast<uint8_t>(m_disposedHeroes.size());
         for (auto& hero : m_disposedHeroes)
             stream << hero;
@@ -706,22 +761,35 @@ void H3Map::WriteInternal(ByteOrderDataStreamWriter& stream) const
 
     stream.zeroPadding(31);
 
-    if (m_format > MapFormat::ROE)
-        stream.writeBits(m_allowedArtifacts);
+    if (m_features->m_mapHotaUnknown1) {
+        uint32_t unknown1 = 1;
+        uint16_t unknown2 = 16;
+        uint32_t unknown3 = 0;
+        uint32_t unknown4 = 0xffffffff;
+        stream << unknown1 << unknown2 << unknown3;
+        if (m_hotaVer.m_ver1 == 3)
+            stream << unknown4;
+    }
 
-    if (m_format >= MapFormat::SOD) {
+    if (m_features->m_mapAllowedArtifacts)
+        writeBitsSized(m_allowedArtifacts, m_features->m_mapAllowedArtifactsSized);
+
+    if (m_features->m_mapAllowedSpells)
         stream.writeBits(m_allowedSpells);
+
+    if (m_features->m_mapAllowedSecSkills)
         stream.writeBits(m_allowedSecSkills);
+
+    stream << m_rumors;
+
+    if (m_features->m_mapCustomHeroData) {
+        if (m_features->m_mapCustomHeroSize)
+            stream.writeSize(m_customHeroData.size());
+
+        for (auto& hero : m_customHeroData)
+            stream << hero;
     }
 
-    stream << m_rumorCount;
-
-    if (m_format >= MapFormat::SOD) {
-        for (int z = 0, cnt = GameConstants(m_format).HEROES_QUANTITY; z < cnt; z++) {
-            uint8_t isCustom = 0;
-            stream << isCustom;
-        }
-    }
     for (int ground = 0; ground < (1 + m_tiles.m_hasUnderground); ++ground) {
         for (int y = 0; y < m_tiles.m_size; y++) {
             for (int x = 0; x < m_tiles.m_size; x++) {
@@ -731,7 +799,6 @@ void H3Map::WriteInternal(ByteOrderDataStreamWriter& stream) const
     }
 
     stream << m_objectDefs;
-
     {
         uint32_t count = m_objects.size();
         stream << count;
@@ -773,6 +840,8 @@ void H3Map::FromJson(const PropertyTree& data)
     Core::Reflection::PropertyTreeReader reader;
     *this = {};
     reader.jsonToValue(data, *this);
+    *m_features = MapFormatFeatures(m_format, m_hotaVer.m_ver1);
+
     for (const PropertyTree& objJson : data["objects"].getList()) {
         Object obj;
         reader.jsonToValue(objJson["pos"], obj.m_pos);
@@ -780,7 +849,7 @@ void H3Map::FromJson(const PropertyTree& data)
 
         const ObjectTemplate& objTempl = m_objectDefs.at(obj.m_defnum);
         MapObjectType         type     = static_cast<MapObjectType>(objTempl.m_id);
-        obj.m_impl                     = IMapObject::Create(type, m_format);
+        obj.m_impl                     = IMapObject::Create(type, m_features);
         if (!obj.m_impl)
             throw std::runtime_error("Unsupported map object type:" + std::to_string(objTempl.m_id));
 
@@ -789,7 +858,12 @@ void H3Map::FromJson(const PropertyTree& data)
         m_objects.push_back(std::move(obj));
     }
     for (auto& event : m_events)
-        event.m_format = m_format;
+        event.m_features = m_features;
+    for (auto& heroData : m_customHeroData) {
+        heroData.m_artSet.m_features       = m_features;
+        heroData.m_spellSet.m_features     = m_features;
+        heroData.m_primSkillSet.m_features = m_features;
+    }
 }
 
 void int3::ReadInternal(ByteOrderDataStreamReader& stream)
@@ -886,7 +960,7 @@ void GlobalMapEvent::ReadInternal(ByteOrderDataStreamReader& stream)
     stream >> m_resourceSet;
     stream >> m_players;
 
-    if (m_format > MapFormat::AB)
+    if (m_features->m_mapEventHuman)
         stream >> m_humanAffected;
 
     stream >> m_computerAffected
@@ -902,7 +976,7 @@ void GlobalMapEvent::WriteInternal(ByteOrderDataStreamWriter& stream) const
     stream << m_resourceSet;
     stream << m_players;
 
-    if (m_format > MapFormat::AB)
+    if (m_features->m_mapEventHuman)
         stream << m_humanAffected;
 
     stream << m_computerAffected
@@ -910,6 +984,62 @@ void GlobalMapEvent::WriteInternal(ByteOrderDataStreamWriter& stream) const
            << m_nextOccurence;
 
     stream.zeroPadding(17);
+}
+
+void CustomHeroData::ReadInternal(ByteOrderDataStreamReader& stream)
+{
+    stream >> m_enabled;
+    if (!m_enabled)
+        return;
+    m_spellSet.prepareArrays();
+    m_primSkillSet.prepareArrays();
+
+    [[maybe_unused]] auto offset = stream.GetBuffer().GetOffsetRead();
+    assert(m_enabled == 1U);
+    stream >> m_hasExp;
+    if (m_hasExp)
+        stream >> m_exp;
+
+    stream >> m_hasSkills;
+    if (m_hasSkills) {
+        auto size = stream.readSize();
+        m_skills.resize(size);
+        for (auto& sk : m_skills)
+            stream >> sk.m_id >> sk.m_level;
+    }
+
+    stream >> m_artSet;
+    stream >> m_hasCustomBio;
+    if (m_hasCustomBio)
+        stream >> m_bio;
+    stream >> m_sex;
+
+    [[maybe_unused]] auto offset2 = stream.GetBuffer().GetOffsetRead();
+
+    stream >> m_spellSet >> m_primSkillSet;
+}
+
+void CustomHeroData::WriteInternal(ByteOrderDataStreamWriter& stream) const
+{
+    stream << m_enabled;
+    if (!m_enabled)
+        return;
+
+    stream << m_hasExp;
+    if (m_hasExp)
+        stream << m_exp;
+
+    stream << m_hasSkills;
+    if (m_hasSkills) {
+        stream.writeSize(m_skills.size());
+        for (auto& sk : m_skills)
+            stream << sk.m_id << sk.m_level;
+    }
+
+    stream << m_artSet << m_hasCustomBio;
+    if (m_hasCustomBio)
+        stream << m_bio;
+    stream << m_sex << m_spellSet << m_primSkillSet;
 }
 
 }

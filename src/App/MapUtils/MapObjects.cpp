@@ -8,302 +8,123 @@
 
 #include "Reflection/PropertyTreeReader.hpp"
 #include "Reflection/PropertyTreeWriter.hpp"
+#include "MapObjectsReflection.hpp"
 
 namespace FreeHeroes {
 
-namespace Core::Reflection {
-
-// clang-format off
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<MapQuest::Mission> = EnumTraits::make(
-    MapQuest::Mission::NONE,
-    "NONE"          , MapQuest::Mission::NONE,
-    "LEVEL"         , MapQuest::Mission::LEVEL,
-    "PRIMARY_STAT"  , MapQuest::Mission::PRIMARY_STAT,
-    "KILL_HERO"     , MapQuest::Mission::KILL_HERO,
-    "KILL_CREATURE" , MapQuest::Mission::KILL_CREATURE,
-    "ART"           , MapQuest::Mission::ART,
-    "ARMY"          , MapQuest::Mission::ARMY,
-    "RESOURCES"     , MapQuest::Mission::RESOURCES,
-    "HERO"          , MapQuest::Mission::HERO,
-    "PLAYER"        , MapQuest::Mission::PLAYER
-    );
-
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<MapQuest::Progress> = EnumTraits::make(
-    MapQuest::Progress::NOT_ACTIVE,
-    "NOT_ACTIVE"   , MapQuest::Progress::NOT_ACTIVE,
-    "IN_PROGRESS"  , MapQuest::Progress::IN_PROGRESS,
-    "COMPLETE"     , MapQuest::Progress::COMPLETE
-    );
-
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<MapSeerHut::RewardType> = EnumTraits::make(
-    MapSeerHut::RewardType::NOTHING,
-    "NOTHING"         , MapSeerHut::RewardType::NOTHING,
-    "EXPERIENCE"      , MapSeerHut::RewardType::EXPERIENCE,
-    "MANA_POINTS"     , MapSeerHut::RewardType::MANA_POINTS,
-    "MORALE_BONUS"    , MapSeerHut::RewardType::MORALE_BONUS,
-    "LUCK_BONUS"      , MapSeerHut::RewardType::LUCK_BONUS,
-    "RESOURCES"       , MapSeerHut::RewardType::RESOURCES,
-    "PRIMARY_SKILL"   , MapSeerHut::RewardType::PRIMARY_SKILL,
-    "SECONDARY_SKILL" , MapSeerHut::RewardType::SECONDARY_SKILL,
-    "ARTIFACT"        , MapSeerHut::RewardType::ARTIFACT,
-    "SPELL"           , MapSeerHut::RewardType::SPELL,
-    "CREATURE"        , MapSeerHut::RewardType::CREATURE
-    );
-
-// clang-format on
-
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<StackBasicDescriptor>{
-    Field("id", &StackBasicDescriptor::m_id),
-    Field("count", &StackBasicDescriptor::m_count),
-};
-
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<StackSet>{
-    Field("stacks", &StackSet::m_stacks),
-};
-
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<StackSetFixed>{
-    Field("stacks", &StackSetFixed::m_stacks),
-};
-
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<MapHeroSkill>{
-    Field("id", &MapHeroSkill::m_id),
-    Field("level", &MapHeroSkill::m_level),
-};
-
-// @todo: deduplicate
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<ResourceSet>{
-    Field("resourceAmount", &ResourceSet::m_resourceAmount),
-};
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<PrimarySkillSet>{
-    Field("prim", &PrimarySkillSet::m_prim),
-};
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<HeroArtSet>{
-    Field("hasArts", &HeroArtSet::m_hasArts),
-    Field("main", &HeroArtSet::m_mainSlots),
-    Field("cata", &HeroArtSet::m_cata),
-    Field("book", &HeroArtSet::m_book),
-    Field("misc5", &HeroArtSet::m_misc5),
-    Field("bag", &HeroArtSet::m_bagSlots),
-};
-
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<MapHero>{
-    Field("questIdentifier", &MapHero::m_questIdentifier),
-    Field("playerOwner", &MapHero::m_playerOwner),
-    Field("subID", &MapHero::m_subID),
-
-    Field("hasName", &MapHero::m_hasName),
-    Field("name", &MapHero::m_name),
-    Field("hasExp", &MapHero::m_hasExp),
-    Field("exp", &MapHero::m_exp),
-    Field("hasPortrait", &MapHero::m_hasPortrait),
-    Field("portrait", &MapHero::m_portrait),
-    Field("hasSecSkills", &MapHero::m_hasSecSkills),
-    Field("secSkills", &MapHero::m_secSkills),
-    Field("hasGarison", &MapHero::m_hasGarison),
-    Field("garison", &MapHero::m_garison),
-    Field("formation", &MapHero::m_formation),
-    Field("arts", &MapHero::m_artSet),
-    Field("patrolRadius", &MapHero::m_patrolRadius),
-    Field("hasCustomBiography", &MapHero::m_hasCustomBiography),
-    Field("bio", &MapHero::m_bio),
-    Field("sex", &MapHero::m_sex),
-    Field("hasCustomSpells", &MapHero::m_hasCustomSpells),
-    Field("hasCustomPrimSkills", &MapHero::m_hasCustomPrimSkills),
-};
-
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<MapTown>{
-    Field("questIdentifier", &MapTown::m_questIdentifier),
-    Field("playerOwner", &MapTown::m_playerOwner),
-    Field("hasName", &MapTown::m_hasName),
-    Field("name", &MapTown::m_name),
-    Field("hasGarison", &MapTown::m_hasGarison),
-    Field("garison", &MapTown::m_garison),
-    Field("formation", &MapTown::m_formation),
-    Field("hasCustomBuildings", &MapTown::m_hasCustomBuildings),
-    Field("hasFort", &MapTown::m_hasFort),
-    Field("obligatorySpells", &MapTown::m_obligatorySpells),
-    Field("possibleSpells", &MapTown::m_possibleSpells),
-    Field("events", &MapTown::m_events),
-    Field("alignment", &MapTown::m_alignment),
-
-};
-
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<MapMonster>{
-    Field("questIdentifier", &MapMonster::m_questIdentifier),
-    Field("count", &MapMonster::m_count),
-    Field("joinAppeal", &MapMonster::m_joinAppeal),
-    Field("hasMessage", &MapMonster::m_hasMessage),
-    Field("message", &MapMonster::m_message),
-    Field("resourceSet", &MapMonster::m_resourceSet),
-    Field("artID", &MapMonster::m_artID),
-
-    Field("neverFlees", &MapMonster::m_neverFlees),
-    Field("notGrowingTeam", &MapMonster::m_notGrowingTeam),
-};
-
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<MapQuest>{
-    Field("missionType", &MapQuest::m_missionType),
-    Field("progress", &MapQuest::m_progress),
-    Field("lastDay", &MapQuest::m_lastDay),
-    Field("134val", &MapQuest::m_134val),
-    Field("2stats", &MapQuest::m_2stats),
-    Field("5arts", &MapQuest::m_5arts),
-    Field("6creatures", &MapQuest::m_6creatures),
-    Field("7resources", &MapQuest::m_7resources),
-    Field("89val", &MapQuest::m_89val),
-    Field("firstVisitText", &MapQuest::m_firstVisitText),
-    Field("nextVisitText", &MapQuest::m_nextVisitText),
-    Field("completedText", &MapQuest::m_completedText),
-
-};
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<MapSeerHut>{
-    Field("quest", &MapSeerHut::m_quest),
-    Field("reward", &MapSeerHut::m_reward),
-    Field("rID", &MapSeerHut::m_rID),
-    Field("rVal", &MapSeerHut::m_rVal),
-};
-
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<MapReward>{
-    Field("gainedExp", &MapReward::m_gainedExp),
-    Field("manaDiff", &MapReward::m_manaDiff),
-    Field("moraleDiff", &MapReward::m_moraleDiff),
-    Field("luckDiff", &MapReward::m_luckDiff),
-    Field("resourceSet", &MapReward::m_resourceSet),
-    Field("primSkillSet", &MapReward::m_primSkillSet),
-    Field("secSkills", &MapReward::m_secSkills),
-    Field("artifacts", &MapReward::m_artifacts),
-    Field("spells", &MapReward::m_spells),
-    Field("creatures", &MapReward::m_creatures),
-};
-
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<MapPandora>{
-    Field("message", &MapPandora::m_message),
-    Field("reward", &MapPandora::m_reward),
-};
-
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<MapGuards>{
-    Field("hasGuards", &MapGuards::m_hasGuards),
-    Field("creatures", &MapGuards::m_creatures),
-};
-
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<MapMessage>{
-    Field("hasMessage", &MapMessage::m_hasMessage),
-    Field("message", &MapMessage::m_message),
-    Field("guards", &MapMessage::m_guards),
-};
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<MapArtifact>{
-    Field("message", &MapArtifact::m_message),
-    Field("spellId", &MapArtifact::m_spellId),
-    Field("isSpell", &MapArtifact::m_isSpell),
-};
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<MapResource>{
-    Field("message", &MapResource::m_message),
-    Field("amount", &MapResource::m_amount),
-};
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<MapGarison>{
-    Field("owner", &MapGarison::m_owner),
-    Field("garison", &MapGarison::m_garison),
-    Field("removableUnits", &MapGarison::m_removableUnits),
-};
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<MapEvent>{
-    Field("message", &MapEvent::m_message),
-    Field("reward", &MapEvent::m_reward),
-
-    Field("availableFor", &MapEvent::m_availableFor),
-    Field("computerActivate", &MapEvent::m_computerActivate),
-    Field("removeAfterVisit", &MapEvent::m_removeAfterVisit),
-};
-
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<MapDwelling>{
-    Field("owner", &MapDwelling::m_owner),
-    Field("factionId", &MapDwelling::m_factionId),
-    Field("factionMask", &MapDwelling::m_factionMask),
-    Field("minLevel", &MapDwelling::m_minLevel),
-    Field("maxLevel", &MapDwelling::m_maxLevel),
-};
-
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<MapQuestGuard>{
-    Field("quest", &MapQuestGuard::m_quest),
-};
-
-}
-
-GameConstants::GameConstants(MapFormat format)
+MapFormatFeatures::MapFormatFeatures(MapFormat format, int hotaVer1)
 {
-    F_NUMBER = 9;
+    m_factions = 9;
     if (format == MapFormat::ROE)
-        F_NUMBER = 8;
+        m_factions = 8;
+    if (format >= MapFormat::HOTA1)
+        m_factions = 10;
 
-    ARTIFACTS_QUANTITY = 141; //SOD
+    m_artifactsCount = 141; //SOD
     if (format == MapFormat::AB)
-        ARTIFACTS_QUANTITY = 129;
+        m_artifactsCount = 129;
     if (format == MapFormat::ROE)
-        ARTIFACTS_QUANTITY = 128;
+        m_artifactsCount = 128;
     if (format >= MapFormat::HOTA1)
-        ARTIFACTS_QUANTITY = 165;
+        m_artifactsCount = 165;
 
-    HEROES_QUANTITY = 156;
+    m_heroesCount = 156;
     if (format == MapFormat::ROE)
-        HEROES_QUANTITY = 128;
+        m_heroesCount = 128;
     if (format >= MapFormat::HOTA1)
-        ARTIFACTS_QUANTITY = 179;
+        m_heroesCount = 179;
 
-    SPELLS_QUANTITY    = 81;
-    ABILITIES_QUANTITY = 11;
+    m_spellsCount          = 81;
+    m_spellsAbilitiesCount = 11;
+    m_spellsRegularCount   = m_spellsCount - m_spellsAbilitiesCount;
 
-    CREATURES_COUNT = 150;
+    m_creaturesCount = 150;
     if (format == MapFormat::ROE)
-        CREATURES_COUNT = 115;
+        m_creaturesCount = 115;
     if (format >= MapFormat::HOTA1)
-        CREATURES_COUNT = 171;
+        m_creaturesCount = 171;
 
-    SKILL_QUANTITY    = 28;
-    PRIMARY_SKILLS    = 4;
-    TERRAIN_TYPES     = 10;
-    RESOURCE_QUANTITY = 8;
-    HEROES_PER_TYPE   = 8; //amount of heroes of each type
-    PLAYER_LIMIT_I    = 8;
-    STACK_SIZE        = 7;
+    m_secondarySkillCount = 28;
+    if (format >= MapFormat::HOTA1)
+        m_secondarySkillCount = 29;
+    m_primarySkillsCount = 4;
+    m_terrainTypes       = 10;
+    m_resourceCount      = 8;
+    m_players            = 8;
+    m_stackSize          = 7;
+
+    if (format == MapFormat::HOTA3 && hotaVer1 < 3)
+        m_heroesCount--;
+
+    if (format == MapFormat::HOTA3 && hotaVer1 < 3)
+        m_artifactsCount -= 2;
+
+    m_hasQuestIdentifier         = format > MapFormat::ROE;
+    m_stackId16Bit               = format > MapFormat::ROE;
+    m_artId16Bit                 = format > MapFormat::ROE;
+    m_factions16Bit              = format > MapFormat::ROE;
+    m_creatureBanksCustomization = format == MapFormat::HOTA3 && hotaVer1 == 3;
+
+    m_heroHasExp          = format > MapFormat::AB;
+    m_heroHasBio          = format > MapFormat::ROE;
+    m_heroHasCustomSpells = format > MapFormat::AB;
+    m_heroHasOneSpell     = format == MapFormat::AB;
+    m_heroHasPrimSkills   = format > MapFormat::AB;
+
+    m_townHasObligatorySpells = format > MapFormat::ROE;
+    m_townHasSpellResearch    = format >= MapFormat::HOTA1;
+    m_townHasAlignment        = format > MapFormat::AB;
+
+    m_monsterJoinPercent = format == MapFormat::HOTA3 && hotaVer1 == 3;
+
+    m_creatureBankSize = format == MapFormat::HOTA3 && hotaVer1 == 3;
+
+    m_seerHutExtendedQuest  = format > MapFormat::ROE;
+    m_seerHutMultiQuest     = format == MapFormat::HOTA3 && hotaVer1 == 3;
+    m_witchHutAllowedSkills = format > MapFormat::ROE;
+
+    m_garisonRemovableUnits = format > MapFormat::ROE;
+
+    m_artifactMiscFive = format > MapFormat::AB;
+
+    m_eventHasHumanActivate     = format == MapFormat::HOTA3 && hotaVer1 == 3;
+    m_townEventHasHumanAffected = format > MapFormat::AB;
+
+    m_playerP7               = format == MapFormat::SOD || format == MapFormat::WOG || format >= MapFormat::HOTA1;
+    m_playerGenerateHeroInfo = format > MapFormat::ROE;
+    m_playerPlaceholders     = format > MapFormat::ROE;
+
+    m_mapLevelLimit        = format > MapFormat::ROE;
+    m_mapPlaceholderHeroes = format > MapFormat::ROE;
+    m_mapDisposedHeroes    = format >= MapFormat::SOD;
+
+    m_mapAllowedHeroesSized    = format >= MapFormat::HOTA1;
+    m_mapAllowedArtifacts      = format > MapFormat::ROE;
+    m_mapAllowedArtifactsSized = format >= MapFormat::HOTA1;
+    m_mapAllowedSpells         = format >= MapFormat::SOD;
+    m_mapAllowedSecSkills      = format >= MapFormat::SOD;
+
+    m_mapCustomHeroData = format >= MapFormat::SOD;
+    m_mapCustomHeroSize = format >= MapFormat::HOTA1;
+
+    m_mapEventHuman = format > MapFormat::AB;
+
+    m_mapHotaUnknown1 = format >= MapFormat::HOTA1;
 }
 
-std::unique_ptr<IMapObject> IMapObject::Create(MapObjectType type, MapFormat format)
+std::unique_ptr<IMapObject> IMapObject::Create(MapObjectType type, MapFormatFeaturesPtr features)
 {
     switch (type) {
         case MapObjectType::EVENT:
         {
-            return std::make_unique<MapEvent>(format);
+            return std::make_unique<MapEvent>(features);
             break;
         }
         case MapObjectType::HERO:
         case MapObjectType::RANDOM_HERO:
         case MapObjectType::PRISON:
         {
-            return std::make_unique<MapHero>(format);
+            return std::make_unique<MapHero>(features);
             break;
         }
         case MapObjectType::MONSTER: //Monster
@@ -316,36 +137,35 @@ std::unique_ptr<IMapObject> IMapObject::Create(MapObjectType type, MapFormat for
         case MapObjectType::RANDOM_MONSTER_L6:
         case MapObjectType::RANDOM_MONSTER_L7:
         {
-            return std::make_unique<MapMonster>(format);
+            return std::make_unique<MapMonster>(features);
 
             break;
         }
         case MapObjectType::OCEAN_BOTTLE:
         case MapObjectType::SIGN:
         {
-            return std::make_unique<MapSignBottle>(format);
+            return std::make_unique<MapSignBottle>(features);
             break;
         }
         case MapObjectType::SEER_HUT:
         {
-            return std::make_unique<MapSeerHut>(format);
-            // nobj = readSeerHut();
+            return std::make_unique<MapSeerHut>(features);
             break;
         }
         case MapObjectType::WITCH_HUT:
         {
-            return std::make_unique<MapWitchHut>(format);
+            return std::make_unique<MapWitchHut>(features);
             break;
         }
         case MapObjectType::SCHOLAR:
         {
-            return std::make_unique<MapScholar>(format);
+            return std::make_unique<MapScholar>(features);
             break;
         }
         case MapObjectType::GARRISON:
         case MapObjectType::GARRISON2:
         {
-            return std::make_unique<MapGarison>(format);
+            return std::make_unique<MapGarison>(features);
             break;
         }
         case MapObjectType::ARTIFACT:
@@ -356,7 +176,7 @@ std::unique_ptr<IMapObject> IMapObject::Create(MapObjectType type, MapFormat for
         case MapObjectType::RANDOM_RELIC_ART:
         case MapObjectType::SPELL_SCROLL:
         {
-            auto res       = std::make_unique<MapArtifact>(format);
+            auto res       = std::make_unique<MapArtifact>(features);
             res->m_isSpell = type == MapObjectType::SPELL_SCROLL;
             return res;
             break;
@@ -364,19 +184,19 @@ std::unique_ptr<IMapObject> IMapObject::Create(MapObjectType type, MapFormat for
         case MapObjectType::RANDOM_RESOURCE:
         case MapObjectType::RESOURCE:
         {
-            return std::make_unique<MapResource>(format);
+            return std::make_unique<MapResource>(features);
             break;
         }
         case MapObjectType::RANDOM_TOWN:
         case MapObjectType::TOWN:
         {
-            return std::make_unique<MapTown>(format);
+            return std::make_unique<MapTown>(features);
             break;
         }
         case MapObjectType::MINE:
         case MapObjectType::ABANDONED_MINE:
         {
-            return std::make_unique<MapObjectWithOwner>(format);
+            return std::make_unique<MapObjectWithOwner>(features);
             break;
         }
         case MapObjectType::CREATURE_GENERATOR1:
@@ -384,43 +204,42 @@ std::unique_ptr<IMapObject> IMapObject::Create(MapObjectType type, MapFormat for
         case MapObjectType::CREATURE_GENERATOR3:
         case MapObjectType::CREATURE_GENERATOR4:
         {
-            return std::make_unique<MapObjectWithOwner>(format);
+            return std::make_unique<MapObjectWithOwner>(features);
             break;
         }
         case MapObjectType::SHRINE_OF_MAGIC_INCANTATION:
         case MapObjectType::SHRINE_OF_MAGIC_GESTURE:
         case MapObjectType::SHRINE_OF_MAGIC_THOUGHT:
         {
-            return std::make_unique<MapShrine>(format);
+            return std::make_unique<MapShrine>(features);
             break;
         }
         case MapObjectType::PANDORAS_BOX:
         {
-            return std::make_unique<MapPandora>(format);
+            return std::make_unique<MapPandora>(features);
             break;
         }
         case MapObjectType::GRAIL:
         {
-            //map->grailPos = objPos;
-            //map->grailRadius = stream.ReadScalar<uint32_t>();
+            return std::make_unique<MapGrail>(features);
             break;
         }
         case MapObjectType::QUEST_GUARD:
         {
-            return std::make_unique<MapQuestGuard>(format);
+            return std::make_unique<MapQuestGuard>(features);
             break;
         }
         case MapObjectType::RANDOM_DWELLING:         //same as castle + level range  216
         case MapObjectType::RANDOM_DWELLING_LVL:     //same as castle, fixed level   217
         case MapObjectType::RANDOM_DWELLING_FACTION: //level range, fixed faction    218
         {
-            return std::make_unique<MapDwelling>(format, type);
+            return std::make_unique<MapDwelling>(features, type);
             break;
         }
 
         case MapObjectType::SHIPYARD:
         {
-            return std::make_unique<MapObjectWithOwner>(format);
+            return std::make_unique<MapObjectWithOwner>(features);
             break;
         }
         case MapObjectType::HERO_PLACEHOLDER: //hero placeholder
@@ -446,23 +265,39 @@ std::unique_ptr<IMapObject> IMapObject::Create(MapObjectType type, MapFormat for
 
             break;
         }
+        case MapObjectType::CREATURE_BANK:
+        case MapObjectType::DERELICT_SHIP:
+        case MapObjectType::DRAGON_UTOPIA:
+        case MapObjectType::CRYPT:
+        case MapObjectType::SHIPWRECK:
+        {
+            return std::make_unique<MapObjectCreatureBank>(features);
+            break;
+        }
         case MapObjectType::LIGHTHOUSE: //Lighthouse
         {
-            return std::make_unique<MapObjectWithOwner>(format);
+            return std::make_unique<MapObjectWithOwner>(features);
             break;
         }
         default: //any other object
         {
-            return std::make_unique<MapObjectSimple>(format);
+            return std::make_unique<MapObjectSimple>(features);
             break;
         }
     }
     return nullptr;
 }
 
+void MapHero::prepareArrays()
+{
+    m_spellSet.prepareArrays();
+    m_primSkillSet.prepareArrays();
+}
+
 void MapHero::ReadInternal(ByteOrderDataStreamReader& stream)
 {
-    if (m_format > MapFormat::ROE) {
+    prepareArrays();
+    if (m_features->m_hasQuestIdentifier) {
         stream >> m_questIdentifier;
     }
     stream >> m_playerOwner >> m_subID;
@@ -471,16 +306,13 @@ void MapHero::ReadInternal(ByteOrderDataStreamReader& stream)
     if (m_hasName)
         stream >> m_name;
 
-    if (m_format > MapFormat::AB) {
+    if (m_features->m_heroHasExp) {
         stream >> m_hasExp;
         if (m_hasExp)
             stream >> m_exp;
 
     } else {
         stream >> m_exp;
-        //0 means "not set" in <=AB maps
-        if (!m_exp)
-            m_exp = -1;
     }
 
     stream >> m_hasPortrait;
@@ -501,7 +333,7 @@ void MapHero::ReadInternal(ByteOrderDataStreamReader& stream)
 
     stream >> m_patrolRadius;
 
-    if (m_format > MapFormat::ROE) {
+    if (m_features->m_heroHasBio) {
         stream >> m_hasCustomBiography;
         if (m_hasCustomBiography)
             stream >> m_bio;
@@ -509,36 +341,15 @@ void MapHero::ReadInternal(ByteOrderDataStreamReader& stream)
         stream >> m_sex;
     }
 
-    // Spells
-    if (m_format > MapFormat::AB) {
-        stream >> m_hasCustomSpells;
-        if (m_hasCustomSpells)
-            throw std::runtime_error("CustomSpells on hero is unsupported");
+    stream >> m_spellSet;
+    stream >> m_primSkillSet;
 
-    } else if (m_format == MapFormat::AB) {
-        //we can read one spell
-        auto buff = stream.ReadScalar<uint8_t>();
-        if (buff != 254) {
-            m_hasCustomSpells = true;
-            //            nhi->spells.insert(SpellID::PRESET); //placeholder "preset spells"
-            //            if (buff < 254)                      //255 means no spells
-            //            {
-            //                nhi->spells.insert(SpellID(buff));
-            //            }
-        }
-    }
-
-    if (m_format > MapFormat::AB) {
-        stream >> m_hasCustomPrimSkills;
-        if (m_hasCustomPrimSkills)
-            throw std::runtime_error("CustomPrimSkills on hero is unsupported");
-    }
     stream.zeroPadding(16);
 }
 
 void MapHero::WriteInternal(ByteOrderDataStreamWriter& stream) const
 {
-    if (m_format > MapFormat::ROE) {
+    if (m_features->m_hasQuestIdentifier) {
         stream << m_questIdentifier;
     }
     stream << m_playerOwner << m_subID;
@@ -547,7 +358,7 @@ void MapHero::WriteInternal(ByteOrderDataStreamWriter& stream) const
     if (m_hasName)
         stream << m_name;
 
-    if (m_format > MapFormat::AB) {
+    if (m_features->m_heroHasExp) {
         stream << m_hasExp;
         if (m_hasExp)
             stream << m_exp;
@@ -574,7 +385,7 @@ void MapHero::WriteInternal(ByteOrderDataStreamWriter& stream) const
 
     stream << m_patrolRadius;
 
-    if (m_format > MapFormat::ROE) {
+    if (m_features->m_heroHasBio) {
         stream << m_hasCustomBiography;
         if (m_hasCustomBiography)
             stream << m_bio;
@@ -582,21 +393,9 @@ void MapHero::WriteInternal(ByteOrderDataStreamWriter& stream) const
         stream << m_sex;
     }
 
-    // Spells
-    if (m_format > MapFormat::AB) {
-        stream << m_hasCustomSpells;
+    stream << m_spellSet;
+    stream << m_primSkillSet;
 
-    } else if (m_format == MapFormat::AB) {
-        uint8_t spell = 254;
-        if (m_hasCustomSpells) {
-            spell = 255; // todo:
-        }
-        stream << spell;
-    }
-
-    if (m_format > MapFormat::AB) {
-        stream << m_hasCustomPrimSkills;
-    }
     stream.zeroPadding(16);
 }
 
@@ -609,20 +408,71 @@ void MapHero::ToJson(PropertyTree& data) const
 void MapHero::FromJson(const PropertyTree& data)
 {
     Core::Reflection::PropertyTreeReader reader;
-    *this = { m_format };
+    *this = { m_features };
     reader.jsonToValue(data, *this);
+    prepareArrays();
+}
+
+void MapTownEvent::prepareArrays()
+{
+    m_buildings.resize(48);
+    m_creaturesAmounts.resize(m_features->m_stackSize);
+}
+
+void MapTownEvent::ReadInternal(ByteOrderDataStreamReader& stream)
+{
+    prepareArrays();
+    stream >> m_name >> m_message;
+    stream >> m_resourceSet;
+    stream >> m_players;
+    if (m_features->m_townEventHasHumanAffected)
+        stream >> m_humanAffected;
+
+    stream >> m_computerAffected >> m_firstOccurence >> m_nextOccurence;
+
+    stream.zeroPadding(17);
+
+    stream.readBits(m_buildings);
+
+    for (auto& amount : m_creaturesAmounts)
+        stream >> amount;
+
+    stream.zeroPadding(4);
+}
+
+void MapTownEvent::WriteInternal(ByteOrderDataStreamWriter& stream) const
+{
+    stream << m_name << m_message;
+    stream << m_resourceSet;
+    stream << m_players;
+    if (m_features->m_townEventHasHumanAffected)
+        stream << m_humanAffected;
+
+    stream << m_computerAffected << m_firstOccurence << m_nextOccurence;
+
+    stream.zeroPadding(17);
+
+    stream.writeBits(m_buildings);
+
+    for (auto& amount : m_creaturesAmounts)
+        stream << amount;
+
+    stream.zeroPadding(4);
 }
 
 void MapTown::prepareArrays()
 {
-    if (m_format > MapFormat::ROE)
+    if (m_features->m_townHasObligatorySpells)
         m_obligatorySpells.resize(9);
     m_possibleSpells.resize(9);
+
+    m_builtBuildings.resize(48);
+    m_forbiddenBuildings.resize(48);
 }
 
 void MapTown::ReadInternal(ByteOrderDataStreamReader& stream)
 {
-    if (m_format > MapFormat::ROE) {
+    if (m_features->m_hasQuestIdentifier) {
         stream >> m_questIdentifier;
     }
     stream >> m_playerOwner;
@@ -638,31 +488,41 @@ void MapTown::ReadInternal(ByteOrderDataStreamReader& stream)
     stream >> m_formation;
 
     stream >> m_hasCustomBuildings;
-    if (m_hasCustomBuildings)
-        throw std::runtime_error("Buildings in town is unsupported");
-    else {
+
+    prepareArrays();
+
+    if (m_hasCustomBuildings) {
+        stream.readBits(m_builtBuildings);
+        stream.readBits(m_forbiddenBuildings);
+    } else {
         stream >> m_hasFort;
     }
-    prepareArrays();
-    for (auto& byte : m_obligatorySpells)
-        stream >> byte;
+    if (m_features->m_townHasObligatorySpells) {
+        for (auto& byte : m_obligatorySpells)
+            stream >> byte;
+    }
 
     for (auto& byte : m_possibleSpells)
         stream >> byte;
 
-    stream >> m_events;
-    if (m_events)
-        throw std::runtime_error("Events in town is unsupported");
+    if (m_features->m_townHasSpellResearch)
+        stream >> m_spellResearch;
 
-    if (m_format > MapFormat::AB) {
-        stream >> m_alignment;
+    m_events.resize(stream.readSize());
+    for (auto& event : m_events) {
+        event.m_features = m_features;
+        stream >> event;
     }
+
+    if (m_features->m_townHasAlignment)
+        stream >> m_alignment;
+
     stream.zeroPadding(3);
 }
 
 void MapTown::WriteInternal(ByteOrderDataStreamWriter& stream) const
 {
-    if (m_format > MapFormat::ROE) {
+    if (m_features->m_hasQuestIdentifier) {
         stream << m_questIdentifier;
     }
     stream << m_playerOwner;
@@ -679,22 +539,27 @@ void MapTown::WriteInternal(ByteOrderDataStreamWriter& stream) const
 
     stream << m_hasCustomBuildings;
     if (m_hasCustomBuildings) {
+        stream.writeBits(m_builtBuildings);
+        stream.writeBits(m_forbiddenBuildings);
     } else {
         stream << m_hasFort;
     }
 
-    if (m_format > MapFormat::ROE) {
+    if (m_features->m_townHasObligatorySpells) {
         for (auto& byte : m_obligatorySpells)
             stream << byte;
     }
     for (auto& byte : m_possibleSpells)
         stream << byte;
 
+    if (m_features->m_townHasSpellResearch)
+        stream << m_spellResearch;
+
     stream << m_events;
 
-    if (m_format > MapFormat::AB) {
+    if (m_features->m_townHasAlignment)
         stream << m_alignment;
-    }
+
     stream.zeroPadding(3);
 }
 
@@ -707,8 +572,11 @@ void MapTown::ToJson(PropertyTree& data) const
 void MapTown::FromJson(const PropertyTree& data)
 {
     Core::Reflection::PropertyTreeReader reader;
-    *this = { m_format };
+    *this = { m_features };
     reader.jsonToValue(data, *this);
+    for (auto& event : m_events) {
+        event.m_features = m_features;
+    }
 }
 
 void MapHeroSkill::ReadInternal(ByteOrderDataStreamReader& stream)
@@ -723,7 +591,7 @@ void MapHeroSkill::WriteInternal(ByteOrderDataStreamWriter& stream) const
 
 void MapMonster::ReadInternal(ByteOrderDataStreamReader& stream)
 {
-    if (m_format > MapFormat::ROE) {
+    if (m_features->m_hasQuestIdentifier) {
         stream >> m_questIdentifier;
     }
     stream >> m_count;
@@ -734,19 +602,29 @@ void MapMonster::ReadInternal(ByteOrderDataStreamReader& stream)
         stream >> m_message;
         stream >> m_resourceSet;
 
-        if (m_format == MapFormat::ROE)
-            m_artID = stream.ReadScalar<uint8_t>();
-        else
+        if (m_features->m_artId16Bit)
             stream >> m_artID;
+        else
+            m_artID = stream.ReadScalar<uint8_t>();
     }
 
     stream >> m_neverFlees >> m_notGrowingTeam;
     stream.zeroPadding(2);
+
+    if (m_features->m_monsterJoinPercent) {
+        uint32_t unknown1; // == 0xffffffff
+        uint8_t  unknown2; // == 0x00;
+        stream >> unknown1 >> unknown2;
+        stream >> m_joinPercent;
+        uint32_t unknown3; // == 0xffffffff
+        uint32_t unknown4; // == 0xffffffff
+        stream >> unknown3 >> unknown4;
+    }
 }
 
 void MapMonster::WriteInternal(ByteOrderDataStreamWriter& stream) const
 {
-    if (m_format > MapFormat::ROE) {
+    if (m_features->m_hasQuestIdentifier) {
         stream << m_questIdentifier;
     }
     stream << m_count;
@@ -756,14 +634,24 @@ void MapMonster::WriteInternal(ByteOrderDataStreamWriter& stream) const
         stream << m_message;
         stream << m_resourceSet;
 
-        if (m_format == MapFormat::ROE)
-            stream << static_cast<uint8_t>(m_artID);
-        else
+        if (m_features->m_artId16Bit)
             stream << m_artID;
+        else
+            stream << static_cast<uint8_t>(m_artID);
     }
 
     stream << m_neverFlees << m_notGrowingTeam;
     stream.zeroPadding(2);
+
+    if (m_features->m_monsterJoinPercent) {
+        uint32_t unknown1 = 0xffffffff;
+        uint8_t  unknown2 = 0x00;
+        stream << unknown1 << unknown2;
+        stream << m_joinPercent;
+        uint32_t unknown3 = 0xffffffff;
+        uint32_t unknown4 = 0xffffffff;
+        stream << unknown3 << unknown4;
+    }
 }
 
 void MapMonster::ToJson(PropertyTree& data) const
@@ -775,7 +663,7 @@ void MapMonster::ToJson(PropertyTree& data) const
 void MapMonster::FromJson(const PropertyTree& data)
 {
     Core::Reflection::PropertyTreeReader reader;
-    *this = { m_format };
+    *this = { m_features };
     reader.jsonToValue(data, *this);
 }
 
@@ -801,6 +689,34 @@ void MapObjectWithOwner::FromJson(const PropertyTree& data)
     data["owner"].getScalar().convertTo(m_owner);
 }
 
+void MapObjectCreatureBank::ReadInternal(ByteOrderDataStreamReader& stream)
+{
+    if (m_features->m_creatureBankSize) {
+        stream >> m_content >> m_upgraded;
+        stream.zeroPadding(4);
+    }
+}
+
+void MapObjectCreatureBank::WriteInternal(ByteOrderDataStreamWriter& stream) const
+{
+    if (m_features->m_creatureBankSize) {
+        stream << m_content << m_upgraded;
+        stream.zeroPadding(4);
+    }
+}
+
+void MapObjectCreatureBank::ToJson(PropertyTree& data) const
+{
+    data["content"]  = PropertyTreeScalar(m_content);
+    data["upgraded"] = PropertyTreeScalar(m_upgraded);
+}
+
+void MapObjectCreatureBank::FromJson(const PropertyTree& data)
+{
+    data["content"].getScalar().convertTo(m_content);
+    data["upgraded"].getScalar().convertTo(m_upgraded);
+}
+
 void MapResource::ReadInternal(ByteOrderDataStreamReader& stream)
 {
     m_message.ReadInternal(stream);
@@ -824,7 +740,7 @@ void MapResource::ToJson(PropertyTree& data) const
 void MapResource::FromJson(const PropertyTree& data)
 {
     Core::Reflection::PropertyTreeReader reader;
-    *this = { m_format };
+    *this = { m_features };
     reader.jsonToValue(data, *this);
 }
 
@@ -892,7 +808,7 @@ void MapArtifact::ToJson(PropertyTree& data) const
 void MapArtifact::FromJson(const PropertyTree& data)
 {
     Core::Reflection::PropertyTreeReader reader;
-    *this = { m_format };
+    *this = { m_features };
     reader.jsonToValue(data, *this);
 }
 
@@ -1022,7 +938,14 @@ void MapQuest::FromJson(const PropertyTree& data)
 
 void MapSeerHut::ReadInternal(ByteOrderDataStreamReader& stream)
 {
-    if (m_format > MapFormat::ROE) {
+    if (m_features->m_seerHutExtendedQuest) {
+        if (m_features->m_seerHutMultiQuest) {
+            uint32_t count = 0;
+            stream >> count;
+            if (count != 1) {
+                throw std::runtime_error("Only single quest huts supported");
+            }
+        }
         m_quest.ReadInternal(stream);
     } else {
         //RoE
@@ -1065,10 +988,10 @@ void MapSeerHut::ReadInternal(ByteOrderDataStreamReader& stream)
             }
             case RewardType::ARTIFACT:
             {
-                if (m_format == MapFormat::ROE) {
-                    m_rID = stream.ReadScalar<uint8_t>();
-                } else {
+                if (m_features->m_artId16Bit) {
                     m_rID = stream.ReadScalar<uint16_t>();
+                } else {
+                    m_rID = stream.ReadScalar<uint8_t>();
                 }
                 break;
             }
@@ -1079,13 +1002,12 @@ void MapSeerHut::ReadInternal(ByteOrderDataStreamReader& stream)
             }
             case RewardType::CREATURE:
             {
-                if (m_format > MapFormat::ROE) {
-                    m_rID  = stream.ReadScalar<uint16_t>();
-                    m_rVal = stream.ReadScalar<uint16_t>();
+                if (m_features->m_stackId16Bit) {
+                    m_rID = stream.ReadScalar<uint16_t>();
                 } else {
-                    m_rID  = stream.ReadScalar<uint8_t>();
-                    m_rVal = stream.ReadScalar<uint16_t>();
+                    m_rID = stream.ReadScalar<uint8_t>();
                 }
+                m_rVal = stream.ReadScalar<uint16_t>();
                 break;
             }
             case RewardType::NOTHING:
@@ -1097,11 +1019,16 @@ void MapSeerHut::ReadInternal(ByteOrderDataStreamReader& stream)
     } else {
         stream.zeroPadding(3);
     }
+    if (m_features->m_seerHutMultiQuest)
+        stream.zeroPadding(4);
 }
 
 void MapSeerHut::WriteInternal(ByteOrderDataStreamWriter& stream) const
 {
-    if (m_format > MapFormat::ROE) {
+    if (m_features->m_seerHutExtendedQuest) {
+        if (m_features->m_seerHutMultiQuest) {
+            stream << uint32_t(1);
+        }
         m_quest.WriteInternal(stream);
     } else {
         uint8_t artID = 255;
@@ -1140,7 +1067,7 @@ void MapSeerHut::WriteInternal(ByteOrderDataStreamWriter& stream) const
             }
             case RewardType::ARTIFACT:
             {
-                if (m_format > MapFormat::ROE) {
+                if (m_features->m_artId16Bit) {
                     stream << static_cast<uint16_t>(m_rID);
                 } else {
                     stream << static_cast<uint8_t>(m_rID);
@@ -1154,7 +1081,7 @@ void MapSeerHut::WriteInternal(ByteOrderDataStreamWriter& stream) const
             }
             case RewardType::CREATURE:
             {
-                if (m_format > MapFormat::ROE)
+                if (m_features->m_stackId16Bit)
                     stream << static_cast<uint16_t>(m_rID);
                 else
                     stream << static_cast<uint8_t>(m_rID);
@@ -1171,6 +1098,8 @@ void MapSeerHut::WriteInternal(ByteOrderDataStreamWriter& stream) const
     } else {
         stream.zeroPadding(3);
     }
+    if (m_features->m_seerHutMultiQuest)
+        stream.zeroPadding(4);
 }
 
 void MapSeerHut::ToJson(PropertyTree& data) const
@@ -1182,7 +1111,7 @@ void MapSeerHut::ToJson(PropertyTree& data) const
 void MapSeerHut::FromJson(const PropertyTree& data)
 {
     Core::Reflection::PropertyTreeReader reader;
-    *this = { m_format };
+    *this = { m_features };
     reader.jsonToValue(data, *this);
 }
 
@@ -1208,21 +1137,21 @@ void MapScholar::FromJson(const PropertyTree& data)
     data["bonusId"].getScalar().convertTo(m_bonusId);
 }
 
-MapWitchHut::MapWitchHut(MapFormat format)
-    : MapObjectAbstract(format)
+MapWitchHut::MapWitchHut(MapFormatFeaturesPtr features)
+    : MapObjectAbstract(features)
 {
-    m_allowedSkills.resize(GameConstants(m_format).SKILL_QUANTITY);
+    m_allowedSkills.resize(m_features->m_secondarySkillCount);
 }
 
 void MapWitchHut::ReadInternal(ByteOrderDataStreamReader& stream)
 {
-    if (m_format > MapFormat::ROE)
+    if (m_features->m_witchHutAllowedSkills)
         stream.readBits(m_allowedSkills);
 }
 
 void MapWitchHut::WriteInternal(ByteOrderDataStreamWriter& stream) const
 {
-    if (m_format > MapFormat::ROE)
+    if (m_features->m_witchHutAllowedSkills)
         stream.writeBits(m_allowedSkills);
 }
 
@@ -1248,7 +1177,7 @@ void MapReward::ReadInternal(ByteOrderDataStreamReader& stream)
     auto lock = stream.SetContainerSizeBytesGuarded(1);
     stream >> m_secSkills;
 
-    if (m_format > MapFormat::ROE) {
+    if (m_features->m_artId16Bit) {
         stream >> m_artifacts;
     } else {
         std::vector<uint8_t> artifacts;
@@ -1269,7 +1198,7 @@ void MapReward::WriteInternal(ByteOrderDataStreamWriter& stream) const
     auto lock = stream.SetContainerSizeBytesGuarded(1);
     stream << m_secSkills;
 
-    if (m_format > MapFormat::ROE) {
+    if (m_features->m_artId16Bit) {
         stream << m_artifacts;
     } else {
         std::vector<uint8_t> artifacts;
@@ -1307,7 +1236,7 @@ void MapPandora::ToJson(PropertyTree& data) const
 void MapPandora::FromJson(const PropertyTree& data)
 {
     Core::Reflection::PropertyTreeReader reader;
-    *this = { m_format };
+    *this = { m_features };
     reader.jsonToValue(data, *this);
 }
 
@@ -1318,7 +1247,7 @@ void MapGarison::ReadInternal(ByteOrderDataStreamReader& stream)
 
     stream >> m_garison;
 
-    if (m_format > MapFormat::ROE)
+    if (m_features->m_garisonRemovableUnits)
         stream >> m_removableUnits;
     stream.zeroPadding(8);
 }
@@ -1330,7 +1259,7 @@ void MapGarison::WriteInternal(ByteOrderDataStreamWriter& stream) const
 
     stream << m_garison;
 
-    if (m_format > MapFormat::ROE)
+    if (m_features->m_garisonRemovableUnits)
         stream << m_removableUnits;
     stream.zeroPadding(8);
 }
@@ -1344,7 +1273,7 @@ void MapGarison::ToJson(PropertyTree& data) const
 void MapGarison::FromJson(const PropertyTree& data)
 {
     Core::Reflection::PropertyTreeReader reader;
-    *this = { m_format };
+    *this = { m_features };
     reader.jsonToValue(data, *this);
 }
 
@@ -1379,10 +1308,10 @@ void HeroArtSet::ReadInternal(ByteOrderDataStreamReader& stream)
 
     auto loadArtifact = [&stream, this]() -> uint16_t {
         uint16_t result;
-        if (m_format == MapFormat::ROE)
-            result = stream.ReadScalar<uint8_t>();
-        else
+        if (m_features->m_artId16Bit)
             stream >> result;
+        else
+            result = stream.ReadScalar<uint8_t>();
         return result;
     };
 
@@ -1394,7 +1323,7 @@ void HeroArtSet::ReadInternal(ByteOrderDataStreamReader& stream)
 
     m_book = loadArtifact();
 
-    if (m_format > MapFormat::ROE)
+    if (m_features->m_artifactMiscFive)
         m_misc5 = loadArtifact();
 
     uint16_t amount = 0;
@@ -1412,10 +1341,10 @@ void HeroArtSet::WriteInternal(ByteOrderDataStreamWriter& stream) const
         return;
 
     auto saveArtifact = [&stream, this](uint16_t art) {
-        if (m_format == MapFormat::ROE)
-            stream << static_cast<uint8_t>(art);
-        else
+        if (m_features->m_artId16Bit)
             stream << art;
+        else
+            stream << static_cast<uint8_t>(art);
     };
 
     for (auto& art : m_mainSlots)
@@ -1425,12 +1354,67 @@ void HeroArtSet::WriteInternal(ByteOrderDataStreamWriter& stream) const
 
     saveArtifact(m_book);
 
-    if (m_format > MapFormat::ROE)
+    if (m_features->m_artifactMiscFive)
         saveArtifact(m_misc5);
 
     stream << static_cast<uint16_t>(m_bagSlots.size());
     for (auto& art : m_bagSlots)
         saveArtifact(art);
+}
+
+void HeroSpellSet::ReadInternal(ByteOrderDataStreamReader& stream)
+{
+    if (m_features->m_heroHasCustomSpells) {
+        stream >> m_hasCustomSpells;
+
+        if (m_hasCustomSpells)
+            stream.readBits(m_spells);
+
+    } else if (m_features->m_heroHasOneSpell) {
+        //we can read one spell
+        auto buff = stream.ReadScalar<uint8_t>();
+        if (buff != 254) {
+            m_hasCustomSpells = true;
+        }
+    }
+}
+
+void HeroSpellSet::WriteInternal(ByteOrderDataStreamWriter& stream) const
+{
+    if (m_features->m_heroHasCustomSpells) {
+        stream << m_hasCustomSpells;
+        if (m_hasCustomSpells)
+            stream.writeBits(m_spells);
+
+    } else if (m_features->m_heroHasOneSpell) {
+        uint8_t spell = 254;
+        if (m_hasCustomSpells) {
+            spell = 255; // todo:
+        }
+        stream << spell;
+    }
+}
+
+void HeroPrimSkillSet::ReadInternal(ByteOrderDataStreamReader& stream)
+{
+    if (m_features->m_heroHasPrimSkills) {
+        stream >> m_hasCustomPrimSkills;
+        if (m_hasCustomPrimSkills) {
+            for (auto& skill : m_primSkills)
+                stream >> skill;
+        }
+    }
+}
+
+void HeroPrimSkillSet::WriteInternal(ByteOrderDataStreamWriter& stream) const
+{
+    if (m_features->m_heroHasPrimSkills) {
+        stream << m_hasCustomPrimSkills;
+        if (m_hasCustomPrimSkills) {
+            for (auto& skill : m_primSkills)
+                stream << skill;
+        }
+    }
 }
 
 void MapEvent::ReadInternal(ByteOrderDataStreamReader& stream)
@@ -1440,6 +1424,8 @@ void MapEvent::ReadInternal(ByteOrderDataStreamReader& stream)
     stream.zeroPadding(8);
     stream >> m_availableFor >> m_computerActivate >> m_removeAfterVisit;
     stream.zeroPadding(4);
+    if (m_features->m_eventHasHumanActivate)
+        stream >> m_humanActivate;
 }
 
 void MapEvent::WriteInternal(ByteOrderDataStreamWriter& stream) const
@@ -1450,6 +1436,8 @@ void MapEvent::WriteInternal(ByteOrderDataStreamWriter& stream) const
     stream.zeroPadding(8);
     stream << m_availableFor << m_computerActivate << m_removeAfterVisit;
     stream.zeroPadding(4);
+    if (m_features->m_eventHasHumanActivate)
+        stream << m_humanActivate;
 }
 
 void MapEvent::ToJson(PropertyTree& data) const
@@ -1461,7 +1449,7 @@ void MapEvent::ToJson(PropertyTree& data) const
 void MapEvent::FromJson(const PropertyTree& data)
 {
     Core::Reflection::PropertyTreeReader reader;
-    *this = { m_format };
+    *this = { m_features };
     reader.jsonToValue(data, *this);
 }
 
@@ -1508,7 +1496,7 @@ void MapDwelling::ToJson(PropertyTree& data) const
 void MapDwelling::FromJson(const PropertyTree& data)
 {
     Core::Reflection::PropertyTreeReader reader;
-    *this = { m_format, m_objectType };
+    *this = { m_features, m_objectType };
     reader.jsonToValue(data, *this);
 }
 
@@ -1531,8 +1519,18 @@ void MapQuestGuard::ToJson(PropertyTree& data) const
 void MapQuestGuard::FromJson(const PropertyTree& data)
 {
     Core::Reflection::PropertyTreeReader reader;
-    *this = { m_format };
+    *this = { m_features };
     reader.jsonToValue(data, *this);
+}
+
+void MapGrail::ToJson(PropertyTree& data) const
+{
+    data["radius"] = PropertyTreeScalar(m_radius);
+}
+
+void MapGrail::FromJson(const PropertyTree& data)
+{
+    data["radius"].getScalar().convertTo(m_radius);
 }
 
 }
