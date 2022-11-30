@@ -97,142 +97,142 @@ struct MapFormatFeatures {
 
 enum class MapObjectType
 {
-    NO_OBJ                      = -1,
-    ALTAR_OF_SACRIFICE          = 2,
-    ANCHOR_POINT                = 3,
-    ARENA                       = 4,
-    ARTIFACT                    = 5,
-    PANDORAS_BOX                = 6,
-    BLACK_MARKET                = 7,
-    BOAT                        = 8,
-    BORDERGUARD                 = 9,
-    KEYMASTER                   = 10,
-    BUOY                        = 11,
-    CAMPFIRE                    = 12,
-    CARTOGRAPHER                = 13,
-    SWAN_POND                   = 14,
-    COVER_OF_DARKNESS           = 15,
-    CREATURE_BANK               = 16,
-    CREATURE_GENERATOR1         = 17,
-    CREATURE_GENERATOR2         = 18,
-    CREATURE_GENERATOR3         = 19,
-    CREATURE_GENERATOR4         = 20,
-    CURSED_GROUND1              = 21,
-    CORPSE                      = 22,
-    MARLETTO_TOWER              = 23,
-    DERELICT_SHIP               = 24,
-    DRAGON_UTOPIA               = 25,
-    EVENT                       = 26,
-    EYE_OF_MAGI                 = 27,
-    FAERIE_RING                 = 28,
-    FLOTSAM                     = 29,
-    FOUNTAIN_OF_FORTUNE         = 30,
-    FOUNTAIN_OF_YOUTH           = 31,
-    GARDEN_OF_REVELATION        = 32,
-    GARRISON                    = 33,
-    HERO                        = 34,
-    HILL_FORT                   = 35,
-    GRAIL                       = 36,
-    HUT_OF_MAGI                 = 37,
-    IDOL_OF_FORTUNE             = 38,
-    LEAN_TO                     = 39,
-    LIBRARY_OF_ENLIGHTENMENT    = 41,
-    LIGHTHOUSE                  = 42,
-    MONOLITH_ONE_WAY_ENTRANCE   = 43,
-    MONOLITH_ONE_WAY_EXIT       = 44,
-    MONOLITH_TWO_WAY            = 45,
-    MAGIC_PLAINS1               = 46,
-    SCHOOL_OF_MAGIC             = 47,
-    MAGIC_SPRING                = 48,
-    MAGIC_WELL                  = 49,
-    MERCENARY_CAMP              = 51,
-    MERMAID                     = 52,
-    MINE                        = 53,
-    MONSTER                     = 54,
-    MYSTICAL_GARDEN             = 55,
-    OASIS                       = 56,
-    OBELISK                     = 57,
-    REDWOOD_OBSERVATORY         = 58,
-    OCEAN_BOTTLE                = 59,
-    PILLAR_OF_FIRE              = 60,
-    STAR_AXIS                   = 61,
-    PRISON                      = 62,
-    PYRAMID                     = 63, //subtype 0
-    WOG_OBJECT                  = 63, //subtype > 0
-    RALLY_FLAG                  = 64,
-    RANDOM_ART                  = 65,
-    RANDOM_TREASURE_ART         = 66,
-    RANDOM_MINOR_ART            = 67,
-    RANDOM_MAJOR_ART            = 68,
-    RANDOM_RELIC_ART            = 69,
-    RANDOM_HERO                 = 70,
-    RANDOM_MONSTER              = 71,
-    RANDOM_MONSTER_L1           = 72,
-    RANDOM_MONSTER_L2           = 73,
-    RANDOM_MONSTER_L3           = 74,
-    RANDOM_MONSTER_L4           = 75,
-    RANDOM_RESOURCE             = 76,
-    RANDOM_TOWN                 = 77,
-    REFUGEE_CAMP                = 78,
-    RESOURCE                    = 79,
-    SANCTUARY                   = 80,
-    SCHOLAR                     = 81,
-    SEA_CHEST                   = 82,
-    SEER_HUT                    = 83,
-    CRYPT                       = 84,
-    SHIPWRECK                   = 85,
-    SHIPWRECK_SURVIVOR          = 86,
+    NO_OBJ = -1,
+    //    ALTAR_OF_SACRIFICE          = 2,
+    //    ANCHOR_POINT                = 3,
+    //    ARENA                       = 4,
+    ARTIFACT     = 5,
+    PANDORAS_BOX = 6,
+    //    BLACK_MARKET                = 7,
+    //    BOAT                        = 8,
+    //    BORDERGUARD                 = 9,
+    //    KEYMASTER                   = 10,
+    //    BUOY                        = 11,
+    //    CAMPFIRE                    = 12,
+    //    CARTOGRAPHER                = 13,
+    //    SWAN_POND                   = 14,
+    //    COVER_OF_DARKNESS           = 15,
+    CREATURE_BANK       = 16,
+    CREATURE_GENERATOR1 = 17,
+    CREATURE_GENERATOR2 = 18,
+    CREATURE_GENERATOR3 = 19,
+    CREATURE_GENERATOR4 = 20,
+    //    CURSED_GROUND1              = 21,
+    //    CORPSE                      = 22,
+    //    MARLETTO_TOWER              = 23,
+    DERELICT_SHIP = 24,
+    DRAGON_UTOPIA = 25,
+    EVENT         = 26,
+    //    EYE_OF_MAGI                 = 27,
+    //    FAERIE_RING                 = 28,
+    //    FLOTSAM                     = 29,
+    //    FOUNTAIN_OF_FORTUNE         = 30,
+    //    FOUNTAIN_OF_YOUTH           = 31,
+    //    GARDEN_OF_REVELATION        = 32,
+    GARRISON = 33,
+    HERO     = 34,
+    //    HILL_FORT                   = 35,
+    GRAIL = 36,
+    //    HUT_OF_MAGI                 = 37,
+    //    IDOL_OF_FORTUNE             = 38,
+    //    LEAN_TO                     = 39,
+    //    LIBRARY_OF_ENLIGHTENMENT    = 41,
+    LIGHTHOUSE = 42,
+    //    MONOLITH_ONE_WAY_ENTRANCE   = 43,
+    //    MONOLITH_ONE_WAY_EXIT       = 44,
+    //    MONOLITH_TWO_WAY            = 45,
+    //    MAGIC_PLAINS1               = 46,
+    //    SCHOOL_OF_MAGIC             = 47,
+    //    MAGIC_SPRING                = 48,
+    //    MAGIC_WELL                  = 49,
+    //    MERCENARY_CAMP              = 51,
+    //    MERMAID                     = 52,
+    MINE    = 53,
+    MONSTER = 54,
+    //    MYSTICAL_GARDEN             = 55,
+    //    OASIS                       = 56,
+    //    OBELISK                     = 57,
+    //    REDWOOD_OBSERVATORY         = 58,
+    OCEAN_BOTTLE = 59,
+    //    PILLAR_OF_FIRE              = 60,
+    //    STAR_AXIS                   = 61,
+    PRISON = 62,
+    //    PYRAMID                     = 63, //subtype 0
+    //    WOG_OBJECT                  = 63, //subtype > 0
+    //    RALLY_FLAG                  = 64,
+    RANDOM_ART          = 65,
+    RANDOM_TREASURE_ART = 66,
+    RANDOM_MINOR_ART    = 67,
+    RANDOM_MAJOR_ART    = 68,
+    RANDOM_RELIC_ART    = 69,
+    RANDOM_HERO         = 70,
+    RANDOM_MONSTER      = 71,
+    RANDOM_MONSTER_L1   = 72,
+    RANDOM_MONSTER_L2   = 73,
+    RANDOM_MONSTER_L3   = 74,
+    RANDOM_MONSTER_L4   = 75,
+    RANDOM_RESOURCE     = 76,
+    RANDOM_TOWN         = 77,
+    //    REFUGEE_CAMP                = 78,
+    RESOURCE = 79,
+    //    SANCTUARY                   = 80,
+    SCHOLAR = 81,
+    //    SEA_CHEST                   = 82,
+    SEER_HUT  = 83,
+    CRYPT     = 84,
+    SHIPWRECK = 85,
+    //    SHIPWRECK_SURVIVOR          = 86,
     SHIPYARD                    = 87,
     SHRINE_OF_MAGIC_INCANTATION = 88,
     SHRINE_OF_MAGIC_GESTURE     = 89,
     SHRINE_OF_MAGIC_THOUGHT     = 90,
     SIGN                        = 91,
-    SIRENS                      = 92,
-    SPELL_SCROLL                = 93,
-    STABLES                     = 94,
-    TAVERN                      = 95,
-    TEMPLE                      = 96,
-    DEN_OF_THIEVES              = 97,
-    TOWN                        = 98,
-    TRADING_POST                = 99,
-    LEARNING_STONE              = 100,
-    TREASURE_CHEST              = 101,
-    TREE_OF_KNOWLEDGE           = 102,
-    SUBTERRANEAN_GATE           = 103,
-    UNIVERSITY                  = 104,
-    WAGON                       = 105,
-    WAR_MACHINE_FACTORY         = 106,
-    SCHOOL_OF_WAR               = 107,
-    WARRIORS_TOMB               = 108,
-    WATER_WHEEL                 = 109,
-    WATERING_HOLE               = 110,
-    WHIRLPOOL                   = 111,
-    WINDMILL                    = 112,
-    WITCH_HUT                   = 113,
-    HOLE                        = 124,
-    RANDOM_MONSTER_L5           = 162,
-    RANDOM_MONSTER_L6           = 163,
-    RANDOM_MONSTER_L7           = 164,
-    BORDER_GATE                 = 212,
-    FREELANCERS_GUILD           = 213,
-    HERO_PLACEHOLDER            = 214,
-    QUEST_GUARD                 = 215,
-    RANDOM_DWELLING             = 216,
-    RANDOM_DWELLING_LVL         = 217, //subtype = creature level
-    RANDOM_DWELLING_FACTION     = 218, //subtype = faction
-    GARRISON2                   = 219,
-    ABANDONED_MINE              = 220,
-    TRADING_POST_SNOW           = 221,
-    CLOVER_FIELD                = 222,
-    CURSED_GROUND2              = 223,
-    EVIL_FOG                    = 224,
-    FAVORABLE_WINDS             = 225,
-    FIERY_FIELDS                = 226,
-    HOLY_GROUNDS                = 227,
-    LUCID_POOLS                 = 228,
-    MAGIC_CLOUDS                = 229,
-    MAGIC_PLAINS2               = 230,
-    ROCKLANDS                   = 231,
+    //    SIRENS                      = 92,
+    SPELL_SCROLL = 93,
+    //    STABLES                     = 94,
+    //    TAVERN                      = 95,
+    //    TEMPLE                      = 96,
+    //    DEN_OF_THIEVES              = 97,
+    TOWN = 98,
+    //    TRADING_POST                = 99,
+    //    LEARNING_STONE              = 100,
+    //    TREASURE_CHEST              = 101,
+    //    TREE_OF_KNOWLEDGE           = 102,
+    //    SUBTERRANEAN_GATE           = 103,
+    //    UNIVERSITY                  = 104,
+    //    WAGON                       = 105,
+    //    WAR_MACHINE_FACTORY         = 106,
+    //    SCHOOL_OF_WAR               = 107,
+    //    WARRIORS_TOMB               = 108,
+    //    WATER_WHEEL                 = 109,
+    //    WATERING_HOLE               = 110,
+    //    WHIRLPOOL                   = 111,
+    //    WINDMILL                    = 112,
+    WITCH_HUT = 113,
+    //    HOLE                        = 124,
+    RANDOM_MONSTER_L5 = 162,
+    RANDOM_MONSTER_L6 = 163,
+    RANDOM_MONSTER_L7 = 164,
+    //    BORDER_GATE                 = 212,
+    //    FREELANCERS_GUILD           = 213,
+    HERO_PLACEHOLDER        = 214,
+    QUEST_GUARD             = 215,
+    RANDOM_DWELLING         = 216,
+    RANDOM_DWELLING_LVL     = 217, //subtype = creature level
+    RANDOM_DWELLING_FACTION = 218, //subtype = faction
+    GARRISON2               = 219,
+    ABANDONED_MINE          = 220,
+    //    TRADING_POST_SNOW           = 221,
+    //    CLOVER_FIELD                = 222,
+    //    CURSED_GROUND2              = 223,
+    //    EVIL_FOG                    = 224,
+    //    FAVORABLE_WINDS             = 225,
+    //    FIERY_FIELDS                = 226,
+    //    HOLY_GROUNDS                = 227,
+    //    LUCID_POOLS                 = 228,
+    //    MAGIC_CLOUDS                = 229,
+    //    MAGIC_PLAINS2               = 230,
+    //    ROCKLANDS                   = 231,
 };
 
 using MapFormatFeaturesPtr = std::shared_ptr<const MapFormatFeatures>;
@@ -240,10 +240,10 @@ using MapFormatFeaturesPtr = std::shared_ptr<const MapFormatFeatures>;
 struct IMapObject {
     virtual ~IMapObject() = default;
 
-    virtual void ReadInternal(ByteOrderDataStreamReader& stream)        = 0;
-    virtual void WriteInternal(ByteOrderDataStreamWriter& stream) const = 0;
-    virtual void ToJson(PropertyTree& data) const                       = 0;
-    virtual void FromJson(const PropertyTree& data)                     = 0;
+    virtual void readBinary(ByteOrderDataStreamReader& stream)        = 0;
+    virtual void writeBinary(ByteOrderDataStreamWriter& stream) const = 0;
+    virtual void toJson(PropertyTree& data) const                     = 0;
+    virtual void fromJson(const PropertyTree& data)                   = 0;
 
     static std::unique_ptr<IMapObject> Create(MapObjectType type, MapFormatFeaturesPtr features);
 };
@@ -262,22 +262,22 @@ struct StackSet {
         : m_features(features)
     {}
 
-    void ReadInternal(ByteOrderDataStreamReader& stream)
+    void readBinary(ByteOrderDataStreamReader& stream)
     {
-        auto lock = stream.SetContainerSizeBytesGuarded(1);
+        auto lock = stream.setContainerSizeBytesGuarded(1);
         m_stacks.resize(stream.readSize());
 
         for (auto& stack : m_stacks) {
             if (m_features->m_stackId16Bit)
                 stream >> stack.m_id;
             else
-                stack.m_id = stream.ReadScalar<uint8_t>();
+                stack.m_id = stream.readScalar<uint8_t>();
             stream >> stack.m_count;
         }
     }
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const
+    void writeBinary(ByteOrderDataStreamWriter& stream) const
     {
-        auto lock = stream.SetContainerSizeBytesGuarded(1);
+        auto lock = stream.setContainerSizeBytesGuarded(1);
         stream.writeSize(m_stacks.size());
         for (auto& stack : m_stacks) {
             if (m_features->m_stackId16Bit)
@@ -299,17 +299,17 @@ struct StackSetFixed {
         , m_stacks(features->m_stackSize)
     {}
 
-    void ReadInternal(ByteOrderDataStreamReader& stream)
+    void readBinary(ByteOrderDataStreamReader& stream)
     {
         for (auto& stack : m_stacks) {
             if (m_features->m_stackId16Bit)
                 stream >> stack.m_id;
             else
-                stack.m_id = stream.ReadScalar<uint8_t>();
+                stack.m_id = stream.readScalar<uint8_t>();
             stream >> stack.m_count;
         }
     }
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const
+    void writeBinary(ByteOrderDataStreamWriter& stream) const
     {
         for (auto& stack : m_stacks) {
             if (m_features->m_stackId16Bit)
@@ -328,12 +328,12 @@ struct ResourceSet {
 
     std::vector<uint32_t> m_resourceAmount;
 
-    void ReadInternal(ByteOrderDataStreamReader& stream)
+    void readBinary(ByteOrderDataStreamReader& stream)
     {
         for (auto& res : m_resourceAmount)
             stream >> res;
     }
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const
+    void writeBinary(ByteOrderDataStreamWriter& stream) const
     {
         for (auto& res : m_resourceAmount)
             stream << res;
@@ -347,12 +347,12 @@ struct PrimarySkillSet {
 
     std::vector<uint8_t> m_prim;
 
-    void ReadInternal(ByteOrderDataStreamReader& stream)
+    void readBinary(ByteOrderDataStreamReader& stream)
     {
         for (auto& res : m_prim)
             stream >> res;
     }
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const
+    void writeBinary(ByteOrderDataStreamWriter& stream) const
     {
         for (auto& res : m_prim)
             stream << res;
@@ -374,8 +374,8 @@ struct HeroArtSet {
         : m_features(features)
     {}
 
-    void ReadInternal(ByteOrderDataStreamReader& stream);
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const;
+    void readBinary(ByteOrderDataStreamReader& stream);
+    void writeBinary(ByteOrderDataStreamWriter& stream) const;
 };
 
 struct HeroSpellSet {
@@ -390,8 +390,8 @@ struct HeroSpellSet {
 
     void prepareArrays() { m_spells.resize(m_features->m_spellsRegularCount); }
 
-    void ReadInternal(ByteOrderDataStreamReader& stream);
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const;
+    void readBinary(ByteOrderDataStreamReader& stream);
+    void writeBinary(ByteOrderDataStreamWriter& stream) const;
 };
 
 struct HeroPrimSkillSet {
@@ -406,8 +406,8 @@ struct HeroPrimSkillSet {
 
     void prepareArrays() { m_primSkills.resize(m_features->m_primarySkillsCount); }
 
-    void ReadInternal(ByteOrderDataStreamReader& stream);
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const;
+    void readBinary(ByteOrderDataStreamReader& stream);
+    void writeBinary(ByteOrderDataStreamWriter& stream) const;
 };
 
 struct MapGuards {
@@ -418,8 +418,8 @@ struct MapGuards {
         : m_creatures(features)
     {}
 
-    void ReadInternal(ByteOrderDataStreamReader& stream);
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const;
+    void readBinary(ByteOrderDataStreamReader& stream);
+    void writeBinary(ByteOrderDataStreamWriter& stream) const;
 };
 
 struct MapMessage {
@@ -431,8 +431,8 @@ struct MapMessage {
         : m_guards(features)
     {}
 
-    void ReadInternal(ByteOrderDataStreamReader& stream);
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const;
+    void readBinary(ByteOrderDataStreamReader& stream);
+    void writeBinary(ByteOrderDataStreamWriter& stream) const;
 };
 
 struct MapObjectAbstract : public IMapObject {
@@ -446,10 +446,10 @@ struct MapObjectAbstract : public IMapObject {
 struct MapObjectSimple : public MapObjectAbstract {
     using MapObjectAbstract::MapObjectAbstract;
 
-    void ReadInternal(ByteOrderDataStreamReader& stream) override {}
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const override {}
-    void ToJson(PropertyTree& data) const override {}
-    void FromJson(const PropertyTree& data) override {}
+    void readBinary(ByteOrderDataStreamReader& stream) override {}
+    void writeBinary(ByteOrderDataStreamWriter& stream) const override {}
+    void toJson(PropertyTree& data) const override {}
+    void fromJson(const PropertyTree& data) override {}
 };
 
 struct MapObjectWithOwner : public MapObjectAbstract {
@@ -457,10 +457,10 @@ struct MapObjectWithOwner : public MapObjectAbstract {
 
     uint8_t m_owner = 0;
 
-    void ReadInternal(ByteOrderDataStreamReader& stream) override;
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const override;
-    void ToJson(PropertyTree& data) const override;
-    void FromJson(const PropertyTree& data) override;
+    void readBinary(ByteOrderDataStreamReader& stream) override;
+    void writeBinary(ByteOrderDataStreamWriter& stream) const override;
+    void toJson(PropertyTree& data) const override;
+    void fromJson(const PropertyTree& data) override;
 };
 
 struct MapObjectCreatureBank : public MapObjectAbstract {
@@ -469,18 +469,18 @@ struct MapObjectCreatureBank : public MapObjectAbstract {
     uint32_t m_content  = 0xffffffffU;
     uint8_t  m_upgraded = 0xffU;
 
-    void ReadInternal(ByteOrderDataStreamReader& stream) override;
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const override;
-    void ToJson(PropertyTree& data) const override;
-    void FromJson(const PropertyTree& data) override;
+    void readBinary(ByteOrderDataStreamReader& stream) override;
+    void writeBinary(ByteOrderDataStreamWriter& stream) const override;
+    void toJson(PropertyTree& data) const override;
+    void fromJson(const PropertyTree& data) override;
 };
 
 struct MapHeroSkill {
     uint8_t m_id    = 0;
     uint8_t m_level = 0; //  (1 - basic, 2 - adv., 3 - expert)
 
-    void ReadInternal(ByteOrderDataStreamReader& stream);
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const;
+    void readBinary(ByteOrderDataStreamReader& stream);
+    void writeBinary(ByteOrderDataStreamWriter& stream) const;
 };
 
 struct MapHero : public MapObjectAbstract {
@@ -521,10 +521,10 @@ struct MapHero : public MapObjectAbstract {
 
     void prepareArrays();
 
-    void ReadInternal(ByteOrderDataStreamReader& stream) override;
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const override;
-    void ToJson(PropertyTree& data) const override;
-    void FromJson(const PropertyTree& data) override;
+    void readBinary(ByteOrderDataStreamReader& stream) override;
+    void writeBinary(ByteOrderDataStreamWriter& stream) const override;
+    void toJson(PropertyTree& data) const override;
+    void fromJson(const PropertyTree& data) override;
 };
 
 struct MapTownEvent {
@@ -549,8 +549,8 @@ struct MapTownEvent {
 
     void prepareArrays();
 
-    void ReadInternal(ByteOrderDataStreamReader& stream);
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const;
+    void readBinary(ByteOrderDataStreamReader& stream);
+    void writeBinary(ByteOrderDataStreamWriter& stream) const;
 };
 
 struct MapTown : public MapObjectAbstract {
@@ -586,10 +586,10 @@ struct MapTown : public MapObjectAbstract {
 
     void prepareArrays();
 
-    void ReadInternal(ByteOrderDataStreamReader& stream) override;
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const override;
-    void ToJson(PropertyTree& data) const override;
-    void FromJson(const PropertyTree& data) override;
+    void readBinary(ByteOrderDataStreamReader& stream) override;
+    void writeBinary(ByteOrderDataStreamWriter& stream) const override;
+    void toJson(PropertyTree& data) const override;
+    void fromJson(const PropertyTree& data) override;
 };
 
 struct MapMonster : public MapObjectAbstract {
@@ -605,14 +605,15 @@ struct MapMonster : public MapObjectAbstract {
     bool        m_neverFlees     = false;
     bool        m_notGrowingTeam = false;
 
-    uint32_t m_joinPercent = 100;
+    uint32_t m_joinPercent      = 100;
+    bool     m_joinOnlyForMoney = false;
 
     using MapObjectAbstract::MapObjectAbstract;
 
-    void ReadInternal(ByteOrderDataStreamReader& stream) override;
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const override;
-    void ToJson(PropertyTree& data) const override;
-    void FromJson(const PropertyTree& data) override;
+    void readBinary(ByteOrderDataStreamReader& stream) override;
+    void writeBinary(ByteOrderDataStreamWriter& stream) const override;
+    void toJson(PropertyTree& data) const override;
+    void fromJson(const PropertyTree& data) override;
 };
 
 struct MapResource : public MapObjectAbstract {
@@ -624,10 +625,10 @@ struct MapResource : public MapObjectAbstract {
         , m_message(features)
     {}
 
-    void ReadInternal(ByteOrderDataStreamReader& stream) override;
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const override;
-    void ToJson(PropertyTree& data) const override;
-    void FromJson(const PropertyTree& data) override;
+    void readBinary(ByteOrderDataStreamReader& stream) override;
+    void writeBinary(ByteOrderDataStreamWriter& stream) const override;
+    void toJson(PropertyTree& data) const override;
+    void fromJson(const PropertyTree& data) override;
 };
 
 struct MapArtifact : public MapObjectAbstract {
@@ -635,15 +636,16 @@ struct MapArtifact : public MapObjectAbstract {
     uint32_t   m_spellId = 0;
     bool       m_isSpell = false;
 
-    MapArtifact(MapFormatFeaturesPtr features)
+    MapArtifact(MapFormatFeaturesPtr features, bool isSpell)
         : MapObjectAbstract(features)
         , m_message(features)
+        , m_isSpell(isSpell)
     {}
 
-    void ReadInternal(ByteOrderDataStreamReader& stream) override;
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const override;
-    void ToJson(PropertyTree& data) const override;
-    void FromJson(const PropertyTree& data) override;
+    void readBinary(ByteOrderDataStreamReader& stream) override;
+    void writeBinary(ByteOrderDataStreamWriter& stream) const override;
+    void toJson(PropertyTree& data) const override;
+    void fromJson(const PropertyTree& data) override;
 };
 
 struct MapQuest : public MapObjectAbstract {
@@ -687,10 +689,10 @@ struct MapQuest : public MapObjectAbstract {
         , m_6creatures(features)
     {}
 
-    void ReadInternal(ByteOrderDataStreamReader& stream) override;
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const override;
-    void ToJson(PropertyTree& data) const override;
-    void FromJson(const PropertyTree& data) override;
+    void readBinary(ByteOrderDataStreamReader& stream) override;
+    void writeBinary(ByteOrderDataStreamWriter& stream) const override;
+    void toJson(PropertyTree& data) const override;
+    void fromJson(const PropertyTree& data) override;
 };
 
 struct MapSeerHut : public MapObjectAbstract {
@@ -723,10 +725,10 @@ struct MapSeerHut : public MapObjectAbstract {
         , m_quest(features)
     {}
 
-    void ReadInternal(ByteOrderDataStreamReader& stream) override;
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const override;
-    void ToJson(PropertyTree& data) const override;
-    void FromJson(const PropertyTree& data) override;
+    void readBinary(ByteOrderDataStreamReader& stream) override;
+    void writeBinary(ByteOrderDataStreamWriter& stream) const override;
+    void toJson(PropertyTree& data) const override;
+    void fromJson(const PropertyTree& data) override;
 };
 
 struct MapShrine : public MapObjectAbstract {
@@ -734,18 +736,18 @@ struct MapShrine : public MapObjectAbstract {
 
     using MapObjectAbstract::MapObjectAbstract;
 
-    void ReadInternal(ByteOrderDataStreamReader& stream) override
+    void readBinary(ByteOrderDataStreamReader& stream) override
     {
         stream >> m_spell;
         stream.zeroPadding(3);
     }
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const override
+    void writeBinary(ByteOrderDataStreamWriter& stream) const override
     {
         stream << m_spell;
         stream.zeroPadding(3);
     }
-    void ToJson(PropertyTree& data) const override;
-    void FromJson(const PropertyTree& data) override;
+    void toJson(PropertyTree& data) const override;
+    void fromJson(const PropertyTree& data) override;
 };
 
 struct MapScholar : public MapObjectAbstract {
@@ -754,18 +756,18 @@ struct MapScholar : public MapObjectAbstract {
 
     using MapObjectAbstract::MapObjectAbstract;
 
-    void ReadInternal(ByteOrderDataStreamReader& stream) override
+    void readBinary(ByteOrderDataStreamReader& stream) override
     {
         stream >> m_bonusType >> m_bonusId;
         stream.zeroPadding(6);
     }
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const override
+    void writeBinary(ByteOrderDataStreamWriter& stream) const override
     {
         stream << m_bonusType << m_bonusId;
         stream.zeroPadding(6);
     }
-    void ToJson(PropertyTree& data) const override;
-    void FromJson(const PropertyTree& data) override;
+    void toJson(PropertyTree& data) const override;
+    void fromJson(const PropertyTree& data) override;
 };
 
 struct MapWitchHut : public MapObjectAbstract {
@@ -773,10 +775,10 @@ struct MapWitchHut : public MapObjectAbstract {
 
     MapWitchHut(MapFormatFeaturesPtr features);
 
-    void ReadInternal(ByteOrderDataStreamReader& stream) override;
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const override;
-    void ToJson(PropertyTree& data) const override;
-    void FromJson(const PropertyTree& data) override;
+    void readBinary(ByteOrderDataStreamReader& stream) override;
+    void writeBinary(ByteOrderDataStreamWriter& stream) const override;
+    void toJson(PropertyTree& data) const override;
+    void fromJson(const PropertyTree& data) override;
 };
 
 struct MapReward {
@@ -799,8 +801,8 @@ struct MapReward {
         , m_creatures(features)
     {}
 
-    void ReadInternal(ByteOrderDataStreamReader& stream);
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const;
+    void readBinary(ByteOrderDataStreamReader& stream);
+    void writeBinary(ByteOrderDataStreamWriter& stream) const;
 };
 
 struct MapPandora : public MapObjectAbstract {
@@ -813,10 +815,10 @@ struct MapPandora : public MapObjectAbstract {
         , m_reward(features)
     {}
 
-    void ReadInternal(ByteOrderDataStreamReader& stream) override;
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const override;
-    void ToJson(PropertyTree& data) const override;
-    void FromJson(const PropertyTree& data) override;
+    void readBinary(ByteOrderDataStreamReader& stream) override;
+    void writeBinary(ByteOrderDataStreamWriter& stream) const override;
+    void toJson(PropertyTree& data) const override;
+    void fromJson(const PropertyTree& data) override;
 };
 
 struct MapGarison : public MapObjectAbstract {
@@ -829,10 +831,10 @@ struct MapGarison : public MapObjectAbstract {
         , m_garison(features)
     {}
 
-    void ReadInternal(ByteOrderDataStreamReader& stream) override;
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const override;
-    void ToJson(PropertyTree& data) const override;
-    void FromJson(const PropertyTree& data) override;
+    void readBinary(ByteOrderDataStreamReader& stream) override;
+    void writeBinary(ByteOrderDataStreamWriter& stream) const override;
+    void toJson(PropertyTree& data) const override;
+    void fromJson(const PropertyTree& data) override;
 };
 
 struct MapSignBottle : public MapObjectAbstract {
@@ -840,10 +842,10 @@ struct MapSignBottle : public MapObjectAbstract {
 
     using MapObjectAbstract::MapObjectAbstract;
 
-    void ReadInternal(ByteOrderDataStreamReader& stream) override;
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const override;
-    void ToJson(PropertyTree& data) const override;
-    void FromJson(const PropertyTree& data) override;
+    void readBinary(ByteOrderDataStreamReader& stream) override;
+    void writeBinary(ByteOrderDataStreamWriter& stream) const override;
+    void toJson(PropertyTree& data) const override;
+    void fromJson(const PropertyTree& data) override;
 };
 
 struct MapEvent : public MapObjectAbstract {
@@ -861,10 +863,10 @@ struct MapEvent : public MapObjectAbstract {
         , m_reward(features)
     {}
 
-    void ReadInternal(ByteOrderDataStreamReader& stream) override;
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const override;
-    void ToJson(PropertyTree& data) const override;
-    void FromJson(const PropertyTree& data) override;
+    void readBinary(ByteOrderDataStreamReader& stream) override;
+    void writeBinary(ByteOrderDataStreamWriter& stream) const override;
+    void toJson(PropertyTree& data) const override;
+    void fromJson(const PropertyTree& data) override;
 };
 
 struct MapDwelling : public MapObjectAbstract {
@@ -882,10 +884,10 @@ struct MapDwelling : public MapObjectAbstract {
     {
     }
 
-    void ReadInternal(ByteOrderDataStreamReader& stream) override;
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const override;
-    void ToJson(PropertyTree& data) const override;
-    void FromJson(const PropertyTree& data) override;
+    void readBinary(ByteOrderDataStreamReader& stream) override;
+    void writeBinary(ByteOrderDataStreamWriter& stream) const override;
+    void toJson(PropertyTree& data) const override;
+    void fromJson(const PropertyTree& data) override;
 };
 
 struct MapQuestGuard : public MapObjectAbstract {
@@ -896,10 +898,10 @@ struct MapQuestGuard : public MapObjectAbstract {
         , m_quest(features)
     {}
 
-    void ReadInternal(ByteOrderDataStreamReader& stream) override;
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const override;
-    void ToJson(PropertyTree& data) const override;
-    void FromJson(const PropertyTree& data) override;
+    void readBinary(ByteOrderDataStreamReader& stream) override;
+    void writeBinary(ByteOrderDataStreamWriter& stream) const override;
+    void toJson(PropertyTree& data) const override;
+    void fromJson(const PropertyTree& data) override;
 };
 
 struct MapGrail : public MapObjectAbstract {
@@ -907,10 +909,10 @@ struct MapGrail : public MapObjectAbstract {
 
     using MapObjectAbstract::MapObjectAbstract;
 
-    void ReadInternal(ByteOrderDataStreamReader& stream) override { stream >> m_radius; }
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const override { stream << m_radius; }
-    void ToJson(PropertyTree& data) const override;
-    void FromJson(const PropertyTree& data) override;
+    void readBinary(ByteOrderDataStreamReader& stream) override { stream >> m_radius; }
+    void writeBinary(ByteOrderDataStreamWriter& stream) const override { stream << m_radius; }
+    void toJson(PropertyTree& data) const override;
+    void fromJson(const PropertyTree& data) override;
 };
 
 }

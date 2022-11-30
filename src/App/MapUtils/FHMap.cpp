@@ -107,13 +107,13 @@ inline constexpr const bool MetaInfo::s_isStringMap<FHMap::PlayersMap>{ true };
 
 }
 
-void FHMap::ToJson(PropertyTree& data) const
+void FHMap::toJson(PropertyTree& data) const
 {
     Core::Reflection::PropertyTreeWriter writer;
     writer.valueToJson(*this, data);
 }
 
-void FHMap::FromJson(const PropertyTree& data)
+void FHMap::fromJson(const PropertyTree& data)
 {
     Core::Reflection::PropertyTreeReader reader;
     *this = {};

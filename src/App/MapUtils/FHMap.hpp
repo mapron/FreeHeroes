@@ -96,8 +96,8 @@ struct FHMap {
 
     std::string m_defaultTerrain;
 
-    void ToJson(PropertyTree& data) const;
-    void FromJson(const PropertyTree& data);
+    void toJson(PropertyTree& data) const;
+    void fromJson(const PropertyTree& data);
 };
 
 }

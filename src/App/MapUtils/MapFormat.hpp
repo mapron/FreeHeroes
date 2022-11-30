@@ -16,55 +16,31 @@ class IGameDatabase;
 class IRandomGenerator;
 }
 
-using si8 = int8_t;
-using ui8 = uint8_t;
-
-using si16 = int16_t;
-using ui16 = uint16_t;
-
-using si32 = int32_t;
-using ui32 = uint32_t;
-
-using si64 = int64_t;
-using ui64 = uint64_t;
-
-// Typedef declarations
-typedef ui8                   TFaction;
-typedef si64                  TExpType;
-typedef std::pair<si64, si64> TDmgRange;
-typedef si32                  TBonusSubtype;
-typedef si32                  TQuantity;
-using TeamID = ui8;
-
-constexpr const TeamID NO_TEAM{ 255 };
-
-typedef int TRmgTemplateZoneId;
-
 class int3 {
 public:
     uint8_t x{ 0 }, y{ 0 }, z{ 0 };
 
-    void ReadInternal(ByteOrderDataStreamReader& stream);
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const;
+    void readBinary(ByteOrderDataStreamReader& stream);
+    void writeBinary(ByteOrderDataStreamWriter& stream) const;
 };
 
 /// The disposed hero struct describes which hero can be hired from which player.
 struct DisposedHero {
-    ui8         heroId   = 0;
-    ui8         portrait = 0xFF; /// The portrait id of the hero, 0xFF is default.
+    uint8_t     heroId   = 0;
+    uint8_t     portrait = 0xFF; /// The portrait id of the hero, 0xFF is default.
     std::string name;
-    ui8         players = 0; /// Who can hire this hero (bitfield).
+    uint8_t     players = 0; /// Who can hire this hero (bitfield).
 
-    void ReadInternal(ByteOrderDataStreamReader& stream);
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const;
+    void readBinary(ByteOrderDataStreamReader& stream);
+    void writeBinary(ByteOrderDataStreamWriter& stream) const;
 };
 
 struct SHeroName {
     uint8_t     heroId;
     std::string heroName;
 
-    void ReadInternal(ByteOrderDataStreamReader& stream);
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const;
+    void readBinary(ByteOrderDataStreamReader& stream);
+    void writeBinary(ByteOrderDataStreamWriter& stream) const;
 };
 
 enum class EAiTactic
@@ -96,16 +72,16 @@ struct PlayerInfo {
 
     uint8_t mainCustomHeroId = 0xff; /// ID of custom hero
 
-    bool hasMainTown            = false;
-    bool generateHeroAtMainTown = false;
-    int3 posOfMainTown;
-    ui8  team{ NO_TEAM }; /// The default value NO_TEAM
+    bool    hasMainTown            = false;
+    bool    generateHeroAtMainTown = false;
+    int3    posOfMainTown;
+    uint8_t team{ 0xff }; /// The default value NO_TEAM
 
-    ui8 generateHero{ 0 }; /// Unused.
-    ui8 p7{ 0 };           /// Unknown and unused.
+    uint8_t generateHero{ 0 }; /// Unused.
+    uint8_t p7{ 0 };           /// Unknown and unused.
     /// Unused. Count of hero placeholders containing hero type.
     /// WARNING: powerPlaceholders sometimes gives false 0 (eg. even if there is one placeholder), maybe different meaning ???
-    ui8 powerPlaceholders{ 0 };
+    uint8_t powerPlaceholders{ 0 };
 
     std::vector<SHeroName> heroesNames; /// list of placed heroes on the map
 };
@@ -134,8 +110,8 @@ struct MapTile {
         FavorableWinds = 0x80,
     };
 
-    void ReadInternal(ByteOrderDataStreamReader& stream);
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const;
+    void readBinary(ByteOrderDataStreamReader& stream);
+    void writeBinary(ByteOrderDataStreamWriter& stream) const;
 };
 
 struct MapTileSet {
@@ -187,8 +163,8 @@ struct ObjectTemplate {
 
     void prepareArrays();
 
-    void ReadInternal(ByteOrderDataStreamReader& stream);
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const;
+    void readBinary(ByteOrderDataStreamReader& stream);
+    void writeBinary(ByteOrderDataStreamWriter& stream) const;
 };
 
 struct Object {
@@ -211,8 +187,8 @@ struct GlobalMapEvent {
     uint16_t m_firstOccurence   = 0;
     uint8_t  m_nextOccurence    = 0;
 
-    void ReadInternal(ByteOrderDataStreamReader& stream);
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const;
+    void readBinary(ByteOrderDataStreamReader& stream);
+    void writeBinary(ByteOrderDataStreamWriter& stream) const;
 };
 struct CustomHeroData {
     struct SecSkill {
@@ -235,8 +211,8 @@ struct CustomHeroData {
     HeroSpellSet     m_spellSet;
     HeroPrimSkillSet m_primSkillSet;
 
-    void ReadInternal(ByteOrderDataStreamReader& stream);
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const;
+    void readBinary(ByteOrderDataStreamReader& stream);
+    void writeBinary(ByteOrderDataStreamWriter& stream) const;
 };
 
 struct FHMap;
@@ -246,6 +222,9 @@ struct H3Map {
         uint32_t m_ver1 = 3;
         uint16_t m_ver2 = 0;
         uint32_t m_ver3 = 12;
+
+        uint32_t m_fixedMap   = 1;
+        uint32_t m_roundLimit = 0xffffffff;
     };
     HotaVersion                        m_hotaVer;
     std::shared_ptr<MapFormatFeatures> m_features;
@@ -301,8 +280,8 @@ struct H3Map {
         uint8_t m_hallLevel   = 0;
         uint8_t m_castleLevel = 0;
 
-        void ReadInternal(ByteOrderDataStreamReader& stream);
-        void WriteInternal(ByteOrderDataStreamWriter& stream) const;
+        void readBinary(ByteOrderDataStreamReader& stream);
+        void writeBinary(ByteOrderDataStreamWriter& stream) const;
     };
     struct LossCondition {
         MapFormatFeaturesPtr m_features;
@@ -310,8 +289,8 @@ struct H3Map {
         uint16_t             m_daysPassed = 0;
         int3                 m_pos;
 
-        void ReadInternal(ByteOrderDataStreamReader& stream);
-        void WriteInternal(ByteOrderDataStreamWriter& stream) const;
+        void readBinary(ByteOrderDataStreamReader& stream);
+        void writeBinary(ByteOrderDataStreamWriter& stream) const;
     };
 
     VictoryCondition m_victoryCondition;
@@ -330,8 +309,8 @@ struct H3Map {
         std::string m_name;
         std::string m_text;
 
-        void ReadInternal(ByteOrderDataStreamReader& stream) { stream >> m_name >> m_text; }
-        void WriteInternal(ByteOrderDataStreamWriter& stream) const { stream << m_name << m_text; }
+        void readBinary(ByteOrderDataStreamReader& stream) { stream >> m_name >> m_text; }
+        void writeBinary(ByteOrderDataStreamWriter& stream) const { stream << m_name << m_text; }
     };
 
     std::vector<Rumor>          m_rumors;
@@ -346,12 +325,11 @@ struct H3Map {
     H3Map();
 
     void prepareArrays();
-    void convertFromFH(const FHMap& map, const Core::IGameDatabase* database, Core::IRandomGenerator* rng);
 
-    void ReadInternal(ByteOrderDataStreamReader& stream);
-    void WriteInternal(ByteOrderDataStreamWriter& stream) const;
-    void ToJson(PropertyTree& data) const;
-    void FromJson(const PropertyTree& data);
+    void readBinary(ByteOrderDataStreamReader& stream);
+    void writeBinary(ByteOrderDataStreamWriter& stream) const;
+    void toJson(PropertyTree& data) const;
+    void fromJson(const PropertyTree& data);
 };
 
 }

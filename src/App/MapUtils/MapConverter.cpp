@@ -13,6 +13,9 @@
 #include "FileFormatJson.hpp"
 #include "Compression.hpp"
 
+#include "FH2H3M.hpp"
+#include "H3M2FH.hpp"
+
 #include <iostream>
 
 namespace FreeHeroes {
@@ -278,13 +281,13 @@ bool MapConverter::run(Task task) noexcept
                 }
 
                 ByteOrderBuffer           bobuffer(m_h3mraw);
-                ByteOrderDataStreamReader reader(bobuffer, ByteOrderDataStream::CreateByteorderMask(ORDER_LE, ORDER_LE, ORDER_LE));
+                ByteOrderDataStreamReader reader(bobuffer, ByteOrderDataStream::createByteorderMask(ORDER_LE, ORDER_LE, ORDER_LE));
 
                 try {
                     reader >> m_mapLegacy;
                 }
                 catch (std::exception& ex) {
-                    throw std::runtime_error(ex.what() + std::string(", offset=") + std::to_string(bobuffer.GetOffsetRead()));
+                    throw std::runtime_error(ex.what() + std::string(", offset=") + std::to_string(bobuffer.getOffsetRead()));
                 }
             } break;
 
@@ -292,7 +295,7 @@ bool MapConverter::run(Task task) noexcept
             {
                 m_h3mraw = {};
                 ByteOrderBuffer           bobuffer(m_h3mraw);
-                ByteOrderDataStreamWriter writer(bobuffer, ByteOrderDataStream::CreateByteorderMask(ORDER_LE, ORDER_LE, ORDER_LE));
+                ByteOrderDataStreamWriter writer(bobuffer, ByteOrderDataStream::createByteorderMask(ORDER_LE, ORDER_LE, ORDER_LE));
 
                 writer << m_mapLegacy;
 
@@ -301,26 +304,26 @@ bool MapConverter::run(Task task) noexcept
 
             case Task::SerializeLegacyObjectToProperty:
             {
-                m_mapLegacy.ToJson(m_json);
+                m_mapLegacy.toJson(m_json);
             } break;
             case Task::DeserializeLegacyObjectFromProperty:
             {
-                m_mapLegacy.FromJson(m_json);
+                m_mapLegacy.fromJson(m_json);
             } break;
             case Task::SerializeFHObjectToProperty:
             {
-                m_mapFH.ToJson(m_json);
+                m_mapFH.toJson(m_json);
             } break;
             case Task::DeserializeFHObjectFromProperty:
             {
-                m_mapFH.FromJson(m_json);
+                m_mapFH.fromJson(m_json);
 
             } break;
             case Task::ConstructH3MFromFH:
             {
                 auto rnd = m_rngFactory->create();
                 rnd->setSeed(m_mapFH.m_seed);
-                m_mapLegacy.convertFromFH(m_mapFH, m_databaseContainer->getDatabase(m_mapFH.m_version), rnd.get());
+                convertFH2H3M(m_mapFH, m_mapLegacy, m_databaseContainer->getDatabase(m_mapFH.m_version), rnd.get());
             } break;
 
             case Task::CheckH3MInputOutputEquality:

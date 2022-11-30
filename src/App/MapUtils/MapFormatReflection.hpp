@@ -190,6 +190,8 @@ inline constexpr const std::tuple MetaInfo::s_fields<H3Map::HotaVersion>{
     Field("v1", &H3Map::HotaVersion::m_ver1),
     Field("v2", &H3Map::HotaVersion::m_ver2),
     Field("v3", &H3Map::HotaVersion::m_ver3),
+    Field("fixed", &H3Map::HotaVersion::m_fixedMap),
+    Field("roundLimit", &H3Map::HotaVersion::m_roundLimit),
 };
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<H3Map::Rumor>{

@@ -14,23 +14,23 @@ namespace FreeHeroes {
 
 MapFormatFeatures::MapFormatFeatures(MapFormat format, int hotaVer1)
 {
-    m_factions = 9;
-    if (format == MapFormat::ROE)
-        m_factions = 8;
+    m_factions = 8; //ROE
+    if (format >= MapFormat::AB)
+        m_factions = 9;
     if (format >= MapFormat::HOTA1)
         m_factions = 10;
 
-    m_artifactsCount = 141; //SOD
-    if (format == MapFormat::AB)
+    m_artifactsCount = 128; //ROE
+    if (format >= MapFormat::AB)
         m_artifactsCount = 129;
-    if (format == MapFormat::ROE)
-        m_artifactsCount = 128;
+    if (format >= MapFormat::SOD)
+        m_artifactsCount = 141;
     if (format >= MapFormat::HOTA1)
         m_artifactsCount = 165;
 
-    m_heroesCount = 156;
-    if (format == MapFormat::ROE)
-        m_heroesCount = 128;
+    m_heroesCount = 128; // ROE
+    if (format >= MapFormat::AB)
+        m_heroesCount = 156;
     if (format >= MapFormat::HOTA1)
         m_heroesCount = 179;
 
@@ -38,15 +38,16 @@ MapFormatFeatures::MapFormatFeatures(MapFormat format, int hotaVer1)
     m_spellsAbilitiesCount = 11;
     m_spellsRegularCount   = m_spellsCount - m_spellsAbilitiesCount;
 
-    m_creaturesCount = 150;
-    if (format == MapFormat::ROE)
-        m_creaturesCount = 115;
+    m_creaturesCount = 115;
+    if (format >= MapFormat::AB)
+        m_creaturesCount = 150;
     if (format >= MapFormat::HOTA1)
         m_creaturesCount = 171;
 
     m_secondarySkillCount = 28;
     if (format >= MapFormat::HOTA1)
         m_secondarySkillCount = 29;
+
     m_primarySkillsCount = 4;
     m_terrainTypes       = 10;
     m_resourceCount      = 8;
@@ -118,16 +119,14 @@ std::unique_ptr<IMapObject> IMapObject::Create(MapObjectType type, MapFormatFeat
         case MapObjectType::EVENT:
         {
             return std::make_unique<MapEvent>(features);
-            break;
         }
         case MapObjectType::HERO:
         case MapObjectType::RANDOM_HERO:
         case MapObjectType::PRISON:
         {
             return std::make_unique<MapHero>(features);
-            break;
         }
-        case MapObjectType::MONSTER: //Monster
+        case MapObjectType::MONSTER:
         case MapObjectType::RANDOM_MONSTER:
         case MapObjectType::RANDOM_MONSTER_L1:
         case MapObjectType::RANDOM_MONSTER_L2:
@@ -138,35 +137,28 @@ std::unique_ptr<IMapObject> IMapObject::Create(MapObjectType type, MapFormatFeat
         case MapObjectType::RANDOM_MONSTER_L7:
         {
             return std::make_unique<MapMonster>(features);
-
-            break;
         }
         case MapObjectType::OCEAN_BOTTLE:
         case MapObjectType::SIGN:
         {
             return std::make_unique<MapSignBottle>(features);
-            break;
         }
         case MapObjectType::SEER_HUT:
         {
             return std::make_unique<MapSeerHut>(features);
-            break;
         }
         case MapObjectType::WITCH_HUT:
         {
             return std::make_unique<MapWitchHut>(features);
-            break;
         }
         case MapObjectType::SCHOLAR:
         {
             return std::make_unique<MapScholar>(features);
-            break;
         }
         case MapObjectType::GARRISON:
         case MapObjectType::GARRISON2:
         {
             return std::make_unique<MapGarison>(features);
-            break;
         }
         case MapObjectType::ARTIFACT:
         case MapObjectType::RANDOM_ART:
@@ -176,94 +168,58 @@ std::unique_ptr<IMapObject> IMapObject::Create(MapObjectType type, MapFormatFeat
         case MapObjectType::RANDOM_RELIC_ART:
         case MapObjectType::SPELL_SCROLL:
         {
-            auto res       = std::make_unique<MapArtifact>(features);
-            res->m_isSpell = type == MapObjectType::SPELL_SCROLL;
-            return res;
-            break;
+            return std::make_unique<MapArtifact>(features, type == MapObjectType::SPELL_SCROLL);
         }
         case MapObjectType::RANDOM_RESOURCE:
         case MapObjectType::RESOURCE:
         {
             return std::make_unique<MapResource>(features);
-            break;
         }
         case MapObjectType::RANDOM_TOWN:
         case MapObjectType::TOWN:
         {
             return std::make_unique<MapTown>(features);
-            break;
         }
         case MapObjectType::MINE:
         case MapObjectType::ABANDONED_MINE:
-        {
-            return std::make_unique<MapObjectWithOwner>(features);
-            break;
-        }
         case MapObjectType::CREATURE_GENERATOR1:
         case MapObjectType::CREATURE_GENERATOR2:
         case MapObjectType::CREATURE_GENERATOR3:
         case MapObjectType::CREATURE_GENERATOR4:
+        case MapObjectType::SHIPYARD:
+        case MapObjectType::LIGHTHOUSE:
         {
             return std::make_unique<MapObjectWithOwner>(features);
-            break;
         }
         case MapObjectType::SHRINE_OF_MAGIC_INCANTATION:
         case MapObjectType::SHRINE_OF_MAGIC_GESTURE:
         case MapObjectType::SHRINE_OF_MAGIC_THOUGHT:
         {
             return std::make_unique<MapShrine>(features);
-            break;
         }
         case MapObjectType::PANDORAS_BOX:
         {
             return std::make_unique<MapPandora>(features);
-            break;
         }
         case MapObjectType::GRAIL:
         {
             return std::make_unique<MapGrail>(features);
-            break;
         }
         case MapObjectType::QUEST_GUARD:
         {
             return std::make_unique<MapQuestGuard>(features);
-            break;
         }
         case MapObjectType::RANDOM_DWELLING:         //same as castle + level range  216
         case MapObjectType::RANDOM_DWELLING_LVL:     //same as castle, fixed level   217
         case MapObjectType::RANDOM_DWELLING_FACTION: //level range, fixed faction    218
         {
             return std::make_unique<MapDwelling>(features, type);
-            break;
         }
 
-        case MapObjectType::SHIPYARD:
+        case MapObjectType::HERO_PLACEHOLDER:
         {
-            return std::make_unique<MapObjectWithOwner>(features);
-            break;
-        }
-        case MapObjectType::HERO_PLACEHOLDER: //hero placeholder
-        {
-            /*auto  hp = new CGHeroPlaceholder();
-            nobj = hp;
-            
-            hp->setOwner(PlayerColor(stream.ReadScalar<uint8_t>()));
-            
-            int htid = stream.ReadScalar<uint8_t>(); //hero type id
-            nobj->subID = htid;
-            
-            if(htid == 0xff)
-            {
-                hp->power = stream.ReadScalar<uint8_t>();
-                logGlobal->info("Hero placeholder: by power at %s", objPos.toString());
-            }
-            else
-            {
-                logGlobal->info("Hero placeholder: %s at %s", VLC->heroh->heroes[htid]->name, objPos.toString());
-                hp->power = 0;
-            }*/
-
-            break;
+            assert(!"Unsupported");
+            return nullptr;
         }
         case MapObjectType::CREATURE_BANK:
         case MapObjectType::DERELICT_SHIP:
@@ -272,17 +228,10 @@ std::unique_ptr<IMapObject> IMapObject::Create(MapObjectType type, MapFormatFeat
         case MapObjectType::SHIPWRECK:
         {
             return std::make_unique<MapObjectCreatureBank>(features);
-            break;
         }
-        case MapObjectType::LIGHTHOUSE: //Lighthouse
-        {
-            return std::make_unique<MapObjectWithOwner>(features);
-            break;
-        }
-        default: //any other object
+        default:
         {
             return std::make_unique<MapObjectSimple>(features);
-            break;
         }
     }
     return nullptr;
@@ -294,7 +243,7 @@ void MapHero::prepareArrays()
     m_primSkillSet.prepareArrays();
 }
 
-void MapHero::ReadInternal(ByteOrderDataStreamReader& stream)
+void MapHero::readBinary(ByteOrderDataStreamReader& stream)
 {
     prepareArrays();
     if (m_features->m_hasQuestIdentifier) {
@@ -347,7 +296,7 @@ void MapHero::ReadInternal(ByteOrderDataStreamReader& stream)
     stream.zeroPadding(16);
 }
 
-void MapHero::WriteInternal(ByteOrderDataStreamWriter& stream) const
+void MapHero::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
     if (m_features->m_hasQuestIdentifier) {
         stream << m_questIdentifier;
@@ -399,13 +348,13 @@ void MapHero::WriteInternal(ByteOrderDataStreamWriter& stream) const
     stream.zeroPadding(16);
 }
 
-void MapHero::ToJson(PropertyTree& data) const
+void MapHero::toJson(PropertyTree& data) const
 {
     Core::Reflection::PropertyTreeWriter writer;
     writer.valueToJson(*this, data);
 }
 
-void MapHero::FromJson(const PropertyTree& data)
+void MapHero::fromJson(const PropertyTree& data)
 {
     Core::Reflection::PropertyTreeReader reader;
     *this = { m_features };
@@ -419,7 +368,7 @@ void MapTownEvent::prepareArrays()
     m_creaturesAmounts.resize(m_features->m_stackSize);
 }
 
-void MapTownEvent::ReadInternal(ByteOrderDataStreamReader& stream)
+void MapTownEvent::readBinary(ByteOrderDataStreamReader& stream)
 {
     prepareArrays();
     stream >> m_name >> m_message;
@@ -440,7 +389,7 @@ void MapTownEvent::ReadInternal(ByteOrderDataStreamReader& stream)
     stream.zeroPadding(4);
 }
 
-void MapTownEvent::WriteInternal(ByteOrderDataStreamWriter& stream) const
+void MapTownEvent::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
     stream << m_name << m_message;
     stream << m_resourceSet;
@@ -470,11 +419,11 @@ void MapTown::prepareArrays()
     m_forbiddenBuildings.resize(48);
 }
 
-void MapTown::ReadInternal(ByteOrderDataStreamReader& stream)
+void MapTown::readBinary(ByteOrderDataStreamReader& stream)
 {
-    if (m_features->m_hasQuestIdentifier) {
+    if (m_features->m_hasQuestIdentifier)
         stream >> m_questIdentifier;
-    }
+
     stream >> m_playerOwner;
 
     stream >> m_hasName;
@@ -497,6 +446,7 @@ void MapTown::ReadInternal(ByteOrderDataStreamReader& stream)
     } else {
         stream >> m_hasFort;
     }
+
     if (m_features->m_townHasObligatorySpells) {
         for (auto& byte : m_obligatorySpells)
             stream >> byte;
@@ -520,7 +470,7 @@ void MapTown::ReadInternal(ByteOrderDataStreamReader& stream)
     stream.zeroPadding(3);
 }
 
-void MapTown::WriteInternal(ByteOrderDataStreamWriter& stream) const
+void MapTown::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
     if (m_features->m_hasQuestIdentifier) {
         stream << m_questIdentifier;
@@ -563,13 +513,13 @@ void MapTown::WriteInternal(ByteOrderDataStreamWriter& stream) const
     stream.zeroPadding(3);
 }
 
-void MapTown::ToJson(PropertyTree& data) const
+void MapTown::toJson(PropertyTree& data) const
 {
     Core::Reflection::PropertyTreeWriter writer;
     writer.valueToJson(*this, data);
 }
 
-void MapTown::FromJson(const PropertyTree& data)
+void MapTown::fromJson(const PropertyTree& data)
 {
     Core::Reflection::PropertyTreeReader reader;
     *this = { m_features };
@@ -579,21 +529,21 @@ void MapTown::FromJson(const PropertyTree& data)
     }
 }
 
-void MapHeroSkill::ReadInternal(ByteOrderDataStreamReader& stream)
+void MapHeroSkill::readBinary(ByteOrderDataStreamReader& stream)
 {
     stream >> m_id >> m_level;
 }
 
-void MapHeroSkill::WriteInternal(ByteOrderDataStreamWriter& stream) const
+void MapHeroSkill::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
     stream << m_id << m_level;
 }
 
-void MapMonster::ReadInternal(ByteOrderDataStreamReader& stream)
+void MapMonster::readBinary(ByteOrderDataStreamReader& stream)
 {
-    if (m_features->m_hasQuestIdentifier) {
+    if (m_features->m_hasQuestIdentifier)
         stream >> m_questIdentifier;
-    }
+
     stream >> m_count;
     stream >> m_joinAppeal;
     stream >> m_hasMessage;
@@ -605,24 +555,26 @@ void MapMonster::ReadInternal(ByteOrderDataStreamReader& stream)
         if (m_features->m_artId16Bit)
             stream >> m_artID;
         else
-            m_artID = stream.ReadScalar<uint8_t>();
+            m_artID = stream.readScalar<uint8_t>();
     }
 
     stream >> m_neverFlees >> m_notGrowingTeam;
     stream.zeroPadding(2);
 
     if (m_features->m_monsterJoinPercent) {
-        uint32_t unknown1; // == 0xffffffff
-        uint8_t  unknown2; // == 0x00;
-        stream >> unknown1 >> unknown2;
+        uint32_t unknown1 = 0;
+        stream >> unknown1 >> m_joinOnlyForMoney;
         stream >> m_joinPercent;
-        uint32_t unknown3; // == 0xffffffff
-        uint32_t unknown4; // == 0xffffffff
+        uint32_t unknown3 = 0;
+        uint32_t unknown4 = 0;
         stream >> unknown3 >> unknown4;
+        assert(unknown1 == 0xffffffffU);
+        assert(unknown3 == 0xffffffffU);
+        assert(unknown4 == 0xffffffffU);
     }
 }
 
-void MapMonster::WriteInternal(ByteOrderDataStreamWriter& stream) const
+void MapMonster::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
     if (m_features->m_hasQuestIdentifier) {
         stream << m_questIdentifier;
@@ -645,8 +597,7 @@ void MapMonster::WriteInternal(ByteOrderDataStreamWriter& stream) const
 
     if (m_features->m_monsterJoinPercent) {
         uint32_t unknown1 = 0xffffffff;
-        uint8_t  unknown2 = 0x00;
-        stream << unknown1 << unknown2;
+        stream << unknown1 << m_joinOnlyForMoney;
         stream << m_joinPercent;
         uint32_t unknown3 = 0xffffffff;
         uint32_t unknown4 = 0xffffffff;
@@ -654,42 +605,42 @@ void MapMonster::WriteInternal(ByteOrderDataStreamWriter& stream) const
     }
 }
 
-void MapMonster::ToJson(PropertyTree& data) const
+void MapMonster::toJson(PropertyTree& data) const
 {
     Core::Reflection::PropertyTreeWriter writer;
     writer.valueToJson(*this, data);
 }
 
-void MapMonster::FromJson(const PropertyTree& data)
+void MapMonster::fromJson(const PropertyTree& data)
 {
     Core::Reflection::PropertyTreeReader reader;
     *this = { m_features };
     reader.jsonToValue(data, *this);
 }
 
-void MapObjectWithOwner::ReadInternal(ByteOrderDataStreamReader& stream)
+void MapObjectWithOwner::readBinary(ByteOrderDataStreamReader& stream)
 {
     stream >> m_owner;
     stream.zeroPadding(3);
 }
 
-void MapObjectWithOwner::WriteInternal(ByteOrderDataStreamWriter& stream) const
+void MapObjectWithOwner::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
     stream << m_owner;
     stream.zeroPadding(3);
 }
 
-void MapObjectWithOwner::ToJson(PropertyTree& data) const
+void MapObjectWithOwner::toJson(PropertyTree& data) const
 {
     data["owner"] = PropertyTreeScalar(m_owner);
 }
 
-void MapObjectWithOwner::FromJson(const PropertyTree& data)
+void MapObjectWithOwner::fromJson(const PropertyTree& data)
 {
     data["owner"].getScalar().convertTo(m_owner);
 }
 
-void MapObjectCreatureBank::ReadInternal(ByteOrderDataStreamReader& stream)
+void MapObjectCreatureBank::readBinary(ByteOrderDataStreamReader& stream)
 {
     if (m_features->m_creatureBankSize) {
         stream >> m_content >> m_upgraded;
@@ -697,7 +648,7 @@ void MapObjectCreatureBank::ReadInternal(ByteOrderDataStreamReader& stream)
     }
 }
 
-void MapObjectCreatureBank::WriteInternal(ByteOrderDataStreamWriter& stream) const
+void MapObjectCreatureBank::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
     if (m_features->m_creatureBankSize) {
         stream << m_content << m_upgraded;
@@ -705,46 +656,46 @@ void MapObjectCreatureBank::WriteInternal(ByteOrderDataStreamWriter& stream) con
     }
 }
 
-void MapObjectCreatureBank::ToJson(PropertyTree& data) const
+void MapObjectCreatureBank::toJson(PropertyTree& data) const
 {
     data["content"]  = PropertyTreeScalar(m_content);
     data["upgraded"] = PropertyTreeScalar(m_upgraded);
 }
 
-void MapObjectCreatureBank::FromJson(const PropertyTree& data)
+void MapObjectCreatureBank::fromJson(const PropertyTree& data)
 {
     data["content"].getScalar().convertTo(m_content);
     data["upgraded"].getScalar().convertTo(m_upgraded);
 }
 
-void MapResource::ReadInternal(ByteOrderDataStreamReader& stream)
+void MapResource::readBinary(ByteOrderDataStreamReader& stream)
 {
-    m_message.ReadInternal(stream);
+    m_message.readBinary(stream);
     stream >> m_amount;
     stream.zeroPadding(4);
 }
 
-void MapResource::WriteInternal(ByteOrderDataStreamWriter& stream) const
+void MapResource::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
-    m_message.WriteInternal(stream);
+    m_message.writeBinary(stream);
     stream << m_amount;
     stream.zeroPadding(4);
 }
 
-void MapResource::ToJson(PropertyTree& data) const
+void MapResource::toJson(PropertyTree& data) const
 {
     Core::Reflection::PropertyTreeWriter writer;
     writer.valueToJson(*this, data);
 }
 
-void MapResource::FromJson(const PropertyTree& data)
+void MapResource::fromJson(const PropertyTree& data)
 {
     Core::Reflection::PropertyTreeReader reader;
     *this = { m_features };
     reader.jsonToValue(data, *this);
 }
 
-void MapGuards::ReadInternal(ByteOrderDataStreamReader& stream)
+void MapGuards::readBinary(ByteOrderDataStreamReader& stream)
 {
     stream >> m_hasGuards;
     if (!m_hasGuards)
@@ -753,7 +704,7 @@ void MapGuards::ReadInternal(ByteOrderDataStreamReader& stream)
     stream >> m_creatures;
 }
 
-void MapGuards::WriteInternal(ByteOrderDataStreamWriter& stream) const
+void MapGuards::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
     stream << m_hasGuards;
 
@@ -763,7 +714,7 @@ void MapGuards::WriteInternal(ByteOrderDataStreamWriter& stream) const
     stream << m_creatures;
 }
 
-void MapMessage::ReadInternal(ByteOrderDataStreamReader& stream)
+void MapMessage::readBinary(ByteOrderDataStreamReader& stream)
 {
     stream >> m_hasMessage;
     if (!m_hasMessage)
@@ -774,7 +725,7 @@ void MapMessage::ReadInternal(ByteOrderDataStreamReader& stream)
     stream.zeroPadding(4);
 }
 
-void MapMessage::WriteInternal(ByteOrderDataStreamWriter& stream) const
+void MapMessage::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
     stream << m_hasMessage;
     if (!m_hasMessage)
@@ -785,36 +736,36 @@ void MapMessage::WriteInternal(ByteOrderDataStreamWriter& stream) const
     stream.zeroPadding(4);
 }
 
-void MapArtifact::ReadInternal(ByteOrderDataStreamReader& stream)
+void MapArtifact::readBinary(ByteOrderDataStreamReader& stream)
 {
-    m_message.ReadInternal(stream);
+    m_message.readBinary(stream);
     if (m_isSpell)
         stream >> m_spellId;
 }
 
-void MapArtifact::WriteInternal(ByteOrderDataStreamWriter& stream) const
+void MapArtifact::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
-    m_message.WriteInternal(stream);
+    m_message.writeBinary(stream);
     if (m_isSpell)
         stream << m_spellId;
 }
 
-void MapArtifact::ToJson(PropertyTree& data) const
+void MapArtifact::toJson(PropertyTree& data) const
 {
     Core::Reflection::PropertyTreeWriter writer;
     writer.valueToJson(*this, data);
 }
 
-void MapArtifact::FromJson(const PropertyTree& data)
+void MapArtifact::fromJson(const PropertyTree& data)
 {
     Core::Reflection::PropertyTreeReader reader;
-    *this = { m_features };
+    *this = { m_features, m_isSpell };
     reader.jsonToValue(data, *this);
 }
 
-void MapQuest::ReadInternal(ByteOrderDataStreamReader& stream)
+void MapQuest::readBinary(ByteOrderDataStreamReader& stream)
 {
-    m_missionType = static_cast<Mission>(stream.ReadScalar<uint8_t>());
+    m_missionType = static_cast<Mission>(stream.readScalar<uint8_t>());
 
     switch (m_missionType) {
         case Mission::NONE:
@@ -835,14 +786,14 @@ void MapQuest::ReadInternal(ByteOrderDataStreamReader& stream)
         }
         case Mission::ART:
         {
-            auto lock = stream.SetContainerSizeBytesGuarded(1);
+            auto lock = stream.setContainerSizeBytesGuarded(1);
             stream >> m_5arts;
 
             break;
         }
         case Mission::ARMY:
         {
-            auto lock = stream.SetContainerSizeBytesGuarded(1);
+            auto lock = stream.setContainerSizeBytesGuarded(1);
             stream >> m_6creatures;
             break;
         }
@@ -870,7 +821,7 @@ void MapQuest::ReadInternal(ByteOrderDataStreamReader& stream)
     stream >> m_firstVisitText >> m_nextVisitText >> m_completedText;
 }
 
-void MapQuest::WriteInternal(ByteOrderDataStreamWriter& stream) const
+void MapQuest::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
     stream << static_cast<uint8_t>(m_missionType);
 
@@ -892,14 +843,14 @@ void MapQuest::WriteInternal(ByteOrderDataStreamWriter& stream) const
         }
         case Mission::ART:
         {
-            auto lock = stream.SetContainerSizeBytesGuarded(1);
+            auto lock = stream.setContainerSizeBytesGuarded(1);
             stream << m_5arts;
 
             break;
         }
         case Mission::ARMY:
         {
-            auto lock = stream.SetContainerSizeBytesGuarded(1);
+            auto lock = stream.setContainerSizeBytesGuarded(1);
             stream << m_6creatures;
             break;
         }
@@ -926,17 +877,17 @@ void MapQuest::WriteInternal(ByteOrderDataStreamWriter& stream) const
     stream << m_firstVisitText << m_nextVisitText << m_completedText;
 }
 
-void MapQuest::ToJson(PropertyTree& data) const
+void MapQuest::toJson(PropertyTree& data) const
 {
     assert(0);
 }
 
-void MapQuest::FromJson(const PropertyTree& data)
+void MapQuest::fromJson(const PropertyTree& data)
 {
     assert(0);
 }
 
-void MapSeerHut::ReadInternal(ByteOrderDataStreamReader& stream)
+void MapSeerHut::readBinary(ByteOrderDataStreamReader& stream)
 {
     if (m_features->m_seerHutExtendedQuest) {
         if (m_features->m_seerHutMultiQuest) {
@@ -946,7 +897,7 @@ void MapSeerHut::ReadInternal(ByteOrderDataStreamReader& stream)
                 throw std::runtime_error("Only single quest huts supported");
             }
         }
-        m_quest.ReadInternal(stream);
+        m_quest.readBinary(stream);
     } else {
         //RoE
         uint8_t artID = 0;
@@ -958,56 +909,56 @@ void MapSeerHut::ReadInternal(ByteOrderDataStreamReader& stream)
     }
 
     if (m_quest.m_missionType != Mission::NONE) {
-        m_reward = static_cast<RewardType>(stream.ReadScalar<uint8_t>());
+        m_reward = static_cast<RewardType>(stream.readScalar<uint8_t>());
         switch (m_reward) {
             case RewardType::EXPERIENCE:
             case RewardType::MANA_POINTS:
             {
-                m_rVal = stream.ReadScalar<uint32_t>();
+                m_rVal = stream.readScalar<uint32_t>();
                 break;
             }
             case RewardType::MORALE_BONUS:
             case RewardType::LUCK_BONUS:
             {
-                m_rVal = stream.ReadScalar<uint8_t>();
+                m_rVal = stream.readScalar<uint8_t>();
                 break;
             }
             case RewardType::RESOURCES:
             {
-                m_rID = stream.ReadScalar<uint8_t>();
+                m_rID = stream.readScalar<uint8_t>();
                 // Only the first 3 bytes are used. Skip the 4th.
-                m_rVal = stream.ReadScalar<uint32_t>() & 0x00ffffff;
+                m_rVal = stream.readScalar<uint32_t>() & 0x00ffffff;
                 break;
             }
             case RewardType::PRIMARY_SKILL:
             case RewardType::SECONDARY_SKILL:
             {
-                m_rID  = stream.ReadScalar<uint8_t>();
-                m_rVal = stream.ReadScalar<uint8_t>();
+                m_rID  = stream.readScalar<uint8_t>();
+                m_rVal = stream.readScalar<uint8_t>();
                 break;
             }
             case RewardType::ARTIFACT:
             {
                 if (m_features->m_artId16Bit) {
-                    m_rID = stream.ReadScalar<uint16_t>();
+                    m_rID = stream.readScalar<uint16_t>();
                 } else {
-                    m_rID = stream.ReadScalar<uint8_t>();
+                    m_rID = stream.readScalar<uint8_t>();
                 }
                 break;
             }
             case RewardType::SPELL:
             {
-                m_rID = stream.ReadScalar<uint8_t>();
+                m_rID = stream.readScalar<uint8_t>();
                 break;
             }
             case RewardType::CREATURE:
             {
                 if (m_features->m_stackId16Bit) {
-                    m_rID = stream.ReadScalar<uint16_t>();
+                    m_rID = stream.readScalar<uint16_t>();
                 } else {
-                    m_rID = stream.ReadScalar<uint8_t>();
+                    m_rID = stream.readScalar<uint8_t>();
                 }
-                m_rVal = stream.ReadScalar<uint16_t>();
+                m_rVal = stream.readScalar<uint16_t>();
                 break;
             }
             case RewardType::NOTHING:
@@ -1023,13 +974,13 @@ void MapSeerHut::ReadInternal(ByteOrderDataStreamReader& stream)
         stream.zeroPadding(4);
 }
 
-void MapSeerHut::WriteInternal(ByteOrderDataStreamWriter& stream) const
+void MapSeerHut::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
     if (m_features->m_seerHutExtendedQuest) {
         if (m_features->m_seerHutMultiQuest) {
             stream << uint32_t(1);
         }
-        m_quest.WriteInternal(stream);
+        m_quest.writeBinary(stream);
     } else {
         uint8_t artID = 255;
         if (!m_quest.m_5arts.empty())
@@ -1102,36 +1053,36 @@ void MapSeerHut::WriteInternal(ByteOrderDataStreamWriter& stream) const
         stream.zeroPadding(4);
 }
 
-void MapSeerHut::ToJson(PropertyTree& data) const
+void MapSeerHut::toJson(PropertyTree& data) const
 {
     Core::Reflection::PropertyTreeWriter writer;
     writer.valueToJson(*this, data);
 }
 
-void MapSeerHut::FromJson(const PropertyTree& data)
+void MapSeerHut::fromJson(const PropertyTree& data)
 {
     Core::Reflection::PropertyTreeReader reader;
     *this = { m_features };
     reader.jsonToValue(data, *this);
 }
 
-void MapShrine::ToJson(PropertyTree& data) const
+void MapShrine::toJson(PropertyTree& data) const
 {
     data["spell"] = PropertyTreeScalar(m_spell);
 }
 
-void MapShrine::FromJson(const PropertyTree& data)
+void MapShrine::fromJson(const PropertyTree& data)
 {
     data["spell"].getScalar().convertTo(m_spell);
 }
 
-void MapScholar::ToJson(PropertyTree& data) const
+void MapScholar::toJson(PropertyTree& data) const
 {
     data["bonusType"] = PropertyTreeScalar(m_bonusType);
     data["bonusId"]   = PropertyTreeScalar(m_bonusId);
 }
 
-void MapScholar::FromJson(const PropertyTree& data)
+void MapScholar::fromJson(const PropertyTree& data)
 {
     data["bonusType"].getScalar().convertTo(m_bonusType);
     data["bonusId"].getScalar().convertTo(m_bonusId);
@@ -1143,38 +1094,38 @@ MapWitchHut::MapWitchHut(MapFormatFeaturesPtr features)
     m_allowedSkills.resize(m_features->m_secondarySkillCount);
 }
 
-void MapWitchHut::ReadInternal(ByteOrderDataStreamReader& stream)
+void MapWitchHut::readBinary(ByteOrderDataStreamReader& stream)
 {
     if (m_features->m_witchHutAllowedSkills)
         stream.readBits(m_allowedSkills);
 }
 
-void MapWitchHut::WriteInternal(ByteOrderDataStreamWriter& stream) const
+void MapWitchHut::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
     if (m_features->m_witchHutAllowedSkills)
         stream.writeBits(m_allowedSkills);
 }
 
-void MapWitchHut::ToJson(PropertyTree& data) const
+void MapWitchHut::toJson(PropertyTree& data) const
 {
     Core::Reflection::PropertyTreeWriter writer;
     writer.valueToJson(m_allowedSkills, data["allowedSkills"]);
 }
 
-void MapWitchHut::FromJson(const PropertyTree& data)
+void MapWitchHut::fromJson(const PropertyTree& data)
 {
     Core::Reflection::PropertyTreeReader reader;
     m_allowedSkills.clear();
     reader.jsonToValue(data["allowedSkills"], m_allowedSkills);
 }
 
-void MapReward::ReadInternal(ByteOrderDataStreamReader& stream)
+void MapReward::readBinary(ByteOrderDataStreamReader& stream)
 {
     stream >> m_gainedExp >> m_manaDiff >> m_moraleDiff >> m_luckDiff;
 
     stream >> m_resourceSet >> m_primSkillSet;
 
-    auto lock = stream.SetContainerSizeBytesGuarded(1);
+    auto lock = stream.setContainerSizeBytesGuarded(1);
     stream >> m_secSkills;
 
     if (m_features->m_artId16Bit) {
@@ -1189,13 +1140,13 @@ void MapReward::ReadInternal(ByteOrderDataStreamReader& stream)
     stream >> m_creatures;
 }
 
-void MapReward::WriteInternal(ByteOrderDataStreamWriter& stream) const
+void MapReward::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
     stream << m_gainedExp << m_manaDiff << m_moraleDiff << m_luckDiff;
 
     stream << m_resourceSet << m_primSkillSet;
 
-    auto lock = stream.SetContainerSizeBytesGuarded(1);
+    auto lock = stream.setContainerSizeBytesGuarded(1);
     stream << m_secSkills;
 
     if (m_features->m_artId16Bit) {
@@ -1211,7 +1162,7 @@ void MapReward::WriteInternal(ByteOrderDataStreamWriter& stream) const
     stream << m_creatures;
 }
 
-void MapPandora::ReadInternal(ByteOrderDataStreamReader& stream)
+void MapPandora::readBinary(ByteOrderDataStreamReader& stream)
 {
     stream >> m_message;
     stream >> m_reward;
@@ -1219,7 +1170,7 @@ void MapPandora::ReadInternal(ByteOrderDataStreamReader& stream)
     stream.zeroPadding(8);
 }
 
-void MapPandora::WriteInternal(ByteOrderDataStreamWriter& stream) const
+void MapPandora::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
     stream << m_message;
     stream << m_reward;
@@ -1227,20 +1178,20 @@ void MapPandora::WriteInternal(ByteOrderDataStreamWriter& stream) const
     stream.zeroPadding(8);
 }
 
-void MapPandora::ToJson(PropertyTree& data) const
+void MapPandora::toJson(PropertyTree& data) const
 {
     Core::Reflection::PropertyTreeWriter writer;
     writer.valueToJson(*this, data);
 }
 
-void MapPandora::FromJson(const PropertyTree& data)
+void MapPandora::fromJson(const PropertyTree& data)
 {
     Core::Reflection::PropertyTreeReader reader;
     *this = { m_features };
     reader.jsonToValue(data, *this);
 }
 
-void MapGarison::ReadInternal(ByteOrderDataStreamReader& stream)
+void MapGarison::readBinary(ByteOrderDataStreamReader& stream)
 {
     stream >> m_owner;
     stream.zeroPadding(3);
@@ -1252,7 +1203,7 @@ void MapGarison::ReadInternal(ByteOrderDataStreamReader& stream)
     stream.zeroPadding(8);
 }
 
-void MapGarison::WriteInternal(ByteOrderDataStreamWriter& stream) const
+void MapGarison::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
     stream << m_owner;
     stream.zeroPadding(3);
@@ -1264,42 +1215,42 @@ void MapGarison::WriteInternal(ByteOrderDataStreamWriter& stream) const
     stream.zeroPadding(8);
 }
 
-void MapGarison::ToJson(PropertyTree& data) const
+void MapGarison::toJson(PropertyTree& data) const
 {
     Core::Reflection::PropertyTreeWriter writer;
     writer.valueToJson(*this, data);
 }
 
-void MapGarison::FromJson(const PropertyTree& data)
+void MapGarison::fromJson(const PropertyTree& data)
 {
     Core::Reflection::PropertyTreeReader reader;
     *this = { m_features };
     reader.jsonToValue(data, *this);
 }
 
-void MapSignBottle::ReadInternal(ByteOrderDataStreamReader& stream)
+void MapSignBottle::readBinary(ByteOrderDataStreamReader& stream)
 {
     stream >> m_message;
     stream.zeroPadding(4);
 }
 
-void MapSignBottle::WriteInternal(ByteOrderDataStreamWriter& stream) const
+void MapSignBottle::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
     stream << m_message;
     stream.zeroPadding(4);
 }
 
-void MapSignBottle::ToJson(PropertyTree& data) const
+void MapSignBottle::toJson(PropertyTree& data) const
 {
     data = PropertyTreeScalar(m_message);
 }
 
-void MapSignBottle::FromJson(const PropertyTree& data)
+void MapSignBottle::fromJson(const PropertyTree& data)
 {
     data.getScalar().convertTo(m_message);
 }
 
-void HeroArtSet::ReadInternal(ByteOrderDataStreamReader& stream)
+void HeroArtSet::readBinary(ByteOrderDataStreamReader& stream)
 {
     stream >> m_hasArts;
 
@@ -1307,11 +1258,11 @@ void HeroArtSet::ReadInternal(ByteOrderDataStreamReader& stream)
         return;
 
     auto loadArtifact = [&stream, this]() -> uint16_t {
-        uint16_t result;
+        uint16_t result = 0;
         if (m_features->m_artId16Bit)
             stream >> result;
         else
-            result = stream.ReadScalar<uint8_t>();
+            result = stream.readScalar<uint8_t>();
         return result;
     };
 
@@ -1333,7 +1284,7 @@ void HeroArtSet::ReadInternal(ByteOrderDataStreamReader& stream)
         art = loadArtifact();
 }
 
-void HeroArtSet::WriteInternal(ByteOrderDataStreamWriter& stream) const
+void HeroArtSet::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
     stream << m_hasArts;
 
@@ -1362,7 +1313,7 @@ void HeroArtSet::WriteInternal(ByteOrderDataStreamWriter& stream) const
         saveArtifact(art);
 }
 
-void HeroSpellSet::ReadInternal(ByteOrderDataStreamReader& stream)
+void HeroSpellSet::readBinary(ByteOrderDataStreamReader& stream)
 {
     if (m_features->m_heroHasCustomSpells) {
         stream >> m_hasCustomSpells;
@@ -1372,14 +1323,14 @@ void HeroSpellSet::ReadInternal(ByteOrderDataStreamReader& stream)
 
     } else if (m_features->m_heroHasOneSpell) {
         //we can read one spell
-        auto buff = stream.ReadScalar<uint8_t>();
+        auto buff = stream.readScalar<uint8_t>();
         if (buff != 254) {
             m_hasCustomSpells = true;
         }
     }
 }
 
-void HeroSpellSet::WriteInternal(ByteOrderDataStreamWriter& stream) const
+void HeroSpellSet::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
     if (m_features->m_heroHasCustomSpells) {
         stream << m_hasCustomSpells;
@@ -1389,13 +1340,13 @@ void HeroSpellSet::WriteInternal(ByteOrderDataStreamWriter& stream) const
     } else if (m_features->m_heroHasOneSpell) {
         uint8_t spell = 254;
         if (m_hasCustomSpells) {
-            spell = 255; // todo:
+            spell = 255; // @todo: look in m_spells
         }
         stream << spell;
     }
 }
 
-void HeroPrimSkillSet::ReadInternal(ByteOrderDataStreamReader& stream)
+void HeroPrimSkillSet::readBinary(ByteOrderDataStreamReader& stream)
 {
     if (m_features->m_heroHasPrimSkills) {
         stream >> m_hasCustomPrimSkills;
@@ -1406,7 +1357,7 @@ void HeroPrimSkillSet::ReadInternal(ByteOrderDataStreamReader& stream)
     }
 }
 
-void HeroPrimSkillSet::WriteInternal(ByteOrderDataStreamWriter& stream) const
+void HeroPrimSkillSet::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
     if (m_features->m_heroHasPrimSkills) {
         stream << m_hasCustomPrimSkills;
@@ -1417,7 +1368,7 @@ void HeroPrimSkillSet::WriteInternal(ByteOrderDataStreamWriter& stream) const
     }
 }
 
-void MapEvent::ReadInternal(ByteOrderDataStreamReader& stream)
+void MapEvent::readBinary(ByteOrderDataStreamReader& stream)
 {
     stream >> m_message;
     stream >> m_reward;
@@ -1428,7 +1379,7 @@ void MapEvent::ReadInternal(ByteOrderDataStreamReader& stream)
         stream >> m_humanActivate;
 }
 
-void MapEvent::WriteInternal(ByteOrderDataStreamWriter& stream) const
+void MapEvent::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
     stream << m_message;
     stream << m_reward;
@@ -1440,20 +1391,20 @@ void MapEvent::WriteInternal(ByteOrderDataStreamWriter& stream) const
         stream << m_humanActivate;
 }
 
-void MapEvent::ToJson(PropertyTree& data) const
+void MapEvent::toJson(PropertyTree& data) const
 {
     Core::Reflection::PropertyTreeWriter writer;
     writer.valueToJson(*this, data);
 }
 
-void MapEvent::FromJson(const PropertyTree& data)
+void MapEvent::fromJson(const PropertyTree& data)
 {
     Core::Reflection::PropertyTreeReader reader;
     *this = { m_features };
     reader.jsonToValue(data, *this);
 }
 
-void MapDwelling::ReadInternal(ByteOrderDataStreamReader& stream)
+void MapDwelling::readBinary(ByteOrderDataStreamReader& stream)
 {
     stream >> m_owner;
     stream.zeroPadding(3);
@@ -1470,7 +1421,7 @@ void MapDwelling::ReadInternal(ByteOrderDataStreamReader& stream)
         stream >> m_minLevel >> m_maxLevel;
 }
 
-void MapDwelling::WriteInternal(ByteOrderDataStreamWriter& stream) const
+void MapDwelling::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
     stream << m_owner;
     stream.zeroPadding(3);
@@ -1487,48 +1438,48 @@ void MapDwelling::WriteInternal(ByteOrderDataStreamWriter& stream) const
         stream << m_minLevel << m_maxLevel;
 }
 
-void MapDwelling::ToJson(PropertyTree& data) const
+void MapDwelling::toJson(PropertyTree& data) const
 {
     Core::Reflection::PropertyTreeWriter writer;
     writer.valueToJson(*this, data);
 }
 
-void MapDwelling::FromJson(const PropertyTree& data)
+void MapDwelling::fromJson(const PropertyTree& data)
 {
     Core::Reflection::PropertyTreeReader reader;
     *this = { m_features, m_objectType };
     reader.jsonToValue(data, *this);
 }
 
-void MapQuestGuard::ReadInternal(ByteOrderDataStreamReader& stream)
+void MapQuestGuard::readBinary(ByteOrderDataStreamReader& stream)
 {
-    m_quest.ReadInternal(stream);
+    m_quest.readBinary(stream);
 }
 
-void MapQuestGuard::WriteInternal(ByteOrderDataStreamWriter& stream) const
+void MapQuestGuard::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
-    m_quest.WriteInternal(stream);
+    m_quest.writeBinary(stream);
 }
 
-void MapQuestGuard::ToJson(PropertyTree& data) const
+void MapQuestGuard::toJson(PropertyTree& data) const
 {
     Core::Reflection::PropertyTreeWriter writer;
     writer.valueToJson(*this, data);
 }
 
-void MapQuestGuard::FromJson(const PropertyTree& data)
+void MapQuestGuard::fromJson(const PropertyTree& data)
 {
     Core::Reflection::PropertyTreeReader reader;
     *this = { m_features };
     reader.jsonToValue(data, *this);
 }
 
-void MapGrail::ToJson(PropertyTree& data) const
+void MapGrail::toJson(PropertyTree& data) const
 {
     data["radius"] = PropertyTreeScalar(m_radius);
 }
 
-void MapGrail::FromJson(const PropertyTree& data)
+void MapGrail::fromJson(const PropertyTree& data)
 {
     data["radius"].getScalar().convertTo(m_radius);
 }
