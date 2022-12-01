@@ -20,7 +20,7 @@
         }
     },
     "pres": {"unitBackground": "crbkgcas", 
-		"townAnimations" : ["avccast0", "avccasf0", "avccasc0", "avccasx0", "avccasz0"] }
+		"townAnimations" : ["AVCcast0", "AVCcasf0", "AVCcasc0", "AVCcasx0", "AVCcasz0"] }
 },
 
 "sod.faction.rampart"             : {
@@ -40,7 +40,7 @@
         }
     },
     "pres": { "unitBackground": "crbkgram", 
-		"townAnimations" : ["avcramp0", "avcramf0", "avcramc0", "avcramx0", "avcramz0"],
+		"townAnimations" : ["AVCramp0", "AVCramf0", "AVCramc0", "AVCramx0", "AVCramz0"],
         "goesAfterId":"sod.faction.castle"}
 
 },
@@ -61,7 +61,7 @@
         }
     },
     "pres": {"unitBackground":"crbkgtow", 
-		"townAnimations" : ["avctowr0", "avctowf0", "avctowc0", "avctowx0", "avctowz0"],
+		"townAnimations" : ["AVCtowr0", "AVCtowf0", "AVCtowc0", "AVCtowx0", "AVCtowz0"],
         "goesAfterId":"sod.faction.rampart"}
 },
 
@@ -81,7 +81,7 @@
         }
     },
     "pres": { "unitBackground":"crbkginf", 
-	"townAnimations" : ["avcinft0", "avcinff0", "avcinfc0", "avcinfx0", "avcinfz0"]}
+	"townAnimations" : ["AVCinft0", "AVCinff0", "AVCinfc0", "AVCinfx0", "AVCinfz0"]}
 },
 
 "sod.faction.necropolis"             : {
@@ -100,7 +100,7 @@
         }
     },
     "pres": {"unitBackground":"crbkgnec" ,
-		"townAnimations" : ["avcnecr0", "avcnecf0", "avcnecc0", "avcnecx0", "avcnecz0"],
+		"townAnimations" : ["AVCnecr0", "AVCnecf0", "AVCnecc0", "AVCnecx0", "AVCnecz0"],
         "goesAfterId":"sod.faction.inferno"}
 
 },
@@ -121,7 +121,7 @@
         }
     },
     "pres": {"unitBackground":"crbkgdun",
-		"townAnimations" : ["avcdung0", "avcdunf0", "avcdunc0", "avcdunx0", "avcdunz0"],
+		"townAnimations" : ["AVCdung0", "AVCdunf0", "AVCdunc0", "AVCdunx0", "AVCdunz0"],
         "goesAfterId":"sod.faction.necropolis"}
 },
 
@@ -141,7 +141,7 @@
         }
     },
     "pres": { "unitBackground":"crbkgstr",
-		"townAnimations" : ["avcstro0", "avcstrf0", "avcstrc0", "avcstrx0", "avcstrz0"] }
+		"townAnimations" : ["AVCstro0", "AVCstrf0", "AVCstrc0", "AVCstrx0", "AVCstrz0"] }
 },
 
 "sod.faction.fortress"             : {
@@ -163,7 +163,7 @@
         }
     },
     "pres": { "unitBackground":"crbkgfor",
-		"townAnimations" : ["avcftrt0", "avcftrf0", "avcftrc0", "avcftrx0", "avcftrz0"],
+		"townAnimations" : ["AVCftrt0", "AVCftrf0", "AVCftrc0", "AVCftrx0", "AVCftrz0"],
         "goesAfterId":"sod.faction.stronghold"}
 },
 
@@ -183,7 +183,7 @@
         }
     },
     "pres": { "unitBackground":"crbkgele",
-		"townAnimations" : ["avchfor0", "avchfoc0", "avchfof0", "avchforx", "avchforz"],
+		"townAnimations" : ["AVChfor0", "AVChfoc0", "AVChfof0", "AVChforx", "AVChforz"],
         "goesAfterId":"sod.faction.fortress"}
 
 },
@@ -204,7 +204,7 @@
         }
     },
     "pres": { "unitBackground":"crbkgcov",
-		"townAnimations" : ["avccove0", "avccovf0", "avccovc0", "avccovx0", "avccovz0"],
+		"townAnimations" : ["AVCcove0", "AVCcovf0", "AVCcovc0", "AVCcovx0", "AVCcovz0"],
         "goesAfterId":"sod.faction.conflux" }
 },
 

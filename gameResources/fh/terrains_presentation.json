@@ -119,6 +119,8 @@
     "backgroundsBattle" : ["cmbkboat","cmbkdeck" ],
     "icon" : "watrtl:21:0",
 	"centerTilesOffset": 21,
+	"centerTiles": ["watrtl:21:0","watrtl:22:0","watrtl:23:0","watrtl:24:0","watrtl:25:0","watrtl:26:0",
+                    "watrtl:27:0","watrtl:28:0","watrtl:29:0","watrtl:30:0","watrtl:31:0","watrtl:32:0"],
     "tileset": "watrtl"
 }},
 "sod.terrain.rock" : { "pres":

@@ -68,13 +68,16 @@ public:
         SerializeFHObjectToProperty,
         DeserializeFHObjectFromProperty,
         ConstructH3MFromFH,
+        ConstructFHFromH3M,
         CheckH3MInputOutputEquality,
 
         // High-level tasks
         ConvertH3MToJson,
         ConvertJsonToH3M,
-        H3MRoundTrip,
         FHMapToH3M,
+        H3MToFHMap,
+        H3MRoundTripJson,
+        H3MRoundTripFH,
     };
 
 public:
@@ -83,7 +86,7 @@ public:
                  const Core::IRandomGeneratorFactory* rngFactory,
                  Settings                             settings);
 
-    bool run(Task command) noexcept;
+    bool run(Task command, int recurse = 0) noexcept;
 
 public: // todo:
     H3Map             m_mapLegacy;

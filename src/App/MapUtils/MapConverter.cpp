@@ -56,23 +56,29 @@ inline constexpr const auto EnumTraits::s_valueMapping<MapConverter::Task> = Enu
     MapConverter::Task::SerializeLegacyObjectToProperty,
     "DeserializeLegacyObjectFromProperty",
     MapConverter::Task::DeserializeLegacyObjectFromProperty,
-    "CheckH3MInputOutputEquality",
-    MapConverter::Task::CheckH3MInputOutputEquality,
     "SerializeFHObjectToProperty",
     MapConverter::Task::SerializeFHObjectToProperty,
     "DeserializeFHObjectFromProperty",
     MapConverter::Task::DeserializeFHObjectFromProperty,
     "ConstructH3MFromFH",
     MapConverter::Task::ConstructH3MFromFH,
+    "ConstructFHFromH3M",
+    MapConverter::Task::ConstructFHFromH3M,
+    "CheckH3MInputOutputEquality",
+    MapConverter::Task::CheckH3MInputOutputEquality,
 
     "ConvertH3MToJson",
     MapConverter::Task::ConvertH3MToJson,
     "ConvertJsonToH3M",
     MapConverter::Task::ConvertJsonToH3M,
-    "H3MRoundTrip",
-    MapConverter::Task::H3MRoundTrip,
     "FHMapToH3M",
-    MapConverter::Task::FHMapToH3M);
+    MapConverter::Task::FHMapToH3M,
+    "H3MToFHMap",
+    MapConverter::Task::H3MToFHMap,
+    "H3MRoundTripJson",
+    MapConverter::Task::H3MRoundTripJson,
+    "H3MRoundTripFH",
+    MapConverter::Task::H3MRoundTripFH);
 
 }
 
@@ -97,9 +103,12 @@ MapConverter::MapConverter(std::ostream&                        logOutput,
 {
 }
 
-bool MapConverter::run(Task task) noexcept
+bool MapConverter::run(Task task, int recurse) noexcept
 {
     try {
+        for (int r = 0; r < recurse; ++r)
+            m_logOutput << "  ";
+        m_logOutput << "run " << taskToString(task) << "\n";
         auto checkFilename = [this](const std::string& name, const Core::std_path& path, bool checkExists) -> bool {
             if (path.empty()) {
                 m_logOutput << "Path '" << name << "' must not be empty\n";
@@ -316,7 +325,11 @@ bool MapConverter::run(Task task) noexcept
             } break;
             case Task::DeserializeFHObjectFromProperty:
             {
-                m_mapFH.fromJson(m_json);
+                if (m_json["version"].getScalar().toString() == "HOTA")
+                    m_mapFH.m_version = Core::GameVersion::HOTA;
+                else
+                    m_mapFH.m_version = Core::GameVersion::SOD;
+                m_mapFH.fromJson(m_json, m_databaseContainer->getDatabase(m_mapFH.m_version));
 
             } break;
             case Task::ConstructH3MFromFH:
@@ -324,6 +337,14 @@ bool MapConverter::run(Task task) noexcept
                 auto rnd = m_rngFactory->create();
                 rnd->setSeed(m_mapFH.m_seed);
                 convertFH2H3M(m_mapFH, m_mapLegacy, m_databaseContainer->getDatabase(m_mapFH.m_version), rnd.get());
+            } break;
+            case Task::ConstructFHFromH3M:
+            {
+                if (m_mapLegacy.m_format >= MapFormat::HOTA1)
+                    m_mapFH.m_version = Core::GameVersion::HOTA;
+                else
+                    m_mapFH.m_version = Core::GameVersion::SOD;
+                convertH3M2FH(m_mapLegacy, m_mapFH, m_databaseContainer->getDatabase(m_mapFH.m_version));
             } break;
 
             case Task::CheckH3MInputOutputEquality:
@@ -359,26 +380,53 @@ bool MapConverter::run(Task task) noexcept
             case Task::ConvertH3MToJson:
             {
                 return true
-                       && run(Task::ReadH3MRawData)
-                       && run(Task::DetectCompression)
-                       && run(Task::UncompressRaw)
-                       && run(Task::DumpH3MRawDataAsUncompressedInput)
-                       && run(Task::ReadH3MRawToLegacyObject)
-                       && run(Task::SerializeLegacyObjectToProperty)
-                       && run(Task::WriteJsonFromProperty);
+                       && run(Task::ReadH3MRawData, recurse + 1)
+                       && run(Task::DetectCompression, recurse + 1)
+                       && run(Task::UncompressRaw, recurse + 1)
+                       && run(Task::DumpH3MRawDataAsUncompressedInput, recurse + 1)
+                       && run(Task::ReadH3MRawToLegacyObject, recurse + 1)
+                       && run(Task::SerializeLegacyObjectToProperty, recurse + 1)
+                       && run(Task::WriteJsonFromProperty, recurse + 1);
             } break;
             case Task::ConvertJsonToH3M:
             {
                 return true
-                       && run(Task::ReadJsonToProperty)
-                       && run(Task::DeserializeLegacyObjectFromProperty)
-                       && run(Task::WriteH3MRawFromLegacyObject)
-                       && run(Task::DumpH3MRawDataAsUncompressedOutput)
+                       && run(Task::ReadJsonToProperty, recurse + 1)
+                       && run(Task::DeserializeLegacyObjectFromProperty, recurse + 1)
+                       && run(Task::WriteH3MRawFromLegacyObject, recurse + 1)
+                       && run(Task::DumpH3MRawDataAsUncompressedOutput, recurse + 1)
                        //&& [this]() { m_compressionMethod = CompressionMethod::Gzip; return true; }()
-                       && run(Task::CompressRaw)
-                       && run(Task::WriteH3MRawData);
+                       && run(Task::CompressRaw, recurse + 1)
+                       && run(Task::WriteH3MRawData, recurse + 1);
             } break;
-            case Task::H3MRoundTrip:
+            case Task::FHMapToH3M:
+            {
+                return true
+                       && run(Task::ReadJsonToProperty, recurse + 1)
+                       && run(Task::DeserializeFHObjectFromProperty, recurse + 1)
+                       && run(Task::ConstructH3MFromFH, recurse + 1)
+                       && run(Task::SerializeLegacyObjectToProperty, recurse + 1)
+                       // && run(Task::WriteJsonFromProperty, recurse + 1)
+                       && run(Task::WriteH3MRawFromLegacyObject, recurse + 1)
+                       && run(Task::DumpH3MRawDataAsUncompressedOutput, recurse + 1)
+                       && [this]() { m_compressionMethod = CompressionMethod::Gzip; return true; }()
+                       && run(Task::CompressRaw, recurse + 1)
+                       && run(Task::WriteH3MRawData, recurse + 1);
+            } break;
+            case Task::H3MToFHMap:
+            {
+                return true
+                       && run(Task::ReadH3MRawData, recurse + 1)
+                       && run(Task::DetectCompression, recurse + 1)
+                       && run(Task::UncompressRaw, recurse + 1)
+                       && run(Task::DumpH3MRawDataAsUncompressedInput, recurse + 1)
+                       && run(Task::ReadH3MRawToLegacyObject, recurse + 1)
+                       && run(Task::ConstructFHFromH3M, recurse + 1)
+                       && run(Task::SerializeFHObjectToProperty, recurse + 1)
+                       && run(Task::WriteJsonFromProperty, recurse + 1);
+                ;
+            } break;
+            case Task::H3MRoundTripJson:
             {
                 if (m_settings.m_jsonInput != m_settings.m_jsonOutput) {
                     m_logOutput << "You must set jsonInput equal to jsonOutput to perform roundtrip check.\n";
@@ -386,23 +434,21 @@ bool MapConverter::run(Task task) noexcept
                 }
 
                 return true
-                       && run(Task::ConvertH3MToJson)
-                       && run(Task::ConvertJsonToH3M)
-                       && run(Task::CheckH3MInputOutputEquality);
+                       && run(Task::ConvertH3MToJson, recurse + 1)
+                       && run(Task::ConvertJsonToH3M, recurse + 1)
+                       && run(Task::CheckH3MInputOutputEquality, recurse + 1);
             } break;
-            case Task::FHMapToH3M:
+            case Task::H3MRoundTripFH:
             {
+                if (m_settings.m_jsonInput != m_settings.m_jsonOutput) {
+                    m_logOutput << "You must set jsonInput equal to jsonOutput to perform roundtrip check.\n";
+                    return false;
+                }
+
                 return true
-                       && run(Task::ReadJsonToProperty)
-                       && run(Task::DeserializeFHObjectFromProperty)
-                       && run(Task::ConstructH3MFromFH)
-                       && run(Task::SerializeLegacyObjectToProperty)
-                       && run(Task::WriteJsonFromProperty)
-                       && run(Task::WriteH3MRawFromLegacyObject)
-                       && run(Task::DumpH3MRawDataAsUncompressedOutput)
-                       && [this]() { m_compressionMethod = CompressionMethod::Gzip; return true; }()
-                       && run(Task::CompressRaw)
-                       && run(Task::WriteH3MRawData);
+                       && run(Task::H3MToFHMap, recurse + 1)
+                       && run(Task::FHMapToH3M, recurse + 1)
+                       && run(Task::CheckH3MInputOutputEquality, recurse + 1);
             } break;
         }
     }

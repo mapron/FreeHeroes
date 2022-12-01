@@ -11,11 +11,6 @@
 
 namespace FreeHeroes {
 
-namespace Core {
-class IGameDatabase;
-class IRandomGenerator;
-}
-
 class int3 {
 public:
     uint8_t x{ 0 }, y{ 0 }, z{ 0 };
