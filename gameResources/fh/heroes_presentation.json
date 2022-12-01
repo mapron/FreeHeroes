@@ -79,6 +79,7 @@
 "sod.hero.necropolis.dk069"        : [ [ 6  , "hpl069dk" ,  "hps069dk"  ,   "f"] ],
 "sod.hero.necropolis.dk070"        : [ [ 7  , "hpl070dk" ,  "hps070dk"  ,   "m"] ],
 "sod.hero.necropolis.dk071"        : [ [ 9  , "hpl071dk" ,  "hps071dk"  ,   "m"] ],
+"sod.hero.necropolis.dx071"        : [ [ 10 , "hpl071dx" ,  "hps071dx"  ,   "m"] ],
 "sod.hero.necropolis.nc072"        : [ [ 1  , "hpl072nc" ,  "hps072nc"  ,   "f"] ],
 "sod.hero.necropolis.nc073"        : [ [ 2  , "hpl073nc" ,  "hps073nc"  ,   "f"] ],
 "sod.hero.necropolis.nc074"        : [ [ 3  , "hpl074nc" ,  "hps074nc"  ,   "m"] ],

@@ -421,7 +421,8 @@
 "sod.hero.castle.kx003"                     : [ 175 ],
 "sod.hero.fortress.wx122"                   : [ 176 ],
 
-"sod.hero.rampart.rx020"                    : [ 177 ]
+"sod.hero.rampart.rx020"                    : [ 177 ],
+"sod.hero.necropolis.dx071"                 : [ 178 ]
 }
 
 },

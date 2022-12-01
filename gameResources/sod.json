@@ -131,10 +131,10 @@
 "sod.hero.stronghold.bm111"        : { "secondarySkills": [{"skillId": "sod.skill.wisdom"         , "level": 0 }, {"skillId": "sod.skill.resistance"       , "level": 0 }]},
 "sod.hero.fortress.bs112"          : { "secondarySkills": [{"skillId": "sod.skill.armourer"       , "level": 0 }, {"skillId": "sod.skill.resistance"       , "level": 0 }]},
 
-"sod.hero.castle.kx003"         : null,
-"sod.hero.fortress.wx122"         : null,
-"sod.hero.rampart.rx020"         : null
-
+"sod.hero.castle.kx003"            : null,
+"sod.hero.fortress.wx122"          : null,
+"sod.hero.rampart.rx020"           : null,
+"sod.hero.necropolis.dx071"        : null
 }
 
 },

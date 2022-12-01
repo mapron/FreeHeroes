@@ -79,6 +79,7 @@
 "sod.hero.necropolis.dk069"        : [[{"skillId": "sod.skill.necromancy"     , "level": 1 }                                           ]],
 "sod.hero.necropolis.dk070"        : [[{"skillId": "sod.skill.necromancy"     , "level": 0 }, {"skillId": "sod.skill.offense"          , "level": 0 }]],
 "sod.hero.necropolis.dk071"        : [[{"skillId": "sod.skill.necromancy"     , "level": 0 }, {"skillId": "sod.skill.armourer"         , "level": 0 }]],
+"sod.hero.necropolis.dx071"        : [[{"skillId": "sod.skill.necromancy"     , "level": 0 }, {"skillId": "sod.skill.artillery"        , "level": 0 }]],
 "sod.hero.necropolis.nc072"        : [[{"skillId": "sod.skill.necromancy"     , "level": 0 }, {"skillId": "sod.skill.scholar"          , "level": 0 }]],
 "sod.hero.necropolis.nc073"        : [[{"skillId": "sod.skill.necromancy"     , "level": 0 }, {"skillId": "sod.skill.wisdom"           , "level": 0 }]],
 "sod.hero.necropolis.nc074"        : [[{"skillId": "sod.skill.necromancy"     , "level": 0 }, {"skillId": "sod.skill.sorcery"          , "level": 0 }]],
