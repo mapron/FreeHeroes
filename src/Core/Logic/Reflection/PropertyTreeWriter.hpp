@@ -57,6 +57,20 @@ public:
         }
     }
 
+    template<IsStdOptional Container>
+    void valueToJson(const Container& container, PropertyTree& result)
+    {
+        result = {};
+        result.convertToList();
+        if (!container.has_value())
+            return;
+
+        result.getList().resize(1);
+
+        PropertyTree& child = result.getList()[0];
+        valueToJson(container.value(), child);
+    }
+
     template<IsMap Container>
     void valueToJson(const Container& container, PropertyTree& result)
     {

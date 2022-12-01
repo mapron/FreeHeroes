@@ -6,6 +6,7 @@
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
+#include <optional>
 #include <vector>
 #include <list>
 #include <deque>
@@ -35,6 +36,9 @@ concept IsSet = std::same_as<T, std::set<typename T::key_type, typename T::key_c
 
 template<typename T>
 concept IsStdArray = details::is_array<T>::value;
+
+template<typename T>
+concept IsStdOptional = std::same_as<T, std::optional<typename T::value_type>>;
 
 template<typename T>
 concept IsStdVector = std::same_as<T, std::vector<typename T::value_type, typename T::allocator_type>>;

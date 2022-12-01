@@ -108,6 +108,20 @@ public:
         }
     }
 
+    template<IsStdOptional Container>
+    void jsonToValue(const PropertyTree& json, Container& container)
+    {
+        if (!json.isList())
+            return;
+        assert(json.getList().size() <= 1);
+        for (const PropertyTree& child : json.getList()) {
+            typename Container::value_type value;
+            jsonToValue(child, value);
+            container = std::move(value);
+            break;
+        }
+    }
+
     template<IsMap Container>
     void jsonToValue(const PropertyTree& json, Container& container)
     {
