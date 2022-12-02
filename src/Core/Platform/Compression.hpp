@@ -21,8 +21,9 @@ enum class CompressionType
 };
 
 struct CompressionInfo {
-    CompressionType m_type  = CompressionType::None;
-    int             m_level = 5;
+    CompressionType m_type    = CompressionType::None;
+    int             m_level   = 5;
+    bool            m_skipCRC = false;
 };
 
 COREPLATFORM_EXPORT void uncompressDataBuffer(const ByteArrayHolder& input, ByteArrayHolder& output, CompressionInfo compressionInfo);

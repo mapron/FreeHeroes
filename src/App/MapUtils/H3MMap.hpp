@@ -7,13 +7,13 @@
 
 #include "ByteOrderStream.hpp"
 #include "PropertyTree.hpp"
-#include "MapObjects.hpp"
+#include "H3MObjects.hpp"
 
 namespace FreeHeroes {
 
-class int3 {
+class H3Pos {
 public:
-    uint8_t x{ 0 }, y{ 0 }, z{ 0 };
+    uint8_t m_x{ 0 }, m_y{ 0 }, m_z{ 0 };
 
     void readBinary(ByteOrderDataStreamReader& stream);
     void writeBinary(ByteOrderDataStreamWriter& stream) const;
@@ -21,24 +21,24 @@ public:
 
 /// The disposed hero struct describes which hero can be hired from which player.
 struct DisposedHero {
-    uint8_t     heroId   = 0;
-    uint8_t     portrait = 0xFF; /// The portrait id of the hero, 0xFF is default.
-    std::string name;
-    uint8_t     players = 0; /// Who can hire this hero (bitfield).
+    uint8_t     m_heroId   = 0;
+    uint8_t     m_portrait = 0xFF; /// The portrait id of the hero, 0xFF is default.
+    std::string m_name;
+    uint8_t     m_players = 0; /// Who can hire this hero (bitfield).
 
     void readBinary(ByteOrderDataStreamReader& stream);
     void writeBinary(ByteOrderDataStreamWriter& stream) const;
 };
 
 struct SHeroName {
-    uint8_t     heroId;
-    std::string heroName;
+    uint8_t     m_heroId;
+    std::string m_heroName;
 
     void readBinary(ByteOrderDataStreamReader& stream);
     void writeBinary(ByteOrderDataStreamWriter& stream) const;
 };
 
-enum class EAiTactic
+enum class AiTactic
 {
     NONE = -1,
     RANDOM,
@@ -50,45 +50,43 @@ enum class EAiTactic
 /// The player info constains data about which factions are allowed, AI tactical settings,
 /// the main hero name, where to generate the hero, whether the faction should be selected randomly,...
 struct PlayerInfo {
-    bool      canHumanPlay    = false;
-    bool      canComputerPlay = false;
-    EAiTactic aiTactic        = EAiTactic::RANDOM;
+    bool     m_canHumanPlay    = false;
+    bool     m_canComputerPlay = false;
+    AiTactic m_aiTactic        = AiTactic::RANDOM;
 
-    uint16_t allowedFactionsBitmask{ 0 };
-    uint8_t  isFactionRandom{ 0 };
+    uint16_t m_allowedFactionsBitmask{ 0 };
+    uint8_t  m_isFactionRandom{ 0 };
 
-    ///main hero instance (VCMI maps only)
-    std::string mainHeroInstance;
     /// Player has a random main hero
-    bool hasRandomHero = false;
+    bool m_hasRandomHero = false;
 
-    uint8_t     mainCustomHeroPortrait = 0xff;
-    std::string mainCustomHeroName;
+    uint8_t     m_mainCustomHeroPortrait = 0xff;
+    std::string m_mainCustomHeroName;
 
-    uint8_t mainCustomHeroId = 0xff; /// ID of custom hero
+    uint8_t m_mainCustomHeroId = 0xff; /// ID of custom hero
 
-    bool    hasMainTown            = false;
-    bool    generateHeroAtMainTown = false;
-    int3    posOfMainTown;
-    uint8_t team{ 0xff }; /// The default value NO_TEAM
+    bool    m_hasMainTown            = false;
+    bool    m_generateHeroAtMainTown = false;
+    H3Pos   m_posOfMainTown;
+    uint8_t m_team{ 0xff }; /// The default value NO_TEAM
 
-    uint8_t generateHero{ 0 }; /// Unused.
-    uint8_t p7{ 0 };           /// Unknown and unused.
+    uint8_t m_generateHero{ 0 }; /// Unused.
+    uint8_t m_unknown1{ 0 };     /// Unknown and unused.
     /// Unused. Count of hero placeholders containing hero type.
     /// WARNING: powerPlaceholders sometimes gives false 0 (eg. even if there is one placeholder), maybe different meaning ???
-    uint8_t powerPlaceholders{ 0 };
+    uint8_t m_powerPlaceholders{ 0 };
 
-    std::vector<SHeroName> heroesNames; /// list of placed heroes on the map
+    std::vector<SHeroName> m_heroesNames; /// list of placed heroes on the map
 };
 
 struct MapTile {
-    uint8_t terType      = 0xff;
-    uint8_t terView      = 0;
-    uint8_t riverType    = 0;
-    uint8_t riverDir     = 0;
-    uint8_t roadType     = 0;
-    uint8_t roadDir      = 0;
-    uint8_t extTileFlags = 0;
+    uint8_t m_terType      = 0xff;
+    uint8_t m_terView      = 0;
+    uint8_t m_riverType    = 0;
+    uint8_t m_riverDir     = 0;
+    uint8_t m_roadType     = 0;
+    uint8_t m_roadDir      = 0;
+    uint8_t m_extTileFlags = 0;
 
     enum ExtFlags
     {
@@ -163,7 +161,7 @@ struct ObjectTemplate {
 };
 
 struct Object {
-    int3     m_pos;
+    H3Pos    m_pos;
     uint32_t m_defnum = 0;
 
     std::shared_ptr<IMapObject> m_impl;
@@ -271,7 +269,7 @@ struct H3Map {
         uint8_t  m_resourceID     = 0;
         uint32_t m_resourceAmount = 0;
 
-        int3    m_pos;
+        H3Pos   m_pos;
         uint8_t m_hallLevel   = 0;
         uint8_t m_castleLevel = 0;
 
@@ -282,7 +280,7 @@ struct H3Map {
         MapFormatFeaturesPtr m_features;
         LossConditionType    m_type       = LossConditionType::LOSSSTANDARD;
         uint16_t             m_daysPassed = 0;
-        int3                 m_pos;
+        H3Pos                m_pos;
 
         void readBinary(ByteOrderDataStreamReader& stream);
         void writeBinary(ByteOrderDataStreamWriter& stream) const;

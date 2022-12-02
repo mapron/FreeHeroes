@@ -4,13 +4,12 @@
  * See LICENSE file for details.
  */
 
-#include "MapFormat.hpp"
-#include "FHMap.hpp"
+#include "H3MMap.hpp"
 
 #include "Reflection/PropertyTreeReader.hpp"
 #include "Reflection/PropertyTreeWriter.hpp"
-#include "MapFormatReflection.hpp"
-#include "MapObjectsReflection.hpp"
+#include "H3MMapReflection.hpp"
+#include "H3MObjectsReflection.hpp"
 
 #include <set>
 
@@ -290,41 +289,41 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
         stream >> m_levelLimit;
 
     for (PlayerInfo& playerInfo : m_players) {
-        stream >> playerInfo.canHumanPlay >> playerInfo.canComputerPlay;
+        stream >> playerInfo.m_canHumanPlay >> playerInfo.m_canComputerPlay;
 
-        playerInfo.aiTactic = static_cast<EAiTactic>(stream.readScalar<uint8_t>());
+        playerInfo.m_aiTactic = static_cast<AiTactic>(stream.readScalar<uint8_t>());
 
         if (m_features->m_playerP7) {
-            stream >> playerInfo.p7;
+            stream >> playerInfo.m_unknown1;
         } else {
-            playerInfo.p7 = -1;
+            playerInfo.m_unknown1 = -1;
         }
 
         // Factions this player can choose
         if (m_features->m_factions16Bit)
-            stream >> playerInfo.allowedFactionsBitmask;
+            stream >> playerInfo.m_allowedFactionsBitmask;
         else
-            playerInfo.allowedFactionsBitmask = stream.readScalar<uint8_t>();
+            playerInfo.m_allowedFactionsBitmask = stream.readScalar<uint8_t>();
 
-        stream >> playerInfo.isFactionRandom >> playerInfo.hasMainTown;
-        if (playerInfo.hasMainTown) {
-            playerInfo.generateHeroAtMainTown = true;
-            playerInfo.generateHero           = false;
+        stream >> playerInfo.m_isFactionRandom >> playerInfo.m_hasMainTown;
+        if (playerInfo.m_hasMainTown) {
+            playerInfo.m_generateHeroAtMainTown = true;
+            playerInfo.m_generateHero           = false;
             if (m_features->m_playerGenerateHeroInfo)
-                stream >> playerInfo.generateHeroAtMainTown >> playerInfo.generateHero;
+                stream >> playerInfo.m_generateHeroAtMainTown >> playerInfo.m_generateHero;
 
-            stream >> playerInfo.posOfMainTown;
+            stream >> playerInfo.m_posOfMainTown;
         }
 
-        stream >> playerInfo.hasRandomHero >> playerInfo.mainCustomHeroId;
+        stream >> playerInfo.m_hasRandomHero >> playerInfo.m_mainCustomHeroId;
 
-        if (playerInfo.mainCustomHeroId != 0xff) {
-            stream >> playerInfo.mainCustomHeroPortrait;
-            stream >> playerInfo.mainCustomHeroName;
+        if (playerInfo.m_mainCustomHeroId != 0xff) {
+            stream >> playerInfo.m_mainCustomHeroPortrait;
+            stream >> playerInfo.m_mainCustomHeroName;
         }
 
         if (m_features->m_playerPlaceholders)
-            stream >> playerInfo.powerPlaceholders >> playerInfo.heroesNames;
+            stream >> playerInfo.m_powerPlaceholders >> playerInfo.m_heroesNames;
     }
 
     stream >> m_victoryCondition >> m_lossCondition;
@@ -432,8 +431,7 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
 
 void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
-    const auto format = static_cast<int32_t>(m_format);
-    stream << format;
+    stream << static_cast<int32_t>(m_format);
 
     if (m_format >= MapFormat::HOTA1) {
         stream << m_hotaVer.m_ver1 << m_hotaVer.m_ver2;
@@ -449,35 +447,35 @@ void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
         stream << m_levelLimit;
 
     for (const PlayerInfo& playerInfo : m_players) {
-        stream << playerInfo.canHumanPlay << playerInfo.canComputerPlay;
+        stream << playerInfo.m_canHumanPlay << playerInfo.m_canComputerPlay;
 
-        stream << static_cast<uint8_t>(playerInfo.aiTactic);
+        stream << static_cast<uint8_t>(playerInfo.m_aiTactic);
 
         if (m_features->m_playerP7)
-            stream << playerInfo.p7;
+            stream << playerInfo.m_unknown1;
 
         if (m_features->m_factions16Bit)
-            stream << playerInfo.allowedFactionsBitmask;
+            stream << playerInfo.m_allowedFactionsBitmask;
         else
-            stream << uint8_t(playerInfo.allowedFactionsBitmask);
+            stream << uint8_t(playerInfo.m_allowedFactionsBitmask);
 
-        stream << playerInfo.isFactionRandom << playerInfo.hasMainTown;
-        if (playerInfo.hasMainTown) {
+        stream << playerInfo.m_isFactionRandom << playerInfo.m_hasMainTown;
+        if (playerInfo.m_hasMainTown) {
             if (m_features->m_playerGenerateHeroInfo)
-                stream << playerInfo.generateHeroAtMainTown << playerInfo.generateHero;
+                stream << playerInfo.m_generateHeroAtMainTown << playerInfo.m_generateHero;
 
-            stream << playerInfo.posOfMainTown;
+            stream << playerInfo.m_posOfMainTown;
         }
 
-        stream << playerInfo.hasRandomHero << playerInfo.mainCustomHeroId;
+        stream << playerInfo.m_hasRandomHero << playerInfo.m_mainCustomHeroId;
 
-        if (playerInfo.mainCustomHeroId != 0xff) {
-            stream << playerInfo.mainCustomHeroPortrait;
-            stream << playerInfo.mainCustomHeroName;
+        if (playerInfo.m_mainCustomHeroId != 0xff) {
+            stream << playerInfo.m_mainCustomHeroPortrait;
+            stream << playerInfo.m_mainCustomHeroName;
         }
 
         if (m_features->m_playerPlaceholders)
-            stream << playerInfo.powerPlaceholders << playerInfo.heroesNames;
+            stream << playerInfo.m_powerPlaceholders << playerInfo.m_heroesNames;
     }
 
     stream << m_victoryCondition << m_lossCondition;
@@ -613,50 +611,50 @@ void H3Map::fromJson(const PropertyTree& data)
     }
 }
 
-void int3::readBinary(ByteOrderDataStreamReader& stream)
+void H3Pos::readBinary(ByteOrderDataStreamReader& stream)
 {
-    stream >> x >> y >> z;
+    stream >> m_x >> m_y >> m_z;
 }
 
-void int3::writeBinary(ByteOrderDataStreamWriter& stream) const
+void H3Pos::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
-    stream << x << y << z;
+    stream << m_x << m_y << m_z;
 }
 
 void SHeroName::readBinary(ByteOrderDataStreamReader& stream)
 {
-    stream >> heroId;
-    stream >> heroName;
+    stream >> m_heroId;
+    stream >> m_heroName;
 }
 
 void SHeroName::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
-    stream << heroId;
-    stream << heroName;
+    stream << m_heroId;
+    stream << m_heroName;
 }
 
 void DisposedHero::readBinary(ByteOrderDataStreamReader& stream)
 {
-    stream >> heroId >> portrait;
-    stream >> name;
-    stream >> players;
+    stream >> m_heroId >> m_portrait;
+    stream >> m_name;
+    stream >> m_players;
 }
 
 void DisposedHero::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
-    stream << heroId << portrait;
-    stream << name;
-    stream << players;
+    stream << m_heroId << m_portrait;
+    stream << m_name;
+    stream << m_players;
 }
 
 void MapTile::readBinary(ByteOrderDataStreamReader& stream)
 {
-    stream >> terType >> terView >> riverType >> riverDir >> roadType >> roadDir >> extTileFlags;
+    stream >> m_terType >> m_terView >> m_riverType >> m_riverDir >> m_roadType >> m_roadDir >> m_extTileFlags;
 }
 
 void MapTile::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
-    stream << terType << terView << riverType << riverDir << roadType << roadDir << extTileFlags;
+    stream << m_terType << m_terView << m_riverType << m_riverDir << m_roadType << m_roadDir << m_extTileFlags;
 }
 
 void ObjectTemplate::prepareArrays()

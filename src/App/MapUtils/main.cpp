@@ -15,45 +15,79 @@ using namespace FreeHeroes;
 
 int main(int argc, char** argv)
 {
-    AbstractCommandLine parser({ "task", "json-input", "h3m-input", "json-output", "h3m-output" });
-    parser.markRequired({ "task" });
+    AbstractCommandLine parser({
+                                   "input-fhMap",
+                                   "input-fhTpl",
+                                   "input-h3m",
+                                   "input-h3svg",
+                                   "output-fhMap",
+                                   "output-fhTpl",
+                                   "output-h3m",
+                                   "output-h3svg",
+                                   "dump-uncompressed",
+                                   "dump-json",
+                               },
+                               { "tasks" });
+    parser.markRequired({ "tasks" });
     if (!parser.parseArgs(std::cerr, argc, argv)) {
         std::cerr << "Map utils invocation failed, correct usage is:\n";
         std::cerr << parser.getHelp();
         return 1;
     }
 
-    const std::string taskStr                   = parser.getArg("task");
-    const std::string jsonInputFile             = parser.getArg("json-input");
-    const std::string jsonOutputFile            = parser.getArg("json-output");
-    const std::string h3mInputFile              = parser.getArg("h3m-input");
-    const std::string h3mOutputFile             = parser.getArg("h3m-output");
-    const std::string h3mUncompressedInputFile  = h3mInputFile.empty() ? "" : h3mInputFile + ".uncompressed";
-    const std::string h3mUncompressedOutputFile = h3mOutputFile.empty() ? "" : h3mOutputFile + ".uncompressed";
+    const auto tasks            = parser.getMultiArg("tasks");
+    const bool dumpUncompressed = parser.getArg("dump-uncompressed") == "1";
+    const bool dumpJson         = parser.getArg("dump-json") == "1";
 
     Core::CoreApplication fhCoreApp;
     fhCoreApp.initLogger();
     fhCoreApp.load();
 
+    auto makePaths = [&parser](bool isInput) -> MapConverter::PathsSet {
+        const std::string prefix     = isInput ? "input-" : "output-";
+        const std::string fhMap      = parser.getArg(prefix + "fhMap");
+        const std::string fhTemplate = parser.getArg(prefix + "fhTpl");
+        const std::string h3m        = parser.getArg(prefix + "h3m");
+        const std::string h3sav      = parser.getArg(prefix + "h3svg");
+
+        const std::string h3mUncompressed = h3m.empty() ? "" : h3m + ".uncompressed";
+        const std::string h3mJson         = h3m.empty() ? "" : h3m + ".json";
+
+        const std::string h3savUncompressed = h3sav.empty() ? "" : h3sav + ".uncompressed";
+        const std::string h3savJson         = h3sav.empty() ? "" : h3sav + ".json";
+
+        MapConverter::PathsSet result;
+        result.m_fhMap      = fhMap;
+        result.m_fhTemplate = fhTemplate;
+        result.m_h3m        = { .m_binary = h3m, .m_uncompressedBinary = h3mUncompressed, .m_json = h3mJson };
+        result.m_h3svg      = { .m_binary = h3sav, .m_uncompressedBinary = h3savUncompressed, .m_json = h3savJson };
+        return result;
+    };
+
     MapConverter converter(std::cerr,
                            fhCoreApp.getDatabaseContainer(),
                            fhCoreApp.getRandomGeneratorFactory(),
                            MapConverter::Settings{
-                               .m_jsonInput{ jsonInputFile },
-                               .m_jsonOutput{ jsonOutputFile },
-                               .m_h3mInput{ h3mInputFile },
-                               .m_h3mOutput{ h3mOutputFile },
-                               .m_h3mUncompressedInput{ h3mUncompressedInputFile },
-                               .m_h3mUncompressedOutput{ h3mUncompressedOutputFile },
+                               .m_inputs                  = makePaths(true),
+                               .m_outputs                 = makePaths(false),
+                               .m_dumpUncompressedBuffers = dumpUncompressed,
+                               .m_dumpBinaryDataJson      = dumpJson,
                            });
 
-    const MapConverter::Task task = stringToTask(taskStr);
-    if (task == MapConverter::Task::Invalid) {
-        std::cerr << "Unknown task: " << taskStr << "\n";
-        return 1;
+    for (const std::string& taskStr : tasks) {
+        const MapConverter::Task task = stringToTask(taskStr);
+        if (task == MapConverter::Task::Invalid) {
+            std::cerr << "Unknown task: " << taskStr << "\n";
+            return 1;
+        }
+        try {
+            converter.run(task);
+        }
+        catch (std::exception& ex) {
+            std::cerr << ex.what() << "\n";
+            return 1;
+        }
     }
-    if (!converter.run(task))
-        return 1;
 
     return 0;
 }

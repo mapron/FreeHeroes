@@ -6,7 +6,7 @@
 #include "FH2H3M.hpp"
 
 #include "FHMap.hpp"
-#include "MapFormat.hpp"
+#include "H3MMap.hpp"
 
 #include "IGameDatabase.hpp"
 #include "IRandomGenerator.hpp"
@@ -29,7 +29,7 @@ constexpr const std::string_view g_terrainDirt  = "sod.terrain.dirt";
 constexpr const std::string_view g_terrainSand  = "sod.terrain.sand";
 constexpr const std::string_view g_terrainWater = "sod.terrain.water";
 
-int3 int3fromPos(FHPos pos, int xoffset = 0)
+H3Pos int3fromPos(FHPos pos, int xoffset = 0)
 {
     return { (uint8_t) (pos.m_x + xoffset), (uint8_t) pos.m_y, (uint8_t) pos.m_z };
 }
@@ -74,17 +74,17 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
     for (uint8_t z = 0; z < tileMap.m_depth; ++z) {
         for (uint32_t y = 0; y < tileMap.m_height; ++y) {
             for (uint32_t x = 0; x < tileMap.m_width; ++x) {
-                auto& tile            = tileMap.get(x, y, z);
-                auto& destTile        = dest.m_tiles.get(x, y, z);
-                destTile.terType      = static_cast<uint8_t>(tile.m_terrain->legacyId);
-                destTile.terView      = tile.m_view;
-                destTile.extTileFlags = 0;
+                auto& tile              = tileMap.get(x, y, z);
+                auto& destTile          = dest.m_tiles.get(x, y, z);
+                destTile.m_terType      = static_cast<uint8_t>(tile.m_terrain->legacyId);
+                destTile.m_terView      = tile.m_view;
+                destTile.m_extTileFlags = 0;
                 if (tile.m_flipHor)
-                    destTile.extTileFlags |= MapTile::TerrainFlipHor;
+                    destTile.m_extTileFlags |= MapTile::TerrainFlipHor;
                 if (tile.m_flipVert)
-                    destTile.extTileFlags |= MapTile::TerrainFlipVert;
+                    destTile.m_extTileFlags |= MapTile::TerrainFlipVert;
                 if (tile.m_coastal)
-                    destTile.extTileFlags |= MapTile::Coastal;
+                    destTile.m_extTileFlags |= MapTile::Coastal;
             }
         }
     }
@@ -97,8 +97,8 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
         auto  index    = static_cast<int>(playerId);
         auto& h3player = dest.m_players[index];
 
-        h3player.canHumanPlay    = fhPlayer.m_humanPossible;
-        h3player.canComputerPlay = fhPlayer.m_aiPossible;
+        h3player.m_canHumanPlay    = fhPlayer.m_humanPossible;
+        h3player.m_canComputerPlay = fhPlayer.m_aiPossible;
 
         uint16_t factionsBitmask = 0;
         for (std::string allowedFaction : fhPlayer.m_startingFactions) {
@@ -106,7 +106,7 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
             assume(faction != nullptr);
             factionsBitmask |= 1U << uint32_t(faction->legacyId);
         }
-        h3player.allowedFactionsBitmask = factionsBitmask;
+        h3player.m_allowedFactionsBitmask = factionsBitmask;
     }
     for (auto& bit : dest.m_allowedHeroes)
         bit = 1;
@@ -175,9 +175,9 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
         auto  playerIndex = static_cast<int>(fhTown.m_player);
         auto& h3player    = dest.m_players[playerIndex];
         if (fhTown.m_isMain) {
-            h3player.hasMainTown   = true;
-            h3player.posOfMainTown = int3fromPos(fhTown.m_pos, -townGateOffset);
-            h3player.generateHero  = true;
+            h3player.m_hasMainTown   = true;
+            h3player.m_posOfMainTown = int3fromPos(fhTown.m_pos, -townGateOffset);
+            h3player.m_generateHero  = true;
         }
 
         auto cas1               = std::make_unique<MapTown>(dest.m_features);
@@ -205,10 +205,10 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
         const uint8_t heroId = libraryHero->legacyId;
 
         if (fhHero.m_isMain) {
-            h3player.mainCustomHeroId = heroId;
-            h3player.generateHero     = false;
+            h3player.m_mainCustomHeroId = heroId;
+            h3player.m_generateHero     = false;
         }
-        h3player.heroesNames.push_back(SHeroName{ .heroId = heroId, .heroName = "" });
+        h3player.m_heroesNames.push_back(SHeroName{ .m_heroId = heroId, .m_heroName = "" });
 
         auto her1                    = std::make_unique<MapHero>(dest.m_features);
         her1->m_playerOwner          = playerIndex;

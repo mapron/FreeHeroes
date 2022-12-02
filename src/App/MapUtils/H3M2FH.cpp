@@ -6,7 +6,7 @@
 #include "H3M2FH.hpp"
 
 #include "FHMap.hpp"
-#include "MapFormat.hpp"
+#include "H3MMap.hpp"
 
 #include "IGameDatabase.hpp"
 
@@ -18,9 +18,9 @@ namespace FreeHeroes {
 
 namespace {
 
-FHPos posFromInt3(int3 pos, int xoffset = 0)
+FHPos posFromInt3(H3Pos pos, int xoffset = 0)
 {
-    return { (uint32_t) (pos.x + xoffset), (uint32_t) pos.y, pos.z };
+    return { (uint32_t) (pos.m_x + xoffset), (uint32_t) pos.m_y, pos.m_z };
 }
 
 }
@@ -55,17 +55,17 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
         const auto playerId = static_cast<FHPlayerId>(index++);
         auto&      fhPlayer = dest.m_players[playerId];
 
-        fhPlayer.m_aiPossible    = playerInfo.canComputerPlay;
-        fhPlayer.m_humanPossible = playerInfo.canHumanPlay;
+        fhPlayer.m_aiPossible    = playerInfo.m_canComputerPlay;
+        fhPlayer.m_humanPossible = playerInfo.m_canHumanPlay;
 
-        if (playerInfo.hasMainTown) {
-            mainTowns[playerId] = posFromInt3(playerInfo.posOfMainTown, +2);
+        if (playerInfo.m_hasMainTown) {
+            mainTowns[playerId] = posFromInt3(playerInfo.m_posOfMainTown, +2);
         }
-        if (playerInfo.mainCustomHeroId != 0xff) {
-            mainHeroes[playerId] = playerInfo.mainCustomHeroId;
+        if (playerInfo.m_mainCustomHeroId != 0xff) {
+            mainHeroes[playerId] = playerInfo.m_mainCustomHeroId;
         }
 
-        const uint16_t factionsBitmask = playerInfo.allowedFactionsBitmask;
+        const uint16_t factionsBitmask = playerInfo.m_allowedFactionsBitmask;
         for (auto* faction : factionsContainer->records()) {
             if (faction->legacyId < 0)
                 continue;
@@ -303,7 +303,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
     };
 
     std::set<FHPos> zoned;
-    auto            defTerrainType = src.m_tiles.get(0, 0, 0).terType;
+    auto            defTerrainType = src.m_tiles.get(0, 0, 0).m_terType;
     dest.m_defaultTerrain          = legacyToLibraryTerrain(defTerrainType);
 
     if (1) {
@@ -315,7 +315,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
         auto addToResult = [&zoned, &result, &exclude, &src, &current, curType, defTerrainType](int dx, int dy) {
             const FHPos neighbour{ current.m_x + dx, current.m_y + dy, current.m_z };
             auto&       neighbourTile = src.m_tiles.get(neighbour.m_x, neighbour.m_y, neighbour.m_z);
-            if (neighbourTile.terType == defTerrainType || neighbourTile.terType != curType)
+            if (neighbourTile.m_terType == defTerrainType || neighbourTile.m_terType != curType)
                 return;
             if (zoned.contains(neighbour))
                 return;
@@ -337,7 +337,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
         for (uint32_t y = 0; y < dest.m_tileMap.m_height; ++y) {
             for (uint32_t x = 0; x < dest.m_tileMap.m_width; ++x) {
                 auto& tile = src.m_tiles.get(x, y, z);
-                if (tile.terType == defTerrainType)
+                if (tile.m_terType == defTerrainType)
                     continue;
 
                 const FHPos tilePos{ x, y, z };
@@ -352,7 +352,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                 while (true) {
                     std::set<FHPos> newFloodTiles;
                     for (const FHPos& prevIterTile : newZoneIter) {
-                        fillAdjucent(prevIterTile, tile.terType, newZone, newFloodTiles);
+                        fillAdjucent(prevIterTile, tile.m_terType, newZone, newFloodTiles);
                     }
                     if (newFloodTiles.empty())
                         break;
@@ -365,10 +365,10 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                 FHZone fhZone;
                 fhZone.m_tiles = std::vector<FHPos>(newZone.cbegin(), newZone.cend());
                 for (auto& pos : fhZone.m_tiles) {
-                    auto terVariant = src.m_tiles.get(pos.m_x, pos.m_y, pos.m_z).terView;
+                    auto terVariant = src.m_tiles.get(pos.m_x, pos.m_y, pos.m_z).m_terView;
                     fhZone.m_tilesVariants.push_back(terVariant);
                 }
-                fhZone.m_terrain = legacyToLibraryTerrain(tile.terType);
+                fhZone.m_terrain = legacyToLibraryTerrain(tile.m_terType);
                 dest.m_zones.push_back(std::move(fhZone));
             }
         }

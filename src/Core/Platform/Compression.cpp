@@ -85,7 +85,7 @@ int def(std::istream& source, std::vector<uint8_t>& dest, int level)
    invalid or incomplete, Z_VERSION_ERROR if the version of zlib.h and
    the version of the library linked do not match, or Z_ERRNO if there
    is an error reading or writing the files. */
-int inf(const std::vector<uint8_t>& source, std::ostream& dest)
+int inf(const std::vector<uint8_t>& source, bool skipCRC, std::ostream& dest)
 {
     int      ret;
     unsigned have;
@@ -127,8 +127,12 @@ int inf(const std::vector<uint8_t>& source, std::ostream& dest)
             assert(ret != Z_STREAM_ERROR); /* state not clobbered */
             switch (ret) {
                 case Z_NEED_DICT:
-                    ret = Z_DATA_ERROR; /* and fall through */
+                    ret = Z_DATA_ERROR;
+                    [[fallthrough]];
                 case Z_DATA_ERROR:
+                    if (skipCRC && strm.msg == std::string_view("incorrect data check"))
+                        ret = Z_OK;
+                    [[fallthrough]];
                 case Z_MEM_ERROR:
                     (void) inflateEnd(&strm);
                     return ret;
@@ -189,7 +193,7 @@ void uncompressDataBuffer(const ByteArrayHolder& input, ByteArrayHolder& output,
     else if (compressionInfo.m_type == CompressionType::Gzip) {
         ByteArrayHolderBufWriter outBuffer(output);
         std::ostream             outBufferStream(&outBuffer);
-        auto                     infResult = inf(input.ref(), outBufferStream);
+        auto                     infResult = inf(input.ref(), compressionInfo.m_skipCRC, outBufferStream);
         if (infResult != Z_OK)
             throw std::runtime_error("Gzip inflate failed:" + std::to_string(infResult));
     }

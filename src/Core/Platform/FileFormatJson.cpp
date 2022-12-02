@@ -124,7 +124,7 @@ void propertyToJson(const PropertyTree& data, rapidjson::Value& json, rapidjson:
     }
 }
 
-bool readJsonFromBuffer(const std::string& buffer, PropertyTree& data)
+bool readJsonFromBuffer(const std::string& buffer, PropertyTree& data) noexcept(true)
 {
     rapidjson::Document input;
     const char*         dataPtr = buffer.data();
@@ -146,7 +146,7 @@ bool readJsonFromBuffer(const std::string& buffer, PropertyTree& data)
     return true;
 }
 
-bool writeJsonToBuffer(std::string& buffer, const PropertyTree& data)
+bool writeJsonToBuffer(std::string& buffer, const PropertyTree& data) noexcept(true)
 {
     if (data.isNull()) {
         return false;
@@ -159,6 +159,22 @@ bool writeJsonToBuffer(std::string& buffer, const PropertyTree& data)
     json.Accept(writer);
 
     return true;
+}
+
+PropertyTree readJsonFromBufferThrow(const std::string& buffer) noexcept(false)
+{
+    PropertyTree result;
+    if (!readJsonFromBuffer(buffer, result))
+        throw std::runtime_error("Failed to read JSON");
+    return result;
+}
+
+std::string writeJsonToBufferThrow(const PropertyTree& data) noexcept(false)
+{
+    std::string buffer;
+    if (!writeJsonToBuffer(buffer, data))
+        throw std::runtime_error("Failed to write JSON");
+    return buffer;
 }
 
 }

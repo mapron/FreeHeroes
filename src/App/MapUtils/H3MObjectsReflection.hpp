@@ -8,7 +8,7 @@
 #include "Reflection/EnumTraits.hpp"
 #include "Reflection/MetaInfo.hpp"
 
-#include "MapObjects.hpp"
+#include "H3MObjects.hpp"
 
 namespace FreeHeroes::Core::Reflection {
 

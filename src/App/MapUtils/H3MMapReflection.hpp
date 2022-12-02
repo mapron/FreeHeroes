@@ -8,64 +8,63 @@
 #include "Reflection/EnumTraits.hpp"
 #include "Reflection/MetaInfo.hpp"
 
-#include "MapFormat.hpp"
+#include "H3MMap.hpp"
 
 namespace FreeHeroes::Core::Reflection {
 
 template<>
-inline constexpr const std::tuple MetaInfo::s_fields<int3>{
-    Field("x", &int3::x),
-    Field("y", &int3::y),
-    Field("z", &int3::z),
+inline constexpr const std::tuple MetaInfo::s_fields<H3Pos>{
+    Field("x", &H3Pos::m_x),
+    Field("y", &H3Pos::m_y),
+    Field("z", &H3Pos::m_z),
 };
 
 // clang-format off
 template<>
-inline constexpr const auto EnumTraits::s_valueMapping<EAiTactic> = EnumTraits::make(
-    EAiTactic::NONE,
-    "NONE", EAiTactic::NONE,
-    "RANDOM", EAiTactic::RANDOM,
-    "WARRIOR", EAiTactic::WARRIOR,
-    "BUILDER", EAiTactic::BUILDER,
-    "EXPLORER", EAiTactic::EXPLORER
+inline constexpr const auto EnumTraits::s_valueMapping<AiTactic> = EnumTraits::make(
+    AiTactic::NONE,
+    "NONE", AiTactic::NONE,
+    "RANDOM", AiTactic::RANDOM,
+    "WARRIOR", AiTactic::WARRIOR,
+    "BUILDER", AiTactic::BUILDER,
+    "EXPLORER", AiTactic::EXPLORER
     );
 // clang-format on
 
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<SHeroName>{
-    Field("heroId", &SHeroName::heroId),
-    Field("heroName", &SHeroName::heroName),
+    Field("heroId", &SHeroName::m_heroId),
+    Field("heroName", &SHeroName::m_heroName),
 
 };
 
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<DisposedHero>{
-    Field("heroId", &DisposedHero::heroId),
-    Field("portrait", &DisposedHero::portrait),
-    Field("name", &DisposedHero::name),
-    Field("players", &DisposedHero::players),
+    Field("heroId", &DisposedHero::m_heroId),
+    Field("portrait", &DisposedHero::m_portrait),
+    Field("name", &DisposedHero::m_name),
+    Field("players", &DisposedHero::m_players),
 };
 
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<PlayerInfo>{
-    Field("canHumanPlay", &PlayerInfo::canHumanPlay),
-    Field("canComputerPlay", &PlayerInfo::canComputerPlay),
-    Field("aiTactic", &PlayerInfo::aiTactic),
-    Field("allowedFactionsBitmask", &PlayerInfo::allowedFactionsBitmask),
-    Field("isFactionRandom", &PlayerInfo::isFactionRandom),
-    Field("mainHeroInstance", &PlayerInfo::mainHeroInstance),
-    Field("hasRandomHero", &PlayerInfo::hasRandomHero),
-    Field("mainCustomHeroPortrait", &PlayerInfo::mainCustomHeroPortrait),
-    Field("mainCustomHeroName", &PlayerInfo::mainCustomHeroName),
-    Field("mainCustomHeroId", &PlayerInfo::mainCustomHeroId),
-    Field("hasMainTown", &PlayerInfo::hasMainTown),
-    Field("generateHeroAtMainTown", &PlayerInfo::generateHeroAtMainTown),
-    Field("posOfMainTown", &PlayerInfo::posOfMainTown),
-    Field("team", &PlayerInfo::team),
-    Field("generateHero", &PlayerInfo::generateHero),
-    Field("p7", &PlayerInfo::p7),
-    Field("powerPlaceholders", &PlayerInfo::powerPlaceholders),
-    Field("heroesNames", &PlayerInfo::heroesNames),
+    Field("canHumanPlay", &PlayerInfo::m_canHumanPlay),
+    Field("canComputerPlay", &PlayerInfo::m_canComputerPlay),
+    Field("aiTactic", &PlayerInfo::m_aiTactic),
+    Field("allowedFactionsBitmask", &PlayerInfo::m_allowedFactionsBitmask),
+    Field("isFactionRandom", &PlayerInfo::m_isFactionRandom),
+    Field("hasRandomHero", &PlayerInfo::m_hasRandomHero),
+    Field("mainCustomHeroPortrait", &PlayerInfo::m_mainCustomHeroPortrait),
+    Field("mainCustomHeroName", &PlayerInfo::m_mainCustomHeroName),
+    Field("mainCustomHeroId", &PlayerInfo::m_mainCustomHeroId),
+    Field("hasMainTown", &PlayerInfo::m_hasMainTown),
+    Field("generateHeroAtMainTown", &PlayerInfo::m_generateHeroAtMainTown),
+    Field("posOfMainTown", &PlayerInfo::m_posOfMainTown),
+    Field("team", &PlayerInfo::m_team),
+    Field("generateHero", &PlayerInfo::m_generateHero),
+    Field("p7", &PlayerInfo::m_unknown1),
+    Field("powerPlaceholders", &PlayerInfo::m_powerPlaceholders),
+    Field("heroesNames", &PlayerInfo::m_heroesNames),
 
 };
 
@@ -123,13 +122,13 @@ inline constexpr const auto EnumTraits::s_valueMapping<ObjectTemplate::Type> = E
 
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<MapTile>{
-    Field("ex", &MapTile::extTileFlags),
-    Field("rdd", &MapTile::roadDir),
-    Field("rdt", &MapTile::roadType),
-    Field("rid", &MapTile::riverDir),
-    Field("rit", &MapTile::riverType),
-    Field("v", &MapTile::terView),
-    Field("t", &MapTile::terType),
+    Field("ex", &MapTile::m_extTileFlags),
+    Field("rdd", &MapTile::m_roadDir),
+    Field("rdt", &MapTile::m_roadType),
+    Field("rid", &MapTile::m_riverDir),
+    Field("rit", &MapTile::m_riverType),
+    Field("v", &MapTile::m_terView),
+    Field("t", &MapTile::m_terType),
 };
 
 template<>

@@ -4,11 +4,11 @@
  * See LICENSE file for details.
  */
 
-#include "MapObjects.hpp"
+#include "H3MObjects.hpp"
 
 #include "Reflection/PropertyTreeReader.hpp"
 #include "Reflection/PropertyTreeWriter.hpp"
-#include "MapObjectsReflection.hpp"
+#include "H3MObjectsReflection.hpp"
 
 namespace FreeHeroes {
 

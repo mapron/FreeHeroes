@@ -18,7 +18,15 @@
 
 #include <iostream>
 
+#define runMember(name) run(&MapConverter::name, #name, recurse + 1)
+#define setInput(name) setInputFilename(m_settings.name, #name)
+#define setOutput(name) setOutputFilename(m_settings.name, #name)
+
 namespace FreeHeroes {
+
+class ConverterExpection : public std::runtime_error {
+    using runtime_error::runtime_error;
+};
 
 namespace Core::Reflection {
 template<>
@@ -27,56 +35,26 @@ inline constexpr const auto EnumTraits::s_valueMapping<MapConverter::Task> = Enu
     "Invalid",
     MapConverter::Task::Invalid,
 
-    "ReadH3MRawData",
-    MapConverter::Task::ReadH3MRawData,
-    "WriteH3MRawData",
-    MapConverter::Task::WriteH3MRawData,
-    "DumpH3MRawDataAsUncompressedInput",
-    MapConverter::Task::DumpH3MRawDataAsUncompressedInput,
-    "DumpH3MRawDataAsUncompressedOutput",
-    MapConverter::Task::DumpH3MRawDataAsUncompressedOutput,
-
-    "ReadJsonToProperty",
-    MapConverter::Task::ReadJsonToProperty,
-    "WriteJsonFromProperty",
-    MapConverter::Task::WriteJsonFromProperty,
-
-    "DetectCompression",
-    MapConverter::Task::DetectCompression,
-    "UncompressRaw",
-    MapConverter::Task::UncompressRaw,
-    "CompressRaw",
-    MapConverter::Task::CompressRaw,
-
-    "ReadH3MRawToLegacyObject",
-    MapConverter::Task::ReadH3MRawToLegacyObject,
-    "WriteH3MFromLegacyObject",
-    MapConverter::Task::WriteH3MRawFromLegacyObject,
-    "SerializeLegacyObjectToProperty",
-    MapConverter::Task::SerializeLegacyObjectToProperty,
-    "DeserializeLegacyObjectFromProperty",
-    MapConverter::Task::DeserializeLegacyObjectFromProperty,
-    "SerializeFHObjectToProperty",
-    MapConverter::Task::SerializeFHObjectToProperty,
-    "DeserializeFHObjectFromProperty",
-    MapConverter::Task::DeserializeFHObjectFromProperty,
-    "ConstructH3MFromFH",
-    MapConverter::Task::ConstructH3MFromFH,
-    "ConstructFHFromH3M",
-    MapConverter::Task::ConstructFHFromH3M,
-    "CheckH3MInputOutputEquality",
-    MapConverter::Task::CheckH3MInputOutputEquality,
+    "CheckBinaryInputOutputEquality",
+    MapConverter::Task::CheckBinaryInputOutputEquality,
 
     "ConvertH3MToJson",
     MapConverter::Task::ConvertH3MToJson,
     "ConvertJsonToH3M",
     MapConverter::Task::ConvertJsonToH3M,
+    "ConvertH3SVGToJson",
+    MapConverter::Task::ConvertH3SVGToJson,
+    "ConvertJsonToH3SVG",
+    MapConverter::Task::ConvertJsonToH3SVG,
+
     "FHMapToH3M",
     MapConverter::Task::FHMapToH3M,
     "H3MToFHMap",
     MapConverter::Task::H3MToFHMap,
     "H3MRoundTripJson",
     MapConverter::Task::H3MRoundTripJson,
+    "H3SVGRoundTripJson",
+    MapConverter::Task::H3SVGRoundTripJson,
     "H3MRoundTripFH",
     MapConverter::Task::H3MRoundTripFH);
 
@@ -103,361 +81,465 @@ MapConverter::MapConverter(std::ostream&                        logOutput,
 {
 }
 
-bool MapConverter::run(Task task, int recurse) noexcept
+void MapConverter::run(Task task, int recurse) noexcept(false)
 {
     try {
-        for (int r = 0; r < recurse; ++r)
-            m_logOutput << "  ";
-        m_logOutput << "run " << taskToString(task) << "\n";
-        auto checkFilename = [this](const std::string& name, const Core::std_path& path, bool checkExists) -> bool {
-            if (path.empty()) {
-                m_logOutput << "Path '" << name << "' must not be empty\n";
-                return false;
-            }
-            if (checkExists && !Core::std_fs::exists(path)) {
-                m_logOutput << "Path '" << path << "' must exist!\n";
-                return false;
-            }
-            return true;
-        };
+        m_currentTask = taskToString(task);
+        ScopeLogger scope(m_currentTask, recurse, m_logOutput);
+
         switch (task) {
             case Task::Invalid:
             {
-                m_logOutput << "Can't execute invalid task.\n";
-                return false;
+                throw std::runtime_error("Can't execute invalid task.");
             }
-                // -------------------------- Binary I/O ----------------------------------
-            case Task::ReadH3MRawData:
+            case Task::CheckBinaryInputOutputEquality:
             {
-                m_rawState = RawState::Undefined;
-                if (!checkFilename("h3mInput", m_settings.m_h3mInput, true))
-                    return false;
-
-                if (!Core::readFileIntoBuffer(m_settings.m_h3mInput, m_h3mraw)) {
-                    m_logOutput << "Failed to read " << m_settings.m_h3mInput << ".\n";
-                    return false;
-                }
-                m_rawState = RawState::Compressed;
+                checkH3MInputOutputEquality();
             } break;
-            case Task::WriteH3MRawData:
-            {
-                if (!checkFilename("h3mOutput", m_settings.m_h3mOutput, false))
-                    return false;
-                if (m_rawState != RawState::Compressed) {
-                    m_logOutput << "Buffer need to be in Compressed state.\n";
-                    return false;
-                }
-
-                if (!Core::writeFileFromBuffer(m_settings.m_h3mOutput, m_h3mraw)) {
-                    m_logOutput << "Failed to write to " << m_settings.m_h3mOutput << ".\n";
-                    return false;
-                }
-
-            } break;
-
-            case Task::DumpH3MRawDataAsUncompressedInput:
-            {
-                if (!checkFilename("h3mUncompressedInput", m_settings.m_h3mUncompressedInput, false))
-                    return false;
-                if (m_rawState != RawState::Uncompressed) {
-                    m_logOutput << "Buffer need to be in Uncompressed state.\n";
-                    return false;
-                }
-
-                if (!Core::writeFileFromBuffer(m_settings.m_h3mUncompressedInput, m_h3mraw)) {
-                    m_logOutput << "Failed to write to " << m_settings.m_h3mUncompressedInput << ".\n";
-                    return false;
-                }
-            } break;
-            case Task::DumpH3MRawDataAsUncompressedOutput:
-            {
-                if (!checkFilename("h3mUncompressedOutput", m_settings.m_h3mUncompressedOutput, false))
-                    return false;
-                if (m_rawState != RawState::Uncompressed) {
-                    m_logOutput << "Buffer need to be in Uncompressed state.\n";
-                    return false;
-                }
-
-                if (!Core::writeFileFromBuffer(m_settings.m_h3mUncompressedOutput, m_h3mraw)) {
-                    m_logOutput << "Failed to write to " << m_settings.m_h3mUncompressedOutput << ".\n";
-                    return false;
-                }
-            } break;
-
-                // -------------------------- Text I/O ----------------------------------
-            case Task::ReadJsonToProperty:
-            {
-                if (!checkFilename("jsonInput", m_settings.m_jsonInput, true))
-                    return false;
-                std::string buffer;
-                if (!Core::readFileIntoBuffer(m_settings.m_jsonInput, buffer)) {
-                    m_logOutput << "Failed to read " << m_settings.m_jsonInput << ".\n";
-                    return false;
-                }
-                if (!Core::readJsonFromBuffer(buffer, m_json)) {
-                    m_logOutput << "Failed to parse JSON " << m_settings.m_jsonInput << ".\n";
-                    return false;
-                }
-
-            } break;
-            case Task::WriteJsonFromProperty:
-            {
-                if (!checkFilename("jsonOutput", m_settings.m_jsonOutput, false))
-                    return false;
-
-                std::string buffer;
-                if (!Core::writeJsonToBuffer(buffer, m_json)) {
-                    m_logOutput << "Failed to serialize JSON tree to byte buffer for " << m_settings.m_jsonOutput << ".\n";
-                    return false;
-                }
-
-                if (!Core::writeFileFromBuffer(m_settings.m_jsonOutput, buffer)) {
-                    m_logOutput << "Failed to write to " << m_settings.m_jsonOutput << ".\n";
-                    return false;
-                }
-
-            } break;
-
-                // -------------------------- Compression tasks ----------------------------------
-            case Task::DetectCompression:
-            {
-                m_compressionMethod = CompressionMethod::Undefined;
-                if (m_rawState != RawState::Compressed) {
-                    m_logOutput << "Buffer need to be in Compressed state.\n";
-                    return false;
-                }
-
-                // todo: real detection of different methods!
-                m_compressionMethod = CompressionMethod::Gzip;
-            } break;
-            case Task::UncompressRaw:
-            {
-                if (m_rawState != RawState::Compressed) {
-                    m_logOutput << "Buffer need to be in Compressed state.\n";
-                    return false;
-                }
-                if (m_compressionMethod == CompressionMethod::Undefined) {
-                    m_logOutput << "CompressionMethod need to be defined (or detected).\n";
-                    return false;
-                }
-                if (m_compressionMethod == CompressionMethod::NoCompression) {
-                    m_rawState = RawState::Uncompressed;
-                    return true;
-                }
-                if (m_compressionMethod != CompressionMethod::Gzip) {
-                    assert("Invalid compression method");
-                    return false;
-                }
-
-                ByteArrayHolder out;
-                Core::uncompressDataBuffer(m_h3mraw, out, { .m_type = Core::CompressionType::Gzip }); // throws;
-                m_h3mraw = std::move(out);
-
-                m_rawState = RawState::Uncompressed;
-            } break;
-            case Task::CompressRaw:
-            {
-                if (m_rawState != RawState::Uncompressed) {
-                    m_logOutput << "Buffer need to be in Uncompressed state.\n";
-                    return false;
-                }
-                if (m_compressionMethod == CompressionMethod::Undefined) {
-                    m_logOutput << "CompressionMethod need to be defined.\n";
-                    return false;
-                }
-                if (m_compressionMethod == CompressionMethod::NoCompression) {
-                    m_rawState = RawState::Compressed;
-                    return true;
-                }
-                if (m_compressionMethod != CompressionMethod::Gzip) {
-                    assert("Invalid compression method");
-                    return false;
-                }
-
-                ByteArrayHolder out;
-                Core::compressDataBuffer(m_h3mraw, out, { .m_type = Core::CompressionType::Gzip }); // throws;
-                m_h3mraw = std::move(out);
-
-                m_rawState = RawState::Compressed;
-            } break;
-
-                // -------------------------- Primitive tasks ----------------------------------
-            case Task::ReadH3MRawToLegacyObject:
-            {
-                if (m_rawState != RawState::Uncompressed) {
-                    m_logOutput << "Buffer must be in uncomressed state.\n";
-                    return false;
-                }
-
-                ByteOrderBuffer           bobuffer(m_h3mraw);
-                ByteOrderDataStreamReader reader(bobuffer, ByteOrderDataStream::createByteorderMask(ORDER_LE, ORDER_LE, ORDER_LE));
-
-                try {
-                    reader >> m_mapLegacy;
-                }
-                catch (std::exception& ex) {
-                    throw std::runtime_error(ex.what() + std::string(", offset=") + std::to_string(bobuffer.getOffsetRead()));
-                }
-            } break;
-
-            case Task::WriteH3MRawFromLegacyObject:
-            {
-                m_h3mraw = {};
-                ByteOrderBuffer           bobuffer(m_h3mraw);
-                ByteOrderDataStreamWriter writer(bobuffer, ByteOrderDataStream::createByteorderMask(ORDER_LE, ORDER_LE, ORDER_LE));
-
-                writer << m_mapLegacy;
-
-                m_rawState = RawState::Uncompressed;
-            } break;
-
-            case Task::SerializeLegacyObjectToProperty:
-            {
-                m_mapLegacy.toJson(m_json);
-            } break;
-            case Task::DeserializeLegacyObjectFromProperty:
-            {
-                m_mapLegacy.fromJson(m_json);
-            } break;
-            case Task::SerializeFHObjectToProperty:
-            {
-                m_mapFH.toJson(m_json);
-            } break;
-            case Task::DeserializeFHObjectFromProperty:
-            {
-                if (m_json["version"].getScalar().toString() == "HOTA")
-                    m_mapFH.m_version = Core::GameVersion::HOTA;
-                else
-                    m_mapFH.m_version = Core::GameVersion::SOD;
-                m_mapFH.fromJson(m_json, m_databaseContainer->getDatabase(m_mapFH.m_version));
-
-            } break;
-            case Task::ConstructH3MFromFH:
-            {
-                auto rnd = m_rngFactory->create();
-                rnd->setSeed(m_mapFH.m_seed);
-                convertFH2H3M(m_mapFH, m_mapLegacy, m_databaseContainer->getDatabase(m_mapFH.m_version), rnd.get());
-            } break;
-            case Task::ConstructFHFromH3M:
-            {
-                if (m_mapLegacy.m_format >= MapFormat::HOTA1)
-                    m_mapFH.m_version = Core::GameVersion::HOTA;
-                else
-                    m_mapFH.m_version = Core::GameVersion::SOD;
-                convertH3M2FH(m_mapLegacy, m_mapFH, m_databaseContainer->getDatabase(m_mapFH.m_version));
-            } break;
-
-            case Task::CheckH3MInputOutputEquality:
-            {
-                std::string bufferIn, bufferOut;
-                Core::readFileIntoBuffer(m_settings.m_h3mUncompressedInput, bufferIn);
-                Core::readFileIntoBuffer(m_settings.m_h3mUncompressedOutput, bufferOut);
-                const bool result = bufferIn == bufferOut;
-                m_logOutput << "Round trip result: " << (result ? "PASSED" : "FAILED") << ", h3mInput size=" << bufferIn.size() << ", h3mOutput size=" << bufferOut.size() << "\n";
-                if (!result) {
-                    auto minSize = std::min(bufferIn.size(), bufferOut.size());
-                    bufferIn.resize(minSize);
-                    bufferOut.resize(minSize);
-                    const bool commonEqual = bufferIn == bufferOut;
-                    m_logOutput << "Common part is: " << (commonEqual ? "EQUAL" : "DIFFERENT") << "\n";
-                    if (!commonEqual) {
-                        int maxDiffCounter = 10;
-                        for (size_t i = 0; i < minSize; ++i) {
-                            if (bufferIn[i] != bufferOut[i]) {
-                                if (maxDiffCounter-- > 0)
-                                    m_logOutput << "difference at [" << i << " / 0x" << std::hex << std::setfill('0') << i << "], in: 0x" << std::setw(2) << int(uint8_t(bufferIn[i]))
-                                                << ", out: 0x" << std::setw(2) << int(uint8_t(bufferOut[i])) << "\n"
-                                                << std::dec << std::setfill(' ');
-                            }
-                        }
-                    }
-                }
-                return result;
-
-            } break;
-
-                //  -------------------------- High-level tasks ----------------------------------
             case Task::ConvertH3MToJson:
             {
-                return true
-                       && run(Task::ReadH3MRawData, recurse + 1)
-                       && run(Task::DetectCompression, recurse + 1)
-                       && run(Task::UncompressRaw, recurse + 1)
-                       && run(Task::DumpH3MRawDataAsUncompressedInput, recurse + 1)
-                       && run(Task::ReadH3MRawToLegacyObject, recurse + 1)
-                       && run(Task::SerializeLegacyObjectToProperty, recurse + 1)
-                       && run(Task::WriteJsonFromProperty, recurse + 1);
+                setInput(m_inputs.m_h3m.m_binary);
+                runMember(readBinaryBufferData);
+
+                runMember(detectCompression);
+                runMember(uncompressRaw);
+                if (m_settings.m_dumpUncompressedBuffers) {
+                    setOutput(m_inputs.m_h3m.m_uncompressedBinary);
+                    runMember(writeBinaryBufferDataAsUncompressed);
+                }
+
+                runMember(binaryDeserializeH3M);
+                runMember(propertySerializeH3M);
+                setOutput(m_outputs.m_h3m.m_json);
+                runMember(writeJsonFromProperty);
             } break;
             case Task::ConvertJsonToH3M:
             {
-                return true
-                       && run(Task::ReadJsonToProperty, recurse + 1)
-                       && run(Task::DeserializeLegacyObjectFromProperty, recurse + 1)
-                       && run(Task::WriteH3MRawFromLegacyObject, recurse + 1)
-                       && run(Task::DumpH3MRawDataAsUncompressedOutput, recurse + 1)
-                       //&& [this]() { m_compressionMethod = CompressionMethod::Gzip; return true; }()
-                       && run(Task::CompressRaw, recurse + 1)
-                       && run(Task::WriteH3MRawData, recurse + 1);
+                setInput(m_inputs.m_h3m.m_json);
+                runMember(readJsonToProperty);
+
+                runMember(propertyDeserializeH3M);
+                runMember(binarySerializeH3M);
+                if (m_settings.m_dumpUncompressedBuffers) {
+                    setOutput(m_outputs.m_h3m.m_uncompressedBinary);
+                    runMember(writeBinaryBufferDataAsUncompressed);
+                }
+
+                m_compressionMethod = CompressionMethod::Gzip;
+                runMember(compressRaw);
+                setOutput(m_outputs.m_h3m.m_binary);
+                runMember(writeBinaryBufferData);
+            } break;
+            case Task::ConvertH3SVGToJson:
+            {
+                setInput(m_inputs.m_h3svg.m_binary);
+                runMember(readBinaryBufferData);
+
+                runMember(detectCompression);
+                runMember(uncompressRaw);
+                if (m_settings.m_dumpUncompressedBuffers) {
+                    setOutput(m_inputs.m_h3svg.m_uncompressedBinary);
+                    runMember(writeBinaryBufferDataAsUncompressed);
+                }
+
+                runMember(binaryDeserializeH3SVG);
+                runMember(propertySerializeH3SVG);
+                setOutput(m_outputs.m_h3svg.m_json);
+                runMember(writeJsonFromProperty);
+            } break;
+            case Task::ConvertJsonToH3SVG:
+            {
+                setInput(m_inputs.m_h3svg.m_json);
+                runMember(readJsonToProperty);
+
+                runMember(propertyDeserializeH3SVG);
+                runMember(binarySerializeH3SVG);
+                if (m_settings.m_dumpUncompressedBuffers) {
+                    setOutput(m_outputs.m_h3svg.m_uncompressedBinary);
+                    runMember(writeBinaryBufferDataAsUncompressed);
+                }
+
+                m_compressionMethod = CompressionMethod::Gzip;
+                runMember(compressRaw);
+                setOutput(m_outputs.m_h3svg.m_binary);
+                runMember(writeBinaryBufferData);
             } break;
             case Task::FHMapToH3M:
             {
-                return true
-                       && run(Task::ReadJsonToProperty, recurse + 1)
-                       && run(Task::DeserializeFHObjectFromProperty, recurse + 1)
-                       && run(Task::ConstructH3MFromFH, recurse + 1)
-                       && run(Task::SerializeLegacyObjectToProperty, recurse + 1)
-                       // && run(Task::WriteJsonFromProperty, recurse + 1)
-                       && run(Task::WriteH3MRawFromLegacyObject, recurse + 1)
-                       && run(Task::DumpH3MRawDataAsUncompressedOutput, recurse + 1)
-                       && [this]() { m_compressionMethod = CompressionMethod::Gzip; return true; }()
-                       && run(Task::CompressRaw, recurse + 1)
-                       && run(Task::WriteH3MRawData, recurse + 1);
+                setInput(m_inputs.m_fhMap);
+                runMember(readJsonToProperty);
+
+                runMember(propertyDeserializeFH);
+                runMember(convertFHtoH3M);
+                if (m_settings.m_dumpBinaryDataJson) {
+                    runMember(propertySerializeH3M);
+                    setOutput(m_outputs.m_h3m.m_json);
+                    runMember(writeJsonFromProperty);
+                }
+
+                runMember(binarySerializeH3M);
+                if (m_settings.m_dumpUncompressedBuffers) {
+                    setOutput(m_outputs.m_h3m.m_uncompressedBinary);
+                    runMember(writeBinaryBufferDataAsUncompressed);
+                }
+
+                m_compressionMethod = CompressionMethod::Gzip;
+                runMember(compressRaw);
+                setOutput(m_outputs.m_h3m.m_binary);
+                runMember(writeBinaryBufferData);
             } break;
             case Task::H3MToFHMap:
             {
-                return true
-                       && run(Task::ReadH3MRawData, recurse + 1)
-                       && run(Task::DetectCompression, recurse + 1)
-                       && run(Task::UncompressRaw, recurse + 1)
-                       && run(Task::DumpH3MRawDataAsUncompressedInput, recurse + 1)
-                       && run(Task::ReadH3MRawToLegacyObject, recurse + 1)
-                       && run(Task::ConstructFHFromH3M, recurse + 1)
-                       && run(Task::SerializeFHObjectToProperty, recurse + 1)
-                       && run(Task::WriteJsonFromProperty, recurse + 1);
+                setInput(m_inputs.m_h3m.m_binary);
+                runMember(readBinaryBufferData);
+
+                runMember(detectCompression);
+                runMember(uncompressRaw);
+                if (m_settings.m_dumpUncompressedBuffers) {
+                    setOutput(m_inputs.m_h3m.m_uncompressedBinary);
+                    runMember(writeBinaryBufferDataAsUncompressed);
+                }
+
+                runMember(binaryDeserializeH3M);
+                if (m_settings.m_dumpBinaryDataJson) {
+                    runMember(propertySerializeH3M);
+                    setOutput(m_inputs.m_h3m.m_json);
+                    runMember(writeJsonFromProperty);
+                }
+                runMember(convertH3MtoFH);
+                runMember(propertySerializeFH);
+                setOutput(m_outputs.m_fhMap);
+                runMember(writeJsonFromProperty);
                 ;
             } break;
             case Task::H3MRoundTripJson:
             {
-                if (m_settings.m_jsonInput != m_settings.m_jsonOutput) {
-                    m_logOutput << "You must set jsonInput equal to jsonOutput to perform roundtrip check.\n";
-                    return false;
-                }
+                if (!m_settings.m_dumpUncompressedBuffers)
+                    throw std::runtime_error("You need to set dumpUncompressedBuffers");
 
-                return true
-                       && run(Task::ConvertH3MToJson, recurse + 1)
-                       && run(Task::ConvertJsonToH3M, recurse + 1)
-                       && run(Task::CheckH3MInputOutputEquality, recurse + 1);
+                run(Task::ConvertH3MToJson, recurse + 1);
+                safeCopy(m_settings.m_outputs.m_h3m.m_json, m_settings.m_inputs.m_h3m.m_json);
+                run(Task::ConvertJsonToH3M, recurse + 1);
+
+                setInput(m_inputs.m_h3m.m_uncompressedBinary);
+                setOutput(m_outputs.m_h3m.m_uncompressedBinary);
+                run(Task::CheckBinaryInputOutputEquality, recurse + 1);
+            } break;
+            case Task::H3SVGRoundTripJson:
+            {
+                if (!m_settings.m_dumpUncompressedBuffers)
+                    throw std::runtime_error("You need to set dumpUncompressedBuffers");
+
+                run(Task::ConvertH3SVGToJson, recurse + 1);
+                safeCopy(m_settings.m_outputs.m_h3svg.m_json, m_settings.m_inputs.m_h3svg.m_json);
+                run(Task::ConvertJsonToH3SVG, recurse + 1);
+
+                setInput(m_inputs.m_h3svg.m_uncompressedBinary);
+                setOutput(m_outputs.m_h3svg.m_uncompressedBinary);
+                run(Task::CheckBinaryInputOutputEquality, recurse + 1);
             } break;
             case Task::H3MRoundTripFH:
             {
-                if (m_settings.m_jsonInput != m_settings.m_jsonOutput) {
-                    m_logOutput << "You must set jsonInput equal to jsonOutput to perform roundtrip check.\n";
-                    return false;
-                }
+                if (!m_settings.m_dumpUncompressedBuffers)
+                    throw std::runtime_error("You need to set dumpUncompressedBuffers");
 
-                return true
-                       && run(Task::H3MToFHMap, recurse + 1)
-                       && run(Task::FHMapToH3M, recurse + 1)
-                       && run(Task::CheckH3MInputOutputEquality, recurse + 1);
+                run(Task::H3MToFHMap, recurse + 1);
+                safeCopy(m_settings.m_outputs.m_fhMap, m_settings.m_inputs.m_fhMap);
+                run(Task::FHMapToH3M, recurse + 1);
+
+                setInput(m_inputs.m_h3m.m_uncompressedBinary);
+                setOutput(m_outputs.m_h3m.m_uncompressedBinary);
+                run(Task::CheckBinaryInputOutputEquality, recurse + 1);
             } break;
         }
+        scope.markDone();
+    }
+    catch (ConverterExpection&) {
+        throw;
     }
     catch (std::exception& ex) {
-        m_logOutput << "Exception thrown during execution of task '" << taskToString(task) << "': " << ex.what() << ".\n";
-        return false;
+        throw ConverterExpection("Exception thrown during execution of task '" + m_currentTask + "': " + std::string(ex.what()));
+    }
+}
+
+void MapConverter::run(MemberProc member, const char* descr, int recurse) noexcept(false)
+{
+    m_currentTask = descr;
+    ScopeLogger scope(descr, recurse, m_logOutput);
+    (this->*member)();
+    scope.markDone();
+}
+
+void MapConverter::setInputFilename(const Core::std_path& path, std::string_view descr)
+{
+    if (path.empty())
+        throw std::runtime_error("Path '" + std::string(descr) + "' is empty");
+
+    if (!Core::std_fs::exists(path))
+        throw std::runtime_error("Path '" + Core::path2string(path) + "' is not exist!");
+
+    m_inputFilename = path;
+}
+
+void MapConverter::setOutputFilename(const Core::std_path& path, std::string_view descr)
+{
+    if (path.empty())
+        throw std::runtime_error("Path '" + std::string(descr) + "' is empty");
+
+    m_outputFilename = path;
+}
+
+void MapConverter::readBinaryBufferData()
+{
+    m_rawState = RawState::Undefined;
+
+    m_binaryBuffer = Core::readFileIntoHolderThrow(m_inputFilename);
+
+    m_rawState = RawState::Compressed;
+}
+
+void MapConverter::writeBinaryBufferData()
+{
+    if (m_rawState != RawState::Compressed)
+        throw std::runtime_error("Buffer needs to be in Compressed state.");
+
+    Core::writeFileFromHolderThrow(m_outputFilename, m_binaryBuffer);
+}
+
+void MapConverter::writeBinaryBufferDataAsUncompressed()
+{
+    if (m_rawState != RawState::Uncompressed)
+        throw std::runtime_error("Buffer needs to be in Uncompressed state.");
+
+    Core::writeFileFromHolderThrow(m_outputFilename, m_binaryBuffer);
+}
+
+void MapConverter::readJsonToProperty()
+{
+    std::string buffer = Core::readFileIntoBufferThrow(m_inputFilename);
+    m_json             = Core::readJsonFromBufferThrow(buffer);
+}
+
+void MapConverter::writeJsonFromProperty()
+{
+    std::string buffer = Core::writeJsonToBufferThrow(m_json);
+    Core::writeFileFromBufferThrow(m_outputFilename, buffer);
+}
+
+void MapConverter::detectCompression()
+{
+    m_compressionMethod = CompressionMethod::Undefined;
+    if (m_rawState != RawState::Compressed)
+        throw std::runtime_error("Buffer needs to be in Compressed state.");
+
+    /// @todo: real detection of different methods!
+    m_compressionMethod = CompressionMethod::Gzip;
+}
+
+void MapConverter::uncompressRaw()
+{
+    if (m_rawState != RawState::Compressed)
+        throw std::runtime_error("Buffer needs to be in Compressed state.");
+
+    if (m_compressionMethod == CompressionMethod::Undefined)
+        throw std::runtime_error("CompressionMethod need to be defined (or detected).");
+
+    if (m_compressionMethod == CompressionMethod::NoCompression) {
+        m_rawState = RawState::Uncompressed;
+        return;
+    }
+    if (m_compressionMethod != CompressionMethod::Gzip) {
+        assert("Invalid compression method");
+        return;
     }
 
-    return true;
+    ByteArrayHolder out;
+    Core::uncompressDataBuffer(m_binaryBuffer, out, { .m_type = Core::CompressionType::Gzip, .m_skipCRC = true }); // throws;
+    m_binaryBuffer = std::move(out);
+
+    m_rawState = RawState::Uncompressed;
+}
+
+void MapConverter::compressRaw()
+{
+    if (m_rawState != RawState::Uncompressed)
+        throw std::runtime_error("Buffer needs to be in Uncompressed state.");
+
+    if (m_compressionMethod == CompressionMethod::Undefined)
+        throw std::runtime_error("CompressionMethod need to be defined (or detected).");
+
+    if (m_compressionMethod == CompressionMethod::NoCompression) {
+        m_rawState = RawState::Compressed;
+        return;
+    }
+    if (m_compressionMethod != CompressionMethod::Gzip) {
+        assert("Invalid compression method");
+        return;
+    }
+
+    ByteArrayHolder out;
+    Core::compressDataBuffer(m_binaryBuffer, out, { .m_type = Core::CompressionType::Gzip }); // throws;
+    m_binaryBuffer = std::move(out);
+
+    m_rawState = RawState::Compressed;
+}
+
+void MapConverter::binaryDeserializeH3M()
+{
+    if (m_rawState != RawState::Uncompressed)
+        throw std::runtime_error("Buffer needs to be in Uncompressed state.");
+
+    ByteOrderBuffer           bobuffer(m_binaryBuffer);
+    ByteOrderDataStreamReader reader(bobuffer, ByteOrderDataStream::createByteorderMask(ORDER_LE, ORDER_LE, ORDER_LE));
+
+    try {
+        reader >> m_mapH3M;
+    }
+    catch (std::exception& ex) {
+        throw std::runtime_error(ex.what() + std::string(", offset=") + std::to_string(bobuffer.getOffsetRead()));
+    }
+}
+
+void MapConverter::binarySerializeH3M()
+{
+    m_binaryBuffer = {};
+    ByteOrderBuffer           bobuffer(m_binaryBuffer);
+    ByteOrderDataStreamWriter writer(bobuffer, ByteOrderDataStream::createByteorderMask(ORDER_LE, ORDER_LE, ORDER_LE));
+
+    writer << m_mapH3M;
+
+    m_rawState = RawState::Uncompressed;
+}
+
+void MapConverter::propertySerializeH3M()
+{
+    m_mapH3M.toJson(m_json);
+}
+
+void MapConverter::propertyDeserializeH3M()
+{
+    m_mapH3M.fromJson(m_json);
+}
+
+void MapConverter::binaryDeserializeH3SVG()
+{
+    if (m_rawState != RawState::Uncompressed)
+        throw std::runtime_error("Buffer needs to be in Uncompressed state.");
+
+    ByteOrderBuffer           bobuffer(m_binaryBuffer);
+    ByteOrderDataStreamReader reader(bobuffer, ByteOrderDataStream::createByteorderMask(ORDER_LE, ORDER_LE, ORDER_LE));
+
+    try {
+        reader >> m_mapH3SVG;
+    }
+    catch (std::exception& ex) {
+        throw std::runtime_error(ex.what() + std::string(", offset=") + std::to_string(bobuffer.getOffsetRead()));
+    }
+}
+
+void MapConverter::binarySerializeH3SVG()
+{
+    m_binaryBuffer = {};
+    ByteOrderBuffer           bobuffer(m_binaryBuffer);
+    ByteOrderDataStreamWriter writer(bobuffer, ByteOrderDataStream::createByteorderMask(ORDER_LE, ORDER_LE, ORDER_LE));
+
+    writer << m_mapH3SVG;
+
+    m_rawState = RawState::Uncompressed;
+}
+
+void MapConverter::propertySerializeH3SVG()
+{
+    m_mapH3SVG.toJson(m_json);
+}
+
+void MapConverter::propertyDeserializeH3SVG()
+{
+    m_mapH3SVG.fromJson(m_json);
+}
+
+void MapConverter::propertySerializeFH()
+{
+    m_mapFH.toJson(m_json);
+}
+
+void MapConverter::propertyDeserializeFH()
+{
+    if (m_json["version"].getScalar().toString() == "HOTA")
+        m_mapFH.m_version = Core::GameVersion::HOTA;
+    else
+        m_mapFH.m_version = Core::GameVersion::SOD;
+    m_mapFH.fromJson(m_json, m_databaseContainer->getDatabase(m_mapFH.m_version));
+}
+
+void MapConverter::convertFHtoH3M()
+{
+    auto rnd = m_rngFactory->create();
+    rnd->setSeed(m_mapFH.m_seed);
+    convertFH2H3M(m_mapFH, m_mapH3M, m_databaseContainer->getDatabase(m_mapFH.m_version), rnd.get());
+}
+
+void MapConverter::convertH3MtoFH()
+{
+    if (m_mapH3M.m_format >= MapFormat::HOTA1)
+        m_mapFH.m_version = Core::GameVersion::HOTA;
+    else
+        m_mapFH.m_version = Core::GameVersion::SOD;
+    convertH3M2FH(m_mapH3M, m_mapFH, m_databaseContainer->getDatabase(m_mapFH.m_version));
+}
+
+void MapConverter::checkH3MInputOutputEquality()
+{
+    std::string bufferIn  = Core::readFileIntoBufferThrow(m_inputFilename);
+    std::string bufferOut = Core::readFileIntoBufferThrow(m_outputFilename);
+
+    const bool result = bufferIn == bufferOut;
+    m_logOutput << "Round-trip result: " << (result ? "PASSED" : "FAILED") << ", Input size=" << bufferIn.size() << ", Output size=" << bufferOut.size() << "\n";
+    if (result)
+        return;
+
+    auto minSize = std::min(bufferIn.size(), bufferOut.size());
+    bufferIn.resize(minSize);
+    bufferOut.resize(minSize);
+    const bool commonEqual = bufferIn == bufferOut;
+    m_logOutput << "Common part is: " << (commonEqual ? "EQUAL" : "DIFFERENT") << "\n";
+    if (!commonEqual) {
+        int maxDiffCounter = 10;
+        for (size_t i = 0; i < minSize; ++i) {
+            if (bufferIn[i] != bufferOut[i]) {
+                if (maxDiffCounter-- > 0)
+                    m_logOutput << "difference at [" << i << " / 0x" << std::hex << std::setfill('0') << i << "], in: 0x" << std::setw(2) << int(uint8_t(bufferIn[i]))
+                                << ", out: 0x" << std::setw(2) << int(uint8_t(bufferOut[i])) << "\n"
+                                << std::dec << std::setfill(' ');
+            }
+        }
+    }
+    throw std::runtime_error("Failed round-trip");
+}
+
+void MapConverter::safeCopy(const Core::std_path& src, const Core::std_path& dest)
+{
+    if (src != dest) {
+        Core::std_fs::remove(dest);
+        Core::std_fs::copy_file(src, dest);
+    }
+}
+
+MapConverter::ScopeLogger::ScopeLogger(std::string currentTask, int indent, std::ostream& output)
+    : m_currentTask(std::move(currentTask))
+    , m_indent(indent)
+    , m_output(output)
+{
+    for (int r = 0; r < m_indent; ++r)
+        m_output << "  ";
+    m_output << "start " << m_currentTask << "\n";
+}
+
+MapConverter::ScopeLogger::~ScopeLogger()
+{
+    for (int r = 0; r < m_indent; ++r)
+        m_output << "  ";
+    m_output << "end " << m_currentTask << " (" << m_timer.elapsed() << " us.)\n";
 }
 
 }

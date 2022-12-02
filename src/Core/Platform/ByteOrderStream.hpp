@@ -191,6 +191,11 @@ public:
         m_buf.markRead(size);
         m_buf.checkRemain(0);
     }
+    void readBlock(char* data, ptrdiff_t size)
+    {
+        readBlock(reinterpret_cast<uint8_t*>(data), size);
+    }
+
     void zeroPadding(ptrdiff_t size)
     {
         m_buf.markRead(size);
@@ -300,7 +305,7 @@ public:
     {
         writeSize(str.size());
 
-        writeBlock(reinterpret_cast<const uint8_t*>(str.data()), str.size());
+        writeBlock(str.data(), str.size());
     }
     /// Read/write raw data blocks.
     void writeBlock(const uint8_t* data, ptrdiff_t size)
@@ -311,6 +316,11 @@ public:
         m_buf.markWrite(size);
         m_buf.checkRemain(0);
     }
+    void writeBlock(const char* data, ptrdiff_t size)
+    {
+        writeBlock(reinterpret_cast<const uint8_t*>(data), size);
+    }
+
     void zeroPadding(size_t count)
     {
         uint8_t* start = m_buf.posWrite(count);
