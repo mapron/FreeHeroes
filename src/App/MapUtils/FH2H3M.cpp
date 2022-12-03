@@ -16,6 +16,7 @@
 #include "LibraryHero.hpp"
 #include "LibrarySecondarySkill.hpp"
 #include "LibraryTerrain.hpp"
+#include "LibraryObjectDef.hpp"
 
 #define assume(cond) \
     if (!(cond)) \
@@ -33,14 +34,21 @@ H3Pos int3fromPos(FHPos pos, int xoffset = 0)
 {
     return { (uint8_t) (pos.m_x + xoffset), (uint8_t) pos.m_y, (uint8_t) pos.m_z };
 }
+
+std::vector<uint8_t> reverseArray(std::vector<uint8_t> arr)
+{
+    std::reverse(arr.begin(), arr.end());
+    return arr;
+}
 }
 
 void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* database, Core::IRandomGenerator* rng)
 {
-    dest            = {};
-    dest.m_mapName  = src.m_name;
-    dest.m_mapDescr = src.m_descr;
-    auto tileMap    = src.m_tileMap;
+    dest              = {};
+    dest.m_mapName    = src.m_name;
+    dest.m_mapDescr   = src.m_descr;
+    dest.m_difficulty = src.m_difficulty;
+    auto tileMap      = src.m_tileMap;
     tileMap.updateSize();
     assume(tileMap.m_width == tileMap.m_height && tileMap.m_width > 0);
 
@@ -50,8 +58,6 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
     dest.m_tiles.m_hasUnderground = tileMap.m_depth > 1;
     dest.m_tiles.updateSize();
     dest.prepareArrays();
-
-    dest.m_difficulty = 0x04; // @todo:
 
     auto fillZoneTerrain = [&tileMap](const FHZone& zone) {
         if (!zone.m_terrain)
@@ -92,6 +98,7 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
     const int townGateOffset = 2;
 
     auto* factionsContainer = database->factions();
+    auto* defsContainer     = database->objectDefs();
 
     for (auto& [playerId, fhPlayer] : src.m_players) {
         auto  index    = static_cast<int>(playerId);
@@ -122,54 +129,40 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
         return index;
     };
 
-    auto makeRandomMonsterDef = []() -> ObjectTemplate {
-        ObjectTemplate res{ .m_visitMask = { 0, 0, 0, 0, 0, 128 }, .m_blockMask = { 255, 255, 255, 255, 255, 127 }, .m_id = static_cast<uint32_t>(MapObjectType::RANDOM_MONSTER), .m_type = ObjectTemplate::Type::CREATURE };
-        res.m_animationFile      = "AVWmrnd0.def";
-        res.m_allowedTerrainMask = 1;
-        res.m_unknownFlag        = 255;
-        //res.m_drawPriority       = 0xCC;
-        return res;
-    };
-    auto makeHoleDef = []() -> ObjectTemplate {
-        ObjectTemplate res{ .m_visitMask = { 0, 0, 0, 0, 0, 0 }, .m_blockMask = { 255, 255, 255, 255, 255, 255 }, .m_id = static_cast<uint32_t>(MapObjectType::HOLE), .m_type = ObjectTemplate::Type::INVALID };
-        res.m_animationFile      = "AVLholg0.def";
-        res.m_allowedTerrainMask = 4;
-        res.m_unknownFlag        = 4;
-        res.m_drawPriority       = 1;
-        return res;
-    };
+    auto makeDefFromDb = [](Core::LibraryObjectDefConstPtr record) {
+        assert(record);
+        ObjectTemplate res{
+            .m_animationFile = record->defFile + ".def",
+            .m_blockMask     = reverseArray(record->blockMap),
+            .m_visitMask     = reverseArray(record->visitMap),
+            .m_terrainsHard  = reverseArray(record->terrainsHard),
+            .m_terrainsSoft  = reverseArray(record->terrainsSoft),
 
-    auto makeCastleDef = [](Core::LibraryFactionConstPtr libraryFaction, Core::LibraryFaction::Presentation::TownIndex index) -> ObjectTemplate {
-        ObjectTemplate res{ .m_visitMask = { 0, 0, 0, 0, 0, 32 }, .m_blockMask = { 255, 255, 255, 143, 7, 7 }, .m_id = static_cast<uint32_t>(MapObjectType::TOWN), .m_type = ObjectTemplate::Type::COMMON };
-        res.m_subid = libraryFaction->legacyId;
-        assert(!libraryFaction->presentationParams.townAnimations.empty());
-        res.m_animationFile      = libraryFaction->presentationParams.townAnimations[static_cast<int>(index)] + ".def";
-        res.m_allowedTerrainMask = 3327;
-        res.m_unknownFlag        = 3327;
+            .m_id           = static_cast<uint32_t>(record->objId),
+            .m_subid        = static_cast<uint32_t>(record->subId),
+            .m_type         = static_cast<ObjectTemplate::Type>(record->type),
+            .m_drawPriority = static_cast<uint8_t>(record->priority),
+        };
         return res;
     };
 
-    auto makeHeroDef = [](Core::LibraryHeroConstPtr hero) {
-        ObjectTemplate res{ .m_visitMask = { 0, 0, 0, 0, 0, 64 }, .m_blockMask = { 255, 255, 255, 255, 255, 191 }, .m_id = static_cast<uint32_t>(MapObjectType::HERO), .m_type = ObjectTemplate::Type::HERO };
+    auto makeDefFromDbId = [defsContainer, &makeDefFromDb](std::string defId) {
+        if (defId.ends_with(".def"))
+            defId = defId.substr(0, defId.size() - 4);
+        std::transform(defId.begin(), defId.end(), defId.begin(), [](unsigned char c) { return std::tolower(c); });
+        return makeDefFromDb(defsContainer->find(defId));
+    };
 
-        auto resNameAdv          = hero->getAdventureSprite();
-        res.m_animationFile      = resNameAdv + "e.def";
-        res.m_allowedTerrainMask = 3327;
-        res.m_unknownFlag        = 3327;
+    auto makeHeroDef = [&makeDefFromDbId](Core::LibraryHeroConstPtr hero) {
+        ObjectTemplate res = makeDefFromDbId("hero");
+
+        auto resNameAdv     = hero->getAdventureSprite();
+        res.m_animationFile = resNameAdv + "e.def";
         return res;
     };
 
-    auto makeGoldDef = []() -> ObjectTemplate {
-        ObjectTemplate res{ .m_visitMask = { 0, 0, 0, 0, 0, 128 }, .m_blockMask = { 255, 255, 255, 255, 255, 127 }, .m_id = static_cast<uint32_t>(MapObjectType::RESOURCE), .m_type = ObjectTemplate::Type::RESOURCE };
-        res.m_animationFile      = "AVTgold0.def";
-        res.m_allowedTerrainMask = 1;
-        res.m_unknownFlag        = 3583;
-        res.m_subid              = 6;
-        return res;
-    };
-
-    getDefFileIndex(makeRandomMonsterDef());
-    getDefFileIndex(makeHoleDef());
+    getDefFileIndex(makeDefFromDbId("avwmrnd0"));
+    getDefFileIndex(makeDefFromDbId("avlholg0"));
 
     for (auto& fhTown : src.m_towns) {
         auto  playerIndex = static_cast<int>(fhTown.m_player);
@@ -189,10 +182,15 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
         cas1->prepareArrays();
         auto* libraryFaction = factionsContainer->find(fhTown.m_faction);
         assert(libraryFaction);
-        Core::LibraryFaction::Presentation::TownIndex index = Core::LibraryFaction::Presentation::TownIndex::Village;
-        if (fhTown.m_hasFort)
-            index = Core::LibraryFaction::Presentation::TownIndex::Castle; // weird. HotA use def files for castle anyway in H3M, whatever is really placed on map.
-        dest.m_objects.push_back(Object{ .m_pos = int3fromPos(fhTown.m_pos), .m_defnum = getDefFileIndex(makeCastleDef(libraryFaction, index)), .m_impl = std::move(cas1) });
+        ObjectTemplate res;
+        if (!fhTown.m_defFile.empty()) {
+            res = makeDefFromDbId(fhTown.m_defFile);
+        } else {
+            res = makeDefFromDb(libraryFaction->mapObjectDef);
+        }
+        res.m_subid = libraryFaction->legacyId;
+
+        dest.m_objects.push_back(Object{ .m_pos = int3fromPos(fhTown.m_pos), .m_defnum = getDefFileIndex(res), .m_impl = std::move(cas1) });
     }
 
     for (auto& fhHero : src.m_wanderingHeroes) {
@@ -223,7 +221,7 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
         auto res1      = std::make_unique<MapResource>(dest.m_features);
         res1->m_amount = fhRes.m_amount;
 
-        dest.m_objects.push_back(Object{ .m_pos = int3fromPos(fhRes.m_pos), .m_defnum = getDefFileIndex(makeGoldDef()), .m_impl = std::move(res1) });
+        dest.m_objects.push_back(Object{ .m_pos = int3fromPos(fhRes.m_pos), .m_defnum = getDefFileIndex(makeDefFromDb(fhRes.m_resource->mapObjectDef)), .m_impl = std::move(res1) });
     }
 
     for (auto& allowed : dest.m_allowedHeroes)

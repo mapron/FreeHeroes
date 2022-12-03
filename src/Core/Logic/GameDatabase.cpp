@@ -9,17 +9,18 @@
 #include "Logger.hpp"
 #include "Profiler.hpp"
 
-#include "LibraryFaction.hpp"
-#include "LibrarySecondarySkill.hpp"
-#include "LibraryUnit.hpp"
-#include "LibraryHeroSpec.hpp"
 #include "LibraryArtifact.hpp"
+#include "LibraryFaction.hpp"
+#include "LibraryGameRules.hpp"
 #include "LibraryHero.hpp"
+#include "LibraryHeroSpec.hpp"
+#include "LibraryMapObject.hpp"
+#include "LibraryObjectDef.hpp"
+#include "LibraryResource.hpp"
+#include "LibrarySecondarySkill.hpp"
 #include "LibrarySpell.hpp"
 #include "LibraryTerrain.hpp"
-#include "LibraryResource.hpp"
-#include "LibraryMapObject.hpp"
-#include "LibraryGameRules.hpp"
+#include "LibraryUnit.hpp"
 
 #include "LibrarySerialize.hpp"
 #include "FileFormatJson.hpp"
@@ -52,6 +53,7 @@ template<> struct LibraryContainerKey<LibraryHeroSpec      > { static constexpr 
 template<> struct LibraryContainerKey<LibraryArtifact      > { static constexpr const char * scopeName = "artifacts" ; };
 template<> struct LibraryContainerKey<LibraryHero          > { static constexpr const char * scopeName = "heroes" ; };
 template<> struct LibraryContainerKey<LibraryMapObject     > { static constexpr const char * scopeName = "mapObjects" ; };
+template<> struct LibraryContainerKey<LibraryObjectDef     > { static constexpr const char * scopeName = "objectDefs" ; };
 // clang-format on
 }
 
@@ -168,6 +170,7 @@ struct GameDatabase::Impl {
 
     LibraryContainer<LibraryHero>      m_heroes;
     LibraryContainer<LibraryMapObject> m_mapObjects;
+    LibraryContainer<LibraryObjectDef> m_objectDefs;
 
     LibraryGameRules m_gameRules;
 
@@ -298,6 +301,11 @@ IGameDatabase::LibraryHeroSpecContainerPtr GameDatabase::heroSpecs() const
     return &m_impl->m_specs;
 }
 
+IGameDatabase::LibraryObjectDefContainerPtr GameDatabase::objectDefs() const
+{
+    return &m_impl->m_objectDefs;
+}
+
 LibraryGameRulesConstPtr GameDatabase::gameRules() const
 {
     return &m_impl->m_gameRules;
@@ -350,6 +358,7 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
     m_impl->m_artifacts  .prepareObjectKeys(recordObjectMaps);
     m_impl->m_heroes     .prepareObjectKeys(recordObjectMaps);
     m_impl->m_mapObjects .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_objectDefs .prepareObjectKeys(recordObjectMaps);
     // clang-format on
 
     // clang-format off
@@ -364,6 +373,7 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
             && m_impl->m_artifacts  .loadRecordList(this, recordObjectMaps)
             && m_impl->m_heroes     .loadRecordList(this, recordObjectMaps)
             && m_impl->m_mapObjects .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_objectDefs .loadRecordList(this, recordObjectMaps)
             ;
     // clang-format on
 

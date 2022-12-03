@@ -18,7 +18,7 @@ namespace FreeHeroes {
 
 namespace {
 
-FHPos posFromInt3(H3Pos pos, int xoffset = 0)
+FHPos posFromH3M(H3Pos pos, int xoffset = 0)
 {
     return { (uint32_t) (pos.m_x + xoffset), (uint32_t) pos.m_y, pos.m_z };
 }
@@ -36,8 +36,9 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
     dest.m_tileMap.m_height = dest.m_tileMap.m_width = src.m_tiles.m_size;
     dest.m_tileMap.m_depth                           = 1U + src.m_tiles.m_hasUnderground;
 
-    dest.m_name  = src.m_mapName;
-    dest.m_descr = src.m_mapDescr;
+    dest.m_name       = src.m_mapName;
+    dest.m_descr      = src.m_mapDescr;
+    dest.m_difficulty = src.m_difficulty;
 
     auto*      factionsContainer = database->factions();
     const auto factionIds        = factionsContainer->legacyOrderedIds();
@@ -47,6 +48,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
     const auto spellIds    = database->spells()->legacyOrderedIds();
     const auto secSkillIds = database->secSkills()->legacyOrderedIds();
     const auto terrainIds  = database->terrains()->legacyOrderedIds();
+    const auto resIds      = database->resources()->legacyOrderedIds();
 
     std::map<FHPlayerId, FHPos>   mainTowns;
     std::map<FHPlayerId, uint8_t> mainHeroes;
@@ -59,7 +61,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
         fhPlayer.m_humanPossible = playerInfo.m_canHumanPlay;
 
         if (playerInfo.m_hasMainTown) {
-            mainTowns[playerId] = posFromInt3(playerInfo.m_posOfMainTown, +2);
+            mainTowns[playerId] = posFromH3M(playerInfo.m_posOfMainTown, +2);
         }
         if (playerInfo.m_mainCustomHeroId != 0xff) {
             mainHeroes[playerId] = playerInfo.m_mainCustomHeroId;
@@ -94,7 +96,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                 const auto playerId = static_cast<FHPlayerId>(hero->m_playerOwner);
                 FHHero     fhhero;
                 fhhero.m_player          = playerId;
-                fhhero.m_pos             = posFromInt3(obj.m_pos, -1);
+                fhhero.m_pos             = posFromH3M(obj.m_pos, -1);
                 fhhero.m_id              = heroIds[hero->m_subID];
                 fhhero.m_isMain          = mainHeroes.contains(playerId) && mainHeroes[playerId] == hero->m_subID;
                 fhhero.m_questIdentifier = hero->m_questIdentifier;
@@ -156,8 +158,9 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             {
                 const auto* resource = static_cast<const MapResource*>(impl);
                 FHResource  fhres;
-                fhres.m_pos    = posFromInt3(obj.m_pos);
-                fhres.m_amount = resource->m_amount;
+                fhres.m_pos      = posFromH3M(obj.m_pos);
+                fhres.m_amount   = resource->m_amount;
+                fhres.m_resource = database->resources()->find(resIds[objTempl.m_subid]);
                 dest.m_objects.m_resources.push_back(fhres);
             } break;
             case MapObjectType::RANDOM_TOWN:
@@ -167,11 +170,12 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                 const auto  playerId = static_cast<FHPlayerId>(town->m_playerOwner);
                 FHTown      fhtown;
                 fhtown.m_player          = playerId;
-                fhtown.m_pos             = posFromInt3(obj.m_pos);
+                fhtown.m_pos             = posFromH3M(obj.m_pos);
                 fhtown.m_faction         = factionIds[objTempl.m_subid];
                 fhtown.m_questIdentifier = town->m_questIdentifier;
                 fhtown.m_hasFort         = town->m_hasFort;
                 fhtown.m_spellResearch   = town->m_spellResearch;
+                fhtown.m_defFile         = objTempl.m_animationFile;
                 if (mainTowns.contains(playerId) && mainTowns.at(playerId) == fhtown.m_pos)
                     fhtown.m_isMain = true;
                 dest.m_towns.push_back(fhtown);

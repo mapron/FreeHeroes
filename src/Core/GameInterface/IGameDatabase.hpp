@@ -30,7 +30,8 @@ concept GameDatabaseObject = is_any_of<T,
                                        LibraryTerrain,
                                        LibraryResource,
                                        LibraryMapObject,
-                                       LibraryGameRules>;
+                                       LibraryGameRules,
+                                       LibraryObjectDef>;
 
 class IGameDatabase {
 public:
@@ -58,6 +59,7 @@ public:
     using LibraryTerrainContainerPtr        = const ContainerInterface<LibraryTerrain>*;
     using LibraryMapObjectContainerPtr      = const ContainerInterface<LibraryMapObject>*;
     using LibraryHeroSpecContainerPtr       = const ContainerInterface<LibraryHeroSpec>*;
+    using LibraryObjectDefContainerPtr      = const ContainerInterface<LibraryObjectDef>*;
 
     virtual LibraryUnitContainerPtr           units() const      = 0;
     virtual LibraryHeroContainerPtr           heroes() const     = 0;
@@ -69,6 +71,7 @@ public:
     virtual LibraryTerrainContainerPtr        terrains() const   = 0;
     virtual LibraryMapObjectContainerPtr      mapObjects() const = 0;
     virtual LibraryHeroSpecContainerPtr       heroSpecs() const  = 0;
+    virtual LibraryObjectDefContainerPtr      objectDefs() const = 0;
 
     virtual LibraryGameRulesConstPtr gameRules() const = 0;
 
@@ -90,6 +93,7 @@ template <> inline IGameDatabase::LibraryResourceContainerPtr       IGameDatabas
 template <> inline IGameDatabase::LibraryTerrainContainerPtr        IGameDatabase::container() const { return terrains();}
 template <> inline IGameDatabase::LibraryMapObjectContainerPtr      IGameDatabase::container() const { return mapObjects();}
 template <> inline IGameDatabase::LibraryHeroSpecContainerPtr       IGameDatabase::container() const { return heroSpecs();}
+template <> inline IGameDatabase::LibraryObjectDefContainerPtr      IGameDatabase::container() const { return objectDefs();}
 // clang-format on
 
 class IGameDatabaseContainer {

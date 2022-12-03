@@ -1,7 +1,7 @@
 $
 database
-	FH_Base		fh	artifacts.json	artifacts_presentation.json	factions.json	factions_presentation.json	heroes.json	heroes_presentation.json	heroes_skills.json	terrains.json	terrains_presentation.json	resources.json	resources_presentation.json	skills.json	skills_presentation.json	specialities.json	specialities_presentation.json	spells.json	spells_presentation.json	spells_effect.json	units.json	units_abilities.json	units_presentation.json	map_objects.json	map_objects_presentation.json	game_rules.json	legacy.json
-	FH_SoD	FH_Base		sod.json
+	FH_Base		fh	artifacts.json	artifacts_presentation.json	factions.json	factions_presentation.json	heroes.json	heroes_presentation.json	heroes_skills.json	terrains.json	terrains_presentation.json	resources.json	resources_presentation.json	skills.json	skills_presentation.json	specialities.json	specialities_presentation.json	spells.json	spells_presentation.json	spells_effect.json	units.json	units_abilities.json	units_presentation.json	map_objects.json	map_objects_presentation.json	object_defs.json	game_rules.json	legacy.json
+	FH_SoD	FH_Base		sod.json	sod_defs.json
 	FH_HotA	FH_Base		hota.json
 	FH_Test	FH_Base		test.json
 sprites

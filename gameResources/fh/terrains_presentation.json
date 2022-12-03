@@ -130,7 +130,9 @@
     "minimapUnblocked" : [ 0, 0, 0 ],
     "minimapBlocked"   : [ 0, 0, 0 ],
     "music" : "underground",
-    "backgroundsBattle" : []
+    "backgroundsBattle" : [],
+	"centerTilesOffset": 0,
+	"centerTiles": ["rocktl:0","rocktl:1","rocktl:2","rocktl:3","rocktl:4","rocktl:5","rocktl:6","rocktl:7"]
 }},
 
 "hota.terrain.highland" : { "pres":

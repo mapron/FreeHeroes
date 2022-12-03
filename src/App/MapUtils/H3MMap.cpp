@@ -659,8 +659,11 @@ void MapTile::writeBinary(ByteOrderDataStreamWriter& stream) const
 
 void ObjectTemplate::prepareArrays()
 {
-    m_visitMask.resize(6);
-    m_blockMask.resize(6);
+    m_visitMask.resize(6 * 8);
+    m_blockMask.resize(6 * 8);
+
+    m_terrainsHard.resize(16);
+    m_terrainsSoft.resize(16);
 }
 
 void ObjectTemplate::readBinary(ByteOrderDataStreamReader& stream)
@@ -668,13 +671,12 @@ void ObjectTemplate::readBinary(ByteOrderDataStreamReader& stream)
     stream >> m_animationFile;
 
     prepareArrays();
-    for (auto& byte : m_blockMask)
-        stream >> byte;
-    for (auto& byte : m_visitMask)
-        stream >> byte;
+    stream.readBits(m_blockMask);
+    stream.readBits(m_visitMask);
 
-    stream >> m_unknownFlag;
-    stream >> m_allowedTerrainMask;
+    stream.readBits(m_terrainsHard);
+    stream.readBits(m_terrainsSoft);
+
     stream >> m_id >> m_subid;
     m_type = static_cast<Type>(stream.readScalar<uint8_t>());
     stream >> m_drawPriority;
@@ -686,13 +688,12 @@ void ObjectTemplate::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
     stream << m_animationFile;
 
-    for (auto& byte : m_blockMask)
-        stream << byte;
-    for (auto& byte : m_visitMask)
-        stream << byte;
+    stream.writeBits(m_blockMask);
+    stream.writeBits(m_visitMask);
 
-    stream << m_unknownFlag;
-    stream << m_allowedTerrainMask;
+    stream.writeBits(m_terrainsHard);
+    stream.writeBits(m_terrainsSoft);
+
     stream << m_id << m_subid;
     stream << static_cast<uint8_t>(m_type) << m_drawPriority;
 

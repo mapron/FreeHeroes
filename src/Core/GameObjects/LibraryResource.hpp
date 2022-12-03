@@ -24,7 +24,8 @@ struct LibraryResource {
     std::string untranslatedName;
     int         legacyId = -1;
 
-    Presentation presentationParams;
+    LibraryObjectDefConstPtr mapObjectDef = nullptr;
+    Presentation             presentationParams;
 };
 
 }

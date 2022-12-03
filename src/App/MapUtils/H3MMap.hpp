@@ -134,8 +134,10 @@ struct MapTileSet {
 
 struct ObjectTemplate {
     std::string          m_animationFile;
-    std::vector<uint8_t> m_visitMask;
     std::vector<uint8_t> m_blockMask;
+    std::vector<uint8_t> m_visitMask;
+    std::vector<uint8_t> m_terrainsHard;
+    std::vector<uint8_t> m_terrainsSoft;
 
     enum class Type
     {
@@ -147,12 +149,10 @@ struct ObjectTemplate {
         RESOURCE,
     };
 
-    uint16_t m_unknownFlag        = 255;
-    uint16_t m_allowedTerrainMask = 255;
-    uint32_t m_id                 = 0;
-    uint32_t m_subid              = 0;
-    Type     m_type               = Type::INVALID;
-    uint8_t  m_drawPriority       = 0;
+    uint32_t m_id           = 0;
+    uint32_t m_subid        = 0;
+    Type     m_type         = Type::INVALID;
+    uint8_t  m_drawPriority = 0;
 
     void prepareArrays();
 

@@ -37,6 +37,7 @@ public:
     LibraryTerrainContainerPtr        terrains() const override;
     LibraryMapObjectContainerPtr      mapObjects() const override;
     LibraryHeroSpecContainerPtr       heroSpecs() const override;
+    LibraryObjectDefContainerPtr      objectDefs() const override;
 
     LibraryGameRulesConstPtr gameRules() const override;
 

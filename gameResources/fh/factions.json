@@ -6,6 +6,7 @@
     "untranslatedName" : "Castle",
     "alignment":"good",
     "nativeTerrain": "sod.terrain.grass",
+	"mapObjectDef": "avccasx0",
     "warriorClass": {
     "id": "sod.faction.castle.warrior",
     "untranslatedName": "Knight",
@@ -78,6 +79,7 @@
     "untranslatedName" : "Rampart",
     "alignment":"good",
     "nativeTerrain": "sod.terrain.grass",
+	"mapObjectDef": "avcramx0",
     "warriorClass": {
     "id": "sod.faction.rampart.warrior",
     "untranslatedName": "Ranger",
@@ -139,6 +141,7 @@
     "untranslatedName" : "Tower",
     "alignment":"good",
     "nativeTerrain": "sod.terrain.snow",
+	"mapObjectDef": "avctowx0",
     "warriorClass": {
     "id": "sod.faction.tower.warrior",
     "untranslatedName": "Alchemist",
@@ -208,6 +211,7 @@
     "untranslatedName" : "Inferno",
     "alignment":"evil",
     "nativeTerrain": "sod.terrain.lava",
+	"mapObjectDef": "avcinfx0",
     "warriorClass": {
     "id": "sod.faction.inferno.warrior",
     "untranslatedName": "Demoniac",
@@ -271,6 +275,7 @@
     "untranslatedName" : "Necropolis",
     "alignment":"evil",
     "nativeTerrain": "sod.terrain.dirt",
+	"mapObjectDef": "avcnecx0",
     "warriorClass": {
     "id": "sod.faction.necropolis.warrior",
     "untranslatedName": "DeathKnight",
@@ -337,6 +342,7 @@
     "untranslatedName" : "Dungeon",
     "alignment":"evil",
     "nativeTerrain": "sod.terrain.subterra",
+	"mapObjectDef": "avcdunx0",
     "warriorClass": {
     "id": "sod.faction.dungeon.warrior",
     "untranslatedName": "Overlord",
@@ -400,6 +406,7 @@
 "sod.faction.stronghold"             : {
     "untranslatedName" : "Stronghold",
     "nativeTerrain": "sod.terrain.rough",
+	"mapObjectDef": "avcstrx0",
     "warriorClass": {
     "id": "sod.faction.stronghold.warrior",
     "untranslatedName": "Barbarian",
@@ -468,6 +475,7 @@
 "sod.faction.fortress"             : {
     "untranslatedName" : "Fortress",
     "nativeTerrain": "sod.terrain.swamp",
+	"mapObjectDef": "avcftrx0",
     "warriorClass": {
     "id": "sod.faction.fortress.warrior",
     "untranslatedName": "Beastmaster",
@@ -528,6 +536,7 @@
 "sod.faction.conflux"             : {
     "untranslatedName" : "Conflux",
     "nativeTerrain": "hota.terrain.highland",
+	"mapObjectDef": "avchforx",
     "warriorClass": {
     "id": "sod.faction.conflux.warrior",
     "untranslatedName": "Planeswalker",
@@ -592,6 +601,7 @@
 "hota.faction.cove"             : {
     "untranslatedName" : "Cove",
     "nativeTerrain": "sod.terrain.swamp",
+	"mapObjectDef": "avccovx0",
     "warriorClass": {
     "id": "hota.faction.cove.warrior",
     "untranslatedName": "Captain",

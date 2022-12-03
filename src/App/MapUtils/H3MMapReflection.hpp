@@ -143,9 +143,8 @@ inline constexpr const std::tuple MetaInfo::s_fields<ObjectTemplate>{
     Field("animationFile", &ObjectTemplate::m_animationFile),
     Field("visitMask", &ObjectTemplate::m_visitMask),
     Field("blockMask", &ObjectTemplate::m_blockMask),
-
-    Field("unknownFlag", &ObjectTemplate::m_unknownFlag),
-    Field("allowedTerrainMask", &ObjectTemplate::m_allowedTerrainMask),
+    Field("terrainsHard", &ObjectTemplate::m_terrainsHard),
+    Field("terrainsSoft", &ObjectTemplate::m_terrainsSoft),
     Field("id", &ObjectTemplate::m_id),
     Field("subid", &ObjectTemplate::m_subid),
     Field("type", &ObjectTemplate::m_type),

@@ -83,6 +83,7 @@ struct FHTown : public FHPlayerControlledObject {
     bool        m_hasFort{ false };
     uint32_t    m_questIdentifier = 0;
     bool        m_spellResearch{ false };
+    std::string m_defFile; // just for the sake of roundtrip tests.
 };
 
 struct FHTileMap {
@@ -172,7 +173,8 @@ struct FHZone {
 };
 
 struct FHResource : public FHCommonObject {
-    uint32_t m_amount = 0;
+    uint32_t                      m_amount   = 0;
+    Core::LibraryResourceConstPtr m_resource = nullptr;
 };
 
 struct FHMap {
@@ -185,6 +187,7 @@ struct FHMap {
 
     std::string m_name;
     std::string m_descr;
+    uint8_t     m_difficulty = 0;
 
     PlayersMap          m_players;
     std::vector<FHHero> m_wanderingHeroes;

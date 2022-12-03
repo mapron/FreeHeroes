@@ -71,7 +71,8 @@ struct LibraryFaction {
     std::vector<LibraryUnitConstPtr> units;
     std::vector<LibraryHeroConstPtr> heroes;
 
-    Presentation presentationParams;
+    LibraryObjectDefConstPtr mapObjectDef = nullptr;
+    Presentation             presentationParams;
 };
 
 }

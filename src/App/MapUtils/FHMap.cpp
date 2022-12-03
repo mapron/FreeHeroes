@@ -85,6 +85,7 @@ inline constexpr const std::tuple MetaInfo::s_fields<FHTown>{
     Field("hasFort", &FHTown::m_hasFort),
     Field("questId", &FHTown::m_questIdentifier),
     Field("spellResearch", &FHTown::m_spellResearch),
+    Field("defFile", &FHTown::m_defFile),
 };
 
 template<>
@@ -107,6 +108,7 @@ template<>
 inline constexpr const std::tuple MetaInfo::s_fields<FHResource>{
     Field("pos", &FHResource::m_pos),
     Field("amount", &FHResource::m_amount),
+    Field("resource", &FHResource::m_resource),
 };
 
 template<>
@@ -128,6 +130,7 @@ inline constexpr const std::tuple MetaInfo::s_fields<FHMap>{
     Field("tileMap", &FHMap::m_tileMap),
     Field("name", &FHMap::m_name),
     Field("descr", &FHMap::m_descr),
+    Field("difficulty", &FHMap::m_difficulty),
     Field("players", &FHMap::m_players),
     Field("wanderingHeroes", &FHMap::m_wanderingHeroes),
     Field("towns", &FHMap::m_towns),

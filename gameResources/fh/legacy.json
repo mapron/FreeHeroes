@@ -769,5 +769,25 @@
 
 }
 
+},
+
+
+{
+"scope": "resources",
+"compactCols":                                [ "legacyId" ],
+"records" : {
+
+"wood"                                      : [  0 ],
+"mercury"                                   : [  1 ],
+"ore"                                       : [  2 ],
+
+"sulfur"                                    : [  3 ],
+"crystal"                                   : [  4 ],
+"gems"                                      : [  5 ],
+
+"gold"                                      : [  6 ]
+
+}
+
 }]
 

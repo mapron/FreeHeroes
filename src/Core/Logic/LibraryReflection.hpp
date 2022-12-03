@@ -5,17 +5,18 @@
  */
 #pragma once
 
-#include "LibraryFaction.hpp"
-#include "LibrarySecondarySkill.hpp"
-#include "LibraryUnit.hpp"
-#include "LibraryHeroSpec.hpp"
 #include "LibraryArtifact.hpp"
+#include "LibraryFaction.hpp"
+#include "LibraryGameRules.hpp"
 #include "LibraryHero.hpp"
+#include "LibraryHeroSpec.hpp"
+#include "LibraryMapObject.hpp"
+#include "LibraryObjectDef.hpp"
+#include "LibraryResource.hpp"
+#include "LibrarySecondarySkill.hpp"
 #include "LibrarySpell.hpp"
 #include "LibraryTerrain.hpp"
-#include "LibraryResource.hpp"
-#include "LibraryMapObject.hpp"
-#include "LibraryGameRules.hpp"
+#include "LibraryUnit.hpp"
 
 #include "Reflection/EnumTraits.hpp"
 #include "Reflection/MetaInfo.hpp"
@@ -147,6 +148,7 @@ inline constexpr const std::tuple MetaInfo::s_fields<LibraryResource>{
     
     Field("untranslatedName" , &LibraryResource::untranslatedName),
     Field("legacyId"         , &LibraryResource::legacyId),
+    Field("mapObjectDef"     , &LibraryResource::mapObjectDef),
     Field("pres"             , &LibraryResource::presentationParams),
 };
 
@@ -208,6 +210,7 @@ inline constexpr const std::tuple MetaInfo::s_fields<LibraryFaction>{
     Field("warriorClass"      , &LibraryFaction::warriorClass),
     Field("mageClass"         , &LibraryFaction::mageClass),
     Field("nativeTerrain"     , &LibraryFaction::nativeTerrain),
+    Field("mapObjectDef"      , &LibraryFaction::mapObjectDef),
     Field("pres"              , &LibraryFaction::presentationParams),
 };
  //  -----------------------------------------------------------------------------
@@ -773,6 +776,20 @@ inline constexpr const std::tuple MetaInfo::s_fields<LibraryGameRules>{
     Field("morale"          , &LibraryGameRules::morale),
     Field("physicalConst"   , &LibraryGameRules::physicalConst),
     Field("limits"          , &LibraryGameRules::limits),
+};
+
+template<>
+inline constexpr const std::tuple MetaInfo::s_fields<LibraryObjectDef>{
+    Field("legacyId"       , &LibraryObjectDef::legacyId),
+    Field("defFile"        , &LibraryObjectDef::defFile),
+    Field("blockMap"       , &LibraryObjectDef::blockMap),
+    Field("visitMap"       , &LibraryObjectDef::visitMap),
+    Field("terrainsHard"   , &LibraryObjectDef::terrainsHard),
+    Field("terrainsSoft"   , &LibraryObjectDef::terrainsSoft),
+    Field("objId"          , &LibraryObjectDef::objId),
+    Field("subId"          , &LibraryObjectDef::subId),
+    Field("type"           , &LibraryObjectDef::type),
+    Field("priority"       , &LibraryObjectDef::priority),
 };
 
 template<>

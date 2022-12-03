@@ -113,6 +113,13 @@ bool deserialize(const IGameDatabase* gameDatabase, LibraryGameRules& obj, const
     return true;
 }
 
+bool deserialize(const IGameDatabase* gameDatabase, LibraryObjectDef& obj, const PropertyTree& jsonObj)
+{
+    PropertyTreeReader reader(gameDatabase);
+    reader.jsonToValue(jsonObj, obj);
+    return true;
+}
+
 bool serialize(const SkillHeroItem& obj, PropertyTree& jsonObj)
 {
     PropertyTreeWriter writer;
