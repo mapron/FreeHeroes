@@ -74,6 +74,20 @@ QString prepareDescription(QString description)
     return description;
 }
 
+IGraphicsLibrary::PixmapKey getTerrainKey(Core::LibraryTerrainConstPtr terrain, int variant)
+{
+    if (terrain->presentationParams.defFileSplit) {
+        IGraphicsLibrary::PixmapKey result;
+        auto                        suffix = std::to_string(variant);
+        while (suffix.size() < 3)
+            suffix = "0" + suffix;
+        result.resourceName = terrain->presentationParams.defFile + suffix;
+        return result;
+    }
+    const bool isAnimated = terrain->presentationParams.isAnimated;
+    return IGraphicsLibrary::PixmapKey(terrain->presentationParams.defFile, isAnimated ? variant : 0, isAnimated ? 0 : variant);
+}
+
 }
 
 template<typename WrapperType, typename SrcType>
@@ -324,15 +338,17 @@ GuiFaction::GuiFaction(Sound::IMusicBox&, IGraphicsLibrary& graphicsLibrary, Cor
 GuiTerrain::GuiTerrain(Sound::IMusicBox&, IGraphicsLibrary& graphicsLibrary, Core::LibraryTerrainConstPtr source)
     : QObject(nullptr)
     , Base(source)
-    , m_icon(graphicsLibrary.getPixmap(source->presentationParams.icon))
+    , m_icon(graphicsLibrary.getPixmapByKey(getTerrainKey(source, source->presentationParams.centerTilesOffset)))
     , m_graphicsLibrary(graphicsLibrary)
 {
 }
 
 QPixmap GuiTerrain::getTile(int variant) const
 {
-    const auto& variantSet      = getSource()->presentationParams.centerTiles;
-    auto        terrainPixAsync = m_graphicsLibrary.getPixmap(variantSet[variant % variantSet.size()]);
+    const auto centerTilesCount = getSource()->presentationParams.centerTilesCount;
+    variant                     = variant % centerTilesCount;
+    const auto key              = getTerrainKey(getSource(), getSource()->presentationParams.centerTilesOffset + variant);
+    auto       terrainPixAsync  = m_graphicsLibrary.getPixmapByKey(key);
     assert(terrainPixAsync && terrainPixAsync->exists());
     auto pix = terrainPixAsync->get();
     return pix;

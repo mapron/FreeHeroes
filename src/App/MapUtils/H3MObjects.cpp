@@ -50,9 +50,12 @@ MapFormatFeatures::MapFormatFeatures(MapFormat format, int hotaVer1)
 
     m_primarySkillsCount = 4;
     m_terrainTypes       = 10;
-    m_resourceCount      = 8;
-    m_players            = 8;
-    m_stackSize          = 7;
+    if (format >= MapFormat::HOTA1)
+        m_terrainTypes = 12;
+
+    m_resourceCount = 8;
+    m_players       = 8;
+    m_stackSize     = 7;
 
     if (format == MapFormat::HOTA3 && hotaVer1 < 3)
         m_heroesCount--;
@@ -91,7 +94,7 @@ MapFormatFeatures::MapFormatFeatures(MapFormat format, int hotaVer1)
     m_eventHasHumanActivate     = format == MapFormat::HOTA3 && hotaVer1 == 3;
     m_townEventHasHumanAffected = format > MapFormat::AB;
 
-    m_playerP7               = format == MapFormat::SOD || format == MapFormat::WOG || format >= MapFormat::HOTA1;
+    m_playerP7               = format >= MapFormat::SOD;
     m_playerGenerateHeroInfo = format > MapFormat::ROE;
     m_playerPlaceholders     = format > MapFormat::ROE;
 

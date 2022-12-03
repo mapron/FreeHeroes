@@ -9,6 +9,8 @@
 #include "PropertyTree.hpp"
 #include "H3MObjects.hpp"
 
+#include <set>
+
 namespace FreeHeroes {
 
 class H3Pos {
@@ -71,7 +73,7 @@ struct PlayerInfo {
     uint8_t m_team{ 0xff }; /// The default value NO_TEAM
 
     uint8_t m_generateHero{ 0 }; /// Unused.
-    uint8_t m_unknown1{ 0 };     /// Unknown and unused.
+    uint8_t m_p7{ 0 };           /// Unknown and unused.
     /// Unused. Count of hero placeholders containing hero type.
     /// WARNING: powerPlaceholders sometimes gives false 0 (eg. even if there is one placeholder), maybe different meaning ???
     uint8_t m_powerPlaceholders{ 0 };
@@ -133,6 +135,8 @@ struct MapTileSet {
 };
 
 struct ObjectTemplate {
+    MapFormatFeaturesPtr m_features;
+
     std::string          m_animationFile;
     std::vector<uint8_t> m_blockMask;
     std::vector<uint8_t> m_visitMask;
@@ -188,6 +192,7 @@ struct CustomHeroData {
         uint8_t m_id    = 0;
         uint8_t m_level = 0;
     };
+    MapFormatFeaturesPtr m_features;
 
     uint8_t m_enabled = 0;
 
@@ -203,6 +208,8 @@ struct CustomHeroData {
     uint8_t          m_sex = 0xFF;
     HeroSpellSet     m_spellSet;
     HeroPrimSkillSet m_primSkillSet;
+
+    void prepareArrays();
 
     void readBinary(ByteOrderDataStreamReader& stream);
     void writeBinary(ByteOrderDataStreamWriter& stream) const;
@@ -314,6 +321,10 @@ struct H3Map {
     std::vector<Object>         m_objects;
 
     std::vector<GlobalMapEvent> m_events;
+
+    // when saving from SoD editor, some bytes contains random garbage data.
+    // we will save offsets in file for that, to perform byte equality check as close as possible.
+    std::set<size_t> m_ignoredOffsets;
 
     H3Map();
 

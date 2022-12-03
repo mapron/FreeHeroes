@@ -62,7 +62,7 @@ inline constexpr const std::tuple MetaInfo::s_fields<PlayerInfo>{
     Field("posOfMainTown", &PlayerInfo::m_posOfMainTown),
     Field("team", &PlayerInfo::m_team),
     Field("generateHero", &PlayerInfo::m_generateHero),
-    Field("p7", &PlayerInfo::m_unknown1),
+    Field("p7", &PlayerInfo::m_p7),
     Field("powerPlaceholders", &PlayerInfo::m_powerPlaceholders),
     Field("heroesNames", &PlayerInfo::m_heroesNames),
 

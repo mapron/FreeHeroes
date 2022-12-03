@@ -37,6 +37,8 @@ inline constexpr const auto EnumTraits::s_valueMapping<MapConverter::Task> = Enu
 
     "CheckBinaryInputOutputEquality",
     MapConverter::Task::CheckBinaryInputOutputEquality,
+    "CheckJsonInputOutputEquality",
+    MapConverter::Task::CheckJsonInputOutputEquality,
 
     "ConvertH3MToJson",
     MapConverter::Task::ConvertH3MToJson,
@@ -94,7 +96,11 @@ void MapConverter::run(Task task, int recurse) noexcept(false)
             }
             case Task::CheckBinaryInputOutputEquality:
             {
-                checkH3MInputOutputEquality();
+                checkBinaryInputOutputEquality();
+            } break;
+            case Task::CheckJsonInputOutputEquality:
+            {
+                checkJsonInputOutputEquality();
             } break;
             case Task::ConvertH3MToJson:
             {
@@ -247,6 +253,10 @@ void MapConverter::run(Task task, int recurse) noexcept(false)
                 safeCopy(m_settings.m_outputs.m_fhMap, m_settings.m_inputs.m_fhMap);
                 run(Task::FHMapToH3M, recurse + 1);
 
+                setInput(m_inputs.m_h3m.m_json);
+                setOutput(m_outputs.m_h3m.m_json);
+                run(Task::CheckJsonInputOutputEquality, recurse + 1);
+
                 setInput(m_inputs.m_h3m.m_uncompressedBinary);
                 setOutput(m_outputs.m_h3m.m_uncompressedBinary);
                 run(Task::CheckBinaryInputOutputEquality, recurse + 1);
@@ -394,6 +404,7 @@ void MapConverter::binaryDeserializeH3M()
 
     try {
         reader >> m_mapH3M;
+        m_ignoredOffsets = m_mapH3M.m_ignoredOffsets;
     }
     catch (std::exception& ex) {
         throw std::runtime_error(ex.what() + std::string(", offset=") + std::to_string(bobuffer.getOffsetRead()));
@@ -488,33 +499,86 @@ void MapConverter::convertH3MtoFH()
     convertH3M2FH(m_mapH3M, m_mapFH, m_databaseContainer->getDatabase(m_mapFH.m_version));
 }
 
-void MapConverter::checkH3MInputOutputEquality()
+void MapConverter::checkBinaryInputOutputEquality()
 {
-    std::string bufferIn  = Core::readFileIntoBufferThrow(m_inputFilename);
-    std::string bufferOut = Core::readFileIntoBufferThrow(m_outputFilename);
+    const std::string bufferIn  = Core::readFileIntoBufferThrow(m_inputFilename);
+    const std::string bufferOut = Core::readFileIntoBufferThrow(m_outputFilename);
 
-    const bool result = bufferIn == bufferOut;
-    m_logOutput << "Round-trip result: " << (result ? "PASSED" : "FAILED") << ", Input size=" << bufferIn.size() << ", Output size=" << bufferOut.size() << "\n";
+    m_logOutput << "(Input size=" << bufferIn.size() << ", Output size=" << bufferOut.size() << ")\n";
+
+    auto ret = [this](bool status, bool condPassed = false) {
+        if (status) {
+            m_logOutput << "Round-trip binary result: " << (condPassed ? "CONDITIONALLY PASSED" : "PASSED") << "\n";
+            return;
+        }
+        m_logOutput << "Round-trip binary result: FAILED\n";
+        throw std::runtime_error("Failed input == output");
+    };
+    if (bufferIn == bufferOut)
+        return ret(true);
+
+    const bool sizeDifferent = bufferIn.size() != bufferOut.size();
+    const auto minSize       = std::min(bufferIn.size(), bufferOut.size());
+    const bool commonEqual   = (std::memcmp(bufferIn.data(), bufferOut.data(), minSize) == 0);
+
+    if (commonEqual) {
+        m_logOutput << "Common part is: EQUAL\n";
+        assert(!sizeDifferent);
+        return ret(false);
+    }
+
+    const int maxDiffCounter        = 10;
+    int       skippedIgnoredOffsets = 0;
+    int       diffOffsets           = 0;
+    for (size_t i = 0; i < minSize; ++i) {
+        if (bufferIn[i] != bufferOut[i]) {
+            if (m_ignoredOffsets.contains(i)) {
+                skippedIgnoredOffsets++;
+                continue;
+            }
+            if (diffOffsets++ < maxDiffCounter)
+                m_logOutput << "difference at [" << i << " / 0x" << std::hex << std::setfill('0') << i << "], in: 0x" << std::setw(2) << int(uint8_t(bufferIn[i]))
+                            << ", out: 0x" << std::setw(2) << int(uint8_t(bufferOut[i])) << "\n"
+                            << std::dec << std::setfill(' ');
+        }
+    }
+    const bool condPassed = diffOffsets == 0 && !sizeDifferent;
+    if (condPassed) {
+        m_logOutput << "Common part is: CONDITIONALLY EQUAL (skippedIgnored:" << skippedIgnoredOffsets << ")\n";
+        return ret(true, true);
+    }
+    m_logOutput << "Common part is: DIFFERENT (diff bytes: " << diffOffsets << ", skippedIgnored:" << skippedIgnoredOffsets << ")\n";
+
+    return ret(false);
+}
+
+void MapConverter::checkJsonInputOutputEquality()
+{
+    auto jsonIn  = Core::readJsonFromBufferThrow(Core::readFileIntoBufferThrow(m_inputFilename));
+    auto jsonOut = Core::readJsonFromBufferThrow(Core::readFileIntoBufferThrow(m_outputFilename));
+
+    const bool result = jsonIn == jsonOut;
+    m_logOutput << "Round-trip JSON result: " << (result ? "PASSED" : "FAILED") << '\n';
     if (result)
         return;
 
-    auto minSize = std::min(bufferIn.size(), bufferOut.size());
-    bufferIn.resize(minSize);
-    bufferOut.resize(minSize);
-    const bool commonEqual = bufferIn == bufferOut;
-    m_logOutput << "Common part is: " << (commonEqual ? "EQUAL" : "DIFFERENT") << "\n";
-    if (!commonEqual) {
-        int maxDiffCounter = 10;
-        for (size_t i = 0; i < minSize; ++i) {
-            if (bufferIn[i] != bufferOut[i]) {
-                if (maxDiffCounter-- > 0)
-                    m_logOutput << "difference at [" << i << " / 0x" << std::hex << std::setfill('0') << i << "], in: 0x" << std::setw(2) << int(uint8_t(bufferIn[i]))
-                                << ", out: 0x" << std::setw(2) << int(uint8_t(bufferOut[i])) << "\n"
-                                << std::dec << std::setfill(' ');
-            }
-        }
+    {
+        Core::writeFileFromBufferThrow(m_inputFilename, Core::writeJsonToBufferThrow(jsonIn, true));
+        Core::writeFileFromBufferThrow(m_outputFilename, Core::writeJsonToBufferThrow(jsonOut, true));
     }
-    throw std::runtime_error("Failed round-trip");
+
+    const auto& jsonDiffIn  = m_settings.m_inputs.m_jsonDiff;
+    const auto& jsonDiffOut = m_settings.m_outputs.m_jsonDiff;
+    if (jsonDiffIn.empty() || jsonDiffOut.empty()) {
+        m_logOutput << "Prodive jsonDiff fields to save difference to file.\n";
+    } else {
+        m_logOutput << "Saving diff to: in=" << jsonDiffIn << ", out=" << jsonDiffOut << '\n';
+        PropertyTree::removeEqualValues(jsonIn, jsonOut);
+        Core::writeFileFromBufferThrow(jsonDiffIn, Core::writeJsonToBufferThrow(jsonIn, true));
+        Core::writeFileFromBufferThrow(jsonDiffOut, Core::writeJsonToBufferThrow(jsonOut, true));
+    }
+
+    throw std::runtime_error("Failed input == output");
 }
 
 void MapConverter::safeCopy(const Core::std_path& src, const Core::std_path& dest)

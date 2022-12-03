@@ -20,10 +20,12 @@ int main(int argc, char** argv)
                                    "input-fhTpl",
                                    "input-h3m",
                                    "input-h3svg",
+                                   "input-diff-json",
                                    "output-fhMap",
                                    "output-fhTpl",
                                    "output-h3m",
                                    "output-h3svg",
+                                   "output-diff-json",
                                    "dump-uncompressed",
                                    "dump-json",
                                },
@@ -35,20 +37,21 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    const auto tasks            = parser.getMultiArg("tasks");
-    const bool dumpUncompressed = parser.getArg("dump-uncompressed") == "1";
-    const bool dumpJson         = parser.getArg("dump-json") == "1";
+    const auto        tasks            = parser.getMultiArg("tasks");
+    const bool        dumpUncompressed = parser.getArg("dump-uncompressed") == "1";
+    const bool        dumpJson         = parser.getArg("dump-json") == "1";
+    const std::string diffJsonFile     = parser.getArg("diff-json-file");
 
     Core::CoreApplication fhCoreApp;
     fhCoreApp.initLogger();
     fhCoreApp.load();
 
-    auto makePaths = [&parser](bool isInput) -> MapConverter::PathsSet {
-        const std::string prefix     = isInput ? "input-" : "output-";
+    auto makePaths = [&parser](const std::string& prefix) -> MapConverter::PathsSet {
         const std::string fhMap      = parser.getArg(prefix + "fhMap");
         const std::string fhTemplate = parser.getArg(prefix + "fhTpl");
         const std::string h3m        = parser.getArg(prefix + "h3m");
         const std::string h3sav      = parser.getArg(prefix + "h3svg");
+        const std::string diffjson   = parser.getArg(prefix + "diff-json");
 
         const std::string h3mUncompressed = h3m.empty() ? "" : h3m + ".uncompressed";
         const std::string h3mJson         = h3m.empty() ? "" : h3m + ".json";
@@ -61,6 +64,7 @@ int main(int argc, char** argv)
         result.m_fhTemplate = fhTemplate;
         result.m_h3m        = { .m_binary = h3m, .m_uncompressedBinary = h3mUncompressed, .m_json = h3mJson };
         result.m_h3svg      = { .m_binary = h3sav, .m_uncompressedBinary = h3savUncompressed, .m_json = h3savJson };
+        result.m_jsonDiff   = diffjson;
         return result;
     };
 
@@ -68,8 +72,8 @@ int main(int argc, char** argv)
                            fhCoreApp.getDatabaseContainer(),
                            fhCoreApp.getRandomGeneratorFactory(),
                            MapConverter::Settings{
-                               .m_inputs                  = makePaths(true),
-                               .m_outputs                 = makePaths(false),
+                               .m_inputs                  = makePaths("input-"),
+                               .m_outputs                 = makePaths("output-"),
                                .m_dumpUncompressedBuffers = dumpUncompressed,
                                .m_dumpBinaryDataJson      = dumpJson,
                            });

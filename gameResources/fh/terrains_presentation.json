@@ -11,12 +11,20 @@
     "minimapBlocked"   : [ 57, 40, 8 ],
     "music" : "dirt",
     "backgroundsBattle" : ["cmbkdrmt", "cmbkdrtr", "cmbkdrdd"],
-    "icon": "dirttl:21",
+    "defFile": "dirttl",
+	"sandBorderTilesOffset": 0,
+	"sandDirtBorderTilesOffset": 20,
+	"sandDirtBorderTilesCount": 1,
 	"centerTilesOffset": 21,
-    "centerTiles": ["dirttl:21","dirttl:22","dirttl:23","dirttl:24","dirttl:25","dirttl:26",
-                    "dirttl:27","dirttl:28","dirttl:29","dirttl:30","dirttl:31","dirttl:32",
-                    "dirttl:33","dirttl:34","dirttl:35","dirttl:36","dirttl:37","dirttl:38",
-                    "dirttl:39","dirttl:40","dirttl:41","dirttl:42","dirttl:43","dirttl:44"]
+    "centerTilesCount": 24,
+	"borderCounts": {
+		"TL" : 4,
+		"L"  : 4,
+		"T"  : 4,
+		"BR" : 4,
+		"TLS": 2,
+		"BRS": 2
+	}
 }},
 "sod.terrain.sand" : { "pres":
 {
@@ -25,12 +33,9 @@
     "minimapBlocked"   : [ 165, 158, 107 ],
     "music" : "sand",
     "backgroundsBattle" : ["cmbkbch", "cmbkdes" ],
-    "icon": "sandtl:0",
+    "defFile": "sandtl",
 	"centerTilesOffset": 0,
-    "centerTiles": ["sandtl:0","sandtl:1","sandtl:2","sandtl:3","sandtl:4","sandtl:5",
-                    "sandtl:6","sandtl:7","sandtl:8","sandtl:9","sandtl:10","sandtl:11",
-                    "sandtl:12","sandtl:13","sandtl:14","sandtl:15","sandtl:16","sandtl:17",
-                    "sandtl:18","sandtl:19","sandtl:20","sandtl:21","sandtl:22","sandtl:23"]
+    "centerTilesCount": 24
 }},
 "sod.terrain.grass" : { "pres":
 {
@@ -39,12 +44,13 @@
     "minimapBlocked"   : [ 0, 48, 0 ],
     "music" : "grass",
     "backgroundsBattle" : ["cmbkgrmt", "cmbkgrtr"],
-    "icon": "grastl:49",
+    "defFile": "grastl",
+	"dirtBorderTilesOffset": 0,
+	"sandBorderTilesOffset": 20,
+	"sandDirtBorderTilesOffset": 40,
+	"sandDirtBorderTilesCount": 9,
 	"centerTilesOffset": 49,
-    "centerTiles": ["grastl:49","grastl:50","grastl:51","grastl:52","grastl:53","grastl:54",
-                    "grastl:55","grastl:56","grastl:57","grastl:58","grastl:59","grastl:60",
-                    "grastl:61","grastl:62","grastl:63","grastl:64","grastl:65","grastl:66",
-                    "grastl:67","grastl:68","grastl:69","grastl:70","grastl:71","grastl:72"]
+    "centerTilesCount": 24
 }},
 "sod.terrain.snow" : { "pres":
 {
@@ -53,12 +59,13 @@
     "minimapBlocked"   : [ 140, 158, 156 ],
     "music" : "snow",
     "backgroundsBattle" : ["cmbksntr", "cmbksnmt"],
-    "icon": "snowtl:49",
+    "defFile": "snowtl",
+	"dirtBorderTilesOffset": 0,
+	"sandBorderTilesOffset": 20,
+	"sandDirtBorderTilesOffset": 40,
+	"sandDirtBorderTilesCount": 9,
 	"centerTilesOffset": 49,
-    "centerTiles": ["snowtl:49","snowtl:50","snowtl:51","snowtl:52","snowtl:53","snowtl:54",
-                    "snowtl:55","snowtl:56","snowtl:57","snowtl:58","snowtl:59","snowtl:60",
-                    "snowtl:61","snowtl:62","snowtl:63","snowtl:64","snowtl:65","snowtl:66",
-                    "snowtl:67","snowtl:68","snowtl:69","snowtl:70","snowtl:71","snowtl:72"]
+    "centerTilesCount": 24
 }},
 "sod.terrain.swamp" : { "pres":
 {
@@ -67,12 +74,13 @@
     "minimapBlocked"   : [ 33,  89,  66 ],
     "music" : "swamp",
     "backgroundsBattle": ["cmbkswmp", "cmbkswdv", "cmbkswhl"],
-    "icon": "swmptl:49",
+    "defFile": "swmptl",
+	"dirtBorderTilesOffset": 0,
+	"sandBorderTilesOffset": 20,
+	"sandDirtBorderTilesOffset": 40,
+	"sandDirtBorderTilesCount": 9,
 	"centerTilesOffset": 49,
-    "centerTiles": ["swmptl:49","swmptl:50","swmptl:51","swmptl:52","swmptl:53","swmptl:54",
-                    "swmptl:55","swmptl:56","swmptl:57","swmptl:58","swmptl:59","swmptl:60",
-                    "swmptl:61","swmptl:62","swmptl:63","swmptl:64","swmptl:65","swmptl:66",
-                    "swmptl:67","swmptl:68","swmptl:69","swmptl:70","swmptl:71","swmptl:72"]
+    "centerTilesCount": 24
 }},
 "sod.terrain.rough" : { "pres":
 {
@@ -81,12 +89,13 @@
     "minimapBlocked"   : [  99,  81, 33 ],
     "music" : "rough",
     "backgroundsBattle" : ["cmbkrgh"],
-    "icon": "rougtl:49",
+    "defFile": "rougtl",
+	"dirtBorderTilesOffset": 0,
+	"sandBorderTilesOffset": 20,
+	"sandDirtBorderTilesOffset": 40,
+	"sandDirtBorderTilesCount": 9,
 	"centerTilesOffset": 49,
-    "centerTiles": ["rougtl:49","rougtl:50","rougtl:51","rougtl:52","rougtl:53","rougtl:54",
-                    "rougtl:55","rougtl:56","rougtl:57","rougtl:58","rougtl:59","rougtl:60",
-                    "rougtl:61","rougtl:62","rougtl:63","rougtl:64","rougtl:65","rougtl:66",
-                    "rougtl:67","rougtl:68","rougtl:69","rougtl:70","rougtl:71","rougtl:72"]
+    "centerTilesCount": 24
 }},
 "sod.terrain.subterra" : { "pres":
 {
@@ -95,9 +104,13 @@
     "minimapBlocked"   : [  90,  8, 0 ],
     "music" : "underground",
     "backgroundsBattle" : ["cmbksub" ],
-    "icon": "subbtl:50",
-	"centerTilesOffset": 50,
-    "tileset": "subbtl"
+    "defFile": "subbtl",
+	"dirtBorderTilesOffset": 0,
+	"sandBorderTilesOffset": 20,
+	"sandDirtBorderTilesOffset": 40,
+	"sandDirtBorderTilesCount": 9,
+	"centerTilesOffset": 49,
+    "centerTilesCount": 24
 }},
 "sod.terrain.lava" : { "pres":
 {
@@ -106,9 +119,14 @@
     "minimapBlocked"   : [ 41, 40, 41 ],
     "music" : "lava",
     "backgroundsBattle" : ["cmbklava" , "cmbklvst"],
-    "icon": "lavatl:69:0",
-	"centerTilesOffset": 69,
-    "tileset": "lavatl"
+    "defFile": "lavatl",
+	"isAnimated": true,
+	"dirtBorderTilesOffset": 0,
+	"sandBorderTilesOffset": 20,
+	"sandDirtBorderTilesOffset": 40,
+	"sandDirtBorderTilesCount": 9,
+	"centerTilesOffset": 49,
+    "centerTilesCount": 24
 }},
 "sod.terrain.water" : { "pres":
 {
@@ -117,11 +135,11 @@
     "minimapBlocked"   : [ 8, 81, 148 ],
     "music" : "water",
     "backgroundsBattle" : ["cmbkboat","cmbkdeck" ],
-    "icon" : "watrtl:21:0",
-	"centerTilesOffset": 21,
-	"centerTiles": ["watrtl:21:0","watrtl:22:0","watrtl:23:0","watrtl:24:0","watrtl:25:0","watrtl:26:0",
-                    "watrtl:27:0","watrtl:28:0","watrtl:29:0","watrtl:30:0","watrtl:31:0","watrtl:32:0"],
-    "tileset": "watrtl"
+    "defFile" : "watrtl",
+	"isAnimated": true,
+	"sandBorderTilesOffset": 0,
+	"centerTilesOffset": 20,
+	"centerTilesCount": 13
 }},
 "sod.terrain.rock" : { "pres":
 {
@@ -131,8 +149,9 @@
     "minimapBlocked"   : [ 0, 0, 0 ],
     "music" : "underground",
     "backgroundsBattle" : [],
+	"sandBorderTilesOffset": 8,
 	"centerTilesOffset": 0,
-	"centerTiles": ["rocktl:0","rocktl:1","rocktl:2","rocktl:3","rocktl:4","rocktl:5","rocktl:6","rocktl:7"]
+	"centerTilesCount": 8
 }},
 
 "hota.terrain.highland" : { "pres":
@@ -142,7 +161,22 @@
     "minimapBlocked"   : [ 0, 48, 0 ],
     "music" : "highlands",
     "backgroundsBattle" : ["cmbkhlmt"],
-    "icon": "hglnt078"
+    "defFile": "hglnt",
+	"defFileSplit": true,
+	"dirtBorderTilesOffset": 0,
+	"sandBorderTilesOffset": 34,
+	"sandDirtBorderTilesOffset": 68,
+	"sandDirtBorderTilesCount": 9,
+	"centerTilesOffset": 77,
+    "centerTilesCount": 41,
+	"borderCounts": {
+		"TL" : 6,
+		"L"  : 8,
+		"T"  : 8,
+		"BR" : 6,
+		"TLS": 3,
+		"BRS": 3
+	}
 }},
 
 "hota.terrain.wasteland" : { "pres":
@@ -152,7 +186,22 @@
     "minimapBlocked"   : [ 0, 48, 0 ],
     "music" : "wasteland",
     "backgroundsBattle" : ["cmbkwstp"],
-    "icon": "wstlt078"
+    "defFile": "wstlt",
+	"defFileSplit": true,
+	"dirtBorderTilesOffset": 0,
+	"sandBorderTilesOffset": 34,
+	"sandDirtBorderTilesOffset": 68,
+	"sandDirtBorderTilesCount": 9,
+	"centerTilesOffset": 77,
+    "centerTilesCount": 41,
+	"borderCounts": {
+		"TL" : 6,
+		"L"  : 8,
+		"T"  : 8,
+		"BR" : 6,
+		"TLS": 3,
+		"BRS": 3
+	}
 }},
 
 "sod.terrain.magicPlains" : { "pres":

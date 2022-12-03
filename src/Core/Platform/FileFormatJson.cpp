@@ -146,8 +146,14 @@ bool readJsonFromBuffer(const std::string& buffer, PropertyTree& data) noexcept(
     return true;
 }
 
-bool writeJsonToBuffer(std::string& buffer, const PropertyTree& data) noexcept(true)
+bool writeJsonToBuffer(std::string& buffer, const PropertyTree& data, bool pretty) noexcept(true)
 {
+    if (pretty) {
+        std::ostringstream os;
+        PropertyTree::printReadableJson(os, data);
+        buffer = os.str();
+        return true;
+    }
     if (data.isNull()) {
         return false;
     }
@@ -169,10 +175,10 @@ PropertyTree readJsonFromBufferThrow(const std::string& buffer) noexcept(false)
     return result;
 }
 
-std::string writeJsonToBufferThrow(const PropertyTree& data) noexcept(false)
+std::string writeJsonToBufferThrow(const PropertyTree& data, bool pretty) noexcept(false)
 {
     std::string buffer;
-    if (!writeJsonToBuffer(buffer, data))
+    if (!writeJsonToBuffer(buffer, data, pretty))
         throw std::runtime_error("Failed to write JSON");
     return buffer;
 }

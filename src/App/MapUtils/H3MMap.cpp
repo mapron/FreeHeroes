@@ -244,9 +244,11 @@ void H3Map::prepareArrays()
     m_customHeroData.resize(m_features->m_heroesCount);
 
     for (auto& heroData : m_customHeroData) {
+        heroData.m_features                = m_features;
         heroData.m_artSet.m_features       = m_features;
         heroData.m_spellSet.m_features     = m_features;
         heroData.m_primSkillSet.m_features = m_features;
+        heroData.prepareArrays();
     }
 }
 
@@ -290,13 +292,17 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
 
     for (PlayerInfo& playerInfo : m_players) {
         stream >> playerInfo.m_canHumanPlay >> playerInfo.m_canComputerPlay;
-
+        const bool isValid    = playerInfo.m_canHumanPlay || playerInfo.m_canComputerPlay;
         playerInfo.m_aiTactic = static_cast<AiTactic>(stream.readScalar<uint8_t>());
 
         if (m_features->m_playerP7) {
-            stream >> playerInfo.m_unknown1;
+            if (!isValid)
+                m_ignoredOffsets.insert(stream.getBuffer().getOffsetRead());
+            stream >> playerInfo.m_p7;
+            if (!isValid)
+                playerInfo.m_p7 = 0;
         } else {
-            playerInfo.m_unknown1 = -1;
+            playerInfo.m_p7 = -1;
         }
 
         // Factions this player can choose
@@ -305,7 +311,11 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
         else
             playerInfo.m_allowedFactionsBitmask = stream.readScalar<uint8_t>();
 
+        if (!isValid)
+            m_ignoredOffsets.insert(stream.getBuffer().getOffsetRead());
         stream >> playerInfo.m_isFactionRandom >> playerInfo.m_hasMainTown;
+        if (!isValid)
+            playerInfo.m_isFactionRandom = 0;
         if (playerInfo.m_hasMainTown) {
             playerInfo.m_generateHeroAtMainTown = true;
             playerInfo.m_generateHero           = false;
@@ -400,7 +410,15 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
         }
     }
 
-    stream >> m_objectDefs;
+    {
+        uint32_t count = 0;
+        stream >> count;
+        m_objectDefs.resize(count);
+        for (auto& objDef : m_objectDefs) {
+            objDef.m_features = m_features;
+            stream >> objDef;
+        }
+    }
 
     {
         uint32_t count = 0;
@@ -452,7 +470,7 @@ void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
         stream << static_cast<uint8_t>(playerInfo.m_aiTactic);
 
         if (m_features->m_playerP7)
-            stream << playerInfo.m_unknown1;
+            stream << playerInfo.m_p7;
 
         if (m_features->m_factions16Bit)
             stream << playerInfo.m_allowedFactionsBitmask;
@@ -662,8 +680,8 @@ void ObjectTemplate::prepareArrays()
     m_visitMask.resize(6 * 8);
     m_blockMask.resize(6 * 8);
 
-    m_terrainsHard.resize(16);
-    m_terrainsSoft.resize(16);
+    m_terrainsHard.resize(m_features->m_terrainTypes);
+    m_terrainsSoft.resize(m_features->m_terrainTypes);
 }
 
 void ObjectTemplate::readBinary(ByteOrderDataStreamReader& stream)
@@ -732,14 +750,19 @@ void GlobalMapEvent::writeBinary(ByteOrderDataStreamWriter& stream) const
     stream.zeroPadding(17);
 }
 
+void CustomHeroData::prepareArrays()
+{
+    m_spellSet.prepareArrays();
+    m_primSkillSet.prepareArrays();
+}
+
 void CustomHeroData::readBinary(ByteOrderDataStreamReader& stream)
 {
     stream >> m_enabled;
     if (!m_enabled)
         return;
 
-    m_spellSet.prepareArrays();
-    m_primSkillSet.prepareArrays();
+    prepareArrays();
 
     assert(m_enabled == 1U);
     stream >> m_hasExp;

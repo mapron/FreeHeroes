@@ -33,6 +33,7 @@ public:
         Core::std_path m_fhMap;
         BinaryPathsSet m_h3m;
         BinaryPathsSet m_h3svg;
+        Core::std_path m_jsonDiff;
     };
 
     struct Settings {
@@ -61,6 +62,7 @@ public:
         Invalid,
 
         CheckBinaryInputOutputEquality,
+        CheckJsonInputOutputEquality,
         ConvertH3MToJson,
         ConvertJsonToH3M,
         ConvertH3SVGToJson,
@@ -128,7 +130,8 @@ private:
     void convertFHtoH3M();
     void convertH3MtoFH();
 
-    void checkH3MInputOutputEquality();
+    void checkBinaryInputOutputEquality();
+    void checkJsonInputOutputEquality();
 
 private:
     void safeCopy(const Core::std_path& src, const Core::std_path& dest);
@@ -152,10 +155,11 @@ private:
         ScopeTimer    m_timer;
     };
 
-    Settings       m_settings;
-    std::string    m_currentTask;
-    Core::std_path m_inputFilename;
-    Core::std_path m_outputFilename;
+    Settings         m_settings;
+    std::string      m_currentTask;
+    Core::std_path   m_inputFilename;
+    Core::std_path   m_outputFilename;
+    std::set<size_t> m_ignoredOffsets;
 };
 
 std::string        taskToString(MapConverter::Task task);

@@ -78,7 +78,7 @@ int addJsonObjectToIndex(PropertyTree& index, const PropertyTree& fileSections)
 
             for (auto it = section["records"].getMap().cbegin(); it != section["records"].getMap().cend(); ++it) {
                 const std::string& id = it->first;
-                recordObjectMap[id].mergePatch(it->second);
+                PropertyTree::mergePatch(recordObjectMap[id], it->second);
                 totalRecordsFound++;
             }
             continue;

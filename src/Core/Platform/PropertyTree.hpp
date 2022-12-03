@@ -72,6 +72,7 @@ public:
 
     // print any possible value as a string.
     std::string dump() const noexcept;
+    void        print(std::ostream& os, bool addQuotes = true, bool escapeString = true) const noexcept;
 
     bool isNull() const noexcept { return m_data.index() == 0; }
     bool isBool() const noexcept { return m_data.index() == 1; }
@@ -161,16 +162,28 @@ public:
 
     void append(PropertyTree child) noexcept(false);
     void insert(const std::string& key, PropertyTree child) noexcept(false);
-    void merge(const PropertyTree& another) noexcept(false);
-    void mergePatch(const PropertyTree& another) noexcept(false);
-    void removeEqualValues(const PropertyTree& another) noexcept(false);
 
     void convertToList() noexcept(false);
     void convertToMap() noexcept(false);
 
-    void dump(std::ostream& stream, int level) const noexcept;
+    struct DumpParams {
+        int    m_indentWidth    = 2;
+        size_t m_smallArraySize = 10;
+        bool   m_isDump         = true;
+        bool   m_quoteKeys      = false;
+        bool   m_quoteValues    = false;
+        bool   m_escapeStrings  = false;
+        bool   m_compactArrays  = true;
+        bool   m_compactMaps    = true;
+    };
+
+    void dump(std::ostream& stream, const DumpParams& params, int level = 0) const noexcept;
 
 public:
+    static void mergePatch(PropertyTree& dest, const PropertyTree& source) noexcept(false);
+    static void removeEqualValues(PropertyTree& one, PropertyTree& two) noexcept(false);
+    static void printReadableJson(std::ostream& stream, const PropertyTree& source) noexcept;
+
     COREPLATFORM_EXPORT friend std::ostream& operator<<(std::ostream& stream, const PropertyTree& tree);
 
 private:

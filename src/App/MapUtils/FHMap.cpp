@@ -228,6 +228,8 @@ void FHTileMap::correctTerrainTypes(Core::LibraryTerrainConstPtr dirtTerrain,
         const auto sandT  = T.m_terrain == sandTerrain || (!waterX && T.m_terrain == waterTerrain);
         const auto sandB  = B.m_terrain == sandTerrain || (!waterX && B.m_terrain == waterTerrain);
         const auto sandBR = BR.m_terrain == sandTerrain || (!waterX && BR.m_terrain == waterTerrain);
+        const auto sandBL = BL.m_terrain == sandTerrain || (!waterX && BL.m_terrain == waterTerrain);
+        const auto sandTR = TR.m_terrain == sandTerrain || (!waterX && TR.m_terrain == waterTerrain);
 
         if (!waterX) {
             X.m_coastal = false
@@ -240,64 +242,64 @@ void FHTileMap::correctTerrainTypes(Core::LibraryTerrainConstPtr dirtTerrain,
                           || TL.m_terrain == waterTerrain
                           || BL.m_terrain == waterTerrain;
         }
+        using BT = Core::LibraryTerrain::BorderType;
 
-        uint8_t diff = 3;
+        auto setView = [&X, flipHor, flipVert, waterTerrain](BT borderType, bool dirt, bool sand) {
+            if (dirt && !sand && X.m_terrain == waterTerrain) {
+                dirt = false;
+                sand = true;
+            }
+            X.calculateOffsets(borderType, dirt, sand);
+            X.m_viewMin  = static_cast<uint8_t>(X.m_tileOffset);
+            X.m_viewMax  = static_cast<uint8_t>(X.m_viewMin + X.m_tileCount - 1);
+            X.m_flipHor  = flipHor;
+            X.m_flipVert = flipVert;
+        };
+
         if (false) {
         } else if (order == 0 && !waterX) {
-            // 40 - D\D
-            // 41 - D\S
-            // 42 - S\S
-            // 43 - right - D, BL - S
-            // 44 - bottom - D, TR - S
-            // 45 - TR - D, BR - S
-            // 46 - BR - S, BL - D
-            // 47 - R - S, B - D
-            // 48 - B - S, R - D
             if (false) {
-            } else if (sandBR && dB && !sandB) {
-                X.m_viewMin = 46;
-                diff        = 0;
-            } else if (sandBR && dR && !sandR) {
-                X.m_viewMin = 45;
-                diff        = 0;
+                /// @todo:
+                setView(BT::ThreeWay_DD, true, true);
+                setView(BT::ThreeWay_DS, true, true);
+                setView(BT::ThreeWay_SS, true, true);
+            } else if (sandBL && dR && !sandR && !sandB) {
+                setView(BT::ThreeWay_RD_BLS, true, true);
+            } else if (sandTR && dB && !sandB && !sandR) {
+                setView(BT::ThreeWay_BD_TRS, true, true); // !<
             } else if (sandR && dB && !sandB) {
-                X.m_viewMin = 47;
-                diff        = 0;
+                setView(BT::ThreeWay_RS_BD, true, true);
             } else if (sandB && dR && !sandR) {
-                X.m_viewMin = 48;
-                diff        = 0;
-            }
-
-            else {
+                setView(BT::ThreeWay_BS_RD, true, true);
+            } else if (sandBR && dR && !dT && !sandR) {
+                setView(BT::ThreeWay_TRD_BRS, true, true);
+            } else if (sandBR && dB && !dR && !sandB) {
+                setView(BT::ThreeWay_BRS_BLD, true, true);
+            } else {
                 return false;
             }
         } else if (order == 1 && dL && dT) {
-            X.m_viewMin = 0 + 20 * (sandL);
+            setView(BT::TL, !sandL, sandL);
             if (!dTR || !dBL) {
-                X.m_viewMin = 16 + 20 * (sandL);
-                diff        = 1;
+                setView(BT::TLS, !sandL, sandL);
             }
         } else if (order == 2 && dL) {
-            X.m_viewMin = 4 + 20 * (sandL);
+            setView(BT::L, !sandL, sandL);
         } else if (order == 2 && dT) {
-            X.m_viewMin = 8 + 20 * (sandT);
+            setView(BT::T, !sandT, sandT);
         } else if (order == 3 && dBR) {
-            X.m_viewMin = 12 + 20 * (sandBR);
+            setView(BT::BR, !sandBR, sandBR);
 
             const auto& B2  = getNeighbour(pos, flipHor ? +0 : +0, flipVert ? -2 : +2);
             const auto& R2  = getNeighbour(pos, flipHor ? -2 : +2, flipVert ? +0 : +0);
             const auto  dB2 = X.m_terrain != B2.m_terrain;
             const auto  dR2 = X.m_terrain != R2.m_terrain;
             if (dB2 || dR2) {
-                X.m_viewMin = 18 + 20 * (sandBR);
-                diff        = 1;
+                setView(BT::BRS, !sandBR, sandBR);
             }
         } else {
             return false;
         }
-        X.m_flipHor  = flipHor;
-        X.m_flipVert = flipVert;
-        X.m_viewMax  = X.m_viewMin + diff;
         return true;
     };
 
@@ -324,9 +326,9 @@ void FHTileMap::correctTerrainTypes(Core::LibraryTerrainConstPtr dirtTerrain,
                     continue;
 
                 const uint8_t offset     = X.m_terrain->presentationParams.centerTilesOffset;
-                const auto    centerSize = X.m_terrain->presentationParams.centerTiles.size();
+                const auto    centerSize = X.m_terrain->presentationParams.centerTilesCount;
                 X.m_viewMin              = offset;
-                X.m_viewMax              = offset + (centerSize == 0 ? 0 : centerSize - 1);
+                X.m_viewMax              = offset + (centerSize <= 0 ? 0 : centerSize - 1);
             }
         }
     }
@@ -357,6 +359,33 @@ void FHTileMap::rngTiles(Core::IRandomGenerator* rng)
                 X.m_view = rngView(X.m_viewMin, X.m_viewMax);
             }
         }
+    }
+}
+
+void FHTileMap::Tile::calculateOffsets(Core::LibraryTerrain::BorderType borderType, bool dirtBorder, bool sandBorder)
+{
+    auto& pp = m_terrain->presentationParams;
+    if (dirtBorder && sandBorder) {
+        if (pp.sandDirtBorderTilesOffset < 0)
+            return calculateOffsets(Core::LibraryTerrain::BorderType::Center, false, false);
+
+        m_tileOffset = pp.sandDirtBorderTilesOffset + pp.borderThreeWayOffsets.at(borderType);
+        m_tileCount  = pp.borderThreeWayCounts.at(borderType);
+    } else if (dirtBorder) {
+        if (pp.dirtBorderTilesOffset < 0)
+            return calculateOffsets(Core::LibraryTerrain::BorderType::Center, false, false);
+
+        m_tileOffset = pp.dirtBorderTilesOffset + pp.borderOffsets.at(borderType);
+        m_tileCount  = pp.borderCounts.at(borderType);
+    } else if (sandBorder) {
+        if (pp.sandBorderTilesOffset < 0)
+            return calculateOffsets(Core::LibraryTerrain::BorderType::Center, false, false);
+
+        m_tileOffset = pp.sandBorderTilesOffset + pp.borderOffsets.at(borderType);
+        m_tileCount  = pp.borderCounts.at(borderType);
+    } else {
+        m_tileOffset = pp.centerTilesOffset;
+        m_tileCount  = pp.centerTilesCount;
     }
 }
 

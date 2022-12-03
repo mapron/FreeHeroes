@@ -89,6 +89,34 @@ bool deserialize(const IGameDatabase* gameDatabase, LibraryTerrain& obj, const P
 {
     PropertyTreeReader reader(gameDatabase);
     reader.jsonToValue(jsonObj, obj);
+    {
+        int offset = 0;
+        using BT   = LibraryTerrain::BorderType;
+        for (auto bt : { BT::TL, BT::L, BT::T, BT::BR, BT::TLS, BT::BRS }) {
+            const int count                          = obj.presentationParams.borderCounts[bt];
+            obj.presentationParams.borderOffsets[bt] = offset;
+            offset += count;
+        }
+    }
+    {
+        int offset = 0;
+        using BT   = LibraryTerrain::BorderType;
+        for (auto bt : {
+                 BT::ThreeWay_DD,
+                 BT::ThreeWay_DS,
+                 BT::ThreeWay_SS,
+                 BT::ThreeWay_RD_BLS,
+                 BT::ThreeWay_BD_TRS,
+                 BT::ThreeWay_TRD_BRS,
+                 BT::ThreeWay_BRS_BLD,
+                 BT::ThreeWay_RS_BD,
+                 BT::ThreeWay_BS_RD,
+             }) {
+            const int count                                  = obj.presentationParams.borderThreeWayCounts[bt];
+            obj.presentationParams.borderThreeWayOffsets[bt] = offset;
+            offset += count;
+        }
+    }
     return true;
 }
 

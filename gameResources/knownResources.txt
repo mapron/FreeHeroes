@@ -8155,7 +8155,6 @@ tpmage1	tpmage1	UI/Buttons	tpmage1
 spellinf	spellinf	UI/Back	spellinf
 townscrn	townscrn	UI/Back	townscrn
 tpshipbk	tpshipbk	UI/Back	tpshipbk
-watrtl	watrtl	UI/Back	watrtl
 adopgpnl	adopgpnl	UI/Back	adopgpnl
 adopopnl	adopopnl	UI/Back	adopopnl
 adopppnl	adopppnl	UI/Back	adopppnl
@@ -8223,6 +8222,7 @@ scnrvl	scnrvl	Sprites/AdventureTiles	scnrvl
 edg	edg	Sprites/AdventureTiles	edg
 dirtrd	dirtrd	Sprites/AdventureTiles	dirtrd
 dirttl	dirttl	Sprites/AdventureTiles	dirttl
+watrtl	watrtl	Sprites/AdventureTiles	watrtl
 pskill	pskill	Sprites	pskill
 resour82	resour82	Sprites	resour82
 resource	resource	Sprites	resource	make_transparent

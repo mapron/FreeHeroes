@@ -48,9 +48,9 @@ static inline constexpr const FHPos g_invalidPos{ uint32_t(-1), uint32_t(-1), ui
 
 struct FHPlayer {
     //int                      m_id{ 0 };
-    bool                     m_humanPossible{ true };
-    bool                     m_aiPossible{ true };
-    std::vector<std::string> m_startingFactions;
+    bool                                      m_humanPossible{ true };
+    bool                                      m_aiPossible{ true };
+    std::vector<Core::LibraryFactionConstPtr> m_startingFactions;
 };
 
 struct FHCommonObject {
@@ -97,6 +97,11 @@ struct FHTileMap {
         bool m_flipHor  = false;
         bool m_flipVert = false;
         bool m_coastal  = false;
+
+        int m_tileOffset = 0;
+        int m_tileCount  = 0;
+
+        void calculateOffsets(Core::LibraryTerrain::BorderType borderType, bool dirtBorder, bool sandBorder);
     };
 
     uint32_t m_width  = 0;

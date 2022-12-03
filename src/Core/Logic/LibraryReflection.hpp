@@ -108,15 +108,46 @@ inline constexpr const std::tuple MetaInfo::s_fields<RngChanceMultiplier>{
 };
 
 // ------------------------------------------------------------------------------------------
+
+template<>
+inline constexpr const bool MetaInfo::s_isStringMap<LibraryTerrain::Presentation::BTMap>{ true };
+
+template<>
+inline constexpr const auto EnumTraits::s_valueMapping<LibraryTerrain::BorderType> = EnumTraits::make(
+    LibraryTerrain::BorderType::Invalid,
+    "TL"  ,   LibraryTerrain::BorderType::TL,
+    "L"   ,   LibraryTerrain::BorderType::L,
+    "T"   ,   LibraryTerrain::BorderType::T,
+    "BR"  ,   LibraryTerrain::BorderType::BR,
+    "TLS" ,   LibraryTerrain::BorderType::TLS,
+    "BRS" ,   LibraryTerrain::BorderType::BRS,
+    "ThreeWay_DD"      ,   LibraryTerrain::BorderType::ThreeWay_DD,
+    "ThreeWay_DS"      ,   LibraryTerrain::BorderType::ThreeWay_DS,
+    "ThreeWay_SS"      ,   LibraryTerrain::BorderType::ThreeWay_SS,
+    "ThreeWay_RD_BLS"  ,   LibraryTerrain::BorderType::ThreeWay_RD_BLS,
+    "ThreeWay_BD_TRS"  ,   LibraryTerrain::BorderType::ThreeWay_BD_TRS,
+    "ThreeWay_TRD_BRS" ,   LibraryTerrain::BorderType::ThreeWay_TRD_BRS,
+    "ThreeWay_BRS_BLD" ,   LibraryTerrain::BorderType::ThreeWay_BRS_BLD,
+    "ThreeWay_RS_BD"   ,   LibraryTerrain::BorderType::ThreeWay_RS_BD,
+    "ThreeWay_BS_RD"   ,   LibraryTerrain::BorderType::ThreeWay_BS_RD,
+    "Center" ,   LibraryTerrain::BorderType::Center
+    );
+
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<LibraryTerrain::Presentation>{
-    
-    Field("music"              , &LibraryTerrain::Presentation::music),
-    Field("backgroundsBattle"  , &LibraryTerrain::Presentation::backgroundsBattle),
-    Field("order"              , &LibraryTerrain::Presentation::order),
-    Field("icon"               , &LibraryTerrain::Presentation::icon),
-    Field("centerTiles"        , &LibraryTerrain::Presentation::centerTiles),
-    Field("centerTilesOffset"  , &LibraryTerrain::Presentation::centerTilesOffset),
+    Field("music"                     , &LibraryTerrain::Presentation::music),
+    Field("backgroundsBattle"         , &LibraryTerrain::Presentation::backgroundsBattle),
+    Field("order"                     , &LibraryTerrain::Presentation::order),
+    Field("defFile"                   , &LibraryTerrain::Presentation::defFile),
+    Field("defFileSplit"              , &LibraryTerrain::Presentation::defFileSplit),
+    Field("isAnimated"                , &LibraryTerrain::Presentation::isAnimated),
+    Field("dirtBorderTilesOffset"     , &LibraryTerrain::Presentation::dirtBorderTilesOffset),
+    Field("sandBorderTilesOffset"     , &LibraryTerrain::Presentation::sandBorderTilesOffset),
+    Field("sandDirtBorderTilesOffset" , &LibraryTerrain::Presentation::sandDirtBorderTilesOffset),
+    Field("centerTilesOffset"         , &LibraryTerrain::Presentation::centerTilesOffset),
+    Field("centerTilesCount"          , &LibraryTerrain::Presentation::centerTilesCount),
+    Field("borderCounts"              , &LibraryTerrain::Presentation::borderCounts),
+    Field("borderThreeWayCounts"      , &LibraryTerrain::Presentation::borderThreeWayCounts),
 };
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<LibraryTerrain::Bonus>{

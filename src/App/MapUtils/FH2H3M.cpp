@@ -70,9 +70,10 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
     for (auto& zone : src.m_zones)
         fillZoneTerrain(zone);
 
-    const auto* dirtTerrain  = database->terrains()->find(std::string(g_terrainDirt));
-    const auto* sandTerrain  = database->terrains()->find(std::string(g_terrainSand));
-    const auto* waterTerrain = database->terrains()->find(std::string(g_terrainWater));
+    const auto*  dirtTerrain   = database->terrains()->find(std::string(g_terrainDirt));
+    const auto*  sandTerrain   = database->terrains()->find(std::string(g_terrainSand));
+    const auto*  waterTerrain  = database->terrains()->find(std::string(g_terrainWater));
+    const size_t terrainsCount = database->terrains()->legacyOrderedIds().size();
 
     tileMap.correctTerrainTypes(dirtTerrain, sandTerrain, waterTerrain);
     tileMap.rngTiles(rng);
@@ -108,8 +109,7 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
         h3player.m_canComputerPlay = fhPlayer.m_aiPossible;
 
         uint16_t factionsBitmask = 0;
-        for (std::string allowedFaction : fhPlayer.m_startingFactions) {
-            auto* faction = factionsContainer->find(allowedFaction);
+        for (Core::LibraryFactionConstPtr faction : fhPlayer.m_startingFactions) {
             assume(faction != nullptr);
             factionsBitmask |= 1U << uint32_t(faction->legacyId);
         }
@@ -129,13 +129,13 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
         return index;
     };
 
-    auto makeDefFromDb = [](Core::LibraryObjectDefConstPtr record) {
+    auto makeDefFromDb = [terrainsCount](Core::LibraryObjectDefConstPtr record, bool forceSoft = false) {
         assert(record);
         ObjectTemplate res{
             .m_animationFile = record->defFile + ".def",
             .m_blockMask     = reverseArray(record->blockMap),
             .m_visitMask     = reverseArray(record->visitMap),
-            .m_terrainsHard  = reverseArray(record->terrainsHard),
+            .m_terrainsHard  = reverseArray(forceSoft ? record->terrainsSoft : record->terrainsHard),
             .m_terrainsSoft  = reverseArray(record->terrainsSoft),
 
             .m_id           = static_cast<uint32_t>(record->objId),
@@ -143,18 +143,20 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
             .m_type         = static_cast<ObjectTemplate::Type>(record->type),
             .m_drawPriority = static_cast<uint8_t>(record->priority),
         };
+        res.m_terrainsHard.resize(terrainsCount);
+        res.m_terrainsSoft.resize(terrainsCount);
         return res;
     };
 
-    auto makeDefFromDbId = [defsContainer, &makeDefFromDb](std::string defId) {
+    auto makeDefFromDbId = [defsContainer, &makeDefFromDb](std::string defId, bool forceSoft = false) {
         if (defId.ends_with(".def"))
             defId = defId.substr(0, defId.size() - 4);
         std::transform(defId.begin(), defId.end(), defId.begin(), [](unsigned char c) { return std::tolower(c); });
-        return makeDefFromDb(defsContainer->find(defId));
+        return makeDefFromDb(defsContainer->find(defId), forceSoft);
     };
 
     auto makeHeroDef = [&makeDefFromDbId](Core::LibraryHeroConstPtr hero) {
-        ObjectTemplate res = makeDefFromDbId("hero");
+        ObjectTemplate res = makeDefFromDbId("hero", true);
 
         auto resNameAdv     = hero->getAdventureSprite();
         res.m_animationFile = resNameAdv + "e.def";
@@ -165,14 +167,15 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
     getDefFileIndex(makeDefFromDbId("avlholg0"));
 
     for (auto& fhTown : src.m_towns) {
-        auto  playerIndex = static_cast<int>(fhTown.m_player);
-        auto& h3player    = dest.m_players[playerIndex];
-        if (fhTown.m_isMain) {
-            h3player.m_hasMainTown   = true;
-            h3player.m_posOfMainTown = int3fromPos(fhTown.m_pos, -townGateOffset);
-            h3player.m_generateHero  = true;
+        auto playerIndex = static_cast<int>(fhTown.m_player);
+        if (playerIndex >= 0) {
+            auto& h3player = dest.m_players[playerIndex];
+            if (fhTown.m_isMain) {
+                h3player.m_hasMainTown   = true;
+                h3player.m_posOfMainTown = int3fromPos(fhTown.m_pos, -townGateOffset);
+                h3player.m_generateHero  = true;
+            }
         }
-
         auto cas1               = std::make_unique<MapTown>(dest.m_features);
         cas1->m_playerOwner     = playerIndex;
         cas1->m_hasFort         = fhTown.m_hasFort;
@@ -184,7 +187,7 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
         assert(libraryFaction);
         ObjectTemplate res;
         if (!fhTown.m_defFile.empty()) {
-            res = makeDefFromDbId(fhTown.m_defFile);
+            res = makeDefFromDbId(fhTown.m_defFile, true);
         } else {
             res = makeDefFromDb(libraryFaction->mapObjectDef);
         }
@@ -195,23 +198,25 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
 
     for (auto& fhHero : src.m_wanderingHeroes) {
         auto  playerIndex = static_cast<int>(fhHero.m_player);
-        auto& h3player    = dest.m_players[playerIndex];
-
         auto* libraryHero = database->heroes()->find(fhHero.m_id);
         assert(libraryHero);
 
         const uint8_t heroId = libraryHero->legacyId;
 
-        if (fhHero.m_isMain) {
-            h3player.m_mainCustomHeroId = heroId;
-            h3player.m_generateHero     = false;
+        if (playerIndex >= 0) {
+            auto& h3player = dest.m_players[playerIndex];
+            if (fhHero.m_isMain) {
+                h3player.m_mainCustomHeroId = heroId;
+                h3player.m_generateHero     = false;
+            }
+            h3player.m_heroesNames.push_back(SHeroName{ .m_heroId = heroId, .m_heroName = "" });
         }
-        h3player.m_heroesNames.push_back(SHeroName{ .m_heroId = heroId, .m_heroName = "" });
 
-        auto her1                    = std::make_unique<MapHero>(dest.m_features);
-        her1->m_playerOwner          = playerIndex;
-        her1->m_subID                = heroId;
-        her1->m_questIdentifier      = fhHero.m_questIdentifier;
+        auto her1               = std::make_unique<MapHero>(dest.m_features);
+        her1->m_playerOwner     = playerIndex;
+        her1->m_subID           = heroId;
+        her1->m_questIdentifier = fhHero.m_questIdentifier;
+        her1->prepareArrays();
         dest.m_allowedHeroes[heroId] = 0;
 
         dest.m_objects.push_back(Object{ .m_pos = int3fromPos(fhHero.m_pos, +1), .m_defnum = getDefFileIndex(makeHeroDef(libraryHero)), .m_impl = std::move(her1) });
@@ -257,8 +262,9 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
         dest.m_allowedSecSkills[legacyId] = 0;
     }
     for (auto& customHero : src.m_customHeroes) {
-        const auto legacyId                           = customHero.m_army.hero.library->legacyId;
-        auto&      destHero                           = dest.m_customHeroData[legacyId];
+        const auto legacyId = customHero.m_army.hero.library->legacyId;
+        auto&      destHero = dest.m_customHeroData[legacyId];
+        destHero.prepareArrays();
         destHero.m_enabled                            = true;
         destHero.m_hasExp                             = customHero.m_hasExp;
         destHero.m_hasCustomBio                       = customHero.m_hasCustomBio;

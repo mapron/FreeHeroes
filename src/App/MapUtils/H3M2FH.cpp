@@ -73,7 +73,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                 continue;
 
             if (factionsBitmask & (1U << uint32_t(faction->legacyId)))
-                fhPlayer.m_startingFactions.push_back(faction->id);
+                fhPlayer.m_startingFactions.push_back(faction);
         }
     }
 
@@ -113,7 +113,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             case MapObjectType::RANDOM_MONSTER_L7:
             {
                 const auto* monster = static_cast<const MapMonster*>(impl);
-                assert(0 && monster);
+                assert(1 && monster);
             } break;
             case MapObjectType::OCEAN_BOTTLE:
             case MapObjectType::SIGN:
@@ -124,17 +124,17 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             case MapObjectType::SEER_HUT:
             {
                 const auto* hut = static_cast<const MapSeerHut*>(impl);
-                assert(0 && hut);
+                assert(1 && hut);
             } break;
             case MapObjectType::WITCH_HUT:
             {
                 const auto* hut = static_cast<const MapWitchHut*>(impl);
-                assert(0 && hut);
+                assert(1 && hut);
             } break;
             case MapObjectType::SCHOLAR:
             {
                 const auto* scholar = static_cast<const MapScholar*>(impl);
-                assert(0 && scholar);
+                assert(1 && scholar);
             } break;
             case MapObjectType::GARRISON:
             case MapObjectType::GARRISON2:
@@ -151,7 +151,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             case MapObjectType::SPELL_SCROLL:
             {
                 const auto* artifact = static_cast<const MapArtifact*>(impl);
-                assert(0 && artifact);
+                assert(1 && artifact);
             } break;
             case MapObjectType::RANDOM_RESOURCE:
             case MapObjectType::RESOURCE:
@@ -179,7 +179,6 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                 if (mainTowns.contains(playerId) && mainTowns.at(playerId) == fhtown.m_pos)
                     fhtown.m_isMain = true;
                 dest.m_towns.push_back(fhtown);
-                //assert(0 && town);
             } break;
             case MapObjectType::MINE:
             case MapObjectType::ABANDONED_MINE:
@@ -191,19 +190,19 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             case MapObjectType::LIGHTHOUSE:
             {
                 const auto* objOwner = static_cast<const MapObjectWithOwner*>(impl);
-                assert(0 && objOwner);
+                assert(1 && objOwner);
             } break;
             case MapObjectType::SHRINE_OF_MAGIC_INCANTATION:
             case MapObjectType::SHRINE_OF_MAGIC_GESTURE:
             case MapObjectType::SHRINE_OF_MAGIC_THOUGHT:
             {
                 const auto* shrine = static_cast<const MapShrine*>(impl);
-                assert(0 && shrine);
+                assert(1 && shrine);
             } break;
             case MapObjectType::PANDORAS_BOX:
             {
                 const auto* pandora = static_cast<const MapPandora*>(impl);
-                assert(0 && pandora);
+                assert(1 && pandora);
             } break;
             case MapObjectType::GRAIL:
             {
@@ -234,7 +233,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             case MapObjectType::SHIPWRECK:
             {
                 const auto* bank = static_cast<const MapObjectCreatureBank*>(impl);
-                assert(0 && bank);
+                assert(1 && bank);
             } break;
             default:
             {

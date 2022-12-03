@@ -14,9 +14,9 @@ namespace FreeHeroes::Core {
 /// @todo: rewrite noexcept version as wrappers over throwing.
 
 COREPLATFORM_EXPORT bool readJsonFromBuffer(const std::string& buffer, PropertyTree& data) noexcept(true);
-COREPLATFORM_EXPORT bool writeJsonToBuffer(std::string& buffer, const PropertyTree& data) noexcept(true);
+COREPLATFORM_EXPORT bool writeJsonToBuffer(std::string& buffer, const PropertyTree& data, bool pretty = false) noexcept(true);
 
 COREPLATFORM_EXPORT PropertyTree readJsonFromBufferThrow(const std::string& buffer) noexcept(false);
-COREPLATFORM_EXPORT std::string writeJsonToBufferThrow(const PropertyTree& data) noexcept(false);
+COREPLATFORM_EXPORT std::string writeJsonToBufferThrow(const PropertyTree& data, bool pretty = false) noexcept(false);
 
 }
