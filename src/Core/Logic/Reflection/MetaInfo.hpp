@@ -51,7 +51,48 @@ concept IsSequentalContainer = std::same_as<T, std::deque<typename T::value_type
 template<typename T>
 concept NonAssociative = IsSequentalContainer<T> || IsSet<T>;
 
+namespace details
+{
+    template<class T>
+    static inline constexpr bool is_comparable() noexcept
+    {
+        return false;
+    }
+    template<std::equality_comparable T>
+    requires(!(IsMap<T> || IsSet<T> || IsStdOptional<T> || IsSequentalContainer<T>) ) static inline constexpr bool is_comparable() noexcept
+    {
+        return true;
+    }
+    template<IsSequentalContainer T>
+    static inline constexpr bool is_comparable() noexcept
+    {
+        return is_comparable<typename T::value_type>();
+    }
+    template<IsStdOptional T>
+    static inline constexpr bool is_comparable() noexcept
+    {
+        return is_comparable<typename T::value_type>();
+    }
+    template<IsSet T>
+    static inline constexpr bool is_comparable() noexcept
+    {
+        return is_comparable<typename T::key_type>();
+    }
+    template<IsMap T>
+    static inline constexpr bool is_comparable() noexcept
+    {
+        return is_comparable<typename T::key_type>() && is_comparable<typename T::mapped_type>();
+    }
+}
+
 struct MetaInfo {
+    template<class Parent>
+    static inline const Parent& getDefaultConstructed()
+    {
+        static const Parent s_inst{};
+        return s_inst;
+    }
+
     template<class Parent, class FieldType>
     struct Field {
         constexpr Field(frozen::string name, FieldType Parent::*f)
@@ -74,6 +115,23 @@ struct MetaInfo {
         constexpr const FieldType& get(const Parent& parent) const noexcept
         {
             return parent.*m_f;
+        }
+        [[nodiscard]] bool isDefault(const FieldType& value) const noexcept
+        {
+            if constexpr (std::is_default_constructible_v<Parent> && details::is_comparable<FieldType>()) {
+                const Parent&    defParent = getDefaultConstructed<Parent>();
+                const FieldType& defValue  = defParent.*m_f;
+                return value == defValue;
+            }
+            return false;
+        }
+        void reset(Parent& value) const noexcept
+        {
+            if constexpr (std::is_default_constructible_v<Parent>) {
+                const Parent&    defParent = getDefaultConstructed<Parent>();
+                const FieldType& defValue  = defParent.*m_f;
+                value.*m_f                 = defValue;
+            }
         }
 
         [[nodiscard]] std::string name() const noexcept
@@ -120,6 +178,13 @@ struct MetaInfo {
         constexpr void set(Parent& parent, ArgTypeSetter value) const noexcept
         {
             (parent.*m_setter)(std::move(value));
+        }
+        [[nodiscard]] bool isDefault(const ArgTypeGetter& value) const noexcept
+        {
+            return false;
+        }
+        void reset(Parent&) const noexcept
+        {
         }
 
         [[nodiscard]] std::string name() const noexcept

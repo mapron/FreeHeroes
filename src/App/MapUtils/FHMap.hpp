@@ -47,9 +47,9 @@ struct FHPos {
 static inline constexpr const FHPos g_invalidPos{ uint32_t(-1), uint32_t(-1), uint8_t(-1) };
 
 struct FHPlayer {
-    //int                      m_id{ 0 };
-    bool                                      m_humanPossible{ true };
-    bool                                      m_aiPossible{ true };
+    bool m_humanPossible{ false };
+    bool m_aiPossible{ false };
+
     std::vector<Core::LibraryFactionConstPtr> m_startingFactions;
 };
 

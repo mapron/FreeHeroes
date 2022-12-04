@@ -26,6 +26,8 @@ public:
             if (jsonMap.contains(field.name())) {
                 auto writer = field.makeValueWriter(value);
                 this->jsonToValue(jsonMap.at(field.name()), writer.getRef());
+            } else {
+                field.reset(value);
             }
         };
         std::apply([&visitor](auto&&... field) { ((visitor(field)), ...); }, MetaInfo::s_fields<T>);

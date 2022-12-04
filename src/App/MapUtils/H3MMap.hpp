@@ -17,6 +17,8 @@ class H3Pos {
 public:
     uint8_t m_x{ 0 }, m_y{ 0 }, m_z{ 0 };
 
+    auto operator<=>(const H3Pos&) const = default;
+
     void readBinary(ByteOrderDataStreamReader& stream);
     void writeBinary(ByteOrderDataStreamWriter& stream) const;
 };
@@ -191,6 +193,8 @@ struct CustomHeroData {
     struct SecSkill {
         uint8_t m_id    = 0;
         uint8_t m_level = 0;
+
+        constexpr auto operator<=>(const SecSkill&) const = default;
     };
     MapFormatFeaturesPtr m_features;
 
@@ -213,6 +217,8 @@ struct CustomHeroData {
 
     void readBinary(ByteOrderDataStreamReader& stream);
     void writeBinary(ByteOrderDataStreamWriter& stream) const;
+
+    auto operator<=>(const CustomHeroData&) const = default;
 };
 
 struct FHMap;
@@ -230,7 +236,7 @@ struct H3Map {
     std::shared_ptr<MapFormatFeatures> m_features;
 
     // header
-    bool        m_anyPlayers = false;
+    bool        m_anyPlayers = true;
     std::string m_mapName;
     std::string m_mapDescr;
     uint8_t     m_difficulty = 0;
@@ -280,6 +286,8 @@ struct H3Map {
         uint8_t m_hallLevel   = 0;
         uint8_t m_castleLevel = 0;
 
+        auto operator<=>(const VictoryCondition&) const = default;
+
         void readBinary(ByteOrderDataStreamReader& stream);
         void writeBinary(ByteOrderDataStreamWriter& stream) const;
     };
@@ -288,6 +296,8 @@ struct H3Map {
         LossConditionType    m_type       = LossConditionType::LOSSSTANDARD;
         uint16_t             m_daysPassed = 0;
         H3Pos                m_pos;
+
+        auto operator<=>(const LossCondition&) const = default;
 
         void readBinary(ByteOrderDataStreamReader& stream);
         void writeBinary(ByteOrderDataStreamWriter& stream) const;

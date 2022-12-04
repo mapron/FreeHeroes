@@ -21,7 +21,9 @@ public:
         auto& jsonMap = result.getMap();
 
         auto visitor = [&value, &jsonMap, this](auto&& field) {
-            this->valueToJson(field.get(value), jsonMap[field.name()]);
+            const auto& fieldVal = field.get(value);
+            if (!field.isDefault(fieldVal))
+                this->valueToJson(fieldVal, jsonMap[field.name()]);
         };
 
         std::apply([&visitor](auto&&... field) { ((visitor(field)), ...); }, MetaInfo::s_fields<T>);

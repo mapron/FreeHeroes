@@ -324,7 +324,7 @@ AddTarget(FH TYPE console_app NAME CoreTests OUTPUT_NAME Tests_CoreLogic
         GameInt
 
         CoreLogic
-    DEPS gtest gtest_main
+    DEPS gtest gtest_main frozen
     )
 
 AddTarget(FH TYPE app NAME SoundTests OUTPUT_NAME Tests_Sound

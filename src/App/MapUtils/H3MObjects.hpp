@@ -251,6 +251,8 @@ struct IMapObject {
 struct StackBasicDescriptor {
     uint16_t m_id    = 0;
     uint16_t m_count = 0;
+
+    constexpr auto operator<=>(const StackBasicDescriptor&) const = default;
 };
 
 struct StackSet {
@@ -294,13 +296,17 @@ struct StackSetFixed {
 
     std::vector<StackBasicDescriptor> m_stacks;
 
-    StackSetFixed(MapFormatFeaturesPtr features)
+    StackSetFixed(MapFormatFeaturesPtr features = nullptr)
         : m_features(features)
-        , m_stacks(features->m_stackSize)
     {}
+
+    auto operator<=>(const StackSetFixed&) const = default;
+
+    void prepareArrays() { m_stacks.resize(m_features->m_stackSize); }
 
     void readBinary(ByteOrderDataStreamReader& stream)
     {
+        prepareArrays();
         for (auto& stack : m_stacks) {
             if (m_features->m_stackId16Bit)
                 stream >> stack.m_id;
@@ -328,6 +334,8 @@ struct ResourceSet {
 
     std::vector<uint32_t> m_resourceAmount;
 
+    auto operator<=>(const ResourceSet&) const = default;
+
     void readBinary(ByteOrderDataStreamReader& stream)
     {
         for (auto& res : m_resourceAmount)
@@ -346,6 +354,8 @@ struct PrimarySkillSet {
     {}
 
     std::vector<uint8_t> m_prim;
+
+    auto operator<=>(const PrimarySkillSet&) const = default;
 
     void readBinary(ByteOrderDataStreamReader& stream)
     {
@@ -376,6 +386,8 @@ struct HeroArtSet {
 
     void readBinary(ByteOrderDataStreamReader& stream);
     void writeBinary(ByteOrderDataStreamWriter& stream) const;
+
+    auto operator<=>(const HeroArtSet&) const = default;
 };
 
 struct HeroSpellSet {
@@ -387,6 +399,8 @@ struct HeroSpellSet {
     HeroSpellSet(MapFormatFeaturesPtr features)
         : m_features(features)
     {}
+
+    auto operator<=>(const HeroSpellSet&) const = default;
 
     void prepareArrays() { m_spells.resize(m_features->m_spellsRegularCount); }
 
@@ -403,6 +417,8 @@ struct HeroPrimSkillSet {
     HeroPrimSkillSet(MapFormatFeaturesPtr features)
         : m_features(features)
     {}
+
+    auto operator<=>(const HeroPrimSkillSet&) const = default;
 
     void prepareArrays() { m_primSkills.resize(m_features->m_primarySkillsCount); }
 
@@ -511,7 +527,7 @@ struct MapHero : public MapObjectAbstract {
     HeroSpellSet     m_spellSet;
     HeroPrimSkillSet m_primSkillSet;
 
-    MapHero(MapFormatFeaturesPtr features)
+    MapHero(MapFormatFeaturesPtr features = nullptr)
         : MapObjectAbstract(features)
         , m_garison(features)
         , m_artSet(features)
@@ -547,6 +563,8 @@ struct MapTownEvent {
         : m_features(features)
     {}
 
+    auto operator<=>(const MapTownEvent&) const = default;
+
     void prepareArrays();
 
     void readBinary(ByteOrderDataStreamReader& stream);
@@ -568,7 +586,7 @@ struct MapTown : public MapObjectAbstract {
     bool                 m_hasCustomBuildings = false;
     std::vector<uint8_t> m_builtBuildings;
     std::vector<uint8_t> m_forbiddenBuildings;
-    bool                 m_hasFort = false;
+    bool                 m_hasFort = true;
 
     std::vector<uint8_t> m_obligatorySpells;
     std::vector<uint8_t> m_possibleSpells;
@@ -579,7 +597,7 @@ struct MapTown : public MapObjectAbstract {
 
     uint8_t m_alignment = 0xff;
 
-    MapTown(MapFormatFeaturesPtr features)
+    MapTown(MapFormatFeaturesPtr features = nullptr)
         : MapObjectAbstract(features)
         , m_garison(features)
     {}
