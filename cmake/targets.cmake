@@ -1,195 +1,13 @@
 # Copyright (C) 2020 Smirnov Vladimir / mapron1@gmail.com
 # SPDX-License-Identifier: MIT
 # See LICENSE file for details.
-
-set(FH_PREFIX FH)
+include_guard(GLOBAL)
 
 include(GenerateExportHeader)
 include(CheckCXXCompilerFlag)
 include(staticCheck)
-
-function(AddCompilerFlagIfSupported)
-    foreach(instruction ${ARGN})
-        CHECK_CXX_COMPILER_FLAG(${instruction} exist_${instruction})
-        if(${exist_${instruction}})
-            add_compile_options(${instruction})
-        endif()
-    endforeach()
-endfunction()
-
-# qt5_make_output_file saved from deprecated
-# macro used to create the names of output files preserving relative dirs
-macro(qt5_make_output_file_freeheroes infile prefix ext outfile )
-    string(LENGTH ${CMAKE_CURRENT_BINARY_DIR} _binlength)
-    string(LENGTH ${infile} _infileLength)
-    set(_checkinfile ${CMAKE_CURRENT_SOURCE_DIR})
-    if(_infileLength GREATER _binlength)
-        string(SUBSTRING "${infile}" 0 ${_binlength} _checkinfile)
-        if(_checkinfile STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
-            file(RELATIVE_PATH rel ${CMAKE_CURRENT_BINARY_DIR} ${infile})
-        else()
-            file(RELATIVE_PATH rel ${CMAKE_CURRENT_SOURCE_DIR} ${infile})
-        endif()
-    else()
-        file(RELATIVE_PATH rel ${CMAKE_CURRENT_SOURCE_DIR} ${infile})
-    endif()
-    if(WIN32 AND rel MATCHES "^([a-zA-Z]):(.*)$") # absolute path
-        set(rel "${CMAKE_MATCH_1}_${CMAKE_MATCH_2}")
-    endif()
-    set(_outfile "${CMAKE_CURRENT_BINARY_DIR}/${rel}")
-    string(REPLACE ".." "__" _outfile ${_outfile})
-    get_filename_component(outpath ${_outfile} PATH)
-    if(CMAKE_VERSION VERSION_LESS "3.14")
-        get_filename_component(_outfile_ext ${_outfile} EXT)
-        get_filename_component(_outfile_ext ${_outfile_ext} NAME_WE)
-        get_filename_component(_outfile ${_outfile} NAME_WE)
-        string(APPEND _outfile ${_outfile_ext})
-    else()
-        get_filename_component(_outfile ${_outfile} NAME_WLE)
-    endif()
-    file(MAKE_DIRECTORY ${outpath})
-    set(${outfile} ${outpath}/${prefix}${_outfile}.${ext})
-endmacro()
-
-function(CreateUiRules outfiles extraIncludes)
-    set(options)
-    set(oneValueArgs)
-    set(multiValueArgs OPTIONS)
-
-    cmake_parse_arguments(_WRAP_UI "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-
-    set(ui_files ${_WRAP_UI_UNPARSED_ARGUMENTS})
-    set(ui_options ${_WRAP_UI_OPTIONS})
-    set(includes)
-
-    foreach(it ${ui_files})
-        get_filename_component(outfile ${it} NAME_WE)
-        get_filename_component(infile ${it} ABSOLUTE)
-
-        qt5_make_output_file_freeheroes(${it} ui_ h outfile)
-
-        get_filename_component(incl_path ${outfile} PATH)
-
-#[[
- What's the problem with textReplace after ui generated?
- Well, Qt for some reason do not generate parent pass for widgets adding into stack widget,
- as they will be set their parent later, probably.
- We highly rely  on every parent passed in constructor is valid in any time, so here we have dirty hack:
- Add explicit parent pass to every thing "Widget" with empty parenthesis.
-
- Another way around is probably avoid stackedWidget at all..
-#]]
-
-        list(APPEND includes ${incl_path} )
-        add_custom_command(OUTPUT ${outfile}
-          COMMAND ${Qt5Widgets_UIC_EXECUTABLE}
-          ARGS ${ui_options} -o ${outfile} ${infile}
-        #  COMMAND ${CMAKE_COMMAND}
-       #   ARGS -DFILENAME=${outfile}  -P  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/textReplace.cmake
-          MAIN_DEPENDENCY ${infile} VERBATIM)
-        list(APPEND ${outfiles} ${outfile})
-    endforeach()
-    list(REMOVE_DUPLICATES includes)
-    set(${outfiles} ${${outfiles}} PARENT_SCOPE)
-    set(${extraIncludes} ${includes} PARENT_SCOPE)
-endfunction()
-
-# modified QT5_WRAP_CPP
-# pathed qt macro to force always have output cpp file. However, it now does not require to run cmake to detect Q_OBJECT macro.
-function(CreateMocRules outfiles includes defines)
-    string(REPLACE ";" "," includesMoc "${${includes}}")
-    string(REPLACE ";" "," definesMoc "${${defines}}")
-    foreach(it ${ARGN})
-        get_filename_component(it ${it} ABSOLUTE)
-        qt5_make_output_file_freeheroes(${it} moc_ cpp outfile)
-        add_custom_command(
-            OUTPUT ${outfile}
-            COMMAND ${CMAKE_COMMAND} -DINFILE=${it} -DOUTFILE=${outfile} -DINCLUDES=${includesMoc} -DDEFINES=${definesMoc} -P ${CMAKE_BINARY_DIR}/mocWrapper.cmake
-            DEPENDS ${it}
-            VERBATIM)
-        list(APPEND ${outfiles} ${outfile})
-    endforeach()
-    set(${outfiles} ${${outfiles}} PARENT_SCOPE)
-endfunction()
-
-# filename - outfile
-# fileListName - variable name with list
-# basedir - root for replace
-# qrcPrefix - prefix for configuration
-function(GenerateQrc filename fileListName basedir qrcPrefix)
-
-    foreach (file ${${fileListName}})
-        string(REPLACE "${basedir}/" "" file "${file}")
-        set(QRC_FILES "${QRC_FILES}<file>${file}</file>\n")
-    endforeach()
-    configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/qrcTemplate.qrc.in ${filename} @ONLY )
-endfunction()
-
-function(AddQrcOutput rccName qrcName)
-    set(fileListAbsConfig ${ARGN})
-    configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/qrcTemplate.qrc.in ${qrcName} @ONLY )
-    source_group("Qt Resource Files" FILES ${qrcName})
-    add_custom_command(OUTPUT ${rccName}
-                       COMMAND ${Qt5Core_RCC_EXECUTABLE}
-                       ARGS --no-compress --binary -o ${rccName} ${qrcName}
-                       MAIN_DEPENDENCY ${qrcName}
-                       DEPENDS ${fileListAbsConfig} VERBATIM)
-endfunction()
-
-function(GenerateQrcFromAssets resourceFolder )
-    set(srcDir ${CMAKE_CURRENT_SOURCE_DIR}/guiAssets/${resourceFolder})
-    set(destDir ${CMAKE_BINARY_DIR}/assetsCompiled/${resourceFolder})
-    set(qrcName ${CMAKE_BINARY_DIR}/assetsCompiled/${resourceFolder}.qrc)
-    set(rccName ${CMAKE_BINARY_DIR}/assetsCompiled/${resourceFolder}.rcc)
-    file(MAKE_DIRECTORY "${destDir}")
-
-    set(QRC_PREFIX ${resourceFolder}) # name is important for .in file
-    set(QRC_FILES)                    # name is important for .in file
-
-    set(masks ${srcDir}/*.png)
-    file(GLOB_RECURSE fileListAbsSrc   ${masks})
-    set(fileListAbsConfig)
-    foreach(absFile ${fileListAbsSrc})
-        string(REPLACE "${srcDir}/" "" relFile "${absFile}")
-        set(destFileAbs "${destDir}/${relFile}")
-        list(APPEND fileListAbsConfig ${destFileAbs})
-        configure_file(${absFile} ${destFileAbs} COPYONLY)
-        string(REPLACE "${resourceFolder}/" "" file "${relFile}")
-        set(QRC_FILES "${QRC_FILES}<file alias=\"${file}\">${resourceFolder}/${relFile}</file>\n")
-    endforeach()
-    AddQrcOutput(${rccName} ${qrcName} ${fileListAbsConfig})
-endfunction()
-
-function(GenerateQrcWithTranslations resourceFolder translationsRoot)
-    set(srcDir ${translationsRoot})
-    set(destDir ${CMAKE_BINARY_DIR}/assetsCompiled/${resourceFolder})
-    set(qrcName ${CMAKE_BINARY_DIR}/assetsCompiled/${resourceFolder}.qrc)
-    set(rccName ${CMAKE_BINARY_DIR}/assetsCompiled/${resourceFolder}.rcc)
-    file(MAKE_DIRECTORY "${destDir}")
-    set(masks ${srcDir}/*.ts)
-    file(GLOB_RECURSE fileListAbsSrc   ${masks})
-
-    set(QRC_PREFIX ${resourceFolder}) # name is important for .in file
-    set(QRC_FILES)                    # name is important for .in file
-
-    set(fileListAbsConfig)
-    foreach(tsFileAbs ${fileListAbsSrc})
-        string(REPLACE "${srcDir}/" "" relFile "${tsFileAbs}")
-        string(REPLACE ".ts" ".qm" relFile "${relFile}")
-        set(qmFileAbs "${destDir}/${relFile}")
-        list(APPEND fileListAbsConfig ${qmFileAbs})
-
-        #configure_file(${absFile} ${destFileAbs} COPYONLY)
-        add_custom_command(OUTPUT ${qmFileAbs}
-                           COMMAND ${Qt5_LRELEASE_EXECUTABLE}
-                           ARGS ${tsFileAbs} -qm ${qmFileAbs}
-                           MAIN_DEPENDENCY ${tsFileAbs} VERBATIM)
-
-        string(REPLACE "${resourceFolder}/" "" file "${relFile}")
-        set(QRC_FILES "${QRC_FILES}<file alias=\"${file}\">${resourceFolder}/${relFile}</file>\n")
-    endforeach()
-    AddQrcOutput(${rccName} ${qrcName} ${fileListAbsConfig})
-endfunction()
+include(utils)
+include(qt_helpers)
 
 function(AddResourceCustomTarget name)
     set(resourceIds ${ARGN})
@@ -201,170 +19,208 @@ function(AddResourceCustomTarget name)
     install(FILES ${rccList} DESTINATION bin/assetsCompiled)
 endfunction()
 
-# function for target declaration.
-function(AddTarget)
-    set(options FH NO_DEFAULT_GLOB QT)
-    set(oneValueArgs NAME OUTPUT_NAME ROOT TYPE MAIN_INCLUDE)
-    set(multiValueArgs SRC INCLUDES DEPS DEPS_FH OPTIONS DEFINES EXCLUDE_FILES MOC_INCLUDES MOC_DEFINES)
-    cmake_parse_arguments(AddTarget "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
-    set(sources)
-    set(headers)
-    set(subdir ${CMAKE_CURRENT_SOURCE_DIR}/)
-    if (AddTarget_ROOT)
-        set(subdir ${CMAKE_CURRENT_SOURCE_DIR}/${AddTarget_ROOT}/)
-    endif()
-    set(masksCpp *.cpp *.c ${AddTarget_SRC})
-    set(masksHeaders *.hpp *.h)
-    if (AddTarget_NO_DEFAULT_GLOB)
-        set(masksCpp ${AddTarget_SRC})
-        set(masksHeaders)
-    endif()
-    foreach (maskl ${masksCpp} )
-        file(GLOB_RECURSE src ${subdir}${maskl})
-        list(APPEND sources ${src})
-    endforeach()
-    foreach (maskl ${masksHeaders} )
-        file(GLOB_RECURSE src ${subdir}${maskl})
-        list(APPEND headers ${src})
-    endforeach()
-    foreach (mask ${AddTarget_EXCLUDE_FILES})
-        list(FILTER sources EXCLUDE REGEX ${mask})
-    endforeach()
-    if (AddTarget_QT)
-        file(GLOB uiFiles ${subdir}*.ui)
-        source_group("Form Files" FILES ${uiFiles})
+function(MakeTargetExport name)
+    string(TOUPPER "${name}_EXPORT" DEFINITION_NAME)
+    set(TARGET ${name})
+    set(headerName  ${CMAKE_CURRENT_BINARY_DIR}/export/${name}Export.hpp)
+    configure_file(${CMAKE_SOURCE_DIR}/cmake/ExportLib.h.in ${headerName} @ONLY)
+    target_sources(${name} PRIVATE ${headerName})
+endfunction()
 
-        CreateUiRules(generatedUiFiles uiIncludes ${uiFiles})
-        list(APPEND AddTarget_INCLUDES ${uiIncludes})
+# type = shared|static|interface|app_ui|app_console|app_bundle|header_only
+function(MakeTarget name type excludeAll)
+    #message("MakeTarget ${name} ${type} ${excludeAll}")
+    if (excludeAll)
+        set(excludeAll EXCLUDE_FROM_ALL)
+    else()
+        set(excludeAll)
+    endif()
+    set( CreateTarget )
+    if(type STREQUAL static)
+        add_library(${name} STATIC ${excludeAll})
+        MakeTargetExport(${name})
+    elseif(type STREQUAL shared)
+        add_library(${name} SHARED ${excludeAll})
+        MakeTargetExport(${name})
+    elseif(type STREQUAL interface)
+        add_library(${name} INTERFACE)
+    elseif(type STREQUAL app_ui)
+        if (WIN32)
+            add_executable(${name} WIN32 ${excludeAll})
+        else()
+            add_executable(${name} ${excludeAll})
+        endif()
+    elseif(type STREQUAL app_console)
+        add_executable(${name} ${excludeAll})
+    elseif(type STREQUAL app_bundle)
+        if (APPLE)
+            add_executable(${name} MACOSX_BUNDLE ${excludeAll})
+        elseif(WIN32)
+            add_executable(${name} WIN32 ${excludeAll})
+        else()
+            add_executable(${name} ${excludeAll})
+        endif()
+    elseif(type STREQUAL header_only)
+        add_library(${name} STATIC ${excludeAll})
+    else()
+        message( FATAL_ERROR "Unknown target type: ${type}" )
+    endif()
+endfunction()
 
-        list(APPEND sources ${uiFiles} )
-        set(mocIncludes ${subdir} ${AddTarget_MOC_INCLUDES})
-        set(mocDefines ${AddTarget_DEFINES} ${AddTarget_MOC_DEFINES})
+function(MakeTargetSources name includes sourceDir useQt generateStub extraSources excludeSources extraPostprocess)
+    file(GLOB_RECURSE globbedFiles "${sourceDir}/[^.]*" )
+    list(APPEND globbedFiles ${extraSources})
+    filterSources(globbedFiles ${excludeSources})
+    set(headers ${globbedFiles})
+    set(sources ${globbedFiles})
+    list(FILTER headers INCLUDE REGEX "\\.(h|hpp)$")
+    list(FILTER sources INCLUDE REGEX "\\.(c|cpp|cxx|mm|m)$")
+
+    if(useQt)
+        set(forms ${globbedFiles})
+        set(resources ${globbedFiles})
+        list(FILTER forms INCLUDE REGEX "\\.ui$")
+        list(FILTER resources INCLUDE REGEX "\\.qrc$")
+        
+        if (forms)
+            CreateUiRules(generatedUiFiles uiIncludes "${extraPostprocess}" ${forms})
+            if (uiIncludes)
+                list(APPEND sources ${generatedUiFiles})
+                target_include_directories(${name} PRIVATE ${uiIncludes})
+            endif()
+        endif()
+
+        set(mocIncludes ${includes} ${sourceDir})
+        set(mocDefines)
         CreateMocRules(sources "mocIncludes" "mocDefines" ${headers} )
     endif()
-    set(name ${AddTarget_NAME})
-    if (AddTarget_FH)
-        set(name ${FH_PREFIX}${name})
-    endif()
-    if ((AddTarget_TYPE STREQUAL "app") OR (AddTarget_TYPE STREQUAL "console_app"))
-        if (WIN32 AND NOT (CMAKE_BUILD_TYPE STREQUAL "Debug") AND NOT (AddTarget_TYPE STREQUAL "console_app"))
-            set(w32 "WIN32")
-        endif()
-        add_executable(${name} ${w32} ${sources} ${headers})
-    else()
-        if (AddTarget_TYPE STREQUAL "static")
-            add_library(${name} STATIC ${sources} ${headers})
-        else()
-            add_library(${name} SHARED ${sources} ${headers})
-            generate_export_header(${name} BASE_NAME ${AddTarget_NAME} EXPORT_FILE_NAME ${AddTarget_NAME}Export.hpp )
-        endif()
-    endif()
-    if (AddTarget_OUTPUT_NAME)
-        set_target_properties(${name} PROPERTIES OUTPUT_NAME ${AddTarget_OUTPUT_NAME})
-    elseif((AddTarget_TYPE STREQUAL "app"))
-        set_target_properties(${name} PROPERTIES OUTPUT_NAME ${AddTarget_NAME})
-    endif()
-    target_include_directories(${name} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-    foreach (inc ${AddTarget_INCLUDES})
-        target_include_directories(${name} PRIVATE ${inc})
-    endforeach()
-    if (AddTarget_MAIN_INCLUDE)
-        target_include_directories(${name} PUBLIC ${AddTarget_MAIN_INCLUDE})
-    else ()
-        target_include_directories(${name} PUBLIC ${subdir})
-    endif()
-    foreach (dep ${AddTarget_DEPS})
-        target_link_libraries(${name} PRIVATE ${dep})
-    endforeach()
-    foreach (dep ${AddTarget_DEPS_FH})
-        target_link_libraries(${name} PRIVATE ${FH_PREFIX}${dep})
-    endforeach()
-    foreach (opt ${AddTarget_OPTIONS})
-        target_compile_options(${name} PRIVATE ${opt})
-    endforeach()
-    foreach (opt ${AddTarget_DEFINES})
-        target_compile_definitions(${name} PRIVATE ${opt})
-    endforeach()
-    if (AddTarget_FH)
-        set_property(TARGET ${name} PROPERTY FOLDER ${subdir})
-    endif()
-    # source_group("SRC" FILES "${sources}")
-    if (AddTarget_QT)
-        set_target_properties(${name} PROPERTIES AUTOMOC OFF AUTOUIC OFF AUTORCC OFF)
-    endif()
-    if (AddTarget_TYPE STREQUAL "app")
-        install(TARGETS ${name}
-                RUNTIME DESTINATION bin
-                )
-    elseif(AddTarget_TYPE STREQUAL "shared")
-        install(TARGETS ${name}
-                        RUNTIME DESTINATION bin
-                        )
+    if (generateStub)
+        set(stubName ${CMAKE_CURRENT_BINARY_DIR}/stubs/Stub${name}.cpp)
+        set(includeList)
+        foreach (hdr ${headers})
+            set(includeList "${includeList} #include \"${hdr}\"\r\n")
+        endforeach()
+        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/headerOnlyStub.cpp.in
+            ${stubName})
+        set_source_files_properties(${stubName} PROPERTIES GENERATED TRUE)
+        list(APPEND sources ${stubName})
     endif()
 
-    if (AddTarget_FH)
-        AddStaticCheckTarget(TARGET_NAME ${name} SOURCE_DIR ${subdir})
+    if (WIN32)
+        set(resources_rc ${globbedFiles})
+        list(FILTER resources_rc INCLUDE REGEX "\\.rc$")
+        if (resources_rc)
+            list(APPEND resources ${resources_rc})
+        endif()
     endif()
+    target_sources(${name} PRIVATE ${sources} ${headers} ${resources})
 endfunction()
 
-function(AddTargetInterface)
-    set(options FH)
-    set(oneValueArgs NAME)
-    set(multiValueArgs INCLUDES DEFINES DEPS DEPS_FH)
-    cmake_parse_arguments(AddTarget "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
-    set(name ${AddTarget_NAME})
-    if (AddTarget_FH)
-        set(name ${FH_PREFIX}${name})
-    endif()
-    add_library(${name} INTERFACE)
-    foreach (inc ${AddTarget_INCLUDES})
-        target_include_directories(${name} INTERFACE ${inc})
-    endforeach()
-    foreach (opt ${AddTarget_DEFINES})
-        target_compile_definitions(${name} INTERFACE ${opt})
-    endforeach()
-    foreach (dep ${AddTarget_DEPS})
-        target_link_libraries(${name} INTERFACE ${dep})
-    endforeach()
-    foreach (dep ${AddTarget_DEPS_FH})
-        target_link_libraries(${name} INTERFACE ${FH_PREFIX}${dep})
-    endforeach()
-endfunction()
+function(AddTarget)
+    set(__options
+        GENERATE_STUB             # 
+        EXPORT_INCLUDES           # TARGET_INCLUDE_DIRECTORIES($SOURCE_DIR)
+        STATIC_RUNTIME            # use static runtime (/MT) (MSVC)
+        )
+    set(__one_val_required
+        NAME                # 
+        TYPE                # shared|static|app_ui|app_console|header_only
+        SOURCE_DIR          # 
+        )
+    set(__one_val_optional
+        OUTPUT_NAME         #
+        OUTPUT_PREFIX       #
+        )
+    set(__multi_val
+        COMPILE_OPTIONS                # TARGET_COMPILE_OPTIONS(PRIVATE/INTERFACE)
+        COMPILE_DEFINITIONS            # TARGET_COMPILE_DEFINITIONS(PRIVATE/INTERFACE)
+        INTERFACE_COMPILE_DEFINITIONS  # TARGET_COMPILE_DEFINITIONS(INTERFACE)
+        LINK_FLAGS                     # PROPERTIES LINK_FLAGS
+        LINK_LIBRARIES                 # TARGET_LINK_LIBRARIES
+        DEPENDENCIES                   # ADD_DEPENDENCIES
+        INCLUDES                       # TARGET_INCLUDE_DIRECTORIES(PRIVATE/INTERFACE)
+        INTERFACE_INCLUDES             # TARGET_INCLUDE_DIRECTORIES(INTERFACE)
 
-function(AddTargetHeaderOnly)
-    set(options FH)
-    set(oneValueArgs NAME)
-    set(multiValueArgs INCLUDES DEFINES DEPS DEPS_FH)
-    cmake_parse_arguments(AddTarget "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
-    set(name ${AddTarget_NAME})
-    if (AddTarget_FH)
-        set(name ${FH_PREFIX}${name})
+        EXTRA_SOURCES                  # 
+        EXCLUDE_SOURCES                # 
+        QT_MODULES                     #
+        UIC_POSTPROCESS_SCRIPTS        # 
+    )
+    ParseArgumentsWithConditions(ARG "${__options}" "${__one_val_required}" "${__one_val_optional}" "${__multi_val}" ${ARGN})
+
+    set(name ${ARG_NAME})
+    MakeTarget(${name} ${ARG_TYPE} false)
+    
+    set(outputName ${name})
+    if (ARG_OUTPUT_NAME)
+        set(outputName ${ARG_OUTPUT_NAME})
     endif()
-    set(headerList)
-    foreach (inc ${AddTarget_INCLUDES})
-        file(GLOB src ${inc}/*.hpp)
-        set(headerList ${headerList} ${src})
+    if (ARG_OUTPUT_PREFIX)
+        set(outputName ${ARG_OUTPUT_PREFIX}${outputName})
+    endif()
+    set_target_properties(${name} PROPERTIES OUTPUT_NAME "${outputName}" DEBUG_POSTFIX D)
+    set_target_properties(${name} PROPERTIES
+        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib
+    )
+
+    if (NOT (ARG_TYPE STREQUAL interface))
+        #function(MakeTargetSources name includes sourceDir useQt extraSources excludeSources extraPostprocess)
+        set(useQt false)
+        if(ARG_QT_MODULES)
+            set(useQt true)
+        endif()
+        set(generateStub false)
+        if(ARG_GENERATE_STUB)
+            set(generateStub true)
+        endif()
+
+        target_include_directories(${name} PRIVATE ${CMAKE_BINARY_DIR}/export)
+        MakeTargetSources(${name} "${ARG_INCLUDES}" "${ARG_SOURCE_DIR}" ${useQt} ${generateStub} "${ARG_EXTRA_SOURCES}" "${ARG_EXCLUDE_SOURCES}" "${ARG_UIC_POSTPROCESS_SCRIPTS}")
+    endif()
+
+    set(defaultVisibility PRIVATE)
+    if (ARG_TYPE STREQUAL interface)
+        set(defaultVisibility INTERFACE)
+    endif()
+    if (ARG_TYPE STREQUAL header_only)
+        set(defaultVisibility PUBLIC)
+    endif()
+
+    if (ARG_EXPORT_INCLUDES OR ARG_TYPE STREQUAL interface OR ARG_TYPE STREQUAL header_only)
+        if (NOT (ARG_SOURCE_DIR STREQUAL .))
+            target_include_directories(${name} INTERFACE ${ARG_SOURCE_DIR})
+        endif()
+    endif()
+
+    if (ARG_INCLUDES)
+        target_include_directories(${name} ${defaultVisibility} ${ARG_INCLUDES})
+    endif()
+    if (ARG_LINK_LIBRARIES)
+        target_link_libraries(${name} ${defaultVisibility} ${ARG_LINK_LIBRARIES})
+    endif()
+    if (ARG_COMPILE_OPTIONS)
+        target_compile_options(${name} ${defaultVisibility} ${ARG_COMPILE_OPTIONS})
+    endif()
+    if (ARG_COMPILE_DEFINITIONS)
+        target_compile_definitions(${name} ${defaultVisibility} ${ARG_COMPILE_DEFINITIONS})
+    endif()
+    
+    if (ARG_INTERFACE_INCLUDES)
+        target_include_directories(${name} INTERFACE ${ARG_INTERFACE_INCLUDES})
+    endif()
+    if (ARG_INTERFACE_COMPILE_DEFINITIONS)
+        target_compile_definitions(${name} INTERFACE ${ARG_INTERFACE_COMPILE_DEFINITIONS})
+    endif()
+    
+    foreach(qt ${ARG_QT_MODULES})
+        target_link_libraries(${name} ${defaultVisibility} Qt5::${qt})
     endforeach()
-    set(includeList)
-    foreach (hdr ${headerList})
-        set(includeList "${includeList} #include \"${hdr}\"\r\n")
-    endforeach()
-    set(stubName ${CMAKE_CURRENT_BINARY_DIR}/headerOnlyStub${name}.cpp)
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/headerOnlyStub.cpp.in
-        ${stubName})
-    set_source_files_properties(${stubName} PROPERTIES GENERATED TRUE)
-    add_library(${name} STATIC ${stubName} ${headerList})
-    foreach (inc ${AddTarget_INCLUDES})
-        target_include_directories(${name} INTERFACE ${inc})
-    endforeach()
-    foreach (opt ${AddTarget_DEFINES})
-        target_compile_definitions(${name} INTERFACE ${opt})
-    endforeach()
-    foreach (dep ${AddTarget_DEPS})
-        target_link_libraries(${name} PUBLIC ${dep})
-    endforeach()
-    foreach (dep ${AddTarget_DEPS_FH})
-        target_link_libraries(${name} PUBLIC ${FH_PREFIX}${dep})
-    endforeach()
-    AddStaticCheckTarget(TARGET_NAME ${name} SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${AddTarget_INCLUDES})
+    if (ARG_LINK_FLAGS)
+        set_target_properties(${name} PROPERTIES LINK_FLAGS "${ARG_LINK_FLAGS}")
+    endif()
+    
+    set(installableTypes shared app_ui app_console app_bundle)
+    if (ARG_TYPE IN_LIST installableTypes)
+        install(TARGETS ${name} RUNTIME DESTINATION bin)
+    endif()
 endfunction()

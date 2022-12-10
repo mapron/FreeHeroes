@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/install CACHE STRING "" FORCE)
 
-cmake_minimum_required(VERSION 3.12...3.19)
+cmake_minimum_required(VERSION 3.20)
 
 project(freeheroes)
 
@@ -39,7 +39,7 @@ if (WARNING_AS_ERROR)
 endif()
 
 if (MSVC)
-	add_definitions(-D_CRT_SECURE_NO_WARNINGS -DNOMINMAX)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS -DNOMINMAX)
     add_compile_options(/W3
         /wd4267 # conversion from int to another int, possible losts of data
         /wd4251 # 'A::Impl' needs to have dll-interface to be used by clients of class 'A'
@@ -72,36 +72,44 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/mocWrapper.cmake.in ${CMAKE_BIN
 
 # Zlib
 
-set(COMPRESSION_DEFINES USE_ZLIB)
 if (MSVC)
-    set(ZLIB_ROOT 3rdparty/zlib)
-    AddTarget(TYPE static NAME zlib_static ROOT ${ZLIB_ROOT}/
-        OPTIONS  /wd4996)
-    set(COMPRESSION_LIBS zlib_static)
+    AddTarget(TYPE static NAME zlib 
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/zlib
+        EXPORT_INCLUDES
+        COMPILE_OPTIONS /wd4996
+        INTERFACE_COMPILE_DEFINITIONS USE_ZLIB
+    )
 else()
-    set(COMPRESSION_LIBS -lz)
+    AddTarget(TYPE interface NAME zlib 
+        SOURCE_DIR .
+        LINK_LIBRARIES -lz
+        INTERFACE_COMPILE_DEFINITIONS USE_ZLIB
+    )
 endif()
 
 # Json
-AddTargetInterface(NAME rapidjson INCLUDES 3rdparty)
+AddTarget(TYPE interface NAME rapidjson 
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty)
 
 # frozen 
-AddTargetInterface(NAME frozen INCLUDES 3rdparty/frozen/include)
+AddTarget(TYPE interface NAME frozen 
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/frozen/include)
 
 # Lua and Sol
-set(LUA_DEFINITIONS)
-if(UNIX)
-    list(APPEND LUA_DEFINITIONS LUA_USE_POSIX)
-endif()
-
-AddTarget(NO_DEFAULT_GLOB TYPE static NAME lua_static ROOT 3rdparty/lua/src
-    SRC
-    *.c *.h ../../sol/include/sol/*.hpp
-    INCLUDES 3rdparty/lua/include
+AddTarget(TYPE static NAME lua_static SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/lua/src
+   # SRC
+   # *.c *.h ../../sol/include/sol/*.hpp
+    INTERFACE_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/lua/include
+    INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/lua/include
+    COMPILE_DEFINITIONS [ UNIX LUA_USE_POSIX ]
     )
-target_include_directories(lua_static INTERFACE 3rdparty/lua/include)
+#target_include_directories(lua_static INTERFACE 3rdparty/lua/include)
 
-AddTargetInterface(NAME sol INCLUDES 3rdparty/sol/include DEPS lua_static)
+
+
+AddTarget(TYPE interface NAME sol SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/sol/include LINK_LIBRARIES lua_static)
+
+
 
 # Google Test
 set(BUILD_GMOCK OFF)
@@ -115,116 +123,146 @@ add_subdirectory(3rdparty/googletest/googletest)
 #]]
 
 # Interfaces
-AddTargetHeaderOnly(FH  NAME GameObjects        INCLUDES src/Core/GameObjects)
-AddTargetHeaderOnly(FH  NAME GameInt            INCLUDES src/Core/GameInterface DEPS_FH GameObjects CorePlatform )
-AddTargetHeaderOnly(FH  NAME GuiInt             INCLUDES src/Gui/Interface  DEPS_FH CorePlatform GameObjects GameInt DEPS Qt5::Widgets) # todo: GameObjects remove for cursors.
-AddTargetHeaderOnly(FH  NAME SoundInt           INCLUDES src/Sound/Interface DEPS Qt5::Widgets)
+AddTarget(TYPE header_only GENERATE_STUB NAME GameObjects OUTPUT_PREFIX FH
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/GameObjects)
+AddTarget(TYPE header_only GENERATE_STUB NAME SoundInt OUTPUT_PREFIX FH
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Sound/Interface
+    QT_MODULES Widgets)
 
 # Core
-AddTarget          (FH  NAME CorePlatform  TYPE shared   ROOT src/Core/Platform
-	DEFINES ${COMPRESSION_DEFINES}
-	DEPS    rapidjson ${COMPRESSION_LIBS})
+AddTarget(TYPE shared NAME CorePlatform OUTPUT_PREFIX FH
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/Platform
+    EXPORT_INCLUDES
+    LINK_LIBRARIES rapidjson zlib)
 
-AddTarget(FH TYPE shared NAME CoreRng ROOT src/Core/Rng
-    DEPS_FH CorePlatform
+AddTarget(TYPE header_only GENERATE_STUB NAME GameInt OUTPUT_PREFIX FH
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/GameInterface
+    LINK_LIBRARIES GameObjects CorePlatform)
+AddTarget(TYPE header_only GENERATE_STUB NAME GuiInt OUTPUT_PREFIX FH
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Interface
+    LINK_LIBRARIES CorePlatform GameObjects GameInt  OUTPUT_PREFIX FH
+    QT_MODULES Widgets) # todo: GameObjects remove for cursors.
+
+AddTarget(TYPE shared NAME CoreRng OUTPUT_PREFIX FH
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/Rng
+    EXPORT_INCLUDES
+    LINK_LIBRARIES CorePlatform
     )
 
-AddTarget(FH TYPE shared NAME CoreResource ROOT src/Core/Resource
-    DEPS_FH CorePlatform
+AddTarget(TYPE shared NAME CoreResource OUTPUT_PREFIX FH
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/Resource
+    EXPORT_INCLUDES
+    LINK_LIBRARIES CorePlatform
     )
 
-AddTarget(FH TYPE shared NAME CoreLogic ROOT src/Core/Logic
-    DEPS_FH CoreResource CorePlatform GameObjects GameInt
-    DEPS sol frozen
+AddTarget(TYPE shared NAME CoreLogic OUTPUT_PREFIX FH
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/Logic
+    EXPORT_INCLUDES
+    LINK_LIBRARIES CoreResource CorePlatform GameObjects GameInt sol frozen
     )
 
-AddTarget(FH TYPE shared NAME BattleLogic ROOT src/Core/BattleLogic
-    DEPS_FH CorePlatform CoreLogic GameObjects GameInt
+AddTarget(TYPE shared NAME BattleLogic OUTPUT_PREFIX FH
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/BattleLogic
+    EXPORT_INCLUDES
+    LINK_LIBRARIES CorePlatform CoreLogic GameObjects GameInt
     )
 
-AddTarget(FH TYPE shared NAME CoreApplication ROOT src/Core/Application
-    DEPS_FH
-		CorePlatform
-		GameObjects
-		GameInt
-	
-		CoreResource
-		CoreLogic
-		CoreRng
+AddTarget(TYPE shared NAME CoreApplication OUTPUT_PREFIX FH
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/Application
+    EXPORT_INCLUDES
+    LINK_LIBRARIES
+        CorePlatform
+        GameObjects
+        GameInt
+    
+        CoreResource
+        CoreLogic
+        CoreRng
     )
 
 # Sound
 
-AddTarget(FH QT TYPE shared NAME SoundPlayer ROOT src/Sound/Player
-    DEPS_FH SoundInt CoreResource CorePlatform
-    DEPS  Qt5::Multimedia
+AddTarget(TYPE shared NAME SoundPlayer OUTPUT_PREFIX FH
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Sound/Player
+    EXPORT_INCLUDES
+    LINK_LIBRARIES SoundInt CoreResource CorePlatform
+    QT_MODULES Multimedia
     )
 
 
 # Gui
 set(assetsPath ../../../assets)
-AddTarget(FH QT TYPE shared NAME GuiResource ROOT src/Gui/Resource
-    DEPS_FH
+AddTarget(TYPE shared NAME GuiResource OUTPUT_PREFIX FH
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Resource
+    EXPORT_INCLUDES
+    LINK_LIBRARIES
         GuiInt CorePlatform
-    DEPS
-        Qt5::Widgets
+    QT_MODULES Widgets
     )
 
-AddTarget(FH QT TYPE shared NAME GuiLocalization ROOT src/Gui/Localization
-    DEPS_FH
+AddTarget(TYPE shared NAME GuiLocalization OUTPUT_PREFIX FH
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Localization
+    EXPORT_INCLUDES
+    LINK_LIBRARIES
         GuiInt CorePlatform GameObjects
-    DEPS
-        Qt5::Widgets
+    QT_MODULES Widgets
     )
 
-AddTarget(FH QT TYPE shared NAME GuiGameWrappers ROOT src/Gui/GameWrappers
-    DEPS_FH
+AddTarget(TYPE shared NAME GuiGameWrappers OUTPUT_PREFIX FH
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/GameWrappers
+    EXPORT_INCLUDES
+    LINK_LIBRARIES
         GuiInt CorePlatform GameInt SoundInt
         GameObjects GuiResource CoreResource GuiUtils
-    DEPS
-        Qt5::Widgets
+    QT_MODULES Widgets
     )
 
-AddTarget(FH QT TYPE shared NAME GuiUtils ROOT src/Gui/Utils
-    DEPS_FH
+AddTarget(TYPE shared NAME GuiUtils OUTPUT_PREFIX FH
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Utils
+    EXPORT_INCLUDES
+    LINK_LIBRARIES
         GuiInt
-    DEPS
-        Qt5::Widgets
+    QT_MODULES Widgets
     )
 
-AddTarget(FH QT TYPE shared NAME GuiWidgets ROOT src/Gui/Widgets
-    DEPS_FH
+AddTarget(TYPE shared NAME GuiWidgets OUTPUT_PREFIX FH
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Widgets
+    EXPORT_INCLUDES
+    LINK_LIBRARIES
         GuiInt CorePlatform GameObjects GameInt SoundInt
 
         GuiGameWrappers GuiUtils
-    DEPS
-        Qt5::Widgets
+    QT_MODULES Widgets
     )
 
-AddTarget(FH QT TYPE shared NAME GuiEditor ROOT src/Gui/Editor
-    DEPS_FH
+AddTarget(TYPE shared NAME GuiEditor OUTPUT_PREFIX FH
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Editor
+    EXPORT_INCLUDES
+    LINK_LIBRARIES
         GuiInt CorePlatform GameObjects GameInt SoundInt
         GuiGameWrappers
 
         GuiWidgets GuiUtils
-    DEPS
-        Qt5::Widgets
+    QT_MODULES Widgets
     )
 
-AddTarget(FH QT TYPE shared NAME GuiBattle ROOT src/Gui/Battle
-    DEPS_FH
+AddTarget(TYPE shared NAME GuiBattle OUTPUT_PREFIX FH
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Battle
+    EXPORT_INCLUDES
+    LINK_LIBRARIES
         GuiInt CorePlatform SoundInt GameObjects GameInt
 
         CoreLogic
         GuiUtils
         GuiWidgets
         GuiGameWrappers
-    DEPS
-        Qt5::Widgets
+    QT_MODULES Widgets
     )
 
-AddTarget(FH QT TYPE shared NAME GuiApplication ROOT src/Gui/Application
-    DEPS_FH
+AddTarget(TYPE shared NAME GuiApplication OUTPUT_PREFIX FH
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Application
+    EXPORT_INCLUDES
+    LINK_LIBRARIES
         CorePlatform
         GuiInt
         SoundInt
@@ -241,35 +279,37 @@ AddTarget(FH QT TYPE shared NAME GuiApplication ROOT src/Gui/Application
         GuiLocalization
         GuiGameWrappers
         SoundPlayer
-    DEPS  Qt5::Widgets
+    QT_MODULES Widgets
     )
 
 # App
 
-AddTarget(FH QT  TYPE app NAME LegacyConverter ROOT src/App/LegacyConverter
-    DEPS_FH
+AddTarget( TYPE app_ui NAME LegacyConverter
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/LegacyConverter
+    LINK_LIBRARIES
     CorePlatform
     GuiInt
-	GameInt
+    GameInt
     GameObjects
 
     CoreResource
-	CoreApplication
+    CoreApplication
     GuiApplication
     GuiResource
 
-    DEPS Qt5::Widgets ${COMPRESSION_LIBS} ${PTHREAD}
+    zlib ${PTHREAD}
+    QT_MODULES Widgets
     )
-AddTarget(FH QT TYPE app NAME BattleEmulator
-    ROOT src/App/BattleEmulator
-    DEPS_FH
+AddTarget(TYPE app_ui NAME BattleEmulator
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/BattleEmulator
+    LINK_LIBRARIES
         CorePlatform
         GuiInt
         SoundInt
         GameObjects
         GameInt
 
-		CoreApplication
+        CoreApplication
         GuiApplication
         GuiWidgets
         GuiEditor
@@ -277,19 +317,19 @@ AddTarget(FH QT TYPE app NAME BattleEmulator
         GuiGameWrappers
         CoreLogic
         BattleLogic
-    DEPS Qt5::Widgets
+    QT_MODULES Widgets
     )
 
-AddTarget(FH QT TYPE app NAME MapGenTest
-    ROOT src/App/MapGenTest
-    DEPS_FH
+AddTarget(TYPE app_ui NAME MapGenTest
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/MapGenTest
+    LINK_LIBRARIES
         CorePlatform
         GuiInt
         SoundInt
         GameObjects
         GameInt
 
-		CoreApplication
+        CoreApplication
         GuiApplication
         GuiWidgets
         GuiEditor
@@ -297,46 +337,47 @@ AddTarget(FH QT TYPE app NAME MapGenTest
         GuiGameWrappers
         CoreLogic
         BattleLogic
-    DEPS Qt5::Widgets
+    QT_MODULES Widgets
     )
 
-AddTarget(FH TYPE console_app NAME MapUtils
-    ROOT src/App/MapUtils
-    DEPS_FH
+AddTarget(TYPE app_console NAME MapUtils
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/MapUtils
+    LINK_LIBRARIES
         CorePlatform
         GameObjects
         GameInt
 
-		CoreApplication
+        CoreApplication
         CoreLogic
         BattleLogic
-     DEPS
         frozen
     )
 
 # tests
 
-AddTarget(FH TYPE console_app NAME CoreTests OUTPUT_NAME Tests_CoreLogic
-    ROOT src/Core/Tests
-    DEPS_FH
+AddTarget(TYPE app_console NAME CoreTests OUTPUT_NAME Tests_CoreLogic
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/Tests
+    LINK_LIBRARIES
         CorePlatform
         GameObjects
         GameInt
 
         CoreLogic
-    DEPS gtest gtest_main frozen
+
+    gtest gtest_main frozen
     )
 
-AddTarget(FH TYPE app NAME SoundTests OUTPUT_NAME Tests_Sound
-    ROOT src/Sound/Tests
-    DEPS_FH
+AddTarget(TYPE app_ui NAME SoundTests OUTPUT_NAME Tests_Sound
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Sound/Tests
+    LINK_LIBRARIES
         CorePlatform
         SoundInt
-		GameInt
+        GameInt
 
-		CoreApplication
+        CoreApplication
         GuiApplication
-    DEPS Qt5::Widgets
+
+    QT_MODULES Widgets
     )
 
 
