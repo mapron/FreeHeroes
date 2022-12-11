@@ -12,6 +12,8 @@
 #include "H3MMap.hpp"
 #include "FHMap.hpp"
 
+#include "MapUtilExport.hpp"
+
 #include <iosfwd>
 
 namespace FreeHeroes {
@@ -20,7 +22,7 @@ class IGameDatabaseContainer;
 class IRandomGeneratorFactory;
 }
 
-class MapConverter {
+class MAPUTIL_EXPORT MapConverter {
 public:
     struct BinaryPathsSet {
         Core::std_path m_binary;
@@ -162,7 +164,7 @@ private:
     std::set<size_t> m_ignoredOffsets;
 };
 
-std::string        taskToString(MapConverter::Task task);
-MapConverter::Task stringToTask(const std::string& str);
+MAPUTIL_EXPORT std::string taskToString(MapConverter::Task task);
+MAPUTIL_EXPORT MapConverter::Task stringToTask(const std::string& str);
 
 }

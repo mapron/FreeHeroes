@@ -30,7 +30,7 @@ const QString g_launcher = "Launcher.exe";
 
 QString guessInstallationPath()
 {
-    QSettings reg(g_regInstall, QSettings::Registry32Format);
+    QSettings reg(g_regInstall, QSettings::NativeFormat);
     if (reg.contains(g_regKey))
         return reg.value(g_regKey).toString();
 

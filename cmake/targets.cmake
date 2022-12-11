@@ -138,6 +138,7 @@ function(AddTarget)
         EXPORT_INCLUDES           # TARGET_INCLUDE_DIRECTORIES($SOURCE_DIR)
         STATIC_RUNTIME            # use static runtime (/MT) (MSVC)
         EXCLUDE_FROM_ALL          # 
+        SKIP_STATIC_CHECK         #
         )
     set(__one_val_required
         NAME                # 
@@ -193,6 +194,9 @@ function(AddTarget)
 
         target_include_directories(${name} PRIVATE ${CMAKE_BINARY_DIR}/export)
         MakeTargetSources(${name} "${ARG_INCLUDES}" "${ARG_SOURCE_DIR}" ${useQt} ${generateStub} "${ARG_EXTRA_SOURCES}" "${ARG_EXCLUDE_SOURCES}" "${ARG_UIC_POSTPROCESS_SCRIPTS}")
+        if (NOT ARG_SKIP_STATIC_CHECK)
+            AddStaticCheckTarget(TARGET_NAME ${name} SOURCE_DIR "${ARG_SOURCE_DIR}")
+        endif()
     endif()
 
     set(defaultVisibility PRIVATE)

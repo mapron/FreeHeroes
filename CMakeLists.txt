@@ -79,6 +79,7 @@ if (MSVC)
     AddTarget(TYPE static NAME zlib 
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/zlib
         EXPORT_INCLUDES
+        SKIP_STATIC_CHECK
         COMPILE_OPTIONS /wd4996
         INTERFACE_COMPILE_DEFINITIONS USE_ZLIB
     )
@@ -105,6 +106,7 @@ AddTarget(TYPE static NAME lua_static SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rd
     INTERFACE_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/lua/include
     INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/lua/include
     COMPILE_DEFINITIONS [ UNIX LUA_USE_POSIX ]
+    SKIP_STATIC_CHECK
     )
 #target_include_directories(lua_static INTERFACE 3rdparty/lua/include)
 
@@ -285,6 +287,19 @@ AddTarget(TYPE shared NAME GuiApplication OUTPUT_PREFIX FH
     QT_MODULES Widgets
     )
 
+AddTarget(TYPE shared NAME MapUtil
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/MapUtil
+    EXPORT_INCLUDES
+    LINK_LIBRARIES
+        CorePlatform
+        GameObjects
+        GameInt
+
+        CoreLogic
+        BattleLogic
+        frozen
+    )
+
 # App
 
 AddTarget( TYPE app_ui NAME LegacyConverter
@@ -323,8 +338,8 @@ AddTarget(TYPE app_ui NAME BattleEmulator
     QT_MODULES Widgets
     )
 
-AddTarget(TYPE app_ui NAME MapGenTest
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/MapGenTest
+AddTarget(TYPE app_ui NAME MapEditor
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/MapEditor
     LINK_LIBRARIES
         CorePlatform
         GuiInt
@@ -343,17 +358,36 @@ AddTarget(TYPE app_ui NAME MapGenTest
     QT_MODULES Widgets
     )
 
-AddTarget(TYPE app_console NAME MapUtils
-        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/MapUtils
+AddTarget(TYPE app_ui NAME MapToolUI
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/MapToolUI
+    LINK_LIBRARIES
+        CorePlatform
+        GuiInt
+        SoundInt
+        GameObjects
+        GameInt
+
+        CoreApplication
+        GuiApplication
+        GuiWidgets
+        GuiEditor
+        GuiBattle
+        GuiGameWrappers
+        CoreLogic
+        BattleLogic
+        MapUtil
+    QT_MODULES Widgets
+    )
+
+AddTarget(TYPE app_console NAME MapToolCLI
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/MapToolCLI
     LINK_LIBRARIES
         CorePlatform
         GameObjects
         GameInt
 
         CoreApplication
-        CoreLogic
-        BattleLogic
-        frozen
+        MapUtil
     )
 
 AddTarget(TYPE app_ui NAME Launcher

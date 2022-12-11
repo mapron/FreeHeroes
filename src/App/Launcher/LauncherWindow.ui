@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>203</width>
-    <height>218</height>
+    <width>162</width>
+    <height>264</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,19 +26,33 @@
       <number>5</number>
      </property>
      <item>
-      <widget class="QPushButton" name="pushButtonEmulator">
-       <property name="enabled">
-        <bool>true</bool>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <property name="bottomMargin">
+        <number>0</number>
        </property>
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Battle emulator</string>
-       </property>
-      </widget>
+       <item>
+        <widget class="QPushButton" name="pushButtonEmulator">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Battle emulator</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="checkBoxEmulator">
+         <property name="text">
+          <string>Set as default</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item>
       <widget class="QPushButton" name="pushButtonConverter">
@@ -56,19 +70,33 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButtonGenerator">
-       <property name="enabled">
-        <bool>true</bool>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <property name="bottomMargin">
+        <number>0</number>
        </property>
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Map generator</string>
-       </property>
-      </widget>
+       <item>
+        <widget class="QPushButton" name="pushButtonGenerator">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Map generator</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="checkBoxMapGen">
+         <property name="text">
+          <string>Set as default</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item>
       <spacer name="verticalSpacer">
@@ -82,6 +110,21 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButtonClose">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Exit</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

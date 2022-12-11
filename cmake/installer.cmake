@@ -54,6 +54,7 @@ AddInstallArchiveTarget(InstallArchive)
 AddTarget(TYPE static NAME 7zip_static
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/7zip
     EXPORT_INCLUDES
+    SKIP_STATIC_CHECK
     STATIC_RUNTIME
 )
 
@@ -64,7 +65,7 @@ set(archive ${CMAKE_BINARY_DIR}/InstallData.7z)
 set(splash ${CMAKE_CURRENT_SOURCE_DIR}/src/InstallerExtractor/splash.bmp)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/InstallerExtractor/resources.rc.in ${CMAKE_BINARY_DIR}/installer_resource.rc)
 
-AddTarget(TYPE app_ui NAME InstallerSelfExtractor
+AddTarget(TYPE app_ui NAME InstallerSelfExtractor OUTPUT_NAME FreeHeroes_Installer
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/InstallerExtractor
     LINK_LIBRARIES 7zip_static
     STATIC_RUNTIME
