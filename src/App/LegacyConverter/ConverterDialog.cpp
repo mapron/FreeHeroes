@@ -21,7 +21,7 @@
 #include "ResourceLibrary.hpp"
 
 // Platform
-#include "ExploreFolder.hpp"
+#include "ShellUtils.hpp"
 #include "Logger.hpp"
 
 #include <QStandardPaths>

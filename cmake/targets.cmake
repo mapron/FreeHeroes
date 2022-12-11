@@ -19,6 +19,23 @@ function(AddResourceCustomTarget name)
     install(FILES ${rccList} DESTINATION bin/assetsCompiled)
 endfunction()
 
+function(AddInstallArchiveTarget name)
+    set(archive ${CMAKE_BINARY_DIR}/InstallData.7z)
+    set(compressionFlags -mx=9 -myx=9)
+    if(fastCompression)
+        set(compressionFlags -mx=1 -myx=0)
+    endif()
+    find_program(7zip 7z.exe PATHS "C:/Program Files/7-Zip" "C:/Program Files (x86)/7-Zip" REQUIRED)
+    add_custom_command(OUTPUT "${archive}"
+        COMMAND ${CMAKE_COMMAND} -E remove "${archive}"
+        COMMAND "${7zip}" a ${compressionFlags} "${archive}" *
+        WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}/bin
+        COMMENT "Archiving ${archive}"
+        DEPENDS install
+        )
+    add_custom_target(${name} DEPENDS ${archive})
+endfunction()
+
 function(MakeTargetExport name)
     string(TOUPPER "${name}_EXPORT" DEFINITION_NAME)
     set(TARGET ${name})
@@ -29,7 +46,6 @@ endfunction()
 
 # type = shared|static|interface|app_ui|app_console|app_bundle|header_only
 function(MakeTarget name type excludeAll)
-    #message("MakeTarget ${name} ${type} ${excludeAll}")
     if (excludeAll)
         set(excludeAll EXCLUDE_FROM_ALL)
     else()
@@ -121,6 +137,7 @@ function(AddTarget)
         GENERATE_STUB             # 
         EXPORT_INCLUDES           # TARGET_INCLUDE_DIRECTORIES($SOURCE_DIR)
         STATIC_RUNTIME            # use static runtime (/MT) (MSVC)
+        EXCLUDE_FROM_ALL          # 
         )
     set(__one_val_required
         NAME                # 
@@ -149,7 +166,7 @@ function(AddTarget)
     ParseArgumentsWithConditions(ARG "${__options}" "${__one_val_required}" "${__one_val_optional}" "${__multi_val}" ${ARGN})
 
     set(name ${ARG_NAME})
-    MakeTarget(${name} ${ARG_TYPE} false)
+    MakeTarget(${name} ${ARG_TYPE} "${ARG_EXCLUDE_FROM_ALL}")
     
     set(outputName ${name})
     if (ARG_OUTPUT_NAME)
@@ -220,7 +237,11 @@ function(AddTarget)
     endif()
     
     set(installableTypes shared app_ui app_console app_bundle)
-    if (ARG_TYPE IN_LIST installableTypes)
+    if (ARG_TYPE IN_LIST installableTypes AND NOT ARG_EXCLUDE_FROM_ALL)
         install(TARGETS ${name} RUNTIME DESTINATION bin)
+    endif()
+    if (MSVC AND ARG_STATIC_RUNTIME)
+        target_link_libraries(${name} PRIVATE optimized libcmt.lib debug libcmtd.lib)
+        target_compile_options(${name} PRIVATE $<$<CONFIG:Debug>:/MTd>$<$<CONFIG:Release>:/MT>)
     endif()
 endfunction()

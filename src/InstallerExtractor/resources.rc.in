@@ -1,0 +1,4 @@
+#define APSTUDIO_READONLY_SYMBOLS
+#include "WinResrc.h"
+archive RCDATA "@archive@"
+splash BITMAP "@splash@"

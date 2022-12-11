@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SetupWindow</class>
+ <widget class="QFrame" name="SetupWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>559</width>
+    <height>216</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string/>
+  </property>
+  <layout class="QVBoxLayout" name="mainLayout" stretch="0,0,0">
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>FreeHeroes installation root:</string>
+     </property>
+     <layout class="QVBoxLayout" name="groupBoxLayout">
+      <property name="spacing">
+       <number>2</number>
+      </property>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QLineEdit" name="destPath"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButtonBrowse">
+          <property name="text">
+           <string>Browse...</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox2">
+     <property name="title">
+      <string>Install settings:</string>
+     </property>
+     <layout class="QVBoxLayout" name="groupBoxLayout3">
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QCheckBox" name="checkBoxShortcut">
+          <property name="text">
+           <string>Desktop shortcut</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkBoxStartLauncher">
+          <property name="text">
+           <string>Start Launcher after install</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_5">
+     <property name="topMargin">
+      <number>5</number>
+     </property>
+     <property name="bottomMargin">
+      <number>5</number>
+     </property>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButtonFinish">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Finish installation</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
