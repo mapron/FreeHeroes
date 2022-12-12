@@ -55,21 +55,21 @@ int WINAPI WinMain(HINSTANCE hInstance,
     try {
         const std::wstring cmdLine = ::GetCommandLine();
 
-        // 1. создаем временную директорию
+        // 1. create temp dir in AppData
         TmpDir tmpPath;
         std::wcout << "tmpPath=" << tmpPath.path() << std::endl;
 
         SplashWindow splash;
 
-        // 4. Загружаем сплеш и его размеры
+        // 2. Load slash from exe resource
         splash.LoadSplashBitmap();
 
-        // 5. Создаем окно для сплеша
+        // 3. Show splash bitmap as HWND
         splash.CreateNativeWindow(hInstance);
 
         splash.Show();
 
-        // 6. Извлекаем остальные файлы
+        // 4. Extract 7z resources
 
         std::function<void()> extractCallback([&tmpPath]() {
             try {
@@ -98,14 +98,14 @@ int WINAPI WinMain(HINSTANCE hInstance,
             CloseHandle(threadHandle);
         }
 
-        // 7. Создадим файл-маркер, удаление которого ознаменует успешный запуск GUI.
+        // 5. Create marker file to check for folder cleanup needed
         const auto markerPath = tmpPath.path() + g_extractorFileMarker;
         {
             std::ofstream markerFile;
             markerFile.open(markerPath, std::ios::out);
         }
 
-        // 8. Запускаем инсталлятор и дожидаемся его работы
+        // 6. Launch postinstall setup application
         std::wstring appName = tmpPath.path() + g_mainApp;
 
         PROCESS_INFORMATION piProcInfo;
@@ -121,6 +121,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
         if (!resEx)
             throw std::runtime_error("Failed to start installer front-end application.");
 
+        // 7. Wait until postinstall closed.
         WaitProcessWrapper(piProcInfo, exitCode);
 
         if (_waccess(markerPath.c_str(), 0) == -1) {
