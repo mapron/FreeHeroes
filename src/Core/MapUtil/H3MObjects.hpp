@@ -210,8 +210,13 @@ enum class MapObjectType
     //    WATERING_HOLE               = 110,
     //    WHIRLPOOL                   = 111,
     //    WINDMILL                    = 112,
-    WITCH_HUT         = 113,
-    HOLE              = 124,
+    WITCH_HUT = 113,
+    HOLE      = 124,
+
+    MOUNTAIN_1 = 134,
+
+    MOUNTAIN_2 = 161,
+
     RANDOM_MONSTER_L5 = 162,
     RANDOM_MONSTER_L6 = 163,
     RANDOM_MONSTER_L7 = 164,

@@ -12,8 +12,10 @@
 
 #include "LibraryDwelling.hpp"
 #include "LibraryFaction.hpp"
-#include "LibraryObjectDef.hpp"
 #include "LibraryHero.hpp"
+#include "LibraryMapBank.hpp"
+#include "LibraryMapObstacle.hpp"
+#include "LibraryObjectDef.hpp"
 #include "LibraryTerrain.hpp"
 
 namespace FreeHeroes {
@@ -68,6 +70,20 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             for (int i = 0, cnt = dwelling->mapObjectDefs.size(); i < cnt; ++i) {
                 dwellMap[dwelling->mapObjectDefs[i]->id] = { dwelling, i };
             }
+        }
+    }
+    std::map<std::string, std::pair<Core::LibraryMapBankConstPtr, int>> bankMap;
+    {
+        for (auto* bank : database->mapBanks()->records()) {
+            for (int i = 0, cnt = bank->mapObjectDefs.size(); i < cnt; ++i) {
+                bankMap[bank->mapObjectDefs[i]->id] = { bank, i };
+            }
+        }
+    }
+    std::map<std::string, Core::LibraryMapObstacleConstPtr> obstacleMap;
+    {
+        for (auto* obstacle : database->mapObstacles()->records()) {
+            obstacleMap[obstacle->mapObjectDef->id] = obstacle;
         }
     }
 
@@ -278,7 +294,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                 FHDwelling  dwelling;
                 const auto [id, variant] = dwellMap.at(defObjectKey);
                 dwelling.m_id            = id;
-                dwelling.m_variant       = variant;
+                dwelling.m_defVariant    = variant;
                 dwelling.m_order         = index;
                 dwelling.m_pos           = posFromH3M(obj.m_pos);
                 dwelling.m_player        = makePlayerId(objOwner->m_owner);
@@ -326,10 +342,28 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             case MapObjectType::SHIPWRECK:
             {
                 const auto* bank = static_cast<const MapObjectCreatureBank*>(impl);
-                assert(1 && bank);
+                (void) bank;
+                FHBank fhBank;
+                const auto [id, variant] = bankMap.at(defObjectKey);
+                fhBank.m_id              = id;
+                fhBank.m_defVariant      = variant;
+                fhBank.m_order           = index;
+                fhBank.m_pos             = posFromH3M(obj.m_pos);
+                dest.m_objects.m_banks.push_back(fhBank);
+            } break;
+            case MapObjectType::MOUNTAIN_1:
+            case MapObjectType::MOUNTAIN_2:
+            {
+                FHObstacle fhObstacle;
+                const auto id      = obstacleMap.at(defObjectKey);
+                fhObstacle.m_id    = id;
+                fhObstacle.m_order = index;
+                fhObstacle.m_pos   = posFromH3M(obj.m_pos);
+                dest.m_objects.m_obstacles.push_back(fhObstacle);
             } break;
             default:
             {
+                assert(!"Unsupported");
                 // simple object.
             } break;
         }

@@ -148,7 +148,25 @@ inline constexpr const std::tuple MetaInfo::s_fields<FHDwelling>{
     Field("player", &FHDwelling::m_player),
 
     Field("id", &FHDwelling::m_id),
-    Field("variant", &FHDwelling::m_variant),
+    Field("defVariant", &FHDwelling::m_defVariant),
+};
+
+template<>
+inline constexpr const std::tuple MetaInfo::s_fields<FHBank>{
+    Field("pos", &FHBank::m_pos),
+    Field("order", &FHBank::m_order),
+
+    Field("id", &FHBank::m_id),
+    Field("defVariant", &FHBank::m_defVariant),
+    Field("guardsVariant", &FHBank::m_guardsVariant),
+};
+
+template<>
+inline constexpr const std::tuple MetaInfo::s_fields<FHObstacle>{
+    Field("pos", &FHObstacle::m_pos),
+    Field("order", &FHObstacle::m_order),
+
+    Field("id", &FHObstacle::m_id),
 };
 
 template<>
@@ -157,6 +175,8 @@ inline constexpr const std::tuple MetaInfo::s_fields<FHMap::Objects>{
     Field("artifacts", &FHMap::Objects::m_artifacts),
     Field("monsters", &FHMap::Objects::m_monsters),
     Field("dwellings", &FHMap::Objects::m_dwellings),
+    Field("banks", &FHMap::Objects::m_banks),
+    Field("obstacles", &FHMap::Objects::m_obstacles),
 };
 
 template<>

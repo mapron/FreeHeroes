@@ -15,9 +15,11 @@
 #include "LibraryDwelling.hpp"
 #include "LibraryFaction.hpp"
 #include "LibraryHero.hpp"
+#include "LibraryMapBank.hpp"
+#include "LibraryMapObstacle.hpp"
+#include "LibraryObjectDef.hpp"
 #include "LibrarySecondarySkill.hpp"
 #include "LibraryTerrain.hpp"
-#include "LibraryObjectDef.hpp"
 
 #define assume(cond) \
     if (!(cond)) \
@@ -320,8 +322,21 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
         auto dwell     = std::make_unique<MapObjectWithOwner>(dest.m_features);
         dwell->m_owner = static_cast<uint8_t>(fhDwelling.m_player);
 
-        auto* def = fhDwelling.m_id->mapObjectDefs[fhDwelling.m_variant];
+        auto* def = fhDwelling.m_id->mapObjectDefs[fhDwelling.m_defVariant];
         dest.m_objects.push_back(Object{ .m_order = fhDwelling.m_order, .m_pos = int3fromPos(fhDwelling.m_pos), .m_defnum = getDefFileIndex(makeDefFromDb(def)), .m_impl = std::move(dwell) });
+    }
+
+    for (auto& fhBank : src.m_objects.m_banks) {
+        auto bank = std::make_unique<MapObjectCreatureBank>(dest.m_features);
+
+        auto* def = fhBank.m_id->mapObjectDefs[fhBank.m_defVariant];
+        dest.m_objects.push_back(Object{ .m_order = fhBank.m_order, .m_pos = int3fromPos(fhBank.m_pos), .m_defnum = getDefFileIndex(makeDefFromDb(def)), .m_impl = std::move(bank) });
+    }
+    for (auto& fhObstacle : src.m_objects.m_obstacles) {
+        auto obj = std::make_unique<MapObjectSimple>(dest.m_features);
+
+        auto* def = fhObstacle.m_id->mapObjectDef;
+        dest.m_objects.push_back(Object{ .m_order = fhObstacle.m_order, .m_pos = int3fromPos(fhObstacle.m_pos), .m_defnum = getDefFileIndex(makeDefFromDb(def)), .m_impl = std::move(obj) });
     }
 
     std::sort(dest.m_objects.begin(), dest.m_objects.end(), [](const auto& lh, const auto& rh) { return lh.m_order < rh.m_order; });

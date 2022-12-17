@@ -358,7 +358,7 @@ QPixmap GuiTerrain::getTile(int variant) const
 GuiMapBank::GuiMapBank(Sound::IMusicBox&, IGraphicsLibrary& graphicsLibrary, Core::LibraryMapBankConstPtr source)
     : QObject(nullptr)
     , Base(source)
-    , m_icon(graphicsLibrary.getPixmapByKey(IGraphicsLibrary::PixmapKey(source->mapObjectDef->id, 0, 0)))
+    , m_icon(graphicsLibrary.getPixmapByKey(IGraphicsLibrary::PixmapKey(source->mapObjectDefs[0]->id, 0, 0)))
 {
     for (auto& variant : source->variants)
         m_variantNames << QString::fromStdString(variant.name);

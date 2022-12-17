@@ -53,8 +53,8 @@ struct LibraryMapBank {
     struct Presentation {
         int order = 0;
     };
-    Presentation             presentationParams;
-    LibraryObjectDefConstPtr mapObjectDef = nullptr;
+    Presentation                          presentationParams;
+    std::vector<LibraryObjectDefConstPtr> mapObjectDefs;
 };
 
 }

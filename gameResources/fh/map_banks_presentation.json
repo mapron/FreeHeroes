@@ -1,0 +1,33 @@
+[{
+"scope": "mapBanks",
+
+"records" : {
+
+"sod.map.crypt"                      : { "pres": { "order":1    } , "mapObjectDefs": [ "avxgyds0" ] },
+"sod.map.utopia"                     : { "pres": { "order":2    } , "mapObjectDefs": [ "avsutop0" ] },
+"sod.map.derelictShip"               : { "pres": { "order":1001 } , "mapObjectDefs": [ "avadlic0" ] },
+"sod.map.shipwreck"                  : { "pres": { "order":1002 } , "mapObjectDefs": [ "avawrek0" ] },
+"hota.map.blackTower"                : { "pres": { "order":3    } , "mapObjectDefs": [ "avblktgr" ] },
+"hota.map.mansion"                   : { "pres": { "order":4    } , "mapObjectDefs": [ "avmnsion" ] },
+"hota.map.beholderSanctuary"         : { "pres": { "order":5    } , "mapObjectDefs": [ "sanct_wt" ] },
+"hota.map.templeSea"                 : { "pres": { "order":1003 } , "mapObjectDefs": [ "avsutopw" ] },
+"hota.map.churchyard"                : { "pres": { "order":6    } , "mapObjectDefs": [ "avcmetry" ] },
+"sod.map.conservatory"               : { "pres": { "order":100  } , "mapObjectDefs": [ "avxbnk30" ] },
+"sod.map.hive"                       : { "pres": { "order":101  } , "mapObjectDefs": [ "avxbnk70" ] },
+"hota.map.experimentalShop"          : { "pres": { "order":102  } , "mapObjectDefs": [ "avxbnk90" ] },
+"hota.map.wolfRaiderPicket"          : { "pres": { "order":103  } , "mapObjectDefs": [ "avxbnk80" ] },
+"hota.map.vermilionTower"            : { "pres": { "order":104  } , "mapObjectDefs": [ "avredtwr" ] },
+"hota.map.pirateCave"                : { "pres": { "order":105  } , "mapObjectDefs": [ "hapcave"  ] },
+"hota.map.ivoryTower"                : { "pres": { "order":106  } , "mapObjectDefs": [ "avivtow2" ] },
+
+"sod.map.impCache"                   : { "pres": { "order":200  } , "mapObjectDefs": [ "avxbnk40" ] },
+"sod.map.dwarvenTreasury"            : { "pres": { "order":201  } , "mapObjectDefs": [ "avxbnk20" ] },
+"sod.map.medusaStores"               : { "pres": { "order":202  } , "mapObjectDefs": [ "avxbnk50" ] },
+"sod.map.cyclopsStockpile"           : { "pres": { "order":203  } , "mapObjectDefs": [ "avxbnk10" ] },
+"sod.map.nagaBank"                   : { "pres": { "order":204  } , "mapObjectDefs": [ "avxbnk60" ] },
+"hota.map.spit"                      : { "pres": { "order":205  } , "mapObjectDefs": [ "avbone02" ] },
+"hota.map.ruins"                     : { "pres": { "order":206  } , "mapObjectDefs": [ "avxruins" ] }
+
+}
+
+}]

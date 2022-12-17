@@ -780,7 +780,7 @@ inline constexpr const std::tuple MetaInfo::s_fields<LibraryMapBank::Presentatio
 };
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<LibraryMapBank>{
-    Field("mapObjectDef"        , &LibraryMapBank::mapObjectDef),
+    Field("mapObjectDefs"       , &LibraryMapBank::mapObjectDefs),
     Field("untranslatedName"    , &LibraryMapBank::untranslatedName),
     Field("legacyId"            , &LibraryMapBank::legacyId),
     Field("variants"            , &LibraryMapBank::variants),

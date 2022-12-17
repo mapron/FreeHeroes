@@ -1,0 +1,12 @@
+[{
+"scope": "mapObstacles",
+
+"compactCols":                   ["mapObjectDef" ],
+"records": {
+
+"obstacle_avlmtwl1"             : [ "avlmtwl1" ],
+"obstacle_avlrfx02"             : [ "avlrfx02" ]
+
+
+}
+}]

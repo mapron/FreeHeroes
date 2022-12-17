@@ -88,8 +88,8 @@ struct FHTown : public FHPlayerControlledObject {
 };
 
 struct FHDwelling : public FHPlayerControlledObject {
-    Core::LibraryDwellingConstPtr m_id      = nullptr;
-    int                           m_variant = 0;
+    Core::LibraryDwellingConstPtr m_id         = nullptr;
+    int                           m_defVariant = 0;
 };
 
 struct FHTileMap {
@@ -208,6 +208,16 @@ struct FHMonster : public FHCommonObject {
     uint32_t m_questIdentifier = 0;
 };
 
+struct FHBank : public FHCommonObject {
+    Core::LibraryMapBankConstPtr m_id            = nullptr;
+    int                          m_defVariant    = 0;
+    int                          m_guardsVariant = -1;
+};
+
+struct FHObstacle : public FHCommonObject {
+    Core::LibraryMapObstacleConstPtr m_id = nullptr;
+};
+
 struct FHMap {
     using PlayersMap = std::map<FHPlayerId, FHPlayer>;
 
@@ -230,6 +240,8 @@ struct FHMap {
         std::vector<FHArtifact> m_artifacts;
         std::vector<FHMonster>  m_monsters;
         std::vector<FHDwelling> m_dwellings;
+        std::vector<FHBank>     m_banks;
+        std::vector<FHObstacle> m_obstacles;
     } m_objects;
 
     Core::LibraryTerrainConstPtr m_defaultTerrain = nullptr;
