@@ -136,6 +136,10 @@ inline constexpr const std::tuple MetaInfo::s_fields<FHMonster>{
 
     Field("id", &FHMonster::m_id),
     Field("count", &FHMonster::m_count),
+    Field("agressionMin", &FHMonster::m_agressionMin),
+    Field("agressionMax", &FHMonster::m_agressionMax),
+    Field("questIdentifier", &FHMonster::m_questIdentifier),
+
 };
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<FHDwelling>{

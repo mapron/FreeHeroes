@@ -201,6 +201,11 @@ struct FHArtifact : public FHCommonObject {
 struct FHMonster : public FHCommonObject {
     Core::LibraryUnitConstPtr m_id    = nullptr;
     uint32_t                  m_count = 0;
+
+    int m_agressionMin = 1;
+    int m_agressionMax = 10;
+
+    uint32_t m_questIdentifier = 0;
 };
 
 struct FHMap {

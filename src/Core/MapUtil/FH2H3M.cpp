@@ -12,6 +12,7 @@
 #include "IRandomGenerator.hpp"
 
 #include "LibraryArtifact.hpp"
+#include "LibraryDwelling.hpp"
 #include "LibraryFaction.hpp"
 #include "LibraryHero.hpp"
 #include "LibrarySecondarySkill.hpp"
@@ -290,9 +291,37 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
     }
 
     for (auto& fhMon : src.m_objects.m_monsters) {
-        auto monster     = std::make_unique<MapMonster>(dest.m_features);
-        monster->m_count = static_cast<uint16_t>(fhMon.m_count);
+        auto monster               = std::make_unique<MapMonster>(dest.m_features);
+        monster->m_count           = static_cast<uint16_t>(fhMon.m_count);
+        monster->m_questIdentifier = fhMon.m_questIdentifier;
+        if (fhMon.m_agressionMax == fhMon.m_agressionMin) {
+            if (fhMon.m_agressionMax == 0)
+                monster->m_joinAppeal = 0;
+            else if (fhMon.m_agressionMax == 10)
+                monster->m_joinAppeal = 4;
+            else {
+                monster->m_joinAppeal     = 5;
+                monster->m_agressionExact = fhMon.m_agressionMax;
+            }
+        } else if (fhMon.m_agressionMin == 1 && fhMon.m_agressionMax == 7) {
+            monster->m_joinAppeal = 1;
+        } else if (fhMon.m_agressionMin == 1 && fhMon.m_agressionMax == 10) {
+            monster->m_joinAppeal = 2;
+        } else if (fhMon.m_agressionMin == 4 && fhMon.m_agressionMax == 10) {
+            monster->m_joinAppeal = 3;
+        } else {
+            throw std::runtime_error("unsupported monster appeal");
+        }
+
         dest.m_objects.push_back(Object{ .m_order = fhMon.m_order, .m_pos = int3fromPos(fhMon.m_pos, dest.m_features->m_monstersMapXOffset), .m_defnum = getDefFileIndex(makeDefFromDb(fhMon.m_id->mapObjectDef)), .m_impl = std::move(monster) });
+    }
+
+    for (auto& fhDwelling : src.m_objects.m_dwellings) {
+        auto dwell     = std::make_unique<MapObjectWithOwner>(dest.m_features);
+        dwell->m_owner = static_cast<uint8_t>(fhDwelling.m_player);
+
+        auto* def = fhDwelling.m_id->mapObjectDefs[fhDwelling.m_variant];
+        dest.m_objects.push_back(Object{ .m_order = fhDwelling.m_order, .m_pos = int3fromPos(fhDwelling.m_pos), .m_defnum = getDefFileIndex(makeDefFromDb(def)), .m_impl = std::move(dwell) });
     }
 
     std::sort(dest.m_objects.begin(), dest.m_objects.end(), [](const auto& lh, const auto& rh) { return lh.m_order < rh.m_order; });

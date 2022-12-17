@@ -142,10 +142,40 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             {
                 const auto* monster = static_cast<const MapMonster*>(impl);
                 FHMonster   fhMonster;
-                fhMonster.m_order = index;
-                fhMonster.m_pos   = posFromH3M(obj.m_pos, -src.m_features->m_monstersMapXOffset);
-                fhMonster.m_count = monster->m_count;
-                fhMonster.m_id    = unitIds[objTempl.m_subid];
+                fhMonster.m_order           = index;
+                fhMonster.m_pos             = posFromH3M(obj.m_pos, -src.m_features->m_monstersMapXOffset);
+                fhMonster.m_count           = monster->m_count;
+                fhMonster.m_id              = unitIds[objTempl.m_subid];
+                fhMonster.m_questIdentifier = monster->m_questIdentifier;
+                switch (monster->m_joinAppeal) {
+                    case 0:
+                        fhMonster.m_agressionMin = 0;
+                        fhMonster.m_agressionMax = 0;
+                        break;
+                    case 1:
+                        fhMonster.m_agressionMin = 1;
+                        fhMonster.m_agressionMax = 7;
+                        break;
+                    case 2:
+                        fhMonster.m_agressionMin = 1;
+                        fhMonster.m_agressionMax = 10;
+                        break;
+                    case 3:
+                        fhMonster.m_agressionMin = 4;
+                        fhMonster.m_agressionMax = 10;
+                        break;
+                    case 4:
+                        fhMonster.m_agressionMin = 10;
+                        fhMonster.m_agressionMax = 10;
+                        break;
+                    case 5:
+                        fhMonster.m_agressionMin = monster->m_agressionExact;
+                        fhMonster.m_agressionMax = monster->m_agressionExact;
+                        break;
+                    default:
+                        break;
+                }
+
                 dest.m_objects.m_monsters.push_back(fhMonster);
             } break;
             case MapObjectType::OCEAN_BOTTLE:
@@ -243,6 +273,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             case MapObjectType::SHIPYARD:
             case MapObjectType::LIGHTHOUSE:
             {
+                assert(type == MapObjectType::CREATURE_GENERATOR1);
                 const auto* objOwner = static_cast<const MapObjectWithOwner*>(impl);
                 FHDwelling  dwelling;
                 const auto [id, variant] = dwellMap.at(defObjectKey);
