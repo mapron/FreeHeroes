@@ -329,6 +329,23 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
     for (auto& fhBank : src.m_objects.m_banks) {
         auto bank = std::make_unique<MapObjectCreatureBank>(dest.m_features);
 
+        if (!fhBank.m_guardsVariants.empty()) {
+            const int variantsCount = fhBank.m_id->variants.size();
+            if (variantsCount > 4) {
+                bank->m_content = fhBank.m_guardsVariants[0];
+                if (bank->m_content > 4)
+                    bank->m_content -= variantsCount / 2;
+                if (fhBank.m_guardsVariants.size() == 2)
+                    bank->m_upgraded = 0xffu;
+                else if (fhBank.m_guardsVariants[0] < variantsCount / 2)
+                    bank->m_upgraded = 0;
+                else
+                    bank->m_upgraded = 1;
+            } else {
+                bank->m_content = fhBank.m_guardsVariants[0];
+            }
+        }
+
         auto* def = fhBank.m_id->mapObjectDefs[fhBank.m_defVariant];
         dest.m_objects.push_back(Object{ .m_order = fhBank.m_order, .m_pos = int3fromPos(fhBank.m_pos), .m_defnum = getDefFileIndex(makeDefFromDb(def)), .m_impl = std::move(bank) });
     }

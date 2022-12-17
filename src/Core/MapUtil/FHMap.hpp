@@ -209,9 +209,9 @@ struct FHMonster : public FHCommonObject {
 };
 
 struct FHBank : public FHCommonObject {
-    Core::LibraryMapBankConstPtr m_id            = nullptr;
-    int                          m_defVariant    = 0;
-    int                          m_guardsVariant = -1;
+    Core::LibraryMapBankConstPtr m_id         = nullptr;
+    int                          m_defVariant = 0;
+    std::vector<int>             m_guardsVariants; // empty = full random
 };
 
 struct FHObstacle : public FHCommonObject {

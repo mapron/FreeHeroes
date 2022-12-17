@@ -338,11 +338,26 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                 const auto* bank = static_cast<const MapObjectCreatureBank*>(impl);
                 (void) bank;
                 FHBank fhBank;
-                const auto [id, variant] = bankMap.at(defObjectKey);
-                fhBank.m_id              = id;
-                fhBank.m_defVariant      = variant;
-                fhBank.m_order           = index;
-                fhBank.m_pos             = posFromH3M(obj.m_pos);
+                const auto [id, defvariant] = bankMap.at(defObjectKey);
+                fhBank.m_id                 = id;
+                fhBank.m_defVariant         = defvariant;
+                fhBank.m_order              = index;
+                fhBank.m_pos                = posFromH3M(obj.m_pos);
+                if (bank->m_content != 0xffffffffu) {
+                    const int variant       = bank->m_content;
+                    const int variantsCount = id->variants.size();
+                    if (variantsCount > 4) {
+                        if (bank->m_upgraded == 0xffu) {
+                            fhBank.m_guardsVariants = { variant, variant + variantsCount / 2 };
+                        } else if (bank->m_upgraded == 1) {
+                            fhBank.m_guardsVariants = { variant + variantsCount / 2 };
+                        } else {
+                            fhBank.m_guardsVariants = { variant };
+                        }
+                    } else {
+                        fhBank.m_guardsVariants = { variant };
+                    }
+                }
                 dest.m_objects.m_banks.push_back(fhBank);
             } break;
             default:

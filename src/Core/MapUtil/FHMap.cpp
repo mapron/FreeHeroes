@@ -158,7 +158,7 @@ inline constexpr const std::tuple MetaInfo::s_fields<FHBank>{
 
     Field("id", &FHBank::m_id),
     Field("defVariant", &FHBank::m_defVariant),
-    Field("guardsVariant", &FHBank::m_guardsVariant),
+    Field("guardsVariants", &FHBank::m_guardsVariants),
 };
 
 template<>
