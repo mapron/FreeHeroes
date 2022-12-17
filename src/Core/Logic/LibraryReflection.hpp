@@ -790,9 +790,80 @@ inline constexpr const std::tuple MetaInfo::s_fields<LibraryMapBank>{
 };
 // ------------------------------------------------------------------------------------------
 template<>
+inline constexpr const auto EnumTraits::s_valueMapping<LibraryMapObstacle::Type> = EnumTraits::make(
+    LibraryMapObstacle::Type::Invalid,
+
+    "BRUSH",                      LibraryMapObstacle::Type::BRUSH,
+    "BUSH",                       LibraryMapObstacle::Type::BUSH,
+    "CACTUS",                     LibraryMapObstacle::Type::CACTUS,
+    "CANYON",                     LibraryMapObstacle::Type::CANYON,
+    "CRATER",                     LibraryMapObstacle::Type::CRATER,
+    "DEAD_VEGETATION",            LibraryMapObstacle::Type::DEAD_VEGETATION,
+    "FLOWERS",                    LibraryMapObstacle::Type::FLOWERS,
+    "FROZEN_LAKE",                LibraryMapObstacle::Type::FROZEN_LAKE,
+    "HEDGE",                      LibraryMapObstacle::Type::HEDGE,
+    "HILL",                       LibraryMapObstacle::Type::HILL,
+
+    "HOLE",                       LibraryMapObstacle::Type::HOLE,
+    "KELP",                       LibraryMapObstacle::Type::KELP,
+    "LAKE",                       LibraryMapObstacle::Type::LAKE,
+    "LAVA_FLOW",                  LibraryMapObstacle::Type::LAVA_FLOW,
+    "LAVA_LAKE",                  LibraryMapObstacle::Type::LAVA_LAKE,
+    "MUSHROOMS",                  LibraryMapObstacle::Type::MUSHROOMS,
+    "LOG",                        LibraryMapObstacle::Type::LOG,
+    "MANDRAKE",                   LibraryMapObstacle::Type::MANDRAKE,
+    "MOSS",                       LibraryMapObstacle::Type::MOSS,
+    "MOUND",                      LibraryMapObstacle::Type::MOUND,
+    "MOUNTAIN",                   LibraryMapObstacle::Type::MOUNTAIN,
+    "OAK_TREES",                  LibraryMapObstacle::Type::OAK_TREES,
+    "OUTCROPPING",                LibraryMapObstacle::Type::OUTCROPPING,
+    "PINE_TREES",                 LibraryMapObstacle::Type::PINE_TREES,
+    "PLANT",                      LibraryMapObstacle::Type::PLANT,
+
+    "NON_BLOCKING_DECORATION",    LibraryMapObstacle::Type::NON_BLOCKING_DECORATION,
+
+    "RIVER_DELTA",                LibraryMapObstacle::Type::RIVER_DELTA,
+
+    "ROCK",                       LibraryMapObstacle::Type::ROCK,
+    "SAND_DUNE",                  LibraryMapObstacle::Type::SAND_DUNE,
+    "SAND_PIT",                   LibraryMapObstacle::Type::SAND_PIT,
+    "SHRUB",                      LibraryMapObstacle::Type::SHRUB,
+    "SKULL",                      LibraryMapObstacle::Type::SKULL,
+    "STALAGMITE",                 LibraryMapObstacle::Type::STALAGMITE,
+    "STUMP",                      LibraryMapObstacle::Type::STUMP,
+    "TAR_PIT",                    LibraryMapObstacle::Type::TAR_PIT,
+    "TREES",                      LibraryMapObstacle::Type::TREES,
+    "VINE",                       LibraryMapObstacle::Type::VINE,
+    "VOLCANIC_VENT",              LibraryMapObstacle::Type::VOLCANIC_VENT,
+    "VOLCANO",                    LibraryMapObstacle::Type::VOLCANO,
+    "WILLOW_TREES",               LibraryMapObstacle::Type::WILLOW_TREES,
+    "YUCCA_TREES",                LibraryMapObstacle::Type::YUCCA_TREES,
+    "REEF",                       LibraryMapObstacle::Type::REEF,
+
+    "DESERT_HILLS",               LibraryMapObstacle::Type::DESERT_HILLS,
+    "DIRT_HILLS",                 LibraryMapObstacle::Type::DIRT_HILLS,
+    "GRASS_HILLS",                LibraryMapObstacle::Type::GRASS_HILLS,
+    "ROUGH_HILLS",                LibraryMapObstacle::Type::ROUGH_HILLS,
+    "SUBTERRANEAN_ROCKS",         LibraryMapObstacle::Type::SUBTERRANEAN_ROCKS,
+    "SWAMP_FOLIAGE",              LibraryMapObstacle::Type::SWAMP_FOLIAGE,
+
+    "CLOVER_FIELD",               LibraryMapObstacle::Type::CLOVER_FIELD,
+    "CURSED_GROUND",              LibraryMapObstacle::Type::CURSED_GROUND,
+    "EVIL_FOG",                   LibraryMapObstacle::Type::EVIL_FOG,
+    "FAVORABLE_WINDS",            LibraryMapObstacle::Type::FAVORABLE_WINDS,
+    "FIERY_FIELDS",               LibraryMapObstacle::Type::FIERY_FIELDS,
+    "HOLY_GROUNDS",               LibraryMapObstacle::Type::HOLY_GROUNDS,
+    "LUCID_POOLS",                LibraryMapObstacle::Type::LUCID_POOLS,
+    "MAGIC_CLOUDS",               LibraryMapObstacle::Type::MAGIC_CLOUDS,
+    "MAGIC_PLAINS",               LibraryMapObstacle::Type::MAGIC_PLAINS,
+    "ROCKLANDS",                  LibraryMapObstacle::Type::ROCKLANDS
+);
+
+template<>
 inline constexpr const std::tuple MetaInfo::s_fields<LibraryMapObstacle>{
     Field("legacyId"            , &LibraryMapObstacle::legacyId),
     Field("mapObjectDef"        , &LibraryMapObstacle::mapObjectDef),
+    Field("type"                , &LibraryMapObstacle::type),
 };
 // ------------------------------------------------------------------------------------------
 template<>

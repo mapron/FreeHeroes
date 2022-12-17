@@ -80,12 +80,6 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             }
         }
     }
-    std::map<std::string, Core::LibraryMapObstacleConstPtr> obstacleMap;
-    {
-        for (auto* obstacle : database->mapObstacles()->records()) {
-            obstacleMap[obstacle->mapObjectDef->id] = obstacle;
-        }
-    }
 
     std::map<FHPlayerId, FHPos>   mainTowns;
     std::map<FHPlayerId, uint8_t> mainHeroes;
@@ -351,18 +345,18 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                 fhBank.m_pos             = posFromH3M(obj.m_pos);
                 dest.m_objects.m_banks.push_back(fhBank);
             } break;
-            case MapObjectType::MOUNTAIN_1:
-            case MapObjectType::MOUNTAIN_2:
-            {
-                FHObstacle fhObstacle;
-                const auto id      = obstacleMap.at(defObjectKey);
-                fhObstacle.m_id    = id;
-                fhObstacle.m_order = index;
-                fhObstacle.m_pos   = posFromH3M(obj.m_pos);
-                dest.m_objects.m_obstacles.push_back(fhObstacle);
-            } break;
             default:
             {
+                auto* obstacle = database->mapObstacles()->find(defObjectKey);
+                if (obstacle) {
+                    FHObstacle fhObstacle;
+                    fhObstacle.m_id    = obstacle;
+                    fhObstacle.m_order = index;
+                    fhObstacle.m_pos   = posFromH3M(obj.m_pos);
+                    dest.m_objects.m_obstacles.push_back(fhObstacle);
+                    break;
+                }
+
                 assert(!"Unsupported");
                 // simple object.
             } break;
