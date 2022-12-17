@@ -192,12 +192,12 @@ bool MetaInfo::transformTree<ResourceAmount>(const PropertyTree& treeIn, Propert
         return false;
 
     treeOut.convertToMap();
-    std::string value(treeIn.getScalar().toString());
+    std::string valueStr(treeIn.getScalar().toString());
 
-    if (value.empty() || value == "0") {
+    if (valueStr.empty() || valueStr == "0") {
         return true;
     }
-    auto parts   = splitLine(value, ',', true);
+    auto parts   = splitLine(valueStr, ',', true);
     bool hasGold = false;
     for (size_t i = 0; i < parts.size(); ++i) {
         const auto& str     = parts[i];
@@ -226,12 +226,12 @@ bool MetaInfo::transformTree<ArtifactRewardAmount>(const PropertyTree& treeIn, P
         return false;
 
     treeOut.convertToMap();
-    std::string value(treeIn.getScalar().toString());
+    std::string valueStr(treeIn.getScalar().toString());
 
-    if (value.empty()) {
+    if (valueStr.empty()) {
         return true;
     }
-    auto  parts     = splitLine(value, ',', true);
+    auto  parts     = splitLine(valueStr, ',', true);
     auto& resources = treeOut["artifacts"];
     resources.convertToList();
     for (size_t i = 0; i < parts.size(); ++i) {

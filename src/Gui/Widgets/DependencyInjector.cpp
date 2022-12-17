@@ -43,7 +43,6 @@ QVariant loadDependencyData(QWidget* widget, const char* propName)
         return data;
 
     throw std::runtime_error("Dependency data is not initialized:" + std::string(propName));
-    return QVariant();
 }
 
 }

@@ -21,16 +21,19 @@ namespace FreeHeroes::Core {
 namespace {
 std_path getHomePath()
 {
-    char* envPath;
-    char* envDrive;
-    if ((envPath = getenv("USERPROFILE"))) {
+    char* envPath = getenv("USERPROFILE");
+    if (envPath)
         return envPath;
-    } else if ((envDrive = getenv("HOMEDRIVE")) && (envPath = getenv("HOMEPATH"))) {
+
+    char* envDrive = getenv("HOMEDRIVE");
+    envPath        = getenv("HOMEPATH");
+    if (envDrive && envPath)
         return std::string(envDrive) + envPath;
-    }
-    if ((envPath = getenv("HOME"))) {
+
+    envPath = getenv("HOME");
+    if (envPath)
         return envPath;
-    }
+
     return {};
 }
 

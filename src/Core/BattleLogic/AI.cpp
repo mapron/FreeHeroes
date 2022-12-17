@@ -194,11 +194,13 @@ int64_t AI::calculateValueForAttackPlan(const BattlePlanMove& planResult)
     const int64_t defenderValue          = planResult.m_defender->library->value;
     int64_t       damageEstimateByKills  = 0;
     int64_t       damageEstimateByDamage = 0;
-    auto          deathWeight            = m_params.mainKillsWeight;
-    if (rollMain.avgRoll.loss.remainCount == 0)
-        deathWeight *= m_params.fullKillsMultiply;
-    damageEstimateByKills += defenderValue * rollMain.avgRoll.loss.deaths * deathWeight;
-    damageEstimateByDamage += defenderValue * rollMain.avgRoll.loss.damageTotal * m_params.mainDamageWeight / planResult.m_defender->current.primary.maxHealth;
+    {
+        auto deathWeight = m_params.mainKillsWeight;
+        if (rollMain.avgRoll.loss.remainCount == 0)
+            deathWeight *= m_params.fullKillsMultiply;
+        damageEstimateByKills += defenderValue * rollMain.avgRoll.loss.deaths * deathWeight;
+        damageEstimateByDamage += defenderValue * rollMain.avgRoll.loss.damageTotal * m_params.mainDamageWeight / planResult.m_defender->current.primary.maxHealth;
+    }
 
     if (retaliate.isValid) {
         damageEstimateByKills += attackerValue * retaliate.avgRoll.loss.deaths * m_params.retaliationKillsWeight;
@@ -316,8 +318,8 @@ bool AI::makeMoveToClosestTarget()
 
     auto failedPathParams                     = t.moveParams;
     failedPathParams.m_calculateUnlimitedPath = true;
-    auto               plan                   = m_battleView.findPlanMove(failedPathParams, {});
-    BattlePositionPath planFailedPath         = plan.m_walkPath;
+
+    BattlePositionPath planFailedPath = m_battleView.findPlanMove(failedPathParams, {}).m_walkPath;
     if (planFailedPath.empty())
         return false;
 

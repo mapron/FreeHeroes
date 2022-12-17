@@ -270,9 +270,9 @@ void BattleControlWidget::beforeAttackMelee(BattleStackConstPtr stack, const Aff
         msg += tr(", splash has done damage to: ");
 
     for (size_t i = 0; i < affected.extra.size(); i++) {
-        auto loss  = affected.extra[i].damage.loss;
-        auto stack = affected.extra[i].stack;
-        auto name  = m_modelsProvider.units()->find(stack->library)->getName();
+        auto loss     = affected.extra[i].damage.loss;
+        auto affstack = affected.extra[i].stack;
+        auto name     = m_modelsProvider.units()->find(affstack->library)->getName();
         if (i > 0)
             msg += ", ";
         if (loss.remainCount && loss.deaths)

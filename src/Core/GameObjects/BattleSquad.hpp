@@ -40,9 +40,9 @@ struct BattleSquad {
                 stacks.emplace_back(&advStack, battleHero, side);
         }
     }
-    void updateAdventure(AdventureSquad& adventure)
+    void updateAdventure(AdventureSquad& adventureSquad)
     {
-        for (AdventureStack& stack : adventure.stacks) {
+        for (AdventureStack& stack : adventureSquad.stacks) {
             if (!stack.isValid())
                 continue;
             int battleIndex = stack.armyParams.indexInArmyValid;

@@ -24,14 +24,14 @@ struct BattleArmy {
         }
         squad = std::make_unique<BattleSquad>(&adventure->squad, battleHero.isValid() ? &battleHero : nullptr, side);
     }
-    void updateAdventure(AdventureArmy& adventure, const BattleSquad::LossInformation& opponentLoss, bool isWin)
+    void updateAdventure(AdventureArmy& adventureArmy, const BattleSquad::LossInformation& opponentLoss, bool isWin)
     {
-        squad->updateAdventure(adventure.squad);
+        squad->updateAdventure(adventureArmy.squad);
 
         if (battleHero.isValid()) {
-            adventure.hero.mana = battleHero.mana;
+            adventureArmy.hero.mana = battleHero.mana;
             if (isWin)
-                adventure.hero.experience += opponentLoss.totalHpLoss;
+                adventureArmy.hero.experience += opponentLoss.totalHpLoss;
         }
     }
     bool isEmpty() const noexcept { return squad->stacks.empty(); }

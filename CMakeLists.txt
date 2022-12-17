@@ -28,7 +28,6 @@ if (WARNING_AS_ERROR)
     if (MSVC)
         add_compile_options(/WX) #warning as error.
     else()
-        # most of exceptions - workaround for json/rttr headers.
         add_compile_options(-Werror
             -Wno-error=sign-compare
             -Wno-error=redundant-move
@@ -43,10 +42,15 @@ if (WIN32)
 endif()
 
 if (MSVC)
-    add_compile_options(/W3
+    add_compile_options(/W4
         /wd4267 # conversion from int to another int, possible losts of data
         /wd4251 # 'A::Impl' needs to have dll-interface to be used by clients of class 'A'
         /wd4275 # non dll-interface class 'Ismth' used as base for dll-interface class 'smth'
+        /wd4127 # conditional expression is constant
+        /wd5054 # operator '|': deprecated between enumerations of different types
+        /wd4244 # conversion from 'int' to 'char', possible loss of data
+        /wd4245 # '=': conversion from 'int' to 'unsigned int', signed/unsigned mismatch
+        /wd4100 # 'data': unreferenced formal parameter
         /bigobj
         )
 else()
@@ -80,7 +84,9 @@ if (MSVC)
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/zlib
         EXPORT_INCLUDES
         SKIP_STATIC_CHECK
-        COMPILE_OPTIONS /wd4996
+        COMPILE_OPTIONS
+            /wd4996 
+            /wd4131 # 'xxxx': uses old-style declarator
         INTERFACE_COMPILE_DEFINITIONS USE_ZLIB
     )
 else()
@@ -106,6 +112,13 @@ AddTarget(TYPE static NAME lua_static SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rd
     INTERFACE_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/lua/include
     INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/lua/include
     COMPILE_DEFINITIONS [ UNIX LUA_USE_POSIX ]
+    COMPILE_OPTIONS
+        [ MSVC
+        /wd4310 # cast truncates constant value
+        /wd4701 # potentially uninitialized local variable 'x' used
+        /wd4702 # unreachable code
+        /wd4324 # 'x': structure was padded due to alignment specifier
+        ]
     SKIP_STATIC_CHECK
     )
 #target_include_directories(lua_static INTERFACE 3rdparty/lua/include)

@@ -139,8 +139,8 @@ BattlePositionSet BattleFieldGeometry::getAdjacentSet(const BattlePositionExtend
     BattlePositionSet result = this->getAdjacentSet(pos.mainPos());
     if (pos.isLarge()) {
         auto extra = this->getAdjacentSet(pos.secondaryPos());
-        for (auto&& pos : extra)
-            result.insert(pos);
+        for (auto&& extrapos : extra)
+            result.insert(extrapos);
         result.erase(pos.mainPos());
         result.erase(pos.secondaryPos());
     }
@@ -173,8 +173,8 @@ BattlePositionSet BattleFieldGeometry::getFloodFillFrom(const BattlePosition pos
                 resultIter.insert(edgePosNext);
             }
         }
-        for (auto pos : resultIter)
-            result.insert(pos);
+        for (auto&& extrapos : resultIter)
+            result.insert(extrapos);
         prevIter = resultIter;
     }
     return result;

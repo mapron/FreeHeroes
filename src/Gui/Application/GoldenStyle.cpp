@@ -299,7 +299,7 @@ void GoldenStyle::drawControl(ControlElement element,
                 int rightLineAdjust  = 1;
                 int topLineAdjust    = 1;
                 int leftLineAdjust   = 1;
-                QRect r =  option->rect;
+                QRect rec =  option->rect;
                 for (int i = 0; i < maxThin; i++) {
                     QColor bottom = getColor(bottomBorderCfg, i);
                     QColor right  = getColor(rightBorderCfg , i);
@@ -308,10 +308,10 @@ void GoldenStyle::drawControl(ControlElement element,
 
                     {
 
-                        const int x = r.x();
-                        const int y = r.y();
-                        const int w = r.width();
-                        const int h = r.height();
+                        const int x = rec.x();
+                        const int y = rec.y();
+                        const int w = rec.width();
+                        const int h = rec.height();
                         const int b = y + h - 1;
                         const int r = x + w - 1;
                         const int lbFix = leftBottomFix > 0 && i < leftBottomFix ? (leftBottomFix - i) : 0;
@@ -330,7 +330,7 @@ void GoldenStyle::drawControl(ControlElement element,
                         p->drawLine(QPoint(x + lbFix, b), QPoint(r, b));
                     }
 
-                    r.adjust(leftLineAdjust, topLineAdjust, -(rightLineAdjust ), -(bottomLineAdjust));
+                    rec.adjust(leftLineAdjust, topLineAdjust, -(rightLineAdjust ), -(bottomLineAdjust));
                     if (i >= topLineHeight - 1)
                         topLineAdjust = 0;
                     if (i >= leftLineWidth - 1)
@@ -341,7 +341,7 @@ void GoldenStyle::drawControl(ControlElement element,
                         rightLineAdjust = 0;
                 }
                 if (fill) {
-                    p->fillRect(r, QColor(0,0,0, 80));
+                    p->fillRect(rec, QColor(0,0,0, 80));
                 }
 
                 if (borderStyle == "wide") {

@@ -25,9 +25,9 @@ struct AdventureHero {
     {
         reset(library);
     }
-    void reset(LibraryHeroConstPtr library)
+    void reset(LibraryHeroConstPtr plibrary)
     {
-        this->library      = library;
+        this->library      = plibrary;
         secondarySkills    = getInitialSkills();
         currentBasePrimary = getInitialPrimary();
         name               = getInitialName();
@@ -57,19 +57,19 @@ struct AdventureHero {
             return -1;
         return it->level;
     };
-    bool setSkillLevel(LibrarySecondarySkillConstPtr skill, int level, int limit)
+    bool setSkillLevel(LibrarySecondarySkillConstPtr skill, int plevel, int limit)
     {
-        if (level < 0 || level > 2)
+        if (plevel < 0 || plevel > 2)
             return false;
         auto it = std::find_if(secondarySkills.begin(), secondarySkills.end(), [skill](auto sk) { return sk.skill == skill; });
         if (it == secondarySkills.cend()) {
             if (static_cast<int>(secondarySkills.size()) >= limit)
                 return false;
 
-            secondarySkills.emplace_back(skill, level);
+            secondarySkills.emplace_back(skill, plevel);
             return true;
         }
-        it->level = level;
+        it->level = plevel;
         return true;
     };
     bool removeSkill(LibrarySecondarySkillConstPtr skill)

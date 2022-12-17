@@ -95,7 +95,7 @@ EmulatorMainWidget::EmulatorMainWidget(IGraphicsLibrary&              graphicsLi
     }
 
     {
-        ProfilerScope scope("setupUI");
+        ProfilerScope scope3("setupUI");
         m_ui->setupUi(this);
     }
 

@@ -240,7 +240,6 @@ std::unique_ptr<IMapObject> IMapObject::Create(MapObjectType type, MapFormatFeat
             return std::make_unique<MapObjectSimple>(features);
         }
     }
-    return nullptr;
 }
 
 void MapHero::prepareArrays()

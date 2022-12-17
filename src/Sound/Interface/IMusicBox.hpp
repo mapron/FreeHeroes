@@ -34,29 +34,29 @@ public:
             : commonEffect(e)
         {}
 
-        EffectSettings& setLoopAround(bool loopAround = true)
+        EffectSettings& setLoopAround(bool ploopAround = true)
         {
-            this->loopAround = loopAround;
+            this->loopAround = ploopAround;
             return *this;
         }
-        EffectSettings& setFadeIn(int fadeIn)
+        EffectSettings& setFadeIn(int pfadeIn)
         {
-            this->fadeIn = fadeIn;
+            this->fadeIn = pfadeIn;
             return *this;
         }
-        EffectSettings& setFadeOut(int fadeOut)
+        EffectSettings& setFadeOut(int pfadeOut)
         {
-            this->fadeOut = fadeOut;
+            this->fadeOut = pfadeOut;
             return *this;
         }
-        EffectSettings& setExpectedDuration(int expectedDuration)
+        EffectSettings& setExpectedDuration(int pexpectedDuration)
         {
-            this->expectedDuration = expectedDuration;
+            this->expectedDuration = pexpectedDuration;
             return *this;
         }
-        EffectSettings& setDelay(int delay)
+        EffectSettings& setDelay(int pdelay)
         {
-            this->delay = delay;
+            this->delay = pdelay;
             return *this;
         }
     };
@@ -75,9 +75,9 @@ public:
             : mSet(m)
         {}
 
-        MusicSettings& setLoopAround(bool loopAround = true)
+        MusicSettings& setLoopAround(bool ploopAround = true)
         {
-            this->loopAround = loopAround;
+            this->loopAround = ploopAround;
             return *this;
         }
         MusicSettings& setFadeIn(int fadeIn)

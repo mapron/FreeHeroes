@@ -60,13 +60,13 @@ private:
     {
         QGraphicsScene::drawBackground(painter, rect);
 
-        const int                    x = static_cast<int>(rect.left());
-        const int                    y = static_cast<int>(rect.top());
+        const int                    rectx = static_cast<int>(rect.left());
+        const int                    recty = static_cast<int>(rect.top());
         QVarLengthArray<QLineF, 100> lines;
         for (const auto& grid : m_grids) {
             const int gridSize = grid.step;
-            qreal     left     = x - (x % gridSize);
-            qreal     top      = y - (y % gridSize);
+            qreal     left     = rectx - (rectx % gridSize);
+            qreal     top      = recty - (recty % gridSize);
 
             lines.clear();
 

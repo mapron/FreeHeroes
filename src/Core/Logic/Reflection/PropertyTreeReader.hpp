@@ -120,7 +120,7 @@ public:
             typename Container::value_type value;
             jsonToValue(child, value);
             container = std::move(value);
-            break;
+            //break;
         }
     }
 

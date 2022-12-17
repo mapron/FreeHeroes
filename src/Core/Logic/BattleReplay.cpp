@@ -39,7 +39,6 @@ bool BattleReplayPlayer::executeCurrent()
 
     if (!handleEvent(m_data.m_records[m_pos])) {
         throw std::runtime_error("Battle manager can not repeat this from pos:" + std::to_string(m_pos));
-        return false;
     }
 
     m_pos++;
@@ -59,7 +58,6 @@ bool BattleReplayPlayer::handleEvent(const BattleReplayData::EventRecord& rec)
     }
     // clang-format on
     throw std::runtime_error("Unknown event type");
-    return false;
 }
 
 BattleReplayRecorder::BattleReplayRecorder(IBattleControl& sourceControl, BattleReplayData& data)

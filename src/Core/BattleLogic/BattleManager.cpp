@@ -854,8 +854,8 @@ void BattleManager::makeMelee(BattleStackMutablePtr attacker, BattleStackMutable
         if (!sideTarget->isAlive())
             continue;
 
-        const DamageResult damage = fullDamageEstimate(baseRoll, attacker, sideTarget, true, { 1, 1 }, LuckRoll::None);
-        affected.extra.push_back({ sideTarget, damage });
+        const DamageResult damageSide = fullDamageEstimate(baseRoll, attacker, sideTarget, true, { 1, 1 }, LuckRoll::None);
+        affected.extra.push_back({ sideTarget, damageSide });
     }
     m_notifiers->beforeAttackMelee(attacker, affected, isRetaliation);
 

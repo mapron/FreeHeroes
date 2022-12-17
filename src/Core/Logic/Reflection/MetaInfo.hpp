@@ -122,8 +122,9 @@ struct MetaInfo {
                 const Parent&    defParent = getDefaultConstructed<Parent>();
                 const FieldType& defValue  = defParent.*m_f;
                 return value == defValue;
+            } else {
+                return false;
             }
-            return false;
         }
         void reset(Parent& value) const noexcept
         {

@@ -152,12 +152,14 @@ TEST_F(PathFindTest, ClosestPos)
        ___  ___  ___  3,2
      ___  ___  ___  3,3
     */
-    std::set<BattlePosition> result = geometry.closestTo({ 1, 1 },
-                                                         std::set<BattlePosition>{ { 0, 1 }, { 2, 1 }, { 3, 2 }, { 3, 3 } });
-    std::set<BattlePosition> resultCheck{
-        { 0, 1 }, { 2, 1 }
-    };
-    ASSERT_EQ(result, resultCheck);
+    {
+        std::set<BattlePosition> result = geometry.closestTo({ 1, 1 },
+                                                             std::set<BattlePosition>{ { 0, 1 }, { 2, 1 }, { 3, 2 }, { 3, 3 } });
+        std::set<BattlePosition> resultCheck{
+            { 0, 1 }, { 2, 1 }
+        };
+        ASSERT_EQ(result, resultCheck);
+    }
 
     const int hex1 = BattlePosition{ 1, 2 }.hexDistance(BattlePosition{ 3, 1 });
     const int hex2 = BattlePosition{ 1, 2 }.hexDistance(BattlePosition{ 3, 2 });

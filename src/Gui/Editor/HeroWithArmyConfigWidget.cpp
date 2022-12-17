@@ -46,7 +46,7 @@ HeroWithArmyConfigWidget::HeroWithArmyConfigWidget(QWidget* parent)
 {
     ProfilerScope scope("HeroWithArmyConfigWidget()");
     {
-        ProfilerScope scope("setupUi");
+        ProfilerScope scope3("setupUi");
         m_ui->setupUi(this);
     }
     ProfilerScope scope2("remain");

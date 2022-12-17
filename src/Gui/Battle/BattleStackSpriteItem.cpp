@@ -160,14 +160,14 @@ void BattleStackSpriteItem::paint(QPainter* painter, const QStyleOptionGraphicsI
         t2.scale(-1, 1);
     }
     painter->setTransform(t2);
-    auto offset = m_boundingOrigin + m_pixmapPadding;
-    painter->drawPixmap(offset, m_pixmap);
+    auto offsetTop = m_boundingOrigin + m_pixmapPadding;
+    painter->drawPixmap(offsetTop, m_pixmap);
 
     auto mainHightLight = getMainHighlight();
 
     if (mainHightLight != Highlight::No) {
         auto       img    = m_pixmap.toImage();
-        const auto points = getOpaqueRegionBorder(img, offset); // @todo: cache maybe
+        const auto points = getOpaqueRegionBorder(img, offsetTop); // @todo: cache maybe
 
         const auto pulseColor = mainHightLight == Highlight::Selected ? QColor(255, 255, 0, 128) : QColor(0, 255, 255, 192);
         painter->setPen(linearPulse(pulseColor, 100, m_frameMsTick, pulseDurationMs));
