@@ -11,7 +11,8 @@
 #include "LibraryGameRules.hpp"
 #include "LibraryHero.hpp"
 #include "LibraryHeroSpec.hpp"
-#include "LibraryMapObject.hpp"
+#include "LibraryMapBank.hpp"
+#include "LibraryMapObstacle.hpp"
 #include "LibraryObjectDef.hpp"
 #include "LibraryResource.hpp"
 #include "LibrarySecondarySkill.hpp"
@@ -756,10 +757,10 @@ inline constexpr const std::tuple MetaInfo::s_fields<SpellFilter>{
 // ------------------------------------------------------------------------------------------
 
 template<>
-inline constexpr const std::tuple MetaInfo::s_fields<LibraryMapObject::Reward>{
-    Field("resources"  , &LibraryMapObject::Reward::resources),
-    Field("unit"       , &LibraryMapObject::Reward::unit),
-    Field("artifacts"  , &LibraryMapObject::Reward::artifacts),
+inline constexpr const std::tuple MetaInfo::s_fields<LibraryMapBank::Reward>{
+    Field("resources"  , &LibraryMapBank::Reward::resources),
+    Field("unit"       , &LibraryMapBank::Reward::unit),
+    Field("artifacts"  , &LibraryMapBank::Reward::artifacts),
 };
 
 template<>
@@ -768,24 +769,30 @@ inline constexpr const std::tuple MetaInfo::s_fields<UnitWithCount>{
     Field("n"         , &UnitWithCount::count),
 };
 template<>
-inline constexpr const std::tuple MetaInfo::s_fields<LibraryMapObject::Variant>{
-    Field("name"        , &LibraryMapObject::Variant::name),
-    Field("rewardIndex" , &LibraryMapObject::Variant::rewardIndex),
-    Field("guards"      , &LibraryMapObject::Variant::guards),
+inline constexpr const std::tuple MetaInfo::s_fields<LibraryMapBank::Variant>{
+    Field("name"        , &LibraryMapBank::Variant::name),
+    Field("rewardIndex" , &LibraryMapBank::Variant::rewardIndex),
+    Field("guards"      , &LibraryMapBank::Variant::guards),
 };
 template<>
-inline constexpr const std::tuple MetaInfo::s_fields<LibraryMapObject::Presentation>{
-    Field("order"              , &LibraryMapObject::Presentation::order),
-    Field("icon"               , &LibraryMapObject::Presentation::icon),
+inline constexpr const std::tuple MetaInfo::s_fields<LibraryMapBank::Presentation>{
+    Field("order"              , &LibraryMapBank::Presentation::order),
 };
 template<>
-inline constexpr const std::tuple MetaInfo::s_fields<LibraryMapObject>{
-    Field("untranslatedName"    , &LibraryMapObject::untranslatedName),
-    Field("legacyId"            , &LibraryMapObject::legacyId),
-    Field("variants"            , &LibraryMapObject::variants),
-    Field("rewards"             , &LibraryMapObject::rewards),
-    Field("pres"                , &LibraryMapObject::presentationParams),
-    Field("fieldLayout"         , &LibraryMapObject::fieldLayout),
+inline constexpr const std::tuple MetaInfo::s_fields<LibraryMapBank>{
+    Field("mapObjectDef"        , &LibraryMapBank::mapObjectDef),
+    Field("untranslatedName"    , &LibraryMapBank::untranslatedName),
+    Field("legacyId"            , &LibraryMapBank::legacyId),
+    Field("variants"            , &LibraryMapBank::variants),
+    Field("rewards"             , &LibraryMapBank::rewards),
+    Field("pres"                , &LibraryMapBank::presentationParams),
+    Field("fieldLayout"         , &LibraryMapBank::fieldLayout),
+};
+// ------------------------------------------------------------------------------------------
+template<>
+inline constexpr const std::tuple MetaInfo::s_fields<LibraryMapObstacle>{
+    Field("legacyId"            , &LibraryMapObstacle::legacyId),
+    Field("mapObjectDef"        , &LibraryMapObstacle::mapObjectDef),
 };
 // ------------------------------------------------------------------------------------------
 template<>

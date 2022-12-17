@@ -8,12 +8,13 @@
 #include "IGraphicsLibrary.hpp"
 
 #include "LibraryArtifact.hpp"
-#include "LibraryUnit.hpp"
 #include "LibraryHero.hpp"
 #include "LibraryHeroSpec.hpp"
+#include "LibraryMapBank.hpp"
+#include "LibraryObjectDef.hpp"
 #include "LibrarySecondarySkill.hpp"
 #include "LibraryTerrain.hpp"
-#include "LibraryMapObject.hpp"
+#include "LibraryUnit.hpp"
 
 #include "IMusicBox.hpp"
 
@@ -40,15 +41,15 @@ struct TranslationContextName {
     static void** context;
 };
 // clang-format off
-template<> struct TranslationContextName<Core::LibraryUnit>               { static constexpr const char * context = "units"; };
+template<> struct TranslationContextName<Core::LibraryArtifact>           { static constexpr const char * context = "artifacts"; };
+template<> struct TranslationContextName<Core::LibraryFaction>            { static constexpr const char * context = "factions"; };
+template<> struct TranslationContextName<Core::LibraryFactionHeroClass>   { static constexpr const char * context = "classes"; };
 template<> struct TranslationContextName<Core::LibraryHero>               { static constexpr const char * context = "heroes"; };
+template<> struct TranslationContextName<Core::LibraryMapBank>            { static constexpr const char * context = "mapBanks"; };
 template<> struct TranslationContextName<Core::LibrarySecondarySkill>     { static constexpr const char * context = "skills"; };
 template<> struct TranslationContextName<Core::LibrarySpell>              { static constexpr const char * context = "spells"; };
-template<> struct TranslationContextName<Core::LibraryArtifact>           { static constexpr const char * context = "artifacts"; };
-template<> struct TranslationContextName<Core::LibraryFactionHeroClass>   { static constexpr const char * context = "classes"; };
-template<> struct TranslationContextName<Core::LibraryFaction>            { static constexpr const char * context = "factions"; };
-template<> struct TranslationContextName<Core::LibraryMapObject>          { static constexpr const char * context = "mapObjects"; };
 template<> struct TranslationContextName<Core::LibraryTerrain>            { static constexpr const char * context = "terrains"; };
+template<> struct TranslationContextName<Core::LibraryUnit>               { static constexpr const char * context = "units"; };
 
 // clang-format on
 
@@ -354,10 +355,10 @@ QPixmap GuiTerrain::getTile(int variant) const
     return pix;
 }
 
-GuiMapObject::GuiMapObject(Sound::IMusicBox&, IGraphicsLibrary& graphicsLibrary, Core::LibraryMapObjectConstPtr source)
+GuiMapBank::GuiMapBank(Sound::IMusicBox&, IGraphicsLibrary& graphicsLibrary, Core::LibraryMapBankConstPtr source)
     : QObject(nullptr)
     , Base(source)
-    , m_icon(graphicsLibrary.getPixmap(source->presentationParams.icon))
+    , m_icon(graphicsLibrary.getPixmapByKey(IGraphicsLibrary::PixmapKey(source->mapObjectDef->id, 0, 0)))
 {
     for (auto& variant : source->variants)
         m_variantNames << QString::fromStdString(variant.name);
@@ -400,6 +401,6 @@ template class AbstractGuiWrapper<GuiSkill, Core::LibrarySecondarySkill>;
 template class AbstractGuiWrapper<GuiSpell, Core::LibrarySpell>;
 template class AbstractGuiWrapper<GuiFaction, Core::LibraryFaction>;
 template class AbstractGuiWrapper<GuiTerrain, Core::LibraryTerrain>;
-template class AbstractGuiWrapper<GuiMapObject, Core::LibraryMapObject>;
+template class AbstractGuiWrapper<GuiMapBank, Core::LibraryMapBank>;
 
 }

@@ -32,7 +32,8 @@ public:
     LibraryFactionContainerPtr        factions() const override;
     LibraryHeroContainerPtr           heroes() const override;
     LibraryHeroSpecContainerPtr       heroSpecs() const override;
-    LibraryMapObjectContainerPtr      mapObjects() const override;
+    LibraryMapBankContainerPtr        mapBanks() const override;
+    LibraryMapObstacleContainerPtr    mapObstacles() const override;
     LibraryObjectDefContainerPtr      objectDefs() const override;
     LibraryResourceContainerPtr       resources() const override;
     LibrarySecondarySkillContainerPtr secSkills() const override;

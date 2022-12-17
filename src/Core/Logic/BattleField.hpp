@@ -9,7 +9,7 @@
 
 #include "BattleFieldPosition.hpp"
 
-#include "LibraryMapObject.hpp"
+#include "LibraryMapBank.hpp"
 
 #include <map>
 #include <optional>

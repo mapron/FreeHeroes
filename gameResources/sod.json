@@ -141,7 +141,7 @@
 
 
 {
-"scope": "mapObjects",
+"scope": "mapBanks",
 "records" : {
 
 "hota.map.blackTower"          : null,

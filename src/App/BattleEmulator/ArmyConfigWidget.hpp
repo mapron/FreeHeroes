@@ -39,7 +39,7 @@ public:
 
     void setAIControl(bool isAI);
     bool isAIControl() const;
-    void initFromMapObject(Core::LibraryMapObjectConstPtr mapObject, int variant);
+    void initFromMapObject(Core::LibraryMapBankConstPtr mapObject, int variant);
 
 signals:
     void makeLevelup(int newLevel);

@@ -283,16 +283,16 @@ bool TerrainsFilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& sou
     return !terrain->isObstacle;
 }
 
-QVariant MapObjectsModel::data(const QModelIndex& index, int role) const
+QVariant MapBanksModel::data(const QModelIndex& index, int role) const
 {
     if (role == Qt::DecorationRole || role == IconSmall) {
-        auto    mapObject = Base::data(index, GuiObject).value<GuiMapObjectConstPtr>();
-        QPixmap img       = mapObject->getIcon();
+        auto    mapBank = Base::data(index, GuiObject).value<GuiMapBankConstPtr>();
+        QPixmap img     = mapBank->getIcon();
         return QVariant(img);
     }
     if (role == VaraintNames) {
-        auto mapObject = Base::data(index, GuiObject).value<GuiMapObjectConstPtr>();
-        return QVariant(mapObject->getVariantNames());
+        auto mapBank = Base::data(index, GuiObject).value<GuiMapBankConstPtr>();
+        return QVariant(mapBank->getVariantNames());
     }
     return Base::data(index, role);
 }
@@ -303,15 +303,15 @@ LibraryModelsProvider::LibraryModelsProvider(const IGameDatabase* gameDatabase,
                                              QObject*             parent)
     : QObject(parent)
 {
-    m_artifacts  = new ArtifactsModel(musicBox, graphicsLibrary, this);
-    m_units      = new UnitsModel(musicBox, graphicsLibrary, this);
-    m_heroes     = new HeroesModel(musicBox, graphicsLibrary, this);
-    m_skills     = new SkillsModel(musicBox, graphicsLibrary, this);
-    m_spells     = new SpellsModel(musicBox, graphicsLibrary, this);
-    m_factions   = new FactionsModel(musicBox, graphicsLibrary, this);
-    m_terrains   = new TerrainsModel(musicBox, graphicsLibrary, this);
-    m_mapObjects = new MapObjectsModel(musicBox, graphicsLibrary, this);
-    m_uiCommon   = new UiCommonModel(musicBox, graphicsLibrary, this);
+    m_artifacts = new ArtifactsModel(musicBox, graphicsLibrary, this);
+    m_units     = new UnitsModel(musicBox, graphicsLibrary, this);
+    m_heroes    = new HeroesModel(musicBox, graphicsLibrary, this);
+    m_skills    = new SkillsModel(musicBox, graphicsLibrary, this);
+    m_spells    = new SpellsModel(musicBox, graphicsLibrary, this);
+    m_factions  = new FactionsModel(musicBox, graphicsLibrary, this);
+    m_terrains  = new TerrainsModel(musicBox, graphicsLibrary, this);
+    m_mapBanks  = new MapBanksModel(musicBox, graphicsLibrary, this);
+    m_uiCommon  = new UiCommonModel(musicBox, graphicsLibrary, this);
 
     for (auto* rec : gameDatabase->artifacts()->records())
         m_artifacts->addRecord(rec);
@@ -327,8 +327,8 @@ LibraryModelsProvider::LibraryModelsProvider(const IGameDatabase* gameDatabase,
         m_factions->addRecord(rec);
     for (auto* rec : gameDatabase->terrains()->records())
         m_terrains->addRecord(rec);
-    for (auto* rec : gameDatabase->mapObjects()->records())
-        m_mapObjects->addRecord(rec);
+    for (auto* rec : gameDatabase->mapBanks()->records())
+        m_mapBanks->addRecord(rec);
 
     QMap<QString, QPixmap> resourceIcons;
     for (auto* res : gameDatabase->resources()->records()) {
@@ -345,6 +345,6 @@ template class AbstractGuiWrapperListModel<GuiSkill>;
 template class AbstractGuiWrapperListModel<GuiSpell>;
 template class AbstractGuiWrapperListModel<GuiFaction>;
 template class AbstractGuiWrapperListModel<GuiTerrain>;
-template class AbstractGuiWrapperListModel<GuiMapObject>;
+template class AbstractGuiWrapperListModel<GuiMapBank>;
 
 }

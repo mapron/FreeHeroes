@@ -19,13 +19,13 @@
 namespace FreeHeroes::Core {
 
 struct AdventureState {
-    AdventureArmy            m_att;
-    AdventureArmy            m_def;
-    LibraryTerrainConstPtr   m_terrain = nullptr;
-    uint64_t                 m_seed    = 0;
-    BattleFieldPreset        m_field;
-    LibraryMapObjectConstPtr m_mapObject        = nullptr;
-    int                      m_mapObjectVariant = 0;
+    AdventureArmy          m_att;
+    AdventureArmy          m_def;
+    LibraryTerrainConstPtr m_terrain = nullptr;
+    uint64_t               m_seed    = 0;
+    BattleFieldPreset      m_field;
+    LibraryMapBankConstPtr m_mapBank        = nullptr;
+    int                    m_mapBankVariant = 0;
 };
 
 struct BattleReplayData {

@@ -1,5 +1,5 @@
 $
-translation	ru_RU	mapObjects
+translation	ru_RU	mapBanks
 	sod.map.crypt	Склеп
 	sod.map.utopia	Утопия Драконов
 	sod.map.derelictShip	Покинутый Корабль

@@ -15,7 +15,8 @@
 #include "LibraryGameRules.hpp"
 #include "LibraryHero.hpp"
 #include "LibraryHeroSpec.hpp"
-#include "LibraryMapObject.hpp"
+#include "LibraryMapBank.hpp"
+#include "LibraryMapObstacle.hpp"
 #include "LibraryObjectDef.hpp"
 #include "LibraryResource.hpp"
 #include "LibrarySecondarySkill.hpp"
@@ -49,7 +50,8 @@ template<> struct LibraryContainerKey<LibraryDwelling      > { static constexpr 
 template<> struct LibraryContainerKey<LibraryFaction       > { static constexpr const char * scopeName = "factions" ; };
 template<> struct LibraryContainerKey<LibraryHero          > { static constexpr const char * scopeName = "heroes" ; };
 template<> struct LibraryContainerKey<LibraryHeroSpec      > { static constexpr const char * scopeName = "specialities" ; };
-template<> struct LibraryContainerKey<LibraryMapObject     > { static constexpr const char * scopeName = "mapObjects" ; };
+template<> struct LibraryContainerKey<LibraryMapBank       > { static constexpr const char * scopeName = "mapBanks" ; };
+template<> struct LibraryContainerKey<LibraryMapObstacle   > { static constexpr const char * scopeName = "mapObstacles"; };
 template<> struct LibraryContainerKey<LibraryObjectDef     > { static constexpr const char * scopeName = "objectDefs" ; };
 template<> struct LibraryContainerKey<LibraryResource      > { static constexpr const char * scopeName = "resources" ; };
 template<> struct LibraryContainerKey<LibrarySecondarySkill> { static constexpr const char * scopeName = "skills" ; };
@@ -173,7 +175,8 @@ struct GameDatabase::Impl {
     LibraryContainer<LibraryFaction>        m_factions;
     LibraryContainer<LibraryHero>           m_heroes;
     LibraryContainer<LibraryHeroSpec>       m_heroSpecs;
-    LibraryContainer<LibraryMapObject>      m_mapObjects;
+    LibraryContainer<LibraryMapBank>        m_mapBanks;
+    LibraryContainer<LibraryMapObstacle>    m_mapObstacles;
     LibraryContainer<LibraryObjectDef>      m_objectDefs;
     LibraryContainer<LibraryResource>       m_resources;
     LibraryContainer<LibrarySecondarySkill> m_skills;
@@ -195,19 +198,49 @@ struct GameDatabase::Impl {
     }
 };
 template<>
-GameDatabase::Impl::LibraryContainer<LibraryTerrain>& GameDatabase::Impl::getContainer<LibraryTerrain>()
+GameDatabase::Impl::LibraryContainer<LibraryArtifact>& GameDatabase::Impl::getContainer<LibraryArtifact>()
 {
-    return m_terrains;
+    return m_artifacts;
 }
 template<>
-GameDatabase::Impl::LibraryContainer<LibraryResource>& GameDatabase::Impl::getContainer<LibraryResource>()
+GameDatabase::Impl::LibraryContainer<LibraryDwelling>& GameDatabase::Impl::getContainer<LibraryDwelling>()
 {
-    return m_resources;
+    return m_dwellings;
 }
 template<>
 GameDatabase::Impl::LibraryContainer<LibraryFaction>& GameDatabase::Impl::getContainer<LibraryFaction>()
 {
     return m_factions;
+}
+template<>
+GameDatabase::Impl::LibraryContainer<LibraryHero>& GameDatabase::Impl::getContainer<LibraryHero>()
+{
+    return m_heroes;
+}
+template<>
+GameDatabase::Impl::LibraryContainer<LibraryHeroSpec>& GameDatabase::Impl::getContainer<LibraryHeroSpec>()
+{
+    return m_heroSpecs;
+}
+template<>
+GameDatabase::Impl::LibraryContainer<LibraryMapBank>& GameDatabase::Impl::getContainer<LibraryMapBank>()
+{
+    return m_mapBanks;
+}
+template<>
+GameDatabase::Impl::LibraryContainer<LibraryMapObstacle>& GameDatabase::Impl::getContainer<LibraryMapObstacle>()
+{
+    return m_mapObstacles;
+}
+template<>
+GameDatabase::Impl::LibraryContainer<LibraryObjectDef>& GameDatabase::Impl::getContainer<LibraryObjectDef>()
+{
+    return m_objectDefs;
+}
+template<>
+GameDatabase::Impl::LibraryContainer<LibraryResource>& GameDatabase::Impl::getContainer<LibraryResource>()
+{
+    return m_resources;
 }
 template<>
 GameDatabase::Impl::LibraryContainer<LibrarySecondarySkill>& GameDatabase::Impl::getContainer<LibrarySecondarySkill>()
@@ -220,29 +253,14 @@ GameDatabase::Impl::LibraryContainer<LibrarySpell>& GameDatabase::Impl::getConta
     return m_spells;
 }
 template<>
+GameDatabase::Impl::LibraryContainer<LibraryTerrain>& GameDatabase::Impl::getContainer<LibraryTerrain>()
+{
+    return m_terrains;
+}
+template<>
 GameDatabase::Impl::LibraryContainer<LibraryUnit>& GameDatabase::Impl::getContainer<LibraryUnit>()
 {
     return m_units;
-}
-template<>
-GameDatabase::Impl::LibraryContainer<LibraryHeroSpec>& GameDatabase::Impl::getContainer<LibraryHeroSpec>()
-{
-    return m_heroSpecs;
-}
-template<>
-GameDatabase::Impl::LibraryContainer<LibraryArtifact>& GameDatabase::Impl::getContainer<LibraryArtifact>()
-{
-    return m_artifacts;
-}
-template<>
-GameDatabase::Impl::LibraryContainer<LibraryHero>& GameDatabase::Impl::getContainer<LibraryHero>()
-{
-    return m_heroes;
-}
-template<>
-GameDatabase::Impl::LibraryContainer<LibraryMapObject>& GameDatabase::Impl::getContainer<LibraryMapObject>()
-{
-    return m_mapObjects;
 }
 
 GameDatabase::GameDatabase(const std::vector<Resource>& resourceFiles)
@@ -280,9 +298,13 @@ IGameDatabase::LibraryHeroSpecContainerPtr GameDatabase::heroSpecs() const
 {
     return &m_impl->m_heroSpecs;
 }
-IGameDatabase::LibraryMapObjectContainerPtr GameDatabase::mapObjects() const
+IGameDatabase::LibraryMapBankContainerPtr GameDatabase::mapBanks() const
 {
-    return &m_impl->m_mapObjects;
+    return &m_impl->m_mapBanks;
+}
+IGameDatabase::LibraryMapObstacleContainerPtr GameDatabase::mapObstacles() const
+{
+    return &m_impl->m_mapObstacles;
 }
 IGameDatabase::LibraryObjectDefContainerPtr GameDatabase::objectDefs() const
 {
@@ -351,34 +373,36 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
     }
 
     // clang-format off
-    m_impl->m_artifacts  .prepareObjectKeys(recordObjectMaps);
-    m_impl->m_dwellings  .prepareObjectKeys(recordObjectMaps);
-    m_impl->m_factions   .prepareObjectKeys(recordObjectMaps);
-    m_impl->m_heroSpecs  .prepareObjectKeys(recordObjectMaps);
-    m_impl->m_heroes     .prepareObjectKeys(recordObjectMaps);
-    m_impl->m_mapObjects .prepareObjectKeys(recordObjectMaps);
-    m_impl->m_objectDefs .prepareObjectKeys(recordObjectMaps);
-    m_impl->m_resources  .prepareObjectKeys(recordObjectMaps);
-    m_impl->m_skills     .prepareObjectKeys(recordObjectMaps);
-    m_impl->m_spells     .prepareObjectKeys(recordObjectMaps);
-    m_impl->m_terrains   .prepareObjectKeys(recordObjectMaps);
-    m_impl->m_units      .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_artifacts    .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_dwellings    .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_factions     .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_heroSpecs    .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_heroes       .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_mapBanks     .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_mapObstacles .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_objectDefs   .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_resources    .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_skills       .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_spells       .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_terrains     .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_units        .prepareObjectKeys(recordObjectMaps);
     // clang-format on
 
     // clang-format off
     const bool result =
-               m_impl->m_artifacts  .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_dwellings  .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_factions   .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_heroSpecs  .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_heroes     .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_mapObjects .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_objectDefs .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_resources  .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_skills     .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_spells     .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_terrains   .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_units      .loadRecordList(this, recordObjectMaps)
+               m_impl->m_artifacts    .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_dwellings    .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_factions     .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_heroSpecs    .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_heroes       .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_mapBanks     .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_mapObstacles .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_objectDefs   .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_resources    .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_skills       .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_spells       .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_terrains     .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_units        .loadRecordList(this, recordObjectMaps)
             ;
     // clang-format on
 
@@ -589,17 +613,20 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
     for (auto* terrain : m_impl->m_terrains.m_unsorted) {
         m_impl->m_terrains.m_sorted.push_back(terrain);
     }
-    // mapObjects postproc
-    std::sort(m_impl->m_mapObjects.m_unsorted.begin(), m_impl->m_mapObjects.m_unsorted.end(), [](auto* l, auto* r) {
+    // mapBanks postproc
+    std::sort(m_impl->m_mapBanks.m_unsorted.begin(), m_impl->m_mapBanks.m_unsorted.end(), [](auto* l, auto* r) {
         return l->presentationParams.order < r->presentationParams.order;
     });
-    for (auto* obj : m_impl->m_mapObjects.m_unsorted) {
+    for (auto* obj : m_impl->m_mapBanks.m_unsorted) {
         for (auto& variant : obj->variants) {
             for ([[maybe_unused]] auto& guard : variant.guards) {
                 assert(guard.unit);
             }
         }
-        m_impl->m_mapObjects.m_sorted.push_back(obj);
+        m_impl->m_mapBanks.m_sorted.push_back(obj);
+    }
+    for (auto* obj : m_impl->m_mapObstacles.m_unsorted) {
+        m_impl->m_mapObstacles.m_sorted.push_back(obj);
     }
     for (auto* d : m_impl->m_dwellings.m_unsorted) {
         m_impl->m_dwellings.m_sorted.push_back(d);

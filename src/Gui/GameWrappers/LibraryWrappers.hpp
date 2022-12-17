@@ -253,13 +253,13 @@ public:
     virtual GuiTerrainConstPtr find(Core::LibraryTerrainConstPtr source) const = 0;
 };
 
-class GUIGAMEWRAPPERS_EXPORT GuiMapObject : public QObject
-    , public AbstractGuiWrapper<GuiMapObject, Core::LibraryMapObject> {
+class GUIGAMEWRAPPERS_EXPORT GuiMapBank : public QObject
+    , public AbstractGuiWrapper<GuiMapBank, Core::LibraryMapBank> {
     Q_OBJECT
-    using Base = AbstractGuiWrapper<GuiMapObject, Core::LibraryMapObject>;
+    using Base = AbstractGuiWrapper<GuiMapBank, Core::LibraryMapBank>;
 
 public:
-    GuiMapObject(Sound::IMusicBox& musicBox, IGraphicsLibrary& graphicsLibrary, Core::LibraryMapObjectConstPtr source);
+    GuiMapBank(Sound::IMusicBox& musicBox, IGraphicsLibrary& graphicsLibrary, Core::LibraryMapBankConstPtr source);
 
     QPixmap            getIcon() const { return m_icon->get(); }
     const QStringList& getVariantNames() const { return m_variantNames; }
@@ -268,11 +268,11 @@ private:
     IAsyncPixmapPtr m_icon;
     QStringList     m_variantNames;
 };
-using GuiMapObjectConstPtr = const GuiMapObject*;
-class GuiMapObjectProvider {
+using GuiMapBankConstPtr = const GuiMapBank*;
+class GuiMapBankProvider {
 public:
-    virtual ~GuiMapObjectProvider()                                                = default;
-    virtual GuiMapObjectConstPtr find(Core::LibraryMapObjectConstPtr source) const = 0;
+    virtual ~GuiMapBankProvider()                                              = default;
+    virtual GuiMapBankConstPtr find(Core::LibraryMapBankConstPtr source) const = 0;
 };
 
 class GUIGAMEWRAPPERS_EXPORT ResourceAmountHelper : public QObject {

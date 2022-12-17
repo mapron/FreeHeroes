@@ -73,15 +73,15 @@ public:
     TerrainsComboModel(QAbstractItemModel* sourceModel, QObject* parent);
 };
 
-class GUIEDITOR_EXPORT MapObjectsComboModel : public ComboModel {
+class GUIEDITOR_EXPORT MapBanksComboModel : public ComboModel {
     Q_OBJECT
 public:
-    MapObjectsComboModel(QAbstractItemModel* sourceModel, QObject* parent);
+    MapBanksComboModel(QAbstractItemModel* sourceModel, QObject* parent);
 };
 
-class GUIEDITOR_EXPORT MapObjectsTreeModel : public QAbstractItemModel {
+class GUIEDITOR_EXPORT MapBanksTreeModel : public QAbstractItemModel {
 public:
-    MapObjectsTreeModel(QAbstractItemModel* source, QObject* parent);
+    MapBanksTreeModel(QAbstractItemModel* source, QObject* parent);
 
     QVariant      data(const QModelIndex& index, int role) const override;
     QModelIndex   index(int row, int column, const QModelIndex& parent) const override;

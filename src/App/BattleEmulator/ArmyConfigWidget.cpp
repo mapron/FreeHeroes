@@ -19,7 +19,7 @@
 // Core
 #include "IRandomGenerator.hpp"
 #include "LibraryFaction.hpp"
-#include "LibraryMapObject.hpp"
+#include "LibraryMapBank.hpp"
 #include "AdventureArmy.hpp"
 
 // Platform
@@ -69,7 +69,7 @@ bool ArmyConfigWidget::isAIControl() const
     return m_ui->checkBoxAIControl->isChecked();
 }
 
-void ArmyConfigWidget::initFromMapObject(LibraryMapObjectConstPtr mapObject, int variant)
+void ArmyConfigWidget::initFromMapObject(LibraryMapBankConstPtr mapObject, int variant)
 {
     auto& guards = mapObject->variants[variant].guards;
     for (size_t i = 0; i < m_army->getSquad()->getCount(); ++i) {

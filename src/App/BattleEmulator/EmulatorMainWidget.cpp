@@ -39,7 +39,7 @@
 #include "AdventureEstimation.hpp"
 #include "GeneralEstimation.hpp"
 #include "LibraryTerrain.hpp"
-#include "LibraryMapObject.hpp"
+#include "LibraryMapBank.hpp"
 #include "LibrarySecondarySkill.hpp"
 #include "LibraryGameRules.hpp"
 #include "AdventureKingdom.hpp"
@@ -132,9 +132,9 @@ EmulatorMainWidget::EmulatorMainWidget(IGraphicsLibrary&              graphicsLi
         }
     }
     connect(m_ui->comboBoxTerrain, qOverload<int>(&QComboBox::currentIndexChanged), this, &EmulatorMainWidget::onTerrainChanged);
-    auto* comboModel     = new MapObjectsComboModel(modelsProvider.mapObjects(), this);
-    auto* mapObjectsTree = new MapObjectsTreeModel(comboModel, this);
-    m_ui->comboBoxObjectPreset->setModel(mapObjectsTree);
+    auto* comboModel   = new MapBanksComboModel(modelsProvider.mapBanks(), this);
+    auto* mapBanksTree = new MapBanksTreeModel(comboModel, this);
+    m_ui->comboBoxObjectPreset->setModel(mapBanksTree);
     m_ui->comboBoxObjectPreset->setIconSize({ 32, 24 });
     m_ui->comboBoxObjectPreset->expandAll();
 
@@ -193,7 +193,7 @@ EmulatorMainWidget::EmulatorMainWidget(IGraphicsLibrary&              graphicsLi
     m_ui->comboBoxReplaySelect->setModel(m_replayManager.get());
     m_ui->comboBoxReplaySelect->setCurrentIndex(m_ui->comboBoxReplaySelect->count() - 1);
 
-    m_ui->comboBoxObjectPreset->selectIndex(mapObjectsTree->index(0, 0, mapObjectsTree->index(1, 0, {})));
+    m_ui->comboBoxObjectPreset->selectIndex(mapBanksTree->index(0, 0, mapBanksTree->index(1, 0, {})));
 
     setWindowTitle(tr("Battle emulator"));
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
@@ -319,19 +319,19 @@ void EmulatorMainWidget::onTerrainChanged()
 
 void EmulatorMainWidget::onObjectPresetChanged()
 {
-    m_adventureState->m_mapObject = nullptr;
-    auto mapObject                = m_ui->comboBoxObjectPreset->currentData(MapObjectsModel::SourceObject).value<MapObjectsModel::SrcTypePtr>();
-    if (!mapObject) {
+    m_adventureState->m_mapBank = nullptr;
+    auto mapBank                = m_ui->comboBoxObjectPreset->currentData(MapBanksModel::SourceObject).value<MapBanksModel::SrcTypePtr>();
+    if (!mapBank) {
         m_ui->comboBoxPositionsPreset->setCurrentIndex(0);
         return;
     }
 
-    m_adventureState->m_mapObjectVariant = m_ui->comboBoxObjectPreset->currentIndex();
-    m_adventureState->m_mapObject        = mapObject;
+    m_adventureState->m_mapBankVariant = m_ui->comboBoxObjectPreset->currentIndex();
+    m_adventureState->m_mapBank        = mapBank;
 
-    const int layoutIndex = static_cast<int>(m_adventureState->m_mapObject->fieldLayout);
+    const int layoutIndex = static_cast<int>(m_adventureState->m_mapBank->fieldLayout);
     m_ui->comboBoxPositionsPreset->setCurrentIndex(layoutIndex);
-    m_ui->armyConfigDef->initFromMapObject(m_adventureState->m_mapObject, m_adventureState->m_mapObjectVariant);
+    m_ui->armyConfigDef->initFromMapObject(m_adventureState->m_mapBank, m_adventureState->m_mapBankVariant);
 }
 
 void EmulatorMainWidget::readAdventureStateFromUI()
@@ -373,8 +373,8 @@ void EmulatorMainWidget::applyCurrentObjectRewards(QString defenderName)
     QStringList               rewardDescriptionTitles;
     GeneralPopupDialog::Items items;
     {
-        int         rewIndex = m_adventureState->m_mapObject->variants[m_adventureState->m_mapObjectVariant].rewardIndex;
-        const auto& reward   = m_adventureState->m_mapObject->rewards[rewIndex];
+        int         rewIndex = m_adventureState->m_mapBank->variants[m_adventureState->m_mapBankVariant].rewardIndex;
+        const auto& reward   = m_adventureState->m_mapBank->rewards[rewIndex];
         assert(reward.totalItems() > 0);
         const bool isSingleReward = reward.totalItems() == 1;
 
@@ -622,7 +622,7 @@ int EmulatorMainWidget::execBattle(bool isReplay, bool isQuick)
                 m_guiAdventureArmyAtt->emitChanges();
                 m_guiAdventureArmyDef->emitChanges();
 
-                if (m_adventureState->m_mapObject && m_adventureState->m_mapObject->rewards.size() && resultInfo.goodResult) {
+                if (m_adventureState->m_mapBank && m_adventureState->m_mapBank->rewards.size() && resultInfo.goodResult) {
                     applyCurrentObjectRewards(resultInfo.sides[1].name);
                 }
             }

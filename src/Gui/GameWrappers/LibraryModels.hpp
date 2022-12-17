@@ -198,9 +198,9 @@ protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
 };
 
-class GUIGAMEWRAPPERS_EXPORT MapObjectsModel : public AbstractGuiWrapperListModel<GuiMapObject> {
+class GUIGAMEWRAPPERS_EXPORT MapBanksModel : public AbstractGuiWrapperListModel<GuiMapBank> {
 public:
-    using Base = AbstractGuiWrapperListModel<GuiMapObject>;
+    using Base = AbstractGuiWrapperListModel<GuiMapBank>;
     using AbstractGuiWrapperListModel::AbstractGuiWrapperListModel;
 
     enum MapItemDataRole
@@ -228,20 +228,20 @@ public:
     SpellsModel      * spells     () const noexcept { return m_spells;}
     FactionsModel    * factions   () const noexcept { return m_factions;}
     TerrainsModel    * terrains   () const noexcept { return m_terrains;}
-    MapObjectsModel  * mapObjects () const noexcept { return m_mapObjects;}
+    MapBanksModel    * mapBanks   () const noexcept { return m_mapBanks;}
     UiCommonModel    * ui         () const noexcept { return m_uiCommon;}
     // clang-format on
 
 private:
-    ArtifactsModel*  m_artifacts;
-    UnitsModel*      m_units;
-    HeroesModel*     m_heroes;
-    SkillsModel*     m_skills;
-    SpellsModel*     m_spells;
-    FactionsModel*   m_factions;
-    TerrainsModel*   m_terrains;
-    MapObjectsModel* m_mapObjects;
-    UiCommonModel*   m_uiCommon;
+    ArtifactsModel* m_artifacts;
+    UnitsModel*     m_units;
+    HeroesModel*    m_heroes;
+    SkillsModel*    m_skills;
+    SpellsModel*    m_spells;
+    FactionsModel*  m_factions;
+    TerrainsModel*  m_terrains;
+    MapBanksModel*  m_mapBanks;
+    UiCommonModel*  m_uiCommon;
 };
 
 }

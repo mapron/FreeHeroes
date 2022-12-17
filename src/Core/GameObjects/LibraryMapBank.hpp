@@ -23,7 +23,7 @@ struct UnitWithCount {
     int                 count = 0;
 };
 
-struct LibraryMapObject {
+struct LibraryMapBank {
     std::string id;
     std::string untranslatedName;
     int         legacyId = -1;
@@ -51,10 +51,10 @@ struct LibraryMapObject {
     Variants variants;
 
     struct Presentation {
-        int         order = 0;
-        std::string icon;
+        int order = 0;
     };
-    Presentation presentationParams;
+    Presentation             presentationParams;
+    LibraryObjectDefConstPtr mapObjectDef = nullptr;
 };
 
 }
