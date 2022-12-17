@@ -6,6 +6,7 @@
 #pragma once
 
 #include "LibraryArtifact.hpp"
+#include "LibraryDwelling.hpp"
 #include "LibraryFaction.hpp"
 #include "LibraryGameRules.hpp"
 #include "LibraryHero.hpp"
@@ -417,7 +418,6 @@ inline constexpr const std::tuple MetaInfo::s_fields<LibraryUnit::HeroStackSize>
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<LibraryUnit::Presentation>{
     Field("spriteBattle"         , &LibraryUnit::Presentation::spriteBattle),
-    Field("spriteAdventure"      , &LibraryUnit::Presentation::spriteAdventure),
     Field("portrait"             , &LibraryUnit::Presentation::portrait),
     Field("portraitSM"           , &LibraryUnit::Presentation::portraitSmall),
     Field("soundId"              , &LibraryUnit::Presentation::soundId),
@@ -441,6 +441,7 @@ inline constexpr const std::tuple MetaInfo::s_fields<LibraryUnit>{
     Field("bmArtifact"           , &LibraryUnit::battleMachineArtifact), //(metadata("optional", true))
     Field("abilities"            , &LibraryUnit::abilities),
     Field("pres"                 , &LibraryUnit::presentationParams),
+    Field("mapObjectDef"         , &LibraryUnit::mapObjectDef),
     Field("traits"               , &LibraryUnit::traits),
 };
 
@@ -538,6 +539,7 @@ inline constexpr const std::tuple MetaInfo::s_fields<LibraryArtifact>{
     Field("noPenalty"       , &LibraryArtifact::disabledPenalties),
     Field("bmUnit"          , &LibraryArtifact::battleMachineUnit), //(metadata("optional", true))
     Field("pres"            , &LibraryArtifact::presentationParams),
+    Field("mapObjectDef"    , &LibraryArtifact::mapObjectDef),
 };
 
 template<>
@@ -548,6 +550,13 @@ template<>
 inline constexpr const std::tuple MetaInfo::s_fields<ArtifactRewardAmount::SingleReward>{
     Field("class", &ArtifactRewardAmount::SingleReward::treasureClass),
     Field("n"    , &ArtifactRewardAmount::SingleReward::count),
+};
+// ------------------------------------------------------------------------------------------
+
+template<>
+inline constexpr const std::tuple MetaInfo::s_fields<LibraryDwelling>{
+    Field("creatureIds", &LibraryDwelling::creatureIds),
+    Field("mapObjectDefs", &LibraryDwelling::mapObjectDefs),
 };
 // ------------------------------------------------------------------------------------------
 

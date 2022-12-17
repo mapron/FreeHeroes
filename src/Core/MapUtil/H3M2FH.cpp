@@ -10,7 +10,9 @@
 
 #include "IGameDatabase.hpp"
 
+#include "LibraryDwelling.hpp"
 #include "LibraryFaction.hpp"
+#include "LibraryObjectDef.hpp"
 #include "LibraryHero.hpp"
 #include "LibraryTerrain.hpp"
 
@@ -21,6 +23,15 @@ namespace {
 FHPos posFromH3M(H3Pos pos, int xoffset = 0)
 {
     return { (uint32_t) (pos.m_x + xoffset), (uint32_t) pos.m_y, pos.m_z };
+}
+
+FHPlayerId makePlayerId(int h3Id)
+{
+    if (h3Id >= 0 && h3Id <= 7)
+        return static_cast<FHPlayerId>(h3Id);
+    if (h3Id == -1 || h3Id == 255)
+        return FHPlayerId::None;
+    return FHPlayerId::Invalid;
 }
 
 }
@@ -41,20 +52,30 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
     dest.m_difficulty = src.m_difficulty;
 
     auto*      factionsContainer = database->factions();
-    const auto factionIds        = factionsContainer->legacyOrderedIds();
+    const auto factionIds        = factionsContainer->legacyOrderedRecords();
 
-    const auto heroIds     = database->heroes()->legacyOrderedIds();
-    const auto artIds      = database->artifacts()->legacyOrderedIds();
-    const auto spellIds    = database->spells()->legacyOrderedIds();
-    const auto secSkillIds = database->secSkills()->legacyOrderedIds();
-    const auto terrainIds  = database->terrains()->legacyOrderedIds();
-    const auto resIds      = database->resources()->legacyOrderedIds();
+    const auto heroIds     = database->heroes()->legacyOrderedRecords();
+    const auto artIds      = database->artifacts()->legacyOrderedRecords();
+    const auto spellIds    = database->spells()->legacyOrderedRecords();
+    const auto secSkillIds = database->secSkills()->legacyOrderedRecords();
+    const auto terrainIds  = database->terrains()->legacyOrderedRecords();
+    const auto resIds      = database->resources()->legacyOrderedRecords();
+    const auto unitIds     = database->units()->legacyOrderedRecords();
+
+    std::map<std::string, std::pair<Core::LibraryDwellingConstPtr, int>> dwellMap;
+    {
+        for (auto* dwelling : database->dwellings()->records()) {
+            for (int i = 0, cnt = dwelling->mapObjectDefs.size(); i < cnt; ++i) {
+                dwellMap[dwelling->mapObjectDefs[i]->id] = { dwelling, i };
+            }
+        }
+    }
 
     std::map<FHPlayerId, FHPos>   mainTowns;
     std::map<FHPlayerId, uint8_t> mainHeroes;
 
     for (int index = 0; const PlayerInfo& playerInfo : src.m_players) {
-        const auto playerId = static_cast<FHPlayerId>(index++);
+        const auto playerId = makePlayerId(index++);
         auto&      fhPlayer = dest.m_players[playerId];
 
         fhPlayer.m_aiPossible    = playerInfo.m_canComputerPlay;
@@ -78,9 +99,15 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
     }
 
     for (int index = 0; const Object& obj : src.m_objects) {
-        const IMapObject*     impl     = obj.m_impl.get();
-        const ObjectTemplate& objTempl = src.m_objectDefs[obj.m_defnum];
-        MapObjectType         type     = static_cast<MapObjectType>(objTempl.m_id);
+        const IMapObject*     impl         = obj.m_impl.get();
+        const ObjectTemplate& objTempl     = src.m_objectDefs[obj.m_defnum];
+        std::string           defObjectKey = objTempl.m_animationFile;
+        {
+            if (defObjectKey.ends_with(".def"))
+                defObjectKey = defObjectKey.substr(0, defObjectKey.size() - 4);
+            std::transform(defObjectKey.begin(), defObjectKey.end(), defObjectKey.begin(), [](unsigned char c) { return std::tolower(c); });
+        }
+        MapObjectType type = static_cast<MapObjectType>(objTempl.m_id);
         switch (type) {
             case MapObjectType::EVENT:
             {
@@ -93,9 +120,10 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             {
                 const auto* hero = static_cast<const MapHero*>(impl);
 
-                const auto playerId = static_cast<FHPlayerId>(hero->m_playerOwner);
+                const auto playerId = makePlayerId(hero->m_playerOwner);
                 FHHero     fhhero;
                 fhhero.m_player          = playerId;
+                fhhero.m_order           = index;
                 fhhero.m_pos             = posFromH3M(obj.m_pos, -1);
                 fhhero.m_id              = heroIds[hero->m_subID];
                 fhhero.m_isMain          = mainHeroes.contains(playerId) && mainHeroes[playerId] == hero->m_subID;
@@ -113,7 +141,12 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             case MapObjectType::RANDOM_MONSTER_L7:
             {
                 const auto* monster = static_cast<const MapMonster*>(impl);
-                assert(1 && monster);
+                FHMonster   fhMonster;
+                fhMonster.m_order = index;
+                fhMonster.m_pos   = posFromH3M(obj.m_pos, -src.m_features->m_monstersMapXOffset);
+                fhMonster.m_count = monster->m_count;
+                fhMonster.m_id    = unitIds[objTempl.m_subid];
+                dest.m_objects.m_monsters.push_back(fhMonster);
             } break;
             case MapObjectType::OCEAN_BOTTLE:
             case MapObjectType::SIGN:
@@ -134,7 +167,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             case MapObjectType::SCHOLAR:
             {
                 const auto* scholar = static_cast<const MapScholar*>(impl);
-                assert(1 && scholar);
+                assert(0 && scholar);
             } break;
             case MapObjectType::GARRISON:
             case MapObjectType::GARRISON2:
@@ -151,27 +184,48 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             case MapObjectType::SPELL_SCROLL:
             {
                 const auto* artifact = static_cast<const MapArtifact*>(impl);
-                assert(1 && artifact);
+                assert(!artifact->m_isSpell);
+                if (artifact->m_isSpell) {
+                } else {
+                    FHArtifact art;
+                    art.m_order = index;
+                    art.m_pos   = posFromH3M(obj.m_pos);
+                    art.m_id    = artIds[objTempl.m_subid];
+                    dest.m_objects.m_artifacts.push_back(art);
+                }
             } break;
             case MapObjectType::RANDOM_RESOURCE:
             case MapObjectType::RESOURCE:
             {
                 const auto* resource = static_cast<const MapResource*>(impl);
                 FHResource  fhres;
-                fhres.m_pos      = posFromH3M(obj.m_pos);
-                fhres.m_amount   = resource->m_amount;
-                fhres.m_resource = database->resources()->find(resIds[objTempl.m_subid]);
+                fhres.m_order  = index;
+                fhres.m_pos    = posFromH3M(obj.m_pos);
+                fhres.m_amount = resource->m_amount;
+                fhres.m_id     = resIds[objTempl.m_subid];
+                assert(fhres.m_id);
+                dest.m_objects.m_resources.push_back(fhres);
+            } break;
+            case MapObjectType::TREASURE_CHEST:
+            {
+                FHResource fhres;
+                fhres.m_order  = index;
+                fhres.m_pos    = posFromH3M(obj.m_pos);
+                fhres.m_amount = 0;
+                fhres.m_id     = nullptr;
+                fhres.m_type   = FHResource::Type::TreasureChest;
                 dest.m_objects.m_resources.push_back(fhres);
             } break;
             case MapObjectType::RANDOM_TOWN:
             case MapObjectType::TOWN:
             {
                 const auto* town     = static_cast<const MapTown*>(impl);
-                const auto  playerId = static_cast<FHPlayerId>(town->m_playerOwner);
+                const auto  playerId = makePlayerId(town->m_playerOwner);
                 FHTown      fhtown;
                 fhtown.m_player          = playerId;
+                fhtown.m_order           = index;
                 fhtown.m_pos             = posFromH3M(obj.m_pos);
-                fhtown.m_faction         = factionIds[objTempl.m_subid];
+                fhtown.m_factionId       = factionIds[objTempl.m_subid];
                 fhtown.m_questIdentifier = town->m_questIdentifier;
                 fhtown.m_hasFort         = town->m_hasFort;
                 fhtown.m_spellResearch   = town->m_spellResearch;
@@ -190,7 +244,15 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             case MapObjectType::LIGHTHOUSE:
             {
                 const auto* objOwner = static_cast<const MapObjectWithOwner*>(impl);
-                assert(1 && objOwner);
+                FHDwelling  dwelling;
+                const auto [id, variant] = dwellMap.at(defObjectKey);
+                dwelling.m_id            = id;
+                dwelling.m_variant       = variant;
+                dwelling.m_order         = index;
+                dwelling.m_pos           = posFromH3M(obj.m_pos);
+                dwelling.m_player        = makePlayerId(objOwner->m_owner);
+                dest.m_objects.m_dwellings.push_back(dwelling);
+
             } break;
             case MapObjectType::SHRINE_OF_MAGIC_INCANTATION:
             case MapObjectType::SHRINE_OF_MAGIC_GESTURE:
@@ -202,7 +264,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             case MapObjectType::PANDORAS_BOX:
             {
                 const auto* pandora = static_cast<const MapPandora*>(impl);
-                assert(1 && pandora);
+                assert(0 && pandora);
             } break;
             case MapObjectType::GRAIL:
             {
@@ -252,7 +314,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
 
     for (int index = 0; auto& allowedFlag : src.m_allowedArtifacts) {
         const auto& artId = artIds[index++];
-        if (!allowedFlag && !artId.empty())
+        if (!allowedFlag && artId)
             dest.m_disabledArtifacts.push_back(artId);
     }
 
@@ -272,7 +334,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
         if (!customHero.m_enabled)
             continue;
         FHHeroData destHero;
-        destHero.m_army.hero     = Core::AdventureHero(database->heroes()->find(heroId));
+        destHero.m_army.hero     = Core::AdventureHero(heroId);
         destHero.m_hasExp        = customHero.m_hasExp;
         destHero.m_hasCustomBio  = customHero.m_hasCustomBio;
         destHero.m_hasSecSkills  = customHero.m_hasSkills;
@@ -282,9 +344,8 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             auto& skillList = destHero.m_army.hero.secondarySkills;
             skillList.clear();
             for (auto& sk : customHero.m_skills) {
-                const auto& secSkillId   = secSkillIds[sk.m_id];
-                auto*       librarySkill = database->secSkills()->find(secSkillId);
-                skillList.push_back({ librarySkill, sk.m_level });
+                const auto* secSkillId = secSkillIds[sk.m_id];
+                skillList.push_back({ secSkillId, sk.m_level });
             }
         }
         if (destHero.m_hasPrimSkills) {
@@ -295,19 +356,9 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
         dest.m_customHeroes.push_back(std::move(destHero));
     }
 
-    std::map<uint8_t, Core::LibraryTerrainConstPtr> terCache;
-    auto                                            legacyToLibraryTerrain = [&terrainIds, &terCache, database](uint8_t terId) {
-        auto it = terCache.find(terId);
-        if (it != terCache.cend())
-            return it->second;
-        auto* lib       = database->terrains()->find(terrainIds[terId]);
-        terCache[terId] = lib;
-        return lib;
-    };
-
     std::set<FHPos> zoned;
     auto            defTerrainType = src.m_tiles.get(0, 0, 0).m_terType;
-    dest.m_defaultTerrain          = legacyToLibraryTerrain(defTerrainType);
+    dest.m_defaultTerrain          = terrainIds[defTerrainType];
 
     if (1) {
         dest.m_defaultTerrain = database->terrains()->find("hota.terrain.wasteland");
@@ -371,7 +422,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                     auto terVariant = src.m_tiles.get(pos.m_x, pos.m_y, pos.m_z).m_terView;
                     fhZone.m_tilesVariants.push_back(terVariant);
                 }
-                fhZone.m_terrain = legacyToLibraryTerrain(tile.m_terType);
+                fhZone.m_terrainId = terrainIds[tile.m_terType];
                 dest.m_zones.push_back(std::move(fhZone));
             }
         }

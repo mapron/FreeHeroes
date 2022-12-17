@@ -32,14 +32,19 @@ inline constexpr const auto EnumTraits::s_valueMapping<FHPlayerId> = EnumTraits:
     "Teal"     , FHPlayerId::Teal,
     "Pink"     , FHPlayerId::Pink
     );
-// clang-format on
 
-// clang-format off
 template<>
 inline constexpr const auto EnumTraits::s_valueMapping<Core::GameVersion> = EnumTraits::make(
     Core::GameVersion::Invalid,
     "SOD"  , Core::GameVersion::SOD,
     "HOTA" , Core::GameVersion::HOTA
+    );
+
+template<>
+inline constexpr const auto EnumTraits::s_valueMapping<FHResource::Type> = EnumTraits::make(
+    FHResource::Type::Resource,
+    "Resource"      , FHResource::Type::Resource,
+    "TreasureChest" , FHResource::Type::TreasureChest
     );
 // clang-format on
 
@@ -70,7 +75,9 @@ inline constexpr const std::tuple MetaInfo::s_fields<FHHeroData>{
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<FHHero>{
     Field("pos", &FHHero::m_pos),
+    Field("order", &FHHero::m_order),
     Field("player", &FHHero::m_player),
+
     Field("main", &FHHero::m_isMain),
     Field("id", &FHHero::m_id),
     Field("questId", &FHHero::m_questIdentifier),
@@ -79,9 +86,11 @@ inline constexpr const std::tuple MetaInfo::s_fields<FHHero>{
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<FHTown>{
     Field("pos", &FHTown::m_pos),
+    Field("order", &FHTown::m_order),
     Field("player", &FHTown::m_player),
+
     Field("main", &FHTown::m_isMain),
-    Field("faction", &FHTown::m_faction),
+    Field("factionId", &FHTown::m_factionId),
     Field("hasFort", &FHTown::m_hasFort),
     Field("questId", &FHTown::m_questIdentifier),
     Field("spellResearch", &FHTown::m_spellResearch),
@@ -98,7 +107,7 @@ inline constexpr const std::tuple MetaInfo::s_fields<FHZone::Rect>{
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<FHZone>{
     Field("id", &FHZone::m_id),
-    Field("terrain", &FHZone::m_terrain),
+    Field("terrainId", &FHZone::m_terrainId),
     Field("tiles", &FHZone::m_tiles),
     Field("tilesVariants", &FHZone::m_tilesVariants),
     Field("rect", &FHZone::m_rect),
@@ -107,13 +116,43 @@ inline constexpr const std::tuple MetaInfo::s_fields<FHZone>{
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<FHResource>{
     Field("pos", &FHResource::m_pos),
+    Field("order", &FHResource::m_order),
+
     Field("amount", &FHResource::m_amount),
-    Field("resource", &FHResource::m_resource),
+    Field("id", &FHResource::m_id),
+    Field("type", &FHResource::m_type),
+};
+template<>
+inline constexpr const std::tuple MetaInfo::s_fields<FHArtifact>{
+    Field("pos", &FHArtifact::m_pos),
+    Field("order", &FHArtifact::m_order),
+
+    Field("id", &FHArtifact::m_id),
+};
+template<>
+inline constexpr const std::tuple MetaInfo::s_fields<FHMonster>{
+    Field("pos", &FHMonster::m_pos),
+    Field("order", &FHMonster::m_order),
+
+    Field("id", &FHMonster::m_id),
+    Field("count", &FHMonster::m_count),
+};
+template<>
+inline constexpr const std::tuple MetaInfo::s_fields<FHDwelling>{
+    Field("pos", &FHDwelling::m_pos),
+    Field("order", &FHDwelling::m_order),
+    Field("player", &FHDwelling::m_player),
+
+    Field("id", &FHDwelling::m_id),
+    Field("variant", &FHDwelling::m_variant),
 };
 
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<FHMap::Objects>{
     Field("resources", &FHMap::Objects::m_resources),
+    Field("artifacts", &FHMap::Objects::m_artifacts),
+    Field("monsters", &FHMap::Objects::m_monsters),
+    Field("dwellings", &FHMap::Objects::m_dwellings),
 };
 
 template<>
@@ -172,7 +211,7 @@ void FHZone::placeOnMap(FHTileMap& map) const
                                .m_y = y + rect.m_pos.m_y,
                                .m_z = rect.m_pos.m_z })
                     .m_terrain
-                    = m_terrain;
+                    = m_terrainId;
             }
         }
         return;
@@ -180,14 +219,14 @@ void FHZone::placeOnMap(FHTileMap& map) const
     if (!m_tiles.empty() && m_tilesVariants.size() == m_tiles.size()) {
         for (size_t i = 0; i < m_tiles.size(); ++i) {
             auto& tile     = map.get(m_tiles[i]);
-            tile.m_terrain = m_terrain;
+            tile.m_terrain = m_terrainId;
             tile.m_view    = m_tilesVariants[i];
         }
         return;
     }
     if (!m_tiles.empty()) {
         for (auto& pos : m_tiles) {
-            map.get(pos).m_terrain = m_terrain;
+            map.get(pos).m_terrain = m_terrainId;
         }
     }
 }

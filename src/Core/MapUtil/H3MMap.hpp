@@ -167,6 +167,7 @@ struct ObjectTemplate {
 };
 
 struct Object {
+    int      m_order = 0;
     H3Pos    m_pos;
     uint32_t m_defnum = 0;
 

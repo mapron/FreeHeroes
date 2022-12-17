@@ -8,41 +8,33 @@
 namespace FreeHeroes::Core {
 
 struct LibraryArtifact;
-using LibraryArtifactConstPtr = const LibraryArtifact*;
-
-struct LibraryUnit;
-using LibraryUnitConstPtr = const LibraryUnit*;
-
+struct LibraryDwelling;
 struct LibraryFaction;
-using LibraryFactionConstPtr = const LibraryFaction*;
 struct LibraryFactionHeroClass;
-using LibraryFactionHeroClassConstPtr = const LibraryFactionHeroClass*;
-
-struct LibraryHeroSpec;
-using LibraryHeroSpecConstPtr = const LibraryHeroSpec*;
-
-struct LibraryHero;
-using LibraryHeroConstPtr = const LibraryHero*;
-
-struct LibrarySecondarySkill;
-using LibrarySecondarySkillConstPtr = const LibrarySecondarySkill*;
-
-struct LibrarySpell;
-using LibrarySpellConstPtr = const LibrarySpell*;
-
-struct LibraryTerrain;
-using LibraryTerrainConstPtr = const LibraryTerrain*;
-
-struct LibraryResource;
-using LibraryResourceConstPtr = const LibraryResource*;
-
-struct LibraryMapObject;
-using LibraryMapObjectConstPtr = const LibraryMapObject*;
-
-struct LibraryObjectDef;
-using LibraryObjectDefConstPtr = const LibraryObjectDef*;
-
 struct LibraryGameRules;
-using LibraryGameRulesConstPtr = const LibraryGameRules*;
+struct LibraryHero;
+struct LibraryHeroSpec;
+struct LibraryMapObject;
+struct LibraryObjectDef;
+struct LibraryResource;
+struct LibrarySecondarySkill;
+struct LibrarySpell;
+struct LibraryTerrain;
+struct LibraryUnit;
+
+using LibraryArtifactConstPtr         = const LibraryArtifact*;
+using LibraryDwellingConstPtr         = const LibraryDwelling*;
+using LibraryFactionConstPtr          = const LibraryFaction*;
+using LibraryFactionHeroClassConstPtr = const LibraryFactionHeroClass*;
+using LibraryGameRulesConstPtr        = const LibraryGameRules*;
+using LibraryHeroConstPtr             = const LibraryHero*;
+using LibraryHeroSpecConstPtr         = const LibraryHeroSpec*;
+using LibraryMapObjectConstPtr        = const LibraryMapObject*;
+using LibraryObjectDefConstPtr        = const LibraryObjectDef*;
+using LibraryResourceConstPtr         = const LibraryResource*;
+using LibrarySecondarySkillConstPtr   = const LibrarySecondarySkill*;
+using LibrarySpellConstPtr            = const LibrarySpell*;
+using LibraryTerrainConstPtr          = const LibraryTerrain*;
+using LibraryUnitConstPtr             = const LibraryUnit*;
 
 }

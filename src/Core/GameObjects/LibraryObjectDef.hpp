@@ -25,6 +25,8 @@ struct LibraryObjectDef {
     int subId    = -1;
     int type     = -1;
     int priority = -1;
+
+    LibraryUnitConstPtr creatureId = nullptr;
 };
 
 }

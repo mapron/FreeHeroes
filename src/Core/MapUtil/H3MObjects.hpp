@@ -39,6 +39,8 @@ struct MapFormatFeatures {
     int m_stackSize           = 0;
     int m_secondarySkillCount = 0;
 
+    int m_monstersMapXOffset = 0;
+
     bool m_hasQuestIdentifier         = false;
     bool m_stackId16Bit               = false;
     bool m_artId16Bit                 = false;
@@ -196,7 +198,7 @@ enum class MapObjectType
     TOWN = 98,
     //    TRADING_POST                = 99,
     //    LEARNING_STONE              = 100,
-    //    TREASURE_CHEST              = 101,
+    TREASURE_CHEST = 101,
     //    TREE_OF_KNOWLEDGE           = 102,
     //    SUBTERRANEAN_GATE           = 103,
     //    UNIVERSITY                  = 104,
@@ -623,6 +625,7 @@ struct MapMonster : public MapObjectAbstract {
     bool        m_neverFlees     = false;
     bool        m_notGrowingTeam = false;
 
+    uint32_t m_agressionExact   = 0xffffffffU;
     uint32_t m_joinPercent      = 100;
     bool     m_joinOnlyForMoney = false;
 

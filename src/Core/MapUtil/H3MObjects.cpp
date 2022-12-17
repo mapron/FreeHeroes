@@ -114,6 +114,9 @@ MapFormatFeatures::MapFormatFeatures(MapFormat format, int hotaVer1)
     m_mapEventHuman = format > MapFormat::AB;
 
     m_mapHotaUnknown1 = format >= MapFormat::HOTA1;
+
+    // hota reworked monster adventure sprites so they shifted from bottom right corner.
+    m_monstersMapXOffset = format >= MapFormat::HOTA1 && format <= MapFormat::HOTA3 ? 1 : 0;
 }
 
 std::unique_ptr<IMapObject> IMapObject::Create(MapObjectType type, MapFormatFeaturesPtr features)
@@ -565,13 +568,11 @@ void MapMonster::readBinary(ByteOrderDataStreamReader& stream)
     stream.zeroPadding(2);
 
     if (m_features->m_monsterJoinPercent) {
-        uint32_t unknown1 = 0;
-        stream >> unknown1 >> m_joinOnlyForMoney;
+        stream >> m_agressionExact >> m_joinOnlyForMoney;
         stream >> m_joinPercent;
         uint32_t unknown3 = 0;
         uint32_t unknown4 = 0;
         stream >> unknown3 >> unknown4;
-        assert(unknown1 == 0xffffffffU);
         assert(unknown3 == 0xffffffffU);
         assert(unknown4 == 0xffffffffU);
     }
@@ -599,8 +600,7 @@ void MapMonster::writeBinary(ByteOrderDataStreamWriter& stream) const
     stream.zeroPadding(2);
 
     if (m_features->m_monsterJoinPercent) {
-        uint32_t unknown1 = 0xffffffff;
-        stream << unknown1 << m_joinOnlyForMoney;
+        stream << m_agressionExact << m_joinOnlyForMoney;
         stream << m_joinPercent;
         uint32_t unknown3 = 0xffffffff;
         uint32_t unknown4 = 0xffffffff;

@@ -1,0 +1,115 @@
+[{
+"scope": "dwellings",
+
+"compactCols":                   [ "creatureIds"                    , "mapObjectDefs"  ],
+"records": {
+
+"sod.unit.pikeman"             : [ [ "sod.unit.pikeman"            ], [ "avgpike0" ] ],
+"sod.unit.archer"              : [ [ "sod.unit.archer"             ], [ "avgcros0" ] ],
+"sod.unit.griffin"             : [ [ "sod.unit.griffin"            ], [ "avggrff0" ] ],
+"sod.unit.swordsman"           : [ [ "sod.unit.swordsman"          ], [ "avgswor0" ] ],
+"sod.unit.monk"                : [ [ "sod.unit.monk"               ], [ "avgmonk0" ] ],
+"sod.unit.cavalier"            : [ [ "sod.unit.cavalier"           ], [ "avgcavl0" ] ],
+"sod.unit.angel"               : [ [ "sod.unit.angel"              ], [ "avgangl0" ] ],
+
+"sod.unit.centaur"             : [ [ "sod.unit.centaur"            ], [ "avgcent0" ] ],
+"sod.unit.dwarf"               : [ [ "sod.unit.dwarf"              ], [ "avgdwrf0" ] ],
+"sod.unit.woodElf"             : [ [ "sod.unit.woodElf"            ], [ "avgelf0"  ] ],
+"sod.unit.pegasus"             : [ [ "sod.unit.pegasus"            ], [ "avgpega0" ] ],
+"sod.unit.dendroidGuard"       : [ [ "sod.unit.dendroidGuard"      ], [ "avgtree0" ] ],
+"sod.unit.unicorn"             : [ [ "sod.unit.unicorn"            ], [ "avgunic0", "avg2uni" ] ],
+"sod.unit.greenDragon"         : [ [ "sod.unit.greenDragon"        ], [ "avggdrg0" ] ],
+
+"sod.unit.gremlin"             : [ [ "sod.unit.gremlin"            ], [ "avggrem0" ] ],
+"sod.unit.stoneGargoyle"       : [ [ "sod.unit.stoneGargoyle"      ], [ "avggarg0" ] ],
+
+"sod.unit.mage"                : [ [ "sod.unit.mage"               ], [ "avgmage0" ] ],
+"sod.unit.genie"               : [ [ "sod.unit.genie"              ], [ "avggeni0" ] ],
+"sod.unit.naga"                : [ [ "sod.unit.naga"               ], [ "avgnaga0" ] ],
+"sod.unit.giant"               : [ [ "sod.unit.giant"              ], [ "avgtitn0" ] ],
+
+"sod.unit.skeleton"            : [ [ "sod.unit.skeleton"           ], [ "avgskel0" ] ],
+"sod.unit.walkingDead"         : [ [ "sod.unit.walkingDead"        ], [ "avgzomb0" ] ],
+"sod.unit.wight"               : [ [ "sod.unit.wight"              ], [ "avgwght0" ] ],
+"sod.unit.vampire"             : [ [ "sod.unit.vampire"            ], [ "avgvamp0" ] ],
+"sod.unit.lich"                : [ [ "sod.unit.lich"               ], [ "avglich0" ] ],
+"sod.unit.blackKnight"         : [ [ "sod.unit.blackKnight"        ], [ "avgbkni0" ] ],
+"sod.unit.boneDragon"          : [ [ "sod.unit.boneDragon"         ], [ "avgbone0" ] ],
+
+"sod.unit.troglodyte"          : [ [ "sod.unit.troglodyte"         ], [ "avgtrog0" ] ],
+"sod.unit.harpy"               : [ [ "sod.unit.harpy"              ], [ "avgharp0" ] ],
+"sod.unit.beholder"            : [ [ "sod.unit.beholder"           ], [ "avgbhld0" ] ],
+"sod.unit.medusa"              : [ [ "sod.unit.medusa"             ], [ "avgmdsa0" ] ],
+"sod.unit.minotaur"            : [ [ "sod.unit.minotaur"           ], [ "avgmino0" ] ],
+"sod.unit.manticore"           : [ [ "sod.unit.manticore"          ], [ "avgmant0" ] ],
+"sod.unit.redDragon"           : [ [ "sod.unit.redDragon"          ], [ "avgrdrg0" ] ],
+
+"sod.unit.imp"                 : [ [ "sod.unit.imp"                ], [ "avgimp0"  ] ],
+"sod.unit.gog"                 : [ [ "sod.unit.gog"                ], [ "avggogs0" ] ],
+"sod.unit.hellHound"           : [ [ "sod.unit.hellHound"          ], [ "avghell0" ] ],
+"sod.unit.demon"               : [ [ "sod.unit.demon"              ], [ "avgdemn0" ] ],
+"sod.unit.pitFiend"            : [ [ "sod.unit.pitFiend"           ], [ "avgpit0"  ] ],
+"sod.unit.efreet"              : [ [ "sod.unit.efreet"             ], [ "avgefre0" ] ],
+"sod.unit.devil"               : [ [ "sod.unit.devil"              ], [ "avgdevl0" ] ],
+
+"sod.unit.gnoll"               : [ [ "sod.unit.gnoll"              ], [ "avggnll0" ] ],
+"sod.unit.lizardman"           : [ [ "sod.unit.lizardman"          ], [ "avglzrd0" ] ],
+"sod.unit.serpentFly"          : [ [ "sod.unit.serpentFly"         ], [ "avgdfly0" ] ],
+"sod.unit.basilisk"            : [ [ "sod.unit.basilisk"           ], [ "avgbasl0" ] ],
+"sod.unit.gorgon"              : [ [ "sod.unit.gorgon"             ], [ "avggorg0" ] ],
+"sod.unit.wyvern"              : [ [ "sod.unit.wyvern"             ], [ "avgwyvn0" ] ],
+"sod.unit.hydra"               : [ [ "sod.unit.hydra"              ], [ "avghydr0" ] ],
+
+"sod.unit.goblin"              : [ [ "sod.unit.goblin"             ], [ "avggobl0" ] ],
+"sod.unit.wolfRider"           : [ [ "sod.unit.wolfRider"          ], [ "avgwolf0" ] ],
+"sod.unit.orc"                 : [ [ "sod.unit.orc"                ], [ "avgorcg0" ] ],
+"sod.unit.ogre"                : [ [ "sod.unit.ogre"               ], [ "avgogre0" ] ],
+"sod.unit.roc"                 : [ [ "sod.unit.roc"                ], [ "avgrocs0" ] ],
+"sod.unit.cyclop"              : [ [ "sod.unit.cyclop"             ], [ "avgcycl0" ] ],
+"sod.unit.behemoth"            : [ [ "sod.unit.behemoth"           ], [ "avgbhmt0" ] ],
+
+"sod.unit.pixie"               : [ [ "sod.unit.pixie"              ], [ "avgpixie" ] ],
+"sod.unit.airElemental"        : [ [ "sod.unit.airElemental"       ], [ "avgair0" , "avg2ela" ] ],
+"sod.unit.waterElemental"      : [ [ "sod.unit.waterElemental"     ], [ "avgwatr0", "avg2elw" ] ],
+"sod.unit.fireElemental"       : [ [ "sod.unit.fireElemental"      ], [ "avgfire0", "avg2elf" ] ],
+"sod.unit.earthElemental"      : [ [ "sod.unit.earthElemental"     ], [ "avgerth0", "avg2ele" ] ],
+"sod.unit.psychicElemental"    : [ [ "sod.unit.psychicElemental"   ], [ "avgelp"   ] ],
+"sod.unit.firebird"            : [ [ "sod.unit.firebird"           ], [ "avgfbrd"  ] ],
+
+
+"hota.unit.nimph"              : [ [ "hota.unit.nimph"             ], [ "nimphfo" ] ],
+"hota.unit.crewMate"           : [ [ "hota.unit.crewMate"          ], [ "swshcamp" ] ],
+"hota.unit.pirate"             : [ [ "hota.unit.pirate"            ], [ "fregat" ] ],
+"hota.unit.stormbird"          : [ [ "hota.unit.stormbird"         ], [ "nestas" ] ],
+"hota.unit.seaWitch"           : [ [ "hota.unit.seaWitch"          ], [ "towerza" ] ],
+"hota.unit.nix"                : [ [ "hota.unit.nix"               ], [ "fortnix", "fortnixr" ] ],
+"hota.unit.seaSerpent"         : [ [ "hota.unit.seaSerpent"        ], [ "hasphtpl", "haspwtpl" ] ],
+
+"sod.unit.peasant"             : [ [ "sod.unit.peasant"            ], [ "avgpeas" ] ],
+"sod.unit.halfling"            : [ [ "sod.unit.halfling"           ], [ "avghalf" ] ],
+"sod.unit.boar"                : [ [ "sod.unit.boar"               ], [ "avgboar" ] ],
+"sod.unit.rogue"               : [ [ "sod.unit.rogue"              ], [ "avgrog"  ] ],
+"sod.unit.nomad"               : [ [ "sod.unit.nomad"              ], [ "avgnomd" ] ],
+"sod.unit.mummy"               : [ [ "sod.unit.mummy"              ], [ "avgmumy" ] ],
+"sod.unit.sharpshooter"        : [ [ "sod.unit.sharpshooter"       ], [ "avgshrp" ] ],
+"sod.unit.troll"               : [ [ "sod.unit.troll"              ], [ "avgtrll" ] ],
+"sod.unit.enchanter"           : [ [ "sod.unit.enchanter"          ], [ "avgench"  ] ],
+"sod.unit.fairieDragon"        : [ [ "sod.unit.fairieDragon"       ], [ "avgfdrg" ] ],
+"sod.unit.rustDragon"          : [ [ "sod.unit.rustDragon"         ], [ "avgrust" ] ],
+"sod.unit.crystalDragon"       : [ [ "sod.unit.crystalDragon"      ], [ "avgcdrg" ] ],
+"sod.unit.azureDragon"         : [ [ "sod.unit.azureDragon"        ], [ "avgazur" ] ],
+
+"hota.unit.leprechaun"         : [ [ "hota.unit.leprechaun"        ], [ "avglprch" ] ],
+"hota.unit.satyr"              : [ [ "hota.unit.satyr"             ], [ "avgsaty0" ] ],
+"hota.unit.fangarm"            : [ [ "hota.unit.fangarm"           ], [ "avgfngrm" ] ],
+
+
+"sod.unit.stoneGolem"          : [ [ "sod.unit.stoneGolem", "sod.unit.ironGolem", "sod.unit.goldGolem", "sod.unit.diamondGolem"  ], [ "avggolm0" ] ],
+"sod.unit.allElem"             : [ [ "sod.unit.airElemental",  "sod.unit.waterElemental", "sod.unit.fireElemental" , "sod.unit.earthElemental"], [ "avgelem0" ] ],
+"sod.unit.warMachine"          : [ [ "sod.unit.ammoCart","sod.unit.firstAidTent", "sod.unit.ballista"           ], [ "avgsieg0"  ] ],
+"sod.unit.refugee"             : [ [], [ "avgrefg0"  ] ],
+"hota.unit.cannonBlacksmith"   : [ [ "hota.unit.cannon"            ], [ "avcnbksm"  ] ]
+
+
+}
+}]

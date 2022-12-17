@@ -10,6 +10,7 @@
 #include "Profiler.hpp"
 
 #include "LibraryArtifact.hpp"
+#include "LibraryDwelling.hpp"
 #include "LibraryFaction.hpp"
 #include "LibraryGameRules.hpp"
 #include "LibraryHero.hpp"
@@ -43,17 +44,18 @@ struct LibraryContainerKey {
 };
 
 // clang-format off
-template<> struct LibraryContainerKey<LibraryTerrain       > { static constexpr const char * scopeName = "terrains" ; };
-template<> struct LibraryContainerKey<LibraryResource      > { static constexpr const char * scopeName = "resources" ; };
-template<> struct LibraryContainerKey<LibraryFaction       > { static constexpr const char * scopeName = "factions" ; };
-template<> struct LibraryContainerKey<LibrarySecondarySkill> { static constexpr const char * scopeName = "skills" ; };
-template<> struct LibraryContainerKey<LibrarySpell         > { static constexpr const char * scopeName = "spells" ; };
-template<> struct LibraryContainerKey<LibraryUnit          > { static constexpr const char * scopeName = "units" ; };
-template<> struct LibraryContainerKey<LibraryHeroSpec      > { static constexpr const char * scopeName = "specialities" ; };
 template<> struct LibraryContainerKey<LibraryArtifact      > { static constexpr const char * scopeName = "artifacts" ; };
+template<> struct LibraryContainerKey<LibraryDwelling      > { static constexpr const char * scopeName = "dwellings" ; };
+template<> struct LibraryContainerKey<LibraryFaction       > { static constexpr const char * scopeName = "factions" ; };
 template<> struct LibraryContainerKey<LibraryHero          > { static constexpr const char * scopeName = "heroes" ; };
+template<> struct LibraryContainerKey<LibraryHeroSpec      > { static constexpr const char * scopeName = "specialities" ; };
 template<> struct LibraryContainerKey<LibraryMapObject     > { static constexpr const char * scopeName = "mapObjects" ; };
 template<> struct LibraryContainerKey<LibraryObjectDef     > { static constexpr const char * scopeName = "objectDefs" ; };
+template<> struct LibraryContainerKey<LibraryResource      > { static constexpr const char * scopeName = "resources" ; };
+template<> struct LibraryContainerKey<LibrarySecondarySkill> { static constexpr const char * scopeName = "skills" ; };
+template<> struct LibraryContainerKey<LibrarySpell         > { static constexpr const char * scopeName = "spells" ; };
+template<> struct LibraryContainerKey<LibraryTerrain       > { static constexpr const char * scopeName = "terrains" ; };
+template<> struct LibraryContainerKey<LibraryUnit          > { static constexpr const char * scopeName = "units" ; };
 // clang-format on
 }
 
@@ -81,19 +83,28 @@ struct GameDatabase::Impl {
         }
         std::vector<std::string> legacyOrderedIds() const override
         {
-            std::map<int, std::string> resultMap;
-            int                        maxId = 0;
+            const auto               records = legacyOrderedRecords();
+            std::vector<std::string> result(records.size());
+            for (size_t i = 0; i < records.size(); ++i)
+                result[i] = records[i]->id;
+            return result;
+        }
+
+        std::vector<const T*> legacyOrderedRecords() const override
+        {
+            std::map<int, const T*> resultMap;
+            int                     maxId = 0;
             for (const T* obj : m_sorted) {
                 if (obj->legacyId < 0)
                     continue;
-                if (!resultMap[obj->legacyId].empty()) {
+                if (resultMap[obj->legacyId]) {
                     assert(0);
                     throw std::runtime_error("all legacyIds must be unique");
                 }
-                resultMap[obj->legacyId] = obj->id;
+                resultMap[obj->legacyId] = obj;
                 maxId                    = std::max(maxId, obj->legacyId);
             }
-            std::vector<std::string> result(maxId + 1);
+            std::vector<const T*> result(maxId + 1);
             for (auto& [key, id] : resultMap)
                 result[key] = id;
             return result;
@@ -157,20 +168,18 @@ struct GameDatabase::Impl {
             m_sorted.reserve(m_unsorted.size());
         }
     };
-    LibraryContainer<LibraryTerrain>  m_terrains;
-    LibraryContainer<LibraryResource> m_resources;
-
+    LibraryContainer<LibraryArtifact>       m_artifacts;
+    LibraryContainer<LibraryDwelling>       m_dwellings;
     LibraryContainer<LibraryFaction>        m_factions;
+    LibraryContainer<LibraryHero>           m_heroes;
+    LibraryContainer<LibraryHeroSpec>       m_heroSpecs;
+    LibraryContainer<LibraryMapObject>      m_mapObjects;
+    LibraryContainer<LibraryObjectDef>      m_objectDefs;
+    LibraryContainer<LibraryResource>       m_resources;
     LibraryContainer<LibrarySecondarySkill> m_skills;
     LibraryContainer<LibrarySpell>          m_spells;
-
-    LibraryContainer<LibraryUnit>     m_units;
-    LibraryContainer<LibraryHeroSpec> m_specs;
-    LibraryContainer<LibraryArtifact> m_artifacts;
-
-    LibraryContainer<LibraryHero>      m_heroes;
-    LibraryContainer<LibraryMapObject> m_mapObjects;
-    LibraryContainer<LibraryObjectDef> m_objectDefs;
+    LibraryContainer<LibraryTerrain>        m_terrains;
+    LibraryContainer<LibraryUnit>           m_units;
 
     LibraryGameRules m_gameRules;
 
@@ -218,7 +227,7 @@ GameDatabase::Impl::LibraryContainer<LibraryUnit>& GameDatabase::Impl::getContai
 template<>
 GameDatabase::Impl::LibraryContainer<LibraryHeroSpec>& GameDatabase::Impl::getContainer<LibraryHeroSpec>()
 {
-    return m_specs;
+    return m_heroSpecs;
 }
 template<>
 GameDatabase::Impl::LibraryContainer<LibraryArtifact>& GameDatabase::Impl::getContainer<LibraryArtifact>()
@@ -251,59 +260,53 @@ GameDatabase::~GameDatabase()
 {
 }
 
-IGameDatabase::LibraryUnitContainerPtr GameDatabase::units() const
-{
-    return &m_impl->m_units;
-}
-
-IGameDatabase::LibraryHeroContainerPtr GameDatabase::heroes() const
-{
-    return &m_impl->m_heroes;
-}
-
 IGameDatabase::LibraryArtifactContainerPtr GameDatabase::artifacts() const
 {
     return &m_impl->m_artifacts;
 }
-
-IGameDatabase::LibrarySecondarySkillContainerPtr GameDatabase::secSkills() const
+IGameDatabase::LibraryDwellingContainerPtr GameDatabase::dwellings() const
 {
-    return &m_impl->m_skills;
+    return &m_impl->m_dwellings;
 }
-
 IGameDatabase::LibraryFactionContainerPtr GameDatabase::factions() const
 {
     return &m_impl->m_factions;
 }
-
-IGameDatabase::LibrarySpellContainerPtr GameDatabase::spells() const
+IGameDatabase::LibraryHeroContainerPtr GameDatabase::heroes() const
 {
-    return &m_impl->m_spells;
+    return &m_impl->m_heroes;
 }
-
-IGameDatabase::LibraryResourceContainerPtr GameDatabase::resources() const
+IGameDatabase::LibraryHeroSpecContainerPtr GameDatabase::heroSpecs() const
 {
-    return &m_impl->m_resources;
+    return &m_impl->m_heroSpecs;
 }
-
-IGameDatabase::LibraryTerrainContainerPtr GameDatabase::terrains() const
-{
-    return &m_impl->m_terrains;
-}
-
 IGameDatabase::LibraryMapObjectContainerPtr GameDatabase::mapObjects() const
 {
     return &m_impl->m_mapObjects;
 }
-
-IGameDatabase::LibraryHeroSpecContainerPtr GameDatabase::heroSpecs() const
-{
-    return &m_impl->m_specs;
-}
-
 IGameDatabase::LibraryObjectDefContainerPtr GameDatabase::objectDefs() const
 {
     return &m_impl->m_objectDefs;
+}
+IGameDatabase::LibraryResourceContainerPtr GameDatabase::resources() const
+{
+    return &m_impl->m_resources;
+}
+IGameDatabase::LibrarySecondarySkillContainerPtr GameDatabase::secSkills() const
+{
+    return &m_impl->m_skills;
+}
+IGameDatabase::LibrarySpellContainerPtr GameDatabase::spells() const
+{
+    return &m_impl->m_spells;
+}
+IGameDatabase::LibraryTerrainContainerPtr GameDatabase::terrains() const
+{
+    return &m_impl->m_terrains;
+}
+IGameDatabase::LibraryUnitContainerPtr GameDatabase::units() const
+{
+    return &m_impl->m_units;
 }
 
 LibraryGameRulesConstPtr GameDatabase::gameRules() const
@@ -348,32 +351,34 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
     }
 
     // clang-format off
-    m_impl->m_terrains   .prepareObjectKeys(recordObjectMaps);
-    m_impl->m_resources  .prepareObjectKeys(recordObjectMaps);
-    m_impl->m_factions   .prepareObjectKeys(recordObjectMaps);
-    m_impl->m_skills     .prepareObjectKeys(recordObjectMaps);
-    m_impl->m_spells     .prepareObjectKeys(recordObjectMaps);
-    m_impl->m_units      .prepareObjectKeys(recordObjectMaps);
-    m_impl->m_specs      .prepareObjectKeys(recordObjectMaps);
     m_impl->m_artifacts  .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_dwellings  .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_factions   .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_heroSpecs  .prepareObjectKeys(recordObjectMaps);
     m_impl->m_heroes     .prepareObjectKeys(recordObjectMaps);
     m_impl->m_mapObjects .prepareObjectKeys(recordObjectMaps);
     m_impl->m_objectDefs .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_resources  .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_skills     .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_spells     .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_terrains   .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_units      .prepareObjectKeys(recordObjectMaps);
     // clang-format on
 
     // clang-format off
     const bool result =
-               m_impl->m_terrains   .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_resources  .loadRecordList(this, recordObjectMaps)
+               m_impl->m_artifacts  .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_dwellings  .loadRecordList(this, recordObjectMaps)
             && m_impl->m_factions   .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_skills     .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_spells     .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_units      .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_specs      .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_artifacts  .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_heroSpecs  .loadRecordList(this, recordObjectMaps)
             && m_impl->m_heroes     .loadRecordList(this, recordObjectMaps)
             && m_impl->m_mapObjects .loadRecordList(this, recordObjectMaps)
             && m_impl->m_objectDefs .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_resources  .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_skills     .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_spells     .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_terrains   .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_units      .loadRecordList(this, recordObjectMaps)
             ;
     // clang-format on
 
@@ -384,7 +389,7 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
         return false;
 
     // making object links.
-    for (auto spec : m_impl->m_specs.m_unsorted) {
+    for (auto spec : m_impl->m_heroSpecs.m_unsorted) {
         if (spec->type == LibraryHeroSpec::Type::Unit
             || spec->type == LibraryHeroSpec::Type::UnitUpgrade
             || spec->type == LibraryHeroSpec::Type::UnitNonStd
@@ -534,8 +539,8 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
         unit->baseUpgrade = unitIt;
     }
     // spec postproc - do we need an order at all?
-    for (auto* spec : m_impl->m_specs.m_unsorted) {
-        m_impl->m_specs.m_sorted.push_back(spec);
+    for (auto* spec : m_impl->m_heroSpecs.m_unsorted) {
+        m_impl->m_heroSpecs.m_sorted.push_back(spec);
     }
     // artifacts postproc
     std::sort(m_impl->m_artifacts.m_unsorted.begin(), m_impl->m_artifacts.m_unsorted.end(), [](auto* l, auto* r) {
@@ -595,6 +600,9 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
             }
         }
         m_impl->m_mapObjects.m_sorted.push_back(obj);
+    }
+    for (auto* d : m_impl->m_dwellings.m_unsorted) {
+        m_impl->m_dwellings.m_sorted.push_back(d);
     }
 
     return true;

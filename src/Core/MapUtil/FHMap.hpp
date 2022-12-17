@@ -55,6 +55,7 @@ struct FHPlayer {
 
 struct FHCommonObject {
     FHPos m_pos{ g_invalidPos };
+    int   m_order = 0;
 };
 
 struct FHPlayerControlledObject : public FHCommonObject {
@@ -72,18 +73,23 @@ struct FHHeroData {
 };
 
 struct FHHero : public FHPlayerControlledObject {
-    bool        m_isMain{ false };
-    std::string m_id;
-    uint32_t    m_questIdentifier = 0;
+    bool                      m_isMain{ false };
+    Core::LibraryHeroConstPtr m_id              = nullptr;
+    uint32_t                  m_questIdentifier = 0;
 };
 
 struct FHTown : public FHPlayerControlledObject {
-    bool        m_isMain{ false };
-    std::string m_faction;
-    bool        m_hasFort{ false };
-    uint32_t    m_questIdentifier = 0;
-    bool        m_spellResearch{ false };
-    std::string m_defFile; // just for the sake of roundtrip tests.
+    bool                         m_isMain{ false };
+    Core::LibraryFactionConstPtr m_factionId = nullptr;
+    bool                         m_hasFort{ false };
+    uint32_t                     m_questIdentifier = 0;
+    bool                         m_spellResearch{ false };
+    std::string                  m_defFile; // just for the sake of roundtrip tests.
+};
+
+struct FHDwelling : public FHPlayerControlledObject {
+    Core::LibraryDwellingConstPtr m_id      = nullptr;
+    int                           m_variant = 0;
 };
 
 struct FHTileMap {
@@ -164,7 +170,7 @@ struct FHTileMap {
 struct FHZone {
     int m_id = 0;
 
-    Core::LibraryTerrainConstPtr m_terrain = nullptr;
+    Core::LibraryTerrainConstPtr m_terrainId = nullptr;
     std::vector<FHPos>           m_tiles;
     std::vector<uint8_t>         m_tilesVariants;
     struct Rect {
@@ -178,8 +184,23 @@ struct FHZone {
 };
 
 struct FHResource : public FHCommonObject {
-    uint32_t                      m_amount   = 0;
-    Core::LibraryResourceConstPtr m_resource = nullptr;
+    enum class Type
+    {
+        Resource,
+        TreasureChest,
+    };
+    uint32_t                      m_amount = 0;
+    Core::LibraryResourceConstPtr m_id     = nullptr;
+    Type                          m_type   = Type::Resource;
+};
+
+struct FHArtifact : public FHCommonObject {
+    Core::LibraryArtifactConstPtr m_id = nullptr;
+};
+
+struct FHMonster : public FHCommonObject {
+    Core::LibraryUnitConstPtr m_id    = nullptr;
+    uint32_t                  m_count = 0;
 };
 
 struct FHMap {
@@ -201,14 +222,17 @@ struct FHMap {
 
     struct Objects {
         std::vector<FHResource> m_resources;
+        std::vector<FHArtifact> m_artifacts;
+        std::vector<FHMonster>  m_monsters;
+        std::vector<FHDwelling> m_dwellings;
     } m_objects;
 
     Core::LibraryTerrainConstPtr m_defaultTerrain = nullptr;
 
-    std::vector<std::string> m_disabledHeroes;
-    std::vector<std::string> m_disabledArtifacts;
-    std::vector<std::string> m_disabledSpells;
-    std::vector<std::string> m_disabledSkills;
+    std::vector<Core::LibraryHeroConstPtr>           m_disabledHeroes;
+    std::vector<Core::LibraryArtifactConstPtr>       m_disabledArtifacts;
+    std::vector<Core::LibrarySpellConstPtr>          m_disabledSpells;
+    std::vector<Core::LibrarySecondarySkillConstPtr> m_disabledSkills;
 
     std::vector<FHHeroData> m_customHeroes;
 

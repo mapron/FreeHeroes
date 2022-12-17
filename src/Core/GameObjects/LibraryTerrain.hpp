@@ -15,6 +15,10 @@
 namespace FreeHeroes::Core {
 
 struct LibraryTerrain {
+    [[maybe_unused]] static inline constexpr const std::string_view s_terrainDirt  = "sod.terrain.dirt";
+    [[maybe_unused]] static inline constexpr const std::string_view s_terrainSand  = "sod.terrain.sand";
+    [[maybe_unused]] static inline constexpr const std::string_view s_terrainWater = "sod.terrain.water";
+
     enum class BorderType
     {
         Invalid,

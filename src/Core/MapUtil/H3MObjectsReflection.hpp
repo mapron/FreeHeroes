@@ -176,6 +176,7 @@ inline constexpr const std::tuple MetaInfo::s_fields<MapMonster>{
     Field("neverFlees", &MapMonster::m_neverFlees),
     Field("notGrowingTeam", &MapMonster::m_notGrowingTeam),
     Field("joinPercent", &MapMonster::m_joinPercent),
+    Field("agressionExact", &MapMonster::m_agressionExact),
     Field("joinOnlyForMoney", &MapMonster::m_joinOnlyForMoney),
 };
 

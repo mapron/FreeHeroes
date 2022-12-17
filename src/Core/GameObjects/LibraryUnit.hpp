@@ -121,8 +121,6 @@ struct LibraryUnit {
         bool isValid() const { return min > 0 && max > 0; }
     };
     struct Presentation {
-        std::string spriteAdventure;
-
         std::string spriteBattle;
         std::string portrait;
         std::string portraitSmall;
@@ -155,9 +153,10 @@ struct LibraryUnit {
 
     LibraryArtifactConstPtr battleMachineArtifact = nullptr;
 
-    Traits       traits;
-    Abilities    abilities;
-    Presentation presentationParams;
+    Traits                   traits;
+    Abilities                abilities;
+    Presentation             presentationParams;
+    LibraryObjectDefConstPtr mapObjectDef = nullptr;
 };
 
 }

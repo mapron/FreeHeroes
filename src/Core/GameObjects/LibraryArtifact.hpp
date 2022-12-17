@@ -217,7 +217,8 @@ struct LibraryArtifact {
     ArtifactSlotRequirement slotReq;
     LibraryArtifactConstPtr partOfSet = nullptr;
 
-    Presentation presentationParams;
+    LibraryObjectDefConstPtr mapObjectDef = nullptr;
+    Presentation             presentationParams;
 
     constexpr auto sortOrdering() const noexcept { return std::tie(presentationParams.orderCategory, presentationParams.orderGroup, presentationParams.order, value); }
 };

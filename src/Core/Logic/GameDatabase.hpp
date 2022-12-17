@@ -27,17 +27,18 @@ public:
     GameDatabase(const std::string& dataBaseId, const IResourceLibrary* resourceLibrary);
     ~GameDatabase();
 
-    LibraryUnitContainerPtr           units() const override;
-    LibraryHeroContainerPtr           heroes() const override;
     LibraryArtifactContainerPtr       artifacts() const override;
-    LibrarySecondarySkillContainerPtr secSkills() const override;
+    LibraryDwellingContainerPtr       dwellings() const override;
     LibraryFactionContainerPtr        factions() const override;
-    LibrarySpellContainerPtr          spells() const override;
-    LibraryResourceContainerPtr       resources() const override;
-    LibraryTerrainContainerPtr        terrains() const override;
-    LibraryMapObjectContainerPtr      mapObjects() const override;
+    LibraryHeroContainerPtr           heroes() const override;
     LibraryHeroSpecContainerPtr       heroSpecs() const override;
+    LibraryMapObjectContainerPtr      mapObjects() const override;
     LibraryObjectDefContainerPtr      objectDefs() const override;
+    LibraryResourceContainerPtr       resources() const override;
+    LibrarySecondarySkillContainerPtr secSkills() const override;
+    LibrarySpellContainerPtr          spells() const override;
+    LibraryTerrainContainerPtr        terrains() const override;
+    LibraryUnitContainerPtr           units() const override;
 
     LibraryGameRulesConstPtr gameRules() const override;
 

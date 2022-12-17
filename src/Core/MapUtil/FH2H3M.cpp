@@ -26,10 +26,6 @@ namespace FreeHeroes {
 
 namespace {
 
-constexpr const std::string_view g_terrainDirt  = "sod.terrain.dirt";
-constexpr const std::string_view g_terrainSand  = "sod.terrain.sand";
-constexpr const std::string_view g_terrainWater = "sod.terrain.water";
-
 H3Pos int3fromPos(FHPos pos, int xoffset = 0)
 {
     return { (uint8_t) (pos.m_x + xoffset), (uint8_t) pos.m_y, (uint8_t) pos.m_z };
@@ -60,19 +56,19 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
     dest.prepareArrays();
 
     auto fillZoneTerrain = [&tileMap](const FHZone& zone) {
-        if (!zone.m_terrain)
+        if (!zone.m_terrainId)
             return;
 
         zone.placeOnMap(tileMap);
     };
 
-    fillZoneTerrain(FHZone{ .m_terrain = src.m_defaultTerrain, .m_rect{ FHZone::Rect{ .m_pos{ 0, 0, 0 }, .m_width = tileMap.m_width, .m_height = tileMap.m_height } } });
+    fillZoneTerrain(FHZone{ .m_terrainId = src.m_defaultTerrain, .m_rect{ FHZone::Rect{ .m_pos{ 0, 0, 0 }, .m_width = tileMap.m_width, .m_height = tileMap.m_height } } });
     for (auto& zone : src.m_zones)
         fillZoneTerrain(zone);
 
-    const auto*  dirtTerrain   = database->terrains()->find(std::string(g_terrainDirt));
-    const auto*  sandTerrain   = database->terrains()->find(std::string(g_terrainSand));
-    const auto*  waterTerrain  = database->terrains()->find(std::string(g_terrainWater));
+    const auto*  dirtTerrain   = database->terrains()->find(std::string(Core::LibraryTerrain::s_terrainDirt));
+    const auto*  sandTerrain   = database->terrains()->find(std::string(Core::LibraryTerrain::s_terrainSand));
+    const auto*  waterTerrain  = database->terrains()->find(std::string(Core::LibraryTerrain::s_terrainWater));
     const size_t terrainsCount = database->terrains()->legacyOrderedIds().size();
 
     tileMap.correctTerrainTypes(dirtTerrain, sandTerrain, waterTerrain);
@@ -98,8 +94,7 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
 
     const int townGateOffset = 2;
 
-    auto* factionsContainer = database->factions();
-    auto* defsContainer     = database->objectDefs();
+    auto* defsContainer = database->objectDefs();
 
     for (auto& [playerId, fhPlayer] : src.m_players) {
         auto  index    = static_cast<int>(playerId);
@@ -183,7 +178,7 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
         cas1->m_spellResearch   = fhTown.m_spellResearch;
         //cas1->m_formation       = 0xCC;
         cas1->prepareArrays();
-        auto* libraryFaction = factionsContainer->find(fhTown.m_faction);
+        auto* libraryFaction = fhTown.m_factionId;
         assert(libraryFaction);
         ObjectTemplate res;
         if (!fhTown.m_defFile.empty()) {
@@ -193,12 +188,12 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
         }
         res.m_subid = libraryFaction->legacyId;
 
-        dest.m_objects.push_back(Object{ .m_pos = int3fromPos(fhTown.m_pos), .m_defnum = getDefFileIndex(res), .m_impl = std::move(cas1) });
+        dest.m_objects.push_back(Object{ .m_order = fhTown.m_order, .m_pos = int3fromPos(fhTown.m_pos), .m_defnum = getDefFileIndex(res), .m_impl = std::move(cas1) });
     }
 
     for (auto& fhHero : src.m_wanderingHeroes) {
         auto  playerIndex = static_cast<int>(fhHero.m_player);
-        auto* libraryHero = database->heroes()->find(fhHero.m_id);
+        auto* libraryHero = fhHero.m_id;
         assert(libraryHero);
 
         const uint8_t heroId = libraryHero->legacyId;
@@ -219,14 +214,7 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
         her1->prepareArrays();
         dest.m_allowedHeroes[heroId] = 0;
 
-        dest.m_objects.push_back(Object{ .m_pos = int3fromPos(fhHero.m_pos, +1), .m_defnum = getDefFileIndex(makeHeroDef(libraryHero)), .m_impl = std::move(her1) });
-    }
-
-    for (auto& fhRes : src.m_objects.m_resources) {
-        auto res1      = std::make_unique<MapResource>(dest.m_features);
-        res1->m_amount = fhRes.m_amount;
-
-        dest.m_objects.push_back(Object{ .m_pos = int3fromPos(fhRes.m_pos), .m_defnum = getDefFileIndex(makeDefFromDb(fhRes.m_resource->mapObjectDef)), .m_impl = std::move(res1) });
+        dest.m_objects.push_back(Object{ .m_order = fhHero.m_order, .m_pos = int3fromPos(fhHero.m_pos, +1), .m_defnum = getDefFileIndex(makeHeroDef(libraryHero)), .m_impl = std::move(her1) });
     }
 
     for (auto& allowed : dest.m_allowedHeroes)
@@ -239,7 +227,7 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
         allowed = 1;
 
     for (const auto& heroId : src.m_disabledHeroes) {
-        const auto legacyId            = database->heroes()->find(heroId)->legacyId;
+        const auto legacyId            = (heroId)->legacyId;
         dest.m_allowedHeroes[legacyId] = 0;
     }
 
@@ -249,16 +237,16 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
         dest.m_allowedArtifacts[144] = 0;
     }
     for (const auto& artId : src.m_disabledArtifacts) {
-        const auto legacyId               = database->artifacts()->find(artId)->legacyId;
+        const auto legacyId               = (artId)->legacyId;
         dest.m_allowedArtifacts[legacyId] = 0;
     }
 
     for (const auto& spellId : src.m_disabledSpells) {
-        const auto legacyId            = database->spells()->find(spellId)->legacyId;
+        const auto legacyId            = (spellId)->legacyId;
         dest.m_allowedSpells[legacyId] = 0;
     }
     for (const auto& secSkillId : src.m_disabledSkills) {
-        const auto legacyId               = database->secSkills()->find(secSkillId)->legacyId;
+        const auto legacyId               = (secSkillId)->legacyId;
         dest.m_allowedSecSkills[legacyId] = 0;
     }
     for (auto& customHero : src.m_customHeroes) {
@@ -283,6 +271,31 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
             }
         }
     }
+
+    for (auto& fhRes : src.m_objects.m_resources) {
+        if (fhRes.m_type == FHResource::Type::Resource) {
+            auto res      = std::make_unique<MapResource>(dest.m_features);
+            res->m_amount = fhRes.m_amount;
+
+            dest.m_objects.push_back(Object{ .m_order = fhRes.m_order, .m_pos = int3fromPos(fhRes.m_pos), .m_defnum = getDefFileIndex(makeDefFromDb(fhRes.m_id->mapObjectDef)), .m_impl = std::move(res) });
+        } else if (fhRes.m_type == FHResource::Type::TreasureChest) {
+            dest.m_objects.push_back(Object{ .m_order = fhRes.m_order, .m_pos = int3fromPos(fhRes.m_pos), .m_defnum = getDefFileIndex(makeDefFromDbId("avtchst0")), .m_impl = std::make_unique<MapObjectSimple>(dest.m_features) });
+        }
+    }
+
+    for (auto& fhArt : src.m_objects.m_artifacts) {
+        auto art = std::make_unique<MapArtifact>(dest.m_features, false);
+
+        dest.m_objects.push_back(Object{ .m_order = fhArt.m_order, .m_pos = int3fromPos(fhArt.m_pos), .m_defnum = getDefFileIndex(makeDefFromDb(fhArt.m_id->mapObjectDef)), .m_impl = std::move(art) });
+    }
+
+    for (auto& fhMon : src.m_objects.m_monsters) {
+        auto monster     = std::make_unique<MapMonster>(dest.m_features);
+        monster->m_count = static_cast<uint16_t>(fhMon.m_count);
+        dest.m_objects.push_back(Object{ .m_order = fhMon.m_order, .m_pos = int3fromPos(fhMon.m_pos, dest.m_features->m_monstersMapXOffset), .m_defnum = getDefFileIndex(makeDefFromDb(fhMon.m_id->mapObjectDef)), .m_impl = std::move(monster) });
+    }
+
+    std::sort(dest.m_objects.begin(), dest.m_objects.end(), [](const auto& lh, const auto& rh) { return lh.m_order < rh.m_order; });
 }
 
 }
