@@ -68,6 +68,10 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
     fillZoneTerrain(FHZone{ .m_terrainId = src.m_defaultTerrain, .m_rect{ FHZone::Rect{ .m_pos{ 0, 0, 0 }, .m_width = tileMap.m_width, .m_height = tileMap.m_height } } });
     for (auto& zone : src.m_zones)
         fillZoneTerrain(zone);
+    for (auto& river : src.m_rivers)
+        river.placeOnMap(tileMap);
+    for (auto& road : src.m_roads)
+        road.placeOnMap(tileMap);
 
     const auto*  dirtTerrain   = database->terrains()->find(std::string(Core::LibraryTerrain::s_terrainDirt));
     const auto*  sandTerrain   = database->terrains()->find(std::string(Core::LibraryTerrain::s_terrainSand));
@@ -75,6 +79,8 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
     const size_t terrainsCount = database->terrains()->legacyOrderedIds().size();
 
     tileMap.correctTerrainTypes(dirtTerrain, sandTerrain, waterTerrain);
+    tileMap.correctRoads();
+    tileMap.correctRivers();
     tileMap.rngTiles(rng);
 
     for (uint8_t z = 0; z < tileMap.m_depth; ++z) {
@@ -84,11 +90,23 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
                 auto& destTile          = dest.m_tiles.get(x, y, z);
                 destTile.m_terType      = static_cast<uint8_t>(tile.m_terrain->legacyId);
                 destTile.m_terView      = tile.m_view;
+                destTile.m_riverType    = static_cast<uint8_t>(tile.m_riverType);
+                destTile.m_riverDir     = tile.m_riverView;
+                destTile.m_roadType     = static_cast<uint8_t>(tile.m_roadType);
+                destTile.m_roadDir      = tile.m_roadView;
                 destTile.m_extTileFlags = 0;
                 if (tile.m_flipHor)
                     destTile.m_extTileFlags |= MapTile::TerrainFlipHor;
                 if (tile.m_flipVert)
                     destTile.m_extTileFlags |= MapTile::TerrainFlipVert;
+                if (tile.m_roadFlipHor)
+                    destTile.m_extTileFlags |= MapTile::RoadFlipHor;
+                if (tile.m_roadFlipVert)
+                    destTile.m_extTileFlags |= MapTile::RoadFlipVert;
+                if (tile.m_riverFlipHor)
+                    destTile.m_extTileFlags |= MapTile::RiverFlipHor;
+                if (tile.m_riverFlipVert)
+                    destTile.m_extTileFlags |= MapTile::RiverFlipVert;
                 if (tile.m_coastal)
                     destTile.m_extTileFlags |= MapTile::Coastal;
             }
