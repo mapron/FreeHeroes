@@ -8,10 +8,11 @@
 #include "FHMap.hpp"
 
 #include "Reflection/EnumTraitsMacro.hpp"
-#include "Reflection/MetaInfo.hpp"
+#include "Reflection/MetaInfoMacro.hpp"
 
 #include "FHTileMapReflection.hpp"
 
+// clang-format off
 namespace FreeHeroes::Core::Reflection {
 
 ENUM_REFLECTION_STRINGIY(FHPlayerId,
@@ -46,183 +47,201 @@ ENUM_REFLECTION_STRINGIY(FHRandomArtifact::Type,
                          Major,
                          Relic)
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<FHPlayer>{
-    Field("ai", &FHPlayer::m_aiPossible),
-    Field("human", &FHPlayer::m_humanPossible),
-    Field("factions", &FHPlayer::m_startingFactions),
-};
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<FHHeroData>{
-    Field("hasExp", &FHHeroData::m_hasExp),
-    Field("hasSecSkills", &FHHeroData::m_hasSecSkills),
-    Field("hasPrimSkills", &FHHeroData::m_hasPrimSkills),
-    Field("hasCustomBio", &FHHeroData::m_hasCustomBio),
-    Field("hasSpells", &FHHeroData::m_hasSpells),
-    Field("army", &FHHeroData::m_army),
-};
+STRUCT_REFLECTION_PAIRED(
+    FHPlayer,
+    "ai",                  m_aiPossible,
+    "human",               m_humanPossible,
+    "factions",            m_startingFactions
+)
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<FHHero>{
-    Field("pos", &FHHero::m_pos),
-    Field("order", &FHHero::m_order),
-    Field("player", &FHHero::m_player),
 
-    Field("main", &FHHero::m_isMain),
-    Field("data", &FHHero::m_data),
-    Field("questId", &FHHero::m_questIdentifier),
-};
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHHeroData,
+    m_hasExp,
+    m_hasSecSkills,
+    m_hasPrimSkills,
+    m_hasCustomBio,
+    m_hasSpells,
+    m_army
+)
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<FHTown>{
-    Field("pos", &FHTown::m_pos),
-    Field("order", &FHTown::m_order),
-    Field("player", &FHTown::m_player),
 
-    Field("main", &FHTown::m_isMain),
-    Field("factionId", &FHTown::m_factionId),
-    Field("hasFort", &FHTown::m_hasFort),
-    Field("questId", &FHTown::m_questIdentifier),
-    Field("spellResearch", &FHTown::m_spellResearch),
-    Field("defFile", &FHTown::m_defFile),
-};
+STRUCT_REFLECTION_PAIRED(
+    FHHero,
+    "pos",                 m_pos,
+    "order",               m_order,
+    "player",              m_player,
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<FHZone::Rect>{
-    Field("pos", &FHZone::Rect::m_pos),
-    Field("w", &FHZone::Rect::m_width),
-    Field("h", &FHZone::Rect::m_height),
-};
+    "main",                m_isMain,
+    "data",                m_data,
+    "questId",             m_questIdentifier
+)
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<FHResource>{
-    Field("pos", &FHResource::m_pos),
-    Field("order", &FHResource::m_order),
 
-    Field("amount", &FHResource::m_amount),
-    Field("id", &FHResource::m_id),
-    Field("type", &FHResource::m_type),
-};
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<FHRandomResource>{
-    Field("pos", &FHRandomResource::m_pos),
-    Field("order", &FHRandomResource::m_order),
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHTown,
+    m_pos,
+    m_order,
+    m_player,
 
-    Field("amount", &FHRandomResource::m_amount),
-};
+    m_isMain,
+    m_factionId,
+    m_hasFort,
+    m_questIdentifier,
+    m_spellResearch,
+    m_defFile
+)
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<FHArtifact>{
-    Field("pos", &FHArtifact::m_pos),
-    Field("order", &FHArtifact::m_order),
 
-    Field("id", &FHArtifact::m_id),
-};
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<FHRandomArtifact>{
-    Field("pos", &FHRandomArtifact::m_pos),
-    Field("order", &FHRandomArtifact::m_order),
+STRUCT_REFLECTION_PAIRED(
+    FHZone::Rect,
+    "pos",                 m_pos,
+    "w",                   m_width,
+    "h",                   m_height
+)
 
-    Field("type", &FHRandomArtifact::m_type),
-};
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<FHPandora>{
-    Field("pos", &FHPandora::m_pos),
-    Field("order", &FHPandora::m_order),
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHResource,
+    m_pos,
+    m_order,
 
-    Field("reward", &FHPandora::m_reward),
-};
+    m_amount,
+    m_id,
+    m_type
+)
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<FHMonster>{
-    Field("pos", &FHMonster::m_pos),
-    Field("order", &FHMonster::m_order),
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRandomResource,
+    m_pos,
+    m_order,
 
-    Field("id", &FHMonster::m_id),
-    Field("count", &FHMonster::m_count),
-    Field("agressionMin", &FHMonster::m_agressionMin),
-    Field("agressionMax", &FHMonster::m_agressionMax),
-    Field("questIdentifier", &FHMonster::m_questIdentifier),
+    m_amount
+)
 
-};
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<FHDwelling>{
-    Field("pos", &FHDwelling::m_pos),
-    Field("order", &FHDwelling::m_order),
-    Field("player", &FHDwelling::m_player),
 
-    Field("id", &FHDwelling::m_id),
-    Field("defVariant", &FHDwelling::m_defVariant),
-};
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<FHMine>{
-    Field("pos", &FHMine::m_pos),
-    Field("order", &FHMine::m_order),
-    Field("player", &FHMine::m_player),
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHArtifact,
+    m_pos,
+    m_order,
 
-    Field("id", &FHMine::m_id),
-    Field("defVariant", &FHMine::m_defVariant),
-};
+    m_id
+)
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<FHBank>{
-    Field("pos", &FHBank::m_pos),
-    Field("order", &FHBank::m_order),
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRandomArtifact,
+    m_pos,
+    m_order,
 
-    Field("id", &FHBank::m_id),
-    Field("defVariant", &FHBank::m_defVariant),
-    Field("guardsVariants", &FHBank::m_guardsVariants),
-};
+    m_type
+)
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<FHObstacle>{
-    Field("pos", &FHObstacle::m_pos),
-    Field("order", &FHObstacle::m_order),
 
-    Field("id", &FHObstacle::m_id),
-};
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHPandora,
+    m_pos,
+    m_order,
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<FHMap::Objects>{
-    Field("resources", &FHMap::Objects::m_resources),
-    Field("resourcesRandom", &FHMap::Objects::m_resourcesRandom),
-    Field("artifacts", &FHMap::Objects::m_artifacts),
-    Field("artifactsRandom", &FHMap::Objects::m_artifactsRandom),
-    Field("monsters", &FHMap::Objects::m_monsters),
-    Field("dwellings", &FHMap::Objects::m_dwellings),
-    Field("banks", &FHMap::Objects::m_banks),
-    Field("obstacles", &FHMap::Objects::m_obstacles),
-    Field("mines", &FHMap::Objects::m_mines),
-    Field("pandoras", &FHMap::Objects::m_pandoras),
-};
+    m_reward
+)
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<FHMap>{
-    Field("version", &FHMap::m_version),
-    Field("seed", &FHMap::m_seed),
-    Field("tileMap", &FHMap::m_tileMap),
-    Field("name", &FHMap::m_name),
-    Field("descr", &FHMap::m_descr),
-    Field("difficulty", &FHMap::m_difficulty),
-    Field("players", &FHMap::m_players),
-    Field("wanderingHeroes", &FHMap::m_wanderingHeroes),
-    Field("towns", &FHMap::m_towns),
-    Field("zones", &FHMap::m_zones),
-    Field("objects", &FHMap::m_objects),
-    Field("rivers", &FHMap::m_rivers),
-    Field("roads", &FHMap::m_roads),
-    Field("defaultTerrain", &FHMap::m_defaultTerrain),
-    Field("disabledHeroes", &FHMap::m_disabledHeroes),
-    Field("disabledArtifacts", &FHMap::m_disabledArtifacts),
-    Field("disabledSpells", &FHMap::m_disabledSpells),
-    Field("disabledSkills", &FHMap::m_disabledSkills),
-    Field("customHeroes", &FHMap::m_customHeroes),
-    Field("initialObjectDefs", &FHMap::m_initialObjectDefs),
-};
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHMonster,
+    m_pos,
+    m_order,
+
+    m_id,
+    m_count,
+    m_agressionMin,
+    m_agressionMax,
+    m_questIdentifier
+)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHDwelling,
+    m_pos,
+    m_order,
+    m_player,
+
+    m_id,
+    m_defVariant
+)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHMine,
+    m_pos,
+    m_order,
+    m_player,
+
+    m_id,
+    m_defVariant
+)
+
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHBank,
+    m_pos,
+    m_order,
+
+    m_id,
+    m_defVariant,
+    m_guardsVariants
+)
+
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHObstacle,
+    m_pos,
+    m_order,
+
+    m_id
+)
+
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHMap::Objects,
+    m_resources,
+    m_resourcesRandom,
+    m_artifacts,
+    m_artifactsRandom,
+    m_monsters,
+    m_dwellings,
+    m_banks,
+    m_obstacles,
+    m_mines,
+    m_pandoras
+)
+
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHMap,
+    m_version,
+    m_seed,
+    m_tileMap,
+    m_name,
+    m_descr,
+    m_difficulty,
+    m_players,
+    m_wanderingHeroes,
+    m_towns,
+    m_zones,
+    m_objects,
+    m_rivers,
+    m_roads,
+    m_defaultTerrain,
+    m_disabledHeroes,
+    m_disabledArtifacts,
+    m_disabledSpells,
+    m_disabledSkills,
+    m_customHeroes,
+    m_initialObjectDefs
+)
 
 template<>
 inline constexpr const bool MetaInfo::s_isStringMap<FHMap::PlayersMap>{ true };
+
+// clang-format on
 
 }

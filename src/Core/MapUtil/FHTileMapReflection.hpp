@@ -8,8 +8,9 @@
 #include "FHTileMap.hpp"
 
 #include "Reflection/EnumTraitsMacro.hpp"
-#include "Reflection/MetaInfo.hpp"
+#include "Reflection/MetaInfoMacro.hpp"
 
+// clang-format off
 namespace FreeHeroes::Core::Reflection {
 
 ENUM_REFLECTION_STRINGIY(FHRiverType,
@@ -27,40 +28,45 @@ ENUM_REFLECTION_STRINGIY(FHRoadType,
                          Gravel,
                          Cobblestone)
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<FHPos>{
-    Field("x", &FHPos::m_x),
-    Field("y", &FHPos::m_y),
-    Field("z", &FHPos::m_z),
-};
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<FHZone>{
-    Field("id", &FHZone::m_id),
-    Field("terrainId", &FHZone::m_terrainId),
-    Field("tiles", &FHZone::m_tiles),
-    Field("tilesVariants", &FHZone::m_tilesVariants),
-    Field("rect", &FHZone::m_rect),
-};
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHPos,
+    m_x,
+    m_y,
+    m_z
+)
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<FHRiver>{
-    Field("type", &FHRiver::m_type),
-    Field("tiles", &FHRiver::m_tiles),
-    Field("tilesVariants", &FHRiver::m_tilesVariants),
-};
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<FHRoad>{
-    Field("type", &FHRoad::m_type),
-    Field("tiles", &FHRoad::m_tiles),
-    Field("tilesVariants", &FHRoad::m_tilesVariants),
-};
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHZone,
+    m_id,
+    m_terrainId,
+    m_tiles,
+    m_tilesVariants,
+    m_rect
+)
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<FHTileMap>{
-    Field("width", &FHTileMap::m_width),
-    Field("height", &FHTileMap::m_height),
-    Field("depth", &FHTileMap::m_depth),
-};
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRiver,
+    m_type,
+    m_tiles,
+    m_tilesVariants
+)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRoad,
+    m_type,
+    m_tiles,
+    m_tilesVariants
+)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHTileMap,
+    m_width,
+    m_height,
+    m_depth
+)
 
 }
+
+// clang-format on

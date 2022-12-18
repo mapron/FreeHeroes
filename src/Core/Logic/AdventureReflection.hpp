@@ -11,42 +11,43 @@
 
 namespace FreeHeroes::Core::Reflection {
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<AdventureHero>{
-    Field("primary", &AdventureHero::currentBasePrimary),
-    Field("artifactsOn", &AdventureHero::artifactsOn),
-    Field("artifactsBag", &AdventureHero::artifactsBag),
-    Field("secSkills", &AdventureHero::secondarySkills),
-    Field("spellbook", &AdventureHero::spellbook),
-    Field("hasSpellBook", &AdventureHero::hasSpellBook),
-    Field("level", &AdventureHero::level),
-    Field("experience", &AdventureHero::experience),
-    Field("mana", &AdventureHero::mana),
-    Field("movePointsRemain", &AdventureHero::movePointsRemain),
-    Field("thisDayMovePoints", &AdventureHero::thisDayMovePoints),
-    Field("newBornHero", &AdventureHero::newBornHero),
-    Field("levelupsWithoutWisdom", &AdventureHero::levelupsWithoutWisdom),
-    Field("levelupsWithoutSchool", &AdventureHero::levelupsWithoutSchool),
-    Field("library", &AdventureHero::library), //(metadata("optional", true))
+// clang-format off
+STRUCT_REFLECTION_PAIRED(
+    AdventureHero,
+    "primary",               currentBasePrimary,
+    "artifactsOn",           artifactsOn,
+    "artifactsBag",          artifactsBag,
+    "secSkills",             secondarySkills,
+    "spellbook",             spellbook,
+    "hasSpellBook",          hasSpellBook,
+    "level",                 level,
+    "experience",            experience,
+    "mana",                  mana,
+    "movePointsRemain",      movePointsRemain,
+    "thisDayMovePoints",     thisDayMovePoints,
+    "newBornHero",           newBornHero,
+    "levelupsWithoutWisdom", levelupsWithoutWisdom,
+    "levelupsWithoutSchool", levelupsWithoutSchool,
+    "library",               library 
+)
 
-};
+STRUCT_REFLECTION_PAIRED(
+    AdventureStack,
+    "n",                     count,
+    "id",                    library
+)
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<AdventureStack>{
-    Field("n", &AdventureStack::count),
-    Field("id", &AdventureStack::library), //(metadata("optional", true))
-};
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<AdventureSquad>{
-    Field("stacks", &AdventureSquad::stacks),
-    Field("useCompactFormation", &AdventureSquad::useCompactFormation),
-};
+STRUCT_REFLECTION_PAIRED(
+    AdventureSquad,
+    "stacks",                stacks,
+    "useCompactFormation",   useCompactFormation
+)
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<AdventureArmy>{
-    Field("hero", &AdventureArmy::hero),
-    Field("squad", &AdventureArmy::squad),
-};
-
+STRUCT_REFLECTION_PAIRED(
+    AdventureArmy,
+    "hero",                  hero,
+    "squad",                 squad
+)
+// clang-format on
 }

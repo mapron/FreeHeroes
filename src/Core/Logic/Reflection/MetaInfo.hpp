@@ -104,6 +104,10 @@ struct MetaInfo {
             : m_name(name)
             , m_f(f)
         {}
+        template<std::size_t N>
+        constexpr Field(size_t offset, char const (&data)[N], FieldType Parent::*f)
+            : Field(frozen::string(data + offset, N - offset - 1), f)
+        {}
 
         struct ValueWriter {
             const Field& m_field;

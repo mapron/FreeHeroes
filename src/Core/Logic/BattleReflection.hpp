@@ -56,48 +56,47 @@ ENUM_REFLECTION_PAIRED( BattlePlanAttackParams::Alteration,
     "freeAttack"   , FreeAttack
 )
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<BattlePosition>{
-    Field("x"    , &BattlePosition::x),
-    Field("y"    , &BattlePosition::y),
-};
+STRUCT_REFLECTION_PAIRED(
+    BattlePosition,
+    "x"                   , x,
+    "y"                   , y
+)
+
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<BattlePositionExtended>{
-    SetGet("main"    , &BattlePositionExtended::setMainPos, &BattlePositionExtended::mainPos       ), // (metadata("reassign", true))
+    SetGet("main"    , &BattlePositionExtended::setMainPos, &BattlePositionExtended::mainPos       ),
     SetGet("sight"   , &BattlePositionExtended::setSight  , &BattlePositionExtended::sightDirection),
     SetGet("large"   , &BattlePositionExtended::setLarge  , &BattlePositionExtended::isLarge       ),
 };
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<BattleFieldGeometry>{
-    Field("w"    , &BattleFieldGeometry::width),
-    Field("h"    , &BattleFieldGeometry::height),
-};
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<BattleFieldPreset>{
-    Field("obstacles"    , &BattleFieldPreset::obstacles),
-    Field("field"        , &BattleFieldPreset::field),
-    Field("layout"       , &BattleFieldPreset::layout),
-};
-
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<BattlePlanAttackParams>{
-    Field("target"    , &BattlePlanAttackParams::m_attackTarget),
-    Field("dir"       , &BattlePlanAttackParams::m_attackDirection),
-    Field("alt"       , &BattlePlanAttackParams::m_alteration),
-};
-
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<BattlePlanMoveParams>{
-    Field("target"       , &BattlePlanMoveParams::m_movePos),
-    Field("targetDbg"    , &BattlePlanMoveParams::m_moveFrom),
-};
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<BattlePlanCastParams>{
-    Field("target"    , &BattlePlanCastParams::m_target),
-    Field("spell"     , &BattlePlanCastParams::m_spell),//(metadata("optional", true))
-    Field("isHeroCast", &BattlePlanCastParams::m_isHeroCast),
-    Field("isUnitCast", &BattlePlanCastParams::m_isUnitCast),
-};
+STRUCT_REFLECTION_PAIRED(
+    BattleFieldGeometry,
+    "w"                   , width,
+    "h"                   , height
+)
+STRUCT_REFLECTION_STRINGIFY(
+    BattleFieldPreset,
+    obstacles,
+    field,
+    layout
+)
+STRUCT_REFLECTION_PAIRED(
+    BattlePlanAttackParams,
+    "target"                   , m_attackTarget,
+    "dir"                      , m_attackDirection,
+    "alt"                      , m_alteration
+)
+STRUCT_REFLECTION_PAIRED(
+    BattlePlanMoveParams,
+    "target"                   , m_movePos,
+    "targetDbg"                , m_moveFrom
+)
+STRUCT_REFLECTION_PAIRED(
+    BattlePlanCastParams,
+    "target"                    , m_target,
+    "spell"                     , m_spell,
+    "isHeroCast"                , m_isHeroCast,
+    "isUnitCast"                , m_isUnitCast
+)
 // clang-format on
 
 }

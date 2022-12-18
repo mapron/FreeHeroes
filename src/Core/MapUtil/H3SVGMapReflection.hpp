@@ -8,19 +8,21 @@
 #include "H3SVGMap.hpp"
 
 #include "Reflection/EnumTraits.hpp"
-#include "Reflection/MetaInfo.hpp"
+#include "Reflection/MetaInfoMacro.hpp"
 
 namespace FreeHeroes::Core::Reflection {
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<H3SVGMap>{
-    Field("format", &H3SVGMap::m_format),
-    Field("anyPlayers", &H3SVGMap::m_anyPlayers),
-    Field("verMajor", &H3SVGMap::m_versionMajor),
-    Field("verMinor", &H3SVGMap::m_versionMinor),
-    Field("mapName", &H3SVGMap::m_mapName),
-    Field("mapDescr", &H3SVGMap::m_mapDescr),
-    Field("tiles", &H3SVGMap::m_tiles),
-};
+// clang-format off
+STRUCT_REFLECTION_PAIRED(
+    H3SVGMap,
+    "format",              m_format,
+    "anyPlayers",          m_anyPlayers,
+    "verMajor",            m_versionMajor,
+    "verMinor",            m_versionMinor,
+    "mapName",             m_mapName,
+    "mapDescr",            m_mapDescr,
+    "tiles",               m_tiles
+)
 
+// clang-format on
 }

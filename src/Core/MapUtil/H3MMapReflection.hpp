@@ -6,232 +6,222 @@
 #pragma once
 
 #include "Reflection/EnumTraitsMacro.hpp"
-#include "Reflection/MetaInfo.hpp"
+#include "Reflection/MetaInfoMacro.hpp"
 
 #include "H3MMap.hpp"
 
 namespace FreeHeroes::Core::Reflection {
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<H3Pos>{
-    Field("x", &H3Pos::m_x),
-    Field("y", &H3Pos::m_y),
-    Field("z", &H3Pos::m_z),
-};
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    H3Pos,
+    m_x,
+    m_y,
+    m_z)
 
-ENUM_REFLECTION_STRINGIY(AiTactic,
-                         NONE,
-                         NONE,
-                         RANDOM,
-                         WARRIOR,
-                         BUILDER,
-                         EXPLORER)
+ENUM_REFLECTION_STRINGIY(
+    AiTactic,
+    NONE,
+    NONE,
+    RANDOM,
+    WARRIOR,
+    BUILDER,
+    EXPLORER)
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<SHeroName>{
-    Field("heroId", &SHeroName::m_heroId),
-    Field("heroName", &SHeroName::m_heroName),
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    SHeroName,
+    m_heroId,
+    m_heroName
 
-};
+)
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<DisposedHero>{
-    Field("heroId", &DisposedHero::m_heroId),
-    Field("portrait", &DisposedHero::m_portrait),
-    Field("name", &DisposedHero::m_name),
-    Field("players", &DisposedHero::m_players),
-};
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    DisposedHero,
+    m_heroId,
+    m_portrait,
+    m_name,
+    m_players)
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<PlayerInfo>{
-    Field("canHumanPlay", &PlayerInfo::m_canHumanPlay),
-    Field("canComputerPlay", &PlayerInfo::m_canComputerPlay),
-    Field("aiTactic", &PlayerInfo::m_aiTactic),
-    Field("allowedFactionsBitmask", &PlayerInfo::m_allowedFactionsBitmask),
-    Field("isFactionRandom", &PlayerInfo::m_isFactionRandom),
-    Field("hasRandomHero", &PlayerInfo::m_hasRandomHero),
-    Field("mainCustomHeroPortrait", &PlayerInfo::m_mainCustomHeroPortrait),
-    Field("mainCustomHeroName", &PlayerInfo::m_mainCustomHeroName),
-    Field("mainCustomHeroId", &PlayerInfo::m_mainCustomHeroId),
-    Field("hasMainTown", &PlayerInfo::m_hasMainTown),
-    Field("generateHeroAtMainTown", &PlayerInfo::m_generateHeroAtMainTown),
-    Field("posOfMainTown", &PlayerInfo::m_posOfMainTown),
-    Field("team", &PlayerInfo::m_team),
-    Field("generateHero", &PlayerInfo::m_generateHero),
-    Field("p7", &PlayerInfo::m_p7),
-    Field("powerPlaceholders", &PlayerInfo::m_powerPlaceholders),
-    Field("heroesNames", &PlayerInfo::m_heroesNames),
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    PlayerInfo,
+    m_canHumanPlay,
+    m_canComputerPlay,
+    m_aiTactic,
+    m_allowedFactionsBitmask,
+    m_isFactionRandom,
+    m_hasRandomHero,
+    m_mainCustomHeroPortrait,
+    m_mainCustomHeroName,
+    m_mainCustomHeroId,
+    m_hasMainTown,
+    m_generateHeroAtMainTown,
+    m_posOfMainTown,
+    m_team,
+    m_generateHero,
+    m_p7,
+    m_powerPlaceholders,
+    m_heroesNames)
 
-};
+ENUM_REFLECTION_STRINGIY(
+    MapFormat,
+    Invalid,
+    Invalid,
+    ROE,
+    AB,
+    SOD,
+    HOTA1,
+    HOTA2,
+    HOTA3,
+    WOG,
+    VCMI)
 
-ENUM_REFLECTION_STRINGIY(MapFormat,
-                         Invalid,
-                         Invalid,
-                         ROE,
-                         AB,
-                         SOD,
-                         HOTA1,
-                         HOTA2,
-                         HOTA3,
-                         WOG,
-                         VCMI)
+ENUM_REFLECTION_STRINGIY(
+    H3Map::VictoryConditionType,
+    WINSTANDARD,
+    ARTIFACT,
+    GATHERTROOP,
+    GATHERRESOURCE,
+    BUILDCITY,
+    BUILDGRAIL,
+    BEATHERO,
+    CAPTURECITY,
+    BEATMONSTER,
+    TAKEDWELLINGS,
+    TAKEMINES,
+    TRANSPORTITEM,
+    WINSTANDARD)
 
-ENUM_REFLECTION_STRINGIY(H3Map::VictoryConditionType,
-                         WINSTANDARD,
-                         ARTIFACT,
-                         GATHERTROOP,
-                         GATHERRESOURCE,
-                         BUILDCITY,
-                         BUILDGRAIL,
-                         BEATHERO,
-                         CAPTURECITY,
-                         BEATMONSTER,
-                         TAKEDWELLINGS,
-                         TAKEMINES,
-                         TRANSPORTITEM,
-                         WINSTANDARD)
+ENUM_REFLECTION_STRINGIY(
+    H3Map::LossConditionType,
+    LOSSSTANDARD,
+    LOSSCASTLE,
+    LOSSHERO,
+    TIMEEXPIRES,
+    LOSSSTANDARD)
 
-ENUM_REFLECTION_STRINGIY(H3Map::LossConditionType,
-                         LOSSSTANDARD,
-                         LOSSCASTLE,
-                         LOSSHERO,
-                         TIMEEXPIRES,
-                         LOSSSTANDARD)
+ENUM_REFLECTION_STRINGIY(
+    ObjectTemplate::Type,
+    INVALID,
+    INVALID,
+    COMMON,
+    CREATURE,
+    HERO,
+    ARTIFACT,
+    RESOURCE)
 
-ENUM_REFLECTION_STRINGIY(ObjectTemplate::Type,
-                         INVALID,
-                         INVALID,
-                         COMMON,
-                         CREATURE,
-                         HERO,
-                         ARTIFACT,
-                         RESOURCE)
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    MapTile,
+    m_extTileFlags,
+    m_roadDir,
+    m_roadType,
+    m_riverDir,
+    m_riverType,
+    m_terView,
+    m_terType)
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<MapTile>{
-    Field("ex", &MapTile::m_extTileFlags),
-    Field("rdd", &MapTile::m_roadDir),
-    Field("rdt", &MapTile::m_roadType),
-    Field("rid", &MapTile::m_riverDir),
-    Field("rit", &MapTile::m_riverType),
-    Field("v", &MapTile::m_terView),
-    Field("t", &MapTile::m_terType),
-};
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    MapTileSet,
+    m_size,
+    m_hasUnderground,
+    m_tiles)
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<MapTileSet>{
-    Field("size", &MapTileSet::m_size),
-    Field("hasUnderground", &MapTileSet::m_hasUnderground),
-    Field("tiles", &MapTileSet::m_tiles),
-};
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    ObjectTemplate,
+    m_animationFile,
+    m_visitMask,
+    m_blockMask,
+    m_terrainsHard,
+    m_terrainsSoft,
+    m_id,
+    m_subid,
+    m_type,
+    m_drawPriority)
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<ObjectTemplate>{
-    Field("animationFile", &ObjectTemplate::m_animationFile),
-    Field("visitMask", &ObjectTemplate::m_visitMask),
-    Field("blockMask", &ObjectTemplate::m_blockMask),
-    Field("terrainsHard", &ObjectTemplate::m_terrainsHard),
-    Field("terrainsSoft", &ObjectTemplate::m_terrainsSoft),
-    Field("id", &ObjectTemplate::m_id),
-    Field("subid", &ObjectTemplate::m_subid),
-    Field("type", &ObjectTemplate::m_type),
-    Field("drawPriority", &ObjectTemplate::m_drawPriority),
-};
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    GlobalMapEvent,
+    m_name,
+    m_message,
+    m_resourceSet,
+    m_players,
+    m_humanAffected,
+    m_computerAffected,
+    m_firstOccurence,
+    m_nextOccurence)
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<GlobalMapEvent>{
-    Field("name", &GlobalMapEvent::m_name),
-    Field("message", &GlobalMapEvent::m_message),
-    Field("resourceSet", &GlobalMapEvent::m_resourceSet),
-    Field("players", &GlobalMapEvent::m_players),
-    Field("humanAffected", &GlobalMapEvent::m_humanAffected),
-    Field("computerAffected", &GlobalMapEvent::m_computerAffected),
-    Field("firstOccurence", &GlobalMapEvent::m_firstOccurence),
-    Field("nextOccurence", &GlobalMapEvent::m_nextOccurence),
-};
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    CustomHeroData::SecSkill,
+    m_id,
+    m_level)
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<CustomHeroData::SecSkill>{
-    Field("id", &CustomHeroData::SecSkill::m_id),
-    Field("l", &CustomHeroData::SecSkill::m_level),
-};
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    CustomHeroData,
+    m_enabled,
+    m_hasExp,
+    m_exp,
+    m_hasSkills,
+    m_skills,
+    m_artSet,
+    m_hasCustomBio,
+    m_bio,
+    m_sex,
+    m_spellSet,
+    m_primSkillSet)
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    H3Map::HotaVersion,
+    m_ver1,
+    m_ver2,
+    m_ver3,
+    m_fixedMap,
+    m_roundLimit)
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    H3Map::Rumor,
+    m_name,
+    m_text)
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    H3Map::VictoryCondition,
+    m_type,
+    m_allowNormalVictory,
+    m_appliesToAI,
+    m_artID,
+    m_creatureID,
+    m_creatureCount,
+    m_resourceID,
+    m_resourceAmount,
+    m_pos,
+    m_hallLevel,
+    m_castleLevel)
 
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<CustomHeroData>{
-    Field("enabled", &CustomHeroData::m_enabled),
-    Field("hasExp", &CustomHeroData::m_hasExp),
-    Field("exp", &CustomHeroData::m_exp),
-    Field("hasSkills", &CustomHeroData::m_hasSkills),
-    Field("skills", &CustomHeroData::m_skills),
-    Field("arts", &CustomHeroData::m_artSet),
-    Field("hasCustomBio", &CustomHeroData::m_hasCustomBio),
-    Field("bio", &CustomHeroData::m_bio),
-    Field("sex", &CustomHeroData::m_sex),
-    Field("spells", &CustomHeroData::m_spellSet),
-    Field("prim", &CustomHeroData::m_primSkillSet),
-};
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<H3Map::HotaVersion>{
-    Field("v1", &H3Map::HotaVersion::m_ver1),
-    Field("v2", &H3Map::HotaVersion::m_ver2),
-    Field("v3", &H3Map::HotaVersion::m_ver3),
-    Field("fixed", &H3Map::HotaVersion::m_fixedMap),
-    Field("roundLimit", &H3Map::HotaVersion::m_roundLimit),
-};
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<H3Map::Rumor>{
-    Field("name", &H3Map::Rumor::m_name),
-    Field("text", &H3Map::Rumor::m_text),
-};
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<H3Map::VictoryCondition>{
-    Field("type", &H3Map::VictoryCondition::m_type),
-    Field("allowNormalVictory", &H3Map::VictoryCondition::m_allowNormalVictory),
-    Field("appliesToAI", &H3Map::VictoryCondition::m_appliesToAI),
-    Field("artID", &H3Map::VictoryCondition::m_artID),
-    Field("creatureID", &H3Map::VictoryCondition::m_creatureID),
-    Field("creatureCount", &H3Map::VictoryCondition::m_creatureCount),
-    Field("resourceID", &H3Map::VictoryCondition::m_resourceID),
-    Field("resourceAmount", &H3Map::VictoryCondition::m_resourceAmount),
-    Field("pos", &H3Map::VictoryCondition::m_pos),
-    Field("hallLevel", &H3Map::VictoryCondition::m_hallLevel),
-    Field("castleLevel", &H3Map::VictoryCondition::m_castleLevel),
-};
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<H3Map::LossCondition>{
-    Field("type", &H3Map::LossCondition::m_type),
-    Field("pos", &H3Map::LossCondition::m_pos),
-    Field("days", &H3Map::LossCondition::m_daysPassed),
-};
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<H3Map>{
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    H3Map::LossCondition,
+    m_type,
+    m_pos,
+    m_daysPassed)
 
-    Field("format", &H3Map::m_format),
-    Field("hotaVer", &H3Map::m_hotaVer),
-    Field("anyPlayers", &H3Map::m_anyPlayers),
-    Field("mapName", &H3Map::m_mapName),
-    Field("mapDescr", &H3Map::m_mapDescr),
-    Field("difficulty", &H3Map::m_difficulty),
-    Field("levelLimit", &H3Map::m_levelLimit),
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    H3Map,
+    m_format,
+    m_hotaVer,
+    m_anyPlayers,
+    m_mapName,
+    m_mapDescr,
+    m_difficulty,
+    m_levelLimit,
 
-    Field("players", &H3Map::m_players),
-    Field("victoryCondition", &H3Map::m_victoryCondition),
-    Field("lossCondition", &H3Map::m_lossCondition),
-    Field("teamCount", &H3Map::m_teamCount),
-    Field("teamSettings", &H3Map::m_teamSettings),
-    Field("allowedHeroes", &H3Map::m_allowedHeroes),
-    Field("placeholderHeroes", &H3Map::m_placeholderHeroes),
-    Field("disposedHeroes", &H3Map::m_disposedHeroes),
-    Field("allowedArtifacts", &H3Map::m_allowedArtifacts),
-    Field("allowedSpells", &H3Map::m_allowedSpells),
-    Field("allowedSecSkills", &H3Map::m_allowedSecSkills),
+    m_players,
+    m_victoryCondition,
+    m_lossCondition,
+    m_teamCount,
+    m_teamSettings,
+    m_allowedHeroes,
+    m_placeholderHeroes,
+    m_disposedHeroes,
+    m_allowedArtifacts,
+    m_allowedSpells,
+    m_allowedSecSkills,
 
-    Field("rumors", &H3Map::m_rumors),
-    Field("customHeroData", &H3Map::m_customHeroData),
-    Field("tiles", &H3Map::m_tiles),
-    Field("objectDefs", &H3Map::m_objectDefs),
+    m_rumors,
+    m_customHeroData,
+    m_tiles,
+    m_objectDefs,
 
-    Field("events", &H3Map::m_events),
-};
-
+    m_events);
 }

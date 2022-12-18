@@ -13,12 +13,13 @@ ENUM_REFLECTION_PAIRED( BattleReplayData::EventRecord::Type,
     "move"        ,  MoveAttack,
     "cast"        ,  Cast
 )
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<BattleReplayData::EventRecord>{
-    Field("type"    , &BattleReplayData::EventRecord::type),
-    Field("move"    , &BattleReplayData::EventRecord::moveParams  ),
-    Field("attack"  , &BattleReplayData::EventRecord::attackParams),
-    Field("cast"    , &BattleReplayData::EventRecord::castParams  ),
-};
+
+STRUCT_REFLECTION_PAIRED(
+    BattleReplayData::EventRecord,
+    "type"    ,   type,
+    "move"    ,   moveParams  ,
+    "attack"  ,   attackParams,
+    "cast"    ,   castParams  
+)
 // clang-format on
 }
