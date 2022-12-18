@@ -184,6 +184,7 @@ struct LibraryArtifact {
     enum class OrderCategory  { Special, Stats, Skills, Magic, Income , Misc, Complex, Scrolls  };
     enum class SpecialEffect { None, NeutralDiplomacy, FactionsAlliance, AlwaysFly, AlwaysWaterWalk, ResurrectFangarms,
                                ExtendedNecromancy, DragonsBuffs, DisableSurrender, NoDamageWhirl, NoTerrainPenalty, BreakImmunities, PermanentDeath };
+    enum class Tag { Invalid, Stats, Control };
     // clang-format on
 
     struct Presentation {
@@ -201,6 +202,8 @@ struct LibraryArtifact {
     SpecialEffect            special       = SpecialEffect::None;
     std::string              untranslatedName;
     int                      legacyId = -1;
+
+    std::vector<Tag> tags;
 
     int                             value       = 0;
     LibrarySpellConstPtr            scrollSpell = nullptr;
@@ -223,21 +226,151 @@ struct LibraryArtifact {
     constexpr auto sortOrdering() const noexcept { return std::tie(presentationParams.orderCategory, presentationParams.orderGroup, presentationParams.order, value); }
 };
 
-struct ArtifactRewardAmount {
-    struct SingleReward {
-        LibraryArtifact::TreasureClass treasureClass = LibraryArtifact::TreasureClass::Special;
-        int                            count         = 0;
-    };
+struct ArtifactFilter {
+    std::vector<LibraryArtifactConstPtr>        onlyArtifacts;
+    std::vector<LibraryArtifactConstPtr>        notArtifacts;
+    std::vector<LibraryArtifact::TreasureClass> classes;
 
-    std::vector<SingleReward> artifacts;
+    std::vector<LibraryArtifact::Tag> tags;
 
-    size_t totalAmount() const noexcept
+    bool all = false;
+
+    bool isDefault() const
     {
-        size_t res = 0;
-        for (const auto& sr : artifacts)
-            res += sr.count;
-        return res;
+        return onlyArtifacts.empty()
+               && notArtifacts.empty()
+               && tags.empty()
+               && classes.empty()
+               && !all;
+    }
+
+    bool contains(LibraryArtifactConstPtr art) const
+    {
+        if (!art)
+            return false;
+
+        if (isDefault())
+            return false;
+
+        if (containsAll())
+            return true;
+
+        bool result = true;
+        if (!onlyArtifacts.empty()) {
+            result = result && std::find(onlyArtifacts.cbegin(), onlyArtifacts.cend(), art) != onlyArtifacts.cend();
+        }
+        if (!notArtifacts.empty()) {
+            result = result && std::find(notArtifacts.cbegin(), notArtifacts.cend(), art) == notArtifacts.cend();
+        }
+        if (!classes.empty()) {
+            result = result && std::find(classes.cbegin(), classes.cend(), art->treasureClass) != classes.cend();
+        }
+        if (!tags.empty()) {
+            bool tagsMatch = false;
+            for (auto tag : tags) {
+                if (std::find(art->tags.cbegin(), art->tags.cend(), tag) != art->tags.cend()) {
+                    tagsMatch = true;
+                    break;
+                }
+            }
+            result = result && tagsMatch;
+        }
+
+        return result;
+    }
+
+    bool containsAll() const
+    {
+        if (isDefault())
+            return false;
+
+        if (all)
+            return true;
+
+        if (!classes.empty()) {
+            auto classesTmp = classes;
+            std::sort(classesTmp.begin(), classesTmp.end());
+            if (classesTmp == std::vector{ LibraryArtifact::TreasureClass::Treasure, LibraryArtifact::TreasureClass::Minor, LibraryArtifact::TreasureClass::Major, LibraryArtifact::TreasureClass::Relic })
+                return true;
+        }
+
+        return false;
+    }
+
+    bool contains(LibraryArtifact::TreasureClass treasureClass) const
+    {
+        if (containsAll())
+            return true;
+
+        return std::find(classes.cbegin(), classes.cend(), treasureClass) != classes.cend();
+    }
+
+    std::vector<LibraryArtifactConstPtr> filterPossible(const std::vector<LibraryArtifact*>& allPossibleSpells) const
+    {
+        if (isDefault())
+            return {};
+
+        std::vector<LibraryArtifactConstPtr> populatedFilter;
+        populatedFilter.reserve(allPossibleSpells.size());
+        for (auto* spell : allPossibleSpells) {
+            if (contains(spell))
+                populatedFilter.push_back(spell);
+        }
+        return populatedFilter;
+    }
+    std::vector<LibraryArtifactConstPtr> filterPossible(const std::vector<LibraryArtifactConstPtr>& allPossibleSpells) const
+    {
+        if (isDefault())
+            return {};
+
+        std::vector<LibraryArtifactConstPtr> populatedFilter;
+        populatedFilter.reserve(allPossibleSpells.size());
+        for (auto* spell : allPossibleSpells) {
+            if (contains(spell))
+                populatedFilter.push_back(spell);
+        }
+        return populatedFilter;
+    }
+
+    void makeUnion(const ArtifactFilter& another)
+    {
+        if (another.isDefault())
+            return;
+
+        all = all || another.all;
+
+        for (auto* art : another.onlyArtifacts) {
+            if (std::find(onlyArtifacts.cbegin(), onlyArtifacts.cend(), art) == onlyArtifacts.cend())
+                onlyArtifacts.push_back(art);
+        }
+        auto tmp = notArtifacts;
+        for (auto* art : tmp) {
+            if (another.contains(art))
+                notArtifacts.erase(std::find(notArtifacts.cbegin(), notArtifacts.cend(), art));
+        }
+        for (auto tc : another.classes) {
+            if (std::find(classes.cbegin(), classes.cend(), tc) == classes.cend())
+                classes.push_back(tc);
+        }
+        std::sort(classes.begin(), classes.end());
+        for (auto tag : another.tags) {
+            if (std::find(tags.cbegin(), tags.cend(), tag) == tags.cend())
+                tags.push_back(tag);
+        }
+
+        auto onlyArtifactsCopy = onlyArtifacts;
+        onlyArtifacts.clear();
+        if (isDefault()) {
+            onlyArtifacts = onlyArtifactsCopy;
+            return;
+        }
+        for (auto* art : onlyArtifactsCopy) {
+            if (!contains(art))
+                onlyArtifacts.push_back(art);
+        }
     }
 };
+
+using ArtifactReward = std::vector<ArtifactFilter>;
 
 }

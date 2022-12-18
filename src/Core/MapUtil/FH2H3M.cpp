@@ -326,7 +326,10 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
 
     for (auto& fhArt : src.m_objects.m_artifacts) {
         auto art = std::make_unique<MapArtifact>(dest.m_features, false);
-
+        if (fhArt.m_id->scrollSpell) {
+            art->m_spellId = fhArt.m_id->scrollSpell->legacyId;
+            art->m_isSpell = true;
+        }
         dest.m_objects.push_back(Object{ .m_order = fhArt.m_order, .m_pos = int3fromPos(fhArt.m_pos), .m_defnum = getDefFileIndex(makeDefFromDb(fhArt.m_id->mapObjectDef)), .m_impl = std::move(art) });
     }
     for (auto& fhArt : src.m_objects.m_artifactsRandom) {
@@ -424,6 +427,42 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
 
         auto* def = fhObstacle.m_id->mapObjectDef;
         dest.m_objects.push_back(Object{ .m_order = fhObstacle.m_order, .m_pos = int3fromPos(fhObstacle.m_pos), .m_defnum = getDefFileIndex(makeDefFromDb(def)), .m_impl = std::move(obj) });
+    }
+    auto convertStacks = [](const std::vector<Core::UnitWithCount>& stacks) -> std::vector<StackBasicDescriptor> {
+        std::vector<StackBasicDescriptor> result;
+        for (auto& stack : stacks)
+            result.push_back({ static_cast<uint16_t>(stack.unit->legacyId), static_cast<uint16_t>(stack.count) });
+        return result;
+    };
+
+    auto convertReward = [&convertStacks](const Core::Reward& fhReward, MapReward& reward) {
+        reward.m_gainedExp  = fhReward.gainedExp;
+        reward.m_manaDiff   = fhReward.manaDiff;
+        reward.m_luckDiff   = fhReward.rngBonus.luck;
+        reward.m_moraleDiff = fhReward.rngBonus.morale;
+
+        reward.m_resourceSet.m_resourceAmount[0] = fhReward.resources.wood;
+        reward.m_resourceSet.m_resourceAmount[1] = fhReward.resources.mercury;
+        reward.m_resourceSet.m_resourceAmount[2] = fhReward.resources.ore;
+        reward.m_resourceSet.m_resourceAmount[3] = fhReward.resources.sulfur;
+        reward.m_resourceSet.m_resourceAmount[4] = fhReward.resources.crystal;
+        reward.m_resourceSet.m_resourceAmount[5] = fhReward.resources.gems;
+        reward.m_resourceSet.m_resourceAmount[6] = fhReward.resources.gold;
+
+        // @todo: m_primSkillSet
+        // @todo: m_secSkills
+        // @todo: m_artifacts
+        for (auto* spell : fhReward.spells.onlySpells)
+            reward.m_spells.push_back(static_cast<uint8_t>(spell->legacyId));
+
+        reward.m_creatures.m_stacks = convertStacks(fhReward.units);
+    };
+
+    for (auto& fhPandora : src.m_objects.m_pandoras) {
+        auto obj = std::make_unique<MapPandora>(dest.m_features);
+        convertReward(fhPandora.m_reward, obj->m_reward);
+
+        dest.m_objects.push_back(Object{ .m_order = fhPandora.m_order, .m_pos = int3fromPos(fhPandora.m_pos), .m_defnum = getDefFileIndex(makeDefFromDbId("ava0128")), .m_impl = std::move(obj) });
     }
 
     std::sort(dest.m_objects.begin(), dest.m_objects.end(), [](const auto& lh, const auto& rh) { return lh.m_order < rh.m_order; });

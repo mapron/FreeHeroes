@@ -25,6 +25,8 @@
 
 #include "StringUtils.hpp"
 
+#include "CoreLogicExport.hpp"
+
 namespace FreeHeroes {
 class PropertyTree;
 }
@@ -487,6 +489,12 @@ inline constexpr const auto EnumTraits::s_valueMapping<LibraryArtifact::Treasure
     "special"  ,   LibraryArtifact::TreasureClass::Special
     );
 template<>
+inline constexpr const auto EnumTraits::s_valueMapping<LibraryArtifact::Tag> = EnumTraits::make(
+    LibraryArtifact::Tag::Invalid,
+    "stats"      ,   LibraryArtifact::Tag::Stats,
+    "control"    ,   LibraryArtifact::Tag::Control
+    );
+template<>
 inline constexpr const auto EnumTraits::s_valueMapping<LibraryArtifact::OrderCategory> = EnumTraits::make(
     LibraryArtifact::OrderCategory::Special,
     "special"  ,  LibraryArtifact::OrderCategory::Special,
@@ -532,6 +540,7 @@ inline constexpr const std::tuple MetaInfo::s_fields<LibraryArtifact>{
     Field("calc"            , &LibraryArtifact::calc),
     Field("untranslatedName", &LibraryArtifact::untranslatedName),
     Field("legacyId"        , &LibraryArtifact::legacyId),
+    Field("tags"            , &LibraryArtifact::tags),
     Field("value"           , &LibraryArtifact::value),
     Field("provideSpells"   , &LibraryArtifact::provideSpells),
     Field("protectSpells"   , &LibraryArtifact::protectSpells),
@@ -545,14 +554,14 @@ inline constexpr const std::tuple MetaInfo::s_fields<LibraryArtifact>{
 };
 
 template<>
-inline constexpr const std::tuple MetaInfo::s_fields<ArtifactRewardAmount>{
-    Field("artifacts", &ArtifactRewardAmount::artifacts),
+inline constexpr const std::tuple MetaInfo::s_fields<ArtifactFilter>{
+    Field("only"     , &ArtifactFilter::onlyArtifacts),
+    Field("not"      , &ArtifactFilter::notArtifacts),
+    Field("classes"  , &ArtifactFilter::classes),
+    Field("tags"     , &ArtifactFilter::tags),
+    Field("all"      , &ArtifactFilter::all),
 };
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<ArtifactRewardAmount::SingleReward>{
-    Field("class", &ArtifactRewardAmount::SingleReward::treasureClass),
-    Field("n"    , &ArtifactRewardAmount::SingleReward::count),
-};
+
 // ------------------------------------------------------------------------------------------
 
 template<>
@@ -758,10 +767,16 @@ inline constexpr const std::tuple MetaInfo::s_fields<SpellFilter>{
 // ------------------------------------------------------------------------------------------
 
 template<>
-inline constexpr const std::tuple MetaInfo::s_fields<LibraryMapBank::Reward>{
-    Field("resources"  , &LibraryMapBank::Reward::resources),
-    Field("unit"       , &LibraryMapBank::Reward::unit),
-    Field("artifacts"  , &LibraryMapBank::Reward::artifacts),
+inline constexpr const std::tuple MetaInfo::s_fields<Reward>{
+    Field("resources"   , &Reward::resources),
+    Field("units"       , &Reward::units),
+    Field("artifacts"   , &Reward::artifacts),
+    Field("exp"         , &Reward::gainedExp),
+    Field("mana"        , &Reward::manaDiff),
+    Field("rng"         , &Reward::rngBonus),
+    Field("stat"        , &Reward::statBonus),
+    Field("secSkills"   , &Reward::secSkills),
+    Field("spells"      , &Reward::spells),
 };
 
 template<>
@@ -942,17 +957,12 @@ bool MetaInfo::transformTree<LibraryUnit::Traits>(const PropertyTree& treeIn, Pr
 template<>
 inline constexpr const bool MetaInfo::s_useCustomTransform<ResourceAmount>{ true };
 template<>
-bool MetaInfo::transformTree<ResourceAmount>(const PropertyTree& treeIn, PropertyTree& treeOut);
-
-template<>
-inline constexpr const bool MetaInfo::s_useCustomTransform<ArtifactRewardAmount>{ true };
-template<>
-bool MetaInfo::transformTree<ArtifactRewardAmount>(const PropertyTree& treeIn, PropertyTree& treeOut);
+CORELOGIC_EXPORT bool MetaInfo::transformTree<ResourceAmount>(const PropertyTree& treeIn, PropertyTree& treeOut);
 
 template<>
 inline constexpr const bool MetaInfo::s_useCustomTransform<UnitWithCount>{ true };
 template<>
-bool MetaInfo::transformTree<UnitWithCount>(const PropertyTree& treeIn, PropertyTree& treeOut);
+CORELOGIC_EXPORT bool MetaInfo::transformTree<UnitWithCount>(const PropertyTree& treeIn, PropertyTree& treeOut);
 
 template<>
 inline constexpr const bool MetaInfo::s_useCustomTransform<LibraryHero::StartStack>{ true };

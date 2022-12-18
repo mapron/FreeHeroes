@@ -13,6 +13,7 @@
 #include "GameConstants.hpp"
 
 #include "AdventureArmy.hpp"
+#include "Reward.hpp"
 
 #include "FHTileMap.hpp"
 
@@ -123,6 +124,10 @@ struct FHRandomArtifact : public FHCommonObject {
     Type m_type = Type::Invalid;
 };
 
+struct FHPandora : public FHCommonObject {
+    Core::Reward m_reward;
+};
+
 struct FHMonster : public FHCommonObject {
     Core::LibraryUnitConstPtr m_id    = nullptr;
     uint32_t                  m_count = 0;
@@ -170,6 +175,7 @@ struct FHMap {
         std::vector<FHBank>           m_banks;
         std::vector<FHObstacle>       m_obstacles;
         std::vector<FHMine>           m_mines;
+        std::vector<FHPandora>        m_pandoras;
     } m_objects;
 
     std::vector<FHRiver> m_rivers;

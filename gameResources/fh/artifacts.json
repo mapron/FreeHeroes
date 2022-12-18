@@ -80,7 +80,7 @@
 "hota.artifact.misc.unluck2"          : {"class":"minor"   , "value": 7000 , "untranslatedName": "Charm Unmorale -1"    ,"slot":"misc"   , "calc": ["h.rngParamsOpp:incLuck(-2)"  ]},
 "hota.artifact.misc.unmorale1"        : {"class":"treasure", "value": 2000 , "untranslatedName": "Charm Unmorale -1"    ,"slot":"misc"   , "calc": ["h.rngParamsOpp:incMorale(-1)"  ]},
 "hota.artifact.ring.unmorale1"        : {"class":"minor"   , "value": 2000 , "untranslatedName": "Ring Unmorale -1"     ,"slot":"ring"   , "calc": ["h.rngParamsOpp:incMorale(-1)"  ]},
-"hota.artifact.neck.unmorale2"        : {"class":"relic"   , "value": 4000 , "untranslatedName": "Neck Unmorale -2"     ,"slot":"neck"   , "calc": ["h.rngParamsOpp:incMorale(-2)"  ]},
+"hota.artifact.neck.unmorale2"        : {"class":"major"   , "value": 4000 , "untranslatedName": "Neck Unmorale -2"     ,"slot":"neck"   , "calc": ["h.rngParamsOpp:incMorale(-2)"  ]},
 
 "sod.artifact.misc.neutralizeMorale"  : {"class":"treasure", "value": 2000 , "untranslatedName": "Charm 0 Morale"       ,"slot":"misc"   , "calc": ["h.rngMult.moralePositive:set(0, 1)"    ]},
 "sod.artifact.misc.neutralizeLuck"    : {"class":"treasure", "value": 2000 , "untranslatedName": "Charm 0 Luck"         ,"slot":"misc"   , "calc": ["h.rngMult.luckPositive:set(0, 1)"      ]},

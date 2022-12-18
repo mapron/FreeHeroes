@@ -6,7 +6,8 @@
 #pragma once
 
 #include "LibraryFwd.hpp"
-#include "LibraryArtifact.hpp"
+
+#include "Reward.hpp"
 
 #include <string>
 #include <vector>
@@ -18,11 +19,6 @@ enum class FieldLayout { Standard, Object, Churchyard1, Churchyard2, Ruins, Spit
 enum class FieldLayoutPos { None = -1, TR = 0, R, BR, BL, L, TL, T, B };
 // clang-format on
 
-struct UnitWithCount {
-    LibraryUnitConstPtr unit  = nullptr;
-    int                 count = 0;
-};
-
 struct LibraryMapBank {
     std::string id;
     std::string untranslatedName;
@@ -30,14 +26,6 @@ struct LibraryMapBank {
 
     FieldLayout fieldLayout = FieldLayout::Object;
 
-    struct Reward {
-        ResourceAmount       resources;
-        UnitWithCount        unit;
-        ArtifactRewardAmount artifacts;
-
-        size_t totalItems() const noexcept { return resources.nonEmptyAmount() + (unit.unit != nullptr) + artifacts.totalAmount(); }
-    };
-    using Rewards = std::vector<Reward>;
     Rewards rewards;
 
     using Guards = std::vector<UnitWithCount>;

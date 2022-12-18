@@ -550,6 +550,7 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
         art.presentationParams.orderGroup    = 0;
         art.presentationParams.orderCategory = LibraryArtifact::OrderCategory::Scrolls;
         art.treasureClass                    = LibraryArtifact::TreasureClass::Scroll;
+        art.mapObjectDef                     = m_impl->m_objectDefs.find("ava0001");
         m_impl->m_artifacts.insertObject(art.id, std::move(art));
     }
 
@@ -595,7 +596,8 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
         if (artifact->parts.empty())
             req.add(artifact->slot);
         artifact->slotReq            = req;
-        artifact->provideSpellsCache = artifact->provideSpells.filterPossible(m_impl->m_spells.m_unsorted);
+        auto cache                   = artifact->provideSpells.filterPossible(m_impl->m_spells.m_unsorted);
+        artifact->provideSpellsCache = std::set<LibrarySpellConstPtr>(cache.cbegin(), cache.cend());
 
         m_impl->m_artifacts.m_sorted.push_back(artifact);
     }

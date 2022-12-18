@@ -381,24 +381,22 @@ void EmulatorMainWidget::applyCurrentObjectRewards(QString defenderName)
         auto rng = m_randomGeneratorFactory->create();
         rng->makeGoodSeed();
 
-        for (auto& artReward : reward.artifacts.artifacts) {
-            auto                                treasureClass = artReward.treasureClass;
-            std::deque<LibraryArtifactConstPtr> suggestions;
-            for (auto art : m_gameDatabase->artifacts()->records()) {
-                if (art->treasureClass == treasureClass)
-                    suggestions.push_back(art);
-            }
-            for (int i = 0; i < artReward.count; i++) {
-                auto ind = rng->gen(suggestions.size() - 1);
-                auto art = suggestions[ind];
-                suggestions.erase(suggestions.begin() + ind);
-                m_adventureState->m_att.hero.artifactsBag[art]++;
-                auto name   = m_modelsProvider.artifacts()->find(art)->getName();
-                auto iconId = art->presentationParams.iconStash;
-                auto pix    = m_graphicsLibrary.getPixmap(iconId)->get();
-                items << GeneralPopupDialog::Item{ pix, name, true };
-                rewardDescriptionTitles << name;
-            }
+        std::vector<LibraryArtifactConstPtr> artRewards;
+        for (auto& artFilter : reward.artifacts) {
+            auto possible = artFilter.filterPossible(m_gameDatabase->artifacts()->records());
+            assert(!possible.empty());
+            auto ind = rng->gen(possible.size() - 1);
+            auto art = possible[ind];
+            artRewards.push_back(art);
+        }
+
+        for (auto* art : artRewards) {
+            m_adventureState->m_att.hero.artifactsBag[art]++;
+            auto name   = m_modelsProvider.artifacts()->find(art)->getName();
+            auto iconId = art->presentationParams.iconStash;
+            auto pix    = m_graphicsLibrary.getPixmap(iconId)->get();
+            items << GeneralPopupDialog::Item{ pix, name, true };
+            rewardDescriptionTitles << name;
         }
 
         const auto resourceRewards = ResourceAmountHelper().trasformResourceAmount(reward.resources);
@@ -409,13 +407,14 @@ void EmulatorMainWidget::applyCurrentObjectRewards(QString defenderName)
             auto pix    = m_graphicsLibrary.getPixmap(iconId)->get();
             items << GeneralPopupDialog::Item{ pix, QString("%1").arg(resReward.amount), false };
         }
-        if (reward.unit.unit) {
-            m_adventureState->m_att.squad.addWithMerge(reward.unit.unit, reward.unit.count);
+        for (const auto& unit : reward.units) {
+            const bool haveRoom = m_adventureState->m_att.squad.addWithMerge(unit.unit, unit.count);
+            (void) haveRoom;
             m_guiAdventureArmyAtt->getSquad()->updateGuiState();
             m_guiAdventureArmyAtt->getSquad()->emitChanges();
-            auto name = m_modelsProvider.units()->find(reward.unit.unit)->getNameWithCount(reward.unit.count);
+            auto name = m_modelsProvider.units()->find(unit.unit)->getNameWithCount(unit.count);
             rewardDescriptionTitles << name;
-            auto iconId = reward.unit.unit->presentationParams.portrait;
+            auto iconId = unit.unit->presentationParams.portrait;
             auto pix    = m_graphicsLibrary.getPixmap(iconId)->get();
             items << GeneralPopupDialog::Item{ pix, name, true };
             onAttDataChanged(true);

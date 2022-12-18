@@ -8,8 +8,8 @@
     "rewards": [
         {"resources":"1500"},
         {"resources":"2000"},
-        {"resources":"2500","artifacts":"treasure=1"},
-        {"resources":"5000","artifacts":"treasure=1"}
+        {"resources":"2500","artifacts":[{"classes": ["treasure"]}]},
+        {"resources":"5000","artifacts":[{"classes": ["treasure"]}]}
     ],
     "variants": [
     { "name": "I"   , "rewardIndex": 0, "guards": [ "sod.unit.skeleton=10", "sod.unit.walkingDead=10", "sod.unit.walkingDead=10", "sod.unit.skeleton=10"   , "sod.unit.skeleton=10"]},
@@ -22,10 +22,10 @@
 "sod.map.utopia"           : {
     "untranslatedName": "Utopia",
     "rewards": [
-        {"resources":"20000","artifacts":"treasure=1,minor=1,major=1,relic=1"},
-        {"resources":"30000","artifacts":"minor=1,major=1,relic=2"},
-        {"resources":"40000","artifacts":"major=1,relic=3"},
-        {"resources":"50000","artifacts":"relic=4"}
+        {"resources":"20000","artifacts":[{"classes": ["treasure"]},{"classes": ["minor"]},{"classes": ["major"]},{"classes": ["relic"]}]},
+        {"resources":"30000","artifacts":[{"classes": ["minor"   ]},{"classes": ["major"]},{"classes": ["relic"]},{"classes": ["relic"]}]},
+        {"resources":"40000","artifacts":[{"classes": ["major"   ]},{"classes": ["relic"]},{"classes": ["relic"]},{"classes": ["relic"]}]},
+        {"resources":"50000","artifacts":[{"classes": ["relic"   ]},{"classes": ["relic"]},{"classes": ["relic"]},{"classes": ["relic"]}]}
     ],
     "variants": [
     { "name": "I"   , "rewardIndex": 0, "guards": [ "sod.unit.greenDragon=8", "sod.unit.redDragon=5", "sod.unit.goldDragon=2", "sod.unit.blackDragon=1"]},
@@ -38,9 +38,9 @@
     "untranslatedName": "Derelict Ship",
     "rewards": [
         {"resources":"3000"},
-        {"resources":"3000","artifacts":"treasure=1"},
-        {"resources":"4000","artifacts":"treasure=1"},
-        {"resources":"6000","artifacts":"minor=1"}
+        {"resources":"3000","artifacts":[{"classes": ["treasure"]}]},
+        {"resources":"4000","artifacts":[{"classes": ["treasure"]}]},
+        {"resources":"6000","artifacts":[{"classes": ["minor"]}]}
     ],
     "variants": [
     { "name": "I"   , "rewardIndex": 0, "guards": [ "sod.unit.waterElemental=4" ,"sod.unit.waterElemental=4" , "sod.unit.waterElemental=4" , "sod.unit.waterElemental=4" , "sod.unit.waterElemental=4" ]},
@@ -54,8 +54,8 @@
     "rewards": [
         {"resources":"2000"},
         {"resources":"3000"},
-        {"resources":"4000","artifacts":"treasure=1"},
-        {"resources":"5000","artifacts":"minor=1"}
+        {"resources":"4000","artifacts":[{"classes": ["treasure"]}]},
+        {"resources":"5000","artifacts":[{"classes": ["minor"]}]}
     ],
     "variants": [
     { "name": "I"   , "rewardIndex": 0, "guards": [ "sod.unit.wight=2" , "sod.unit.wight=2" , "sod.unit.wight=2" , "sod.unit.wight=2" , "sod.unit.wight=2" ]},
@@ -69,10 +69,10 @@
     "untranslatedName": "Black tower",
     "fieldLayout": "std",
     "rewards": [
-        {"resources":"2000","artifacts":"minor=1"},
-        {"resources":"2250","artifacts":"minor=1"},
-        {"resources":"3500","artifacts":"minor=1"},
-        {"resources":"3750","artifacts":"minor=1"}
+        {"resources":"2000","artifacts":[{"classes": ["minor"]}]},
+        {"resources":"2250","artifacts":[{"classes": ["minor"]}]},
+        {"resources":"3500","artifacts":[{"classes": ["minor"]}]},
+        {"resources":"3750","artifacts":[{"classes": ["minor"]}]}
     ],
     "variants": [
     { "name": "I"   , "rewardIndex": 0, "guards": [ "sod.unit.greenDragon=1" ]},
@@ -85,10 +85,10 @@
 "hota.map.mansion"             : {
     "untranslatedName": "Mansion",
     "rewards": [
-        {"resources": "2500,mercury=2,sulfur=2,crystal=2,gems=2","artifacts":"major=1"},
-        {"resources": "5000,mercury=3,sulfur=3,crystal=3,gems=3","artifacts":"major=1"},
-        {"resources": "7500,mercury=4,sulfur=4,crystal=4,gems=4","artifacts":"major=1"},
-        {"resources":"10000,mercury=5,sulfur=5,crystal=5,gems=5","artifacts":"major=1"}
+        {"resources": "2500,mercury=2,sulfur=2,crystal=2,gems=2","artifacts":[{"classes": ["major"]}]},
+        {"resources": "5000,mercury=3,sulfur=3,crystal=3,gems=3","artifacts":[{"classes": ["major"]}]},
+        {"resources": "7500,mercury=4,sulfur=4,crystal=4,gems=4","artifacts":[{"classes": ["major"]}]},
+        {"resources":"10000,mercury=5,sulfur=5,crystal=5,gems=5","artifacts":[{"classes": ["major"]}]}
     ],
     "variants": [
     { "name": "I"   , "rewardIndex": 0, "guards": [ "sod.unit.vampireLord=8" , "sod.unit.vampireLord=8" ,"sod.unit.vampireLord=8" ,"sod.unit.vampireLord=8" ,"sod.unit.vampireLord=8" ]},
@@ -101,10 +101,10 @@
 "hota.map.beholderSanctuary"             : {
     "untranslatedName": "Beholders' Sanctuary",
     "rewards": [
-        {"resources": "3000","artifacts":"minor=1"},
-        {"resources": "5000","artifacts":"minor=1"},
-        {"resources": "6000","artifacts":"major=1"},
-        {"resources": "9000","artifacts":"major=1"}
+        {"resources": "3000","artifacts":[{"classes": ["minor"]}]},
+        {"resources": "5000","artifacts":[{"classes": ["minor"]}]},
+        {"resources": "6000","artifacts":[{"classes": ["major"]}]},
+        {"resources": "9000","artifacts":[{"classes": ["major"]}]}
     ],
     "variants": [
     { "name": "I"   , "rewardIndex": 0, "guards": [ "sod.unit.beholder=10", "sod.unit.beholder=10", "sod.unit.beholder=10", "sod.unit.beholder=10", "sod.unit.beholder=10"]},
@@ -117,10 +117,10 @@
 "hota.map.templeSea"           : {
     "untranslatedName": "Temple of the Sea",
     "rewards": [
-        {"resources":"10000","artifacts":"treasure=2,minor=1,relic=1"},
-        {"resources":"15000","artifacts":"treasure=1,minor=1,major=1,relic=1"},
-        {"resources":"20000","artifacts":"minor=1,major=2,relic=1"},
-        {"resources":"30000","artifacts":"major=2,relic=2"}
+        {"resources":"10000","artifacts":[{"classes": ["treasure"]},{"classes": ["treasure"]},{"classes": ["minor"]},{"classes": ["relic"]}]},
+        {"resources":"15000","artifacts":[{"classes": ["treasure"]},{"classes": ["minor"   ]},{"classes": ["major"]},{"classes": ["relic"]}]},
+        {"resources":"20000","artifacts":[{"classes": ["minor"   ]},{"classes": ["major"   ]},{"classes": ["major"]},{"classes": ["relic"]}]},
+        {"resources":"30000","artifacts":[{"classes": ["major"   ]},{"classes": ["major"   ]},{"classes": ["relic"]},{"classes": ["relic"]}]}
     ],
     "variants": [
     { "name": "I"   , "rewardIndex": 0, "guards": [ "hota.unit.seaSerpent=6", "sod.unit.chaosHydra=3", "hota.unit.haspid=2", "sod.unit.hydra=8"]},
@@ -133,7 +133,7 @@
     "untranslatedName": "Churchyard",
     "fieldLayout": "churchyard2",
     "rewards": [
-        {"resources":"2500","artifacts":"minor=1" }
+        {"resources":"2500","artifacts":[{"classes": ["minor"]}] }
     ],
     "variants": [
         { "name": "I"   , "rewardIndex": 0, "guards": [ "sod.unit.zombieLord=15", "sod.unit.zombieLord=15", "sod.unit.zombieLord=15", "sod.unit.zombieLord=15", "sod.unit.zombieLord=15", "sod.unit.zombieLord=15"]}
@@ -143,10 +143,10 @@
     "untranslatedName": "Griffins' conservatory",
 
     "rewards": [
-        {"unit":"sod.unit.angel=1"},
-        {"unit":"sod.unit.angel=2"},
-        {"unit":"sod.unit.angel=3"},
-        {"unit":"sod.unit.angel=4"}
+        {"units":["sod.unit.angel=1"]},
+        {"units":["sod.unit.angel=2"]},
+        {"units":["sod.unit.angel=3"]},
+        {"units":["sod.unit.angel=4"]}
     ],
     "variants": [
     { "name": "I"    , "rewardIndex": 0, "guards": [ "sod.unit.griffin=10", "sod.unit.griffin=10", "sod.unit.griffin=10"     , "sod.unit.griffin=10", "sod.unit.griffin=10"]},
@@ -163,10 +163,10 @@
     "untranslatedName": "Dragonflies hive",
 
     "rewards": [
-        {"unit":"sod.unit.wyvern=1"},
-        {"unit":"sod.unit.wyvern=2"},
-        {"unit":"sod.unit.wyvern=3"},
-        {"unit":"sod.unit.wyvern=4"}
+        {"units":["sod.unit.wyvern=1"]},
+        {"units":["sod.unit.wyvern=2"]},
+        {"units":["sod.unit.wyvern=3"]},
+        {"units":["sod.unit.wyvern=4"]}
     ],
     "variants": [
     { "name": "I"    , "rewardIndex": 0, "guards": [ "sod.unit.dragonFly=6" , "sod.unit.dragonFly=6" , "sod.unit.dragonFly=6" , "sod.unit.dragonFly=6" , "sod.unit.dragonFly=6" ]},
@@ -179,10 +179,10 @@
     "untranslatedName": "Experimental Shop",
 
     "rewards": [
-        {"unit":"sod.unit.giant=1"},
-        {"unit":"sod.unit.giant=2"},
-        {"unit":"sod.unit.giant=3"},
-        {"unit":"sod.unit.giant=4"}
+        {"units":["sod.unit.giant=1"]},
+        {"units":["sod.unit.giant=2"]},
+        {"units":["sod.unit.giant=3"]},
+        {"units":["sod.unit.giant=4"]}
     ],
     "variants": [
     { "name": "I"    , "rewardIndex": 0, "guards": [ "hota.unit.steelGolem=5" , "hota.unit.steelGolem=5" , "hota.unit.steelGolem=5" , "hota.unit.steelGolem=5" , "hota.unit.steelGolem=5" ]},
@@ -194,10 +194,10 @@
 "hota.map.wolfRaiderPicket"           : {
     "untranslatedName": "Wolf Raider Picket",
     "rewards": [
-        {"unit":"sod.unit.cyclop=4"},
-        {"unit":"sod.unit.cyclop=6"},
-        {"unit":"sod.unit.cyclop=8"},
-        {"unit":"sod.unit.cyclop=12"}
+        {"units":["sod.unit.cyclop=4"]},
+        {"units":["sod.unit.cyclop=6"]},
+        {"units":["sod.unit.cyclop=8"]},
+        {"units":["sod.unit.cyclop=12"]}
     ],
     "variants": [
     { "name": "I"    , "rewardIndex": 0, "guards": [ "sod.unit.wolfHoboRider=10", "sod.unit.wolfHoboRider=10", "sod.unit.wolfHoboRider=10", "sod.unit.wolfHoboRider=10", "sod.unit.wolfHoboRider=10"]},
@@ -209,10 +209,10 @@
 "hota.map.vermilionTower"             : {
     "untranslatedName": "Vermilion tower",
     "rewards": [
-        {"unit":"sod.unit.firebird=1"},
-        {"unit":"sod.unit.firebird=2"},
-        {"unit":"sod.unit.firebird=3"},
-        {"unit":"sod.unit.firebird=4"}
+        {"units":["sod.unit.firebird=1"]},
+        {"units":["sod.unit.firebird=2"]},
+        {"units":["sod.unit.firebird=3"]},
+        {"units":["sod.unit.firebird=4"]}
     ],
     "variants": [
     { "name": "I"   , "rewardIndex": 0, "guards": [ "sod.unit.fireElemental=7" , "sod.unit.fireElemental=7" , "sod.unit.fireElemental=7" , "sod.unit.fireElemental=7" , "sod.unit.fireElemental=7"   ]},
@@ -225,10 +225,10 @@
 "hota.map.pirateCave"             : {
     "untranslatedName": "Pirate Cave",
     "rewards": [
-        {"unit":"hota.unit.seaSerpent=1"},
-        {"unit":"hota.unit.seaSerpent=2"},
-        {"unit":"hota.unit.seaSerpent=3"},
-        {"unit":"hota.unit.seaSerpent=4"}
+        {"units":["hota.unit.seaSerpent=1"]},
+        {"units":["hota.unit.seaSerpent=2"]},
+        {"units":["hota.unit.seaSerpent=3"]},
+        {"units":["hota.unit.seaSerpent=4"]}
     ],
     "variants": [
     { "name": "I"   , "rewardIndex": 0, "guards": [ "hota.unit.pirate=10", "hota.unit.corsair=10", "hota.unit.pirate=10", "hota.unit.corsair=10"  ]},
@@ -241,10 +241,10 @@
 "hota.map.ivoryTower"             : {
     "untranslatedName": "Ivory tower",
     "rewards": [
-        {"unit":"sod.unit.enchanter=3"},
-        {"unit":"sod.unit.enchanter=6"},
-        {"unit":"sod.unit.enchanter=9"},
-        {"unit":"sod.unit.enchanter=12"}
+        {"units":["sod.unit.enchanter=3"]},
+        {"units":["sod.unit.enchanter=6"]},
+        {"units":["sod.unit.enchanter=9"]},
+        {"units":["sod.unit.enchanter=12"]}
     ],
     "variants": [
     { "name": "I"   , "rewardIndex": 0, "guards": [ "sod.unit.archMage=7" , "sod.unit.archMage=7" , "sod.unit.archMage=7" , "sod.unit.archMage=7" , "sod.unit.archMage=7"   ]},

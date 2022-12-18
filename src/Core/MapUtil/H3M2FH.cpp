@@ -180,6 +180,38 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
         dest.m_initialObjectDefs.push_back(record);
     }
 
+    auto convertStacks = [&unitIds](const std::vector<StackBasicDescriptor>& stacks) -> std::vector<Core::UnitWithCount> {
+        std::vector<Core::UnitWithCount> result;
+        for (auto& stack : stacks)
+            result.push_back({ unitIds[stack.m_id], stack.m_count });
+        return result;
+    };
+
+    auto convertReward = [&spellIds, &convertStacks](const MapReward& reward) -> Core::Reward {
+        Core::Reward fhReward;
+        fhReward.gainedExp       = reward.m_gainedExp;
+        fhReward.manaDiff        = reward.m_manaDiff;
+        fhReward.rngBonus.luck   = reward.m_luckDiff;
+        fhReward.rngBonus.morale = reward.m_moraleDiff;
+
+        fhReward.resources.wood    = reward.m_resourceSet.m_resourceAmount[0];
+        fhReward.resources.mercury = reward.m_resourceSet.m_resourceAmount[1];
+        fhReward.resources.ore     = reward.m_resourceSet.m_resourceAmount[2];
+        fhReward.resources.sulfur  = reward.m_resourceSet.m_resourceAmount[3];
+        fhReward.resources.crystal = reward.m_resourceSet.m_resourceAmount[4];
+        fhReward.resources.gems    = reward.m_resourceSet.m_resourceAmount[5];
+        fhReward.resources.gold    = reward.m_resourceSet.m_resourceAmount[6];
+
+        // @todo: m_primSkillSet
+        // @todo: m_secSkills
+        // @todo: m_artifacts
+        for (uint8_t spellId : reward.m_spells)
+            fhReward.spells.onlySpells.push_back(spellIds.at(spellId));
+
+        fhReward.units = convertStacks(reward.m_creatures.m_stacks);
+        return fhReward;
+    };
+
     for (int index = 0; const Object& obj : src.m_objects) {
         const IMapObject*              impl     = obj.m_impl.get();
         const ObjectTemplate&          objTempl = src.m_objectDefs[obj.m_defnum];
@@ -276,7 +308,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                         break;
                 }
 
-                dest.m_objects.m_monsters.push_back(fhMonster);
+                dest.m_objects.m_monsters.push_back(std::move(fhMonster));
             } break;
             case MapObjectType::OCEAN_BOTTLE:
             case MapObjectType::SIGN:
@@ -308,17 +340,20 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             case MapObjectType::ARTIFACT:
             case MapObjectType::SPELL_SCROLL:
             {
-                //const auto* artifact = static_cast<const MapArtifact*>(impl);
-                //assert(!artifact->m_isSpell);
+                FHArtifact art;
+                art.m_order = index;
+                art.m_pos   = posFromH3M(obj.m_pos);
                 if (type == MapObjectType::SPELL_SCROLL) {
+                    const auto* artifact = static_cast<const MapArtifact*>(impl);
+                    const auto* spell    = spellIds.at(artifact->m_spellId);
+                    assert(spell);
+                    art.m_id = database->artifacts()->find("sod.artifact." + spell->id); // @todo: constaint for prefix?
+                    assert(art.m_id);
                 } else {
                     assert(objTempl.m_subid != 0);
-                    FHArtifact art;
-                    art.m_order = index;
-                    art.m_pos   = posFromH3M(obj.m_pos);
-                    art.m_id    = artIds[objTempl.m_subid];
-                    dest.m_objects.m_artifacts.push_back(art);
+                    art.m_id = artIds[objTempl.m_subid];
                 }
+                dest.m_objects.m_artifacts.push_back(std::move(art));
             } break;
             case MapObjectType::RANDOM_ART:
             case MapObjectType::RANDOM_TREASURE_ART:
@@ -340,7 +375,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                 else if (type == MapObjectType::RANDOM_RELIC_ART)
                     art.m_type = FHRandomArtifact::Type::Relic;
 
-                dest.m_objects.m_artifactsRandom.push_back(art);
+                dest.m_objects.m_artifactsRandom.push_back(std::move(art));
             } break;
             case MapObjectType::RANDOM_RESOURCE:
             {
@@ -349,7 +384,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                 fhres.m_order  = index;
                 fhres.m_pos    = posFromH3M(obj.m_pos);
                 fhres.m_amount = resource->m_amount;
-                dest.m_objects.m_resourcesRandom.push_back(fhres);
+                dest.m_objects.m_resourcesRandom.push_back(std::move(fhres));
             } break;
             case MapObjectType::RESOURCE:
             {
@@ -360,7 +395,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                 fhres.m_amount = resource->m_amount;
                 fhres.m_id     = resIds[objTempl.m_subid];
                 assert(fhres.m_id);
-                dest.m_objects.m_resources.push_back(fhres);
+                dest.m_objects.m_resources.push_back(std::move(fhres));
             } break;
             case MapObjectType::TREASURE_CHEST:
             case MapObjectType::CAMPFIRE:
@@ -374,7 +409,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                     fhres.m_type = FHResource::Type::TreasureChest;
                 else if (type == MapObjectType::CAMPFIRE)
                     fhres.m_type = FHResource::Type::CampFire;
-                dest.m_objects.m_resources.push_back(fhres);
+                dest.m_objects.m_resources.push_back(std::move(fhres));
             } break;
             case MapObjectType::RANDOM_TOWN:
             case MapObjectType::TOWN:
@@ -392,7 +427,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                 fhtown.m_defFile         = objTempl.m_animationFile;
                 if (mainTowns.contains(playerId) && mainTowns.at(playerId) == fhtown.m_pos)
                     fhtown.m_isMain = true;
-                dest.m_towns.push_back(fhtown);
+                dest.m_towns.push_back(std::move(fhtown));
             } break;
             case MapObjectType::MINE:
             case MapObjectType::ABANDONED_MINE:
@@ -400,6 +435,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                 const auto* objOwner = static_cast<const MapObjectWithOwner*>(impl);
                 FHMine      mine;
                 mine.m_pos    = posFromH3M(obj.m_pos);
+                mine.m_order  = index;
                 mine.m_player = makePlayerId(objOwner->m_owner);
                 mine.m_id     = resIds[objTempl.m_subid];
                 auto it       = std::find(mine.m_id->minesDefs.cbegin(), mine.m_id->minesDefs.cend(), objDef);
@@ -425,7 +461,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                     dwelling.m_order         = index;
                     dwelling.m_pos           = posFromH3M(obj.m_pos);
                     dwelling.m_player        = makePlayerId(objOwner->m_owner);
-                    dest.m_objects.m_dwellings.push_back(dwelling);
+                    dest.m_objects.m_dwellings.push_back(std::move(dwelling));
                 }
 
             } break;
@@ -439,7 +475,11 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             case MapObjectType::PANDORAS_BOX:
             {
                 const auto* pandora = static_cast<const MapPandora*>(impl);
-                assert(1 && pandora);
+                FHPandora   fhPandora;
+                fhPandora.m_pos    = posFromH3M(obj.m_pos);
+                fhPandora.m_order  = index;
+                fhPandora.m_reward = convertReward(pandora->m_reward);
+                dest.m_objects.m_pandoras.push_back(std::move(fhPandora));
             } break;
             case MapObjectType::GRAIL:
             {
@@ -492,7 +532,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                         fhBank.m_guardsVariants = { variant };
                     }
                 }
-                dest.m_objects.m_banks.push_back(fhBank);
+                dest.m_objects.m_banks.push_back(std::move(fhBank));
             } break;
             default:
             {
@@ -502,7 +542,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                     fhObstacle.m_id    = obstacle;
                     fhObstacle.m_order = index;
                     fhObstacle.m_pos   = posFromH3M(obj.m_pos);
-                    dest.m_objects.m_obstacles.push_back(fhObstacle);
+                    dest.m_objects.m_obstacles.push_back(std::move(fhObstacle));
                     break;
                 }
 

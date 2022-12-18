@@ -138,6 +138,14 @@ inline constexpr const std::tuple MetaInfo::s_fields<FHRandomArtifact>{
 };
 
 template<>
+inline constexpr const std::tuple MetaInfo::s_fields<FHPandora>{
+    Field("pos", &FHPandora::m_pos),
+    Field("order", &FHPandora::m_order),
+
+    Field("reward", &FHPandora::m_reward),
+};
+
+template<>
 inline constexpr const std::tuple MetaInfo::s_fields<FHMonster>{
     Field("pos", &FHMonster::m_pos),
     Field("order", &FHMonster::m_order),
@@ -197,6 +205,7 @@ inline constexpr const std::tuple MetaInfo::s_fields<FHMap::Objects>{
     Field("banks", &FHMap::Objects::m_banks),
     Field("obstacles", &FHMap::Objects::m_obstacles),
     Field("mines", &FHMap::Objects::m_mines),
+    Field("pandoras", &FHMap::Objects::m_pandoras),
 };
 
 template<>

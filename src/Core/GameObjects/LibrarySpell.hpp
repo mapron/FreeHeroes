@@ -200,15 +200,16 @@ struct SpellFilter {
         return std::find(schools.cbegin(), schools.cend(), school) != schools.cend();
     }
 
-    std::set<LibrarySpellConstPtr> filterPossible(const std::vector<LibrarySpell*>& allPossibleSpells)
+    std::vector<LibrarySpellConstPtr> filterPossible(const std::vector<LibrarySpell*>& allPossibleSpells) const
     {
         if (isDefault())
             return {};
 
-        std::set<LibrarySpellConstPtr> populatedFilter;
-        for (auto spell : allPossibleSpells) {
+        std::vector<LibrarySpellConstPtr> populatedFilter;
+        populatedFilter.reserve(allPossibleSpells.size());
+        for (auto* spell : allPossibleSpells) {
             if (contains(spell))
-                populatedFilter.insert(spell);
+                populatedFilter.push_back(spell);
         }
         return populatedFilter;
     }

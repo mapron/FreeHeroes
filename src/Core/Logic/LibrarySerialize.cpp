@@ -211,7 +211,7 @@ bool MetaInfo::transformTree<ResourceAmount>(const PropertyTree& treeIn, Propert
         const auto& str     = parts[i];
         auto        partsEq = splitLine(str, '=', true);
         if (partsEq.size() == 1 && !hasGold) {
-            treeOut["gold"] = PropertyTreeScalar(partsEq[0]);
+            treeOut["gold"] = PropertyTreeScalar(std::atoi(partsEq[0].c_str()));
             hasGold         = true;
             continue;
         }
@@ -227,37 +227,6 @@ bool MetaInfo::transformTree<ResourceAmount>(const PropertyTree& treeIn, Propert
     return true;
 }
 
-template<>
-bool MetaInfo::transformTree<ArtifactRewardAmount>(const PropertyTree& treeIn, PropertyTree& treeOut)
-{
-    if (!treeIn.isScalar())
-        return false;
-
-    treeOut.convertToMap();
-    std::string valueStr(treeIn.getScalar().toString());
-
-    if (valueStr.empty()) {
-        return true;
-    }
-    auto  parts     = splitLine(valueStr, ',', true);
-    auto& resources = treeOut["artifacts"];
-    resources.convertToList();
-    for (size_t i = 0; i < parts.size(); ++i) {
-        PropertyTree res;
-        const auto&  str     = parts[i];
-        auto         partsEq = splitLine(str, '=', true);
-        if (partsEq.size() != 2 || partsEq[0].empty()) {
-            return {};
-        }
-        int value = std::atoi(partsEq[1].c_str());
-        if (!value)
-            return false;
-        res["class"] = PropertyTreeScalar(partsEq[0]);
-        res["n"]     = PropertyTreeScalar(value);
-        resources.append(res);
-    }
-    return true;
-}
 template<>
 bool MetaInfo::transformTree<UnitWithCount>(const PropertyTree& treeIn, PropertyTree& treeOut)
 {

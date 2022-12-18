@@ -96,6 +96,11 @@ struct PrimaryRngParams : public internal::MakeAggregate<PrimaryRngParams> {
 
     constexpr auto asTuple() const noexcept { return std::tie(luck, morale); }
     constexpr auto asTuple() noexcept { return std::tie(luck, morale); }
+
+    size_t nonEmptyAmount() const noexcept
+    {
+        return (luck != 0) + (morale != 0);
+    }
 };
 
 struct RngChanceMultiplier : public internal::MakeAggregate<RngChanceMultiplier> {
@@ -181,6 +186,11 @@ struct HeroPrimaryParams : public internal::MakeAggregate<HeroPrimaryParams> {
 
     constexpr auto asTuple() const noexcept { return std::tie(ad, magic); }
     constexpr auto asTuple() noexcept { return std::tie(ad, magic); }
+
+    size_t nonEmptyAmount() const noexcept
+    {
+        return (ad.attack != 0) + (ad.defense != 0) + (magic.intelligence != 0) + (magic.spellPower != 0);
+    }
 };
 
 struct MoraleDetails : public internal::MakeAggregate<MoraleDetails> {
