@@ -46,7 +46,7 @@ void FHTileMap::correctTerrainTypes(Core::LibraryTerrainConstPtr dirtTerrain,
          *  L  X   R
          * BL  B  BR
          */
-        const auto& TL = getNeighbour(pos, flipHor ? +1 : -1, flipVert ? +1 : -1);
+        //const auto& TL = getNeighbour(pos, flipHor ? +1 : -1, flipVert ? +1 : -1);
         const auto& T  = getNeighbour(pos, flipHor ? +0 : +0, flipVert ? +1 : -1);
         const auto& TR = getNeighbour(pos, flipHor ? -1 : +1, flipVert ? +1 : -1);
         const auto& L  = getNeighbour(pos, flipHor ? +1 : -1, flipVert ? +0 : +0);
@@ -75,17 +75,6 @@ void FHTileMap::correctTerrainTypes(Core::LibraryTerrainConstPtr dirtTerrain,
         const auto sandBL = BL.m_terrain == sandTerrain || (!waterX && BL.m_terrain == waterTerrain);
         const auto sandTR = TR.m_terrain == sandTerrain || (!waterX && TR.m_terrain == waterTerrain);
 
-        if (!waterX) {
-            X.m_coastal = false
-                          || R.m_terrain == waterTerrain
-                          || L.m_terrain == waterTerrain
-                          || T.m_terrain == waterTerrain
-                          || B.m_terrain == waterTerrain
-                          || BR.m_terrain == waterTerrain
-                          || TR.m_terrain == waterTerrain
-                          || TL.m_terrain == waterTerrain
-                          || BL.m_terrain == waterTerrain;
-        }
         using BT = Core::LibraryTerrain::BorderType;
 
         auto setView = [&X, flipHor, flipVert, waterTerrain](BT borderType, bool dirt, bool sand) {
@@ -147,13 +136,49 @@ void FHTileMap::correctTerrainTypes(Core::LibraryTerrainConstPtr dirtTerrain,
         return true;
     };
 
+    auto coastalDetect = [this, waterTerrain](const FHPos& pos, Tile& X) {
+        if (X.m_terrain == waterTerrain) {
+            X.m_coastal = false;
+            return;
+        }
+
+        const auto& TL = getNeighbour(pos, -1, -1);
+        const auto& T  = getNeighbour(pos, +0, -1);
+        const auto& TR = getNeighbour(pos, +1, -1);
+        const auto& L  = getNeighbour(pos, -1, +0);
+
+        const auto& R  = getNeighbour(pos, +1, +0);
+        const auto& BL = getNeighbour(pos, -1, +1);
+        const auto& B  = getNeighbour(pos, +0, +1);
+        const auto& BR = getNeighbour(pos, +1, +1);
+
+        X.m_coastal = false
+                      || R.m_terrain == waterTerrain
+                      || L.m_terrain == waterTerrain
+                      || T.m_terrain == waterTerrain
+                      || B.m_terrain == waterTerrain
+                      || BR.m_terrain == waterTerrain
+                      || TR.m_terrain == waterTerrain
+                      || TL.m_terrain == waterTerrain
+                      || BL.m_terrain == waterTerrain;
+    };
+
     for (uint8_t z = 0; z < m_depth; ++z) {
         for (uint32_t y = 0; y < m_height; ++y) {
             for (uint32_t x = 0; x < m_width; ++x) {
                 const FHPos pos{ x, y, z };
                 auto&       X = get(pos);
-                if (X.m_terrain == sandTerrain || X.m_terrain == dirtTerrain)
+
+                const uint8_t offset     = X.m_terrain->presentationParams.centerTilesOffset;
+                const auto    centerSize = X.m_terrain->presentationParams.centerTilesCount;
+
+                coastalDetect(pos, X);
+
+                if (X.m_terrain == sandTerrain) {
+                    X.m_viewMin = offset;
+                    X.m_viewMax = offset + (centerSize <= 0 ? 0 : centerSize - 1);
                     continue;
+                }
 
                 const bool tileCorrected = [&correctTile, &pos]() {
                     for (int order = 0; order <= 3; ++order) {
@@ -169,10 +194,8 @@ void FHTileMap::correctTerrainTypes(Core::LibraryTerrainConstPtr dirtTerrain,
                 if (tileCorrected)
                     continue;
 
-                const uint8_t offset     = X.m_terrain->presentationParams.centerTilesOffset;
-                const auto    centerSize = X.m_terrain->presentationParams.centerTilesCount;
-                X.m_viewMin              = offset;
-                X.m_viewMax              = offset + (centerSize <= 0 ? 0 : centerSize - 1);
+                X.m_viewMin = offset;
+                X.m_viewMax = offset + (centerSize <= 0 ? 0 : centerSize - 1);
             }
         }
     }
