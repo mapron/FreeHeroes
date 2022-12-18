@@ -182,6 +182,7 @@ inline constexpr const std::tuple MetaInfo::s_fields<LibraryResource>{
     Field("untranslatedName" , &LibraryResource::untranslatedName),
     Field("legacyId"         , &LibraryResource::legacyId),
     Field("mapObjectDef"     , &LibraryResource::mapObjectDef),
+    Field("minesDefs"        , &LibraryResource::minesDefs),
     Field("pres"             , &LibraryResource::presentationParams),
 };
 

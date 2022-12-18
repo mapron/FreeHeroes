@@ -343,6 +343,14 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                 dest.m_objects.m_artifactsRandom.push_back(art);
             } break;
             case MapObjectType::RANDOM_RESOURCE:
+            {
+                const auto*      resource = static_cast<const MapResource*>(impl);
+                FHRandomResource fhres;
+                fhres.m_order  = index;
+                fhres.m_pos    = posFromH3M(obj.m_pos);
+                fhres.m_amount = resource->m_amount;
+                dest.m_objects.m_resourcesRandom.push_back(fhres);
+            } break;
             case MapObjectType::RESOURCE:
             {
                 const auto* resource = static_cast<const MapResource*>(impl);
@@ -355,13 +363,17 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                 dest.m_objects.m_resources.push_back(fhres);
             } break;
             case MapObjectType::TREASURE_CHEST:
+            case MapObjectType::CAMPFIRE:
             {
                 FHResource fhres;
                 fhres.m_order  = index;
                 fhres.m_pos    = posFromH3M(obj.m_pos);
                 fhres.m_amount = 0;
                 fhres.m_id     = nullptr;
-                fhres.m_type   = FHResource::Type::TreasureChest;
+                if (type == MapObjectType::TREASURE_CHEST)
+                    fhres.m_type = FHResource::Type::TreasureChest;
+                else if (type == MapObjectType::CAMPFIRE)
+                    fhres.m_type = FHResource::Type::CampFire;
                 dest.m_objects.m_resources.push_back(fhres);
             } break;
             case MapObjectType::RANDOM_TOWN:
@@ -384,6 +396,18 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             } break;
             case MapObjectType::MINE:
             case MapObjectType::ABANDONED_MINE:
+            {
+                const auto* objOwner = static_cast<const MapObjectWithOwner*>(impl);
+                FHMine      mine;
+                mine.m_pos    = posFromH3M(obj.m_pos);
+                mine.m_player = makePlayerId(objOwner->m_owner);
+                mine.m_id     = resIds[objTempl.m_subid];
+                auto it       = std::find(mine.m_id->minesDefs.cbegin(), mine.m_id->minesDefs.cend(), objDef);
+                assert(it != mine.m_id->minesDefs.cend());
+
+                mine.m_defVariant = std::distance(mine.m_id->minesDefs.cbegin(), it);
+                dest.m_objects.m_mines.push_back(std::move(mine));
+            } break;
             case MapObjectType::CREATURE_GENERATOR1:
             case MapObjectType::CREATURE_GENERATOR2:
             case MapObjectType::CREATURE_GENERATOR3:

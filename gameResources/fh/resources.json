@@ -3,15 +3,15 @@
 
 "records": {
 
-"wood"     : {"untranslatedName":"Wood", "mapObjectDef":"avtwood0"},
-"mercury"  : {"untranslatedName":"Mercury", "mapObjectDef":"avtmerc0"},
-"ore"      : {"untranslatedName":"Wood", "mapObjectDef":"avtore0"},
+"wood"     : {"untranslatedName":"Wood" },
+"mercury"  : {"untranslatedName":"Mercury" },
+"ore"      : {"untranslatedName":"Wood" },
 
-"sulfur"   : {"untranslatedName":"Sulfur", "mapObjectDef":"avtsulf0"},
-"crystal"  : {"untranslatedName":"Crystal", "mapObjectDef":"avtcrys0"},
-"gems"     : {"untranslatedName":"Gems", "mapObjectDef":"avtgems0"},
+"sulfur"   : {"untranslatedName":"Sulfur"},
+"crystal"  : {"untranslatedName":"Crystal" },
+"gems"     : {"untranslatedName":"Gems" },
 
-"gold"     : {"untranslatedName":"Gold", "mapObjectDef":"avtgold0"}
+"gold"     : {"untranslatedName":"Gold"}
 }
 
 }]

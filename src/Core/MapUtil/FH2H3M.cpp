@@ -313,7 +313,15 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
             dest.m_objects.push_back(Object{ .m_order = fhRes.m_order, .m_pos = int3fromPos(fhRes.m_pos), .m_defnum = getDefFileIndex(makeDefFromDb(fhRes.m_id->mapObjectDef)), .m_impl = std::move(res) });
         } else if (fhRes.m_type == FHResource::Type::TreasureChest) {
             dest.m_objects.push_back(Object{ .m_order = fhRes.m_order, .m_pos = int3fromPos(fhRes.m_pos), .m_defnum = getDefFileIndex(makeDefFromDbId("avtchst0")), .m_impl = std::make_unique<MapObjectSimple>(dest.m_features) });
+        } else if (fhRes.m_type == FHResource::Type::CampFire) {
+            dest.m_objects.push_back(Object{ .m_order = fhRes.m_order, .m_pos = int3fromPos(fhRes.m_pos), .m_defnum = getDefFileIndex(makeDefFromDbId("adcfra")), .m_impl = std::make_unique<MapObjectSimple>(dest.m_features) });
         }
+    }
+
+    for (auto& fhRes : src.m_objects.m_resourcesRandom) {
+        auto res      = std::make_unique<MapResource>(dest.m_features);
+        res->m_amount = fhRes.m_amount;
+        dest.m_objects.push_back(Object{ .m_order = fhRes.m_order, .m_pos = int3fromPos(fhRes.m_pos), .m_defnum = getDefFileIndex(makeDefFromDbId("avtrndm0")), .m_impl = std::move(res) });
     }
 
     for (auto& fhArt : src.m_objects.m_artifacts) {
@@ -379,6 +387,13 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
 
         auto* def = fhDwelling.m_id->mapObjectDefs[fhDwelling.m_defVariant];
         dest.m_objects.push_back(Object{ .m_order = fhDwelling.m_order, .m_pos = int3fromPos(fhDwelling.m_pos), .m_defnum = getDefFileIndex(makeDefFromDb(def)), .m_impl = std::move(dwell) });
+    }
+    for (auto& fhMine : src.m_objects.m_mines) {
+        auto mine     = std::make_unique<MapObjectWithOwner>(dest.m_features);
+        mine->m_owner = static_cast<uint8_t>(fhMine.m_player);
+
+        auto* def = fhMine.m_id->minesDefs[fhMine.m_defVariant];
+        dest.m_objects.push_back(Object{ .m_order = fhMine.m_order, .m_pos = int3fromPos(fhMine.m_pos), .m_defnum = getDefFileIndex(makeDefFromDb(def)), .m_impl = std::move(mine) });
     }
 
     for (auto& fhBank : src.m_objects.m_banks) {

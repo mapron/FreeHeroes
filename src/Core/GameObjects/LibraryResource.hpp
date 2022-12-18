@@ -8,6 +8,7 @@
 #include "LibraryFwd.hpp"
 
 #include <string>
+#include <vector>
 
 namespace FreeHeroes::Core {
 
@@ -24,8 +25,9 @@ struct LibraryResource {
     std::string untranslatedName;
     int         legacyId = -1;
 
-    LibraryObjectDefConstPtr mapObjectDef = nullptr;
-    Presentation             presentationParams;
+    LibraryObjectDefConstPtr              mapObjectDef = nullptr;
+    std::vector<LibraryObjectDefConstPtr> minesDefs;
+    Presentation                          presentationParams;
 };
 
 }

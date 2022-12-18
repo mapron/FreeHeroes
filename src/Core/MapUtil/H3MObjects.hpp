@@ -110,7 +110,7 @@ enum class MapObjectType
     //    BORDERGUARD                 = 9,
     //    KEYMASTER                   = 10,
     //    BUOY                        = 11,
-    //    CAMPFIRE                    = 12,
+    CAMPFIRE = 12,
     //    CARTOGRAPHER                = 13,
     //    SWAN_POND                   = 14,
     //    COVER_OF_DARKNESS           = 15,

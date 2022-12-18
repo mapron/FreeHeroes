@@ -41,7 +41,8 @@ template<>
 inline constexpr const auto EnumTraits::s_valueMapping<FHResource::Type> = EnumTraits::make(
     FHResource::Type::Resource,
     "Resource"      , FHResource::Type::Resource,
-    "TreasureChest" , FHResource::Type::TreasureChest
+    "TreasureChest" , FHResource::Type::TreasureChest,
+    "CampFire"      , FHResource::Type::CampFire
     );
 template<>
 inline constexpr const auto EnumTraits::s_valueMapping<FHRandomArtifact::Type> = EnumTraits::make(
@@ -114,6 +115,14 @@ inline constexpr const std::tuple MetaInfo::s_fields<FHResource>{
     Field("type", &FHResource::m_type),
 };
 template<>
+inline constexpr const std::tuple MetaInfo::s_fields<FHRandomResource>{
+    Field("pos", &FHRandomResource::m_pos),
+    Field("order", &FHRandomResource::m_order),
+
+    Field("amount", &FHRandomResource::m_amount),
+};
+
+template<>
 inline constexpr const std::tuple MetaInfo::s_fields<FHArtifact>{
     Field("pos", &FHArtifact::m_pos),
     Field("order", &FHArtifact::m_order),
@@ -149,6 +158,15 @@ inline constexpr const std::tuple MetaInfo::s_fields<FHDwelling>{
     Field("id", &FHDwelling::m_id),
     Field("defVariant", &FHDwelling::m_defVariant),
 };
+template<>
+inline constexpr const std::tuple MetaInfo::s_fields<FHMine>{
+    Field("pos", &FHMine::m_pos),
+    Field("order", &FHMine::m_order),
+    Field("player", &FHMine::m_player),
+
+    Field("id", &FHMine::m_id),
+    Field("defVariant", &FHMine::m_defVariant),
+};
 
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<FHBank>{
@@ -171,12 +189,14 @@ inline constexpr const std::tuple MetaInfo::s_fields<FHObstacle>{
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<FHMap::Objects>{
     Field("resources", &FHMap::Objects::m_resources),
+    Field("resourcesRandom", &FHMap::Objects::m_resourcesRandom),
     Field("artifacts", &FHMap::Objects::m_artifacts),
     Field("artifactsRandom", &FHMap::Objects::m_artifactsRandom),
     Field("monsters", &FHMap::Objects::m_monsters),
     Field("dwellings", &FHMap::Objects::m_dwellings),
     Field("banks", &FHMap::Objects::m_banks),
     Field("obstacles", &FHMap::Objects::m_obstacles),
+    Field("mines", &FHMap::Objects::m_mines),
 };
 
 template<>

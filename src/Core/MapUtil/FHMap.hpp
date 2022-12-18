@@ -84,15 +84,25 @@ struct FHDwelling : public FHPlayerControlledObject {
     int                           m_defVariant = 0;
 };
 
+struct FHMine : public FHPlayerControlledObject {
+    Core::LibraryResourceConstPtr m_id         = nullptr;
+    int                           m_defVariant = 0;
+};
+
 struct FHResource : public FHCommonObject {
     enum class Type
     {
         Resource,
         TreasureChest,
+        CampFire,
     };
     uint32_t                      m_amount = 0;
     Core::LibraryResourceConstPtr m_id     = nullptr;
     Type                          m_type   = Type::Resource;
+};
+
+struct FHRandomResource : public FHCommonObject {
+    uint32_t m_amount = 0;
 };
 
 struct FHArtifact : public FHCommonObject {
@@ -152,12 +162,14 @@ struct FHMap {
 
     struct Objects {
         std::vector<FHResource>       m_resources;
+        std::vector<FHRandomResource> m_resourcesRandom;
         std::vector<FHArtifact>       m_artifacts;
         std::vector<FHRandomArtifact> m_artifactsRandom;
         std::vector<FHMonster>        m_monsters;
         std::vector<FHDwelling>       m_dwellings;
         std::vector<FHBank>           m_banks;
         std::vector<FHObstacle>       m_obstacles;
+        std::vector<FHMine>           m_mines;
     } m_objects;
 
     std::vector<FHRiver> m_rivers;
