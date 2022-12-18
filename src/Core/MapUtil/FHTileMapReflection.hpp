@@ -7,28 +7,25 @@
 
 #include "FHTileMap.hpp"
 
-#include "Reflection/EnumTraits.hpp"
+#include "Reflection/EnumTraitsMacro.hpp"
 #include "Reflection/MetaInfo.hpp"
 
 namespace FreeHeroes::Core::Reflection {
 
-// clang-format off
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<FHRiverType> = EnumTraits::make(
-    FHRiverType::Invalid,
-    "Water"   , FHRiverType::Water,
-    "Ice"     , FHRiverType::Ice,
-    "Mud"     , FHRiverType::Mud,
-    "Lava"    , FHRiverType::Lava
-    );
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<FHRoadType> = EnumTraits::make(
-    FHRoadType::Invalid,
-    "Dirt"         , FHRoadType::Dirt,
-    "Gravel"       , FHRoadType::Gravel,
-    "Cobblestone"  , FHRoadType::Cobblestone
-    );
-// clang-format on
+ENUM_REFLECTION_STRINGIY(FHRiverType,
+                         Invalid,
+                         Invalid,
+                         Water,
+                         Ice,
+                         Mud,
+                         Lava)
+
+ENUM_REFLECTION_STRINGIY(FHRoadType,
+                         Invalid,
+                         Invalid,
+                         Dirt,
+                         Gravel,
+                         Cobblestone)
 
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<FHPos>{

@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "Reflection/EnumTraits.hpp"
+#include "Reflection/EnumTraitsMacro.hpp"
 #include "Reflection/MetaInfo.hpp"
 
 #include "H3MMap.hpp"
@@ -19,17 +19,13 @@ inline constexpr const std::tuple MetaInfo::s_fields<H3Pos>{
     Field("z", &H3Pos::m_z),
 };
 
-// clang-format off
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<AiTactic> = EnumTraits::make(
-    AiTactic::NONE,
-    "NONE", AiTactic::NONE,
-    "RANDOM", AiTactic::RANDOM,
-    "WARRIOR", AiTactic::WARRIOR,
-    "BUILDER", AiTactic::BUILDER,
-    "EXPLORER", AiTactic::EXPLORER
-    );
-// clang-format on
+ENUM_REFLECTION_STRINGIY(AiTactic,
+                         NONE,
+                         NONE,
+                         RANDOM,
+                         WARRIOR,
+                         BUILDER,
+                         EXPLORER)
 
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<SHeroName>{
@@ -68,57 +64,48 @@ inline constexpr const std::tuple MetaInfo::s_fields<PlayerInfo>{
 
 };
 
-// clang-format off
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<MapFormat> = EnumTraits::make(
-    MapFormat::Invalid,
-    "INVALID"  , MapFormat::Invalid,
-    "ROE"      , MapFormat::ROE,
-    "AB"       , MapFormat::AB,
-    "SOD"      , MapFormat::SOD,
-    "HOTA1"    , MapFormat::HOTA1,
-    "HOTA2"    , MapFormat::HOTA2,
-    "HOTA3"    , MapFormat::HOTA3,
-    "WOG"      , MapFormat::WOG,
-    "VCMI"     , MapFormat::VCMI
-    );
+ENUM_REFLECTION_STRINGIY(MapFormat,
+                         Invalid,
+                         Invalid,
+                         ROE,
+                         AB,
+                         SOD,
+                         HOTA1,
+                         HOTA2,
+                         HOTA3,
+                         WOG,
+                         VCMI)
 
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<H3Map::VictoryConditionType> = EnumTraits::make(
-    H3Map::VictoryConditionType::WINSTANDARD,
-    "ARTIFACT"       , H3Map::VictoryConditionType::ARTIFACT,
-    "GATHERTROOP"    , H3Map::VictoryConditionType::GATHERTROOP,
-    "GATHERRESOURCE" , H3Map::VictoryConditionType::GATHERRESOURCE,
-    "BUILDCITY"      , H3Map::VictoryConditionType::BUILDCITY,
-    "BUILDGRAIL"     , H3Map::VictoryConditionType::BUILDGRAIL,
-    "BEATHERO"       , H3Map::VictoryConditionType::BEATHERO,
-    "CAPTURECITY"    , H3Map::VictoryConditionType::CAPTURECITY,
-    "BEATMONSTER"    , H3Map::VictoryConditionType::BEATMONSTER,
-    "TAKEDWELLINGS"  , H3Map::VictoryConditionType::TAKEDWELLINGS,
-    "TAKEMINES"      , H3Map::VictoryConditionType::TAKEMINES,
-    "TRANSPORTITEM"  , H3Map::VictoryConditionType::TRANSPORTITEM,
-    "WINSTANDARD"    , H3Map::VictoryConditionType::WINSTANDARD
-    );
+ENUM_REFLECTION_STRINGIY(H3Map::VictoryConditionType,
+                         WINSTANDARD,
+                         ARTIFACT,
+                         GATHERTROOP,
+                         GATHERRESOURCE,
+                         BUILDCITY,
+                         BUILDGRAIL,
+                         BEATHERO,
+                         CAPTURECITY,
+                         BEATMONSTER,
+                         TAKEDWELLINGS,
+                         TAKEMINES,
+                         TRANSPORTITEM,
+                         WINSTANDARD)
 
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<H3Map::LossConditionType> = EnumTraits::make(
-    H3Map::LossConditionType::LOSSSTANDARD,
-    "LOSSCASTLE"   , H3Map::LossConditionType::LOSSCASTLE,
-    "LOSSHERO"     , H3Map::LossConditionType::LOSSHERO,
-    "TIMEEXPIRES"  , H3Map::LossConditionType::TIMEEXPIRES,
-    "LOSSSTANDARD" , H3Map::LossConditionType::LOSSSTANDARD
-    );
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<ObjectTemplate::Type> = EnumTraits::make(
-    ObjectTemplate::Type::INVALID,
-    "INVALID"  , ObjectTemplate::Type::INVALID,
-    "COMMON"   , ObjectTemplate::Type::COMMON,
-    "CREATURE" , ObjectTemplate::Type::CREATURE,
-    "HERO"     , ObjectTemplate::Type::HERO,
-    "ARTIFACT" , ObjectTemplate::Type::ARTIFACT,
-    "RESOURCE" , ObjectTemplate::Type::RESOURCE
-    );
-// clang-format on
+ENUM_REFLECTION_STRINGIY(H3Map::LossConditionType,
+                         LOSSSTANDARD,
+                         LOSSCASTLE,
+                         LOSSHERO,
+                         TIMEEXPIRES,
+                         LOSSSTANDARD)
+
+ENUM_REFLECTION_STRINGIY(ObjectTemplate::Type,
+                         INVALID,
+                         INVALID,
+                         COMMON,
+                         CREATURE,
+                         HERO,
+                         ARTIFACT,
+                         RESOURCE)
 
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<MapTile>{

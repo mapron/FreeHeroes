@@ -20,8 +20,8 @@
 #include "LibraryTerrain.hpp"
 #include "LibraryUnit.hpp"
 
-#include "Reflection/EnumTraits.hpp"
-#include "Reflection/MetaInfo.hpp"
+#include "Reflection/EnumTraitsMacro.hpp"
+#include "Reflection/MetaInfoMacro.hpp"
 
 #include "StringUtils.hpp"
 
@@ -71,18 +71,16 @@ inline constexpr const std::tuple MetaInfo::s_fields<HeroPrimaryParams>{
     Field("ad"   , &HeroPrimaryParams::ad),
     Field("magic", &HeroPrimaryParams::magic),
 };
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<HeroPrimaryParamType> = EnumTraits::make(
-    HeroPrimaryParamType::Attack,
-    "attack" ,   HeroPrimaryParamType::Attack,
-    "defense",   HeroPrimaryParamType::Defense,
-    "sp"     ,   HeroPrimaryParamType::SpellPower,
-    "int"    ,   HeroPrimaryParamType::Intelligence,
-    "mana"   ,   HeroPrimaryParamType::Mana,
-    "exp"    ,   HeroPrimaryParamType::Experience
-    );
 
-//inline constexpr const std::tuple MetaInfo::s_fields<Reflection::LibraryIdResolver::DelayedDeserializeParam>{
+ENUM_REFLECTION_PAIRED(HeroPrimaryParamType,
+    Attack,
+    "attack" ,  Attack,
+    "defense",  Defense,
+    "sp"     ,  SpellPower,
+    "int"    ,  Intelligence,
+    "mana"   ,  Mana,
+    "exp"    ,  Experience
+)
 
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<MagicReduce>{
@@ -116,26 +114,25 @@ inline constexpr const std::tuple MetaInfo::s_fields<RngChanceMultiplier>{
 template<>
 inline constexpr const bool MetaInfo::s_isStringMap<LibraryTerrain::Presentation::BTMap>{ true };
 
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<LibraryTerrain::BorderType> = EnumTraits::make(
-    LibraryTerrain::BorderType::Invalid,
-    "TL"  ,   LibraryTerrain::BorderType::TL,
-    "L"   ,   LibraryTerrain::BorderType::L,
-    "T"   ,   LibraryTerrain::BorderType::T,
-    "BR"  ,   LibraryTerrain::BorderType::BR,
-    "TLS" ,   LibraryTerrain::BorderType::TLS,
-    "BRS" ,   LibraryTerrain::BorderType::BRS,
-    "ThreeWay_DD"      ,   LibraryTerrain::BorderType::ThreeWay_DD,
-    "ThreeWay_DS"      ,   LibraryTerrain::BorderType::ThreeWay_DS,
-    "ThreeWay_SS"      ,   LibraryTerrain::BorderType::ThreeWay_SS,
-    "ThreeWay_RD_BLS"  ,   LibraryTerrain::BorderType::ThreeWay_RD_BLS,
-    "ThreeWay_BD_TRS"  ,   LibraryTerrain::BorderType::ThreeWay_BD_TRS,
-    "ThreeWay_TRD_BRS" ,   LibraryTerrain::BorderType::ThreeWay_TRD_BRS,
-    "ThreeWay_BRS_BLD" ,   LibraryTerrain::BorderType::ThreeWay_BRS_BLD,
-    "ThreeWay_RS_BD"   ,   LibraryTerrain::BorderType::ThreeWay_RS_BD,
-    "ThreeWay_BS_RD"   ,   LibraryTerrain::BorderType::ThreeWay_BS_RD,
-    "Center" ,   LibraryTerrain::BorderType::Center
-    );
+ENUM_REFLECTION_PAIRED(LibraryTerrain::BorderType,
+    Invalid,
+    "TL"               ,   TL,
+    "L"                ,   L,
+    "T"                ,   T,
+    "BR"               ,   BR,
+    "TLS"              ,   TLS,
+    "BRS"              ,   BRS,
+    "ThreeWay_DD"      ,   ThreeWay_DD,
+    "ThreeWay_DS"      ,   ThreeWay_DS,
+    "ThreeWay_SS"      ,   ThreeWay_SS,
+    "ThreeWay_RD_BLS"  ,   ThreeWay_RD_BLS,
+    "ThreeWay_BD_TRS"  ,   ThreeWay_BD_TRS,
+    "ThreeWay_TRD_BRS" ,   ThreeWay_TRD_BRS,
+    "ThreeWay_BRS_BLD" ,   ThreeWay_BRS_BLD,
+    "ThreeWay_RS_BD"   ,   ThreeWay_RS_BD,
+    "ThreeWay_BS_RD"   ,   ThreeWay_BS_RD,
+    "Center"           ,   Center
+)
 
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<LibraryTerrain::Presentation>{
@@ -221,15 +218,15 @@ inline constexpr const std::tuple MetaInfo::s_fields<LibraryFactionHeroClass>{
     Field("highLevelIncrease" , &LibraryFactionHeroClass::highLevelIncrease),
     Field("pres"              , &LibraryFactionHeroClass::presentationParams),
 };
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<LibraryFaction::Alignment> = EnumTraits::make(
-    LibraryFaction::Alignment::Special,
-    "good"       ,  LibraryFaction::Alignment::Good,
-    "evil"       ,  LibraryFaction::Alignment::Evil,
-    "neutral"    ,  LibraryFaction::Alignment::Neutral,
-    "independent",  LibraryFaction::Alignment::Independent,
-    "special"    ,  LibraryFaction::Alignment::Special
-    );
+ENUM_REFLECTION_PAIRED(LibraryFaction::Alignment,
+    Special,
+    "good"       ,  Good,
+    "evil"       ,  Evil,
+    "neutral"    ,  Neutral,
+    "independent",  Independent,
+    "special"    ,  Special
+)
+
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<LibraryFaction::Presentation>{
     
@@ -257,14 +254,15 @@ inline constexpr const std::tuple MetaInfo::s_fields<LibrarySecondarySkill::Pres
     Field("iconMedium", &LibrarySecondarySkill::Presentation::LevelParams::iconMedium),
     Field("iconLarge" , &LibrarySecondarySkill::Presentation::LevelParams::iconLarge),
 };
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<LibrarySecondarySkill::HandlerType> = EnumTraits::make(
-    LibrarySecondarySkill::HandlerType::Stat,
-    "stat"       ,  LibrarySecondarySkill::HandlerType::Stat,
-    "special"    ,  LibrarySecondarySkill::HandlerType::Special,
-    "wisdom"     ,  LibrarySecondarySkill::HandlerType::Wisdom,
-    "school"     ,  LibrarySecondarySkill::HandlerType::School
-    );
+
+ENUM_REFLECTION_PAIRED(LibrarySecondarySkill::HandlerType,
+    Stat,
+    "stat"       ,  Stat,
+    "special"    ,  Special,
+    "wisdom"     ,  Wisdom,
+    "school"     ,  School
+)
+
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<LibrarySecondarySkill::Presentation>{
     Field("levels"            , &LibrarySecondarySkill::Presentation::levels),
@@ -281,27 +279,23 @@ inline constexpr const std::tuple MetaInfo::s_fields<LibrarySecondarySkill>{
     Field("pres"              , &LibrarySecondarySkill::presentationParams),
 };
  //  -----------------------------------------------------------------------------
+ENUM_REFLECTION_PAIRED(UnitType,
+    Unknown,
+    "living"     , Living,
+    "nonLiving"  , NonLiving,
+    "siege"      , SiegeMachine,
+    "arrowTower" , ArrowTower,
+    "wall"       , Wall
+)
+ENUM_REFLECTION_PAIRED(UnitNonLivingType,
+    None,
+    "undead"    ,  Undead,
+    "golem"     ,  Golem,
+    "gargoyle"  ,  Gargoyle,
+    "elemental" ,  Elemental,
+    "bm"        ,  BattleMachine
+)
 
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<UnitType> = EnumTraits::make(
-    UnitType::Unknown,
-    "living"     ,  UnitType::Living,
-    "nonLiving"  ,  UnitType::NonLiving,
-    "siege"      ,  UnitType::SiegeMachine,
-    "arrowTower" ,  UnitType::ArrowTower,
-    "wall"       ,  UnitType::Wall,
-    ""           ,  UnitType::Unknown
-    );
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<UnitNonLivingType> = EnumTraits::make(
-    UnitNonLivingType::None,
-    ""          ,   UnitNonLivingType::None,
-    "undead"    ,   UnitNonLivingType::Undead,
-    "golem"     ,   UnitNonLivingType::Golem,
-    "gargoyle"  ,   UnitNonLivingType::Gargoyle,
-    "elemental" ,   UnitNonLivingType::Elemental,
-    "bm"        ,   UnitNonLivingType::BattleMachine
-    );
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<LibraryUnit::Traits>{
     
@@ -315,35 +309,30 @@ inline constexpr const std::tuple MetaInfo::s_fields<LibraryUnit::Traits>{
     Field("autoReturn"   , &LibraryUnit::Traits::returnAfterAttack),
 };
 
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<LibraryUnit::Abilities::SplashAttack> = EnumTraits::make(
-    LibraryUnit::Abilities::SplashAttack::None,
-    ""           ,  LibraryUnit::Abilities::SplashAttack::None,
-    "dragon"     ,  LibraryUnit::Abilities::SplashAttack::Dragon,
-    "neighbours" ,  LibraryUnit::Abilities::SplashAttack::Neighbours,
-    "sides"      ,  LibraryUnit::Abilities::SplashAttack::Sides,
-    "ranged"     ,  LibraryUnit::Abilities::SplashAttack::Ranged
-    );
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<RangeAttackPenalty> = EnumTraits::make(
-    RangeAttackPenalty::Melee,
-    "melee"    , RangeAttackPenalty::Melee,
-    "distance" , RangeAttackPenalty::Distance,
-    "obstacle" , RangeAttackPenalty::Obstacle,
-    "blocked"  , RangeAttackPenalty::Blocked
-    );
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<LibraryUnit::Abilities::AttackWithElement> = EnumTraits::make(
-    LibraryUnit::Abilities::AttackWithElement::None,
-    ""       ,  LibraryUnit::Abilities::AttackWithElement::None,
-    "fire"   ,  LibraryUnit::Abilities::AttackWithElement::Fire,
-    "earth"  ,  LibraryUnit::Abilities::AttackWithElement::Earth,
-    "air"    ,  LibraryUnit::Abilities::AttackWithElement::Air,
-    "ice"    ,  LibraryUnit::Abilities::AttackWithElement::Ice,
-    "mind"   ,  LibraryUnit::Abilities::AttackWithElement::Mind,
-    "magic"  ,  LibraryUnit::Abilities::AttackWithElement::Magic,
-    "undead" ,  LibraryUnit::Abilities::AttackWithElement::Undead
-    );
+ENUM_REFLECTION_PAIRED(LibraryUnit::Abilities::SplashAttack,
+    None,
+    "dragon"     ,  Dragon,
+    "neighbours" ,  Neighbours,
+    "sides"      ,  Sides,
+    "ranged"     ,  Ranged
+)
+ENUM_REFLECTION_PAIRED(RangeAttackPenalty,
+    Melee,
+    "melee"    , Melee,
+    "distance" , Distance,
+    "obstacle" , Obstacle,
+    "blocked"  , Blocked
+)
+ENUM_REFLECTION_PAIRED(LibraryUnit::Abilities::AttackWithElement,
+    None,
+    "fire"   ,  Fire,
+    "earth"  ,  Earth,
+    "air"    ,  Air,
+    "ice"    ,  Ice,
+    "mind"   ,  Mind,
+    "magic"  ,  Magic,
+    "undead" ,  Undead
+)
 
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<LibraryUnit::Abilities::StatBonus>{
@@ -450,79 +439,74 @@ inline constexpr const std::tuple MetaInfo::s_fields<LibraryUnit>{
 };
 
 // ------------------------------------------------------------------------------------------
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<ArtifactSlotType> = EnumTraits::make(
-    ArtifactSlotType::Invalid,
-    ""       ,  ArtifactSlotType::Invalid,
-    "sword"  ,  ArtifactSlotType::Sword,
-    "shield" ,  ArtifactSlotType::Shield,
-    "helm"   ,  ArtifactSlotType::Helm,
-    "torso"  ,  ArtifactSlotType::Torso,
-    "ring"   ,  ArtifactSlotType::Ring,
-    "neck"   ,  ArtifactSlotType::Neck,
-    "boots"  ,  ArtifactSlotType::Boots,
-    "cape"   ,  ArtifactSlotType::Cape,
-    "misc"   ,  ArtifactSlotType::Misc,
+ENUM_REFLECTION_PAIRED(ArtifactSlotType,
+    Invalid,
+    "sword"   ,  Sword,
+    "shield"  ,  Shield,
+    "helm"    ,  Helm,
+    "torso"   ,  Torso,
+    "ring"    ,  Ring,
+    "neck"    ,  Neck,
+    "boots"   ,  Boots,
+    "cape"    ,  Cape,
+    "misc"    ,  Misc,
+    
+    "bmAmmo"  ,  BmAmmo,
+    "bmShoot" ,  BmShoot,
+    "bmTent"  ,  BmTent,
+    "bagOnly" ,  BagOnly,
+    
+    "ring1"   ,  Ring1,
+    "misc1"   ,  Misc1,
+    "misc2"   ,  Misc2,
+    "misc3"   ,  Misc3,
+    "misc4"   ,  Misc4
+)
+ENUM_REFLECTION_PAIRED(LibraryArtifact::TreasureClass,
+    Special,
+    "treasure" ,  Treasure,
+    "minor"    ,  Minor,
+    "major"    ,  Major,
+    "relic"    ,  Relic,
+    "unique"   ,  Unique,
+    "complex"  ,  Complex,
+    "bm"       ,  BattleMachine,
+    "scroll"   ,  Scroll,
+    "special"  ,  Special
+)
+ENUM_REFLECTION_PAIRED(LibraryArtifact::Tag,
+    Invalid,
+    "stats"      ,  Stats,
+    "control"    ,  Control
+)
+ENUM_REFLECTION_PAIRED(LibraryArtifact::OrderCategory,
+    Special,
+    "special"  ,  Special,
+    "stats"    ,  Stats  ,
+    "skills"   ,  Skills ,
+    "magic"    ,  Magic  ,
+    "income"   ,  Income ,
+    "misc"     ,  Misc   ,
+    "complex"  ,  Complex,
+    "scrolls"  ,  Scrolls
+)
 
-    "bmAmmo" ,  ArtifactSlotType::BmAmmo,
-    "bmShoot",  ArtifactSlotType::BmShoot,
-    "bmTent" ,  ArtifactSlotType::BmTent,
-    "bagOnly",  ArtifactSlotType::BagOnly,
-
-    "ring1"   ,  ArtifactSlotType::Ring1,
-    "misc1"   ,  ArtifactSlotType::Misc1,
-    "misc2"   ,  ArtifactSlotType::Misc2,
-    "misc3"   ,  ArtifactSlotType::Misc3,
-    "misc4"   ,  ArtifactSlotType::Misc4
-    );
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<LibraryArtifact::TreasureClass> = EnumTraits::make(
-    LibraryArtifact::TreasureClass::Special,
-    "treasure" ,   LibraryArtifact::TreasureClass::Treasure,
-    "minor"    ,   LibraryArtifact::TreasureClass::Minor,
-    "major"    ,   LibraryArtifact::TreasureClass::Major,
-    "relic"    ,   LibraryArtifact::TreasureClass::Relic,
-    "unique"   ,   LibraryArtifact::TreasureClass::Unique,
-    "complex"  ,   LibraryArtifact::TreasureClass::Complex,
-    "bm"       ,   LibraryArtifact::TreasureClass::BattleMachine,
-    "scroll"   ,   LibraryArtifact::TreasureClass::Scroll,
-    "special"  ,   LibraryArtifact::TreasureClass::Special
-    );
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<LibraryArtifact::Tag> = EnumTraits::make(
-    LibraryArtifact::Tag::Invalid,
-    "stats"      ,   LibraryArtifact::Tag::Stats,
-    "control"    ,   LibraryArtifact::Tag::Control
-    );
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<LibraryArtifact::OrderCategory> = EnumTraits::make(
-    LibraryArtifact::OrderCategory::Special,
-    "special"  ,  LibraryArtifact::OrderCategory::Special,
-    "stats"    ,  LibraryArtifact::OrderCategory::Stats  ,
-    "skills"   ,  LibraryArtifact::OrderCategory::Skills ,
-    "magic"    ,  LibraryArtifact::OrderCategory::Magic  ,
-    "income"   ,  LibraryArtifact::OrderCategory::Income ,
-    "misc"     ,  LibraryArtifact::OrderCategory::Misc   ,
-    "complex"  ,  LibraryArtifact::OrderCategory::Complex,
-    "scrolls"  ,  LibraryArtifact::OrderCategory::Scrolls
-    );
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<LibraryArtifact::SpecialEffect> = EnumTraits::make(
-    LibraryArtifact::SpecialEffect::None,
-    "none"               ,  LibraryArtifact::SpecialEffect::None               ,
-    "neutralDiplomacy"   ,  LibraryArtifact::SpecialEffect::NeutralDiplomacy   ,
-    "factionsAlliance"   ,  LibraryArtifact::SpecialEffect::FactionsAlliance   ,
-    "alwaysFly"          ,  LibraryArtifact::SpecialEffect::AlwaysFly          ,
-    "alwaysWaterWalk"    ,  LibraryArtifact::SpecialEffect::AlwaysWaterWalk    ,
-    "resurrectFangarms"  ,  LibraryArtifact::SpecialEffect::ResurrectFangarms  ,
-    "extendedNecromancy" ,  LibraryArtifact::SpecialEffect::ExtendedNecromancy ,
-    "dragonsBuffs"       ,  LibraryArtifact::SpecialEffect::DragonsBuffs       ,
-    "disableSurrender"   ,  LibraryArtifact::SpecialEffect::DisableSurrender   ,
-    "noDamageWhirl"      ,  LibraryArtifact::SpecialEffect::NoDamageWhirl      ,
-    "noTerrainPenalty"   ,  LibraryArtifact::SpecialEffect::NoTerrainPenalty   ,
-    "breakImmunities"    ,  LibraryArtifact::SpecialEffect::BreakImmunities    ,
-    "permanentDeath"     ,  LibraryArtifact::SpecialEffect::PermanentDeath     
-    );
+ENUM_REFLECTION_PAIRED(LibraryArtifact::SpecialEffect,
+    None,
+    "none"               ,  None               ,
+    "neutralDiplomacy"   ,  NeutralDiplomacy   ,
+    "factionsAlliance"   ,  FactionsAlliance   ,
+    "alwaysFly"          ,  AlwaysFly          ,
+    "alwaysWaterWalk"    ,  AlwaysWaterWalk    ,
+    "resurrectFangarms"  ,  ResurrectFangarms  ,
+    "extendedNecromancy" ,  ExtendedNecromancy ,
+    "dragonsBuffs"       ,  DragonsBuffs       ,
+    "disableSurrender"   ,  DisableSurrender   ,
+    "noDamageWhirl"      ,  NoDamageWhirl      ,
+    "noTerrainPenalty"   ,  NoTerrainPenalty   ,
+    "breakImmunities"    ,  BreakImmunities    ,
+    "permanentDeath"     ,  PermanentDeath     
+)
 
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<LibraryArtifact::Presentation>{
@@ -570,32 +554,25 @@ inline constexpr const std::tuple MetaInfo::s_fields<LibraryDwelling>{
     Field("mapObjectDefs", &LibraryDwelling::mapObjectDefs),
 };
 // ------------------------------------------------------------------------------------------
+ENUM_REFLECTION_PAIRED(LibraryHero::Presentation::Gender,
+    Unspec,
+    "f" ,   Female,
+    "m" ,   Male
+)
+ENUM_REFLECTION_PAIRED(LibraryHeroSpec::Type,
+    None,
+    "income"         ,   Income,
+    "unit"           ,   Unit,
+    "unitUpgrade"    ,   UnitUpgrade,
+    "unitNonStd"     ,   UnitNonStd,
+    "spell"          ,   Spell,
+    "skill"          ,   Skill,
+    "specialBallista",   SpecialBallista,
+    "specialCannon"  ,   SpecialCannon,
+    "specialDragons" ,   SpecialDragons,
+    "specialSpeed"   ,   SpecialSpeed
+)
 
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<LibraryHero::Presentation::Gender> = EnumTraits::make(
-    LibraryHero::Presentation::Gender::Unspec,
-    ""       ,   LibraryHero::Presentation::Gender::Unspec,
-    "f"      ,   LibraryHero::Presentation::Gender::Female,
-    "m"      ,   LibraryHero::Presentation::Gender::Male
-    );
-
-
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<LibraryHeroSpec::Type> = EnumTraits::make(
-    LibraryHeroSpec::Type::None,
-    ""               ,   LibraryHeroSpec::Type::None,
-    "income"         ,   LibraryHeroSpec::Type::Income,
-    "unit"           ,   LibraryHeroSpec::Type::Unit,
-    "unitUpgrade"    ,   LibraryHeroSpec::Type::UnitUpgrade,
-    "unitNonStd"     ,   LibraryHeroSpec::Type::UnitNonStd,
-    "spell"          ,   LibraryHeroSpec::Type::Spell,
-    "skill"          ,   LibraryHeroSpec::Type::Skill,
-    "specialBallista",   LibraryHeroSpec::Type::SpecialBallista,
-    "specialCannon"  ,   LibraryHeroSpec::Type::SpecialCannon,
-    "specialDragons" ,   LibraryHeroSpec::Type::SpecialDragons,
-    "specialSpeed"   ,   LibraryHeroSpec::Type::SpecialSpeed
-
-    );
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<LibraryHeroSpec::Presentation>{
     Field("icon"             , &LibraryHeroSpec::Presentation::icon),
@@ -642,73 +619,63 @@ inline constexpr const std::tuple MetaInfo::s_fields<LibraryHero>{
     Field("pres"              , &LibraryHero::presentationParams),
 };
 // ------------------------------------------------------------------------------------------
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<LibrarySpell::Type> = EnumTraits::make(
-    LibrarySpell::Type::Temp,
-    "temp"       ,   LibrarySpell::Type::Temp,
-    "offensive"  ,   LibrarySpell::Type::Offensive,
-    "special"    ,   LibrarySpell::Type::Special,
-    "summon"     ,   LibrarySpell::Type::Summon,
-    "rising"     ,   LibrarySpell::Type::Rising,
-    "adventure"  ,   LibrarySpell::Type::Adventure
-    );
+ENUM_REFLECTION_PAIRED(LibrarySpell::Type,
+    Temp,
+    "temp"       ,  Temp,
+    "offensive"  ,  Offensive,
+    "special"    ,  Special,
+    "summon"     ,  Summon,
+    "rising"     ,  Rising,
+    "adventure"  ,  Adventure
+)
+ENUM_REFLECTION_PAIRED(MagicSchool,
+    Any,
+    "any"      ,  Any,
+    "earth"    ,  Earth,
+    "air"      ,  Air,
+    "water"    ,  Water,
+    "fire"     ,  Fire
+)
+ENUM_REFLECTION_PAIRED(LibrarySpell::TargetClass,
+    None,
+    "units"       ,   Units,
+    "land"        ,   Land,
+    "immediate"   ,   Immediate
+)
+ENUM_REFLECTION_PAIRED(LibrarySpell::Range,
+    Single,
+    "single"       ,   Single,
+    "r1"           ,   R1,
+    "r1NoCenter"   ,   R1NoCenter,
+    "r2"           ,   R2,
+    "r3"           ,   R3,
+    "obstacle2"    ,   Obstacle2,
+    "obstacle3"    ,   Obstacle3,
+    "chain4"       ,   Chain4,
+    "chain5"       ,   Chain5,
+    "all"          ,   All
+)
+ENUM_REFLECTION_PAIRED(LibrarySpell::Qualify,
+    None,
+    "good"        ,   Good,
+    "bad"         ,   Bad
+)
+ENUM_REFLECTION_PAIRED(LibrarySpell::Tag,
+    Mind,
+    "mind"        ,  Mind,
+    "vision"      ,  Vision,
+    "ice"         ,  Ice,
+    "lightning"   ,  Lightning,
+    "airElem"     ,  AirElem,
+    "fireElem"    ,  FireElem
+)
+ENUM_REFLECTION_PAIRED(LibrarySpell::EndCondition,
+    Time,
+    "time"          ,  Time,
+    "getHit"        ,  GetHit,
+    "makingAttack"  ,  MakingAttack
+)
 
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<MagicSchool> = EnumTraits::make(
-     MagicSchool::Any,
-    "any"      ,   MagicSchool::Any,
-    "earth"    ,   MagicSchool::Earth,
-    "air"      ,   MagicSchool::Air,
-    "water"    ,   MagicSchool::Water,
-    "fire"     ,   MagicSchool::Fire
-    );
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<LibrarySpell::TargetClass> = EnumTraits::make(
-    LibrarySpell::TargetClass::None,
-    ""            ,   LibrarySpell::TargetClass::None,
-    "units"       ,   LibrarySpell::TargetClass::Units,
-    "land"        ,   LibrarySpell::TargetClass::Land,
-    "immediate"   ,   LibrarySpell::TargetClass::Immediate
-    );
-
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<LibrarySpell::Range> = EnumTraits::make(
-    LibrarySpell::Range::Single,
-    "single"       ,   LibrarySpell::Range::Single,
-    "r1"           ,   LibrarySpell::Range::R1,
-    "r1NoCenter"   ,   LibrarySpell::Range::R1NoCenter,
-    "r2"           ,   LibrarySpell::Range::R2,
-    "r3"           ,   LibrarySpell::Range::R3,
-    "obstacle2"    ,   LibrarySpell::Range::Obstacle2,
-    "obstacle3"    ,   LibrarySpell::Range::Obstacle3,
-    "chain4"       ,   LibrarySpell::Range::Chain4,
-    "chain5"       ,   LibrarySpell::Range::Chain5,
-    "all"          ,   LibrarySpell::Range::All
-    );
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<LibrarySpell::Qualify> = EnumTraits::make(
-    LibrarySpell::Qualify::None,
-    ""            ,   LibrarySpell::Qualify::None,
-    "good"        ,   LibrarySpell::Qualify::Good,
-    "bad"         ,   LibrarySpell::Qualify::Bad
-    );
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<LibrarySpell::Tag> = EnumTraits::make(
-    LibrarySpell::Tag::Mind,
-    "mind"        ,  LibrarySpell::Tag::Mind,
-    "vision"      ,  LibrarySpell::Tag::Vision,
-    "ice"         ,  LibrarySpell::Tag::Ice,
-    "lightning"   ,  LibrarySpell::Tag::Lightning,
-    "airElem"     ,  LibrarySpell::Tag::AirElem,
-    "fireElem"    ,  LibrarySpell::Tag::FireElem
-    );
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<LibrarySpell::EndCondition> = EnumTraits::make(
-    LibrarySpell::EndCondition::Time,
-    "time"          ,  LibrarySpell::EndCondition::Time,
-    "getHit"        ,  LibrarySpell::EndCondition::GetHit,
-    "makingAttack"  ,  LibrarySpell::EndCondition::MakingAttack
-    );
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<LibrarySpell::Presentation>{
     Field("bottomAnimation"     , &LibrarySpell::Presentation::bottomAnimation),
@@ -794,86 +761,83 @@ template<>
 inline constexpr const std::tuple MetaInfo::s_fields<LibraryMapBank::Presentation>{
     Field("order"              , &LibraryMapBank::Presentation::order),
 };
-template<>
-inline constexpr const std::tuple MetaInfo::s_fields<LibraryMapBank>{
-    Field("mapObjectDefs"       , &LibraryMapBank::mapObjectDefs),
-    Field("untranslatedName"    , &LibraryMapBank::untranslatedName),
-    Field("legacyId"            , &LibraryMapBank::legacyId),
-    Field("variants"            , &LibraryMapBank::variants),
-    Field("rewards"             , &LibraryMapBank::rewards),
-    Field("pres"                , &LibraryMapBank::presentationParams),
-    Field("fieldLayout"         , &LibraryMapBank::fieldLayout),
-};
-// ------------------------------------------------------------------------------------------
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<LibraryMapObstacle::Type> = EnumTraits::make(
-    LibraryMapObstacle::Type::Invalid,
 
-    "BRUSH",                      LibraryMapObstacle::Type::BRUSH,
-    "BUSH",                       LibraryMapObstacle::Type::BUSH,
-    "CACTUS",                     LibraryMapObstacle::Type::CACTUS,
-    "CANYON",                     LibraryMapObstacle::Type::CANYON,
-    "CRATER",                     LibraryMapObstacle::Type::CRATER,
-    "DEAD_VEGETATION",            LibraryMapObstacle::Type::DEAD_VEGETATION,
-    "FLOWERS",                    LibraryMapObstacle::Type::FLOWERS,
-    "FROZEN_LAKE",                LibraryMapObstacle::Type::FROZEN_LAKE,
-    "HEDGE",                      LibraryMapObstacle::Type::HEDGE,
-    "HILL",                       LibraryMapObstacle::Type::HILL,
+STRUCT_REFLECTION_PAIRED(LibraryMapBank,
+    "mapObjectDefs"       , mapObjectDefs,
+    "untranslatedName"    , untranslatedName,
+    "legacyId"            , legacyId,
+    "variants"            , variants,
+    "rewards"             , rewards,
+    "pres"                , presentationParams,
+    "fieldLayout"         , fieldLayout
+    )
 
-    "HOLE",                       LibraryMapObstacle::Type::HOLE,
-    "KELP",                       LibraryMapObstacle::Type::KELP,
-    "LAKE",                       LibraryMapObstacle::Type::LAKE,
-    "LAVA_FLOW",                  LibraryMapObstacle::Type::LAVA_FLOW,
-    "LAVA_LAKE",                  LibraryMapObstacle::Type::LAVA_LAKE,
-    "MUSHROOMS",                  LibraryMapObstacle::Type::MUSHROOMS,
-    "LOG",                        LibraryMapObstacle::Type::LOG,
-    "MANDRAKE",                   LibraryMapObstacle::Type::MANDRAKE,
-    "MOSS",                       LibraryMapObstacle::Type::MOSS,
-    "MOUND",                      LibraryMapObstacle::Type::MOUND,
-    "MOUNTAIN",                   LibraryMapObstacle::Type::MOUNTAIN,
-    "OAK_TREES",                  LibraryMapObstacle::Type::OAK_TREES,
-    "OUTCROPPING",                LibraryMapObstacle::Type::OUTCROPPING,
-    "PINE_TREES",                 LibraryMapObstacle::Type::PINE_TREES,
-    "PLANT",                      LibraryMapObstacle::Type::PLANT,
+ENUM_REFLECTION_STRINGIY(LibraryMapObstacle::Type, Invalid,
+    BRUSH,
+    BUSH,
+    CACTUS,
+    CANYON,
+    CRATER,
+    DEAD_VEGETATION,
+    FLOWERS,
+    FROZEN_LAKE,
+    HEDGE,
+    HILL,
 
-    "NON_BLOCKING_DECORATION",    LibraryMapObstacle::Type::NON_BLOCKING_DECORATION,
+    HOLE,
+    KELP,
+    LAKE,
+    LAVA_FLOW,
+    LAVA_LAKE,
+    MUSHROOMS,
+    LOG,
+    MANDRAKE,
+    MOSS,
+    MOUND,
+    MOUNTAIN,
+    OAK_TREES,
+    OUTCROPPING,
+    PINE_TREES,
+    PLANT,
 
-    "RIVER_DELTA",                LibraryMapObstacle::Type::RIVER_DELTA,
+    NON_BLOCKING_DECORATION,
 
-    "ROCK",                       LibraryMapObstacle::Type::ROCK,
-    "SAND_DUNE",                  LibraryMapObstacle::Type::SAND_DUNE,
-    "SAND_PIT",                   LibraryMapObstacle::Type::SAND_PIT,
-    "SHRUB",                      LibraryMapObstacle::Type::SHRUB,
-    "SKULL",                      LibraryMapObstacle::Type::SKULL,
-    "STALAGMITE",                 LibraryMapObstacle::Type::STALAGMITE,
-    "STUMP",                      LibraryMapObstacle::Type::STUMP,
-    "TAR_PIT",                    LibraryMapObstacle::Type::TAR_PIT,
-    "TREES",                      LibraryMapObstacle::Type::TREES,
-    "VINE",                       LibraryMapObstacle::Type::VINE,
-    "VOLCANIC_VENT",              LibraryMapObstacle::Type::VOLCANIC_VENT,
-    "VOLCANO",                    LibraryMapObstacle::Type::VOLCANO,
-    "WILLOW_TREES",               LibraryMapObstacle::Type::WILLOW_TREES,
-    "YUCCA_TREES",                LibraryMapObstacle::Type::YUCCA_TREES,
-    "REEF",                       LibraryMapObstacle::Type::REEF,
+    RIVER_DELTA,
 
-    "DESERT_HILLS",               LibraryMapObstacle::Type::DESERT_HILLS,
-    "DIRT_HILLS",                 LibraryMapObstacle::Type::DIRT_HILLS,
-    "GRASS_HILLS",                LibraryMapObstacle::Type::GRASS_HILLS,
-    "ROUGH_HILLS",                LibraryMapObstacle::Type::ROUGH_HILLS,
-    "SUBTERRANEAN_ROCKS",         LibraryMapObstacle::Type::SUBTERRANEAN_ROCKS,
-    "SWAMP_FOLIAGE",              LibraryMapObstacle::Type::SWAMP_FOLIAGE,
+    ROCK,
+    SAND_DUNE,
+    SAND_PIT,
+    SHRUB,
+    SKULL,
+    STALAGMITE,
+    STUMP,
+    TAR_PIT,
+    TREES,
+    VINE,
+    VOLCANIC_VENT,
+    VOLCANO,
+    WILLOW_TREES,
+    YUCCA_TREES,
+    REEF,
 
-    "CLOVER_FIELD",               LibraryMapObstacle::Type::CLOVER_FIELD,
-    "CURSED_GROUND",              LibraryMapObstacle::Type::CURSED_GROUND,
-    "EVIL_FOG",                   LibraryMapObstacle::Type::EVIL_FOG,
-    "FAVORABLE_WINDS",            LibraryMapObstacle::Type::FAVORABLE_WINDS,
-    "FIERY_FIELDS",               LibraryMapObstacle::Type::FIERY_FIELDS,
-    "HOLY_GROUNDS",               LibraryMapObstacle::Type::HOLY_GROUNDS,
-    "LUCID_POOLS",                LibraryMapObstacle::Type::LUCID_POOLS,
-    "MAGIC_CLOUDS",               LibraryMapObstacle::Type::MAGIC_CLOUDS,
-    "MAGIC_PLAINS",               LibraryMapObstacle::Type::MAGIC_PLAINS,
-    "ROCKLANDS",                  LibraryMapObstacle::Type::ROCKLANDS
-);
+    DESERT_HILLS,
+    DIRT_HILLS,
+    GRASS_HILLS,
+    ROUGH_HILLS,
+    SUBTERRANEAN_ROCKS,
+    SWAMP_FOLIAGE,
+
+    CLOVER_FIELD,
+    CURSED_GROUND,
+    EVIL_FOG,
+    FAVORABLE_WINDS,
+    FIERY_FIELDS,
+    HOLY_GROUNDS,
+    LUCID_POOLS,
+    MAGIC_CLOUDS,
+    MAGIC_PLAINS,
+    ROCKLANDS
+)
 
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<LibraryMapObstacle>{
@@ -926,18 +890,17 @@ inline constexpr const std::tuple MetaInfo::s_fields<LibraryObjectDef>{
     Field("priority"       , &LibraryObjectDef::priority),
 };
 
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<FieldLayout>  = EnumTraits::make(
-    FieldLayout::Standard,
-    "std"          ,   FieldLayout::Standard,
-    "obj"          ,   FieldLayout::Object,
-    "churchyard1"  ,   FieldLayout::Churchyard1,
-    "churchyard2"  ,   FieldLayout::Churchyard2,
-    "ruins"        ,   FieldLayout::Ruins,
-    "spit"         ,   FieldLayout::Spit
-    );
-// clang-format on
+ENUM_REFLECTION_PAIRED(FieldLayout,
+    Standard,
+    "std"          , Standard,
+    "obj"          , Object,
+    "churchyard1"  , Churchyard1,
+    "churchyard2"  , Churchyard2,
+    "ruins"        , Ruins,
+    "spit"         , Spit
+)
 
+// clang-format on
 template<>
 inline constexpr const bool MetaInfo::s_useFromString<BonusRatio>{ true };
 template<>

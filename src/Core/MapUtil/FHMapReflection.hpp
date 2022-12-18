@@ -7,54 +7,44 @@
 
 #include "FHMap.hpp"
 
-#include "Reflection/EnumTraits.hpp"
+#include "Reflection/EnumTraitsMacro.hpp"
 #include "Reflection/MetaInfo.hpp"
 
 #include "FHTileMapReflection.hpp"
 
 namespace FreeHeroes::Core::Reflection {
 
-// clang-format off
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<FHPlayerId> = EnumTraits::make(
-    FHPlayerId::Invalid,
-    "Invalid"  , FHPlayerId::Invalid,
-    "None"     , FHPlayerId::None,
-    "Red"      , FHPlayerId::Red,
-    "Blue"     , FHPlayerId::Blue,
-    "Tan"      , FHPlayerId::Tan,
-    "Green"    , FHPlayerId::Green,
-    "Orange"   , FHPlayerId::Orange,
-    "Purple"   , FHPlayerId::Purple,
-    "Teal"     , FHPlayerId::Teal,
-    "Pink"     , FHPlayerId::Pink
-    );
+ENUM_REFLECTION_STRINGIY(FHPlayerId,
+                         Invalid,
+                         Invalid,
+                         None,
+                         Red,
+                         Blue,
+                         Tan,
+                         Green,
+                         Orange,
+                         Purple,
+                         Teal,
+                         Pink)
 
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<Core::GameVersion> = EnumTraits::make(
-    Core::GameVersion::Invalid,
-    "SOD"  , Core::GameVersion::SOD,
-    "HOTA" , Core::GameVersion::HOTA
-    );
+ENUM_REFLECTION_STRINGIY(Core::GameVersion,
+                         Invalid,
+                         SOD,
+                         HOTA)
 
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<FHResource::Type> = EnumTraits::make(
-    FHResource::Type::Resource,
-    "Resource"      , FHResource::Type::Resource,
-    "TreasureChest" , FHResource::Type::TreasureChest,
-    "CampFire"      , FHResource::Type::CampFire
-    );
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<FHRandomArtifact::Type> = EnumTraits::make(
-    FHRandomArtifact::Type::Invalid,
-    "Any"        , FHRandomArtifact::Type::Any,
-    "Treasure"   , FHRandomArtifact::Type::Treasure,
-    "Minor"      , FHRandomArtifact::Type::Minor,
-    "Major"      , FHRandomArtifact::Type::Major,
-    "Relic"      , FHRandomArtifact::Type::Relic
-    );
+ENUM_REFLECTION_STRINGIY(FHResource::Type,
+                         Resource,
+                         Resource,
+                         TreasureChest,
+                         CampFire)
 
-// clang-format on
+ENUM_REFLECTION_STRINGIY(FHRandomArtifact::Type,
+                         Invalid,
+                         Any,
+                         Treasure,
+                         Minor,
+                         Major,
+                         Relic)
 
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<FHPlayer>{

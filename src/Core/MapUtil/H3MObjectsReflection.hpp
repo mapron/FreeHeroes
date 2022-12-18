@@ -5,54 +5,45 @@
  */
 #pragma once
 
-#include "Reflection/EnumTraits.hpp"
+#include "Reflection/EnumTraitsMacro.hpp"
 #include "Reflection/MetaInfo.hpp"
 
 #include "H3MObjects.hpp"
 
 namespace FreeHeroes::Core::Reflection {
 
-// clang-format off
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<MapQuest::Mission> = EnumTraits::make(
-    MapQuest::Mission::NONE,
-    "NONE"          , MapQuest::Mission::NONE,
-    "LEVEL"         , MapQuest::Mission::LEVEL,
-    "PRIMARY_STAT"  , MapQuest::Mission::PRIMARY_STAT,
-    "KILL_HERO"     , MapQuest::Mission::KILL_HERO,
-    "KILL_CREATURE" , MapQuest::Mission::KILL_CREATURE,
-    "ART"           , MapQuest::Mission::ART,
-    "ARMY"          , MapQuest::Mission::ARMY,
-    "RESOURCES"     , MapQuest::Mission::RESOURCES,
-    "HERO"          , MapQuest::Mission::HERO,
-    "PLAYER"        , MapQuest::Mission::PLAYER
-    );
+ENUM_REFLECTION_STRINGIY(MapQuest::Mission,
+                         NONE,
+                         NONE,
+                         LEVEL,
+                         PRIMARY_STAT,
+                         KILL_HERO,
+                         KILL_CREATURE,
+                         ART,
+                         ARMY,
+                         RESOURCES,
+                         HERO,
+                         PLAYER)
 
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<MapQuest::Progress> = EnumTraits::make(
-    MapQuest::Progress::NOT_ACTIVE,
-    "NOT_ACTIVE"   , MapQuest::Progress::NOT_ACTIVE,
-    "IN_PROGRESS"  , MapQuest::Progress::IN_PROGRESS,
-    "COMPLETE"     , MapQuest::Progress::COMPLETE
-    );
+ENUM_REFLECTION_STRINGIY(MapQuest::Progress,
+                         NOT_ACTIVE,
+                         NOT_ACTIVE,
+                         IN_PROGRESS,
+                         COMPLETE)
 
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<MapSeerHut::RewardType> = EnumTraits::make(
-    MapSeerHut::RewardType::NOTHING,
-    "NOTHING"         , MapSeerHut::RewardType::NOTHING,
-    "EXPERIENCE"      , MapSeerHut::RewardType::EXPERIENCE,
-    "MANA_POINTS"     , MapSeerHut::RewardType::MANA_POINTS,
-    "MORALE_BONUS"    , MapSeerHut::RewardType::MORALE_BONUS,
-    "LUCK_BONUS"      , MapSeerHut::RewardType::LUCK_BONUS,
-    "RESOURCES"       , MapSeerHut::RewardType::RESOURCES,
-    "PRIMARY_SKILL"   , MapSeerHut::RewardType::PRIMARY_SKILL,
-    "SECONDARY_SKILL" , MapSeerHut::RewardType::SECONDARY_SKILL,
-    "ARTIFACT"        , MapSeerHut::RewardType::ARTIFACT,
-    "SPELL"           , MapSeerHut::RewardType::SPELL,
-    "CREATURE"        , MapSeerHut::RewardType::CREATURE
-    );
-
-// clang-format on
+ENUM_REFLECTION_STRINGIY(MapSeerHut::RewardType,
+                         NOTHING,
+                         NOTHING,
+                         EXPERIENCE,
+                         MANA_POINTS,
+                         MORALE_BONUS,
+                         LUCK_BONUS,
+                         RESOURCES,
+                         PRIMARY_SKILL,
+                         SECONDARY_SKILL,
+                         ARTIFACT,
+                         SPELL,
+                         CREATURE)
 
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<StackBasicDescriptor>{

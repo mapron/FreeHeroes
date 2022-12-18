@@ -14,48 +14,48 @@
 namespace FreeHeroes::Core::Reflection {
 
 // clang-format off
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<BattleDirection> = EnumTraits::make(
-    BattleDirection::None,
-    ""          ,   BattleDirection::None,
-    "TR"        ,   BattleDirection::TR,
-    "R"         ,   BattleDirection::R,
-    "BR"        ,   BattleDirection::BR,
-    "BL"        ,   BattleDirection::BL,
-    "L"         ,   BattleDirection::L,
-    "TL"        ,   BattleDirection::TL
-    );
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<BattleAttackDirection> = EnumTraits::make(
-    BattleAttackDirection::None,
-    ""          ,   BattleAttackDirection::None,
-    "TR"        ,   BattleAttackDirection::TR,
-    "R"         ,   BattleAttackDirection::R,
-    "BR"        ,   BattleAttackDirection::BR,
-    "BL"        ,   BattleAttackDirection::BL,
-    "L"         ,   BattleAttackDirection::L,
-    "TL"        ,   BattleAttackDirection::TL,
-    "T"         ,   BattleAttackDirection::T,
-    "B"         ,   BattleAttackDirection::B
-    );
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<BattlePositionExtended::Side> = EnumTraits::make(
-    BattlePositionExtended::Side::Right,
-    "r"        ,   BattlePositionExtended::Side::Right,
-    "l"        ,   BattlePositionExtended::Side::Left
-    );
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<BattlePositionExtended::Sight> = EnumTraits::make(
-    BattlePositionExtended::Sight::ToRight,
-    "tr"        ,   BattlePositionExtended::Sight::ToRight,
-    "tl"        ,   BattlePositionExtended::Sight::ToLeft
-    );
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<BattlePositionExtended::Sub> = EnumTraits::make(
-    BattlePositionExtended::Sub::Main,
-    "main"        ,   BattlePositionExtended::Sub::Main,
-    "sec"         ,   BattlePositionExtended::Sub::Secondary
-    );
+ENUM_REFLECTION_STRINGIY(BattleDirection,
+    None,
+    TR,
+    R,
+    BR,
+    BL,
+    L,
+    TL
+)
+ENUM_REFLECTION_STRINGIY(BattleAttackDirection,
+    None,
+    TR,
+    R,
+    BR,
+    BL,
+    L,
+    TL,
+    T,
+    B
+)
+ENUM_REFLECTION_PAIRED(BattlePositionExtended::Side,
+    Right,
+    "r"  ,  Right,
+    "l"  ,  Left
+)
+ENUM_REFLECTION_PAIRED(BattlePositionExtended::Sight,
+    ToRight,
+    "tr"  ,  ToRight,
+    "tl"  ,  ToLeft
+)
+ENUM_REFLECTION_PAIRED(BattlePositionExtended::Sub,
+    Main,
+    "main"  ,  Main,
+    "sec"   ,  Secondary
+)
+ENUM_REFLECTION_PAIRED( BattlePlanAttackParams::Alteration,
+    None,
+    "none"         , None,
+    "forceMelee"   , ForceMelee,
+    "freeAttack"   , FreeAttack
+)
+
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<BattlePosition>{
     Field("x"    , &BattlePosition::x),
@@ -79,13 +79,6 @@ inline constexpr const std::tuple MetaInfo::s_fields<BattleFieldPreset>{
     Field("layout"       , &BattleFieldPreset::layout),
 };
 
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<BattlePlanAttackParams::Alteration> = EnumTraits::make(
-    BattlePlanAttackParams::Alteration::None,
-    "none"         ,   BattlePlanAttackParams::Alteration::None,
-    "forceMelee"   ,   BattlePlanAttackParams::Alteration::ForceMelee,
-    "freeAttack"   ,   BattlePlanAttackParams::Alteration::FreeAttack
-    );
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<BattlePlanAttackParams>{
     Field("target"    , &BattlePlanAttackParams::m_attackTarget),

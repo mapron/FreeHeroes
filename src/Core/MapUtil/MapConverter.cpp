@@ -5,7 +5,7 @@
  */
 #include "MapConverter.hpp"
 
-#include "Reflection/EnumTraits.hpp"
+#include "Reflection/EnumTraitsMacro.hpp"
 
 #include "IGameDatabase.hpp"
 #include "IRandomGenerator.hpp"
@@ -29,36 +29,21 @@ class ConverterExpection : public std::runtime_error {
 };
 
 namespace Core::Reflection {
-template<>
-inline constexpr const auto EnumTraits::s_valueMapping<MapConverter::Task> = EnumTraits::make(
-    MapConverter::Task::Invalid,
-    "Invalid",
-    MapConverter::Task::Invalid,
 
-    "CheckBinaryInputOutputEquality",
-    MapConverter::Task::CheckBinaryInputOutputEquality,
-    "CheckJsonInputOutputEquality",
-    MapConverter::Task::CheckJsonInputOutputEquality,
-
-    "ConvertH3MToJson",
-    MapConverter::Task::ConvertH3MToJson,
-    "ConvertJsonToH3M",
-    MapConverter::Task::ConvertJsonToH3M,
-    "ConvertH3SVGToJson",
-    MapConverter::Task::ConvertH3SVGToJson,
-    "ConvertJsonToH3SVG",
-    MapConverter::Task::ConvertJsonToH3SVG,
-
-    "FHMapToH3M",
-    MapConverter::Task::FHMapToH3M,
-    "H3MToFHMap",
-    MapConverter::Task::H3MToFHMap,
-    "H3MRoundTripJson",
-    MapConverter::Task::H3MRoundTripJson,
-    "H3SVGRoundTripJson",
-    MapConverter::Task::H3SVGRoundTripJson,
-    "H3MRoundTripFH",
-    MapConverter::Task::H3MRoundTripFH);
+ENUM_REFLECTION_STRINGIY(MapConverter::Task,
+                         Invalid,
+                         Invalid,
+                         CheckBinaryInputOutputEquality,
+                         CheckJsonInputOutputEquality,
+                         ConvertH3MToJson,
+                         ConvertJsonToH3M,
+                         ConvertH3SVGToJson,
+                         ConvertJsonToH3SVG,
+                         FHMapToH3M,
+                         H3MToFHMap,
+                         H3MRoundTripJson,
+                         H3SVGRoundTripJson,
+                         H3MRoundTripFH)
 
 }
 
