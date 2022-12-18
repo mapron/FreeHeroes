@@ -495,6 +495,19 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
             assert(!faction->warriorClass.lowLevelIncrease.empty());
             assert(!faction->warriorClass.highLevelIncrease.empty());
         }
+        if (faction->alignment != LibraryFaction::Alignment::Special && faction->alignment != LibraryFaction::Alignment::Independent) {
+            auto copyHeroDef = [this](const std::string& def) {
+                auto& objRecord        = m_impl->m_objectDefs.insertObject(def + "e");
+                objRecord              = *(m_impl->m_objectDefs.find("hero"));
+                objRecord.id           = def + "e";
+                objRecord.defFile      = objRecord.id;
+                objRecord.terrainsHard = objRecord.terrainsSoft;
+            };
+            copyHeroDef(faction->mageClass.presentationParams.adventureSpriteMale);
+            copyHeroDef(faction->mageClass.presentationParams.adventureSpriteFemale);
+            copyHeroDef(faction->warriorClass.presentationParams.adventureSpriteMale);
+            copyHeroDef(faction->warriorClass.presentationParams.adventureSpriteFemale);
+        }
 
         m_impl->m_factions.m_sorted.push_back(faction);
     }
@@ -630,6 +643,9 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
     }
     for (auto* d : m_impl->m_dwellings.m_unsorted) {
         m_impl->m_dwellings.m_sorted.push_back(d);
+    }
+    for (auto* d : m_impl->m_objectDefs.m_unsorted) {
+        m_impl->m_objectDefs.m_sorted.push_back(d);
     }
 
     return true;

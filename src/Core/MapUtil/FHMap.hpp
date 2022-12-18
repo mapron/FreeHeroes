@@ -64,9 +64,10 @@ struct FHHeroData {
 };
 
 struct FHHero : public FHPlayerControlledObject {
-    bool                      m_isMain{ false };
-    Core::LibraryHeroConstPtr m_id              = nullptr;
-    uint32_t                  m_questIdentifier = 0;
+    bool       m_isMain{ false };
+    FHHeroData m_data;
+
+    uint32_t m_questIdentifier = 0;
 };
 
 struct FHTown : public FHPlayerControlledObject {
@@ -96,6 +97,20 @@ struct FHResource : public FHCommonObject {
 
 struct FHArtifact : public FHCommonObject {
     Core::LibraryArtifactConstPtr m_id = nullptr;
+};
+
+struct FHRandomArtifact : public FHCommonObject {
+    enum class Type
+    {
+        Invalid,
+        Any,
+        Treasure,
+        Minor,
+        Major,
+        Relic,
+    };
+
+    Type m_type = Type::Invalid;
 };
 
 struct FHMonster : public FHCommonObject {
@@ -136,12 +151,13 @@ struct FHMap {
     std::vector<FHZone> m_zones;
 
     struct Objects {
-        std::vector<FHResource> m_resources;
-        std::vector<FHArtifact> m_artifacts;
-        std::vector<FHMonster>  m_monsters;
-        std::vector<FHDwelling> m_dwellings;
-        std::vector<FHBank>     m_banks;
-        std::vector<FHObstacle> m_obstacles;
+        std::vector<FHResource>       m_resources;
+        std::vector<FHArtifact>       m_artifacts;
+        std::vector<FHRandomArtifact> m_artifactsRandom;
+        std::vector<FHMonster>        m_monsters;
+        std::vector<FHDwelling>       m_dwellings;
+        std::vector<FHBank>           m_banks;
+        std::vector<FHObstacle>       m_obstacles;
     } m_objects;
 
     std::vector<FHRiver> m_rivers;
@@ -155,6 +171,8 @@ struct FHMap {
     std::vector<Core::LibrarySecondarySkillConstPtr> m_disabledSkills;
 
     std::vector<FHHeroData> m_customHeroes;
+
+    std::vector<Core::LibraryObjectDefConstPtr> m_initialObjectDefs; // mostly for round-trip.
 
     void toJson(PropertyTree& data) const;
     void fromJson(const PropertyTree& data, const Core::IGameDatabase* database);

@@ -3,18 +3,18 @@
 
 "records" : {
 
-"sod.map.crypt"                      : { "pres": { "order":1    } , "mapObjectDefs": [ "avxgyds0" ] },
+"sod.map.crypt"                      : { "pres": { "order":1    } , "mapObjectDefs": [ "avxgyds0" , "avxgysn0", "avxgyne0" ] },
 "sod.map.utopia"                     : { "pres": { "order":2    } , "mapObjectDefs": [ "avsutop0" ] },
 "sod.map.derelictShip"               : { "pres": { "order":1001 } , "mapObjectDefs": [ "avadlic0" ] },
 "sod.map.shipwreck"                  : { "pres": { "order":1002 } , "mapObjectDefs": [ "avawrek0" ] },
-"hota.map.blackTower"                : { "pres": { "order":3    } , "mapObjectDefs": [ "avblktgr" ] },
+"hota.map.blackTower"                : { "pres": { "order":3    } , "mapObjectDefs": [ "avblktgr", "avblktsn", "avblktwr" ] },
 "hota.map.mansion"                   : { "pres": { "order":4    } , "mapObjectDefs": [ "avmnsion" ] },
 "hota.map.beholderSanctuary"         : { "pres": { "order":5    } , "mapObjectDefs": [ "sanct_wt" ] },
 "hota.map.templeSea"                 : { "pres": { "order":1003 } , "mapObjectDefs": [ "avsutopw" ] },
-"hota.map.churchyard"                : { "pres": { "order":6    } , "mapObjectDefs": [ "avcmetry" ] },
+"hota.map.churchyard"                : { "pres": { "order":6    } , "mapObjectDefs": [ "avcmetry", "avcmetrs", "avcmetrh" ] },
 "sod.map.conservatory"               : { "pres": { "order":100  } , "mapObjectDefs": [ "avxbnk30" ] },
 "sod.map.hive"                       : { "pres": { "order":101  } , "mapObjectDefs": [ "avxbnk70" ] },
-"hota.map.experimentalShop"          : { "pres": { "order":102  } , "mapObjectDefs": [ "avxbnk90" ] },
+"hota.map.experimentalShop"          : { "pres": { "order":102  } , "mapObjectDefs": [ "avxbnk90" , "avxbnk9s" ] },
 "hota.map.wolfRaiderPicket"          : { "pres": { "order":103  } , "mapObjectDefs": [ "avxbnk80" ] },
 "hota.map.vermilionTower"            : { "pres": { "order":104  } , "mapObjectDefs": [ "avredtwr" ] },
 "hota.map.pirateCave"                : { "pres": { "order":105  } , "mapObjectDefs": [ "hapcave"  ] },

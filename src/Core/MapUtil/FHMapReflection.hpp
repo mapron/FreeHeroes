@@ -43,6 +43,16 @@ inline constexpr const auto EnumTraits::s_valueMapping<FHResource::Type> = EnumT
     "Resource"      , FHResource::Type::Resource,
     "TreasureChest" , FHResource::Type::TreasureChest
     );
+template<>
+inline constexpr const auto EnumTraits::s_valueMapping<FHRandomArtifact::Type> = EnumTraits::make(
+    FHRandomArtifact::Type::Invalid,
+    "Any"        , FHRandomArtifact::Type::Any,
+    "Treasure"   , FHRandomArtifact::Type::Treasure,
+    "Minor"      , FHRandomArtifact::Type::Minor,
+    "Major"      , FHRandomArtifact::Type::Major,
+    "Relic"      , FHRandomArtifact::Type::Relic
+    );
+
 // clang-format on
 
 template<>
@@ -69,7 +79,7 @@ inline constexpr const std::tuple MetaInfo::s_fields<FHHero>{
     Field("player", &FHHero::m_player),
 
     Field("main", &FHHero::m_isMain),
-    Field("id", &FHHero::m_id),
+    Field("data", &FHHero::m_data),
     Field("questId", &FHHero::m_questIdentifier),
 };
 
@@ -110,6 +120,14 @@ inline constexpr const std::tuple MetaInfo::s_fields<FHArtifact>{
 
     Field("id", &FHArtifact::m_id),
 };
+template<>
+inline constexpr const std::tuple MetaInfo::s_fields<FHRandomArtifact>{
+    Field("pos", &FHRandomArtifact::m_pos),
+    Field("order", &FHRandomArtifact::m_order),
+
+    Field("type", &FHRandomArtifact::m_type),
+};
+
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<FHMonster>{
     Field("pos", &FHMonster::m_pos),
@@ -154,6 +172,7 @@ template<>
 inline constexpr const std::tuple MetaInfo::s_fields<FHMap::Objects>{
     Field("resources", &FHMap::Objects::m_resources),
     Field("artifacts", &FHMap::Objects::m_artifacts),
+    Field("artifactsRandom", &FHMap::Objects::m_artifactsRandom),
     Field("monsters", &FHMap::Objects::m_monsters),
     Field("dwellings", &FHMap::Objects::m_dwellings),
     Field("banks", &FHMap::Objects::m_banks),
@@ -181,6 +200,7 @@ inline constexpr const std::tuple MetaInfo::s_fields<FHMap>{
     Field("disabledSpells", &FHMap::m_disabledSpells),
     Field("disabledSkills", &FHMap::m_disabledSkills),
     Field("customHeroes", &FHMap::m_customHeroes),
+    Field("initialObjectDefs", &FHMap::m_initialObjectDefs),
 };
 
 template<>

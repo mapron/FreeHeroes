@@ -113,8 +113,6 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
         }
     }
 
-    const int townGateOffset = 2;
-
     auto* defsContainer = database->objectDefs();
 
     for (auto& [playerId, fhPlayer] : src.m_players) {
@@ -172,12 +170,14 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
     };
 
     auto makeHeroDef = [&makeDefFromDbId](Core::LibraryHeroConstPtr hero) {
-        ObjectTemplate res = makeDefFromDbId("hero", true);
-
-        auto resNameAdv     = hero->getAdventureSprite();
-        res.m_animationFile = resNameAdv + "e.def";
+        ObjectTemplate res = makeDefFromDbId(hero->getAdventureSprite() + "e");
         return res;
     };
+
+    for (auto* def : src.m_initialObjectDefs) {
+        bool forceSoft = def->objId == static_cast<int>(MapObjectType::TOWN) || def->objId == static_cast<int>(MapObjectType::PRISON);
+        getDefFileIndex(makeDefFromDb(def, forceSoft));
+    }
 
     getDefFileIndex(makeDefFromDbId("avwmrnd0"));
     getDefFileIndex(makeDefFromDbId("avlholg0"));
@@ -187,6 +187,7 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
         if (playerIndex >= 0) {
             auto& h3player = dest.m_players[playerIndex];
             if (fhTown.m_isMain) {
+                const int townGateOffset = 2;
                 h3player.m_hasMainTown   = true;
                 h3player.m_posOfMainTown = int3fromPos(fhTown.m_pos, -townGateOffset);
                 h3player.m_generateHero  = true;
@@ -214,7 +215,7 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
 
     for (auto& fhHero : src.m_wanderingHeroes) {
         auto  playerIndex = static_cast<int>(fhHero.m_player);
-        auto* libraryHero = fhHero.m_id;
+        auto* libraryHero = fhHero.m_data.m_army.hero.library;
         assert(libraryHero);
 
         const uint8_t heroId = libraryHero->legacyId;
@@ -228,14 +229,25 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
             h3player.m_heroesNames.push_back(SHeroName{ .m_heroId = heroId, .m_heroName = "" });
         }
 
-        auto her1               = std::make_unique<MapHero>(dest.m_features);
-        her1->m_playerOwner     = playerIndex;
-        her1->m_subID           = heroId;
-        her1->m_questIdentifier = fhHero.m_questIdentifier;
-        her1->prepareArrays();
+        auto hero               = std::make_unique<MapHero>(dest.m_features);
+        hero->m_playerOwner     = playerIndex;
+        hero->m_subID           = heroId;
+        hero->m_questIdentifier = fhHero.m_questIdentifier;
+        hero->prepareArrays();
+        {
+            hero->m_hasExp                             = fhHero.m_data.m_hasExp;
+            hero->m_hasSecSkills                       = fhHero.m_data.m_hasSecSkills;
+            hero->m_primSkillSet.m_hasCustomPrimSkills = fhHero.m_data.m_hasPrimSkills;
+            hero->m_spellSet.m_hasCustomSpells         = fhHero.m_data.m_hasSpells;
+            if (hero->m_hasExp)
+                hero->m_exp = static_cast<int32_t>(fhHero.m_data.m_army.hero.experience);
+        }
         dest.m_allowedHeroes[heroId] = 0;
-
-        dest.m_objects.push_back(Object{ .m_order = fhHero.m_order, .m_pos = int3fromPos(fhHero.m_pos, +1), .m_defnum = getDefFileIndex(makeHeroDef(libraryHero)), .m_impl = std::move(her1) });
+        if (playerIndex < 0) {
+            dest.m_objects.push_back(Object{ .m_order = fhHero.m_order, .m_pos = int3fromPos(fhHero.m_pos), .m_defnum = getDefFileIndex(makeDefFromDbId("avxprsn0")), .m_impl = std::move(hero) });
+        } else {
+            dest.m_objects.push_back(Object{ .m_order = fhHero.m_order, .m_pos = int3fromPos(fhHero.m_pos, +1), .m_defnum = getDefFileIndex(makeHeroDef(libraryHero)), .m_impl = std::move(hero) });
+        }
     }
 
     for (auto& allowed : dest.m_allowedHeroes)
@@ -308,6 +320,31 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
         auto art = std::make_unique<MapArtifact>(dest.m_features, false);
 
         dest.m_objects.push_back(Object{ .m_order = fhArt.m_order, .m_pos = int3fromPos(fhArt.m_pos), .m_defnum = getDefFileIndex(makeDefFromDb(fhArt.m_id->mapObjectDef)), .m_impl = std::move(art) });
+    }
+    for (auto& fhArt : src.m_objects.m_artifactsRandom) {
+        auto        art = std::make_unique<MapArtifact>(dest.m_features, false);
+        std::string id  = "";
+        switch (fhArt.m_type) {
+            case FHRandomArtifact::Type::Any:
+                id = "avarand";
+                break;
+            case FHRandomArtifact::Type::Treasure:
+                id = "avarnd1";
+                break;
+            case FHRandomArtifact::Type::Minor:
+                id = "avarnd2";
+                break;
+            case FHRandomArtifact::Type::Major:
+                id = "avarnd3";
+                break;
+            case FHRandomArtifact::Type::Relic:
+                id = "avarnd4";
+                break;
+            case FHRandomArtifact::Type::Invalid:
+                break;
+        }
+
+        dest.m_objects.push_back(Object{ .m_order = fhArt.m_order, .m_pos = int3fromPos(fhArt.m_pos), .m_defnum = getDefFileIndex(makeDefFromDbId(id)), .m_impl = std::move(art) });
     }
 
     for (auto& fhMon : src.m_objects.m_monsters) {
