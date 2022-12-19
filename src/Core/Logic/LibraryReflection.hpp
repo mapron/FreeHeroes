@@ -13,6 +13,7 @@
 #include "LibraryHeroSpec.hpp"
 #include "LibraryMapBank.hpp"
 #include "LibraryMapObstacle.hpp"
+#include "LibraryMapVisitable.hpp"
 #include "LibraryObjectDef.hpp"
 #include "LibraryResource.hpp"
 #include "LibrarySecondarySkill.hpp"
@@ -891,6 +892,14 @@ STRUCT_REFLECTION_PAIRED(
     "mapObjectDef",                mapObjectDef,
     "type",                        type
 )
+// ------------------------------------------------------------------------------------------
+
+STRUCT_REFLECTION_PAIRED(
+    LibraryMapVisitable,
+    "legacyId",                    legacyId,
+    "mapObjectDefs",               mapObjectDefs
+)
+
 // ------------------------------------------------------------------------------------------
 
 STRUCT_REFLECTION_PAIRED(

@@ -15,6 +15,7 @@
 #include "LibraryHero.hpp"
 #include "LibraryMapBank.hpp"
 #include "LibraryMapObstacle.hpp"
+#include "LibraryMapVisitable.hpp"
 #include "LibraryObjectDef.hpp"
 #include "LibraryTerrain.hpp"
 
@@ -116,13 +117,14 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
     auto*      factionsContainer = database->factions();
     const auto factionIds        = factionsContainer->legacyOrderedRecords();
 
-    const auto heroIds     = database->heroes()->legacyOrderedRecords();
-    const auto artIds      = database->artifacts()->legacyOrderedRecords();
-    const auto spellIds    = database->spells()->legacyOrderedRecords();
-    const auto secSkillIds = database->secSkills()->legacyOrderedRecords();
-    const auto terrainIds  = database->terrains()->legacyOrderedRecords();
-    const auto resIds      = database->resources()->legacyOrderedRecords();
-    const auto unitIds     = database->units()->legacyOrderedRecords();
+    const auto heroIds      = database->heroes()->legacyOrderedRecords();
+    const auto artIds       = database->artifacts()->legacyOrderedRecords();
+    const auto spellIds     = database->spells()->legacyOrderedRecords();
+    const auto secSkillIds  = database->secSkills()->legacyOrderedRecords();
+    const auto terrainIds   = database->terrains()->legacyOrderedRecords();
+    const auto resIds       = database->resources()->legacyOrderedRecords();
+    const auto unitIds      = database->units()->legacyOrderedRecords();
+    const auto visitableIds = database->mapVisitables()->legacyOrderedRecords();
 
     std::map<Core::LibraryObjectDefConstPtr, std::pair<Core::LibraryDwellingConstPtr, int>> dwellMap;
     {
@@ -545,8 +547,22 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                     dest.m_objects.m_obstacles.push_back(std::move(fhObstacle));
                     break;
                 }
+                auto* visitable = visitableIds.at(objTempl.m_id);
+                if (visitable) {
+                    FHVisitable fhVisitable;
+                    fhVisitable.m_id    = visitable;
+                    fhVisitable.m_order = index;
+                    fhVisitable.m_pos   = posFromH3M(obj.m_pos);
 
-                // assert(!"Unsupported");
+                    auto it = std::find(fhVisitable.m_id->mapObjectDefs.cbegin(), fhVisitable.m_id->mapObjectDefs.cend(), objDef);
+                    assert(it != fhVisitable.m_id->mapObjectDefs.cend());
+
+                    fhVisitable.m_defVariant = std::distance(fhVisitable.m_id->mapObjectDefs.cbegin(), it);
+                    dest.m_objects.m_visitables.push_back(std::move(fhVisitable));
+                    break;
+                }
+
+                assert(!"Unsupported");
                 // simple object.
             } break;
         }

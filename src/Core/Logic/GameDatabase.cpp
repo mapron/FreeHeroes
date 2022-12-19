@@ -17,6 +17,7 @@
 #include "LibraryHeroSpec.hpp"
 #include "LibraryMapBank.hpp"
 #include "LibraryMapObstacle.hpp"
+#include "LibraryMapVisitable.hpp"
 #include "LibraryObjectDef.hpp"
 #include "LibraryResource.hpp"
 #include "LibrarySecondarySkill.hpp"
@@ -52,6 +53,7 @@ template<> struct LibraryContainerKey<LibraryHero          > { static constexpr 
 template<> struct LibraryContainerKey<LibraryHeroSpec      > { static constexpr const char * scopeName = "specialities" ; };
 template<> struct LibraryContainerKey<LibraryMapBank       > { static constexpr const char * scopeName = "mapBanks" ; };
 template<> struct LibraryContainerKey<LibraryMapObstacle   > { static constexpr const char * scopeName = "mapObstacles"; };
+template<> struct LibraryContainerKey<LibraryMapVisitable  > { static constexpr const char * scopeName = "mapVisitables"; };
 template<> struct LibraryContainerKey<LibraryObjectDef     > { static constexpr const char * scopeName = "objectDefs" ; };
 template<> struct LibraryContainerKey<LibraryResource      > { static constexpr const char * scopeName = "resources" ; };
 template<> struct LibraryContainerKey<LibrarySecondarySkill> { static constexpr const char * scopeName = "skills" ; };
@@ -177,6 +179,7 @@ struct GameDatabase::Impl {
     LibraryContainer<LibraryHeroSpec>       m_heroSpecs;
     LibraryContainer<LibraryMapBank>        m_mapBanks;
     LibraryContainer<LibraryMapObstacle>    m_mapObstacles;
+    LibraryContainer<LibraryMapVisitable>   m_mapVisitables;
     LibraryContainer<LibraryObjectDef>      m_objectDefs;
     LibraryContainer<LibraryResource>       m_resources;
     LibraryContainer<LibrarySecondarySkill> m_skills;
@@ -231,6 +234,11 @@ template<>
 GameDatabase::Impl::LibraryContainer<LibraryMapObstacle>& GameDatabase::Impl::getContainer<LibraryMapObstacle>()
 {
     return m_mapObstacles;
+}
+template<>
+GameDatabase::Impl::LibraryContainer<LibraryMapVisitable>& GameDatabase::Impl::getContainer<LibraryMapVisitable>()
+{
+    return m_mapVisitables;
 }
 template<>
 GameDatabase::Impl::LibraryContainer<LibraryObjectDef>& GameDatabase::Impl::getContainer<LibraryObjectDef>()
@@ -306,6 +314,10 @@ IGameDatabase::LibraryMapObstacleContainerPtr GameDatabase::mapObstacles() const
 {
     return &m_impl->m_mapObstacles;
 }
+IGameDatabase::LibraryMapVisitableContainerPtr GameDatabase::mapVisitables() const
+{
+    return &m_impl->m_mapVisitables;
+}
 IGameDatabase::LibraryObjectDefContainerPtr GameDatabase::objectDefs() const
 {
     return &m_impl->m_objectDefs;
@@ -373,36 +385,38 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
     }
 
     // clang-format off
-    m_impl->m_artifacts    .prepareObjectKeys(recordObjectMaps);
-    m_impl->m_dwellings    .prepareObjectKeys(recordObjectMaps);
-    m_impl->m_factions     .prepareObjectKeys(recordObjectMaps);
-    m_impl->m_heroSpecs    .prepareObjectKeys(recordObjectMaps);
-    m_impl->m_heroes       .prepareObjectKeys(recordObjectMaps);
-    m_impl->m_mapBanks     .prepareObjectKeys(recordObjectMaps);
-    m_impl->m_mapObstacles .prepareObjectKeys(recordObjectMaps);
-    m_impl->m_objectDefs   .prepareObjectKeys(recordObjectMaps);
-    m_impl->m_resources    .prepareObjectKeys(recordObjectMaps);
-    m_impl->m_skills       .prepareObjectKeys(recordObjectMaps);
-    m_impl->m_spells       .prepareObjectKeys(recordObjectMaps);
-    m_impl->m_terrains     .prepareObjectKeys(recordObjectMaps);
-    m_impl->m_units        .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_artifacts      .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_dwellings      .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_factions       .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_heroSpecs      .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_heroes         .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_mapBanks       .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_mapObstacles   .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_mapVisitables  .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_objectDefs     .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_resources      .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_skills         .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_spells         .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_terrains       .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_units          .prepareObjectKeys(recordObjectMaps);
     // clang-format on
 
     // clang-format off
     const bool result =
-               m_impl->m_artifacts    .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_dwellings    .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_factions     .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_heroSpecs    .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_heroes       .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_mapBanks     .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_mapObstacles .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_objectDefs   .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_resources    .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_skills       .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_spells       .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_terrains     .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_units        .loadRecordList(this, recordObjectMaps)
+               m_impl->m_artifacts      .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_dwellings      .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_factions       .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_heroSpecs      .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_heroes         .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_mapBanks       .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_mapObstacles   .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_mapVisitables  .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_objectDefs     .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_resources      .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_skills         .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_spells         .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_terrains       .loadRecordList(this, recordObjectMaps)
+            && m_impl->m_units          .loadRecordList(this, recordObjectMaps)
             ;
     // clang-format on
 
@@ -642,6 +656,9 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
     }
     for (auto* obj : m_impl->m_mapObstacles.m_unsorted) {
         m_impl->m_mapObstacles.m_sorted.push_back(obj);
+    }
+    for (auto* obj : m_impl->m_mapVisitables.m_unsorted) {
+        m_impl->m_mapVisitables.m_sorted.push_back(obj);
     }
     for (auto* d : m_impl->m_dwellings.m_unsorted) {
         m_impl->m_dwellings.m_sorted.push_back(d);

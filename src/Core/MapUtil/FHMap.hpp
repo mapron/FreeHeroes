@@ -147,6 +147,10 @@ struct FHBank : public FHCommonObject {
 struct FHObstacle : public FHCommonObject {
     Core::LibraryMapObstacleConstPtr m_id = nullptr;
 };
+struct FHVisitable : public FHCommonObject {
+    Core::LibraryMapVisitableConstPtr m_id         = nullptr;
+    int                               m_defVariant = 0;
+};
 
 struct FHMap {
     using PlayersMap = std::map<FHPlayerId, FHPlayer>;
@@ -174,6 +178,7 @@ struct FHMap {
         std::vector<FHDwelling>       m_dwellings;
         std::vector<FHBank>           m_banks;
         std::vector<FHObstacle>       m_obstacles;
+        std::vector<FHVisitable>      m_visitables;
         std::vector<FHMine>           m_mines;
         std::vector<FHPandora>        m_pandoras;
     } m_objects;

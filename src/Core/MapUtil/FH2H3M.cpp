@@ -17,6 +17,7 @@
 #include "LibraryHero.hpp"
 #include "LibraryMapBank.hpp"
 #include "LibraryMapObstacle.hpp"
+#include "LibraryMapVisitable.hpp"
 #include "LibraryObjectDef.hpp"
 #include "LibrarySecondarySkill.hpp"
 #include "LibraryTerrain.hpp"
@@ -427,6 +428,12 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
 
         auto* def = fhObstacle.m_id->mapObjectDef;
         dest.m_objects.push_back(Object{ .m_order = fhObstacle.m_order, .m_pos = int3fromPos(fhObstacle.m_pos), .m_defnum = getDefFileIndex(makeDefFromDb(def)), .m_impl = std::move(obj) });
+    }
+    for (auto& fhVisitable : src.m_objects.m_visitables) {
+        auto obj = std::make_unique<MapObjectSimple>(dest.m_features);
+
+        auto* def = fhVisitable.m_id->mapObjectDefs[fhVisitable.m_defVariant];
+        dest.m_objects.push_back(Object{ .m_order = fhVisitable.m_order, .m_pos = int3fromPos(fhVisitable.m_pos), .m_defnum = getDefFileIndex(makeDefFromDb(def)), .m_impl = std::move(obj) });
     }
     auto convertStacks = [](const std::vector<Core::UnitWithCount>& stacks) -> std::vector<StackBasicDescriptor> {
         std::vector<StackBasicDescriptor> result;

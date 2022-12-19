@@ -69,7 +69,13 @@ bool deserialize(const IGameDatabase* gameDatabase, LibraryMapObstacle& obj, con
 
     return true;
 }
+bool deserialize(const IGameDatabase* gameDatabase, LibraryMapVisitable& obj, const PropertyTree& jsonObj)
+{
+    PropertyTreeReader reader(gameDatabase);
+    reader.jsonToValue(jsonObj, obj);
 
+    return true;
+}
 bool deserialize(const IGameDatabase* gameDatabase, LibraryObjectDef& obj, const PropertyTree& jsonObj)
 {
     PropertyTreeReader reader(gameDatabase);

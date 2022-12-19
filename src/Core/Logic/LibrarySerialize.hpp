@@ -23,6 +23,7 @@ bool deserialize(const IGameDatabase* gameDatabase, LibraryHero& hero, const Pro
 bool deserialize(const IGameDatabase* gameDatabase, LibraryHeroSpec& spec, const PropertyTree& jsonObj);
 bool deserialize(const IGameDatabase* gameDatabase, LibraryMapBank& obj, const PropertyTree& jsonObj);
 bool deserialize(const IGameDatabase* gameDatabase, LibraryMapObstacle& obj, const PropertyTree& jsonObj);
+bool deserialize(const IGameDatabase* gameDatabase, LibraryMapVisitable& obj, const PropertyTree& jsonObj);
 bool deserialize(const IGameDatabase* gameDatabase, LibraryObjectDef& obj, const PropertyTree& jsonObj);
 bool deserialize(const IGameDatabase* gameDatabase, LibraryResource& obj, const PropertyTree& jsonObj);
 bool deserialize(const IGameDatabase* gameDatabase, LibrarySecondarySkill& skill, const PropertyTree& jsonObj);

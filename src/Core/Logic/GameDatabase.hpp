@@ -34,6 +34,7 @@ public:
     LibraryHeroSpecContainerPtr       heroSpecs() const override;
     LibraryMapBankContainerPtr        mapBanks() const override;
     LibraryMapObstacleContainerPtr    mapObstacles() const override;
+    LibraryMapVisitableContainerPtr   mapVisitables() const override;
     LibraryObjectDefContainerPtr      objectDefs() const override;
     LibraryResourceContainerPtr       resources() const override;
     LibrarySecondarySkillContainerPtr secSkills() const override;

@@ -47,14 +47,12 @@ ENUM_REFLECTION_STRINGIY(FHRandomArtifact::Type,
                          Major,
                          Relic)
 
-
 STRUCT_REFLECTION_PAIRED(
     FHPlayer,
     "ai",                  m_aiPossible,
     "human",               m_humanPossible,
     "factions",            m_startingFactions
 )
-
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHHeroData,
@@ -66,7 +64,6 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_army
 )
 
-
 STRUCT_REFLECTION_PAIRED(
     FHHero,
     "pos",                 m_pos,
@@ -77,7 +74,6 @@ STRUCT_REFLECTION_PAIRED(
     "data",                m_data,
     "questId",             m_questIdentifier
 )
-
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHTown,
@@ -93,14 +89,12 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_defFile
 )
 
-
 STRUCT_REFLECTION_PAIRED(
     FHZone::Rect,
     "pos",                 m_pos,
     "w",                   m_width,
     "h",                   m_height
 )
-
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHResource,
@@ -120,7 +114,6 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_amount
 )
 
-
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHArtifact,
     m_pos,
@@ -137,7 +130,6 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_type
 )
 
-
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHPandora,
     m_pos,
@@ -145,7 +137,6 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 
     m_reward
 )
-
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHMonster,
@@ -179,7 +170,6 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_defVariant
 )
 
-
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHBank,
     m_pos,
@@ -190,7 +180,6 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_guardsVariants
 )
 
-
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHObstacle,
     m_pos,
@@ -199,6 +188,14 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_id
 )
 
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHVisitable,
+    m_pos,
+    m_order,
+
+    m_id,
+    m_defVariant
+)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHMap::Objects,
@@ -210,10 +207,10 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_dwellings,
     m_banks,
     m_obstacles,
+    m_visitables,
     m_mines,
     m_pandoras
 )
-
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHMap,

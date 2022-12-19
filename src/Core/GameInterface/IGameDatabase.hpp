@@ -32,6 +32,7 @@ concept GameDatabaseObject = is_any_of<T,
                                        LibraryResource,
                                        LibraryMapBank,
                                        LibraryMapObstacle,
+                                       LibraryMapVisitable,
                                        LibraryGameRules,
                                        LibraryObjectDef>;
 
@@ -59,6 +60,7 @@ public:
     using LibraryHeroSpecContainerPtr       = const ContainerInterface<LibraryHeroSpec>*;
     using LibraryMapBankContainerPtr        = const ContainerInterface<LibraryMapBank>*;
     using LibraryMapObstacleContainerPtr    = const ContainerInterface<LibraryMapObstacle>*;
+    using LibraryMapVisitableContainerPtr   = const ContainerInterface<LibraryMapVisitable>*;
     using LibraryObjectDefContainerPtr      = const ContainerInterface<LibraryObjectDef>*;
     using LibraryResourceContainerPtr       = const ContainerInterface<LibraryResource>*;
     using LibrarySecondarySkillContainerPtr = const ContainerInterface<LibrarySecondarySkill>*;
@@ -66,19 +68,20 @@ public:
     using LibraryTerrainContainerPtr        = const ContainerInterface<LibraryTerrain>*;
     using LibraryUnitContainerPtr           = const ContainerInterface<LibraryUnit>*;
 
-    virtual LibraryArtifactContainerPtr       artifacts() const    = 0;
-    virtual LibraryDwellingContainerPtr       dwellings() const    = 0;
-    virtual LibraryFactionContainerPtr        factions() const     = 0;
-    virtual LibraryHeroContainerPtr           heroes() const       = 0;
-    virtual LibraryHeroSpecContainerPtr       heroSpecs() const    = 0;
-    virtual LibraryMapBankContainerPtr        mapBanks() const     = 0;
-    virtual LibraryMapObstacleContainerPtr    mapObstacles() const = 0;
-    virtual LibraryObjectDefContainerPtr      objectDefs() const   = 0;
-    virtual LibraryResourceContainerPtr       resources() const    = 0;
-    virtual LibrarySecondarySkillContainerPtr secSkills() const    = 0;
-    virtual LibrarySpellContainerPtr          spells() const       = 0;
-    virtual LibraryTerrainContainerPtr        terrains() const     = 0;
-    virtual LibraryUnitContainerPtr           units() const        = 0;
+    virtual LibraryArtifactContainerPtr       artifacts() const     = 0;
+    virtual LibraryDwellingContainerPtr       dwellings() const     = 0;
+    virtual LibraryFactionContainerPtr        factions() const      = 0;
+    virtual LibraryHeroContainerPtr           heroes() const        = 0;
+    virtual LibraryHeroSpecContainerPtr       heroSpecs() const     = 0;
+    virtual LibraryMapBankContainerPtr        mapBanks() const      = 0;
+    virtual LibraryMapObstacleContainerPtr    mapObstacles() const  = 0;
+    virtual LibraryMapVisitableContainerPtr   mapVisitables() const = 0;
+    virtual LibraryObjectDefContainerPtr      objectDefs() const    = 0;
+    virtual LibraryResourceContainerPtr       resources() const     = 0;
+    virtual LibrarySecondarySkillContainerPtr secSkills() const     = 0;
+    virtual LibrarySpellContainerPtr          spells() const        = 0;
+    virtual LibraryTerrainContainerPtr        terrains() const      = 0;
+    virtual LibraryUnitContainerPtr           units() const         = 0;
 
     virtual LibraryGameRulesConstPtr gameRules() const = 0;
 
@@ -97,6 +100,7 @@ template <> inline IGameDatabase::LibraryHeroContainerPtr           IGameDatabas
 template <> inline IGameDatabase::LibraryHeroSpecContainerPtr       IGameDatabase::container() const { return heroSpecs();}
 template <> inline IGameDatabase::LibraryMapBankContainerPtr        IGameDatabase::container() const { return mapBanks();}
 template <> inline IGameDatabase::LibraryMapObstacleContainerPtr    IGameDatabase::container() const { return mapObstacles();}
+template <> inline IGameDatabase::LibraryMapVisitableContainerPtr   IGameDatabase::container() const { return mapVisitables();}
 template <> inline IGameDatabase::LibraryObjectDefContainerPtr      IGameDatabase::container() const { return objectDefs();}
 template <> inline IGameDatabase::LibraryResourceContainerPtr       IGameDatabase::container() const { return resources();}
 template <> inline IGameDatabase::LibrarySecondarySkillContainerPtr IGameDatabase::container() const { return secSkills();}

@@ -1,0 +1,103 @@
+[
+
+{
+"scope": "mapVisitables",
+"compactCols":   [ "legacyId" ],
+
+"records": {
+
+"sod.visitable.altar"                      : [ 2   ],
+"sod.visitable.arena"                      : [ 4   ],
+"sod.visitable.blackMarket"                : [ 7   ],
+"sod.visitable.swanPond"                   : [ 14  ],
+"sod.visitable.corpse"                     : [ 22  ],
+"sod.visitable.marlettoTower"              : [ 23  ],
+"sod.visitable.faerieRing"                 : [ 28  ],
+"sod.visitable.fountainOfFortune"          : [ 30  ],
+"sod.visitable.fountainOfYouth"            : [ 31  ],
+"sod.visitable.gardenOfRevelation"         : [ 32  ],
+"sod.visitable.hillFort"                   : [ 35  ],
+"sod.visitable.idolOfFortune"              : [ 38  ],
+"sod.visitable.libraryOfEnlightenment"     : [ 41  ],
+"sod.visitable.schoolOfMagic"              : [ 47  ],
+"sod.visitable.magicSpring"                : [ 48  ],
+"sod.visitable.magicWell"                  : [ 49  ],
+"sod.visitable.mercenaryCamp"              : [ 51  ],
+"sod.visitable.mysticalGarden"             : [ 55  ],
+"sod.visitable.redwoodObservatory"         : [ 58  ],
+"sod.visitable.starAxis"                   : [ 61  ],
+"sod.visitable.rallyFlag"                  : [ 64  ],
+"sod.visitable.refugeeCamp"                : [ 78  ],
+"sod.visitable.stables"                    : [ 94  ],
+"sod.visitable.tavern"                     : [ 95  ],
+"sod.visitable.temple"                     : [ 96  ],
+"sod.visitable.denOfThieves"               : [ 97  ],
+"sod.visitable.learningStone"              : [ 100 ],
+"sod.visitable.university"                 : [ 104 ],
+"sod.visitable.wagon"                      : [ 105 ],
+"sod.visitable.warMachineFactory"          : [ 106 ],
+"sod.visitable.schoolOfWar"                : [ 107 ],
+"sod.visitable.warriorsTomb"               : [ 108 ],
+"sod.visitable.waterWheel"                 : [ 109 ],
+"sod.visitable.wateringHole"               : [ 110 ],
+"sod.visitable.windmill"                   : [ 112 ],
+"hota.visitable.hotaStorage"               : [ 142 ],
+"hota.visitable.hotaVisitable1"            : [ 144 ],
+"hota.visitable.hotaVisitable3"            : [ 146 ],
+"sod.visitable.freelancersGuild"           : [ 213 ]
+
+}
+
+},
+
+
+
+{
+"scope": "mapVisitables",
+"compactCols":   [ "mapObjectDefs" ],
+
+"records": {
+
+"sod.visitable.altar"                      : [ ["avxaltar"] ],
+"sod.visitable.arena"                      : [ ["avsarna0"] ],
+"sod.visitable.blackMarket"                : [ ["avxmktb0"] ],
+"sod.visitable.swanPond"                   : [ ["avsclvd0", "avsclvg0", "avsclvs0"]  ],
+"sod.visitable.corpse"                     : [ ["avxskds0", "avxskds1", "avxskds2"]  ],
+"sod.visitable.marlettoTower"              : [ ["avsmarl"]  ],
+"sod.visitable.faerieRing"                 : [ ["avsring0"]  ],
+"sod.visitable.fountainOfFortune"          : [ ["avsfntn0"]  ],
+"sod.visitable.fountainOfYouth"            : [ ["avxfyth0", "watermag"]  ],
+"sod.visitable.gardenOfRevelation"         : [ ["avsgrdn0"]  ],
+"sod.visitable.hillFort"                   : [ ["avxhild0", "avxhilg0", "avxhils0", "miniftdr", "miniftsd", "minifort", "miniftsn", "miniftsw", "miniftrg", "miniftsb", "miniftlv", "minifthl", "miniftws"]  ],
+"sod.visitable.idolOfFortune"              : [ ["avsidol0", "avsidls0" ]  ],
+"sod.visitable.libraryOfEnlightenment"     : [ ["avslibr0", "avslibs0"]  ],
+"sod.visitable.schoolOfMagic"              : [ ["avsschm0", "avsschm1"]  ],
+"sod.visitable.magicSpring"                : [ ["avxmags0"]  ],
+"sod.visitable.magicWell"                  : [ ["avxwelg0", "avxwelr0", "avxwlsn0" ]  ],
+"sod.visitable.mercenaryCamp"              : [ ["avsmerc0"]  ],
+"sod.visitable.mysticalGarden"             : [ ["avtmyst0", "avtmystd"]  ],
+"sod.visitable.redwoodObservatory"         : [ ["avxredw", "avxreds0", "avwtobtw"]  ],
+"sod.visitable.starAxis"                   : [ ["avsaxis0"]  ],
+"sod.visitable.rallyFlag"                  : [ ["avxrlly0" ]  ],
+"sod.visitable.refugeeCamp"                : [ ["avgrefg0"]  ],
+"sod.visitable.stables"                    : [ ["avxstbl0"]  ],
+"sod.visitable.tavern"                     : [ ["avxtvrn0", "avxtvrs0", "wt_tvrn01"]  ],
+"sod.visitable.temple"                     : [ ["avstmpl0" ]  ],
+"sod.visitable.denOfThieves"               : [ ["avxdent", "avxdend0"  , "avxdens0" ]  ],
+"sod.visitable.learningStone"              : [ ["avsgzbo0", "avsgzbs0" ]  ],
+"sod.visitable.university"                 : [ ["avsuniv0"]  ],
+"sod.visitable.wagon"                      : [ ["avtwagn0", "hatel" ]  ],
+"sod.visitable.warMachineFactory"          : [ ["avgsieg0", "avcnbksm"]  ],
+"sod.visitable.schoolOfWar"                : [ ["avswar20"]  ],
+"sod.visitable.warriorsTomb"               : [ ["avxtomb0"]  ],
+"sod.visitable.waterWheel"                 : [ ["avmwwhl0", "avmwwsn0"]  ],
+"sod.visitable.wateringHole"               : [ ["avxwtrh0"]  ],
+"sod.visitable.windmill"                   : [ ["avmwndd0", "avmwmsn0"] ],
+"hota.visitable.hotaStorage"               : [ ["avwrhswd", "avwrhsmc", "avwrhsor", "avwrhssf", "avwrhscr", "avwrhsgm", "avwrhsgl"]  ],
+"hota.visitable.hotaVisitable1"            : [ ["avmoilpm", "avxtrmts", "avxtrmtw", "avtprosp", "avstrblz", "avstmplt", "avxsktrs", "avsmgarn", "avwtplce", "avxmspr0", "avshrmit", "avxgazeb", "avxjnkmn"]  ],
+"hota.visitable.hotaVisitable3"            : [ ["avxwobs", "avxmaltw", "avxtwngt"]  ],
+"sod.visitable.freelancersGuild"           : [ ["avxfgld"]  ]
+
+}
+
+}]
