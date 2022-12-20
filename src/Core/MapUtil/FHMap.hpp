@@ -50,6 +50,11 @@ struct FHCommonObject {
     int   m_order = 0;
 };
 
+struct FHCommonVisitable : public FHCommonObject {
+    Core::LibraryMapVisitableConstPtr m_visitableId = nullptr;
+    int                               m_defVariant  = 0;
+};
+
 struct FHPlayerControlledObject : public FHCommonObject {
     FHPlayerId m_player = FHPlayerId::Invalid;
 };
@@ -100,6 +105,9 @@ struct FHResource : public FHCommonObject {
     uint32_t                      m_amount = 0;
     Core::LibraryResourceConstPtr m_id     = nullptr;
     Type                          m_type   = Type::Resource;
+
+    Core::LibraryMapVisitableConstPtr m_visitableId = nullptr;
+    int                               m_defVariant  = 0;
 };
 
 struct FHRandomResource : public FHCommonObject {
@@ -135,6 +143,9 @@ struct FHMonster : public FHCommonObject {
     int m_agressionMin = 1;
     int m_agressionMax = 10;
 
+    bool m_joinOnlyForMoney = false;
+    int  m_joinPercent      = 100;
+
     uint32_t m_questIdentifier = 0;
 };
 
@@ -147,9 +158,31 @@ struct FHBank : public FHCommonObject {
 struct FHObstacle : public FHCommonObject {
     Core::LibraryMapObstacleConstPtr m_id = nullptr;
 };
-struct FHVisitable : public FHCommonObject {
-    Core::LibraryMapVisitableConstPtr m_id         = nullptr;
-    int                               m_defVariant = 0;
+struct FHVisitable : public FHCommonVisitable {
+};
+
+struct FHShrine : public FHCommonVisitable {
+    Core::LibrarySpellConstPtr m_spellId     = nullptr;
+    int                        m_randomLevel = -1;
+};
+
+struct FHSkillHut : public FHCommonVisitable {
+    std::vector<Core::LibrarySecondarySkillConstPtr> m_skillIds;
+};
+
+struct FHScholar : public FHCommonVisitable {
+    enum Type
+    {
+        Primary,
+        Secondary,
+        Spell,
+        Random,
+    };
+    Type m_type = Type::Random;
+
+    Core::HeroPrimaryParamType          m_primaryType = Core::HeroPrimaryParamType::Attack;
+    Core::LibrarySecondarySkillConstPtr m_skillId     = nullptr;
+    Core::LibrarySpellConstPtr          m_spellId     = nullptr;
 };
 
 struct FHMap {
@@ -181,7 +214,16 @@ struct FHMap {
         std::vector<FHVisitable>      m_visitables;
         std::vector<FHMine>           m_mines;
         std::vector<FHPandora>        m_pandoras;
+        std::vector<FHShrine>         m_shrines;
+        std::vector<FHSkillHut>       m_skillHuts;
+        std::vector<FHScholar>        m_scholars;
     } m_objects;
+
+    struct Config {
+        bool m_allowSpecialWeeks = true;
+        bool m_hasRoundLimit     = false;
+        int  m_roundLimit        = 100;
+    } m_config;
 
     std::vector<FHRiver> m_rivers;
     std::vector<FHRoad>  m_roads;

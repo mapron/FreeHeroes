@@ -26,7 +26,7 @@ struct LibraryObjectDef {
     int type     = -1;
     int priority = -1;
 
-    LibraryUnitConstPtr creatureId = nullptr;
+    std::vector<LibraryObjectDefConstPtr> alternatives;
 };
 
 }

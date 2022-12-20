@@ -230,8 +230,8 @@ struct H3Map {
         uint16_t m_ver2 = 0;
         uint32_t m_ver3 = 12;
 
-        uint32_t m_fixedMap   = 1;
-        uint32_t m_roundLimit = 0xffffffff;
+        uint32_t m_allowSpecialWeeks = 1;
+        uint32_t m_roundLimit        = 0xffffffff;
     };
     HotaVersion                        m_hotaVer;
     std::shared_ptr<MapFormatFeatures> m_features;

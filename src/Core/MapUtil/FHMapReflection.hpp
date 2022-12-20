@@ -12,47 +12,52 @@
 
 #include "FHTileMapReflection.hpp"
 
-// clang-format off
 namespace FreeHeroes::Core::Reflection {
 
-ENUM_REFLECTION_STRINGIY(FHPlayerId,
-                         Invalid,
-                         Invalid,
-                         None,
-                         Red,
-                         Blue,
-                         Tan,
-                         Green,
-                         Orange,
-                         Purple,
-                         Teal,
-                         Pink)
+ENUM_REFLECTION_STRINGIY(
+    FHPlayerId,
+    Invalid,
+    Invalid,
+    None,
+    Red,
+    Blue,
+    Tan,
+    Green,
+    Orange,
+    Purple,
+    Teal,
+    Pink)
 
-ENUM_REFLECTION_STRINGIY(Core::GameVersion,
-                         Invalid,
-                         SOD,
-                         HOTA)
+ENUM_REFLECTION_STRINGIY(
+    Core::GameVersion,
+    Invalid,
+    SOD,
+    HOTA)
 
-ENUM_REFLECTION_STRINGIY(FHResource::Type,
-                         Resource,
-                         Resource,
-                         TreasureChest,
-                         CampFire)
+ENUM_REFLECTION_STRINGIY(
+    FHResource::Type,
+    Resource,
+    Resource,
+    TreasureChest,
+    CampFire)
 
-ENUM_REFLECTION_STRINGIY(FHRandomArtifact::Type,
-                         Invalid,
-                         Any,
-                         Treasure,
-                         Minor,
-                         Major,
-                         Relic)
+ENUM_REFLECTION_STRINGIY(
+    FHRandomArtifact::Type,
+    Invalid,
+    Any,
+    Treasure,
+    Minor,
+    Major,
+    Relic)
 
+// clang-format off
 STRUCT_REFLECTION_PAIRED(
     FHPlayer,
     "ai",                  m_aiPossible,
     "human",               m_humanPossible,
     "factions",            m_startingFactions
 )
+// clang-format on
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHHeroData,
@@ -61,9 +66,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_hasPrimSkills,
     m_hasCustomBio,
     m_hasSpells,
-    m_army
-)
+    m_army)
 
+// clang-format off
 STRUCT_REFLECTION_PAIRED(
     FHHero,
     "pos",                 m_pos,
@@ -74,6 +79,7 @@ STRUCT_REFLECTION_PAIRED(
     "data",                m_data,
     "questId",             m_questIdentifier
 )
+// clang-format on
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHTown,
@@ -86,15 +92,16 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_hasFort,
     m_questIdentifier,
     m_spellResearch,
-    m_defFile
-)
+    m_defFile)
 
+// clang-format off
 STRUCT_REFLECTION_PAIRED(
     FHZone::Rect,
     "pos",                 m_pos,
     "w",                   m_width,
     "h",                   m_height
 )
+// clang-format on
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHResource,
@@ -103,40 +110,37 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 
     m_amount,
     m_id,
-    m_type
-)
+    m_type,
+    m_visitableId,
+    m_defVariant)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRandomResource,
     m_pos,
     m_order,
 
-    m_amount
-)
+    m_amount)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHArtifact,
     m_pos,
     m_order,
 
-    m_id
-)
+    m_id)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRandomArtifact,
     m_pos,
     m_order,
 
-    m_type
-)
+    m_type)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHPandora,
     m_pos,
     m_order,
 
-    m_reward
-)
+    m_reward)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHMonster,
@@ -147,8 +151,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_count,
     m_agressionMin,
     m_agressionMax,
-    m_questIdentifier
-)
+    m_joinOnlyForMoney,
+    m_joinPercent,
+    m_questIdentifier)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHDwelling,
@@ -157,8 +162,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_player,
 
     m_id,
-    m_defVariant
-)
+    m_defVariant)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHMine,
@@ -167,8 +171,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_player,
 
     m_id,
-    m_defVariant
-)
+    m_defVariant)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHBank,
@@ -177,25 +180,63 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 
     m_id,
     m_defVariant,
-    m_guardsVariants
-)
+    m_guardsVariants)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHObstacle,
     m_pos,
     m_order,
 
-    m_id
-)
+    m_id)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHVisitable,
     m_pos,
     m_order,
 
-    m_id,
-    m_defVariant
-)
+    m_visitableId,
+    m_defVariant)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHShrine,
+    m_pos,
+    m_order,
+
+    m_visitableId,
+    m_defVariant,
+    m_spellId,
+    m_randomLevel)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHSkillHut,
+    m_pos,
+    m_order,
+
+    m_visitableId,
+    m_defVariant,
+
+    m_skillIds)
+
+ENUM_REFLECTION_STRINGIY(
+    FHScholar::Type,
+    Random,
+    Primary,
+    Secondary,
+    Spell,
+    Random)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHScholar,
+    m_pos,
+    m_order,
+
+    m_visitableId,
+    m_defVariant,
+
+    m_type,
+    m_primaryType,
+    m_skillId,
+    m_spellId)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHMap::Objects,
@@ -209,8 +250,16 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_obstacles,
     m_visitables,
     m_mines,
-    m_pandoras
-)
+    m_pandoras,
+    m_shrines,
+    m_skillHuts,
+    m_scholars)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHMap::Config,
+    m_allowSpecialWeeks,
+    m_hasRoundLimit,
+    m_roundLimit)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHMap,
@@ -225,6 +274,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_towns,
     m_zones,
     m_objects,
+    m_config,
     m_rivers,
     m_roads,
     m_defaultTerrain,
@@ -233,12 +283,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_disabledSpells,
     m_disabledSkills,
     m_customHeroes,
-    m_initialObjectDefs
-)
+    m_initialObjectDefs)
 
 template<>
 inline constexpr const bool MetaInfo::s_isStringMap<FHMap::PlayersMap>{ true };
-
-// clang-format on
 
 }

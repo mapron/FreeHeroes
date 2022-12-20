@@ -170,7 +170,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_ver1,
     m_ver2,
     m_ver3,
-    m_fixedMap,
+    m_allowSpecialWeeks,
     m_roundLimit)
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     H3Map::Rumor,

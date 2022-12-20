@@ -829,7 +829,7 @@ struct MapShrine : public MapObjectAbstract {
 };
 
 struct MapScholar : public MapObjectAbstract {
-    uint8_t m_bonusType = 0;
+    uint8_t m_bonusType = 0xFFU;
     uint8_t m_bonusId   = 0;
 
     using MapObjectAbstract::MapObjectAbstract;

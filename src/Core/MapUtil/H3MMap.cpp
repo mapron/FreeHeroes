@@ -374,7 +374,7 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
     if (m_features->m_mapHotaUnknown1) {
         uint16_t unknown1; // == 16;
         uint32_t unknown2; // == 0;
-        stream >> m_hotaVer.m_fixedMap >> unknown1 >> unknown2;
+        stream >> m_hotaVer.m_allowSpecialWeeks >> unknown1 >> unknown2;
         assert(unknown1 == 16);
         assert(unknown2 == 0);
         if (m_hotaVer.m_ver1 == 3)
@@ -529,7 +529,7 @@ void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
     if (m_features->m_mapHotaUnknown1) {
         uint16_t unknown1 = 16;
         uint32_t unknown2 = 0;
-        stream << m_hotaVer.m_fixedMap << unknown1 << unknown2;
+        stream << m_hotaVer.m_allowSpecialWeeks << unknown1 << unknown2;
         if (m_hotaVer.m_ver1 == 3)
             stream << m_hotaVer.m_roundLimit;
     }

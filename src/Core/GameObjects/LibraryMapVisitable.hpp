@@ -9,6 +9,7 @@
 
 #include <string>
 #include <vector>
+#include <cassert>
 
 namespace FreeHeroes::Core {
 

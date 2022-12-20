@@ -947,7 +947,8 @@ STRUCT_REFLECTION_PAIRED(
     "objId",                       objId,
     "subId",                       subId,
     "type",                        type,
-    "priority",                    priority
+    "priority",                    priority,
+    "alternatives",                alternatives
 )
 
 ENUM_REFLECTION_PAIRED(FieldLayout,

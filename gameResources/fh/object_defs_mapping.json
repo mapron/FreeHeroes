@@ -410,10 +410,10 @@
 "records": {
 
 "wood"     : {"mapObjectDef":"avtwood0", "minesDefs": [ "avmsawd0", "avmsawg0", "avmsawl0", "avmsawr0", "avmswds0", "avmswsn0", "avmsaws0", "avmswhl1" ] },
-"mercury"  : {"mapObjectDef":"avtmerc0", "minesDefs": [ "avmalch0", "avmalch0", "avmalch0", "avmalcs0" ] },
+"mercury"  : {"mapObjectDef":"avtmerc0", "minesDefs": [ "avmalch0", "avmalch0", "avmalch0", "avmalcs0", "avmalch0_A", "avmalch0_B" ] },
 "ore"      : {"mapObjectDef":"avtore0", "minesDefs":  [ "avmordr0", "avmords0", "avmore0" , "avmorlv0", "avmorro0", "avmorsb0", "avmorsn0", "avmorsw0", "avmorhl1", "avmorwl1"] },
 
-"sulfur"   : {"mapObjectDef":"avtsulf0", "minesDefs": [ "avmsulf0"] },
+"sulfur"   : {"mapObjectDef":"avtsulf0", "minesDefs": [ "avmsulf0", "avmsulf0_A", "avmsulf0_B", "avmsulf0_C"] },
 "crystal"  : {"mapObjectDef":"avtcrys0", "minesDefs": [ "avmcrys0", "avmcrdr0", "avmcrds0", "avmcrgr0", "avmcrrf0", "avmcrsn0", "avmcrsu0", "avmcrsw0", "avmcrvo0", "avmcrhl1", "mntswpcr", "avmcrdn0", "avmcrwl1" ] },
 "gems"     : {"mapObjectDef":"avtgems0", "minesDefs": [ "avmgems0", "avmgedr0", "avmgelv0", "avmgerf0", "avmgesd0", "avmgesn0", "avmgehl1", "avmgewl1" ] },
 

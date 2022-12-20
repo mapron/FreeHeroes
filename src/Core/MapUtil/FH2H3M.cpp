@@ -40,6 +40,68 @@ std::vector<uint8_t> reverseArray(std::vector<uint8_t> arr)
     std::reverse(arr.begin(), arr.end());
     return arr;
 }
+
+class ObjectTemplateCache {
+public:
+    ObjectTemplateCache(const Core::IGameDatabase* database)
+        : m_database(database)
+    {}
+
+    uint32_t add(ObjectTemplate def)
+    {
+        auto index = static_cast<uint32_t>(m_objectDefs.size());
+        m_objectDefs.push_back(std::move(def));
+        return index;
+    }
+
+    uint32_t add(Core::LibraryObjectDefConstPtr record)
+    {
+        assert(record);
+        if (m_index.contains(record))
+            return m_index.at(record);
+        ObjectTemplate res{
+            .m_animationFile = record->defFile,
+            .m_blockMask     = reverseArray(record->blockMap),
+            .m_visitMask     = reverseArray(record->visitMap),
+            .m_terrainsHard  = reverseArray(record->terrainsHard),
+            .m_terrainsSoft  = reverseArray(record->terrainsSoft),
+
+            .m_id           = static_cast<uint32_t>(record->objId),
+            .m_subid        = static_cast<uint32_t>(record->subId),
+            .m_type         = static_cast<ObjectTemplate::Type>(record->type),
+            .m_drawPriority = static_cast<uint8_t>(record->priority),
+        };
+        if (res.m_animationFile.find('.') == std::string::npos)
+            res.m_animationFile += ".def";
+        const size_t terrainsCount = m_database->terrains()->legacyOrderedIds().size();
+        res.m_terrainsHard.resize(terrainsCount);
+        res.m_terrainsSoft.resize(terrainsCount);
+
+        const auto index = add(res);
+        m_index[record]  = index;
+        return index;
+    }
+
+    uint32_t addId(std::string defId)
+    {
+        auto* defsContainer = m_database->objectDefs();
+        if (defId.ends_with(".def"))
+            defId = defId.substr(0, defId.size() - 4);
+        std::transform(defId.begin(), defId.end(), defId.begin(), [](unsigned char c) { return std::tolower(c); });
+        return add(defsContainer->find(defId));
+    }
+
+    uint32_t addHero(Core::LibraryHeroConstPtr hero)
+    {
+        std::string id = hero->getAdventureSprite() + "e";
+        return addId(std::move(id));
+    }
+
+    std::map<Core::LibraryObjectDefConstPtr, uint32_t> m_index;
+    std::vector<ObjectTemplate>                        m_objectDefs;
+    const Core::IGameDatabase* const                   m_database;
+};
+
 }
 
 void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* database, Core::IRandomGenerator* rng)
@@ -58,6 +120,9 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
     dest.m_tiles.m_hasUnderground = tileMap.m_depth > 1;
     dest.m_tiles.updateSize();
     dest.prepareArrays();
+
+    dest.m_hotaVer.m_allowSpecialWeeks = src.m_config.m_allowSpecialWeeks;
+    dest.m_hotaVer.m_roundLimit        = src.m_config.m_hasRoundLimit ? src.m_config.m_roundLimit : 0xffffffffU;
 
     auto fillZoneTerrain = [&tileMap](const FHZone& zone) {
         if (!zone.m_terrainId)
@@ -114,8 +179,6 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
         }
     }
 
-    auto* defsContainer = database->objectDefs();
-
     for (auto& [playerId, fhPlayer] : src.m_players) {
         auto  index    = static_cast<int>(playerId);
         auto& h3player = dest.m_players[index];
@@ -133,55 +196,13 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
     for (auto& bit : dest.m_allowedHeroes)
         bit = 1;
 
-    std::map<std::string, uint32_t> defs;
-    auto                            getDefFileIndex = [&dest, &defs](ObjectTemplate def) -> uint32_t {
-        auto key = def.m_animationFile;
-        if (defs.contains(key))
-            return defs.at(key);
-        dest.m_objectDefs.push_back(std::move(def));
-        auto index = static_cast<uint32_t>(dest.m_objectDefs.size() - 1);
-        defs[key]  = index;
-        return index;
-    };
+    ObjectTemplateCache tmplCache(database);
 
-    auto makeDefFromDb = [terrainsCount](Core::LibraryObjectDefConstPtr record, bool forceSoft = false) {
-        assert(record);
-        ObjectTemplate res{
-            .m_animationFile = record->defFile + ".def",
-            .m_blockMask     = reverseArray(record->blockMap),
-            .m_visitMask     = reverseArray(record->visitMap),
-            .m_terrainsHard  = reverseArray(forceSoft ? record->terrainsSoft : record->terrainsHard),
-            .m_terrainsSoft  = reverseArray(record->terrainsSoft),
+    for (auto* def : src.m_initialObjectDefs)
+        tmplCache.add(def);
 
-            .m_id           = static_cast<uint32_t>(record->objId),
-            .m_subid        = static_cast<uint32_t>(record->subId),
-            .m_type         = static_cast<ObjectTemplate::Type>(record->type),
-            .m_drawPriority = static_cast<uint8_t>(record->priority),
-        };
-        res.m_terrainsHard.resize(terrainsCount);
-        res.m_terrainsSoft.resize(terrainsCount);
-        return res;
-    };
-
-    auto makeDefFromDbId = [defsContainer, &makeDefFromDb](std::string defId, bool forceSoft = false) {
-        if (defId.ends_with(".def"))
-            defId = defId.substr(0, defId.size() - 4);
-        std::transform(defId.begin(), defId.end(), defId.begin(), [](unsigned char c) { return std::tolower(c); });
-        return makeDefFromDb(defsContainer->find(defId), forceSoft);
-    };
-
-    auto makeHeroDef = [&makeDefFromDbId](Core::LibraryHeroConstPtr hero) {
-        ObjectTemplate res = makeDefFromDbId(hero->getAdventureSprite() + "e");
-        return res;
-    };
-
-    for (auto* def : src.m_initialObjectDefs) {
-        bool forceSoft = def->objId == static_cast<int>(MapObjectType::TOWN) || def->objId == static_cast<int>(MapObjectType::PRISON);
-        getDefFileIndex(makeDefFromDb(def, forceSoft));
-    }
-
-    getDefFileIndex(makeDefFromDbId("avwmrnd0"));
-    getDefFileIndex(makeDefFromDbId("avlholg0"));
+    tmplCache.addId("avwmrnd0");
+    tmplCache.addId("avlholg0");
 
     for (auto& fhTown : src.m_towns) {
         auto playerIndex = static_cast<int>(fhTown.m_player);
@@ -203,15 +224,14 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
         cas1->prepareArrays();
         auto* libraryFaction = fhTown.m_factionId;
         assert(libraryFaction);
-        ObjectTemplate res;
+        uint32_t defnum;
         if (!fhTown.m_defFile.empty()) {
-            res = makeDefFromDbId(fhTown.m_defFile, true);
+            defnum = tmplCache.addId(fhTown.m_defFile);
         } else {
-            res = makeDefFromDb(libraryFaction->mapObjectDef);
+            defnum = tmplCache.add(libraryFaction->mapObjectDef);
         }
-        res.m_subid = libraryFaction->legacyId;
 
-        dest.m_objects.push_back(Object{ .m_order = fhTown.m_order, .m_pos = int3fromPos(fhTown.m_pos), .m_defnum = getDefFileIndex(res), .m_impl = std::move(cas1) });
+        dest.m_objects.push_back(Object{ .m_order = fhTown.m_order, .m_pos = int3fromPos(fhTown.m_pos), .m_defnum = defnum, .m_impl = std::move(cas1) });
     }
 
     for (auto& fhHero : src.m_wanderingHeroes) {
@@ -245,9 +265,9 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
         }
         dest.m_allowedHeroes[heroId] = 0;
         if (playerIndex < 0) {
-            dest.m_objects.push_back(Object{ .m_order = fhHero.m_order, .m_pos = int3fromPos(fhHero.m_pos), .m_defnum = getDefFileIndex(makeDefFromDbId("avxprsn0")), .m_impl = std::move(hero) });
+            dest.m_objects.push_back(Object{ .m_order = fhHero.m_order, .m_pos = int3fromPos(fhHero.m_pos), .m_defnum = tmplCache.addId("avxprsn0"), .m_impl = std::move(hero) });
         } else {
-            dest.m_objects.push_back(Object{ .m_order = fhHero.m_order, .m_pos = int3fromPos(fhHero.m_pos, +1), .m_defnum = getDefFileIndex(makeHeroDef(libraryHero)), .m_impl = std::move(hero) });
+            dest.m_objects.push_back(Object{ .m_order = fhHero.m_order, .m_pos = int3fromPos(fhHero.m_pos, +1), .m_defnum = tmplCache.addHero(libraryHero), .m_impl = std::move(hero) });
         }
     }
 
@@ -304,6 +324,10 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
                 destHero.m_skills.push_back({ static_cast<uint8_t>(sk.skill->legacyId), static_cast<uint8_t>(sk.level) });
             }
         }
+        if (destHero.m_spellSet.m_hasCustomSpells) {
+            for (auto* spell : customHero.m_army.hero.spellbook)
+                destHero.m_spellSet.m_spells[spell->legacyId] = 1;
+        }
     }
 
     for (auto& fhRes : src.m_objects.m_resources) {
@@ -311,18 +335,17 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
             auto res      = std::make_unique<MapResource>(dest.m_features);
             res->m_amount = fhRes.m_amount;
 
-            dest.m_objects.push_back(Object{ .m_order = fhRes.m_order, .m_pos = int3fromPos(fhRes.m_pos), .m_defnum = getDefFileIndex(makeDefFromDb(fhRes.m_id->mapObjectDef)), .m_impl = std::move(res) });
-        } else if (fhRes.m_type == FHResource::Type::TreasureChest) {
-            dest.m_objects.push_back(Object{ .m_order = fhRes.m_order, .m_pos = int3fromPos(fhRes.m_pos), .m_defnum = getDefFileIndex(makeDefFromDbId("avtchst0")), .m_impl = std::make_unique<MapObjectSimple>(dest.m_features) });
-        } else if (fhRes.m_type == FHResource::Type::CampFire) {
-            dest.m_objects.push_back(Object{ .m_order = fhRes.m_order, .m_pos = int3fromPos(fhRes.m_pos), .m_defnum = getDefFileIndex(makeDefFromDbId("adcfra")), .m_impl = std::make_unique<MapObjectSimple>(dest.m_features) });
+            dest.m_objects.push_back(Object{ .m_order = fhRes.m_order, .m_pos = int3fromPos(fhRes.m_pos), .m_defnum = tmplCache.add(fhRes.m_id->mapObjectDef), .m_impl = std::move(res) });
+        } else {
+            auto* def = fhRes.m_visitableId->mapObjectDefs[fhRes.m_defVariant];
+            dest.m_objects.push_back(Object{ .m_order = fhRes.m_order, .m_pos = int3fromPos(fhRes.m_pos), .m_defnum = tmplCache.add(def), .m_impl = std::make_unique<MapObjectSimple>(dest.m_features) });
         }
     }
 
     for (auto& fhRes : src.m_objects.m_resourcesRandom) {
         auto res      = std::make_unique<MapResource>(dest.m_features);
         res->m_amount = fhRes.m_amount;
-        dest.m_objects.push_back(Object{ .m_order = fhRes.m_order, .m_pos = int3fromPos(fhRes.m_pos), .m_defnum = getDefFileIndex(makeDefFromDbId("avtrndm0")), .m_impl = std::move(res) });
+        dest.m_objects.push_back(Object{ .m_order = fhRes.m_order, .m_pos = int3fromPos(fhRes.m_pos), .m_defnum = tmplCache.addId("avtrndm0"), .m_impl = std::move(res) });
     }
 
     for (auto& fhArt : src.m_objects.m_artifacts) {
@@ -331,7 +354,7 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
             art->m_spellId = fhArt.m_id->scrollSpell->legacyId;
             art->m_isSpell = true;
         }
-        dest.m_objects.push_back(Object{ .m_order = fhArt.m_order, .m_pos = int3fromPos(fhArt.m_pos), .m_defnum = getDefFileIndex(makeDefFromDb(fhArt.m_id->mapObjectDef)), .m_impl = std::move(art) });
+        dest.m_objects.push_back(Object{ .m_order = fhArt.m_order, .m_pos = int3fromPos(fhArt.m_pos), .m_defnum = tmplCache.add(fhArt.m_id->mapObjectDef), .m_impl = std::move(art) });
     }
     for (auto& fhArt : src.m_objects.m_artifactsRandom) {
         auto        art = std::make_unique<MapArtifact>(dest.m_features, false);
@@ -356,7 +379,7 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
                 break;
         }
 
-        dest.m_objects.push_back(Object{ .m_order = fhArt.m_order, .m_pos = int3fromPos(fhArt.m_pos), .m_defnum = getDefFileIndex(makeDefFromDbId(id)), .m_impl = std::move(art) });
+        dest.m_objects.push_back(Object{ .m_order = fhArt.m_order, .m_pos = int3fromPos(fhArt.m_pos), .m_defnum = tmplCache.addId(id), .m_impl = std::move(art) });
     }
 
     for (auto& fhMon : src.m_objects.m_monsters) {
@@ -381,8 +404,10 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
         } else {
             throw std::runtime_error("unsupported monster appeal");
         }
+        monster->m_joinOnlyForMoney = fhMon.m_joinOnlyForMoney;
+        monster->m_joinPercent      = fhMon.m_joinPercent;
 
-        dest.m_objects.push_back(Object{ .m_order = fhMon.m_order, .m_pos = int3fromPos(fhMon.m_pos, dest.m_features->m_monstersMapXOffset), .m_defnum = getDefFileIndex(makeDefFromDb(fhMon.m_id->mapObjectDef)), .m_impl = std::move(monster) });
+        dest.m_objects.push_back(Object{ .m_order = fhMon.m_order, .m_pos = int3fromPos(fhMon.m_pos, dest.m_features->m_monstersMapXOffset), .m_defnum = tmplCache.add(fhMon.m_id->mapObjectDef), .m_impl = std::move(monster) });
     }
 
     for (auto& fhDwelling : src.m_objects.m_dwellings) {
@@ -390,14 +415,14 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
         dwell->m_owner = static_cast<uint8_t>(fhDwelling.m_player);
 
         auto* def = fhDwelling.m_id->mapObjectDefs[fhDwelling.m_defVariant];
-        dest.m_objects.push_back(Object{ .m_order = fhDwelling.m_order, .m_pos = int3fromPos(fhDwelling.m_pos), .m_defnum = getDefFileIndex(makeDefFromDb(def)), .m_impl = std::move(dwell) });
+        dest.m_objects.push_back(Object{ .m_order = fhDwelling.m_order, .m_pos = int3fromPos(fhDwelling.m_pos), .m_defnum = tmplCache.add(def), .m_impl = std::move(dwell) });
     }
     for (auto& fhMine : src.m_objects.m_mines) {
         auto mine     = std::make_unique<MapObjectWithOwner>(dest.m_features);
         mine->m_owner = static_cast<uint8_t>(fhMine.m_player);
 
         auto* def = fhMine.m_id->minesDefs[fhMine.m_defVariant];
-        dest.m_objects.push_back(Object{ .m_order = fhMine.m_order, .m_pos = int3fromPos(fhMine.m_pos), .m_defnum = getDefFileIndex(makeDefFromDb(def)), .m_impl = std::move(mine) });
+        dest.m_objects.push_back(Object{ .m_order = fhMine.m_order, .m_pos = int3fromPos(fhMine.m_pos), .m_defnum = tmplCache.add(def), .m_impl = std::move(mine) });
     }
 
     for (auto& fhBank : src.m_objects.m_banks) {
@@ -421,19 +446,50 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
         }
 
         auto* def = fhBank.m_id->mapObjectDefs[fhBank.m_defVariant];
-        dest.m_objects.push_back(Object{ .m_order = fhBank.m_order, .m_pos = int3fromPos(fhBank.m_pos), .m_defnum = getDefFileIndex(makeDefFromDb(def)), .m_impl = std::move(bank) });
+        dest.m_objects.push_back(Object{ .m_order = fhBank.m_order, .m_pos = int3fromPos(fhBank.m_pos), .m_defnum = tmplCache.add(def), .m_impl = std::move(bank) });
     }
     for (auto& fhObstacle : src.m_objects.m_obstacles) {
         auto obj = std::make_unique<MapObjectSimple>(dest.m_features);
 
         auto* def = fhObstacle.m_id->mapObjectDef;
-        dest.m_objects.push_back(Object{ .m_order = fhObstacle.m_order, .m_pos = int3fromPos(fhObstacle.m_pos), .m_defnum = getDefFileIndex(makeDefFromDb(def)), .m_impl = std::move(obj) });
+        dest.m_objects.push_back(Object{ .m_order = fhObstacle.m_order, .m_pos = int3fromPos(fhObstacle.m_pos), .m_defnum = tmplCache.add(def), .m_impl = std::move(obj) });
     }
     for (auto& fhVisitable : src.m_objects.m_visitables) {
         auto obj = std::make_unique<MapObjectSimple>(dest.m_features);
 
-        auto* def = fhVisitable.m_id->mapObjectDefs[fhVisitable.m_defVariant];
-        dest.m_objects.push_back(Object{ .m_order = fhVisitable.m_order, .m_pos = int3fromPos(fhVisitable.m_pos), .m_defnum = getDefFileIndex(makeDefFromDb(def)), .m_impl = std::move(obj) });
+        auto* def = fhVisitable.m_visitableId->mapObjectDefs[fhVisitable.m_defVariant];
+        dest.m_objects.push_back(Object{ .m_order = fhVisitable.m_order, .m_pos = int3fromPos(fhVisitable.m_pos), .m_defnum = tmplCache.add(def), .m_impl = std::move(obj) });
+    }
+    for (auto& fhShrine : src.m_objects.m_shrines) {
+        auto obj = std::make_unique<MapShrine>(dest.m_features);
+        if (fhShrine.m_spellId)
+            obj->m_spell = static_cast<uint8_t>(fhShrine.m_spellId->legacyId);
+        else
+            obj->m_spell = 0xffU;
+
+        auto* def = fhShrine.m_visitableId->mapObjectDefs[fhShrine.m_defVariant];
+        dest.m_objects.push_back(Object{ .m_order = fhShrine.m_order, .m_pos = int3fromPos(fhShrine.m_pos), .m_defnum = tmplCache.add(def), .m_impl = std::move(obj) });
+    }
+    for (auto& fhSkillHut : src.m_objects.m_skillHuts) {
+        auto obj = std::make_unique<MapWitchHut>(dest.m_features);
+        for (auto* allowedSkill : fhSkillHut.m_skillIds)
+            obj->m_allowedSkills[allowedSkill->legacyId] = 1;
+
+        auto* def = fhSkillHut.m_visitableId->mapObjectDefs[fhSkillHut.m_defVariant];
+        dest.m_objects.push_back(Object{ .m_order = fhSkillHut.m_order, .m_pos = int3fromPos(fhSkillHut.m_pos), .m_defnum = tmplCache.add(def), .m_impl = std::move(obj) });
+    }
+    for (auto& fhScholar : src.m_objects.m_scholars) {
+        auto obj         = std::make_unique<MapScholar>(dest.m_features);
+        obj->m_bonusType = fhScholar.m_type == FHScholar::Type::Random ? 0xffU : static_cast<uint8_t>(fhScholar.m_type);
+        if (fhScholar.m_type == FHScholar::Type::Primary)
+            obj->m_bonusId = static_cast<uint8_t>(fhScholar.m_primaryType);
+        else if (fhScholar.m_type == FHScholar::Type::Secondary)
+            obj->m_bonusId = static_cast<uint8_t>(fhScholar.m_skillId->legacyId);
+        else if (fhScholar.m_type == FHScholar::Type::Spell)
+            obj->m_bonusId = static_cast<uint8_t>(fhScholar.m_spellId->legacyId);
+
+        auto* def = fhScholar.m_visitableId->mapObjectDefs[fhScholar.m_defVariant];
+        dest.m_objects.push_back(Object{ .m_order = fhScholar.m_order, .m_pos = int3fromPos(fhScholar.m_pos), .m_defnum = tmplCache.add(def), .m_impl = std::move(obj) });
     }
     auto convertStacks = [](const std::vector<Core::UnitWithCount>& stacks) -> std::vector<StackBasicDescriptor> {
         std::vector<StackBasicDescriptor> result;
@@ -469,8 +525,10 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
         auto obj = std::make_unique<MapPandora>(dest.m_features);
         convertReward(fhPandora.m_reward, obj->m_reward);
 
-        dest.m_objects.push_back(Object{ .m_order = fhPandora.m_order, .m_pos = int3fromPos(fhPandora.m_pos), .m_defnum = getDefFileIndex(makeDefFromDbId("ava0128")), .m_impl = std::move(obj) });
+        dest.m_objects.push_back(Object{ .m_order = fhPandora.m_order, .m_pos = int3fromPos(fhPandora.m_pos), .m_defnum = tmplCache.addId("ava0128"), .m_impl = std::move(obj) });
     }
+
+    dest.m_objectDefs = std::move(tmplCache.m_objectDefs);
 
     std::sort(dest.m_objects.begin(), dest.m_objects.end(), [](const auto& lh, const auto& rh) { return lh.m_order < rh.m_order; });
 }
