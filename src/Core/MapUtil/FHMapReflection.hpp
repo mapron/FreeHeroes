@@ -218,6 +218,17 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 
     m_skillIds)
 
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHQuestHut,
+    m_pos,
+    m_order,
+
+    m_visitableId,
+    m_defVariant,
+
+    m_reward,
+    m_artifacts)
+
 ENUM_REFLECTION_STRINGIY(
     FHScholar::Type,
     Random,
@@ -254,7 +265,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_pandoras,
     m_shrines,
     m_skillHuts,
-    m_scholars)
+    m_scholars,
+    m_questHuts)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHMap::Config,

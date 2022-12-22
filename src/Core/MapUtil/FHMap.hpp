@@ -171,6 +171,11 @@ struct FHShrine : public FHCommonVisitable {
 struct FHSkillHut : public FHCommonVisitable {
     std::vector<Core::LibrarySecondarySkillConstPtr> m_skillIds;
 };
+struct FHQuestHut : public FHCommonVisitable {
+    Core::Reward m_reward;
+
+    std::vector<Core::LibraryArtifactConstPtr> m_artifacts;
+};
 
 struct FHScholar : public FHCommonVisitable {
     enum Type
@@ -219,6 +224,7 @@ struct FHMap {
         std::vector<FHShrine>         m_shrines;
         std::vector<FHSkillHut>       m_skillHuts;
         std::vector<FHScholar>        m_scholars;
+        std::vector<FHQuestHut>       m_questHuts;
     } m_objects;
 
     struct Config {

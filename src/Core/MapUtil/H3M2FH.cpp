@@ -214,13 +214,90 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             result.push_back({ unitIds[stack.m_id], stack.m_count });
         return result;
     };
+    auto convertRewardHut = [&spellIds, &secSkillIds, &artIds, &unitIds](const MapSeerHut& hut) -> Core::Reward {
+        Core::Reward fhReward;
+        switch (hut.m_reward) {
+            case MapSeerHut::RewardType::EXPERIENCE:
+                fhReward.gainedExp = hut.m_rVal;
+                break;
+            case MapSeerHut::RewardType::MANA_POINTS:
+                fhReward.manaDiff = hut.m_rVal;
+                break;
+            case MapSeerHut::RewardType::MORALE_BONUS:
+                fhReward.rngBonus.morale = hut.m_rVal;
+                break;
+            case MapSeerHut::RewardType::LUCK_BONUS:
 
-    auto convertReward = [&spellIds, &convertStacks](const MapReward& reward) -> Core::Reward {
+                fhReward.rngBonus.luck = hut.m_rVal;
+                break;
+
+            case MapSeerHut::RewardType::RESOURCES:
+            {
+                // clang-format off
+                switch (hut.m_rID)  {
+                    case 0: fhReward.resources.wood    = hut.m_rVal; break;
+                    case 1: fhReward.resources.mercury = hut.m_rVal; break;
+                    case 2: fhReward.resources.ore     = hut.m_rVal; break;
+                    case 3: fhReward.resources.sulfur  = hut.m_rVal; break;
+                    case 4: fhReward.resources.crystal = hut.m_rVal; break;
+                    case 5: fhReward.resources.gems    = hut.m_rVal; break;
+                    case 6: fhReward.resources.gold    = hut.m_rVal; break;
+                }
+                // clang-format on
+
+                break;
+            }
+            case MapSeerHut::RewardType::PRIMARY_SKILL:
+            {
+                // clang-format off
+            switch (hut.m_rID)  {
+                case 0: fhReward.statBonus.ad.attack          = hut.m_rVal; break;
+                case 1: fhReward.statBonus.ad.defense         = hut.m_rVal; break;
+                case 2: fhReward.statBonus.magic.spellPower   = hut.m_rVal; break;
+                case 3: fhReward.statBonus.magic.intelligence = hut.m_rVal; break;
+            }
+                // clang-format on
+            }
+
+            case MapSeerHut::RewardType::SECONDARY_SKILL:
+            {
+                fhReward.secSkills.push_back({ secSkillIds[hut.m_rID], (int) hut.m_rVal - 1 });
+                break;
+            }
+            case MapSeerHut::RewardType::ARTIFACT:
+            {
+                fhReward.artifacts.push_back(Core::ArtifactFilter{ .onlyArtifacts = { artIds[hut.m_rID] } });
+                break;
+            }
+            case MapSeerHut::RewardType::SPELL:
+            {
+                fhReward.spells.onlySpells.push_back({ spellIds[hut.m_rID] });
+                break;
+            }
+            case MapSeerHut::RewardType::CREATURE:
+            {
+                fhReward.units.push_back({ unitIds[hut.m_rID], (int) hut.m_rVal });
+                break;
+            }
+            case MapSeerHut::RewardType::NOTHING:
+            {
+                break;
+            }
+        }
+        return fhReward;
+    };
+
+    auto convertReward = [&spellIds, &secSkillIds, &artIds, &convertStacks](const MapReward& reward) -> Core::Reward {
         Core::Reward fhReward;
         fhReward.gainedExp       = reward.m_gainedExp;
         fhReward.manaDiff        = reward.m_manaDiff;
         fhReward.rngBonus.luck   = reward.m_luckDiff;
         fhReward.rngBonus.morale = reward.m_moraleDiff;
+
+        fhReward.statBonus.ad.attack          = reward.m_primSkillSet.m_prim[0];
+        fhReward.statBonus.ad.defense         = reward.m_primSkillSet.m_prim[1];
+        fhReward.statBonus.magic.spellPower   = reward.m_primSkillSet.m_prim[2];
+        fhReward.statBonus.magic.intelligence = reward.m_primSkillSet.m_prim[3];
 
         fhReward.resources.wood    = reward.m_resourceSet.m_resourceAmount[0];
         fhReward.resources.mercury = reward.m_resourceSet.m_resourceAmount[1];
@@ -230,9 +307,13 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
         fhReward.resources.gems    = reward.m_resourceSet.m_resourceAmount[5];
         fhReward.resources.gold    = reward.m_resourceSet.m_resourceAmount[6];
 
-        // @todo: m_primSkillSet
-        // @todo: m_secSkills
-        // @todo: m_artifacts
+        for (auto& skill : reward.m_secSkills)
+            fhReward.secSkills.push_back({ secSkillIds[skill.m_id], skill.m_level - 1 });
+
+        for (auto artId : reward.m_artifacts) {
+            fhReward.artifacts.push_back(Core::ArtifactFilter{ .onlyArtifacts = { artIds[artId] } });
+        }
+
         for (uint8_t spellId : reward.m_spells)
             fhReward.spells.onlySpells.push_back(spellIds.at(spellId));
 
@@ -281,7 +362,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                     skillList.clear();
                     for (auto& sk : hero->m_secSkills) {
                         const auto* secSkillId = secSkillIds[sk.m_id];
-                        skillList.push_back({ secSkillId, sk.m_level });
+                        skillList.push_back({ secSkillId, sk.m_level - 1 });
                     }
                 }
                 if (destHero.m_hasPrimSkills) {
@@ -351,8 +432,21 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             case MapObjectType::SEER_HUT:
             {
                 const auto* hut = static_cast<const MapSeerHut*>(impl);
-                (void) hut;
-                assert(1 && hut);
+
+                auto [visitableId, visitableDefIndex] = visitableMap[objDef];
+                assert(visitableId);
+
+                FHQuestHut fhHut;
+                fhHut.m_pos         = posFromH3M(obj.m_pos);
+                fhHut.m_order       = index;
+                fhHut.m_visitableId = visitableId;
+                fhHut.m_defVariant  = visitableDefIndex;
+                fhHut.m_reward      = convertRewardHut(*hut);
+                assert(hut->m_quest.m_missionType == MapQuest::Mission::ART);
+                for (uint16_t id : hut->m_quest.m_5arts)
+                    fhHut.m_artifacts.push_back(artIds[id]);
+
+                dest.m_objects.m_questHuts.push_back(std::move(fhHut));
             } break;
             case MapObjectType::WITCH_HUT:
             {
@@ -522,23 +616,24 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             case MapObjectType::CREATURE_GENERATOR2:
             case MapObjectType::CREATURE_GENERATOR3:
             case MapObjectType::CREATURE_GENERATOR4:
+            {
+                const auto* objOwner = static_cast<const MapObjectWithOwner*>(impl);
+                FHDwelling  dwelling;
+                const auto [id, variant] = dwellMap.at(objDef);
+                dwelling.m_id            = id;
+                dwelling.m_defVariant    = variant;
+                dwelling.m_order         = index;
+                dwelling.m_pos           = posFromH3M(obj.m_pos);
+                dwelling.m_player        = makePlayerId(objOwner->m_owner);
+                dest.m_objects.m_dwellings.push_back(std::move(dwelling));
+            } break;
             case MapObjectType::SHIPYARD:
             case MapObjectType::LIGHTHOUSE:
             {
-                //assert(type == MapObjectType::CREATURE_GENERATOR1);
-                if (type == MapObjectType::CREATURE_GENERATOR1) {
-                    const auto* objOwner = static_cast<const MapObjectWithOwner*>(impl);
-                    FHDwelling  dwelling;
-                    const auto [id, variant] = dwellMap.at(objDef);
-                    dwelling.m_id            = id;
-                    dwelling.m_defVariant    = variant;
-                    dwelling.m_order         = index;
-                    dwelling.m_pos           = posFromH3M(obj.m_pos);
-                    dwelling.m_player        = makePlayerId(objOwner->m_owner);
-                    dest.m_objects.m_dwellings.push_back(std::move(dwelling));
-                }
-
-            } break;
+                const auto* objOwner = static_cast<const MapObjectWithOwner*>(impl);
+                (void) objOwner;
+                assert(!"unsupported");
+            }
             case MapObjectType::SHRINE_OF_MAGIC_INCANTATION:
             case MapObjectType::SHRINE_OF_MAGIC_GESTURE:
             case MapObjectType::SHRINE_OF_MAGIC_THOUGHT:
@@ -704,7 +799,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             skillList.clear();
             for (auto& sk : customHero.m_skills) {
                 const auto* secSkillId = secSkillIds[sk.m_id];
-                skillList.push_back({ secSkillId, sk.m_level });
+                skillList.push_back({ secSkillId, sk.m_level - 1 });
             }
         }
         if (destHero.m_hasPrimSkills) {

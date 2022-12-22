@@ -50,6 +50,7 @@
 "sod.visitable.witchHut"                   : [ [ "avswtch0", "avswtcs0"] ],
 "sod.visitable.scholar"                    : [ [ "avxschl0" ] ],
 "sod.visitable.leanToWithResource"         : [ [ "avmlean0" ] ],
+"sod.visitable.questHut"                   : [ [ "avxseeb0", "avxseer0", "avxseey0", "avxseec0", "avxseee0" ] ],
 
 "sod.visitable.shrine1"                    : [ [ "avxl1sh0w", "avxl1sh0" ] ],
 "sod.visitable.shrine2"                    : [ [ "avxl2sh0w", "avxl2sh0" ] ],
