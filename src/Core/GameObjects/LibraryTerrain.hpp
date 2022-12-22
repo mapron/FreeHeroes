@@ -35,16 +35,32 @@ struct LibraryTerrain {
         BR,
         TLS,
         BRS,
-        ThreeWay_DD = 20, // 0 - D\D
-        ThreeWay_DS,      // 1 - D\S
-        ThreeWay_SS,      // 2 - S\S
-        ThreeWay_RD_BLS,  // 3 - right - D, BL - S
-        ThreeWay_BD_TRS,  // 4 - bottom - D, TR - S
-        ThreeWay_TRD_BRS, // 5 - TR - D, BR - S
-        ThreeWay_BRS_BLD, // 6 - BR - S, BL - D
-        ThreeWay_RS_BD,   // 7 - R - S, B - D
-        ThreeWay_BS_RD,   // 8 - B - S, R - D
+        Mixed_DNND = 20,
+        Mixed_DNNS,
+        Mixed_SNNS,
+        Mixed_NDSD,
+        Mixed_NSDD,
+        Mixed_NDNS,
+        Mixed_NNDS,
+        Mixed_NSDS,
+        Mixed_NDSS,
+        Center       = 49,
+        Special_DDDD = 73,
+        Special_SSSS,
+        Special_DDDS,
+        Special_SSSD,
+        Special_NSSD,
+        Special_NDDS,
+    };
+
+    enum class BorderClass
+    {
+        Invalid,
+        NormalDirt,
+        NormalSand,
+        Mixed,
         Center,
+        Special,
     };
 
     struct Presentation {
@@ -55,12 +71,13 @@ struct LibraryTerrain {
         bool                     defFileSplit = false; // HotA terrain like wstlt077
         bool                     isAnimated   = false;
 
-        int dirtBorderTilesOffset     = -1;
-        int sandBorderTilesOffset     = -1;
-        int sandDirtBorderTilesOffset = -1;
-        int centerTilesOffset         = -1;
-        int centerTilesCount          = -1;
-        int centerTilesClearCount     = -1; // tiles withour rough parts.
+        int dirtBorderTilesOffset    = -1;
+        int sandBorderTilesOffset    = -1;
+        int mixedBorderTilesOffset   = -1;
+        int specialBorderTilesOffset = -1;
+        int centerTilesOffset        = -1;
+        int centerTilesCount         = -1;
+        int centerTilesClearCount    = -1; // tiles withour rough parts.
 
         using BTMap = std::map<BorderType, int>;
         BTMap borderCounts{
@@ -73,18 +90,28 @@ struct LibraryTerrain {
         };
         BTMap borderOffsets;
 
-        BTMap borderThreeWayCounts{
-            { BorderType::ThreeWay_DD, 1 },
-            { BorderType::ThreeWay_DS, 1 },
-            { BorderType::ThreeWay_SS, 1 },
-            { BorderType::ThreeWay_RD_BLS, 1 },
-            { BorderType::ThreeWay_BD_TRS, 1 },
-            { BorderType::ThreeWay_TRD_BRS, 1 },
-            { BorderType::ThreeWay_BRS_BLD, 1 },
-            { BorderType::ThreeWay_RS_BD, 1 },
-            { BorderType::ThreeWay_BS_RD, 1 },
+        BTMap borderMixedCounts{
+            { BorderType::Mixed_DNND, 1 },
+            { BorderType::Mixed_DNNS, 1 },
+            { BorderType::Mixed_SNNS, 1 },
+            { BorderType::Mixed_NDSD, 1 },
+            { BorderType::Mixed_NSDD, 1 },
+            { BorderType::Mixed_NDNS, 1 },
+            { BorderType::Mixed_NNDS, 1 },
+            { BorderType::Mixed_NSDS, 1 },
+            { BorderType::Mixed_NDSS, 1 },
         };
-        BTMap borderThreeWayOffsets;
+        BTMap borderMixedOffsets;
+
+        BTMap borderSpecialCounts{
+            { BorderType::Special_DDDD, 1 },
+            { BorderType::Special_SSSS, 1 },
+            { BorderType::Special_DDDS, 1 },
+            { BorderType::Special_SSSD, 1 },
+            { BorderType::Special_NSSD, 1 },
+            { BorderType::Special_NDDS, 1 },
+        };
+        BTMap borderSpecialOffsets;
 
         bool hasRotations = false;
     };

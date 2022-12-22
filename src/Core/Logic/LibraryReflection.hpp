@@ -131,24 +131,30 @@ ENUM_REFLECTION_STRINGIY(
     Dirt
     )
 
-ENUM_REFLECTION_PAIRED(LibraryTerrain::BorderType,
+ENUM_REFLECTION_STRINGIY(LibraryTerrain::BorderType,
     Invalid,
-    "TL"               ,           TL,
-    "L"                ,           L,
-    "T"                ,           T,
-    "BR"               ,           BR,
-    "TLS"              ,           TLS,
-    "BRS"              ,           BRS,
-    "ThreeWay_DD"      ,           ThreeWay_DD,
-    "ThreeWay_DS"      ,           ThreeWay_DS,
-    "ThreeWay_SS"      ,           ThreeWay_SS,
-    "ThreeWay_RD_BLS"  ,           ThreeWay_RD_BLS,
-    "ThreeWay_BD_TRS"  ,           ThreeWay_BD_TRS,
-    "ThreeWay_TRD_BRS" ,           ThreeWay_TRD_BRS,
-    "ThreeWay_BRS_BLD" ,           ThreeWay_BRS_BLD,
-    "ThreeWay_RS_BD"   ,           ThreeWay_RS_BD,
-    "ThreeWay_BS_RD"   ,           ThreeWay_BS_RD,
-    "Center"           ,           Center
+    TL,
+    L,
+    T,
+    BR,
+    TLS,
+    BRS,
+    Mixed_DNND,
+    Mixed_DNNS,
+    Mixed_SNNS,
+    Mixed_NDSD,
+    Mixed_NSDD,
+    Mixed_NDNS,
+    Mixed_NNDS,
+    Mixed_NSDS,
+    Mixed_NDSS,
+    Center,
+    Special_DDDD,
+    Special_SSSS,
+    Special_DDDS,
+    Special_SSSD,
+    Special_NSSD,
+    Special_NDDS
 )
 
 
@@ -162,11 +168,13 @@ STRUCT_REFLECTION_PAIRED(
     "isAnimated",                  isAnimated,
     "dirtBorderTilesOffset",       dirtBorderTilesOffset,
     "sandBorderTilesOffset",       sandBorderTilesOffset,
-    "sandDirtBorderTilesOffset",   sandDirtBorderTilesOffset,
+    "mixedBorderTilesOffset",      mixedBorderTilesOffset,
+    "specialBorderTilesOffset",    specialBorderTilesOffset,
     "centerTilesOffset",           centerTilesOffset,
     "centerTilesCount",            centerTilesCount,
     "borderCounts",                borderCounts,
-    "borderThreeWayCounts",        borderThreeWayCounts,
+    "borderMixedCounts",           borderMixedCounts,
+    "borderSpecialCounts",         borderSpecialCounts,
     "hasRotations",                hasRotations
 )
 

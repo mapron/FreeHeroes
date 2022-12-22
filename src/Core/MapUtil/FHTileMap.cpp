@@ -18,111 +18,34 @@ namespace FreeHeroes {
 
 namespace {
 
-using BorderType = Core::LibraryTerrain::BorderType;
+using BorderType  = Core::LibraryTerrain::BorderType;
+using BorderClass = Core::LibraryTerrain::BorderClass;
 
 struct TileInfo {
-    Core::LibraryTerrainConstPtr m_t = nullptr;
-    struct {
-        bool di = false; // is Dirt
-        bool sa = false; // is Sand
-        bool wa = false; // is Water
-    } info;              // tile exact terrain info
+    bool S = false;
+    bool D = false;
+    bool N = false;
 
-    struct {
-        bool di = false; // base is dirt
-        bool sa = false; // base is sand
-    } base;              // base  info
+    bool EQ = false; // equal terrain
 
-    struct {
-        struct {
-            bool equ = false; // terrain is equal
-            bool neq = false;
-        } i; // margin terrain difference
-        struct {
-            bool equ = false; // base is equal
-            bool neq = false;
-        } b; // margin base (sand/dirt)
+    bool SD(bool s) const { return s ? S : D; }
 
-        bool dirt_ = false; // dirt border
-        bool sand_ = false; // sand border
-    } m;                    // margin info;
-
-    bool OOB = false;
-
-    bool diff(bool s) const { return s ? m.sand_ : m.dirt_; }
-
-    bool isba(bool s) const { return s ? base.sa : base.di; }
-
-    //bool id = true;  // identical
-    //    bool eq = true;  // somewhat equal
-    //    bool di = false; // dirt border
-    //    bool sa = false; // sand border
-
-    void read(
-        const FHTileMap&             map,
-        const FHPos&                 pos,
-        Core::LibraryTerrainConstPtr dirtTerrain,
-        Core::LibraryTerrainConstPtr sandTerrain,
-        Core::LibraryTerrainConstPtr waterTerrain,
-        const FHTileMap::Tile&       tile)
+    void set(FHTileMap::SubtileType st)
     {
-        m_t     = tile.m_terrain;
-        info.sa = m_t == sandTerrain;
-        info.di = m_t == dirtTerrain;
-        info.wa = m_t == waterTerrain;
-
-        base.di = m_t->tileBase == Core::LibraryTerrain::TileBase::Dirt;
-        base.sa = m_t->tileBase == Core::LibraryTerrain::TileBase::Sand;
-
-        assert(base.di || base.sa);
-    }
-
-    void read(
-        const FHTileMap&             map,
-        const FHPos&                 pos,
-        Core::LibraryTerrainConstPtr dirtTerrain,
-        Core::LibraryTerrainConstPtr sandTerrain,
-        Core::LibraryTerrainConstPtr waterTerrain,
-        int                          dx,
-        int                          dy)
-    {
-        const FHTileMap::Tile& tile = map.getNeighbour(pos, dx, dy);
-
-        OOB = !map.inBounds(pos.m_x + dx, pos.m_y + dy);
-
-        read(map, pos, dirtTerrain, sandTerrain, waterTerrain, tile);
-    }
-
-    void marginFromTile(const TileInfo& XX)
-    {
-        m.i.equ = m_t == XX.m_t;
-        m.i.neq = !m.i.equ;
-
-        m.b.equ = base.di == XX.base.di;
-        m.b.neq = !m.b.equ;
-
-        if (m.i.equ)
-            return;
-
-        if (XX.info.sa)
-            return;
-
-        if (XX.info.di) {
-            m.sand_ = m.b.neq;
-            return;
-        }
-        if (XX.base.sa || base.sa) {
-            m.sand_ = true;
-            return;
-        }
-
-        m.dirt_ = true;
+        S = st == FHTileMap::SubtileType::Sand;
+        D = st == FHTileMap::SubtileType::Dirt;
+        N = st == FHTileMap::SubtileType::Native;
+        assert(st != FHTileMap::SubtileType::Invalid);
     }
 
     char debugChar() const
     {
-        //if (id)
-        //    return '!';
+        if (S)
+            return 'S';
+        if (D)
+            return 'D';
+        if (N)
+            return 'N';
         return '?';
     }
 };
@@ -134,28 +57,14 @@ struct TileNeightbours {
      *      BL  BC  BR
      *          B2
      */
-    TileInfo TL,
-        TC,
-        TR,
-        CL,
-        XX,
-        CR,
-        BL,
-        BC,
-        BR;
+    TileInfo TL, TR, BL, BR;
 
     TileInfo T2, L2, R2, B2;
 
+    bool m_coastal = false;
+
     bool m_flippedHor  = false;
     bool m_flippedVert = false;
-
-    std::string toDebugString() const
-    {
-        return std::string()
-               + TL.debugChar() + TC.debugChar() + TR.debugChar() + ' '
-               + L2.debugChar() + CL.debugChar() + '_' + CR.debugChar() + R2.debugChar() + ' '
-               + BL.debugChar() + BC.debugChar() + BR.debugChar();
-    }
 
     void read(Core::LibraryTerrainConstPtr dirtTerrain,
               Core::LibraryTerrainConstPtr sandTerrain,
@@ -164,51 +73,47 @@ struct TileNeightbours {
               const FHTileMap::Tile&       tileXX,
               const FHPos&                 pos)
     {
-        TL.read(map, pos, dirtTerrain, sandTerrain, waterTerrain, -1, -1);
-        TC.read(map, pos, dirtTerrain, sandTerrain, waterTerrain, +0, -1);
-        TR.read(map, pos, dirtTerrain, sandTerrain, waterTerrain, +1, -1);
-        CL.read(map, pos, dirtTerrain, sandTerrain, waterTerrain, -1, +0);
-        XX.read(map, pos, dirtTerrain, sandTerrain, waterTerrain, tileXX);
-        CR.read(map, pos, dirtTerrain, sandTerrain, waterTerrain, +1, +0);
-        BL.read(map, pos, dirtTerrain, sandTerrain, waterTerrain, -1, +1);
-        BC.read(map, pos, dirtTerrain, sandTerrain, waterTerrain, +0, +1);
-        BR.read(map, pos, dirtTerrain, sandTerrain, waterTerrain, +1, +1);
+        TL.set(tileXX.TL);
+        TR.set(tileXX.TR);
+        BL.set(tileXX.BL);
+        BR.set(tileXX.BR);
 
-        T2.read(map, pos, dirtTerrain, sandTerrain, waterTerrain, +0, -2);
-        L2.read(map, pos, dirtTerrain, sandTerrain, waterTerrain, -2, +0);
-        R2.read(map, pos, dirtTerrain, sandTerrain, waterTerrain, +2, +0);
-        B2.read(map, pos, dirtTerrain, sandTerrain, waterTerrain, +0, +2);
+        auto* terrTL = map.getNeighbour(pos, -1, -1).m_terrain;
+        auto* terrTC = map.getNeighbour(pos, +0, -1).m_terrain;
+        auto* terrTR = map.getNeighbour(pos, +1, -1).m_terrain;
+        auto* terrCL = map.getNeighbour(pos, -1, +0).m_terrain;
+        auto* terrCR = map.getNeighbour(pos, +1, +0).m_terrain;
+        auto* terrBL = map.getNeighbour(pos, -1, +1).m_terrain;
+        auto* terrBC = map.getNeighbour(pos, +0, +1).m_terrain;
+        auto* terrBR = map.getNeighbour(pos, +1, +1).m_terrain;
 
-        TL.marginFromTile(XX);
-        TC.marginFromTile(XX);
-        TR.marginFromTile(XX);
-        CL.marginFromTile(XX);
-        XX.marginFromTile(XX);
-        CR.marginFromTile(XX);
-        BL.marginFromTile(XX);
-        BC.marginFromTile(XX);
-        BR.marginFromTile(XX);
+        auto* terrT2 = map.getNeighbour(pos, +0, -2).m_terrain;
+        auto* terrL2 = map.getNeighbour(pos, -2, +0).m_terrain;
+        auto* terrR2 = map.getNeighbour(pos, +2, +0).m_terrain;
+        auto* terrB2 = map.getNeighbour(pos, +0, +2).m_terrain;
 
-        T2.marginFromTile(XX);
-        L2.marginFromTile(XX);
-        R2.marginFromTile(XX);
-        B2.marginFromTile(XX);
-    }
+        TL.EQ = terrTL == tileXX.m_terrain;
+        TR.EQ = terrTR == tileXX.m_terrain;
+        BL.EQ = terrBL == tileXX.m_terrain;
+        BR.EQ = terrBR == tileXX.m_terrain;
 
-    bool isCoastal() const
-    {
-        if (XX.info.wa)
-            return false;
+        T2.EQ = terrT2 == tileXX.m_terrain;
+        L2.EQ = terrL2 == tileXX.m_terrain;
+        R2.EQ = terrR2 == tileXX.m_terrain;
+        B2.EQ = terrB2 == tileXX.m_terrain;
 
-        return false
-               || TL.info.wa
-               || TC.info.wa
-               || TR.info.wa
-               || CL.info.wa
-               || CR.info.wa
-               || BL.info.wa
-               || BC.info.wa
-               || BR.info.wa;
+        {
+            const bool waterNeighbour = false
+                                        || terrTL == waterTerrain
+                                        || terrTC == waterTerrain
+                                        || terrTR == waterTerrain
+                                        || terrCL == waterTerrain
+                                        || terrCR == waterTerrain
+                                        || terrBL == waterTerrain
+                                        || terrBC == waterTerrain
+                                        || terrBR == waterTerrain;
+            m_coastal = tileXX.m_terrain != waterTerrain && waterNeighbour;
+        }
     }
 
     TileNeightbours flipped(bool vertical, bool horizontal)
@@ -218,13 +123,8 @@ struct TileNeightbours {
         if (vertical && horizontal)
             return TileNeightbours{
                 .TL            = this->BR,
-                .TC            = this->BC,
                 .TR            = this->BL,
-                .CL            = this->CR,
-                .XX            = this->XX,
-                .CR            = this->CL,
                 .BL            = this->TR,
-                .BC            = this->TC,
                 .BR            = this->TL,
                 .T2            = this->B2,
                 .L2            = this->R2,
@@ -236,13 +136,8 @@ struct TileNeightbours {
         if (vertical)
             return TileNeightbours{
                 .TL            = this->BL,
-                .TC            = this->BC,
                 .TR            = this->BR,
-                .CL            = this->CL,
-                .XX            = this->XX,
-                .CR            = this->CR,
                 .BL            = this->TL,
-                .BC            = this->TC,
                 .BR            = this->TR,
                 .T2            = this->B2,
                 .L2            = this->L2,
@@ -254,13 +149,8 @@ struct TileNeightbours {
         if (horizontal)
             return TileNeightbours{
                 .TL            = this->TR,
-                .TC            = this->TC,
                 .TR            = this->TL,
-                .CL            = this->CR,
-                .XX            = this->XX,
-                .CR            = this->CL,
                 .BL            = this->BR,
-                .BC            = this->BC,
                 .BR            = this->BL,
                 .T2            = this->T2,
                 .L2            = this->R2,
@@ -271,273 +161,287 @@ struct TileNeightbours {
             };
         return {};
     }
+
+    std::string debugString() const
+    {
+        return std::string() + TL.debugChar() + TR.debugChar() + BL.debugChar() + BR.debugChar();
+    }
 };
 
 struct PatternMatcher {
-    BorderType m_type = BorderType::Invalid;
+    BorderType  m_type  = BorderType::Invalid;
+    BorderClass m_class = BorderClass::Invalid;
 
     bool m_doFlipHor  = true;
     bool m_doFlipVert = true;
-
-    bool m_mixed  = false;
-    bool m_center = false;
 
     bool m_useOnDirt = true;
 
     std::function<bool(const TileNeightbours& t, bool sand)> m_f;
 };
 
-static constexpr const bool I__________I = true;
-
 const std::vector<PatternMatcher> g_matchers{
-    PatternMatcher{
-        .m_type       = BorderType::Center,
-        .m_doFlipHor  = false,
-        .m_doFlipVert = false,
-        .m_center     = true,
-        .m_f          = [](const TileNeightbours& t, bool) {
-            return (true
-                    && t.TL.m.i.equ && t.TC.m.i.equ && t.TR.m.i.equ
-                    && t.CL.m.i.equ && t.XX.m.i.equ && t.CR.m.i.equ
-                    && t.BL.m.i.equ && t.BC.m.i.equ && t.BR.m.i.equ)
-                   || (true
-                       && t.TL.base.di && t.TC.base.di && t.TR.base.di
-                       && t.CL.base.di && t.XX.info.di && t.CR.base.di
-                       && t.BL.base.di && t.BC.base.di && t.BR.base.di);
-        } },
-
-    // clang-format off
-    PatternMatcher{
-        .m_type       = BorderType::ThreeWay_DD,
-        .m_doFlipVert = false,
-        .m_mixed      = true,
-        .m_useOnDirt  = false,
-        .m_f          = [](const TileNeightbours& t, bool) {
-            return true
-                   && t.TL.m.dirt_ && t.TC.m.i.equ && t.TR.m.i.equ
-                   && t.CL.m.i.equ && t.XX.m.i.equ && t.CR.m.i.equ
-                   && t.BL.m.i.equ && t.BC.m.i.equ && t.BR.m.dirt_;
-        } 
-    },
-    PatternMatcher{
-        .m_type       = BorderType::ThreeWay_DS,
-        .m_mixed      = true,
-        .m_useOnDirt  = false,
-        .m_f          = [](const TileNeightbours& t, bool) {
-            return true
-                   && t.TL.m.dirt_ && t.TC.m.i.equ && t.TR.m.i.equ
-                   && t.CL.m.i.equ && t.XX.m.i.equ && t.CR.m.i.equ
-                   && t.BL.m.i.equ && t.BC.m.i.equ && t.BR.m.sand_;
-        } 
-    },
-    // clang-format on
-    PatternMatcher{
-        .m_type      = BorderType::ThreeWay_SS,
-        .m_doFlipHor = false,
-        .m_mixed     = true,
-        .m_f         = [](const TileNeightbours& t, bool) {
-            return true
-                   && t.TL.m.sand_ && t.TC.m.i.equ && t.TR.m.i.equ
-                   && t.CL.m.i.equ && t.XX.m.i.equ && t.CR.m.i.equ
-                   && t.BL.m.i.equ && t.BC.m.i.equ && t.BR.m.sand_;
-        },
-    },
-    PatternMatcher{
-        .m_type      = BorderType::ThreeWay_RD_BLS,
-        .m_mixed     = true,
-        .m_useOnDirt = false,
-        .m_f         = [](const TileNeightbours& t, bool) {
-            const bool precond = t.BC.m.dirt_ || t.BC.m.i.equ;
-            return precond
-                   && t.TL.m.i.equ && t.TC.m.i.equ && t.TL.base.di
-                   && t.CL.m.i.equ && t.XX.m.i.equ && t.CR.m.dirt_
-                   && t.BL.m.sand_ && I__________I && I__________I;
-        },
-    },
-    PatternMatcher{
-        .m_type      = BorderType::ThreeWay_BD_TRS,
-        .m_mixed     = true,
-        .m_useOnDirt = false,
-        .m_f         = [](const TileNeightbours& t, bool) {
-            const bool precond = t.CR.m.dirt_ || t.CR.m.i.equ;
-            return precond
-                   && t.TL.m.i.equ && t.TC.m.i.equ && t.TR.m.sand_
-                   && t.CL.m.i.equ && t.XX.m.i.equ && I__________I
-                   && t.BL.base.di && t.BC.m.dirt_ && I__________I;
-        },
-    },
-    PatternMatcher{
-        .m_type      = BorderType::ThreeWay_TRD_BRS,
-        .m_mixed     = true,
-        .m_useOnDirt = false,
-        .m_f         = [](const TileNeightbours& t, bool) {
-            return true
-                   && t.TL.m.i.equ && t.TC.m.i.equ && t.TR.m.dirt_
-                   && t.CL.m.i.equ && t.XX.m.i.equ && t.CR.m.dirt_
-                   && t.BL.m.i.equ && t.BC.m.i.equ && t.BR.m.sand_;
-        },
-    },
-    PatternMatcher{
-        .m_type      = BorderType::ThreeWay_BRS_BLD,
-        .m_mixed     = true,
-        .m_useOnDirt = false,
-        .m_f         = [](const TileNeightbours& t, bool) {
-            return true
-                   && t.TL.m.i.equ && t.TC.m.i.equ && t.TR.m.i.equ
-                   && t.CL.m.i.equ && t.XX.m.i.equ && t.CR.m.i.equ
-                   && t.BL.m.dirt_ && t.BC.m.dirt_ && t.BR.m.sand_;
-        },
-    },
-    PatternMatcher{
-        .m_type      = BorderType::ThreeWay_RS_BD,
-        .m_mixed     = true,
-        .m_useOnDirt = false,
-        .m_f         = [](const TileNeightbours& t, bool) {
-            const bool precond = t.BC.m.dirt_ || (t.BC.m.i.equ);
-            return precond
-                   && t.TL.m.i.equ && t.TC.m.i.equ && I__________I
-                   && t.CL.m.i.equ && t.XX.m.i.equ && t.CR.m.sand_
-                   && t.BL.m.dirt_ && I__________I && I__________I;
-        },
-    },
-    PatternMatcher{
-        .m_type      = BorderType::ThreeWay_BS_RD,
-        .m_mixed     = true,
-        .m_useOnDirt = false,
-        .m_f         = [](const TileNeightbours& t, bool) {
-            const bool precond = t.CR.m.dirt_ || (t.CR.m.i.equ);
-            return precond
-                   && t.TL.m.i.equ && t.TC.m.i.equ && t.TR.m.dirt_
-                   && t.CL.m.i.equ && t.XX.m.i.equ && I__________I
-                   && I__________I && t.BC.m.sand_ && I__________I;
-        },
-    },
 
     PatternMatcher{
-        .m_type = BorderType::TL,
-        .m_f    = [](const TileNeightbours& t, bool s) {
-            const bool sandCond      = s && (t.TR.diff(s) || t.TR.m.dirt_) && (t.BL.diff(s) || t.BL.m.dirt_);
-            const bool irregularCond = (t.CL.diff(s) && t.TC.m.i.equ) || (t.TC.diff(s) && t.CL.m.i.equ);
-            return (true
-                    && t.TL.diff(s) && t.TC.diff(s) && t.TR.diff(s)
-                    && t.CL.diff(s) && t.XX.m.i.equ && t.CR.m.i.equ
-                    && t.BL.diff(s) && t.BC.m.i.equ && t.BR.m.i.equ)
-                   || (irregularCond
-                       && t.TL.m.i.equ && I__________I && t.TR.diff(s)
-                       && I__________I && t.XX.m.i.equ && t.CR.m.i.equ
-                       && t.BL.diff(s) && t.BC.m.i.equ && t.BR.m.i.equ)
-                   || (sandCond
-                       && I__________I && t.TC.diff(s) && I__________I
-                       && t.CL.diff(s) && t.XX.m.i.equ && t.CR.m.i.equ
-                       && I__________I && t.BC.m.i.equ && t.BR.m.i.equ);
+        .m_type  = BorderType::TL,
+        .m_class = BorderClass::NormalDirt,
+        .m_f     = [](const TileNeightbours& t, bool s) {
+            return (!t.BL.EQ && !t.TR.EQ
+                    && t.TL.SD(s) && t.TR.SD(s)
+                    && t.BL.SD(s) && t.BR.N);
         },
     },
     PatternMatcher{
-        .m_type = BorderType::TLS,
-        .m_f    = [](const TileNeightbours& t, bool s) {
-            bool precond = false;
-            if (t.XX.base.sa)
-                precond = t.TR.m.i.equ || t.BL.m.i.equ;
-            else if (s)
-                precond = t.TR.m.i.equ || t.BL.m.i.equ;
-            else
-                precond = (t.TR.m.i.equ && t.BL.m.sand_ == s) || (t.BL.m.i.equ && t.TR.m.sand_ == s);
-
-            return (precond)
-                   && (true
-                       && t.TL.diff(s) && t.TC.diff(s) && I__________I
-                       && t.CL.diff(s) && t.XX.m.i.equ && t.CR.m.i.equ
-                       && I__________I && t.BC.m.i.equ && t.BR.m.i.equ);
+        .m_type  = BorderType::TLS,
+        .m_class = BorderClass::NormalDirt,
+        .m_f     = [](const TileNeightbours& t, bool s) {
+            return ((t.BL.EQ || t.TR.EQ)
+                    && t.TL.SD(s) && t.TR.SD(s)
+                    && t.BL.SD(s) && t.BR.N);
         },
     },
 
     PatternMatcher{
         .m_type       = BorderType::L,
+        .m_class      = BorderClass::NormalDirt,
         .m_doFlipVert = false,
         .m_f          = [](const TileNeightbours& t, bool s) {
-            const bool precond = s || (t.TL.base.sa == t.CL.base.sa && t.BL.base.sa == t.CL.base.sa);
-            return (precond
-                    && I__________I && t.TC.m.i.equ && t.TR.m.i.equ
-                    && t.CL.diff(s) && t.XX.m.i.equ && t.CR.m.i.equ
-                    && I__________I && t.BC.m.i.equ && t.BR.m.i.equ)
-                   || (s
-                       && I__________I && t.TC.base.di && t.TR.base.di
-                       && t.CL.diff(s) && t.XX.info.di && t.CR.base.di
-                       && I__________I && t.BC.base.di && t.BR.base.di);
+            return true
+                   && t.TL.SD(s) && t.TR.N
+                   && t.BL.SD(s) && t.BR.N;
         },
     },
 
     PatternMatcher{
         .m_type      = BorderType::T,
+        .m_class     = BorderClass::NormalDirt,
         .m_doFlipHor = false,
         .m_f         = [](const TileNeightbours& t, bool s) {
-            const bool precond = s || (t.TL.base.sa == t.TC.base.sa && t.TR.base.sa == t.TC.base.sa);
-            return (precond
-                    && I__________I && t.TC.diff(s) && I__________I
-                    && t.CL.m.i.equ && t.XX.m.i.equ && t.CR.m.i.equ
-                    && t.BL.m.i.equ && t.BC.m.i.equ && t.BR.m.i.equ)
-                   || (s
-                       && I__________I && t.TC.diff(s) && I__________I
-                       && t.CL.base.di && t.XX.info.di && t.CR.base.di
-                       && t.BL.base.di && t.BC.base.di && t.BR.base.di);
+            return true
+                   && t.TL.SD(s) && t.TR.SD(s)
+                   && t.BL.N && t.BR.N;
         },
     },
 
     PatternMatcher{
-        .m_type = BorderType::BR,
-        .m_f    = [](const TileNeightbours& t, bool s) {
-            return (true
-                    && t.TL.m.i.equ && t.TC.m.i.equ && t.TR.m.i.equ
-                    && t.CL.m.i.equ && t.XX.m.i.equ && t.CR.m.i.equ && t.R2.m.i.equ
-                    && t.BL.m.i.equ && t.BC.m.i.equ && t.BR.diff(s)
-                    && I__________I && t.B2.m.i.equ)
-                   || (s
-                       && t.TL.base.di && t.TC.base.di && t.TR.base.di
-                       && t.CL.base.di && t.XX.m.i.equ && t.CR.m.i.equ && t.R2.m.i.equ
-                       && t.BL.base.di && t.BC.m.i.equ && t.BR.diff(s)
-                       && I__________I && t.B2.m.i.equ);
+        .m_type  = BorderType::BR,
+        .m_class = BorderClass::NormalDirt,
+        .m_f     = [](const TileNeightbours& t, bool s) {
+            return true
+                   && t.TL.N && t.TR.N
+                   && t.BL.N && t.BR.SD(s)
+                   && t.R2.EQ && t.B2.EQ;
         },
     },
     PatternMatcher{
-        .m_type = BorderType::BRS,
-        .m_f    = [](const TileNeightbours& t, bool s) {
-            //if (1)
-            //    return false;
-            return (true
-                    && t.TL.m.i.equ && t.TC.m.i.equ && t.TR.m.i.equ
-                    && t.CL.m.i.equ && t.XX.m.i.equ && t.CR.m.i.equ && (t.R2.m.i.neq && !t.R2.OOB)
-                    && t.BL.m.i.equ && t.BC.m.i.equ && t.BR.diff(s)
-                    && I__________I && I__________I)
-                   || (true
-                       && t.TL.m.i.equ && t.TC.m.i.equ && t.TR.m.i.equ
-                       && t.CL.m.i.equ && t.XX.m.i.equ && t.CR.m.i.equ && I__________I
-                       && t.BL.m.i.equ && t.BC.m.i.equ && t.BR.diff(s)
-                       && I__________I && (t.B2.m.i.neq && !t.B2.OOB))
-                   || (s
-                       && t.TL.base.di && t.TC.base.di && t.TR.base.di
-                       && t.CL.base.di && t.XX.info.di && t.CR.base.di && I__________I
-                       && t.BL.base.di && t.BC.base.di && t.BR.diff(s)
-                       && I__________I && (t.B2.m.i.neq && !t.B2.OOB))
-                   || (s
-                       && t.TL.base.di && t.TC.base.di && t.TR.base.di
-                       && t.CL.base.di && t.XX.info.di && t.CR.base.di && (t.R2.m.i.neq && !t.R2.OOB)
-                       && t.BL.base.di && t.BC.base.di && t.BR.diff(s)
-                       && I__________I && I__________I);
+        .m_type  = BorderType::BRS,
+        .m_class = BorderClass::NormalDirt,
+        .m_f     = [](const TileNeightbours& t, bool s) {
+            return true
+                   && t.TL.N && t.TR.N
+                   && t.BL.N && t.BR.SD(s)
+                   && (!t.R2.EQ || !t.B2.EQ);
+        },
+    },
+    // clang-format off
+    PatternMatcher{
+        .m_type       = BorderType::Mixed_DNND,
+        .m_class      = BorderClass::Mixed,
+        .m_doFlipVert = false,
+        .m_useOnDirt  = false,
+        .m_f          = [](const TileNeightbours& t, bool) {
+            return true
+                   && t.TL.D && t.TR.N
+                   && t.BL.N && t.BR.D;
+        } 
+    },
+    PatternMatcher{
+        .m_type       = BorderType::Mixed_DNNS,
+        .m_class      = BorderClass::Mixed,
+        .m_useOnDirt  = false,
+        .m_f          = [](const TileNeightbours& t, bool) {
+            return true
+                   && t.TL.D && t.TR.N
+                   && t.BL.N && t.BR.S;
+        } 
+    },
+    // clang-format on
+    PatternMatcher{
+        .m_type      = BorderType::Mixed_SNNS,
+        .m_class     = BorderClass::Mixed,
+        .m_doFlipHor = false,
+        .m_f         = [](const TileNeightbours& t, bool) {
+            return true
+                   && t.TL.S && t.TR.N
+                   && t.BL.N && t.BR.S;
         },
     },
 
+    PatternMatcher{
+        .m_type      = BorderType::Mixed_NDSD,
+        .m_class     = BorderClass::Mixed,
+        .m_useOnDirt = false,
+        .m_f         = [](const TileNeightbours& t, bool) {
+            return true
+                   && t.TL.N && t.TR.D
+                   && t.BL.S && t.BR.D;
+        },
+    },
+    PatternMatcher{
+        .m_type      = BorderType::Mixed_NSDD,
+        .m_class     = BorderClass::Mixed,
+        .m_useOnDirt = false,
+        .m_f         = [](const TileNeightbours& t, bool) {
+            return true
+                   && t.TL.N && t.TR.S
+                   && t.BL.D && t.BR.D;
+        },
+    },
+    PatternMatcher{
+        .m_type      = BorderType::Mixed_NDNS,
+        .m_class     = BorderClass::Mixed,
+        .m_useOnDirt = false,
+        .m_f         = [](const TileNeightbours& t, bool) {
+            return true
+                   && t.TL.N && t.TR.D
+                   && t.BL.N && t.BR.S;
+        },
+    },
+    PatternMatcher{
+        .m_type      = BorderType::Mixed_NNDS,
+        .m_class     = BorderClass::Mixed,
+        .m_useOnDirt = false,
+        .m_f         = [](const TileNeightbours& t, bool) {
+            return true
+                   && t.TL.N && t.TR.N
+                   && t.BL.D && t.BR.S;
+        },
+    },
+    PatternMatcher{
+        .m_type      = BorderType::Mixed_NSDS,
+        .m_class     = BorderClass::Mixed,
+        .m_useOnDirt = false,
+        .m_f         = [](const TileNeightbours& t, bool) {
+            return true
+                   && t.TL.N && t.TR.S
+                   && t.BL.D && t.BR.S;
+        },
+    },
+    PatternMatcher{
+        .m_type      = BorderType::Mixed_NDSS,
+        .m_class     = BorderClass::Mixed,
+        .m_useOnDirt = false,
+        .m_f         = [](const TileNeightbours& t, bool) {
+            return true
+                   && t.TL.N && t.TR.D
+                   && t.BL.S && t.BR.S;
+        },
+    },
+    // clang-format off
+    PatternMatcher{ 
+        .m_type       = BorderType::Center,
+        .m_class      = BorderClass::Center,
+        .m_doFlipHor  = false,
+        .m_doFlipVert = false,
+        .m_f = [](const TileNeightbours& t, bool) {
+               return true
+                      && t.TL.N && t.TR.N
+                      && t.BL.N && t.BR.N;
+           } 
+    },
+    // clang-format on
+    PatternMatcher{
+        .m_type       = BorderType::Special_DDDD,
+        .m_class      = BorderClass::Special,
+        .m_doFlipHor  = false,
+        .m_doFlipVert = false,
+        .m_useOnDirt  = false,
+        .m_f          = [](const TileNeightbours& t, bool) {
+            return true
+                   && t.TL.D && t.TR.D
+                   && t.BL.D && t.BR.D;
+        },
+    },
+    PatternMatcher{
+        .m_type       = BorderType::Special_SSSS,
+        .m_class      = BorderClass::Special,
+        .m_doFlipHor  = false,
+        .m_doFlipVert = false,
+        .m_useOnDirt  = true,
+        .m_f          = [](const TileNeightbours& t, bool) {
+            return true
+                   && t.TL.S && t.TR.S
+                   && t.BL.S && t.BR.S;
+        },
+    },
+    PatternMatcher{
+        .m_type      = BorderType::Special_DDDS,
+        .m_class     = BorderClass::Special,
+        .m_useOnDirt = false,
+        .m_f         = [](const TileNeightbours& t, bool) {
+            return true
+                   && t.TL.D && t.TR.D
+                   && t.BL.D && t.BR.S;
+        },
+    },
+    PatternMatcher{
+        .m_type      = BorderType::Special_SSSD,
+        .m_class     = BorderClass::Special,
+        .m_useOnDirt = false,
+        .m_f         = [](const TileNeightbours& t, bool) {
+            return true
+                   && t.TL.S && t.TR.S
+                   && t.BL.S && t.BR.D;
+        },
+    },
+    PatternMatcher{
+        .m_type      = BorderType::Special_NSSD,
+        .m_class     = BorderClass::Special,
+        .m_useOnDirt = false,
+        .m_f         = [](const TileNeightbours& t, bool) {
+            return true
+                   && t.TL.N && t.TR.S
+                   && t.BL.S && t.BR.D;
+        },
+    },
+    PatternMatcher{
+        .m_type      = BorderType::Special_NDDS,
+        .m_class     = BorderClass::Special,
+        .m_useOnDirt = false,
+        .m_f         = [](const TileNeightbours& t, bool) {
+            return true
+                   && t.TL.N && t.TR.D
+                   && t.BL.D && t.BR.S;
+        },
+    },
 };
+}
+
+bool FHTileMap::Tile::setViewBorderSpecial(Core::LibraryTerrain::BorderType borderType)
+{
+    auto& pp = m_terrain->presentationParams;
+
+    if (pp.specialBorderTilesOffset < 0)
+        return setViewCenter();
+
+    m_tileOffset = pp.specialBorderTilesOffset + pp.borderSpecialOffsets.at(borderType);
+    m_tileCount  = pp.borderSpecialCounts.at(borderType);
+    if (borderType == BorderType::Special_SSSS) {
+        m_flipHor = true; // no sense. It just how it works for this tile. It's pretty symmetrical.
+    }
+    updateMinMax();
+    return true;
 }
 
 bool FHTileMap::Tile::setViewBorderMixed(Core::LibraryTerrain::BorderType borderType)
 {
     auto& pp = m_terrain->presentationParams;
 
-    if (pp.sandDirtBorderTilesOffset < 0)
+    if (pp.mixedBorderTilesOffset < 0)
         return setViewCenter();
 
-    m_tileOffset = pp.sandDirtBorderTilesOffset + pp.borderThreeWayOffsets.at(borderType);
-    m_tileCount  = pp.borderThreeWayCounts.at(borderType);
+    m_tileOffset = pp.mixedBorderTilesOffset + pp.borderMixedOffsets.at(borderType);
+    m_tileCount  = pp.borderMixedCounts.at(borderType);
     updateMinMax();
     return true;
 }
@@ -584,6 +488,26 @@ bool FHTileMap::Tile::setViewCenter()
     return true;
 }
 
+bool FHTileMap::Tile::setView(Core::LibraryTerrain::BorderClass bc, Core::LibraryTerrain::BorderType borderType)
+{
+    switch (bc) {
+        case Core::LibraryTerrain::BorderClass::NormalDirt:
+            return setViewBorderSandOrDirt(borderType, false);
+        case Core::LibraryTerrain::BorderClass::NormalSand:
+            return setViewBorderSandOrDirt(borderType, true);
+        case Core::LibraryTerrain::BorderClass::Mixed:
+            return setViewBorderMixed(borderType);
+        case Core::LibraryTerrain::BorderClass::Center:
+            return setViewCenter();
+        case Core::LibraryTerrain::BorderClass::Special:
+            return setViewBorderSpecial(borderType);
+        case Core::LibraryTerrain::BorderClass::Invalid:
+        default:
+            assert(0);
+            return false;
+    }
+}
+
 void FHTileMap::Tile::updateMinMax()
 {
     m_viewMin = static_cast<uint8_t>(m_tileOffset);
@@ -596,81 +520,153 @@ void FHTileMap::correctTerrainTypes(Core::LibraryTerrainConstPtr dirtTerrain,
                                     Core::LibraryTerrainConstPtr waterTerrain)
 {
     //std::ofstream ofs("E:/debug.txt");
-    for (int z = 0; z < m_depth; ++z) {
-        //ofs << "\n\n";
-        for (int y = 0; y < m_height; ++y) {
-            //ofs << "\n";
-            for (int x = 0; x < m_width; ++x) {
-                const FHPos pos{ x, y, z };
-                auto&       XX = get(pos);
+    //int           row = 0;
 
-                TileNeightbours tilen;
-                tilen.read(dirtTerrain,
-                           sandTerrain,
-                           waterTerrain,
-                           *this,
-                           XX,
-                           pos);
-                //ofs << t.toDebugString() << '\t';
+    eachPos([this](const FHPos& pos) {
+        FHTileMap::Tile& XX = get(pos);
+        XX.TL               = SubtileType::Invalid;
+        XX.TR               = SubtileType::Invalid;
+        XX.BL               = SubtileType::Invalid;
+        XX.BR               = SubtileType::Invalid;
+    });
 
-                XX.m_coastal = tilen.isCoastal();
-
-                if (XX.m_terrain == sandTerrain) {
-                    XX.setViewCenter();
-                    continue;
-                }
-
-                std::array<TileNeightbours, 4> flipConfigs{
-                    { tilen, tilen.flipped(true, false), tilen.flipped(false, true), tilen.flipped(true, true) }
-                };
-
-                const bool isCorrected = [&flipConfigs, &XX, x, y, z]() {
-                    std::vector<int> matchedBts;
-                    for (const TileNeightbours& t : flipConfigs) {
-                        for (const auto& matcher : g_matchers) {
-                            if (!matcher.m_doFlipHor && t.m_flippedHor)
-                                continue;
-                            if (!matcher.m_doFlipVert && t.m_flippedVert)
-                                continue;
-                            if (t.XX.info.di && !matcher.m_useOnDirt) {
-                                continue;
-                            }
-
-                            if (matcher.m_f(t, false)) {
-                                XX.m_flipHor  = t.m_flippedHor;
-                                XX.m_flipVert = t.m_flippedVert;
-                                if (matcher.m_center)
-                                    XX.setViewCenter();
-                                else if (matcher.m_mixed)
-                                    XX.setViewBorderMixed(matcher.m_type);
-                                else
-                                    XX.setViewBorderSandOrDirt(matcher.m_type, false);
-                                matchedBts.push_back(static_cast<int>(matcher.m_type));
-                            }
-                            if (!matcher.m_mixed && !matcher.m_center && matcher.m_f(t, true)) {
-                                XX.m_flipHor  = t.m_flippedHor;
-                                XX.m_flipVert = t.m_flippedVert;
-                                XX.setViewBorderSandOrDirt(matcher.m_type, true);
-                                matchedBts.push_back(static_cast<int>(matcher.m_type));
-                            }
-                        }
-                    }
-                    if (matchedBts.size() == 0) {
-                        XX.setViewCenter();
-                        Logger(Logger::Warning) << "failed to detect pattern at (" << x << ',' << y << ',' << int(z) << ")";
-                        return false;
-                    }
-                    if (matchedBts.size() > 1) {
-                        Logger(Logger::Warning) << "correctTerrainTypes: found [" << matchedBts.size() << "] patterns at (" << x << ',' << y << ',' << int(z) << "): " << matchedBts;
-                    }
-
-                    return true;
-                }();
-                if (!isCorrected)
-                    continue;
+    eachPos([this,
+             dirtTerrain,
+             sandTerrain](const FHPos& pos) {
+        FHTileMap::Tile& XX     = get(pos);
+        auto             makest = [this,
+                       dirtTerrain,
+                       sandTerrain](const FHPos&     pos,
+                                    FHTileMap::Tile& tileXX,
+                                    SubtileType&     sub,
+                                    int              dx,
+                                    int              dy) {
+            // fo sand, it contains only 4 native 'sand' subtiles.
+            if (tileXX.m_terrain == sandTerrain) {
+                sub = SubtileType::Native;
+                return;
             }
+
+            const FHTileMap::Tile& tileDX  = getNeighbour(pos, dx, 0);
+            const FHTileMap::Tile& tileDY  = getNeighbour(pos, 0, dy);
+            const FHTileMap::Tile& tileDXY = getNeighbour(pos, dx, dy);
+
+            const bool eqDX  = tileDX.m_terrain == tileXX.m_terrain;
+            const bool eqDY  = tileDY.m_terrain == tileXX.m_terrain;
+            const bool eqDXY = tileDXY.m_terrain == tileXX.m_terrain;
+
+            const bool allEq = eqDX && eqDY && eqDXY;
+            if (allEq) {
+                sub = SubtileType::Native;
+                return;
+            }
+
+            const bool sandDX  = tileDX.m_terrain->tileBase == Core::LibraryTerrain::TileBase::Sand;
+            const bool sandDY  = tileDY.m_terrain->tileBase == Core::LibraryTerrain::TileBase::Sand;
+            const bool sandDXY = tileDXY.m_terrain->tileBase == Core::LibraryTerrain::TileBase::Sand;
+
+            const bool anySand = sandDX || sandDY || sandDXY;
+            if (anySand) {
+                sub = SubtileType::Sand;
+                return;
+            }
+            if (tileXX.m_terrain->tileBase == Core::LibraryTerrain::TileBase::Sand) {
+                sub = SubtileType::Sand;
+                return;
+            }
+
+            // dirt can contain mix of native 'dirt' and sand tiles.
+            if (tileXX.m_terrain == dirtTerrain) {
+                sub = SubtileType::Native;
+                return;
+            }
+            sub = SubtileType::Dirt;
+        };
+        makest(pos, XX, XX.TL, -1, -1);
+        makest(pos, XX, XX.TR, +1, -1);
+        makest(pos, XX, XX.BL, -1, +1);
+        makest(pos, XX, XX.BR, +1, +1);
+    });
+
+    eachPos([this](const FHPos& pos) {
+        FHTileMap::Tile& XX = get(pos);
+
+        assert(XX.TL != SubtileType::Invalid);
+        assert(XX.TR != SubtileType::Invalid);
+        assert(XX.BL != SubtileType::Invalid);
+        assert(XX.BR != SubtileType::Invalid);
+    });
+
+    eachPos([this,
+             dirtTerrain,
+             sandTerrain,
+             waterTerrain](const FHPos& pos) {
+        auto& XX = get(pos);
+
+        TileNeightbours tilen;
+        tilen.read(dirtTerrain,
+                   sandTerrain,
+                   waterTerrain,
+                   *this,
+                   XX,
+                   pos);
+        XX.m_coastal = tilen.m_coastal;
+
+        /*if (1) {
+            if (row != pos.m_y)
+                ofs << '\n';
+
+            row = pos.m_y;
+            ofs << tilen.debugString() << '\t';
+        }*/
+
+        if (XX.m_terrain == sandTerrain) {
+            XX.setViewCenter();
+            return;
         }
-    }
+
+        std::array<TileNeightbours, 4> flipConfigs{
+            { tilen, tilen.flipped(true, false), tilen.flipped(false, true), tilen.flipped(true, true) }
+        };
+
+        [[maybe_unused]] const bool isCorrected = [&flipConfigs, &XX, dirtTerrain, pos]() {
+            std::vector<int> matchedBts;
+            for (const TileNeightbours& t : flipConfigs) {
+                for (const auto& matcher : g_matchers) {
+                    if (!matcher.m_doFlipHor && t.m_flippedHor)
+                        continue;
+                    if (!matcher.m_doFlipVert && t.m_flippedVert)
+                        continue;
+                    if (XX.m_terrain == dirtTerrain && !matcher.m_useOnDirt) {
+                        continue;
+                    }
+
+                    if (matcher.m_f(t, false)) {
+                        XX.m_flipHor  = t.m_flippedHor;
+                        XX.m_flipVert = t.m_flippedVert;
+                        XX.setView(matcher.m_class, matcher.m_type);
+                        matchedBts.push_back(static_cast<int>(matcher.m_type));
+                    }
+                    if (matcher.m_class == BorderClass::NormalDirt && matcher.m_f(t, true)) {
+                        XX.m_flipHor  = t.m_flippedHor;
+                        XX.m_flipVert = t.m_flippedVert;
+                        XX.setView(BorderClass::NormalSand, matcher.m_type);
+                        matchedBts.push_back(static_cast<int>(matcher.m_type));
+                    }
+                }
+            }
+            if (matchedBts.size() == 0) {
+                XX.setViewCenter();
+                Logger(Logger::Warning) << "failed to detect pattern at (" << pos.m_x << ',' << pos.m_y << ',' << pos.m_z << ")";
+                return false;
+            }
+            if (matchedBts.size() > 1) {
+                Logger(Logger::Warning) << "correctTerrainTypes: found [" << matchedBts.size() << "] patterns at (" << pos.m_x << ',' << pos.m_y << ',' << pos.m_z << "): " << matchedBts;
+            }
+
+            return true;
+        }();
+    });
 }
 
 void FHTileMap::correctRoads()

@@ -42,10 +42,27 @@ enum class FHRoadType
 };
 
 struct FHTileMap {
+    enum class SubtileType
+    {
+        Invalid,
+        Sand,
+        Dirt,
+        Native,
+    };
+
     struct Tile {
         Core::LibraryTerrainConstPtr m_terrain   = nullptr;
         FHRiverType                  m_riverType = FHRiverType::Invalid;
         FHRoadType                   m_roadType  = FHRoadType::Invalid;
+
+        bool m_baseSand = false;
+        bool m_baseDirt = false;
+        bool m_baseNorm = false;
+
+        SubtileType TL = SubtileType::Invalid;
+        SubtileType TR = SubtileType::Invalid;
+        SubtileType BL = SubtileType::Invalid;
+        SubtileType BR = SubtileType::Invalid;
 
         uint8_t m_view    = 0xffU;
         uint8_t m_viewMin = 0;
@@ -72,9 +89,11 @@ struct FHTileMap {
         int m_tileCount      = 0;
         int m_tileCountClear = 0;
 
+        bool setViewBorderSpecial(Core::LibraryTerrain::BorderType borderType);
         bool setViewBorderMixed(Core::LibraryTerrain::BorderType borderType);
         bool setViewBorderSandOrDirt(Core::LibraryTerrain::BorderType borderType, bool sandBorder);
         bool setViewCenter();
+        bool setView(Core::LibraryTerrain::BorderClass bc, Core::LibraryTerrain::BorderType borderType);
         void updateMinMax();
     };
 
@@ -149,6 +168,19 @@ struct FHTileMap {
     void correctRivers();
 
     void rngTiles(Core::IRandomGenerator* rng);
+
+    template<class F>
+    void eachPos(F&& f)
+    {
+        for (int z = 0; z < m_depth; ++z) {
+            for (int y = 0; y < m_height; ++y) {
+                for (int x = 0; x < m_width; ++x) {
+                    const FHPos pos{ x, y, z };
+                    f(pos);
+                }
+            }
+        }
+    }
 };
 
 struct FHZone {

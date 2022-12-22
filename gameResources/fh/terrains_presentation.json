@@ -13,8 +13,8 @@
     "backgroundsBattle" : ["cmbkdrmt", "cmbkdrtr", "cmbkdrdd"],
     "defFile": "dirttl",
 	"sandBorderTilesOffset": 0,
-	"sandDirtBorderTilesOffset": 20,
-	"sandDirtBorderTilesCount": 1,
+	"mixedBorderTilesOffset": 20,
+    "specialBorderTilesOffset": 45,
 	"centerTilesOffset": 21,
     "centerTilesCount": 24,
     "centerTilesClearCount": 8,
@@ -26,10 +26,18 @@
 		"TLS": 2,
 		"BRS": 2
 	},
-    "borderThreeWayCounts": {
-        "ThreeWay_DD": 0,
-        "ThreeWay_DS": 0,
-        "ThreeWay_SS": 1
+    "borderMixedCounts": {
+        "Mixed_DNND": 0,
+        "Mixed_DNNS": 0,
+        "Mixed_SNNS": 1
+    },
+    "borderSpecialCounts": {
+        "Special_DDDD": 0,
+        "Special_SSSS": 1,
+        "Special_DDDS": 0,
+        "Special_SSSD": 0,
+        "Special_NSSD": 0,
+        "Special_NDDS": 0
     }
 }},
 "sod.terrain.sand" : { "pres":
@@ -54,8 +62,8 @@
     "defFile": "grastl",
 	"dirtBorderTilesOffset": 0,
 	"sandBorderTilesOffset": 20,
-	"sandDirtBorderTilesOffset": 40,
-	"sandDirtBorderTilesCount": 9,
+	"mixedBorderTilesOffset": 40,
+    "specialBorderTilesOffset": 73,
 	"centerTilesOffset": 49,
     "centerTilesCount": 24,
     "centerTilesClearCount": 20
@@ -70,8 +78,8 @@
     "defFile": "snowtl",
 	"dirtBorderTilesOffset": 0,
 	"sandBorderTilesOffset": 20,
-	"sandDirtBorderTilesOffset": 40,
-	"sandDirtBorderTilesCount": 9,
+	"mixedBorderTilesOffset": 40,
+    "specialBorderTilesOffset": 73,
 	"centerTilesOffset": 49,
     "centerTilesCount": 24,
     "centerTilesClearCount": 4
@@ -86,8 +94,8 @@
     "defFile": "swmptl",
 	"dirtBorderTilesOffset": 0,
 	"sandBorderTilesOffset": 20,
-	"sandDirtBorderTilesOffset": 40,
-	"sandDirtBorderTilesCount": 9,
+	"mixedBorderTilesOffset": 40,
+    "specialBorderTilesOffset": 73,
 	"centerTilesOffset": 49,
     "centerTilesCount": 24,
     "centerTilesClearCount": 20
@@ -102,8 +110,8 @@
     "defFile": "rougtl",
 	"dirtBorderTilesOffset": 0,
 	"sandBorderTilesOffset": 20,
-	"sandDirtBorderTilesOffset": 40,
-	"sandDirtBorderTilesCount": 9,
+	"mixedBorderTilesOffset": 40,
+    "specialBorderTilesOffset": 73,
 	"centerTilesOffset": 49,
     "centerTilesCount": 24,
     "centerTilesClearCount": 14
@@ -118,8 +126,8 @@
     "defFile": "subbtl",
 	"dirtBorderTilesOffset": 0,
 	"sandBorderTilesOffset": 20,
-	"sandDirtBorderTilesOffset": 40,
-	"sandDirtBorderTilesCount": 9,
+	"mixedBorderTilesOffset": 40,
+    "specialBorderTilesOffset": 73,
 	"centerTilesOffset": 49,
     "centerTilesCount": 24,
     "centerTilesClearCount": 18
@@ -135,8 +143,8 @@
 	"isAnimated": true,
 	"dirtBorderTilesOffset": 0,
 	"sandBorderTilesOffset": 20,
-	"sandDirtBorderTilesOffset": 40,
-	"sandDirtBorderTilesCount": 9,
+	"mixedBorderTilesOffset": 40,
+    "specialBorderTilesOffset": 73,
 	"centerTilesOffset": 49,
     "centerTilesCount": 24,
     "centerTilesClearCount": 14
@@ -187,8 +195,8 @@
 	"defFileSplit": true,
 	"dirtBorderTilesOffset": 0,
 	"sandBorderTilesOffset": 34,
-	"sandDirtBorderTilesOffset": 68,
-	"sandDirtBorderTilesCount": 9,
+	"mixedBorderTilesOffset": 68,
+    "specialBorderTilesOffset": 118,
 	"centerTilesOffset": 77,
     "centerTilesCount": 41,
     "centerTilesClearCount": 24,
@@ -213,8 +221,8 @@
 	"defFileSplit": true,
 	"dirtBorderTilesOffset": 0,
 	"sandBorderTilesOffset": 34,
-	"sandDirtBorderTilesOffset": 68,
-	"sandDirtBorderTilesCount": 9,
+	"mixedBorderTilesOffset": 68,
+    "specialBorderTilesOffset": 73,
 	"centerTilesOffset": 77,
     "centerTilesCount": 41,
     "centerTilesClearCount": 24,
