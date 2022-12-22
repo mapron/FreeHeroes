@@ -19,16 +19,23 @@ struct LibraryTerrain {
     [[maybe_unused]] static inline constexpr const std::string_view s_terrainSand  = "sod.terrain.sand";
     [[maybe_unused]] static inline constexpr const std::string_view s_terrainWater = "sod.terrain.water";
 
+    enum TileBase
+    {
+        None,
+        Sand,
+        Dirt,
+    };
+
     enum class BorderType
     {
         Invalid,
-        TL,
+        TL = 10,
         L,
         T,
         BR,
         TLS,
         BRS,
-        ThreeWay_DD,      // 0 - D\D
+        ThreeWay_DD = 20, // 0 - D\D
         ThreeWay_DS,      // 1 - D\S
         ThreeWay_SS,      // 2 - S\S
         ThreeWay_RD_BLS,  // 3 - right - D, BL - S
@@ -53,6 +60,7 @@ struct LibraryTerrain {
         int sandDirtBorderTilesOffset = -1;
         int centerTilesOffset         = -1;
         int centerTilesCount          = -1;
+        int centerTilesClearCount     = -1; // tiles withour rough parts.
 
         using BTMap = std::map<BorderType, int>;
         BTMap borderCounts{
@@ -77,6 +85,8 @@ struct LibraryTerrain {
             { BorderType::ThreeWay_BS_RD, 1 },
         };
         BTMap borderThreeWayOffsets;
+
+        bool hasRotations = false;
     };
     struct Bonus {
         RngChanceMultiplier rngMult;
@@ -90,6 +100,7 @@ struct LibraryTerrain {
     bool        extraLayer = false;
     Bonus       bonusAll;
 
+    TileBase     tileBase = TileBase::Dirt;
     Presentation presentationParams;
 };
 

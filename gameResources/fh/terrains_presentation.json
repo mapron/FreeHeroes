@@ -17,6 +17,7 @@
 	"sandDirtBorderTilesCount": 1,
 	"centerTilesOffset": 21,
     "centerTilesCount": 24,
+    "centerTilesClearCount": 8,
 	"borderCounts": {
 		"TL" : 4,
 		"L"  : 4,
@@ -24,7 +25,12 @@
 		"BR" : 4,
 		"TLS": 2,
 		"BRS": 2
-	}
+	},
+    "borderThreeWayCounts": {
+        "ThreeWay_DD": 0,
+        "ThreeWay_DS": 0,
+        "ThreeWay_SS": 1
+    }
 }},
 "sod.terrain.sand" : { "pres":
 {
@@ -35,7 +41,8 @@
     "backgroundsBattle" : ["cmbkbch", "cmbkdes" ],
     "defFile": "sandtl",
 	"centerTilesOffset": 0,
-    "centerTilesCount": 24
+    "centerTilesCount": 24,
+    "centerTilesClearCount": 17
 }},
 "sod.terrain.grass" : { "pres":
 {
@@ -50,7 +57,8 @@
 	"sandDirtBorderTilesOffset": 40,
 	"sandDirtBorderTilesCount": 9,
 	"centerTilesOffset": 49,
-    "centerTilesCount": 24
+    "centerTilesCount": 24,
+    "centerTilesClearCount": 20
 }},
 "sod.terrain.snow" : { "pres":
 {
@@ -65,7 +73,8 @@
 	"sandDirtBorderTilesOffset": 40,
 	"sandDirtBorderTilesCount": 9,
 	"centerTilesOffset": 49,
-    "centerTilesCount": 24
+    "centerTilesCount": 24,
+    "centerTilesClearCount": 4
 }},
 "sod.terrain.swamp" : { "pres":
 {
@@ -80,7 +89,8 @@
 	"sandDirtBorderTilesOffset": 40,
 	"sandDirtBorderTilesCount": 9,
 	"centerTilesOffset": 49,
-    "centerTilesCount": 24
+    "centerTilesCount": 24,
+    "centerTilesClearCount": 20
 }},
 "sod.terrain.rough" : { "pres":
 {
@@ -95,7 +105,8 @@
 	"sandDirtBorderTilesOffset": 40,
 	"sandDirtBorderTilesCount": 9,
 	"centerTilesOffset": 49,
-    "centerTilesCount": 24
+    "centerTilesCount": 24,
+    "centerTilesClearCount": 14
 }},
 "sod.terrain.subterra" : { "pres":
 {
@@ -110,7 +121,8 @@
 	"sandDirtBorderTilesOffset": 40,
 	"sandDirtBorderTilesCount": 9,
 	"centerTilesOffset": 49,
-    "centerTilesCount": 24
+    "centerTilesCount": 24,
+    "centerTilesClearCount": 18
 }},
 "sod.terrain.lava" : { "pres":
 {
@@ -126,7 +138,8 @@
 	"sandDirtBorderTilesOffset": 40,
 	"sandDirtBorderTilesCount": 9,
 	"centerTilesOffset": 49,
-    "centerTilesCount": 24
+    "centerTilesCount": 24,
+    "centerTilesClearCount": 14
 }},
 "sod.terrain.water" : { "pres":
 {
@@ -151,7 +164,16 @@
     "backgroundsBattle" : [],
 	"sandBorderTilesOffset": 8,
 	"centerTilesOffset": 0,
-	"centerTilesCount": 8
+	"centerTilesCount": 8,
+    "borderCounts": {
+		"TL" : 2,
+		"L"  : 2,
+		"T"  : 2,
+		"BR" : 2,
+		"TLS": 2,
+		"BRS": 2
+	},
+    "hasRotations": true
 }},
 
 "hota.terrain.highland" : { "pres":
@@ -169,6 +191,7 @@
 	"sandDirtBorderTilesCount": 9,
 	"centerTilesOffset": 77,
     "centerTilesCount": 41,
+    "centerTilesClearCount": 24,
 	"borderCounts": {
 		"TL" : 6,
 		"L"  : 8,
@@ -194,6 +217,7 @@
 	"sandDirtBorderTilesCount": 9,
 	"centerTilesOffset": 77,
     "centerTilesCount": 41,
+    "centerTilesClearCount": 24,
 	"borderCounts": {
 		"TL" : 6,
 		"L"  : 8,

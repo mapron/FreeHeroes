@@ -55,7 +55,8 @@ STRUCT_REFLECTION_PAIRED(
     FHPlayer,
     "ai",                  m_aiPossible,
     "human",               m_humanPossible,
-    "factions",            m_startingFactions
+    "factions",            m_startingFactions,
+    "generateHero",        m_generateHeroAtMainTown
 )
 // clang-format on
 

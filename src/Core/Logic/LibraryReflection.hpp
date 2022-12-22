@@ -123,6 +123,13 @@ STRUCT_REFLECTION_PAIRED(
 
 template<>
 inline constexpr const bool MetaInfo::s_isStringMap<LibraryTerrain::Presentation::BTMap>{ true };
+ENUM_REFLECTION_STRINGIY(
+    LibraryTerrain::TileBase,
+    None,
+    None,
+    Sand,
+    Dirt
+    )
 
 ENUM_REFLECTION_PAIRED(LibraryTerrain::BorderType,
     Invalid,
@@ -159,7 +166,8 @@ STRUCT_REFLECTION_PAIRED(
     "centerTilesOffset",           centerTilesOffset,
     "centerTilesCount",            centerTilesCount,
     "borderCounts",                borderCounts,
-    "borderThreeWayCounts",        borderThreeWayCounts
+    "borderThreeWayCounts",        borderThreeWayCounts,
+    "hasRotations",                hasRotations
 )
 
 STRUCT_REFLECTION_PAIRED(
@@ -176,7 +184,8 @@ STRUCT_REFLECTION_PAIRED(
     "isObstacle",                  isObstacle,
     "extraLayer",                  extraLayer,
     "bonusAll",                    bonusAll,
-    "pres",                        presentationParams
+    "pres",                        presentationParams,
+    "tileBase",                    tileBase
 )
 // ------------------------------------------------------------------------------------------
 

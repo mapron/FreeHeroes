@@ -43,14 +43,20 @@
 "hota.visitable.hotaVisitable1"            : [ ["avmoilpm", "avxtrmts", "avxtrmtw", "avtprosp", "avstrblz", "avstmplt", "avxsktrs", "avsmgarn", "avwtplce", "avxmspr0", "avshrmit", "avxgazeb", "avxjnkmn"]  ],
 "hota.visitable.hotaVisitable3"            : [ ["avxwobs", "avxmaltw", "avxtwngt"]  ],
 "sod.visitable.freelancersGuild"           : [ ["avxfgld"]  ],
+"sod.visitable.obelisk"                    : [ ["avxoblb", "avxoblg", "avxoblk", "avxoblr", "avxoblo", "avxoblp", "avxoblw", "avxobly", "avxoblor", "avxoblt" ] ],
+"sod.visitable.tradingPost"                : [ ["avxpost0", "avxpstr0", "avxpssn" ] ],
+"sod.visitable.treeOfKnowledge"            : [ ["avxtrek0", "avxtrks0" ] ],
+"hota.visitable.ancientLamp"               : [ ["avtglam" ] ],
+"sod.visitable.witchHut"                   : [ [ "avswtch0", "avswtcs0"] ],
+"sod.visitable.scholar"                    : [ [ "avxschl0" ] ],
+"sod.visitable.leanToWithResource"         : [ [ "avmlean0" ] ],
 
 "sod.visitable.shrine1"                    : [ [ "avxl1sh0w", "avxl1sh0" ] ],
 "sod.visitable.shrine2"                    : [ [ "avxl2sh0w", "avxl2sh0" ] ],
 "sod.visitable.shrine3"                    : [ [ "avxl3sh0w", "avxl3sh0" ] ],
 "hota.visitable.shrine4"                   : [ [ "4lvlxshrn" ] ],
 
-"sod.visitable.witchHut"                   : [ [ "avswtch0" ] ],
-"sod.visitable.scholar"                    : [ [ "avxschl0" ] ],
+
 
 "sod.resource.campfire"                    : [ [ "adcfra", "avxcfsn0", "avxcflv0", "avxcfds0"] ],
 "sod.resource.treasureChest"               : [ [ "avtchst0"] ]

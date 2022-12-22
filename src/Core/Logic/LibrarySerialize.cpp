@@ -114,7 +114,13 @@ bool deserialize(const IGameDatabase* gameDatabase, LibraryTerrain& obj, const P
         for (auto bt : { BT::TL, BT::L, BT::T, BT::BR, BT::TLS, BT::BRS }) {
             const int count                          = obj.presentationParams.borderCounts[bt];
             obj.presentationParams.borderOffsets[bt] = offset;
-            offset += count;
+            int rotationCount                        = 1;
+            if (obj.presentationParams.hasRotations) {
+                rotationCount = 4;
+                if (bt == BT::L || bt == BT::T)
+                    rotationCount = 2;
+            }
+            offset += count * rotationCount;
         }
     }
     {

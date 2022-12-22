@@ -11,7 +11,8 @@
 "sod.terrain.sand" :
 {
     "untranslatedName": "Sand",
-    "moveCost" : 150
+    "moveCost" : 150,
+    "tileBase": "Sand"
 },
 "sod.terrain.grass" :
 {
@@ -46,12 +47,14 @@
 "sod.terrain.water" :
 {
     "untranslatedName": "Water",
-    "moveCost" : 100
+    "moveCost" : 100,
+    "tileBase": "Sand"
 },
 "sod.terrain.rock" :
 {
     "untranslatedName": "Rock",
     "isObstacle": true,
+    "tileBase": "Sand",
     "moveCost" : -1
 },
 

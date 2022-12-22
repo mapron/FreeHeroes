@@ -56,9 +56,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_generateHeroAtMainTown,
     m_posOfMainTown,
     m_team,
-    m_generateHero,
-    m_p7,
-    m_powerPlaceholders,
+    m_generatedHeroTownFaction,
+    m_unused1,
+    m_placeholder,
     m_heroesNames)
 
 ENUM_REFLECTION_STRINGIY(

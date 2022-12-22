@@ -16,14 +16,14 @@ class IRandomGenerator;
 }
 
 struct FHPos {
-    uint32_t m_x{ 0 };
-    uint32_t m_y{ 0 };
-    uint8_t  m_z{ 0 };
+    int m_x{ 0 };
+    int m_y{ 0 };
+    int m_z{ 0 };
 
     constexpr auto operator<=>(const FHPos&) const = default;
 };
 
-static inline constexpr const FHPos g_invalidPos{ uint32_t(-1), uint32_t(-1), uint8_t(-1) };
+static inline constexpr const FHPos g_invalidPos{ -1, -1, -1 };
 
 enum class FHRiverType
 {
@@ -49,6 +49,7 @@ struct FHTileMap {
 
         uint8_t m_view    = 0xffU;
         uint8_t m_viewMin = 0;
+        uint8_t m_viewMid = 0; // for center tiles - margin between 'clear' and 'rough' style.
         uint8_t m_viewMax = 0;
 
         bool m_flipHor  = false;
@@ -67,15 +68,19 @@ struct FHTileMap {
         bool    m_riverFlipHor  = false;
         bool    m_riverFlipVert = false;
 
-        int m_tileOffset = 0;
-        int m_tileCount  = 0;
+        int m_tileOffset     = 0;
+        int m_tileCount      = 0;
+        int m_tileCountClear = 0;
 
-        void calculateOffsets(Core::LibraryTerrain::BorderType borderType, bool dirtBorder, bool sandBorder);
+        bool setViewBorderMixed(Core::LibraryTerrain::BorderType borderType);
+        bool setViewBorderSandOrDirt(Core::LibraryTerrain::BorderType borderType, bool sandBorder);
+        bool setViewCenter();
+        void updateMinMax();
     };
 
-    uint32_t m_width  = 0;
-    uint32_t m_height = 0;
-    uint32_t m_depth  = 0; // no underground => depth==1; has underground => depth==2
+    int32_t m_width  = 0;
+    int32_t m_height = 0;
+    int32_t m_depth  = 0; // no underground => depth==1; has underground => depth==2
 
     std::vector<Tile> m_tiles;
 
@@ -94,11 +99,24 @@ struct FHTileMap {
 
     Tile& getNeighbour(int x, int dx, int y, int dy, int z)
     {
-        return get(std::clamp(x + dx, 0, (int) m_width - 1), std::clamp(y + dy, 0, (int) m_height - 1), z);
+        return get(correctX(x + dx), correctY(y + dy), z);
     }
     const Tile& getNeighbour(int x, int dx, int y, int dy, int z) const
     {
-        return get(std::clamp(x + dx, 0, (int) m_width - 1), std::clamp(y + dy, 0, (int) m_height - 1), z);
+        return get(correctX(x + dx), correctY(y + dy), z);
+    }
+
+    [[nodiscard]] int correctX(int x) const
+    {
+        return std::clamp(x, 0, m_width - 1);
+    }
+    [[nodiscard]] int correctY(int y) const
+    {
+        return std::clamp(y, 0, m_height - 1);
+    }
+    bool inBounds(int x, int y) const
+    {
+        return x >= 0 && x < m_width && y >= 0 && y < m_height;
     }
 
     Tile& get(const FHPos& pos)
@@ -140,9 +158,9 @@ struct FHZone {
     std::vector<FHPos>           m_tiles;
     std::vector<uint8_t>         m_tilesVariants;
     struct Rect {
-        FHPos    m_pos{ g_invalidPos };
-        uint32_t m_width{ 0 };
-        uint32_t m_height{ 0 };
+        FHPos m_pos{ g_invalidPos };
+        int   m_width{ 0 };
+        int   m_height{ 0 };
     };
     std::optional<Rect> m_rect;
 

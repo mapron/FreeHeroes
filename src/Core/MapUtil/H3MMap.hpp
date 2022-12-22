@@ -51,8 +51,6 @@ enum class AiTactic
     EXPLORER
 };
 
-/// The player info constains data about which factions are allowed, AI tactical settings,
-/// the main hero name, where to generate the hero, whether the faction should be selected randomly,...
 struct PlayerInfo {
     bool     m_canHumanPlay    = false;
     bool     m_canComputerPlay = false;
@@ -74,11 +72,9 @@ struct PlayerInfo {
     H3Pos   m_posOfMainTown;
     uint8_t m_team{ 0xff }; /// The default value NO_TEAM
 
-    uint8_t m_generateHero{ 0 }; /// Unused.
-    uint8_t m_p7{ 0 };           /// Unknown and unused.
-    /// Unused. Count of hero placeholders containing hero type.
-    /// WARNING: powerPlaceholders sometimes gives false 0 (eg. even if there is one placeholder), maybe different meaning ???
-    uint8_t m_powerPlaceholders{ 0 };
+    uint8_t m_generatedHeroTownFaction{ 0 }; /// faction of town generated hero will be placed. That can differ from starting faction.
+    uint8_t m_unused1{ 0 };
+    uint8_t m_placeholder{ 0 };
 
     std::vector<SHeroName> m_heroesNames; /// list of placed heroes on the map
 };

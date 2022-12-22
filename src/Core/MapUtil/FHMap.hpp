@@ -42,6 +42,8 @@ struct FHPlayer {
     bool m_humanPossible{ false };
     bool m_aiPossible{ false };
 
+    bool m_generateHeroAtMainTown{ false };
+
     std::vector<Core::LibraryFactionConstPtr> m_startingFactions;
 };
 

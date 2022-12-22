@@ -139,19 +139,18 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
     for (auto& road : src.m_roads)
         road.placeOnMap(tileMap);
 
-    const auto*  dirtTerrain   = database->terrains()->find(std::string(Core::LibraryTerrain::s_terrainDirt));
-    const auto*  sandTerrain   = database->terrains()->find(std::string(Core::LibraryTerrain::s_terrainSand));
-    const auto*  waterTerrain  = database->terrains()->find(std::string(Core::LibraryTerrain::s_terrainWater));
-    const size_t terrainsCount = database->terrains()->legacyOrderedIds().size();
+    const auto* dirtTerrain  = database->terrains()->find(std::string(Core::LibraryTerrain::s_terrainDirt));
+    const auto* sandTerrain  = database->terrains()->find(std::string(Core::LibraryTerrain::s_terrainSand));
+    const auto* waterTerrain = database->terrains()->find(std::string(Core::LibraryTerrain::s_terrainWater));
 
     tileMap.correctTerrainTypes(dirtTerrain, sandTerrain, waterTerrain);
     tileMap.correctRoads();
     tileMap.correctRivers();
     tileMap.rngTiles(rng);
 
-    for (uint8_t z = 0; z < tileMap.m_depth; ++z) {
-        for (uint32_t y = 0; y < tileMap.m_height; ++y) {
-            for (uint32_t x = 0; x < tileMap.m_width; ++x) {
+    for (int z = 0; z < tileMap.m_depth; ++z) {
+        for (int y = 0; y < tileMap.m_height; ++y) {
+            for (int x = 0; x < tileMap.m_width; ++x) {
                 auto& tile              = tileMap.get(x, y, z);
                 auto& destTile          = dest.m_tiles.get(x, y, z);
                 destTile.m_terType      = static_cast<uint8_t>(tile.m_terrain->legacyId);
@@ -183,8 +182,9 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
         auto  index    = static_cast<int>(playerId);
         auto& h3player = dest.m_players[index];
 
-        h3player.m_canHumanPlay    = fhPlayer.m_humanPossible;
-        h3player.m_canComputerPlay = fhPlayer.m_aiPossible;
+        h3player.m_canHumanPlay           = fhPlayer.m_humanPossible;
+        h3player.m_canComputerPlay        = fhPlayer.m_aiPossible;
+        h3player.m_generateHeroAtMainTown = fhPlayer.m_generateHeroAtMainTown;
 
         uint16_t factionsBitmask = 0;
         for (Core::LibraryFactionConstPtr faction : fhPlayer.m_startingFactions) {
@@ -209,10 +209,10 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
         if (playerIndex >= 0) {
             auto& h3player = dest.m_players[playerIndex];
             if (fhTown.m_isMain) {
-                const int townGateOffset = 2;
-                h3player.m_hasMainTown   = true;
-                h3player.m_posOfMainTown = int3fromPos(fhTown.m_pos, -townGateOffset);
-                h3player.m_generateHero  = true;
+                const int townGateOffset            = 2;
+                h3player.m_hasMainTown              = true;
+                h3player.m_posOfMainTown            = int3fromPos(fhTown.m_pos, -townGateOffset);
+                h3player.m_generatedHeroTownFaction = static_cast<uint8_t>(fhTown.m_factionId->legacyId);
             }
         }
         auto cas1               = std::make_unique<MapTown>(dest.m_features);
@@ -244,8 +244,8 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
         if (playerIndex >= 0) {
             auto& h3player = dest.m_players[playerIndex];
             if (fhHero.m_isMain) {
-                h3player.m_mainCustomHeroId = heroId;
-                h3player.m_generateHero     = false;
+                h3player.m_mainCustomHeroId         = heroId;
+                h3player.m_generatedHeroTownFaction = 0; // @todo:
             }
             h3player.m_heroesNames.push_back(SHeroName{ .m_heroId = heroId, .m_heroName = "" });
         }

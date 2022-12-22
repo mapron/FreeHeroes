@@ -298,11 +298,11 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
         if (m_features->m_playerP7) {
             if (!isValid)
                 m_ignoredOffsets.insert(stream.getBuffer().getOffsetRead());
-            stream >> playerInfo.m_p7;
+            stream >> playerInfo.m_unused1;
             if (!isValid)
-                playerInfo.m_p7 = 0;
+                playerInfo.m_unused1 = 0;
         } else {
-            playerInfo.m_p7 = -1;
+            playerInfo.m_unused1 = -1;
         }
 
         // Factions this player can choose
@@ -317,10 +317,10 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
         if (!isValid)
             playerInfo.m_isFactionRandom = 0;
         if (playerInfo.m_hasMainTown) {
-            playerInfo.m_generateHeroAtMainTown = true;
-            playerInfo.m_generateHero           = false;
+            playerInfo.m_generateHeroAtMainTown   = true;
+            playerInfo.m_generatedHeroTownFaction = 0;
             if (m_features->m_playerGenerateHeroInfo)
-                stream >> playerInfo.m_generateHeroAtMainTown >> playerInfo.m_generateHero;
+                stream >> playerInfo.m_generateHeroAtMainTown >> playerInfo.m_generatedHeroTownFaction;
 
             stream >> playerInfo.m_posOfMainTown;
         }
@@ -333,7 +333,7 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
         }
 
         if (m_features->m_playerPlaceholders)
-            stream >> playerInfo.m_powerPlaceholders >> playerInfo.m_heroesNames;
+            stream >> playerInfo.m_placeholder >> playerInfo.m_heroesNames;
     }
 
     stream >> m_victoryCondition >> m_lossCondition;
@@ -470,7 +470,7 @@ void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
         stream << static_cast<uint8_t>(playerInfo.m_aiTactic);
 
         if (m_features->m_playerP7)
-            stream << playerInfo.m_p7;
+            stream << playerInfo.m_unused1;
 
         if (m_features->m_factions16Bit)
             stream << playerInfo.m_allowedFactionsBitmask;
@@ -480,7 +480,7 @@ void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
         stream << playerInfo.m_isFactionRandom << playerInfo.m_hasMainTown;
         if (playerInfo.m_hasMainTown) {
             if (m_features->m_playerGenerateHeroInfo)
-                stream << playerInfo.m_generateHeroAtMainTown << playerInfo.m_generateHero;
+                stream << playerInfo.m_generateHeroAtMainTown << playerInfo.m_generatedHeroTownFaction;
 
             stream << playerInfo.m_posOfMainTown;
         }
@@ -493,7 +493,7 @@ void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
         }
 
         if (m_features->m_playerPlaceholders)
-            stream << playerInfo.m_powerPlaceholders << playerInfo.m_heroesNames;
+            stream << playerInfo.m_placeholder << playerInfo.m_heroesNames;
     }
 
     stream << m_victoryCondition << m_lossCondition;

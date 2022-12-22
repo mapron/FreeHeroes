@@ -19,6 +19,8 @@
 #include "LibraryObjectDef.hpp"
 #include "LibraryTerrain.hpp"
 
+#include "Logger.hpp"
+
 #include <functional>
 
 namespace FreeHeroes {
@@ -27,7 +29,7 @@ namespace {
 
 FHPos posFromH3M(H3Pos pos, int xoffset = 0)
 {
-    return { (uint32_t) (pos.m_x + xoffset), (uint32_t) pos.m_y, pos.m_z };
+    return { (pos.m_x + xoffset), pos.m_y, pos.m_z };
 }
 
 FHPlayerId makePlayerId(int h3Id)
@@ -162,8 +164,9 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
         const auto playerId = makePlayerId(index++);
         auto&      fhPlayer = dest.m_players[playerId];
 
-        fhPlayer.m_aiPossible    = playerInfo.m_canComputerPlay;
-        fhPlayer.m_humanPossible = playerInfo.m_canHumanPlay;
+        fhPlayer.m_aiPossible             = playerInfo.m_canComputerPlay;
+        fhPlayer.m_humanPossible          = playerInfo.m_canHumanPlay;
+        fhPlayer.m_generateHeroAtMainTown = playerInfo.m_generateHeroAtMainTown;
 
         if (playerInfo.m_hasMainTown) {
             mainTowns[playerId] = posFromH3M(playerInfo.m_posOfMainTown, +2);
@@ -189,7 +192,8 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                 defObjectKey = defObjectKey.substr(0, defObjectKey.size() - 4);
         }
         auto* record = database->objectDefs()->find(defObjectKey);
-        assert(record);
+        if (!record)
+            throw std::runtime_error("Unknown def file found (need to register in 'objectDefs' scope first):" + defObjectKey);
 
         // couple objdefs like sulfur/mercury mines have several def with same unique def name but different bitmask for terrain.
         for (auto* altRec : record->alternatives) {
@@ -654,9 +658,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                     dest.m_objects.m_visitables.push_back(std::move(fhVisitable));
                     break;
                 }
-
-                assert(!"Unsupported");
-                // simple object.
+                Logger(Logger::Warning) << "Skipping unsupported object def: " << objDef->id;
             } break;
         }
 
@@ -799,9 +801,9 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
         dest.m_rivers.push_back(std::move(fhRiver));
     };
 
-    for (uint8_t z = 0; z < dest.m_tileMap.m_depth; ++z) {
-        for (uint32_t y = 0; y < dest.m_tileMap.m_height; ++y) {
-            for (uint32_t x = 0; x < dest.m_tileMap.m_width; ++x) {
+    for (int z = 0; z < dest.m_tileMap.m_depth; ++z) {
+        for (int y = 0; y < dest.m_tileMap.m_height; ++y) {
+            for (int x = 0; x < dest.m_tileMap.m_width; ++x) {
                 auto&       tile = src.m_tiles.get(x, y, z);
                 const FHPos tilePos{ x, y, z };
                 visitTerrain(tile, tilePos);
