@@ -863,7 +863,7 @@ ENUM_REFLECTION_STRINGIY(LibraryMapObstacle::Type, Invalid,
     PINE_TREES,
     PLANT,
 
-    NON_BLOCKING_DECORATION,
+    DECORATION,
 
     RIVER_DELTA,
 

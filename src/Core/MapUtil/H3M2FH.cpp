@@ -5,11 +5,6 @@
  */
 #include "H3M2FH.hpp"
 
-#include "FHMap.hpp"
-#include "H3MMap.hpp"
-
-#include "IGameDatabase.hpp"
-
 #include "LibraryDwelling.hpp"
 #include "LibraryFaction.hpp"
 #include "LibraryHero.hpp"
@@ -47,7 +42,7 @@ public:
     {
         auto addToResult = [this, &result, &exclude, &current, &pred](int dx, int dy) {
             const FHPos neighbour{ current.m_x + dx, current.m_y + dy, current.m_z };
-            auto&       neighbourTile = m_src->m_tiles.get(neighbour.m_x, neighbour.m_y, neighbour.m_z);
+            auto&       neighbourTile = m_srcTileSet->get(neighbour.m_x, neighbour.m_y, neighbour.m_z);
             if (pred(neighbourTile))
                 return;
             if (m_zoned.contains(neighbour))
@@ -56,9 +51,9 @@ public:
                 return;
             result.insert(neighbour);
         };
-        if (current.m_x < m_dest->m_tileMap.m_width - 1)
+        if (current.m_x < m_destTileMap->m_width - 1)
             addToResult(+1, 0);
-        if (current.m_y < m_dest->m_tileMap.m_height - 1)
+        if (current.m_y < m_destTileMap->m_height - 1)
             addToResult(0, +1);
         if (current.m_x > 0)
             addToResult(-1, 0);
@@ -89,19 +84,34 @@ public:
         return std::vector<FHPos>(newZone.cbegin(), newZone.cend());
     }
 
-    FloodFiller(const H3Map* src, const FHMap* dest)
-        : m_src(src)
-        , m_dest(dest)
+    FloodFiller(const MapTileSet* src, const FHTileMap* dest)
+        : m_srcTileSet(src)
+        , m_destTileMap(dest)
     {
     }
-    const H3Map* const m_src;
-    const FHMap* const m_dest;
-    std::set<FHPos>    m_zoned;
+    const MapTileSet* const m_srcTileSet;
+    const FHTileMap* const  m_destTileMap;
+    std::set<FHPos>         m_zoned;
 };
 
 }
 
-void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* database)
+H3M2FHConverter::H3M2FHConverter(const Core::IGameDatabase* database)
+    : m_database(database)
+{
+    m_factionsContainer = database->factions();
+
+    m_artifactIds = database->artifacts()->legacyOrderedRecords();
+    m_factionIds  = m_factionsContainer->legacyOrderedRecords();
+    m_heroIds     = database->heroes()->legacyOrderedRecords();
+    m_resourceIds = database->resources()->legacyOrderedRecords();
+    m_spellIds    = database->spells()->legacyOrderedRecords();
+    m_secSkillIds = database->secSkills()->legacyOrderedRecords();
+    m_terrainIds  = database->terrains()->legacyOrderedRecords();
+    m_unitIds     = database->units()->legacyOrderedRecords();
+}
+
+void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
 {
     dest = {};
     if (src.m_format >= MapFormat::HOTA1)
@@ -121,20 +131,9 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
     if (dest.m_config.m_hasRoundLimit)
         dest.m_config.m_roundLimit = src.m_hotaVer.m_roundLimit;
 
-    auto*      factionsContainer = database->factions();
-    const auto factionIds        = factionsContainer->legacyOrderedRecords();
-
-    const auto heroIds     = database->heroes()->legacyOrderedRecords();
-    const auto artIds      = database->artifacts()->legacyOrderedRecords();
-    const auto spellIds    = database->spells()->legacyOrderedRecords();
-    const auto secSkillIds = database->secSkills()->legacyOrderedRecords();
-    const auto terrainIds  = database->terrains()->legacyOrderedRecords();
-    const auto resIds      = database->resources()->legacyOrderedRecords();
-    const auto unitIds     = database->units()->legacyOrderedRecords();
-
     std::map<Core::LibraryObjectDefConstPtr, std::pair<Core::LibraryDwellingConstPtr, int>> dwellMap;
     {
-        for (auto* dwelling : database->dwellings()->records()) {
+        for (auto* dwelling : m_database->dwellings()->records()) {
             for (int i = 0, cnt = dwelling->mapObjectDefs.size(); i < cnt; ++i) {
                 dwellMap[dwelling->mapObjectDefs[i]] = { dwelling, i };
             }
@@ -142,7 +141,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
     }
     std::map<Core::LibraryObjectDefConstPtr, std::pair<Core::LibraryMapBankConstPtr, int>> bankMap;
     {
-        for (auto* bank : database->mapBanks()->records()) {
+        for (auto* bank : m_database->mapBanks()->records()) {
             for (int i = 0, cnt = bank->mapObjectDefs.size(); i < cnt; ++i) {
                 bankMap[bank->mapObjectDefs[i]] = { bank, i };
             }
@@ -150,7 +149,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
     }
     std::map<Core::LibraryObjectDefConstPtr, std::pair<Core::LibraryMapVisitableConstPtr, int>> visitableMap;
     {
-        for (auto* visitable : database->mapVisitables()->records()) {
+        for (auto* visitable : m_database->mapVisitables()->records()) {
             for (int i = 0, cnt = visitable->mapObjectDefs.size(); i < cnt; ++i) {
                 visitableMap[visitable->mapObjectDefs[i]] = { visitable, i };
             }
@@ -176,7 +175,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
         }
 
         const uint16_t factionsBitmask = playerInfo.m_allowedFactionsBitmask;
-        for (auto* faction : factionsContainer->records()) {
+        for (auto* faction : m_factionsContainer->records()) {
             if (faction->legacyId < 0)
                 continue;
 
@@ -184,6 +183,8 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                 fhPlayer.m_startingFactions.push_back(faction);
         }
     }
+
+    std::ostringstream missingDefs;
     for (const ObjectTemplate& objTempl : src.m_objectDefs) {
         std::string defObjectKey = objTempl.m_animationFile;
         {
@@ -191,9 +192,33 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             if (defObjectKey.ends_with(".def"))
                 defObjectKey = defObjectKey.substr(0, defObjectKey.size() - 4);
         }
-        auto* record = database->objectDefs()->find(defObjectKey);
-        if (!record)
-            throw std::runtime_error("Unknown def file found (need to register in 'objectDefs' scope first):" + defObjectKey);
+        auto* record = m_database->objectDefs()->find(defObjectKey);
+        if (!record) {
+            auto wstr = [&missingDefs](const std::string& str) {
+                missingDefs << '"' << str << '"';
+                for (size_t i = str.size(); i < 14; ++i)
+                    missingDefs << ' ';
+            };
+            auto warr = [&missingDefs](const std::vector<uint8_t>& arr) {
+                missingDefs << '[';
+                for (size_t i = 0; i < arr.size(); ++i) {
+                    if (i > 0)
+                        missingDefs << ',';
+                    missingDefs << int(arr[arr.size() - i - 1]);
+                }
+                missingDefs << "], ";
+            };
+            wstr(defObjectKey);
+            missingDefs << ": [ ";
+            wstr(objTempl.m_animationFile.substr(0, objTempl.m_animationFile.size() - 4));
+            missingDefs << ", ";
+            warr(objTempl.m_blockMask);
+            warr(objTempl.m_visitMask);
+            warr(objTempl.m_terrainsHard);
+            warr(objTempl.m_terrainsSoft);
+            missingDefs << int(objTempl.m_id) << ", " << int(objTempl.m_subid) << ", " << int(objTempl.m_type) << ", " << int(objTempl.m_drawPriority) << "],\n";
+            continue;
+        }
 
         // couple objdefs like sulfur/mercury mines have several def with same unique def name but different bitmask for terrain.
         for (auto* altRec : record->alternatives) {
@@ -207,119 +232,12 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
 
         dest.m_initialObjectDefs.push_back(record);
     }
-
-    auto convertStacks = [&unitIds](const std::vector<StackBasicDescriptor>& stacks) -> std::vector<Core::UnitWithCount> {
-        std::vector<Core::UnitWithCount> result;
-        for (auto& stack : stacks)
-            result.push_back({ unitIds[stack.m_id], stack.m_count });
-        return result;
-    };
-    auto convertRewardHut = [&spellIds, &secSkillIds, &artIds, &unitIds](const MapSeerHut& hut) -> Core::Reward {
-        Core::Reward fhReward;
-        switch (hut.m_reward) {
-            case MapSeerHut::RewardType::EXPERIENCE:
-                fhReward.gainedExp = hut.m_rVal;
-                break;
-            case MapSeerHut::RewardType::MANA_POINTS:
-                fhReward.manaDiff = hut.m_rVal;
-                break;
-            case MapSeerHut::RewardType::MORALE_BONUS:
-                fhReward.rngBonus.morale = hut.m_rVal;
-                break;
-            case MapSeerHut::RewardType::LUCK_BONUS:
-
-                fhReward.rngBonus.luck = hut.m_rVal;
-                break;
-
-            case MapSeerHut::RewardType::RESOURCES:
-            {
-                // clang-format off
-                switch (hut.m_rID)  {
-                    case 0: fhReward.resources.wood    = hut.m_rVal; break;
-                    case 1: fhReward.resources.mercury = hut.m_rVal; break;
-                    case 2: fhReward.resources.ore     = hut.m_rVal; break;
-                    case 3: fhReward.resources.sulfur  = hut.m_rVal; break;
-                    case 4: fhReward.resources.crystal = hut.m_rVal; break;
-                    case 5: fhReward.resources.gems    = hut.m_rVal; break;
-                    case 6: fhReward.resources.gold    = hut.m_rVal; break;
-                }
-                // clang-format on
-
-                break;
-            }
-            case MapSeerHut::RewardType::PRIMARY_SKILL:
-            {
-                // clang-format off
-            switch (hut.m_rID)  {
-                case 0: fhReward.statBonus.ad.attack          = hut.m_rVal; break;
-                case 1: fhReward.statBonus.ad.defense         = hut.m_rVal; break;
-                case 2: fhReward.statBonus.magic.spellPower   = hut.m_rVal; break;
-                case 3: fhReward.statBonus.magic.intelligence = hut.m_rVal; break;
-            }
-                // clang-format on
-            }
-
-            case MapSeerHut::RewardType::SECONDARY_SKILL:
-            {
-                fhReward.secSkills.push_back({ secSkillIds[hut.m_rID], (int) hut.m_rVal - 1 });
-                break;
-            }
-            case MapSeerHut::RewardType::ARTIFACT:
-            {
-                fhReward.artifacts.push_back(Core::ArtifactFilter{ .onlyArtifacts = { artIds[hut.m_rID] } });
-                break;
-            }
-            case MapSeerHut::RewardType::SPELL:
-            {
-                fhReward.spells.onlySpells.push_back({ spellIds[hut.m_rID] });
-                break;
-            }
-            case MapSeerHut::RewardType::CREATURE:
-            {
-                fhReward.units.push_back({ unitIds[hut.m_rID], (int) hut.m_rVal });
-                break;
-            }
-            case MapSeerHut::RewardType::NOTHING:
-            {
-                break;
-            }
-        }
-        return fhReward;
-    };
-
-    auto convertReward = [&spellIds, &secSkillIds, &artIds, &convertStacks](const MapReward& reward) -> Core::Reward {
-        Core::Reward fhReward;
-        fhReward.gainedExp       = reward.m_gainedExp;
-        fhReward.manaDiff        = reward.m_manaDiff;
-        fhReward.rngBonus.luck   = reward.m_luckDiff;
-        fhReward.rngBonus.morale = reward.m_moraleDiff;
-
-        fhReward.statBonus.ad.attack          = reward.m_primSkillSet.m_prim[0];
-        fhReward.statBonus.ad.defense         = reward.m_primSkillSet.m_prim[1];
-        fhReward.statBonus.magic.spellPower   = reward.m_primSkillSet.m_prim[2];
-        fhReward.statBonus.magic.intelligence = reward.m_primSkillSet.m_prim[3];
-
-        fhReward.resources.wood    = reward.m_resourceSet.m_resourceAmount[0];
-        fhReward.resources.mercury = reward.m_resourceSet.m_resourceAmount[1];
-        fhReward.resources.ore     = reward.m_resourceSet.m_resourceAmount[2];
-        fhReward.resources.sulfur  = reward.m_resourceSet.m_resourceAmount[3];
-        fhReward.resources.crystal = reward.m_resourceSet.m_resourceAmount[4];
-        fhReward.resources.gems    = reward.m_resourceSet.m_resourceAmount[5];
-        fhReward.resources.gold    = reward.m_resourceSet.m_resourceAmount[6];
-
-        for (auto& skill : reward.m_secSkills)
-            fhReward.secSkills.push_back({ secSkillIds[skill.m_id], skill.m_level - 1 });
-
-        for (auto artId : reward.m_artifacts) {
-            fhReward.artifacts.push_back(Core::ArtifactFilter{ .onlyArtifacts = { artIds[artId] } });
-        }
-
-        for (uint8_t spellId : reward.m_spells)
-            fhReward.spells.onlySpells.push_back(spellIds.at(spellId));
-
-        fhReward.units = convertStacks(reward.m_creatures.m_stacks);
-        return fhReward;
-    };
+    auto missingDefsStr = missingDefs.str();
+    if (!missingDefsStr.empty()) {
+        Logger(Logger::Warning) << "missing defs:\n"
+                                << missingDefsStr;
+        throw std::runtime_error("Some defs are missing, map cannot be loaded. Add them to the database.");
+    }
 
     for (int index = 0; const Object& obj : src.m_objects) {
         const IMapObject*              impl     = obj.m_impl.get();
@@ -332,10 +250,9 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             {
                 const auto* event = static_cast<const MapEvent*>(impl);
                 (void) event;
-                assert(0 && event);
+                assert(1 && event);
             } break;
             case MapObjectType::HERO:
-            case MapObjectType::RANDOM_HERO:
             case MapObjectType::PRISON:
             {
                 const auto* hero = static_cast<const MapHero*>(impl);
@@ -349,7 +266,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                 fhhero.m_questIdentifier = hero->m_questIdentifier;
 
                 FHHeroData& destHero = fhhero.m_data;
-                destHero.m_army.hero = Core::AdventureHero(heroIds[hero->m_subID]);
+                destHero.m_army.hero = Core::AdventureHero(m_heroIds[hero->m_subID]);
                 destHero.m_hasExp    = hero->m_hasExp;
                 if (destHero.m_hasExp) {
                     destHero.m_army.hero.experience = hero->m_exp;
@@ -361,7 +278,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                     auto& skillList = destHero.m_army.hero.secondarySkills;
                     skillList.clear();
                     for (auto& sk : hero->m_secSkills) {
-                        const auto* secSkillId = secSkillIds[sk.m_id];
+                        const auto* secSkillId = m_secSkillIds[sk.m_id];
                         skillList.push_back({ secSkillId, sk.m_level - 1 });
                     }
                 }
@@ -371,6 +288,11 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                     destHero.m_army.hero.currentBasePrimary.magic.asTuple() = std::tie(prim[2], prim[3]);
                 }
                 dest.m_wanderingHeroes.push_back(std::move(fhhero));
+            } break;
+
+            case MapObjectType::RANDOM_HERO:
+            {
+                // @todo:
             } break;
             case MapObjectType::MONSTER:
             case MapObjectType::RANDOM_MONSTER:
@@ -387,7 +309,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                 fhMonster.m_order           = index;
                 fhMonster.m_pos             = posFromH3M(obj.m_pos, -src.m_features->m_monstersMapXOffset);
                 fhMonster.m_count           = monster->m_count;
-                fhMonster.m_id              = unitIds[objTempl.m_subid];
+                fhMonster.m_id              = m_unitIds[objTempl.m_subid];
                 fhMonster.m_questIdentifier = monster->m_questIdentifier;
                 switch (monster->m_joinAppeal) {
                     case 0:
@@ -427,14 +349,15 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             {
                 const auto* bottle = static_cast<const MapSignBottle*>(impl);
                 (void) bottle;
-                assert(0 && bottle);
+                assert(1 && bottle);
             } break;
             case MapObjectType::SEER_HUT:
             {
                 const auto* hut = static_cast<const MapSeerHut*>(impl);
 
                 auto [visitableId, visitableDefIndex] = visitableMap[objDef];
-                assert(visitableId);
+                if (!visitableId)
+                    throw std::runtime_error("Unknown def for seer hut:" + objDef->id);
 
                 FHQuestHut fhHut;
                 fhHut.m_pos         = posFromH3M(obj.m_pos);
@@ -442,9 +365,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                 fhHut.m_visitableId = visitableId;
                 fhHut.m_defVariant  = visitableDefIndex;
                 fhHut.m_reward      = convertRewardHut(*hut);
-                assert(hut->m_quest.m_missionType == MapQuest::Mission::ART);
-                for (uint16_t id : hut->m_quest.m_5arts)
-                    fhHut.m_artifacts.push_back(artIds[id]);
+                fhHut.m_quest       = convertQuest(hut->m_quest);
 
                 dest.m_objects.m_questHuts.push_back(std::move(fhHut));
             } break;
@@ -452,7 +373,8 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             {
                 const auto* hut                       = static_cast<const MapWitchHut*>(impl);
                 auto [visitableId, visitableDefIndex] = visitableMap[objDef];
-                assert(visitableId);
+                if (!visitableId)
+                    throw std::runtime_error("Unknown def for witch hut:" + objDef->id);
 
                 FHSkillHut fhHut;
                 fhHut.m_pos         = posFromH3M(obj.m_pos);
@@ -462,7 +384,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                 for (size_t skillIndex = 0; skillIndex < hut->m_allowedSkills.size(); ++skillIndex) {
                     if (!hut->m_allowedSkills[skillIndex])
                         continue;
-                    auto* secSkill = secSkillIds[skillIndex];
+                    auto* secSkill = m_secSkillIds[skillIndex];
                     fhHut.m_skillIds.push_back(secSkill);
                 }
                 dest.m_objects.m_skillHuts.push_back(std::move(fhHut));
@@ -483,9 +405,9 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                 if (fhScholar.m_type == FHScholar::Type::Primary) {
                     fhScholar.m_primaryType = static_cast<Core::HeroPrimaryParamType>(scholar->m_bonusId);
                 } else if (fhScholar.m_type == FHScholar::Type::Secondary) {
-                    fhScholar.m_skillId = secSkillIds.at(scholar->m_bonusId);
+                    fhScholar.m_skillId = m_secSkillIds.at(scholar->m_bonusId);
                 } else if (fhScholar.m_type == FHScholar::Type::Spell) {
-                    fhScholar.m_spellId = spellIds.at(scholar->m_bonusId);
+                    fhScholar.m_spellId = m_spellIds.at(scholar->m_bonusId);
                 } else {
                     assert(scholar->m_bonusType == 0xFFU);
                 }
@@ -497,7 +419,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             {
                 const auto* garison = static_cast<const MapGarison*>(impl);
                 (void) garison;
-                assert(0 && garison);
+                assert(1 && garison);
             } break;
             case MapObjectType::ARTIFACT:
             case MapObjectType::SPELL_SCROLL:
@@ -507,13 +429,13 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                 art.m_pos   = posFromH3M(obj.m_pos);
                 if (type == MapObjectType::SPELL_SCROLL) {
                     const auto* artifact = static_cast<const MapArtifact*>(impl);
-                    const auto* spell    = spellIds.at(artifact->m_spellId);
+                    const auto* spell    = m_spellIds.at(artifact->m_spellId);
                     assert(spell);
-                    art.m_id = database->artifacts()->find("sod.artifact." + spell->id); // @todo: constaint for prefix?
+                    art.m_id = m_database->artifacts()->find("sod.artifact." + spell->id); // @todo: constaint for prefix?
                     assert(art.m_id);
                 } else {
                     assert(objTempl.m_subid != 0);
-                    art.m_id = artIds[objTempl.m_subid];
+                    art.m_id = m_artifactIds[objTempl.m_subid];
                 }
                 dest.m_objects.m_artifacts.push_back(std::move(art));
             } break;
@@ -555,7 +477,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                 fhres.m_order  = index;
                 fhres.m_pos    = posFromH3M(obj.m_pos);
                 fhres.m_amount = resource->m_amount;
-                fhres.m_id     = resIds[objTempl.m_subid];
+                fhres.m_id     = m_resourceIds[objTempl.m_subid];
                 assert(fhres.m_id);
                 dest.m_objects.m_resources.push_back(std::move(fhres));
             } break;
@@ -588,7 +510,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                 fhtown.m_player          = playerId;
                 fhtown.m_order           = index;
                 fhtown.m_pos             = posFromH3M(obj.m_pos);
-                fhtown.m_factionId       = factionIds[objTempl.m_subid];
+                fhtown.m_factionId       = m_factionIds[objTempl.m_subid];
                 fhtown.m_questIdentifier = town->m_questIdentifier;
                 fhtown.m_hasFort         = town->m_hasFort;
                 fhtown.m_spellResearch   = town->m_spellResearch;
@@ -597,15 +519,20 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                     fhtown.m_isMain = true;
                 dest.m_towns.push_back(std::move(fhtown));
             } break;
-            case MapObjectType::MINE:
             case MapObjectType::ABANDONED_MINE:
+            {
+                const auto* objOwner = static_cast<const MapObjectWithOwner*>(impl);
+                (void) objOwner;
+                // @todo: change ABANDONED_MINE to separate object. uint8_t must be resource mask for available resources.
+            } break;
+            case MapObjectType::MINE:
             {
                 const auto* objOwner = static_cast<const MapObjectWithOwner*>(impl);
                 FHMine      mine;
                 mine.m_pos    = posFromH3M(obj.m_pos);
                 mine.m_order  = index;
                 mine.m_player = makePlayerId(objOwner->m_owner);
-                mine.m_id     = resIds[objTempl.m_subid];
+                mine.m_id     = m_resourceIds[objTempl.m_subid];
                 auto it       = std::find(mine.m_id->minesDefs.cbegin(), mine.m_id->minesDefs.cend(), objDef);
                 assert(it != mine.m_id->minesDefs.cend());
 
@@ -632,8 +559,8 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             {
                 const auto* objOwner = static_cast<const MapObjectWithOwner*>(impl);
                 (void) objOwner;
-                assert(!"unsupported");
-            }
+                //assert(!"unsupported");
+            } break;
             case MapObjectType::SHRINE_OF_MAGIC_INCANTATION:
             case MapObjectType::SHRINE_OF_MAGIC_GESTURE:
             case MapObjectType::SHRINE_OF_MAGIC_THOUGHT:
@@ -662,7 +589,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                             break;
                     }
                 } else {
-                    fhShrine.m_spellId = spellIds.at(shrine->m_spell);
+                    fhShrine.m_spellId = m_spellIds.at(shrine->m_spell);
                 }
                 dest.m_objects.m_shrines.push_back(std::move(fhShrine));
             } break;
@@ -685,7 +612,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             {
                 const auto* questGuard = static_cast<const MapQuestGuard*>(impl);
                 (void) questGuard;
-                assert(0 && questGuard);
+                assert(1 && questGuard);
             } break;
             case MapObjectType::RANDOM_DWELLING:         //same as castle + level range  216
             case MapObjectType::RANDOM_DWELLING_LVL:     //same as castle, fixed level   217
@@ -709,6 +636,8 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
                 const auto* bank = static_cast<const MapObjectCreatureBank*>(impl);
                 (void) bank;
                 FHBank fhBank;
+                if (!bankMap.contains(objDef))
+                    throw std::runtime_error("Missing bank def mapping:" + objDef->id);
                 const auto [id, defvariant] = bankMap.at(objDef);
                 fhBank.m_id                 = id;
                 fhBank.m_defVariant         = defvariant;
@@ -733,7 +662,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             } break;
             default:
             {
-                auto* obstacle = database->mapObstacles()->find(objDef->id);
+                auto* obstacle = m_database->mapObstacles()->find(objDef->id);
                 if (obstacle) {
                     FHObstacle fhObstacle;
                     fhObstacle.m_id    = obstacle;
@@ -761,30 +690,30 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
     }
 
     for (int index = 0; auto& allowedFlag : src.m_allowedHeroes) {
-        const auto& heroId = heroIds[index++];
+        const auto& heroId = m_heroIds[index++];
         if (!allowedFlag)
             dest.m_disabledHeroes.push_back(heroId);
     }
 
     for (int index = 0; auto& allowedFlag : src.m_allowedArtifacts) {
-        const auto& artId = artIds[index++];
+        const auto& artId = m_artifactIds[index++];
         if (!allowedFlag && artId)
             dest.m_disabledArtifacts.push_back(artId);
     }
 
     for (int index = 0; auto& allowedFlag : src.m_allowedSpells) {
-        const auto& spellId = spellIds[index++];
+        const auto& spellId = m_spellIds[index++];
         if (!allowedFlag)
             dest.m_disabledSpells.push_back(spellId);
     }
     for (int index = 0; auto& allowedFlag : src.m_allowedSecSkills) {
-        const auto& secSkillId = secSkillIds[index++];
+        const auto& secSkillId = m_secSkillIds[index++];
         if (!allowedFlag)
             dest.m_disabledSkills.push_back(secSkillId);
     }
 
     for (int index = 0; auto& customHero : src.m_customHeroData) {
-        const auto& heroId = heroIds[index++];
+        const auto& heroId = m_heroIds[index++];
         if (!customHero.m_enabled)
             continue;
         FHHeroData destHero;
@@ -798,7 +727,7 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             auto& skillList = destHero.m_army.hero.secondarySkills;
             skillList.clear();
             for (auto& sk : customHero.m_skills) {
-                const auto* secSkillId = secSkillIds[sk.m_id];
+                const auto* secSkillId = m_secSkillIds[sk.m_id];
                 skillList.push_back({ secSkillId, sk.m_level - 1 });
             }
         }
@@ -811,23 +740,206 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
             destHero.m_army.hero.spellbook.clear();
             for (size_t spellId = 0; spellId < customHero.m_spellSet.m_spells.size(); ++spellId) {
                 if (customHero.m_spellSet.m_spells[spellId])
-                    destHero.m_army.hero.spellbook.insert(spellIds[spellId]);
+                    destHero.m_army.hero.spellbook.insert(m_spellIds[spellId]);
             }
         }
         dest.m_customHeroes.push_back(std::move(destHero));
     }
 
-    auto defTerrainType   = src.m_tiles.get(0, 0, 0).m_terType;
-    dest.m_defaultTerrain = terrainIds[defTerrainType];
+    convertTileMap(src, dest);
+    assert(dest.m_tileMap.m_width > 0);
+    assert(dest.m_tileMap.m_width == dest.m_tileMap.m_height);
+}
 
-    if (1) {
-        dest.m_defaultTerrain = database->terrains()->find("hota.terrain.wasteland");
-        defTerrainType        = 0xff;
+Core::ResourceAmount H3M2FHConverter::convertResources(const std::vector<uint32_t>& resourceAmount) const
+{
+    Core::ResourceAmount resources;
+    resources.wood    = resourceAmount[0];
+    resources.mercury = resourceAmount[1];
+    resources.ore     = resourceAmount[2];
+    resources.sulfur  = resourceAmount[3];
+    resources.crystal = resourceAmount[4];
+    resources.gems    = resourceAmount[5];
+    resources.gold    = resourceAmount[6];
+    return resources;
+}
+
+Core::HeroPrimaryParams H3M2FHConverter::convertPrim(const std::vector<uint8_t>& arr) const
+{
+    Core::HeroPrimaryParams result;
+    result.ad.attack          = arr[0];
+    result.ad.defense         = arr[1];
+    result.magic.spellPower   = arr[2];
+    result.magic.intelligence = arr[3];
+    return result;
+}
+
+std::vector<Core::UnitWithCount> H3M2FHConverter::convertStacks(const std::vector<StackBasicDescriptor>& stacks) const
+{
+    std::vector<Core::UnitWithCount> result;
+    for (auto& stack : stacks)
+        result.push_back({ m_unitIds[stack.m_id], stack.m_count });
+    return result;
+}
+
+Core::Reward H3M2FHConverter::convertRewardHut(const MapSeerHut& hut) const
+{
+    Core::Reward fhReward;
+    switch (hut.m_reward) {
+        case MapSeerHut::RewardType::EXPERIENCE:
+            fhReward.gainedExp = hut.m_rVal;
+            break;
+        case MapSeerHut::RewardType::MANA_POINTS:
+            fhReward.manaDiff = hut.m_rVal;
+            break;
+        case MapSeerHut::RewardType::MORALE_BONUS:
+            fhReward.rngBonus.morale = hut.m_rVal;
+            break;
+        case MapSeerHut::RewardType::LUCK_BONUS:
+
+            fhReward.rngBonus.luck = hut.m_rVal;
+            break;
+
+        case MapSeerHut::RewardType::RESOURCES:
+        {
+            std::vector<uint32_t> res(7);
+            res[hut.m_rID]     = hut.m_rVal;
+            fhReward.resources = convertResources(res);
+
+            break;
+        }
+        case MapSeerHut::RewardType::PRIMARY_SKILL:
+        {
+            // clang-format off
+        switch (hut.m_rID)  {
+            case 0: fhReward.statBonus.ad.attack          = hut.m_rVal; break;
+            case 1: fhReward.statBonus.ad.defense         = hut.m_rVal; break;
+            case 2: fhReward.statBonus.magic.spellPower   = hut.m_rVal; break;
+            case 3: fhReward.statBonus.magic.intelligence = hut.m_rVal; break;
+        }
+            // clang-format on
+        }
+
+        case MapSeerHut::RewardType::SECONDARY_SKILL:
+        {
+            fhReward.secSkills.push_back({ m_secSkillIds[hut.m_rID], (int) hut.m_rVal - 1 });
+            break;
+        }
+        case MapSeerHut::RewardType::ARTIFACT:
+        {
+            fhReward.artifacts.push_back(Core::ArtifactFilter{ .onlyArtifacts = { m_artifactIds[hut.m_rID] } });
+            break;
+        }
+        case MapSeerHut::RewardType::SPELL:
+        {
+            fhReward.spells.onlySpells.push_back({ m_spellIds[hut.m_rID] });
+            break;
+        }
+        case MapSeerHut::RewardType::CREATURE:
+        {
+            fhReward.units.push_back({ m_unitIds[hut.m_rID], (int) hut.m_rVal });
+            break;
+        }
+        case MapSeerHut::RewardType::NOTHING:
+        {
+            break;
+        }
     }
 
-    FloodFiller terrainFiller(&src, &dest);
+    return fhReward;
+}
 
-    auto visitTerrain = [&terrainFiller, defTerrainType, &src, &dest, &terrainIds](const MapTile& tile, const FHPos& tilePos) {
+Core::Reward H3M2FHConverter::convertReward(const MapReward& reward) const
+{
+    Core::Reward fhReward;
+    fhReward.gainedExp       = reward.m_gainedExp;
+    fhReward.manaDiff        = reward.m_manaDiff;
+    fhReward.rngBonus.luck   = reward.m_luckDiff;
+    fhReward.rngBonus.morale = reward.m_moraleDiff;
+
+    fhReward.statBonus = convertPrim(reward.m_primSkillSet.m_prim);
+
+    fhReward.resources = convertResources(reward.m_resourceSet.m_resourceAmount);
+
+    for (auto& skill : reward.m_secSkills)
+        fhReward.secSkills.push_back({ m_secSkillIds[skill.m_id], skill.m_level - 1 });
+
+    for (auto artId : reward.m_artifacts) {
+        fhReward.artifacts.push_back(Core::ArtifactFilter{ .onlyArtifacts = { m_artifactIds[artId] } });
+    }
+
+    for (uint8_t spellId : reward.m_spells)
+        fhReward.spells.onlySpells.push_back(m_spellIds.at(spellId));
+
+    fhReward.units = convertStacks(reward.m_creatures.m_stacks);
+    return fhReward;
+}
+
+FHQuest H3M2FHConverter::convertQuest(const MapQuest& quest) const
+{
+    FHQuest fhQuest;
+    switch (quest.m_missionType) {
+        case MapQuest::Mission::PRIMARY_STAT:
+        {
+            fhQuest.m_type    = FHQuest::Type::GetPrimaryStat;
+            fhQuest.m_primary = convertPrim(quest.m_2stats);
+        } break;
+        case MapQuest::Mission::LEVEL:
+        {
+            fhQuest.m_type  = FHQuest::Type::GetHeroLevel;
+            fhQuest.m_level = quest.m_134val;
+        } break;
+        case MapQuest::Mission::ART:
+        {
+            fhQuest.m_type = FHQuest::Type::BringArtifacts;
+            for (uint16_t id : quest.m_5arts)
+                fhQuest.m_artifacts.push_back(m_artifactIds[id]);
+        } break;
+        case MapQuest::Mission::ARMY:
+        {
+            fhQuest.m_type  = FHQuest::Type::BringCreatures;
+            fhQuest.m_units = convertStacks(quest.m_6creatures.m_stacks);
+        } break;
+        case MapQuest::Mission::RESOURCES:
+        {
+            fhQuest.m_type      = FHQuest::Type::BringResource;
+            fhQuest.m_resources = convertResources(quest.m_7resources);
+        } break;
+        case MapQuest::Mission::KILL_CREATURE:
+        {
+            fhQuest.m_type          = FHQuest::Type::KillCreature;
+            fhQuest.m_targetQuestId = quest.m_134val;
+        } break;
+        case MapQuest::Mission::KILL_HERO:
+        {
+            fhQuest.m_type          = FHQuest::Type::KillHero;
+            fhQuest.m_targetQuestId = quest.m_134val;
+        } break;
+        default:
+            Logger(Logger::Warning) << "Unsupported mission type:" << int(quest.m_missionType);
+            assert(!"Unsupported");
+            break;
+    }
+    return fhQuest;
+}
+
+void H3M2FHConverter::convertTileMap(const H3Map& src, FHMap& dest) const
+{
+    auto defTerrainType   = src.m_tiles.get(0, 0, 0).m_terType;
+    dest.m_defaultTerrain = m_terrainIds[defTerrainType];
+    assert(dest.m_defaultTerrain);
+
+    if (0) {
+        //dest.m_defaultTerrain = m_database->terrains()->find("sod.terrain.dirt");
+        //defTerrainType        = 0xff;
+    }
+
+    const MapTileSet& tileSet     = src.m_tiles;
+    FHTileMap&        destTileMap = dest.m_tileMap;
+
+    FloodFiller terrainFiller(&tileSet, &destTileMap);
+
+    auto visitTerrain = [this, &terrainFiller, defTerrainType, &tileSet, &dest](const MapTile& tile, const FHPos& tilePos) {
         if (tile.m_terType == defTerrainType)
             return;
 
@@ -843,16 +955,17 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
         FHZone fhZone;
         fhZone.m_tiles = std::move(tiles);
         for (auto& pos : fhZone.m_tiles) {
-            auto terVariant = src.m_tiles.get(pos.m_x, pos.m_y, pos.m_z).m_terView;
+            auto terVariant = tileSet.get(pos.m_x, pos.m_y, pos.m_z).m_terView;
             fhZone.m_tilesVariants.push_back(terVariant);
         }
-        fhZone.m_terrainId = terrainIds[tile.m_terType];
+        fhZone.m_terrainId = m_terrainIds[tile.m_terType];
+        assert(fhZone.m_terrainId);
         dest.m_zones.push_back(std::move(fhZone));
     };
 
-    FloodFiller roadFiller(&src, &dest);
+    FloodFiller roadFiller(&tileSet, &destTileMap);
 
-    auto visitRoad = [&roadFiller, &src, &dest](const MapTile& tile, const FHPos& tilePos) {
+    auto visitRoad = [&roadFiller, &tileSet, &dest](const MapTile& tile, const FHPos& tilePos) {
         if (tile.m_roadType == 0)
             return;
 
@@ -866,16 +979,16 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
         FHRoad fhRoad;
         fhRoad.m_tiles = std::move(tiles);
         for (auto& pos : fhRoad.m_tiles) {
-            auto roadVariant = src.m_tiles.get(pos.m_x, pos.m_y, pos.m_z).m_roadDir;
+            auto roadVariant = tileSet.get(pos.m_x, pos.m_y, pos.m_z).m_roadDir;
             fhRoad.m_tilesVariants.push_back(roadVariant);
         }
         fhRoad.m_type = static_cast<FHRoadType>(tile.m_roadType);
         dest.m_roads.push_back(std::move(fhRoad));
     };
 
-    FloodFiller riverFiller(&src, &dest);
+    FloodFiller riverFiller(&tileSet, &destTileMap);
 
-    auto visitRiver = [&riverFiller, &src, &dest](const MapTile& tile, const FHPos& tilePos) {
+    auto visitRiver = [&riverFiller, &tileSet, &dest](const MapTile& tile, const FHPos& tilePos) {
         if (tile.m_riverType == 0)
             return;
 
@@ -889,24 +1002,30 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
         FHRiver fhRiver;
         fhRiver.m_tiles = std::move(tiles);
         for (auto& pos : fhRiver.m_tiles) {
-            auto riverVariant = src.m_tiles.get(pos.m_x, pos.m_y, pos.m_z).m_riverDir;
+            auto riverVariant = tileSet.get(pos.m_x, pos.m_y, pos.m_z).m_riverDir;
             fhRiver.m_tilesVariants.push_back(riverVariant);
         }
         fhRiver.m_type = static_cast<FHRiverType>(tile.m_riverType);
         dest.m_rivers.push_back(std::move(fhRiver));
     };
-
+    size_t defaultTiles = 0;
     for (int z = 0; z < dest.m_tileMap.m_depth; ++z) {
         for (int y = 0; y < dest.m_tileMap.m_height; ++y) {
             for (int x = 0; x < dest.m_tileMap.m_width; ++x) {
-                auto&       tile = src.m_tiles.get(x, y, z);
+                auto&       tile = tileSet.get(x, y, z);
                 const FHPos tilePos{ x, y, z };
+                defaultTiles += tile.m_terType == defTerrainType;
+                if (tile.m_terType == defTerrainType) {
+                    assert(!terrainFiller.m_zoned.contains(tilePos));
+                }
                 visitTerrain(tile, tilePos);
                 visitRoad(tile, tilePos);
                 visitRiver(tile, tilePos);
             }
         }
     }
+    size_t zonedSize = terrainFiller.m_zoned.size();
+    assert(defaultTiles + zonedSize == dest.m_tileMap.totalSize());
 }
 
 }

@@ -154,10 +154,14 @@ struct FHTileMap {
     {
         return getNeighbour(pos.m_x, dx, pos.m_y, dy, pos.m_z);
     }
+    size_t totalSize() const
+    {
+        return m_width * m_height * m_depth;
+    }
 
     void updateSize()
     {
-        m_tiles.resize(m_width * m_height * m_depth);
+        m_tiles.resize(totalSize());
     }
 
     void correctTerrainTypes(Core::LibraryTerrainConstPtr dirtTerrain,

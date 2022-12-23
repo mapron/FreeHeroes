@@ -13,8 +13,7 @@
 #include "FileFormatJson.hpp"
 #include "Compression.hpp"
 
-#include "FH2H3M.hpp"
-#include "H3M2FH.hpp"
+#include "H3MConversion.hpp"
 
 #include <iostream>
 

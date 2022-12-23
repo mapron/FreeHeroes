@@ -50,14 +50,20 @@
 "sod.visitable.witchHut"                   : [ [ "avswtch0", "avswtcs0"] ],
 "sod.visitable.scholar"                    : [ [ "avxschl0" ] ],
 "sod.visitable.leanToWithResource"         : [ [ "avmlean0" ] ],
-"sod.visitable.questHut"                   : [ [ "avxseeb0", "avxseer0", "avxseey0", "avxseec0", "avxseee0" ] ],
+"sod.visitable.questHut"                   : [ [ "avxseeb0", "avxseer0", "avxseey0", "avxseec0", "avxseee0" , "wt_seerh" ] ],
 
 "sod.visitable.shrine1"                    : [ [ "avxl1sh0w", "avxl1sh0" ] ],
 "sod.visitable.shrine2"                    : [ [ "avxl2sh0w", "avxl2sh0" ] ],
 "sod.visitable.shrine3"                    : [ [ "avxl3sh0w", "avxl3sh0" ] ],
-"hota.visitable.shrine4"                   : [ [ "4lvlxshrn" ] ],
+"hota.visitable.shrine4"                   : [ [ "avxl4sh0" , "4lvlxshrn" ] ],
+"hota.visitable.loyality"                  : [ [ "haexit01" ] ],
+"hota.visitable.waterAcademy"              : [ [ "avswacad" ] ],
 
+"sod.visitable.monolithEnter"              : [ [ "avxmn1b0", "avxmn1r0", "avxmn1y0", "avxmn4i0", "avxmn1t0", "avxmn1v0", "avxmn1g0", "avxmn1w0", "avxmn5i0", "avxmn6i0", "avxmn7i0", "avxmn8i0"] ],
+"sod.visitable.monolithExit"               : [ [ "avxmx1b0", "avxmx1r0", "avxmx1y0", "avxmn4o0", "avxmx1t0", "avxmx1v0", "avxmx1g0", "avxmx1w0", "avxmn5o0", "avxmn6o0", "avxmn7o0", "avxmn8o0"] ],
+"sod.visitable.monolithTwoSide"            : [ [ "avxmn2g0", "avxmn2o0", "avxmn2p0", "avxmn4b0", "avxmn2pink0", "avxmn2t0", "avxmn2y0", "avxmn2b0", "avxmn2bl", "avxmn2rd", "avxmn5b0", "avxmn6b0", "avxmn7b0", "avxmn8b0", "avxmn9b0", "avxmn10b", "avxmn11b", "avxmn12b", "avxmn19p", "avxmn20b" ] ],
 
+"sod.visitable.eyeOfMagi"                  : [ [ "avxeyem0" ] ],
 
 "sod.resource.campfire"                    : [ [ "adcfra", "avxcfsn0", "avxcflv0", "avxcfds0"] ],
 "sod.resource.treasureChest"               : [ [ "avtchst0"] ]

@@ -171,10 +171,34 @@ struct FHShrine : public FHCommonVisitable {
 struct FHSkillHut : public FHCommonVisitable {
     std::vector<Core::LibrarySecondarySkillConstPtr> m_skillIds;
 };
-struct FHQuestHut : public FHCommonVisitable {
-    Core::Reward m_reward;
+struct FHQuest {
+    enum class Type
+    {
+        Invalid      = 0,
+        GetHeroLevel = 1,
+        GetPrimaryStat,
+        KillHero,
+        KillCreature,
+        BringArtifacts,
+        BringCreatures,
+        BringResource,
+        BeHero,
+        BePlayer,
+    };
+    Type m_type = Type::Invalid;
 
     std::vector<Core::LibraryArtifactConstPtr> m_artifacts;
+    std::vector<Core::UnitWithCount>           m_units;
+    Core::ResourceAmount                       m_resources;
+    Core::HeroPrimaryParams                    m_primary;
+    int                                        m_level = 0;
+
+    uint32_t m_targetQuestId = 0;
+};
+
+struct FHQuestHut : public FHCommonVisitable {
+    Core::Reward m_reward;
+    FHQuest      m_quest;
 };
 
 struct FHScholar : public FHCommonVisitable {

@@ -5,12 +5,6 @@
  */
 #include "FH2H3M.hpp"
 
-#include "FHMap.hpp"
-#include "H3MMap.hpp"
-
-#include "IGameDatabase.hpp"
-#include "IRandomGenerator.hpp"
-
 #include "LibraryArtifact.hpp"
 #include "LibraryDwelling.hpp"
 #include "LibraryFaction.hpp"
@@ -22,26 +16,15 @@
 #include "LibrarySecondarySkill.hpp"
 #include "LibraryTerrain.hpp"
 
+#include "Logger.hpp"
+
 #define assume(cond) \
     if (!(cond)) \
         throw std::runtime_error(#cond " - violated, invalid FH map provided.");
 
 namespace FreeHeroes {
 
-namespace {
-
-H3Pos int3fromPos(FHPos pos, int xoffset = 0)
-{
-    return { (uint8_t) (pos.m_x + xoffset), (uint8_t) pos.m_y, (uint8_t) pos.m_z };
-}
-
-std::vector<uint8_t> reverseArray(std::vector<uint8_t> arr)
-{
-    std::reverse(arr.begin(), arr.end());
-    return arr;
-}
-
-class ObjectTemplateCache {
+class FH2H3MConverter::ObjectTemplateCache {
 public:
     ObjectTemplateCache(const Core::IGameDatabase* database)
         : m_database(database)
@@ -102,9 +85,13 @@ public:
     const Core::IGameDatabase* const                   m_database;
 };
 
+FH2H3MConverter::FH2H3MConverter(const Core::IGameDatabase* database, Core::IRandomGenerator* rng)
+    : m_database(database)
+    , m_rng(rng)
+{
 }
 
-void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* database, Core::IRandomGenerator* rng)
+void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
 {
     dest              = {};
     dest.m_mapName    = src.m_name;
@@ -125,13 +112,16 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
     dest.m_hotaVer.m_roundLimit        = src.m_config.m_hasRoundLimit ? src.m_config.m_roundLimit : 0xffffffffU;
 
     auto fillZoneTerrain = [&tileMap](const FHZone& zone) {
-        if (!zone.m_terrainId)
+        if (!zone.m_terrainId) {
+            assert(0);
             return;
+        }
 
         zone.placeOnMap(tileMap);
     };
 
-    fillZoneTerrain(FHZone{ .m_terrainId = src.m_defaultTerrain, .m_rect{ FHZone::Rect{ .m_pos{ 0, 0, 0 }, .m_width = tileMap.m_width, .m_height = tileMap.m_height } } });
+    for (int z = 0; z < tileMap.m_depth; ++z)
+        fillZoneTerrain(FHZone{ .m_terrainId = src.m_defaultTerrain, .m_rect{ FHZone::Rect{ .m_pos{ 0, 0, z }, .m_width = tileMap.m_width, .m_height = tileMap.m_height } } });
     for (auto& zone : src.m_zones)
         fillZoneTerrain(zone);
     for (auto& river : src.m_rivers)
@@ -139,14 +129,24 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
     for (auto& road : src.m_roads)
         road.placeOnMap(tileMap);
 
-    const auto* dirtTerrain  = database->terrains()->find(std::string(Core::LibraryTerrain::s_terrainDirt));
-    const auto* sandTerrain  = database->terrains()->find(std::string(Core::LibraryTerrain::s_terrainSand));
-    const auto* waterTerrain = database->terrains()->find(std::string(Core::LibraryTerrain::s_terrainWater));
+    const auto* dirtTerrain  = m_database->terrains()->find(std::string(Core::LibraryTerrain::s_terrainDirt));
+    const auto* sandTerrain  = m_database->terrains()->find(std::string(Core::LibraryTerrain::s_terrainSand));
+    const auto* waterTerrain = m_database->terrains()->find(std::string(Core::LibraryTerrain::s_terrainWater));
+
+    for (int z = 0; z < tileMap.m_depth; ++z) {
+        for (int y = 0; y < tileMap.m_height; ++y) {
+            for (int x = 0; x < tileMap.m_width; ++x) {
+                auto& tile = tileMap.get(x, y, z);
+                if (!tile.m_terrain)
+                    Logger(Logger::Err) << "No terrain at: (" << x << "," << y << "," << z << ")";
+            }
+        }
+    }
 
     tileMap.correctTerrainTypes(dirtTerrain, sandTerrain, waterTerrain);
     tileMap.correctRoads();
     tileMap.correctRivers();
-    tileMap.rngTiles(rng);
+    tileMap.rngTiles(m_rng);
 
     for (int z = 0; z < tileMap.m_depth; ++z) {
         for (int y = 0; y < tileMap.m_height; ++y) {
@@ -196,7 +196,7 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
     for (auto& bit : dest.m_allowedHeroes)
         bit = 1;
 
-    ObjectTemplateCache tmplCache(database);
+    ObjectTemplateCache tmplCache(m_database);
 
     for (auto* def : src.m_initialObjectDefs)
         tmplCache.add(def);
@@ -263,9 +263,9 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
             if (hero->m_hasExp)
                 hero->m_exp = static_cast<int32_t>(fhHero.m_data.m_army.hero.experience);
 
-            assert(!hero->m_hasSecSkills);
-            assert(!hero->m_spellSet.m_hasCustomSpells);
-            assert(!hero->m_primSkillSet.m_hasCustomPrimSkills);
+            //assert(!hero->m_hasSecSkills);
+            //assert(!hero->m_spellSet.m_hasCustomSpells);
+            //assert(!hero->m_primSkillSet.m_hasCustomPrimSkills);
         }
         dest.m_allowedHeroes[heroId] = 0;
         if (playerIndex < 0) {
@@ -495,110 +495,15 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
         auto* def = fhScholar.m_visitableId->mapObjectDefs[fhScholar.m_defVariant];
         dest.m_objects.push_back(Object{ .m_order = fhScholar.m_order, .m_pos = int3fromPos(fhScholar.m_pos), .m_defnum = tmplCache.add(def), .m_impl = std::move(obj) });
     }
+
     for (auto& fhQuestHut : src.m_objects.m_questHuts) {
-        auto  obj      = std::make_unique<MapSeerHut>(dest.m_features);
-        auto& fhReward = fhQuestHut.m_reward;
-        if (fhReward.gainedExp) {
-            obj->m_reward = MapSeerHut::RewardType::EXPERIENCE;
-            obj->m_rVal   = static_cast<uint32_t>(fhReward.gainedExp);
-        }
-        if (fhReward.manaDiff) {
-            obj->m_reward = MapSeerHut::RewardType::MANA_POINTS;
-            obj->m_rVal   = static_cast<uint32_t>(fhReward.manaDiff);
-        }
-        if (fhReward.rngBonus.morale) {
-            obj->m_reward = MapSeerHut::RewardType::MORALE_BONUS;
-            obj->m_rVal   = static_cast<uint32_t>(fhReward.rngBonus.morale);
-        }
-        if (fhReward.rngBonus.luck) {
-            obj->m_reward = MapSeerHut::RewardType::LUCK_BONUS;
-            obj->m_rVal   = static_cast<uint32_t>(fhReward.rngBonus.luck);
-        }
-        if (fhReward.resources.nonEmptyAmount()) {
-            obj->m_reward = MapSeerHut::RewardType::RESOURCES;
-            auto apply    = [&obj](int id, int res) {
-                if (res == 0)
-                    return;
-                obj->m_rVal = static_cast<uint32_t>(res);
-                obj->m_rID  = static_cast<uint32_t>(id);
-            };
-            apply(0, fhReward.resources.wood);
-            apply(1, fhReward.resources.mercury);
-            apply(2, fhReward.resources.ore);
-            apply(3, fhReward.resources.sulfur);
-            apply(4, fhReward.resources.crystal);
-            apply(5, fhReward.resources.gems);
-            apply(6, fhReward.resources.gold);
-        }
-
-        auto applySkill = [&obj](int id, int val) {
-            if (val == 0)
-                return;
-            obj->m_reward = MapSeerHut::RewardType::PRIMARY_SKILL;
-            obj->m_rVal   = static_cast<uint32_t>(val);
-            obj->m_rID    = static_cast<uint32_t>(id);
-        };
-
-        applySkill(0, fhReward.statBonus.ad.attack);
-        applySkill(1, fhReward.statBonus.ad.defense);
-        applySkill(2, fhReward.statBonus.magic.spellPower);
-        applySkill(3, fhReward.statBonus.magic.intelligence);
-
-        if (!fhReward.secSkills.empty()) {
-            obj->m_reward = MapSeerHut::RewardType::SECONDARY_SKILL;
-            obj->m_rID    = fhQuestHut.m_reward.secSkills[0].skill->legacyId;
-            obj->m_rVal   = fhQuestHut.m_reward.secSkills[0].level + 1;
-        }
-        if (!fhReward.artifacts.empty()) {
-            obj->m_reward = MapSeerHut::RewardType::ARTIFACT;
-            obj->m_rID    = fhQuestHut.m_reward.artifacts[0].onlyArtifacts[0]->legacyId;
-        }
-        if (!fhReward.spells.isDefault()) {
-            obj->m_reward = MapSeerHut::RewardType::SPELL;
-            obj->m_rID    = fhQuestHut.m_reward.spells.onlySpells[0]->legacyId;
-        }
-        if (!fhReward.units.empty()) {
-            obj->m_reward = MapSeerHut::RewardType::CREATURE;
-            obj->m_rID    = fhQuestHut.m_reward.units[0].unit->legacyId;
-            obj->m_rVal   = fhQuestHut.m_reward.units[0].count;
-        }
-
-        obj->m_quest.m_missionType = MapQuest::Mission::ART;
-        for (auto* art : fhQuestHut.m_artifacts)
-            obj->m_quest.m_5arts.push_back(static_cast<uint16_t>(art->legacyId));
+        auto obj = std::make_unique<MapSeerHut>(dest.m_features);
+        convertRewardHut(fhQuestHut.m_reward, obj.get());
+        convertQuest(fhQuestHut.m_quest, obj->m_quest);
 
         auto* def = fhQuestHut.m_visitableId->mapObjectDefs[fhQuestHut.m_defVariant];
         dest.m_objects.push_back(Object{ .m_order = fhQuestHut.m_order, .m_pos = int3fromPos(fhQuestHut.m_pos), .m_defnum = tmplCache.add(def), .m_impl = std::move(obj) });
     }
-    auto convertStacks = [](const std::vector<Core::UnitWithCount>& stacks) -> std::vector<StackBasicDescriptor> {
-        std::vector<StackBasicDescriptor> result;
-        for (auto& stack : stacks)
-            result.push_back({ static_cast<uint16_t>(stack.unit->legacyId), static_cast<uint16_t>(stack.count) });
-        return result;
-    };
-
-    auto convertReward = [&convertStacks](const Core::Reward& fhReward, MapReward& reward) {
-        reward.m_gainedExp  = fhReward.gainedExp;
-        reward.m_manaDiff   = fhReward.manaDiff;
-        reward.m_luckDiff   = fhReward.rngBonus.luck;
-        reward.m_moraleDiff = fhReward.rngBonus.morale;
-
-        reward.m_resourceSet.m_resourceAmount[0] = fhReward.resources.wood;
-        reward.m_resourceSet.m_resourceAmount[1] = fhReward.resources.mercury;
-        reward.m_resourceSet.m_resourceAmount[2] = fhReward.resources.ore;
-        reward.m_resourceSet.m_resourceAmount[3] = fhReward.resources.sulfur;
-        reward.m_resourceSet.m_resourceAmount[4] = fhReward.resources.crystal;
-        reward.m_resourceSet.m_resourceAmount[5] = fhReward.resources.gems;
-        reward.m_resourceSet.m_resourceAmount[6] = fhReward.resources.gold;
-
-        // @todo: m_primSkillSet
-        // @todo: m_secSkills
-        // @todo: m_artifacts
-        for (auto* spell : fhReward.spells.onlySpells)
-            reward.m_spells.push_back(static_cast<uint8_t>(spell->legacyId));
-
-        reward.m_creatures.m_stacks = convertStacks(fhReward.units);
-    };
 
     for (auto& fhPandora : src.m_objects.m_pandoras) {
         auto obj = std::make_unique<MapPandora>(dest.m_features);
@@ -610,6 +515,170 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
     dest.m_objectDefs = std::move(tmplCache.m_objectDefs);
 
     std::sort(dest.m_objects.begin(), dest.m_objects.end(), [](const auto& lh, const auto& rh) { return lh.m_order < rh.m_order; });
+}
+
+std::vector<uint32_t> FH2H3MConverter::convertResource(const Core::ResourceAmount& amount) const
+{
+    std::vector<uint32_t> res(7);
+
+    res[0] = amount.wood;
+    res[1] = amount.mercury;
+    res[2] = amount.ore;
+    res[3] = amount.sulfur;
+    res[4] = amount.crystal;
+    res[5] = amount.gems;
+    res[6] = amount.gold;
+    return res;
+}
+void FH2H3MConverter::convertReward(const Core::Reward& fhReward, MapReward& reward) const
+{
+    reward.m_gainedExp  = fhReward.gainedExp;
+    reward.m_manaDiff   = fhReward.manaDiff;
+    reward.m_luckDiff   = fhReward.rngBonus.luck;
+    reward.m_moraleDiff = fhReward.rngBonus.morale;
+
+    reward.m_resourceSet.m_resourceAmount = convertResource(fhReward.resources);
+    reward.m_primSkillSet.m_prim          = convertPrimaryStats(fhReward.statBonus);
+
+    // @todo: m_secSkills
+    // @todo: m_artifacts
+    for (auto* spell : fhReward.spells.onlySpells)
+        reward.m_spells.push_back(static_cast<uint8_t>(spell->legacyId));
+
+    reward.m_creatures.m_stacks = convertStacks(fhReward.units);
+}
+
+void FH2H3MConverter::convertRewardHut(const Core::Reward& fhReward, MapSeerHut* hut) const
+{
+    if (fhReward.gainedExp) {
+        hut->m_reward = MapSeerHut::RewardType::EXPERIENCE;
+        hut->m_rVal   = static_cast<uint32_t>(fhReward.gainedExp);
+    }
+    if (fhReward.manaDiff) {
+        hut->m_reward = MapSeerHut::RewardType::MANA_POINTS;
+        hut->m_rVal   = static_cast<uint32_t>(fhReward.manaDiff);
+    }
+    if (fhReward.rngBonus.morale) {
+        hut->m_reward = MapSeerHut::RewardType::MORALE_BONUS;
+        hut->m_rVal   = static_cast<uint32_t>(fhReward.rngBonus.morale);
+    }
+    if (fhReward.rngBonus.luck) {
+        hut->m_reward = MapSeerHut::RewardType::LUCK_BONUS;
+        hut->m_rVal   = static_cast<uint32_t>(fhReward.rngBonus.luck);
+    }
+    if (fhReward.resources.nonEmptyAmount()) {
+        hut->m_reward = MapSeerHut::RewardType::RESOURCES;
+        auto apply    = [&hut](int id, int res) {
+            if (res == 0)
+                return;
+            hut->m_rVal = static_cast<uint32_t>(res);
+            hut->m_rID  = static_cast<uint32_t>(id);
+        };
+
+        apply(0, fhReward.resources.wood);
+        apply(1, fhReward.resources.mercury);
+        apply(2, fhReward.resources.ore);
+        apply(3, fhReward.resources.sulfur);
+        apply(4, fhReward.resources.crystal);
+        apply(5, fhReward.resources.gems);
+        apply(6, fhReward.resources.gold);
+    }
+
+    auto applySkill = [&hut](int id, int val) {
+        if (val == 0)
+            return;
+        hut->m_reward = MapSeerHut::RewardType::PRIMARY_SKILL;
+        hut->m_rVal   = static_cast<uint32_t>(val);
+        hut->m_rID    = static_cast<uint32_t>(id);
+    };
+
+    applySkill(0, fhReward.statBonus.ad.attack);
+    applySkill(1, fhReward.statBonus.ad.defense);
+    applySkill(2, fhReward.statBonus.magic.spellPower);
+    applySkill(3, fhReward.statBonus.magic.intelligence);
+
+    if (!fhReward.secSkills.empty()) {
+        hut->m_reward = MapSeerHut::RewardType::SECONDARY_SKILL;
+        hut->m_rID    = fhReward.secSkills[0].skill->legacyId;
+        hut->m_rVal   = fhReward.secSkills[0].level + 1;
+    }
+    if (!fhReward.artifacts.empty()) {
+        hut->m_reward = MapSeerHut::RewardType::ARTIFACT;
+        hut->m_rID    = fhReward.artifacts[0].onlyArtifacts[0]->legacyId;
+    }
+    if (!fhReward.spells.isDefault()) {
+        hut->m_reward = MapSeerHut::RewardType::SPELL;
+        hut->m_rID    = fhReward.spells.onlySpells[0]->legacyId;
+    }
+    if (!fhReward.units.empty()) {
+        hut->m_reward = MapSeerHut::RewardType::CREATURE;
+        hut->m_rID    = fhReward.units[0].unit->legacyId;
+        hut->m_rVal   = fhReward.units[0].count;
+    }
+}
+
+std::vector<StackBasicDescriptor> FH2H3MConverter::convertStacks(const std::vector<Core::UnitWithCount>& stacks) const
+{
+    std::vector<StackBasicDescriptor> result;
+    for (auto& stack : stacks)
+        result.push_back({ static_cast<uint16_t>(stack.unit->legacyId), static_cast<uint16_t>(stack.count) });
+    return result;
+}
+
+std::vector<uint8_t> FH2H3MConverter::convertPrimaryStats(const Core::HeroPrimaryParams& stats) const
+{
+    std::vector<uint8_t> res(4);
+    res[0] = stats.ad.attack;
+    res[1] = stats.ad.defense;
+    res[2] = stats.magic.spellPower;
+    res[3] = stats.magic.intelligence;
+    return res;
+}
+
+void FH2H3MConverter::convertQuest(const FHQuest& fhQuest, MapQuest& quest) const
+{
+    switch (fhQuest.m_type) {
+        case FHQuest::Type::GetHeroLevel:
+        {
+            quest.m_missionType = MapQuest::Mission::LEVEL;
+            quest.m_134val      = fhQuest.m_level;
+        } break;
+        case FHQuest::Type::GetPrimaryStat:
+        {
+            quest.m_missionType = MapQuest::Mission::PRIMARY_STAT;
+            quest.m_2stats      = convertPrimaryStats(fhQuest.m_primary);
+        } break;
+        case FHQuest::Type::BringArtifacts:
+        {
+            quest.m_missionType = MapQuest::Mission::ART;
+            for (auto* art : fhQuest.m_artifacts)
+                quest.m_5arts.push_back(static_cast<uint16_t>(art->legacyId));
+        } break;
+        case FHQuest::Type::BringCreatures:
+        {
+            quest.m_missionType = MapQuest::Mission::ARMY;
+            for (const auto& stack : fhQuest.m_units)
+                quest.m_6creatures.m_stacks.push_back({ static_cast<uint16_t>(stack.unit->legacyId), static_cast<uint16_t>(stack.count) });
+        } break;
+        case FHQuest::Type::BringResource:
+        {
+            quest.m_missionType = MapQuest::Mission::RESOURCES;
+            quest.m_7resources  = convertResource(fhQuest.m_resources);
+        } break;
+        case FHQuest::Type::KillCreature:
+        {
+            quest.m_missionType = MapQuest::Mission::KILL_CREATURE;
+            quest.m_134val      = fhQuest.m_targetQuestId;
+        } break;
+        case FHQuest::Type::KillHero:
+        {
+            quest.m_missionType = MapQuest::Mission::KILL_HERO;
+            quest.m_134val      = fhQuest.m_targetQuestId;
+        } break;
+        default:
+            assert(!"Unsupported");
+            break;
+    }
 }
 
 }

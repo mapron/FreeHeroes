@@ -240,8 +240,8 @@ enum class MapObjectType
     //    PINE_TREES  = 137,
     //    PLANT       = 138,
 
-    //    NON_BLOCKING_DECORATION_1 = 139,
-    //    NON_BLOCKING_DECORATION_2 = 140,
+    //    DECORATION_1 = 139,
+    //    DECORATION_2 = 140,
     //    UNUSED_2                  = 141,
 
     //    HOTA_STORAGE = 142,

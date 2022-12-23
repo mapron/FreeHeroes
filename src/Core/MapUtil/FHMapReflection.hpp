@@ -218,6 +218,30 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 
     m_skillIds)
 
+ENUM_REFLECTION_STRINGIY(
+    FHQuest::Type,
+    Invalid,
+    Invalid,
+    GetHeroLevel,
+    GetPrimaryStat,
+    KillHero,
+    KillCreature,
+    BringArtifacts,
+    BringCreatures,
+    BringResource,
+    BeHero,
+    BePlayer)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHQuest,
+    m_type,
+    m_artifacts,
+    m_units,
+    m_resources,
+    m_primary,
+    m_level,
+    m_targetQuestId);
+
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHQuestHut,
     m_pos,
@@ -227,7 +251,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_defVariant,
 
     m_reward,
-    m_artifacts)
+    m_quest)
 
 ENUM_REFLECTION_STRINGIY(
     FHScholar::Type,

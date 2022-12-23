@@ -47,7 +47,7 @@ struct LibraryMapObstacle {
         PINE_TREES,  // 137 188
         PLANT,       // 138 189
 
-        NON_BLOCKING_DECORATION, // 139 140,
+        DECORATION, // 139 140,
 
         RIVER_DELTA, // 143 190
 
