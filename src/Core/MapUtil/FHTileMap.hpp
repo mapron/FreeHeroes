@@ -154,6 +154,10 @@ struct FHTileMap {
     {
         return getNeighbour(pos.m_x, dx, pos.m_y, dy, pos.m_z);
     }
+    const Tile& getNeighbour(const FHPos& pos, int dx, int dy, const Tile& def) const
+    {
+        return inBounds(pos.m_x + dx, pos.m_y + dy) ? getNeighbour(pos.m_x, dx, pos.m_y, dy, pos.m_z) : def;
+    }
     size_t totalSize() const
     {
         return m_width * m_height * m_depth;

@@ -925,29 +925,17 @@ FHQuest H3M2FHConverter::convertQuest(const MapQuest& quest) const
 
 void H3M2FHConverter::convertTileMap(const H3Map& src, FHMap& dest) const
 {
-    auto defTerrainType   = src.m_tiles.get(0, 0, 0).m_terType;
-    dest.m_defaultTerrain = m_terrainIds[defTerrainType];
-    assert(dest.m_defaultTerrain);
-
-    if (0) {
-        //dest.m_defaultTerrain = m_database->terrains()->find("sod.terrain.dirt");
-        //defTerrainType        = 0xff;
-    }
-
     const MapTileSet& tileSet     = src.m_tiles;
     FHTileMap&        destTileMap = dest.m_tileMap;
 
     FloodFiller terrainFiller(&tileSet, &destTileMap);
 
-    auto visitTerrain = [this, &terrainFiller, defTerrainType, &tileSet, &dest](const MapTile& tile, const FHPos& tilePos) {
-        if (tile.m_terType == defTerrainType)
-            return;
-
+    auto visitTerrain = [this, &terrainFiller, &tileSet, &dest](const MapTile& tile, const FHPos& tilePos) {
         if (terrainFiller.m_zoned.contains(tilePos))
             return;
 
-        auto tiles = terrainFiller.makeNewZone(tilePos, [&tile, defTerrainType](const MapTile& neighbourTile) -> bool {
-            if (neighbourTile.m_terType == defTerrainType || neighbourTile.m_terType != tile.m_terType)
+        auto tiles = terrainFiller.makeNewZone(tilePos, [&tile](const MapTile& neighbourTile) -> bool {
+            if (neighbourTile.m_terType != tile.m_terType)
                 return true;
             return false;
         });
@@ -1008,24 +996,19 @@ void H3M2FHConverter::convertTileMap(const H3Map& src, FHMap& dest) const
         fhRiver.m_type = static_cast<FHRiverType>(tile.m_riverType);
         dest.m_rivers.push_back(std::move(fhRiver));
     };
-    size_t defaultTiles = 0;
     for (int z = 0; z < dest.m_tileMap.m_depth; ++z) {
         for (int y = 0; y < dest.m_tileMap.m_height; ++y) {
             for (int x = 0; x < dest.m_tileMap.m_width; ++x) {
                 auto&       tile = tileSet.get(x, y, z);
                 const FHPos tilePos{ x, y, z };
-                defaultTiles += tile.m_terType == defTerrainType;
-                if (tile.m_terType == defTerrainType) {
-                    assert(!terrainFiller.m_zoned.contains(tilePos));
-                }
                 visitTerrain(tile, tilePos);
                 visitRoad(tile, tilePos);
                 visitRiver(tile, tilePos);
             }
         }
     }
-    size_t zonedSize = terrainFiller.m_zoned.size();
-    assert(defaultTiles + zonedSize == dest.m_tileMap.totalSize());
+
+    assert(terrainFiller.m_zoned.size() == dest.m_tileMap.totalSize());
 }
 
 }

@@ -120,8 +120,10 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         zone.placeOnMap(tileMap);
     };
 
-    for (int z = 0; z < tileMap.m_depth; ++z)
-        fillZoneTerrain(FHZone{ .m_terrainId = src.m_defaultTerrain, .m_rect{ FHZone::Rect{ .m_pos{ 0, 0, z }, .m_width = tileMap.m_width, .m_height = tileMap.m_height } } });
+    if (src.m_defaultTerrain) {
+        for (int z = 0; z < tileMap.m_depth; ++z)
+            fillZoneTerrain(FHZone{ .m_terrainId = src.m_defaultTerrain, .m_rect{ FHZone::Rect{ .m_pos{ 0, 0, z }, .m_width = tileMap.m_width, .m_height = tileMap.m_height } } });
+    }
     for (auto& zone : src.m_zones)
         fillZoneTerrain(zone);
     for (auto& river : src.m_rivers)

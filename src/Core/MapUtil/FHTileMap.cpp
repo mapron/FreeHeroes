@@ -247,7 +247,7 @@ const std::vector<PatternMatcher> g_matchers{
     PatternMatcher{
         .m_type       = BorderType::Mixed_DNND,
         .m_class      = BorderClass::Mixed,
-        .m_doFlipVert = false,
+        .m_doFlipHor  = false,
         .m_useOnDirt  = false,
         .m_f          = [](const TileNeightbours& t, bool) {
             return true
@@ -351,27 +351,25 @@ const std::vector<PatternMatcher> g_matchers{
     },
     // clang-format on
     PatternMatcher{
-        .m_type       = BorderType::Special_DDDD,
-        .m_class      = BorderClass::Special,
-        .m_doFlipHor  = false,
-        .m_doFlipVert = false,
-        .m_useOnDirt  = false,
-        .m_f          = [](const TileNeightbours& t, bool) {
+        .m_type      = BorderType::Special_DDDD,
+        .m_class     = BorderClass::Special,
+        .m_useOnDirt = false,
+        .m_f         = [](const TileNeightbours& t, bool) {
             return true
                    && t.TL.D && t.TR.D
-                   && t.BL.D && t.BR.D;
+                   && t.BL.D && t.BR.D
+                   && t.R2.EQ && t.B2.EQ;
         },
     },
     PatternMatcher{
-        .m_type       = BorderType::Special_SSSS,
-        .m_class      = BorderClass::Special,
-        .m_doFlipHor  = false,
-        .m_doFlipVert = false,
-        .m_useOnDirt  = true,
-        .m_f          = [](const TileNeightbours& t, bool) {
+        .m_type      = BorderType::Special_SSSS,
+        .m_class     = BorderClass::Special,
+        .m_useOnDirt = true,
+        .m_f         = [](const TileNeightbours& t, bool) {
             return true
                    && t.TL.S && t.TR.S
-                   && t.BL.S && t.BR.S;
+                   && t.BL.S && t.BR.S
+                   && t.R2.EQ && t.B2.EQ;
         },
     },
     PatternMatcher{
@@ -426,9 +424,6 @@ bool FHTileMap::Tile::setViewBorderSpecial(Core::LibraryTerrain::BorderType bord
 
     m_tileOffset = pp.specialBorderTilesOffset + pp.borderSpecialOffsets.at(borderType);
     m_tileCount  = pp.borderSpecialCounts.at(borderType);
-    if (borderType == BorderType::Special_SSSS) {
-        m_flipHor = true; // no sense. It just how it works for this tile. It's pretty symmetrical.
-    }
     updateMinMax();
     return true;
 }
@@ -677,14 +672,15 @@ void FHTileMap::correctRoads()
          *  L  X   R
          * BL  B  BR
          */
+        const Tile def;
         // const auto& TL = getNeighbour(pos, flipHor ? +1 : -1, flipVert ? +1 : -1);
-        const auto& T  = getNeighbour(pos, flipHor ? +0 : +0, flipVert ? +1 : -1);
-        const auto& TR = getNeighbour(pos, flipHor ? -1 : +1, flipVert ? +1 : -1);
-        const auto& L  = getNeighbour(pos, flipHor ? +1 : -1, flipVert ? +0 : +0);
+        const auto& T  = getNeighbour(pos, flipHor ? +0 : +0, flipVert ? +1 : -1, def);
+        const auto& TR = getNeighbour(pos, flipHor ? -1 : +1, flipVert ? +1 : -1, def);
+        const auto& L  = getNeighbour(pos, flipHor ? +1 : -1, flipVert ? +0 : +0, def);
         auto&       X  = get(pos);
-        const auto& R  = getNeighbour(pos, flipHor ? -1 : +1, flipVert ? +0 : +0);
-        const auto& BL = getNeighbour(pos, flipHor ? +1 : -1, flipVert ? -1 : +1);
-        const auto& B  = getNeighbour(pos, flipHor ? +0 : +0, flipVert ? -1 : +1);
+        const auto& R  = getNeighbour(pos, flipHor ? -1 : +1, flipVert ? +0 : +0, def);
+        const auto& BL = getNeighbour(pos, flipHor ? +1 : -1, flipVert ? -1 : +1, def);
+        const auto& B  = getNeighbour(pos, flipHor ? +0 : +0, flipVert ? -1 : +1, def);
         // const auto& BR = getNeighbour(pos, flipHor ? -1 : +1, flipVert ? -1 : +1);
 
         const auto eR  = X.m_roadType == R.m_roadType && &X != &R;
@@ -765,14 +761,15 @@ void FHTileMap::correctRivers()
          *  L  X   R
          * BL  B  BR
          */
+        const Tile def;
         //const auto& TL = getNeighbour(pos, flipHor ? +1 : -1, flipVert ? +1 : -1);
-        const auto& T = getNeighbour(pos, flipHor ? +0 : +0, flipVert ? +1 : -1);
+        const auto& T = getNeighbour(pos, flipHor ? +0 : +0, flipVert ? +1 : -1, def);
         // const auto& TR = getNeighbour(pos, flipHor ? -1 : +1, flipVert ? +1 : -1);
-        const auto& L = getNeighbour(pos, flipHor ? +1 : -1, flipVert ? +0 : +0);
+        const auto& L = getNeighbour(pos, flipHor ? +1 : -1, flipVert ? +0 : +0, def);
         auto&       X = get(pos);
-        const auto& R = getNeighbour(pos, flipHor ? -1 : +1, flipVert ? +0 : +0);
+        const auto& R = getNeighbour(pos, flipHor ? -1 : +1, flipVert ? +0 : +0, def);
         //const auto& BL = getNeighbour(pos, flipHor ? +1 : -1, flipVert ? -1 : +1);
-        const auto& B = getNeighbour(pos, flipHor ? +0 : +0, flipVert ? -1 : +1);
+        const auto& B = getNeighbour(pos, flipHor ? +0 : +0, flipVert ? -1 : +1, def);
         //const auto& BR = getNeighbour(pos, flipHor ? -1 : +1, flipVert ? -1 : +1);
 
         const auto eR = X.m_riverType == R.m_riverType && &X != &R;
