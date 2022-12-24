@@ -10,8 +10,10 @@
 #include "MapConverter.hpp"
 
 #include "SpriteMap.hpp"
+#include "SpriteMapItem.hpp"
 #include "FHMapToSpriteMap.hpp"
 
+#include "IRandomGenerator.hpp"
 #include "IGameDatabase.hpp"
 
 #include <QBoxLayout>
@@ -59,9 +61,6 @@ MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDataba
     // m_adventureMap = std::make_unique<AdventureMap>(width, height, 1);
     //generateMap();
 
-    //AdventureMapItem* item = new AdventureMapItem(*m_adventureMap, m_modelsProvider);
-
-    //m_scene->addItem(item);
     //
 
     m_view->setMinimumSize(400, 400);
@@ -87,13 +86,26 @@ void MapEditorWidget::load(const std::string& filename)
 
     *m_map = std::move(converter.m_mapFH);
 
+    auto rng = m_rngFactory->create();
+    rng->setSeed(m_map->m_seed);
+
+    auto* db = m_gameDatabaseContainer->getDatabase(m_map->m_version);
+
+    m_map->initTiles(db);
+    m_map->m_tileMap.rngTiles(rng.get());
+
     updateMap();
 }
 
 void MapEditorWidget::updateMap()
 {
     MapRenderer renderer;
-    *m_spriteMap = renderer.render(*m_map, m_graphicsLibrary);
+    *m_spriteMap = renderer.render(*m_map, m_graphicsLibrary, 0);
+
+    SpriteMapItem* item = new SpriteMapItem(m_spriteMap.get());
+
+    m_scene->addItem(item);
+    m_scene->setSceneRect(QRectF(0, 0, m_spriteMap->m_width * 32, m_spriteMap->m_height * 32));
 }
 
 MapEditorWidget::~MapEditorWidget()

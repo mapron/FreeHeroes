@@ -479,9 +479,15 @@ void MapConverter::propertyDeserializeFH()
 
 void MapConverter::convertFHtoH3M()
 {
-    auto rnd = m_rngFactory->create();
-    rnd->setSeed(m_mapFH.m_seed);
-    convertFH2H3M(m_mapFH, m_mapH3M, m_databaseContainer->getDatabase(m_mapFH.m_version), rnd.get());
+    auto rng = m_rngFactory->create();
+    rng->setSeed(m_mapFH.m_seed);
+
+    auto* db = m_databaseContainer->getDatabase(m_mapFH.m_version);
+
+    m_mapFH.initTiles(db);
+    m_mapFH.m_tileMap.rngTiles(rng.get());
+
+    convertFH2H3M(m_mapFH, m_mapH3M, db);
 }
 
 void MapConverter::convertH3MtoFH()

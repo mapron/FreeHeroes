@@ -15,7 +15,7 @@ namespace FreeHeroes {
 
 class FH2H3MConverter {
 public:
-    FH2H3MConverter(const Core::IGameDatabase* database, Core::IRandomGenerator* rng);
+    FH2H3MConverter(const Core::IGameDatabase* database);
 
     void convertMap(const FHMap& src, H3Map& dest) const;
 
@@ -37,7 +37,6 @@ private:
 
 private:
     const Core::IGameDatabase* const m_database;
-    Core::IRandomGenerator* const    m_rng;
 };
 
 }

@@ -15,7 +15,7 @@ class IGraphicsLibrary;
 
 class MapRenderer {
 public:
-    SpriteMap render(const FHMap& fhMap, const Gui::IGraphicsLibrary* graphicsLibrary) const;
+    SpriteMap render(const FHMap& fhMap, const Gui::IGraphicsLibrary* graphicsLibrary, int z) const;
 };
 
 }

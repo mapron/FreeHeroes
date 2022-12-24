@@ -9,6 +9,8 @@
 
 #include <optional>
 
+#include "MapUtilExport.hpp"
+
 namespace FreeHeroes {
 
 namespace Core {
@@ -41,7 +43,7 @@ enum class FHRoadType
     Cobblestone,
 };
 
-struct FHTileMap {
+struct MAPUTIL_EXPORT FHTileMap {
     enum class SubtileType
     {
         Invalid,
@@ -178,13 +180,25 @@ struct FHTileMap {
     void rngTiles(Core::IRandomGenerator* rng);
 
     template<class F>
-    void eachPos(F&& f)
+    void eachPos(F&& f) const
     {
         for (int z = 0; z < m_depth; ++z) {
             for (int y = 0; y < m_height; ++y) {
                 for (int x = 0; x < m_width; ++x) {
                     const FHPos pos{ x, y, z };
                     f(pos);
+                }
+            }
+        }
+    }
+    template<class F>
+    void eachPosTile(F&& f) const
+    {
+        for (int z = 0; z < m_depth; ++z) {
+            for (int y = 0; y < m_height; ++y) {
+                for (int x = 0; x < m_width; ++x) {
+                    const FHPos pos{ x, y, z };
+                    f(pos, get(x, y, z));
                 }
             }
         }

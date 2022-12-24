@@ -99,9 +99,8 @@ public:
     const Core::IGameDatabase* const                   m_database;
 };
 
-FH2H3MConverter::FH2H3MConverter(const Core::IGameDatabase* database, Core::IRandomGenerator* rng)
+FH2H3MConverter::FH2H3MConverter(const Core::IGameDatabase* database)
     : m_database(database)
-    , m_rng(rng)
 {
 }
 
@@ -111,88 +110,43 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
     dest.m_mapName    = src.m_name;
     dest.m_mapDescr   = src.m_descr;
     dest.m_difficulty = src.m_difficulty;
-    auto tileMap      = src.m_tileMap;
-    tileMap.updateSize();
-    assume(tileMap.m_width == tileMap.m_height && tileMap.m_width > 0);
+
+    assume(src.m_tileMap.m_width == src.m_tileMap.m_height && src.m_tileMap.m_width > 0);
 
     dest.m_format                 = src.m_version == Core::GameVersion::SOD ? MapFormat::SOD : MapFormat::HOTA3;
     dest.m_anyPlayers             = true;
-    dest.m_tiles.m_size           = tileMap.m_width;
-    dest.m_tiles.m_hasUnderground = tileMap.m_depth > 1;
+    dest.m_tiles.m_size           = src.m_tileMap.m_width;
+    dest.m_tiles.m_hasUnderground = src.m_tileMap.m_depth > 1;
     dest.m_tiles.updateSize();
     dest.prepareArrays();
 
     dest.m_hotaVer.m_allowSpecialWeeks = src.m_config.m_allowSpecialWeeks;
     dest.m_hotaVer.m_roundLimit        = src.m_config.m_hasRoundLimit ? src.m_config.m_roundLimit : 0xffffffffU;
 
-    auto fillZoneTerrain = [&tileMap](const FHZone& zone) {
-        if (!zone.m_terrainId) {
-            assert(0);
-            return;
-        }
-
-        zone.placeOnMap(tileMap);
-    };
-
-    if (src.m_defaultTerrain) {
-        for (int z = 0; z < tileMap.m_depth; ++z)
-            fillZoneTerrain(FHZone{ .m_terrainId = src.m_defaultTerrain, .m_rect{ FHZone::Rect{ .m_pos{ 0, 0, z }, .m_width = tileMap.m_width, .m_height = tileMap.m_height } } });
-    }
-    for (auto& zone : src.m_zones)
-        fillZoneTerrain(zone);
-    for (auto& river : src.m_rivers)
-        river.placeOnMap(tileMap);
-    for (auto& road : src.m_roads)
-        road.placeOnMap(tileMap);
-
-    const auto* dirtTerrain  = m_database->terrains()->find(std::string(Core::LibraryTerrain::s_terrainDirt));
-    const auto* sandTerrain  = m_database->terrains()->find(std::string(Core::LibraryTerrain::s_terrainSand));
-    const auto* waterTerrain = m_database->terrains()->find(std::string(Core::LibraryTerrain::s_terrainWater));
-
-    for (int z = 0; z < tileMap.m_depth; ++z) {
-        for (int y = 0; y < tileMap.m_height; ++y) {
-            for (int x = 0; x < tileMap.m_width; ++x) {
-                auto& tile = tileMap.get(x, y, z);
-                if (!tile.m_terrain)
-                    Logger(Logger::Err) << "No terrain at: (" << x << "," << y << "," << z << ")";
-            }
-        }
-    }
-
-    tileMap.correctTerrainTypes(dirtTerrain, sandTerrain, waterTerrain);
-    tileMap.correctRoads();
-    tileMap.correctRivers();
-    tileMap.rngTiles(m_rng);
-
-    for (int z = 0; z < tileMap.m_depth; ++z) {
-        for (int y = 0; y < tileMap.m_height; ++y) {
-            for (int x = 0; x < tileMap.m_width; ++x) {
-                auto& tile              = tileMap.get(x, y, z);
-                auto& destTile          = dest.m_tiles.get(x, y, z);
-                destTile.m_terType      = static_cast<uint8_t>(tile.m_terrain->legacyId);
-                destTile.m_terView      = tile.m_view;
-                destTile.m_riverType    = static_cast<uint8_t>(tile.m_riverType);
-                destTile.m_riverDir     = tile.m_riverView;
-                destTile.m_roadType     = static_cast<uint8_t>(tile.m_roadType);
-                destTile.m_roadDir      = tile.m_roadView;
-                destTile.m_extTileFlags = 0;
-                if (tile.m_flipHor)
-                    destTile.m_extTileFlags |= MapTile::TerrainFlipHor;
-                if (tile.m_flipVert)
-                    destTile.m_extTileFlags |= MapTile::TerrainFlipVert;
-                if (tile.m_roadFlipHor)
-                    destTile.m_extTileFlags |= MapTile::RoadFlipHor;
-                if (tile.m_roadFlipVert)
-                    destTile.m_extTileFlags |= MapTile::RoadFlipVert;
-                if (tile.m_riverFlipHor)
-                    destTile.m_extTileFlags |= MapTile::RiverFlipHor;
-                if (tile.m_riverFlipVert)
-                    destTile.m_extTileFlags |= MapTile::RiverFlipVert;
-                if (tile.m_coastal)
-                    destTile.m_extTileFlags |= MapTile::Coastal;
-            }
-        }
-    }
+    src.m_tileMap.eachPosTile([&dest](const FHPos& pos, const FHTileMap::Tile& tile) {
+        auto& destTile          = dest.m_tiles.get(pos.m_x, pos.m_y, pos.m_z);
+        destTile.m_terType      = static_cast<uint8_t>(tile.m_terrain->legacyId);
+        destTile.m_terView      = tile.m_view;
+        destTile.m_riverType    = static_cast<uint8_t>(tile.m_riverType);
+        destTile.m_riverDir     = tile.m_riverView;
+        destTile.m_roadType     = static_cast<uint8_t>(tile.m_roadType);
+        destTile.m_roadDir      = tile.m_roadView;
+        destTile.m_extTileFlags = 0;
+        if (tile.m_flipHor)
+            destTile.m_extTileFlags |= MapTile::TerrainFlipHor;
+        if (tile.m_flipVert)
+            destTile.m_extTileFlags |= MapTile::TerrainFlipVert;
+        if (tile.m_roadFlipHor)
+            destTile.m_extTileFlags |= MapTile::RoadFlipHor;
+        if (tile.m_roadFlipVert)
+            destTile.m_extTileFlags |= MapTile::RoadFlipVert;
+        if (tile.m_riverFlipHor)
+            destTile.m_extTileFlags |= MapTile::RiverFlipHor;
+        if (tile.m_riverFlipVert)
+            destTile.m_extTileFlags |= MapTile::RiverFlipVert;
+        if (tile.m_coastal)
+            destTile.m_extTileFlags |= MapTile::Coastal;
+    });
 
     for (auto& [playerId, fhPlayer] : src.m_players) {
         auto  index    = static_cast<int>(playerId);

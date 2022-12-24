@@ -14,6 +14,40 @@ namespace FreeHeroes {
 
 void SpriteMapPainter::paint(QPainter* painter, const SpriteMap* spriteMap) const
 {
+    painter->setRenderHint(QPainter::SmoothPixmapTransform, true);
+
+    int animatedFrame = 0;
+    for (const auto& [rowIndex, row] : spriteMap->m_rows) {
+        for (const auto& [colIndex, cell] : row.m_cells) {
+            for (const auto& item : cell.m_items) {
+                auto                   sprite = item.m_sprite->get();
+                Gui::SpriteSequencePtr seq    = sprite->getFramesForGroup(item.m_isAnimated ? item.m_spriteGroup : 0);
+
+                const auto frameIndex = item.m_isAnimated ? 0 : item.m_animationOffset + animatedFrame;
+                const auto frame      = seq->frames[frameIndex % seq->frames.size()];
+
+                auto oldTransform = painter->transform();
+                if (item.m_flipHor || item.m_flipVert) {
+                    auto t2 = oldTransform;
+                    t2.scale(item.m_flipHor ? -1 : 1, item.m_flipVert ? -1 : 1);
+                    painter->setTransform(t2);
+                }
+
+                //const auto offset = m_boundingOrigin + m_pixmapPadding;
+                painter->drawPixmap(QPoint(rowIndex * 32, colIndex * 32) + frame.paddingLeftTop, frame.frame);
+
+                painter->setTransform(oldTransform);
+            }
+        }
+    }
+
+    //   debug cross
+    //    {
+    //        painter->setPen(Qt::SolidLine);
+    //        painter->drawLine(m_boundingOrigin, QPointF(m_boundingSize.width(), m_boundingSize.height()) + m_boundingOrigin);
+    //        painter->drawLine(QPointF(m_boundingSize.width(), 0) + m_boundingOrigin, QPointF(0, m_boundingSize.height()) + m_boundingOrigin);
+    //    }
+
     /*
     
     // QList<QColor> colors {QColor{82, 56, 8 }, QColor{222, 207, 140}, QColor{ 0, 65, 0}, QColor{ 181, 199, 198 }, QColor{74, 134, 107 }};

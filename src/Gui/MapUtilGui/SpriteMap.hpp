@@ -17,6 +17,11 @@ struct SpriteMap {
         struct Cell {
             struct Item {
                 Gui::IAsyncSpritePtr m_sprite;
+                bool                 m_isAnimated      = false;
+                int                  m_spriteGroup     = 0;
+                int                  m_animationOffset = 0;
+                bool                 m_flipHor         = false;
+                bool                 m_flipVert        = false;
             };
 
             std::vector<Item> m_items;

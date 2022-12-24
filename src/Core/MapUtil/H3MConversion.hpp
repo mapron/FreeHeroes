@@ -15,6 +15,6 @@ class IRandomGenerator;
 struct FHMap;
 struct H3Map;
 void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* database);
-void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* database, Core::IRandomGenerator* rng);
+void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* database);
 
 }

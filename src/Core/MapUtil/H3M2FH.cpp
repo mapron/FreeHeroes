@@ -250,32 +250,6 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
     if (dest.m_config.m_hasRoundLimit)
         dest.m_config.m_roundLimit = src.m_hotaVer.m_roundLimit;
 
-    /*
-    std::map<Core::LibraryObjectDefConstPtr, std::pair<Core::LibraryDwellingConstPtr, int>> dwellMap;
-    {
-        for (auto* dwelling : m_database->dwellings()->records()) {
-            for (int i = 0, cnt = dwelling->mapObjectDefs.size(); i < cnt; ++i) {
-                dwellMap[dwelling->mapObjectDefs[i]] = { dwelling, i };
-            }
-        }
-    }
-    std::map<Core::LibraryObjectDefConstPtr, std::pair<Core::LibraryMapBankConstPtr, int>> bankMap;
-    {
-        for (auto* bank : m_database->mapBanks()->records()) {
-            for (int i = 0, cnt = bank->mapObjectDefs.size(); i < cnt; ++i) {
-                bankMap[bank->mapObjectDefs[i]] = { bank, i };
-            }
-        }
-    }
-    std::map<Core::LibraryObjectDefConstPtr, std::pair<Core::LibraryMapVisitableConstPtr, int>> visitableMap;
-    {
-        for (auto* visitable : m_database->mapVisitables()->records()) {
-            for (int i = 0, cnt = visitable->mapObjectDefs.size(); i < cnt; ++i) {
-                visitableMap[visitable->mapObjectDefs[i]] = { visitable, i };
-            }
-        }
-    }*/
-
     std::map<FHPlayerId, FHPos>   mainTowns;
     std::map<FHPlayerId, uint8_t> mainHeroes;
 

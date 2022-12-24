@@ -44,6 +44,8 @@ int main(int argc, char* argv[])
         fhCoreApp.getRandomGeneratorFactory(),
         fhApp.getGraphicsLibrary(),
         fhApp.getModelsProvider());
+
+    dlg.load(input);
     dlg.show();
 
     return app.exec();

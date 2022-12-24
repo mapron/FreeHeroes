@@ -19,6 +19,8 @@
 
 #include "FHTileMap.hpp"
 
+#include "MapUtilExport.hpp"
+
 namespace FreeHeroes {
 
 namespace Core {
@@ -214,7 +216,7 @@ struct FHScholar : public FHCommonVisitable {
     Core::LibrarySpellConstPtr          m_spellId     = nullptr;
 };
 
-struct FHMap {
+struct MAPUTIL_EXPORT FHMap {
     using PlayersMap = std::map<FHPlayerId, FHPlayer>;
 
     Core::GameVersion m_version = Core::GameVersion::Invalid;
@@ -274,6 +276,8 @@ struct FHMap {
 
     void toJson(PropertyTree& data) const;
     void fromJson(const PropertyTree& data, const Core::IGameDatabase* database);
+
+    void initTiles(const Core::IGameDatabase* database);
 };
 
 }

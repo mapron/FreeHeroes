@@ -52,7 +52,6 @@ private:
     const Gui::IGraphicsLibrary*      m_graphicsLibrary;
     const Gui::LibraryModelsProvider* m_modelsProvider;
 
-    //std::unique_ptr<MapMatrix> m_matrix;
     std::unique_ptr<FHMap>     m_map;
     std::unique_ptr<SpriteMap> m_spriteMap;
 };

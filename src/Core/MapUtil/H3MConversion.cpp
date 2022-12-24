@@ -16,9 +16,9 @@ void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* dat
     converter.convertMap(src, dest);
 }
 
-void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* database, Core::IRandomGenerator* rng)
+void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* database)
 {
-    FH2H3MConverter converter(database, rng);
+    FH2H3MConverter converter(database);
     converter.convertMap(src, dest);
 }
 
