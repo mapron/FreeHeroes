@@ -115,7 +115,7 @@ Application::~Application()
     m_impl->appConfig->save();
 }
 
-void Application::load()
+bool Application::load()
 {
     {
         m_impl->coreApp->initLogger(m_impl->appConfig->global().logLevel);
@@ -124,7 +124,8 @@ void Application::load()
         qWarning() << "checking Qt logs";
     }
 
-    m_impl->coreApp->load();
+    if (!m_impl->coreApp->load())
+        return false;
     if (m_impl->coreApp->hasDatabases())
         m_gameDatabaseUi = m_impl->coreApp->getDatabaseContainer()->getDatabase(m_impl->appConfig->global().databaseId.toStdString());
 
@@ -200,6 +201,7 @@ void Application::load()
         QApplication::setPalette(QApplication::style()->standardPalette());
     }
     Logger(Logger::Info) << "Application::load - end";
+    return true;
 }
 
 IAppSettings& Application::getAppSettings()

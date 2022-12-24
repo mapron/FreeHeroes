@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "LibraryFwd.hpp"
+#include "LibraryObjectDef.hpp"
 
 #include <string>
 #include <vector>
@@ -89,7 +89,7 @@ struct LibraryMapObstacle {
 
     Type type = Type::Invalid;
 
-    LibraryObjectDefConstPtr mapObjectDef = nullptr;
+    ObjectDefMappings objectDefs;
 };
 
 }

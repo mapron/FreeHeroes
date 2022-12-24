@@ -24,12 +24,6 @@ private:
     {
         return { (uint8_t) (pos.m_x + xoffset), (uint8_t) pos.m_y, (uint8_t) pos.m_z };
     }
-    static std::vector<uint8_t> reverseArray(std::vector<uint8_t> arr)
-    {
-        std::reverse(arr.begin(), arr.end());
-        return arr;
-    }
-
     std::vector<uint32_t> convertResource(const Core::ResourceAmount& amount) const;
     void                  convertReward(const Core::Reward& fhReward, MapReward& reward) const;
     void                  convertRewardHut(const Core::Reward& fhReward, MapSeerHut* hut) const;

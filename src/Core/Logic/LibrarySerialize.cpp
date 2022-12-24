@@ -307,4 +307,19 @@ bool MetaInfo::transformTree<LibraryHero::StartStack>(const PropertyTree& treeIn
     return true;
 }
 
+template<>
+bool MetaInfo::transformTree<ObjectDefMappings>(const PropertyTree& treeIn, PropertyTree& treeOut)
+{
+    if (!treeIn.isScalar())
+        return false;
+
+    treeOut.convertToMap();
+    auto s = treeIn.getScalar().toString();
+    if (s.empty())
+        return true;
+
+    treeOut["m"][""] = PropertyTreeScalar(std::move(s));
+    return true;
+}
+
 }

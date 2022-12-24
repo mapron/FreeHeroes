@@ -11,6 +11,8 @@
 #include "H3MMapReflection.hpp"
 #include "H3MObjectsReflection.hpp"
 
+#include "Logger.hpp"
+
 #include <set>
 
 namespace FreeHeroes {
@@ -424,17 +426,28 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
         uint32_t count = 0;
         stream >> count;
         m_objects.resize(count);
+        uint32_t index = 0;
         for (auto& obj : m_objects) {
             stream >> obj.m_pos >> obj.m_defnum;
 
             const ObjectTemplate& objTempl = m_objectDefs.at(obj.m_defnum);
             MapObjectType         type     = static_cast<MapObjectType>(objTempl.m_id);
             stream.zeroPadding(5);
-            obj.m_impl = IMapObject::Create(type, m_features);
+            obj.m_impl = IMapObject::Create(type, objTempl.m_subid, m_features);
             if (!obj.m_impl)
                 throw std::runtime_error("Unsupported map object type:" + std::to_string(objTempl.m_id));
 
+            if (0)
+                Logger(Logger::Warning) << "staring  readBinary [" << index << "]: (" << (int) obj.m_pos.m_x << "," << (int) obj.m_pos.m_y << "," << (int) obj.m_pos.m_z << ")  "
+                                        << objTempl.m_animationFile << ", type:" << objTempl.m_id << ", current offset =" << stream.getBuffer().getOffsetRead();
+
             obj.m_impl->readBinary(stream);
+
+            if (0)
+                Logger(Logger::Warning) << "finished readBinary [" << index << "]: (" << (int) obj.m_pos.m_x << "," << (int) obj.m_pos.m_y << "," << (int) obj.m_pos.m_z << ")  "
+                                        << objTempl.m_animationFile << ", type:" << objTempl.m_id << ", current offset =" << stream.getBuffer().getOffsetRead();
+
+            index++;
         }
     }
 
@@ -612,7 +625,7 @@ void H3Map::fromJson(const PropertyTree& data)
 
         const ObjectTemplate& objTempl = m_objectDefs.at(obj.m_defnum);
         MapObjectType         type     = static_cast<MapObjectType>(objTempl.m_id);
-        obj.m_impl                     = IMapObject::Create(type, m_features);
+        obj.m_impl                     = IMapObject::Create(type, objTempl.m_subid, m_features);
         if (!obj.m_impl)
             throw std::runtime_error("Unsupported map object type:" + std::to_string(objTempl.m_id));
 
@@ -689,11 +702,11 @@ void ObjectTemplate::readBinary(ByteOrderDataStreamReader& stream)
     stream >> m_animationFile;
 
     prepareArrays();
-    stream.readBits(m_blockMask);
-    stream.readBits(m_visitMask);
+    stream.readBits(m_blockMask, false, true);
+    stream.readBits(m_visitMask, false, true);
 
-    stream.readBits(m_terrainsHard);
-    stream.readBits(m_terrainsSoft);
+    stream.readBits(m_terrainsHard, false, true);
+    stream.readBits(m_terrainsSoft, false, true);
 
     stream >> m_id >> m_subid;
     m_type = static_cast<Type>(stream.readScalar<uint8_t>());
@@ -706,11 +719,11 @@ void ObjectTemplate::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
     stream << m_animationFile;
 
-    stream.writeBits(m_blockMask);
-    stream.writeBits(m_visitMask);
+    stream.writeBits(m_blockMask, false, true);
+    stream.writeBits(m_visitMask, false, true);
 
-    stream.writeBits(m_terrainsHard);
-    stream.writeBits(m_terrainsSoft);
+    stream.writeBits(m_terrainsHard, false, true);
+    stream.writeBits(m_terrainsSoft, false, true);
 
     stream << m_id << m_subid;
     stream << static_cast<uint8_t>(m_type) << m_drawPriority;

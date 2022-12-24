@@ -40,7 +40,7 @@ void CoreApplication::initLogger(int debugLevel) const
         m_locations.getAppdataDir() / "Logs"));
 }
 
-void CoreApplication::load()
+bool CoreApplication::load()
 {
     Logger(Logger::Info) << "CoreApplication::load - start";
 
@@ -69,11 +69,18 @@ void CoreApplication::load()
 
     if (m_options.contains(Option::GameDatabase)) {
         ProfilerScope scope("GameDatabase load");
-        m_gameDatabases[GameVersion::SOD]  = std::make_shared<Core::GameDatabase>(g_database_SOD, m_resourceLibrary.get());
-        m_gameDatabases[GameVersion::HOTA] = std::make_shared<Core::GameDatabase>(g_database_HOTA, m_resourceLibrary.get());
+        try {
+            m_gameDatabases[GameVersion::SOD]  = std::make_shared<Core::GameDatabase>(g_database_SOD, m_resourceLibrary.get());
+            m_gameDatabases[GameVersion::HOTA] = std::make_shared<Core::GameDatabase>(g_database_HOTA, m_resourceLibrary.get());
+        }
+        catch (std::exception& ex) {
+            Logger(Logger::Err) << ex.what();
+            return false;
+        }
     }
 
     Logger(Logger::Info) << "CoreApplication::load - end";
+    return true;
 }
 
 const Core::IGameDatabase* CoreApplication::getDatabase(GameVersion version) const

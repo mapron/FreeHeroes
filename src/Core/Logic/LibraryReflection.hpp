@@ -212,7 +212,7 @@ STRUCT_REFLECTION_PAIRED(
     
     "untranslatedName",            untranslatedName,
     "legacyId",                    legacyId,
-    "mapObjectDef",                mapObjectDef,
+    "objectDefs",                  objectDefs,
     "minesDefs",                   minesDefs,
     "pres",                        presentationParams
 )
@@ -267,8 +267,7 @@ STRUCT_REFLECTION_PAIRED(
     LibraryFaction::Presentation,
     
     "goesAfterId",                 goesAfterId,
-    "unitBackground",              unitBackground,
-    "townAnimations",              townAnimations
+    "unitBackground",              unitBackground
 )
 
 STRUCT_REFLECTION_PAIRED(
@@ -280,7 +279,7 @@ STRUCT_REFLECTION_PAIRED(
     "warriorClass",                warriorClass,
     "mageClass",                   mageClass,
     "nativeTerrain",               nativeTerrain,
-    "mapObjectDef",                mapObjectDef,
+    "objectDefs",                  objectDefs,
     "pres",                        presentationParams
 )
  //  -----------------------------------------------------------------------------
@@ -483,7 +482,7 @@ STRUCT_REFLECTION_PAIRED(
     "bmArtifact",                  battleMachineArtifact,
     "abilities",                   abilities,
     "pres",                        presentationParams,
-    "mapObjectDef",                mapObjectDef,
+    "objectDefs",                  objectDefs,
     "traits",                      traits
 )
 
@@ -585,7 +584,7 @@ STRUCT_REFLECTION_PAIRED(
     "noPenalty",                  disabledPenalties,
     "bmUnit",                     battleMachineUnit,
     "pres",                       presentationParams,
-    "mapObjectDef",               mapObjectDef
+    "objectDefs",                 objectDefs
 )
 
 
@@ -604,7 +603,8 @@ STRUCT_REFLECTION_PAIRED(
 STRUCT_REFLECTION_PAIRED(
     LibraryDwelling,
     "creatureIds",                creatureIds,
-    "mapObjectDefs",              mapObjectDefs
+    "objectDefs",                 objectDefs,
+    "hasPlayer",                  hasPlayer
 )
 // ------------------------------------------------------------------------------------------
 ENUM_REFLECTION_PAIRED(LibraryHero::Presentation::Gender,
@@ -826,7 +826,7 @@ STRUCT_REFLECTION_STRINGIFY(
     order)
 
 STRUCT_REFLECTION_PAIRED(LibraryMapBank,
-    "mapObjectDefs"       ,        mapObjectDefs,
+    "objectDefs"          ,        objectDefs,
     "untranslatedName"    ,        untranslatedName,
     "legacyId"            ,        legacyId,
     "variants"            ,        variants,
@@ -906,7 +906,7 @@ ENUM_REFLECTION_STRINGIY(LibraryMapObstacle::Type, Invalid,
 STRUCT_REFLECTION_PAIRED(
     LibraryMapObstacle,
     "legacyId",                    legacyId,
-    "mapObjectDef",                mapObjectDef,
+    "objectDefs",                  objectDefs,
     "type",                        type
 )
 // ------------------------------------------------------------------------------------------
@@ -914,7 +914,7 @@ STRUCT_REFLECTION_PAIRED(
 STRUCT_REFLECTION_PAIRED(
     LibraryMapVisitable,
     "legacyId",                    legacyId,
-    "mapObjectDefs",               mapObjectDefs
+    "objectDefs",                  objectDefs
 )
 
 // ------------------------------------------------------------------------------------------
@@ -965,7 +965,19 @@ STRUCT_REFLECTION_PAIRED(
     "subId",                       subId,
     "type",                        type,
     "priority",                    priority,
-    "alternatives",                alternatives
+    "substituteFor",               substituteFor,
+    "substituteKey",               substituteKey
+)
+
+STRUCT_REFLECTION_PAIRED(
+    ObjectDefMappings,
+    "m",                           variants
+)
+
+STRUCT_REFLECTION_PAIRED(
+    ObjectDefIndex,
+    "v",                           variant,
+    "s",                           substitution
 )
 
 ENUM_REFLECTION_PAIRED(FieldLayout,
@@ -988,12 +1000,12 @@ template<>
 inline constexpr const bool MetaInfo::s_useFromString<BonusRatio>{ true };
 
 template<>
-BonusRatio MetaInfo::fromString(const std::string& value);
+CORELOGIC_EXPORT BonusRatio MetaInfo::fromString(const std::string& value);
 
 template<>
 inline constexpr const bool MetaInfo::s_useCustomTransform<LibraryUnit::Traits>{ true };
 template<>
-bool MetaInfo::transformTree<LibraryUnit::Traits>(const PropertyTree& treeIn, PropertyTree& treeOut);
+CORELOGIC_EXPORT bool MetaInfo::transformTree<LibraryUnit::Traits>(const PropertyTree& treeIn, PropertyTree& treeOut);
 
 template<>
 inline constexpr const bool MetaInfo::s_useCustomTransform<ResourceAmount>{ true };
@@ -1008,12 +1020,20 @@ CORELOGIC_EXPORT bool MetaInfo::transformTree<UnitWithCount>(const PropertyTree&
 template<>
 inline constexpr const bool MetaInfo::s_useCustomTransform<LibraryHero::StartStack>{ true };
 template<>
-bool MetaInfo::transformTree<LibraryHero::StartStack>(const PropertyTree& treeIn, PropertyTree& treeOut);
+CORELOGIC_EXPORT bool MetaInfo::transformTree<LibraryHero::StartStack>(const PropertyTree& treeIn, PropertyTree& treeOut);
+
+template<>
+inline constexpr const bool MetaInfo::s_useCustomTransform<ObjectDefMappings>{ true };
+template<>
+CORELOGIC_EXPORT bool MetaInfo::transformTree<ObjectDefMappings>(const PropertyTree& treeIn, PropertyTree& treeOut);
 
 template<>
 inline constexpr const bool MetaInfo::s_isStringMap<LibraryFactionHeroClass::SkillWeights>{ true };
 
 template<>
 inline constexpr const bool MetaInfo::s_isStringMap<LibraryFactionHeroClass::PrimaryWeights>{ true };
+
+template<>
+inline constexpr const bool MetaInfo::s_isStringMap<ObjectDefMappings::Map>{ true };
 
 }

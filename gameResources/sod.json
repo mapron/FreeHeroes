@@ -256,8 +256,7 @@
         "adventureSpriteMale"  : "ah01_",
         "adventureSpriteFemale": "ah01_"
         }
-    },
-    "pres": {"townAnimations" : ["AVCcast0", "AVCcasx0", "AVCcasx0", "AVCcasx0", "AVCcasz0"]}
+    }
 },
 
 "sod.faction.rampart"             : {
@@ -275,8 +274,7 @@
         "adventureSpriteMale"  : "ah03_",
         "adventureSpriteFemale": "ah03_"
         }
-    },
-    "pres": { "townAnimations" : ["AVCramp0", "AVCramx0", "AVCramx0", "AVCramx0", "AVCramz0"]}
+    }
 
 },
 
@@ -294,8 +292,7 @@
         "adventureSpriteMale"  : "ah05_",
         "adventureSpriteFemale": "ah05_"
         }
-    },
-    "pres": {"townAnimations" : ["AVCtowr0", "AVCtowx0", "AVCtowx0", "AVCtowx0", "AVCtowz0"]}
+    }
 },
 
 "sod.faction.inferno"             : {
@@ -312,8 +309,7 @@
         "adventureSpriteMale"  : "ah07_",
         "adventureSpriteFemale": "ah07b_"
         }
-    },
-    "pres": {"townAnimations" : ["AVCinft0", "AVCinfx0", "AVCinfx0", "AVCinfx0", "AVCinfz0"]}
+    }
 },
 
 "sod.faction.necropolis"             : {
@@ -330,8 +326,7 @@
         "adventureSpriteMale"  : "ah09_",
         "adventureSpriteFemale": "ah09_"
         }
-    },
-    "pres": {"townAnimations" : ["AVCnecr0", "AVCnecx0", "AVCnecx0", "AVCnecx0", "AVCnecz0"]}
+    }
 
 },
 
@@ -349,8 +344,7 @@
         "adventureSpriteMale"  : "ah11_",
         "adventureSpriteFemale": "ah11_"
         }
-    },
-    "pres": {"townAnimations" : ["AVCdung0", "AVCdunx0", "AVCdunx0", "AVCdunx0", "AVCdunz0"]}
+    }
 },
 
 "sod.faction.stronghold"             : {
@@ -367,8 +361,7 @@
         "adventureSpriteMale"  : "ah13_",
         "adventureSpriteFemale": "ah12_"
         }
-    },
-    "pres": { "townAnimations" : ["AVCstro0", "AVCstrx0", "AVCstrx0", "AVCstrx0", "AVCstrz0"] }
+    }
 },
 
 "sod.faction.fortress"             : {
@@ -388,8 +381,7 @@
         "adventureSpriteMale"  : "ah15_",
         "adventureSpriteFemale": "ah15_"
         }
-    },
-    "pres": {"townAnimations" : ["AVCftrt0", "AVCftrx0", "AVCftrx0", "AVCftrx0", "AVCftrz0"]}
+    }
 },
 
 "sod.faction.conflux"             : {
@@ -406,8 +398,7 @@
         "adventureSpriteMale"  : "ah17_",
         "adventureSpriteFemale": "ah17_"
         }
-    },
-    "pres": { "townAnimations" : ["AVChfor0", "AVChforx", "AVChforx", "AVChforx", "AVChforz"]}
+    }
 
 }
 

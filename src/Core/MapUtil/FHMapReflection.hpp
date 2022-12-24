@@ -87,13 +87,13 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_pos,
     m_order,
     m_player,
+    m_defIndex,
 
     m_isMain,
     m_factionId,
     m_hasFort,
     m_questIdentifier,
-    m_spellResearch,
-    m_defFile)
+    m_spellResearch)
 
 // clang-format off
 STRUCT_REFLECTION_PAIRED(
@@ -108,12 +108,12 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHResource,
     m_pos,
     m_order,
+    m_defIndex,
 
     m_amount,
     m_id,
     m_type,
-    m_visitableId,
-    m_defVariant)
+    m_visitableId)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRandomResource,
@@ -147,6 +147,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHMonster,
     m_pos,
     m_order,
+    m_defIndex,
 
     m_id,
     m_count,
@@ -163,30 +164,32 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_player,
 
     m_id,
-    m_defVariant)
+    m_defIndex)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHMine,
     m_pos,
     m_order,
+    m_defIndex,
+
     m_player,
 
-    m_id,
-    m_defVariant)
+    m_id)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHBank,
     m_pos,
     m_order,
+    m_defIndex,
 
     m_id,
-    m_defVariant,
     m_guardsVariants)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHObstacle,
     m_pos,
     m_order,
+    m_defIndex,
 
     m_id)
 
@@ -194,17 +197,18 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHVisitable,
     m_pos,
     m_order,
+    m_defIndex,
 
-    m_visitableId,
-    m_defVariant)
+    m_visitableId)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHShrine,
     m_pos,
     m_order,
+    m_defIndex,
 
     m_visitableId,
-    m_defVariant,
+
     m_spellId,
     m_randomLevel)
 
@@ -212,9 +216,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHSkillHut,
     m_pos,
     m_order,
+    m_defIndex,
 
     m_visitableId,
-    m_defVariant,
 
     m_skillIds)
 
@@ -246,9 +250,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHQuestHut,
     m_pos,
     m_order,
+    m_defIndex,
 
     m_visitableId,
-    m_defVariant,
 
     m_reward,
     m_quest)
@@ -265,9 +269,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHScholar,
     m_pos,
     m_order,
+    m_defIndex,
 
     m_visitableId,
-    m_defVariant,
 
     m_type,
     m_primaryType,
@@ -320,9 +324,12 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_disabledSpells,
     m_disabledSkills,
     m_customHeroes,
-    m_initialObjectDefs)
+    m_initialObjectDefs,
+    m_defReplacements)
 
 template<>
 inline constexpr const bool MetaInfo::s_isStringMap<FHMap::PlayersMap>{ true };
+template<>
+inline constexpr const bool MetaInfo::s_isStringMap<FHMap::DefMap>{ true };
 
 }

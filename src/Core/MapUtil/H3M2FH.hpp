@@ -29,6 +29,8 @@ private:
 
     void convertTileMap(const H3Map& src, FHMap& dest) const;
 
+    Core::LibraryObjectDef convertDef(const ObjectTemplate& objTempl) const;
+
 private:
     const Core::IGameDatabase* const m_database;
 

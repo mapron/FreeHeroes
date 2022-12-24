@@ -1,17 +1,17 @@
 [{
 "scope": "artifacts",
-"compactCols":                                [ "mapObjectDef" ],
+"compactCols":                                [ "objectDefs" ],
 "records" : {
 
-"sod.artifact.special.spellbook"            : [ "ava0000" ],
+"sod.artifact.special.spellbook"            : [ "" ],
 "sod.artifact.special.scroll"               : [ "ava0001" ],
-"sod.artifact.special.grail"                : [ "ava0002" ],
+"sod.artifact.special.grail"                : [ "" ],
 
-"sod.artifact.battleMachine.catapult"       : [ "ava0003" ],
-"sod.artifact.battleMachine.ballista"       : [ "ava0004" ],
-"sod.artifact.battleMachine.ammoCart"       : [ "ava0005" ],
-"sod.artifact.battleMachine.firstAidTent"   : [ "ava0006" ],
-"hota.artifact.battleMachine.cannon"        : [ "ava0146" ],
+"sod.artifact.battleMachine.catapult"       : [ "" ],
+"sod.artifact.battleMachine.ballista"       : [ "" ],
+"sod.artifact.battleMachine.ammoCart"       : [ "" ],
+"sod.artifact.battleMachine.firstAidTent"   : [ "" ],
+"hota.artifact.battleMachine.cannon"        : [ "" ],
 
 
 "sod.artifact.sword.att2"                   : [ "ava0007" ],
@@ -214,7 +214,7 @@
 {
 "scope": "units",
 
-"compactCols":                  [ "mapObjectDef" ],
+"compactCols":                  [ "objectDefs" ],
 
 "records": {
 "sod.unit.pikeman"              : [ "avwpike"   ],
@@ -409,15 +409,74 @@
 
 "records": {
 
-"wood"     : {"mapObjectDef":"avtwood0", "minesDefs": [ "avmsawd0", "avmsawg0", "avmsawl0", "avmsawr0", "avmswds0", "avmswsn0", "avmsaws0", "avmswhl1" ] },
-"mercury"  : {"mapObjectDef":"avtmerc0", "minesDefs": [ "avmalch0", "avmalch0", "avmalch0", "avmalcs0", "avmalch0_A", "avmalch0_B" ] },
-"ore"      : {"mapObjectDef":"avtore0", "minesDefs":  [ "avmordr0", "avmords0", "avmore0" , "avmorlv0", "avmorro0", "avmorsb0", "avmorsn0", "avmorsw0", "avmorhl1", "avmorwl1"] },
+"wood"     : {"objectDefs":"avtwood0", "minesDefs": {"m":{"": "avmsawd0", "A": "avmsawg0", "B": "avmsawl0", "C": "avmsawr0", "D": "avmswds0", "E": "avmswsn0", "F": "avmsaws0", "G":  "avmswhl1" }} },
+"mercury"  : {"objectDefs":"avtmerc0", "minesDefs": {"m":{"": "avmalch0", "A": "avmalcs0"}} },
+"ore"      : {"objectDefs":"avtore0" , "minesDefs": {"m":{"": "avmordr0", "A": "avmords0", "B": "avmore0" , "C": "avmorlv0", "D": "avmorro0", "E": "avmorsb0", "F": "avmorsn0", "G": "avmorsw0", "H": "avmorhl1","K":  "avmorwl1"}} },
 
-"sulfur"   : {"mapObjectDef":"avtsulf0", "minesDefs": [ "avmsulf0", "avmsulf0_A", "avmsulf0_B", "avmsulf0_C"] },
-"crystal"  : {"mapObjectDef":"avtcrys0", "minesDefs": [ "avmcrys0", "avmcrdr0", "avmcrds0", "avmcrgr0", "avmcrrf0", "avmcrsn0", "avmcrsu0", "avmcrsw0", "avmcrvo0", "avmcrhl1", "mntswpcr", "avmcrdn0", "avmcrwl1" ] },
-"gems"     : {"mapObjectDef":"avtgems0", "minesDefs": [ "avmgems0", "avmgedr0", "avmgelv0", "avmgerf0", "avmgesd0", "avmgesn0", "avmgehl1", "avmgewl1" ] },
+"sulfur"   : {"objectDefs":"avtsulf0", "minesDefs": "avmsulf0" },
+"crystal"  : {"objectDefs":"avtcrys0", "minesDefs": {"m":{"": "avmcrys0", "A": "avmcrdr0", "B": "avmcrds0", "C": "avmcrgr0", "D": "avmcrrf0", "E": "avmcrsn0", "F": "avmcrsu0", "G": "avmcrsw0", "H": "avmcrvo0", "K": "avmcrhl1", "L": "mntswpcr", "M": "avmcrdn0", "N": "avmcrwl1" }} },
+"gems"     : {"objectDefs":"avtgems0", "minesDefs": {"m":{"": "avmgems0", "A": "avmgedr0", "B": "avmgelv0", "C": "avmgerf0", "D": "avmgesd0", "E": "avmgesn0", "F": "avmgehl1", "G": "avmgewl1" }} },
 
-"gold"     : {"mapObjectDef":"avtgold0", "minesDefs": [ "avmgodr0", "avmgogr0", "avmgold0", "avmgorf0", "avmgovo0", "avmgods0", "avmgosb0", "avmgosn0", "avmgosw0", "mntswpgl", "avmgohl1", "avmgddn0", "avmgowl0" ] }
+"gold"     : {"objectDefs":"avtgold0", "minesDefs": {"m":{"": "avmgodr0", "A": "avmgogr0", "B": "avmgold0", "C": "avmgorf0", "D": "avmgovo0", "E": "avmgods0", "F": "avmgosb0", "G": "avmgosn0", "H": "avmgosw0", "K": "mntswpgl", "L": "avmgohl1", "M": "avmgddn0", "N": "avmgowl0" }} }
 }
 
+},
+
+{
+"scope": "mapBanks",
+
+"compactCols":                         [ "objectDefs" ],
+
+"records" : {
+
+"sod.map.crypt"                      : [ { "m":{"": "avxgyds0" , "S": "avxgysn0", "A": "avxgyne0" }} ],
+"sod.map.utopia"                     : [  "avsutop0"  ],
+"sod.map.derelictShip"               : [  "avadlic0"  ],
+"sod.map.shipwreck"                  : [  { "m":{"": "avawrek0", "A": "avawre20" }} ],
+"hota.map.blackTower"                : [  { "m":{"": "avblktgr", "S": "avblktsn", "R": "avblktwr" }} ],
+"hota.map.mansion"                   : [  "avmnsion"  ],
+"hota.map.beholderSanctuary"         : [  "sanct_wt"  ],
+"hota.map.templeSea"                 : [  "avsutopw"  ],
+"hota.map.churchyard"                : [ { "m":{"": "avcmetry", "A": "avcmetrs", "B": "avcmetrh" }} ],
+"sod.map.conservatory"               : [  "avxbnk30"  ],
+"sod.map.hive"                       : [  "avxbnk70"  ],
+"hota.map.experimentalShop"          : [ { "m":{"": "avxbnk90" , "S": "avxbnk9s" }} ],
+"hota.map.wolfRaiderPicket"          : [  "avxbnk80"  ],
+"hota.map.vermilionTower"            : [  "avredtwr"  ],
+"hota.map.pirateCave"                : [  "hapcave"   ],
+"hota.map.ivoryTower"                : [ { "m":{"": "avivtow2", "W": "avivtow1" }} ],
+
+"sod.map.impCache"                   : [ "avxbnk40" ],
+"sod.map.dwarvenTreasury"            : [ "avxbnk20" ],
+"sod.map.medusaStores"               : [ "avxbnk50" ],
+"sod.map.cyclopsStockpile"           : [ "avxbnk10" ],
+"sod.map.nagaBank"                   : [ "avxbnk60" ],
+"hota.map.spit"                      : [ "avbone02" ],
+"hota.map.ruins"                     : [ "avxruins" ]
+
+}
+
+},
+
+
+{
+"scope": "factions",
+
+"compactCols":                         [ "objectDefs" ],
+
+"records" : {
+
+"sod.faction.castle"          : [ {"m": {"":"avccast0", "FORT": "avccasf0", "CIT": "avccasc0", "CAS": "avccasx0", "CAP": "avccasz0"}} ],
+"sod.faction.rampart"         : [ {"m": {"":"avcramp0", "FORT": "avcramf0", "CIT": "avcramc0", "CAS": "avcramx0", "CAP": "avcramz0"}} ],
+"sod.faction.tower"           : [ {"m": {"":"avctowr0", "FORT": "avctowf0", "CIT": "avctowc0", "CAS": "avctowx0", "CAP": "avctowz0"}} ],
+"sod.faction.inferno"         : [ {"m": {"":"avcinft0", "FORT": "avcinff0", "CIT": "avcinfc0", "CAS": "avcinfx0", "CAP": "avcinfz0"}} ],
+"sod.faction.necropolis"      : [ {"m": {"":"avcnecr0", "FORT": "avcnecf0", "CIT": "avcnecc0", "CAS": "avcnecx0", "CAP": "avcnecz0"}} ],
+"sod.faction.dungeon"         : [ {"m": {"":"avcdung0", "FORT": "avcdunf0", "CIT": "avcdunc0", "CAS": "avcdunx0", "CAP": "avcdunz0"}} ],
+"sod.faction.stronghold"      : [ {"m": {"":"avcstro0", "FORT": "avcstrf0", "CIT": "avcstrc0", "CAS": "avcstrx0", "CAP": "avcstrz0"}} ],
+"sod.faction.fortress"        : [ {"m": {"":"avcftrt0", "FORT": "avcforf0", "CIT": "avcforc0", "CAS": "avcftrx0", "CAP": "avcforz0"}} ],
+"sod.faction.conflux"         : [ {"m": {"":"avchfor0", "FORT": "avchfof0", "CIT": "avchfoc0", "CAS": "avchforx", "CAP": "avchforz"}} ],
+"hota.faction.cove"           : [ {"m": {"":"avccove0", "FORT": "avccovf0", "CIT": "avccovc0", "CAS": "avccovx0", "CAP": "avccovz0"}} ]
+
+}
 }]
+

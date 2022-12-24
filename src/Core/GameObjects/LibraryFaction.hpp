@@ -6,7 +6,7 @@
 #pragma once
 
 #include "Stat.hpp"
-#include "LibraryFwd.hpp"
+#include "LibraryObjectDef.hpp"
 
 #include <string>
 #include <map>
@@ -55,8 +55,6 @@ struct LibraryFaction {
 
         std::string unitBackground;
         std::string goesAfterId;
-
-        std::vector<std::string> townAnimations;
     };
 
     std::string             id;
@@ -71,8 +69,8 @@ struct LibraryFaction {
     std::vector<LibraryUnitConstPtr> units;
     std::vector<LibraryHeroConstPtr> heroes;
 
-    LibraryObjectDefConstPtr mapObjectDef = nullptr;
-    Presentation             presentationParams;
+    ObjectDefMappings objectDefs;
+    Presentation      presentationParams;
 };
 
 }

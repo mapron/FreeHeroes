@@ -22,6 +22,125 @@ namespace FreeHeroes {
 
 namespace {
 
+std::string printObjDef(const Core::LibraryObjectDef& fhDef)
+{
+    std::ostringstream os;
+    auto               wstr = [&os](const std::string& str) {
+        os << '"' << str << '"';
+        for (size_t i = str.size(); i < 14; ++i)
+            os << ' ';
+    };
+    auto warr = [&os](const std::vector<uint8_t>& arr) {
+        os << '[';
+        for (size_t i = 0; i < arr.size(); ++i) {
+            if (i > 0)
+                os << ',';
+            os << int(arr[i]);
+        }
+        os << "], ";
+    };
+    wstr(fhDef.id);
+    os << ": [ ";
+    wstr(fhDef.defFile);
+    os << ", ";
+    warr(fhDef.blockMap);
+    warr(fhDef.visitMap);
+    warr(fhDef.terrainsHard);
+    warr(fhDef.terrainsSoft);
+    os << fhDef.objId << ", " << fhDef.subId << ", " << fhDef.type << ", " << fhDef.priority << "],";
+    return os.str();
+}
+
+struct ObjTemplateDiag {
+    Core::LibraryObjectDef         m_fhDefFromFile;
+    Core::LibraryObjectDefConstPtr m_originalRecord = nullptr;
+    Core::LibraryObjectDefConstPtr m_substituteAlt  = nullptr;
+    std::string                    m_substitutionId;
+};
+
+struct ObjTemplateDiagContainer {
+    std::vector<ObjTemplateDiag> m_records;
+
+    ObjTemplateDiag& add()
+    {
+        m_records.push_back({});
+        return *m_records.rbegin();
+    }
+
+    void sort()
+    {
+        std::sort(m_records.begin(), m_records.end(), [](const ObjTemplateDiag& rh, const ObjTemplateDiag& lh) {
+            return rh.m_fhDefFromFile.id < lh.m_fhDefFromFile.id;
+        });
+    }
+
+    void check() const
+    {
+        {
+            std::string missingDefs;
+            for (const auto& diag : m_records) {
+                if (!diag.m_originalRecord) {
+                    missingDefs += printObjDef(diag.m_fhDefFromFile) + "\n";
+                }
+            }
+            if (!missingDefs.empty()) {
+                Logger(Logger::Err) << "missing defs:\n"
+                                    << missingDefs;
+                throw std::runtime_error("Some defs are missing, map cannot be loaded. Add them to the database.");
+            }
+        }
+        {
+            std::string substitutions;
+            for (const auto& diag : m_records) {
+                if (diag.m_substituteAlt) {
+                    substitutions += diag.m_originalRecord->id + " -> " + diag.m_substituteAlt->id + " [" + diag.m_substitutionId + "]" + "\n";
+                }
+            }
+            if (!substitutions.empty())
+                Logger(Logger::Warning) << "Some def files have different properties, but they were substitute with alternative ids:\n"
+                                        << substitutions;
+        }
+        {
+            std::ostringstream replacements;
+            for (const auto& diag : m_records) {
+                if (diag.m_fhDefFromFile == *diag.m_originalRecord || diag.m_substituteAlt)
+                    continue;
+                const auto& org = diag.m_fhDefFromFile;
+                const auto& rec = *diag.m_originalRecord;
+
+                std::string diff;
+                {
+                    const bool block = org.blockMap != rec.blockMap;
+                    const bool visit = org.visitMap != rec.visitMap;
+                    const bool hard  = org.terrainsHard != rec.terrainsHard;
+                    const bool soft  = org.terrainsSoft != rec.terrainsSoft;
+                    const bool name  = org.defFile != rec.defFile;
+                    const bool misc  = (org.objId != rec.objId) || (org.subId != rec.subId) || (org.type != rec.type) || (org.priority != rec.priority);
+                    if (name)
+                        diff += "defFile, ";
+                    if (block)
+                        diff += "blockMap, ";
+                    if (visit)
+                        diff += "visitMap, ";
+                    if (hard)
+                        diff += "terrainsHard, ";
+                    if (soft)
+                        diff += "terrainsSoft, ";
+                    if (misc)
+                        diff += "misc info, ";
+                }
+                replacements << diag.m_originalRecord->id << ": DIFF = " << diff << "\n";
+                replacements << "database: " << printObjDef(*diag.m_originalRecord) << "\n";
+                replacements << "file    : " << printObjDef(diag.m_fhDefFromFile) << "\n";
+            }
+            std::string replacementsStr = replacements.str();
+            if (!replacementsStr.empty())
+                Logger(Logger::Warning) << "Some def files differ from the database, cannot be substituted, replacements will be created:\n"
+                                        << replacementsStr;
+        }
+    }
+};
+
 FHPos posFromH3M(H3Pos pos, int xoffset = 0)
 {
     return { (pos.m_x + xoffset), pos.m_y, pos.m_z };
@@ -131,6 +250,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
     if (dest.m_config.m_hasRoundLimit)
         dest.m_config.m_roundLimit = src.m_hotaVer.m_roundLimit;
 
+    /*
     std::map<Core::LibraryObjectDefConstPtr, std::pair<Core::LibraryDwellingConstPtr, int>> dwellMap;
     {
         for (auto* dwelling : m_database->dwellings()->records()) {
@@ -154,7 +274,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 visitableMap[visitable->mapObjectDefs[i]] = { visitable, i };
             }
         }
-    }
+    }*/
 
     std::map<FHPlayerId, FHPos>   mainTowns;
     std::map<FHPlayerId, uint8_t> mainHeroes;
@@ -184,65 +304,60 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
         }
     }
 
-    std::ostringstream missingDefs;
+    ObjTemplateDiagContainer diag;
+
     for (const ObjectTemplate& objTempl : src.m_objectDefs) {
-        std::string defObjectKey = objTempl.m_animationFile;
-        {
-            std::transform(defObjectKey.begin(), defObjectKey.end(), defObjectKey.begin(), [](unsigned char c) { return std::tolower(c); });
-            if (defObjectKey.ends_with(".def"))
-                defObjectKey = defObjectKey.substr(0, defObjectKey.size() - 4);
-        }
-        auto* record = m_database->objectDefs()->find(defObjectKey);
+        Core::LibraryObjectDef fhDef      = convertDef(objTempl);
+        auto&                  diagRecord = diag.add();
+        diagRecord.m_fhDefFromFile        = fhDef;
+
+        auto* record                = m_database->objectDefs()->find(fhDef.id);
+        diagRecord.m_originalRecord = record;
         if (!record) {
-            auto wstr = [&missingDefs](const std::string& str) {
-                missingDefs << '"' << str << '"';
-                for (size_t i = str.size(); i < 14; ++i)
-                    missingDefs << ' ';
-            };
-            auto warr = [&missingDefs](const std::vector<uint8_t>& arr) {
-                missingDefs << '[';
-                for (size_t i = 0; i < arr.size(); ++i) {
-                    if (i > 0)
-                        missingDefs << ',';
-                    missingDefs << int(arr[arr.size() - i - 1]);
-                }
-                missingDefs << "], ";
-            };
-            wstr(defObjectKey);
-            missingDefs << ": [ ";
-            wstr(objTempl.m_animationFile.substr(0, objTempl.m_animationFile.size() - 4));
-            missingDefs << ", ";
-            warr(objTempl.m_blockMask);
-            warr(objTempl.m_visitMask);
-            warr(objTempl.m_terrainsHard);
-            warr(objTempl.m_terrainsSoft);
-            missingDefs << int(objTempl.m_id) << ", " << int(objTempl.m_subid) << ", " << int(objTempl.m_type) << ", " << int(objTempl.m_drawPriority) << "],\n";
             continue;
         }
 
         // couple objdefs like sulfur/mercury mines have several def with same unique def name but different bitmask for terrain.
-        for (auto* altRec : record->alternatives) {
-            std::vector<uint8_t> arr = altRec->terrainsSoft;
-            std::reverse(arr.begin(), arr.end());
-            if (arr == objTempl.m_terrainsSoft) {
-                record = altRec;
+        for (const auto& [subId, altRec] : record->substitutions) {
+            if (*altRec == fhDef) {
+                diagRecord.m_substitutionId = subId;
+                diagRecord.m_substituteAlt  = altRec;
+                record                      = altRec;
                 break;
+            }
+        }
+        {
+            if (*record != fhDef) {
+                if (dest.m_defReplacements.contains(record))
+                    Logger(Logger::Err) << "DUPLICATE REPLACEMENT for:" << record->id;
+
+                dest.m_defReplacements[record] = std::move(fhDef);
             }
         }
 
         dest.m_initialObjectDefs.push_back(record);
     }
-    auto missingDefsStr = missingDefs.str();
-    if (!missingDefsStr.empty()) {
-        Logger(Logger::Warning) << "missing defs:\n"
-                                << missingDefsStr;
-        throw std::runtime_error("Some defs are missing, map cannot be loaded. Add them to the database.");
-    }
+    diag.sort();
+    diag.check();
+
+    std::set<Core::LibraryObjectDefConstPtr> skipped;
 
     for (int index = 0; const Object& obj : src.m_objects) {
         const IMapObject*              impl     = obj.m_impl.get();
         const ObjectTemplate&          objTempl = src.m_objectDefs[obj.m_defnum];
         Core::LibraryObjectDefConstPtr objDef   = dest.m_initialObjectDefs[obj.m_defnum];
+        Core::ObjectDefIndex           defIndex;
+        defIndex.substitution = objDef->substituteKey;
+        if (objDef->substituteFor)
+            objDef = objDef->substituteFor;
+        defIndex.variant = objDef->mappings.key;
+        auto& mappings   = objDef->mappings;
+
+        auto initCommon = [&obj, index, &defIndex](FHCommonObject& fhCommon) {
+            fhCommon.m_pos      = posFromH3M(obj.m_pos);
+            fhCommon.m_order    = index;
+            fhCommon.m_defIndex = defIndex;
+        };
 
         MapObjectType type = static_cast<MapObjectType>(objTempl.m_id);
         switch (type) {
@@ -355,15 +470,13 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             {
                 const auto* hut = static_cast<const MapSeerHut*>(impl);
 
-                auto [visitableId, visitableDefIndex] = visitableMap[objDef];
+                auto* visitableId = mappings.mapVisitable;
                 if (!visitableId)
                     throw std::runtime_error("Unknown def for seer hut:" + objDef->id);
 
                 FHQuestHut fhHut;
-                fhHut.m_pos         = posFromH3M(obj.m_pos);
-                fhHut.m_order       = index;
+                initCommon(fhHut);
                 fhHut.m_visitableId = visitableId;
-                fhHut.m_defVariant  = visitableDefIndex;
                 fhHut.m_reward      = convertRewardHut(*hut);
                 fhHut.m_quest       = convertQuest(hut->m_quest);
 
@@ -371,16 +484,14 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             } break;
             case MapObjectType::WITCH_HUT:
             {
-                const auto* hut                       = static_cast<const MapWitchHut*>(impl);
-                auto [visitableId, visitableDefIndex] = visitableMap[objDef];
+                const auto* hut         = static_cast<const MapWitchHut*>(impl);
+                auto*       visitableId = mappings.mapVisitable;
                 if (!visitableId)
                     throw std::runtime_error("Unknown def for witch hut:" + objDef->id);
 
                 FHSkillHut fhHut;
-                fhHut.m_pos         = posFromH3M(obj.m_pos);
-                fhHut.m_order       = index;
+                initCommon(fhHut);
                 fhHut.m_visitableId = visitableId;
-                fhHut.m_defVariant  = visitableDefIndex;
                 for (size_t skillIndex = 0; skillIndex < hut->m_allowedSkills.size(); ++skillIndex) {
                     if (!hut->m_allowedSkills[skillIndex])
                         continue;
@@ -393,14 +504,12 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             {
                 const auto* scholar = static_cast<const MapScholar*>(impl);
 
-                auto [visitableId, visitableDefIndex] = visitableMap[objDef];
+                auto* visitableId = mappings.mapVisitable;
                 assert(visitableId);
 
                 FHScholar fhScholar;
-                fhScholar.m_pos         = posFromH3M(obj.m_pos);
-                fhScholar.m_order       = index;
+                initCommon(fhScholar);
                 fhScholar.m_visitableId = visitableId;
-                fhScholar.m_defVariant  = visitableDefIndex;
                 fhScholar.m_type        = scholar->m_bonusType == 0xff ? FHScholar::Type::Random : static_cast<FHScholar::Type>(scholar->m_bonusType);
                 if (fhScholar.m_type == FHScholar::Type::Primary) {
                     fhScholar.m_primaryType = static_cast<Core::HeroPrimaryParamType>(scholar->m_bonusId);
@@ -425,8 +534,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             case MapObjectType::SPELL_SCROLL:
             {
                 FHArtifact art;
-                art.m_order = index;
-                art.m_pos   = posFromH3M(obj.m_pos);
+                initCommon(art);
                 if (type == MapObjectType::SPELL_SCROLL) {
                     const auto* artifact = static_cast<const MapArtifact*>(impl);
                     const auto* spell    = m_spellIds.at(artifact->m_spellId);
@@ -446,8 +554,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             case MapObjectType::RANDOM_RELIC_ART:
             {
                 FHRandomArtifact art;
-                art.m_order = index;
-                art.m_pos   = posFromH3M(obj.m_pos);
+                initCommon(art);
                 if (type == MapObjectType::RANDOM_ART)
                     art.m_type = FHRandomArtifact::Type::Any;
                 else if (type == MapObjectType::RANDOM_TREASURE_ART)
@@ -465,8 +572,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             {
                 const auto*      resource = static_cast<const MapResource*>(impl);
                 FHRandomResource fhres;
-                fhres.m_order  = index;
-                fhres.m_pos    = posFromH3M(obj.m_pos);
+                initCommon(fhres);
                 fhres.m_amount = resource->m_amount;
                 dest.m_objects.m_resourcesRandom.push_back(std::move(fhres));
             } break;
@@ -474,8 +580,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             {
                 const auto* resource = static_cast<const MapResource*>(impl);
                 FHResource  fhres;
-                fhres.m_order  = index;
-                fhres.m_pos    = posFromH3M(obj.m_pos);
+                initCommon(fhres);
                 fhres.m_amount = resource->m_amount;
                 fhres.m_id     = m_resourceIds[objTempl.m_subid];
                 assert(fhres.m_id);
@@ -485,19 +590,17 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             case MapObjectType::CAMPFIRE:
             {
                 FHResource fhres;
-                fhres.m_order  = index;
-                fhres.m_pos    = posFromH3M(obj.m_pos);
+                initCommon(fhres);
                 fhres.m_amount = 0;
                 fhres.m_id     = nullptr;
                 if (type == MapObjectType::TREASURE_CHEST)
                     fhres.m_type = FHResource::Type::TreasureChest;
                 else if (type == MapObjectType::CAMPFIRE)
                     fhres.m_type = FHResource::Type::CampFire;
-                auto [visitableId, visitableDefIndex] = visitableMap[objDef];
+                auto* visitableId = mappings.mapVisitable;
                 assert(visitableId);
 
                 fhres.m_visitableId = visitableId;
-                fhres.m_defVariant  = visitableDefIndex;
 
                 dest.m_objects.m_resources.push_back(std::move(fhres));
             } break;
@@ -507,14 +610,13 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 const auto* town     = static_cast<const MapTown*>(impl);
                 const auto  playerId = makePlayerId(town->m_playerOwner);
                 FHTown      fhtown;
-                fhtown.m_player          = playerId;
-                fhtown.m_order           = index;
-                fhtown.m_pos             = posFromH3M(obj.m_pos);
-                fhtown.m_factionId       = m_factionIds[objTempl.m_subid];
+                initCommon(fhtown);
+                fhtown.m_player    = playerId;
+                fhtown.m_factionId = m_factionIds[objTempl.m_subid];
+                assert(fhtown.m_factionId == mappings.factionTown);
                 fhtown.m_questIdentifier = town->m_questIdentifier;
                 fhtown.m_hasFort         = town->m_hasFort;
                 fhtown.m_spellResearch   = town->m_spellResearch;
-                fhtown.m_defFile         = objTempl.m_animationFile;
                 if (mainTowns.contains(playerId) && mainTowns.at(playerId) == fhtown.m_pos)
                     fhtown.m_isMain = true;
                 dest.m_towns.push_back(std::move(fhtown));
@@ -529,14 +631,9 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             {
                 const auto* objOwner = static_cast<const MapObjectWithOwner*>(impl);
                 FHMine      mine;
-                mine.m_pos    = posFromH3M(obj.m_pos);
-                mine.m_order  = index;
+                initCommon(mine);
                 mine.m_player = makePlayerId(objOwner->m_owner);
-                mine.m_id     = m_resourceIds[objTempl.m_subid];
-                auto it       = std::find(mine.m_id->minesDefs.cbegin(), mine.m_id->minesDefs.cend(), objDef);
-                assert(it != mine.m_id->minesDefs.cend());
-
-                mine.m_defVariant = std::distance(mine.m_id->minesDefs.cbegin(), it);
+                mine.m_id     = mappings.resourceMine;
                 dest.m_objects.m_mines.push_back(std::move(mine));
             } break;
             case MapObjectType::CREATURE_GENERATOR1:
@@ -546,12 +643,18 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             {
                 const auto* objOwner = static_cast<const MapObjectWithOwner*>(impl);
                 FHDwelling  dwelling;
-                const auto [id, variant] = dwellMap.at(objDef);
-                dwelling.m_id            = id;
-                dwelling.m_defVariant    = variant;
-                dwelling.m_order         = index;
-                dwelling.m_pos           = posFromH3M(obj.m_pos);
-                dwelling.m_player        = makePlayerId(objOwner->m_owner);
+                initCommon(dwelling);
+                assert(mappings.dwelling);
+                dwelling.m_id     = mappings.dwelling;
+                dwelling.m_player = makePlayerId(objOwner->m_owner);
+                dest.m_objects.m_dwellings.push_back(std::move(dwelling));
+            } break;
+            case MapObjectType::WAR_MACHINE_FACTORY:
+            {
+                FHDwelling dwelling;
+                initCommon(dwelling);
+                assert(mappings.dwelling);
+                dwelling.m_id = mappings.dwelling;
                 dest.m_objects.m_dwellings.push_back(std::move(dwelling));
             } break;
             case MapObjectType::SHIPYARD:
@@ -565,15 +668,13 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             case MapObjectType::SHRINE_OF_MAGIC_GESTURE:
             case MapObjectType::SHRINE_OF_MAGIC_THOUGHT:
             {
-                const auto* shrine                    = static_cast<const MapShrine*>(impl);
-                auto [visitableId, visitableDefIndex] = visitableMap[objDef];
+                const auto* shrine      = static_cast<const MapShrine*>(impl);
+                auto*       visitableId = mappings.mapVisitable;
                 assert(visitableId);
 
                 FHShrine fhShrine;
-                fhShrine.m_pos         = posFromH3M(obj.m_pos);
-                fhShrine.m_order       = index;
+                initCommon(fhShrine);
                 fhShrine.m_visitableId = visitableId;
-                fhShrine.m_defVariant  = visitableDefIndex;
                 if (shrine->m_spell == 0xffU) {
                     switch (type) {
                         case MapObjectType::SHRINE_OF_MAGIC_INCANTATION:
@@ -597,8 +698,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             {
                 const auto* pandora = static_cast<const MapPandora*>(impl);
                 FHPandora   fhPandora;
-                fhPandora.m_pos    = posFromH3M(obj.m_pos);
-                fhPandora.m_order  = index;
+                initCommon(fhPandora);
                 fhPandora.m_reward = convertReward(pandora->m_reward);
                 dest.m_objects.m_pandoras.push_back(std::move(fhPandora));
             } break;
@@ -634,15 +734,12 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             case MapObjectType::SHIPWRECK:
             {
                 const auto* bank = static_cast<const MapObjectCreatureBank*>(impl);
-                (void) bank;
-                FHBank fhBank;
-                if (!bankMap.contains(objDef))
+                auto*       id   = mappings.mapBank;
+                FHBank      fhBank;
+                if (!id)
                     throw std::runtime_error("Missing bank def mapping:" + objDef->id);
-                const auto [id, defvariant] = bankMap.at(objDef);
-                fhBank.m_id                 = id;
-                fhBank.m_defVariant         = defvariant;
-                fhBank.m_order              = index;
-                fhBank.m_pos                = posFromH3M(obj.m_pos);
+                initCommon(fhBank);
+                fhBank.m_id = id;
                 if (bank->m_content != 0xffffffffu) {
                     const int variant       = bank->m_content;
                     const int variantsCount = id->variants.size();
@@ -662,27 +759,24 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             } break;
             default:
             {
-                auto* obstacle = m_database->mapObstacles()->find(objDef->id);
-                if (obstacle) {
+                if (mappings.mapObstacle) {
                     FHObstacle fhObstacle;
-                    fhObstacle.m_id    = obstacle;
-                    fhObstacle.m_order = index;
-                    fhObstacle.m_pos   = posFromH3M(obj.m_pos);
+                    initCommon(fhObstacle);
+                    fhObstacle.m_id = mappings.mapObstacle;
                     dest.m_objects.m_obstacles.push_back(std::move(fhObstacle));
                     break;
                 }
-                auto [visitableId, visitableDefIndex] = visitableMap[objDef];
-                if (visitableId) {
+                if (mappings.mapVisitable) {
                     FHVisitable fhVisitable;
-                    fhVisitable.m_visitableId = visitableId;
-                    fhVisitable.m_order       = index;
-                    fhVisitable.m_pos         = posFromH3M(obj.m_pos);
-
-                    fhVisitable.m_defVariant = visitableDefIndex;
+                    initCommon(fhVisitable);
+                    fhVisitable.m_visitableId = mappings.mapVisitable;
                     dest.m_objects.m_visitables.push_back(std::move(fhVisitable));
                     break;
                 }
-                Logger(Logger::Warning) << "Skipping unsupported object def: " << objDef->id;
+                if (!skipped.contains(objDef)) {
+                    skipped.insert(objDef);
+                    Logger(Logger::Warning) << "Skipping unsupported object def: " << objDef->id;
+                }
             } break;
         }
 
@@ -1009,6 +1103,30 @@ void H3M2FHConverter::convertTileMap(const H3Map& src, FHMap& dest) const
     }
 
     assert(terrainFiller.m_zoned.size() == dest.m_tileMap.totalSize());
+}
+
+Core::LibraryObjectDef H3M2FHConverter::convertDef(const ObjectTemplate& objTempl) const
+{
+    Core::LibraryObjectDef fhDef;
+    fhDef.defFile      = objTempl.m_animationFile;
+    fhDef.id           = fhDef.defFile;
+    fhDef.blockMap     = objTempl.m_blockMask;
+    fhDef.visitMap     = objTempl.m_visitMask;
+    fhDef.terrainsHard = objTempl.m_terrainsHard;
+    fhDef.terrainsSoft = objTempl.m_terrainsSoft;
+
+    fhDef.objId    = objTempl.m_id;
+    fhDef.subId    = objTempl.m_subid;
+    fhDef.type     = static_cast<int>(objTempl.m_type);
+    fhDef.priority = objTempl.m_drawPriority;
+
+    std::transform(fhDef.id.begin(), fhDef.id.end(), fhDef.id.begin(), [](unsigned char c) { return std::tolower(c); });
+    if (fhDef.id.ends_with(".def"))
+        fhDef.id = fhDef.id.substr(0, fhDef.id.size() - 4);
+    if (fhDef.defFile.ends_with(".def"))
+        fhDef.defFile = fhDef.defFile.substr(0, fhDef.defFile.size() - 4);
+
+    return fhDef;
 }
 
 }

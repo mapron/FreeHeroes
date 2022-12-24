@@ -119,7 +119,7 @@ MapFormatFeatures::MapFormatFeatures(MapFormat format, int hotaVer1)
     m_monstersMapXOffset = format >= MapFormat::HOTA1 && format <= MapFormat::HOTA3 ? 1 : 0;
 }
 
-std::unique_ptr<IMapObject> IMapObject::Create(MapObjectType type, MapFormatFeaturesPtr features)
+std::unique_ptr<IMapObject> IMapObject::Create(MapObjectType type, uint32_t subid, MapFormatFeaturesPtr features)
 {
     switch (type) {
         case MapObjectType::EVENT:
@@ -234,6 +234,12 @@ std::unique_ptr<IMapObject> IMapObject::Create(MapObjectType type, MapFormatFeat
         case MapObjectType::SHIPWRECK:
         {
             return std::make_unique<MapObjectCreatureBank>(features);
+        }
+        case MapObjectType::BORDER_GATE:
+        {
+            if (subid == 1000)
+                return std::make_unique<MapQuestGuard>(features);
+            return std::make_unique<MapObjectSimple>(features);
         }
         default:
         {

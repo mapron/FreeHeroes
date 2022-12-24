@@ -7,6 +7,7 @@
 
 #include "LibraryFwd.hpp"
 #include "LibrarySpell.hpp"
+#include "LibraryObjectDef.hpp"
 
 #include <string>
 #include <vector>
@@ -220,8 +221,8 @@ struct LibraryArtifact {
     ArtifactSlotRequirement slotReq;
     LibraryArtifactConstPtr partOfSet = nullptr;
 
-    LibraryObjectDefConstPtr mapObjectDef = nullptr;
-    Presentation             presentationParams;
+    ObjectDefMappings objectDefs;
+    Presentation      presentationParams;
 
     constexpr auto sortOrdering() const noexcept { return std::tie(presentationParams.orderCategory, presentationParams.orderGroup, presentationParams.order, value); }
 };

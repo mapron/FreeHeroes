@@ -15,6 +15,8 @@
 #include "AdventureArmy.hpp"
 #include "Reward.hpp"
 
+#include "LibraryObjectDef.hpp"
+
 #include "FHTileMap.hpp"
 
 namespace FreeHeroes {
@@ -48,13 +50,13 @@ struct FHPlayer {
 };
 
 struct FHCommonObject {
-    FHPos m_pos{ g_invalidPos };
-    int   m_order = 0;
+    FHPos                m_pos{ g_invalidPos };
+    int                  m_order = 0;
+    Core::ObjectDefIndex m_defIndex;
 };
 
 struct FHCommonVisitable : public FHCommonObject {
     Core::LibraryMapVisitableConstPtr m_visitableId = nullptr;
-    int                               m_defVariant  = 0;
 };
 
 struct FHPlayerControlledObject : public FHCommonObject {
@@ -84,17 +86,14 @@ struct FHTown : public FHPlayerControlledObject {
     bool                         m_hasFort{ false };
     uint32_t                     m_questIdentifier = 0;
     bool                         m_spellResearch{ false };
-    std::string                  m_defFile; // just for the sake of roundtrip tests.
 };
 
 struct FHDwelling : public FHPlayerControlledObject {
-    Core::LibraryDwellingConstPtr m_id         = nullptr;
-    int                           m_defVariant = 0;
+    Core::LibraryDwellingConstPtr m_id = nullptr;
 };
 
 struct FHMine : public FHPlayerControlledObject {
-    Core::LibraryResourceConstPtr m_id         = nullptr;
-    int                           m_defVariant = 0;
+    Core::LibraryResourceConstPtr m_id = nullptr;
 };
 
 struct FHResource : public FHCommonObject {
@@ -109,7 +108,6 @@ struct FHResource : public FHCommonObject {
     Type                          m_type   = Type::Resource;
 
     Core::LibraryMapVisitableConstPtr m_visitableId = nullptr;
-    int                               m_defVariant  = 0;
 };
 
 struct FHRandomResource : public FHCommonObject {
@@ -152,9 +150,9 @@ struct FHMonster : public FHCommonObject {
 };
 
 struct FHBank : public FHCommonObject {
-    Core::LibraryMapBankConstPtr m_id         = nullptr;
-    int                          m_defVariant = 0;
-    std::vector<int>             m_guardsVariants; // empty = full random
+    Core::LibraryMapBankConstPtr m_id = nullptr;
+
+    std::vector<int> m_guardsVariants; // empty = full random
 };
 
 struct FHObstacle : public FHCommonObject {
@@ -269,7 +267,10 @@ struct FHMap {
 
     std::vector<FHHeroData> m_customHeroes;
 
+    using DefMap = std::map<Core::LibraryObjectDefConstPtr, Core::LibraryObjectDef>;
+
     std::vector<Core::LibraryObjectDefConstPtr> m_initialObjectDefs; // mostly for round-trip.
+    DefMap                                      m_defReplacements;   // mostly for round-trip.
 
     void toJson(PropertyTree& data) const;
     void fromJson(const PropertyTree& data, const Core::IGameDatabase* database);

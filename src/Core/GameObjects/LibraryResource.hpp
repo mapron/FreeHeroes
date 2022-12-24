@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "LibraryFwd.hpp"
+#include "LibraryObjectDef.hpp"
 
 #include <string>
 #include <vector>
@@ -25,9 +25,9 @@ struct LibraryResource {
     std::string untranslatedName;
     int         legacyId = -1;
 
-    LibraryObjectDefConstPtr              mapObjectDef = nullptr;
-    std::vector<LibraryObjectDefConstPtr> minesDefs;
-    Presentation                          presentationParams;
+    ObjectDefMappings objectDefs;
+    ObjectDefMappings minesDefs;
+    Presentation      presentationParams;
 };
 
 }

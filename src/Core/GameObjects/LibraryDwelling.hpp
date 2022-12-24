@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "LibraryFwd.hpp"
+#include "LibraryObjectDef.hpp"
 
 #include <string>
 #include <vector>
@@ -16,8 +16,10 @@ struct LibraryDwelling {
     std::string id;
     int         legacyId = -1;
 
-    std::vector<LibraryUnitConstPtr>      creatureIds;
-    std::vector<LibraryObjectDefConstPtr> mapObjectDefs;
+    std::vector<LibraryUnitConstPtr> creatureIds;
+    ObjectDefMappings                objectDefs;
+
+    bool hasPlayer = true;
 };
 
 }

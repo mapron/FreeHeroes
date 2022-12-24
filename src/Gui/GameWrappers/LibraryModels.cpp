@@ -12,6 +12,8 @@
 
 #include "IGameDatabase.hpp"
 
+#include "LibraryResource.hpp"
+
 #include <deque>
 #include <unordered_map>
 

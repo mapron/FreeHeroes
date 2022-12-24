@@ -6,9 +6,9 @@
 #pragma once
 
 #include "Stat.hpp"
-#include "LibraryFwd.hpp"
-#include "LibraryResource.hpp"
+
 #include "LibrarySpell.hpp"
+#include "LibraryObjectDef.hpp"
 
 #include <string>
 #include <vector>
@@ -153,10 +153,10 @@ struct LibraryUnit {
 
     LibraryArtifactConstPtr battleMachineArtifact = nullptr;
 
-    Traits                   traits;
-    Abilities                abilities;
-    Presentation             presentationParams;
-    LibraryObjectDefConstPtr mapObjectDef = nullptr;
+    Traits            traits;
+    Abilities         abilities;
+    Presentation      presentationParams;
+    ObjectDefMappings objectDefs;
 };
 
 }

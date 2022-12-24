@@ -9,6 +9,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 namespace FreeHeroes::Core {
 
@@ -26,7 +27,55 @@ struct LibraryObjectDef {
     int type     = -1;
     int priority = -1;
 
-    std::vector<LibraryObjectDefConstPtr> alternatives;
+    constexpr auto asTuple() const noexcept { return std::tie(defFile, blockMap, visitMap, terrainsHard, terrainsSoft, objId, subId, type, priority); }
+    bool           operator==(const LibraryObjectDef& rh) const noexcept { return asTuple() == rh.asTuple(); }
+    bool           operator!=(const LibraryObjectDef& rh) const noexcept { return asTuple() != rh.asTuple(); }
+
+    LibraryObjectDefConstPtr substituteFor = nullptr;
+    std::string              substituteKey;
+
+    std::map<std::string, LibraryObjectDefConstPtr> substitutions; // generated;
+
+    struct Mappings {
+        std::string                 key;
+        LibraryArtifactConstPtr     artifact     = nullptr;
+        LibraryDwellingConstPtr     dwelling     = nullptr;
+        LibraryFactionConstPtr      factionTown  = nullptr;
+        LibraryMapBankConstPtr      mapBank      = nullptr;
+        LibraryMapObstacleConstPtr  mapObstacle  = nullptr;
+        LibraryMapVisitableConstPtr mapVisitable = nullptr;
+        LibraryResourceConstPtr     resource     = nullptr;
+        LibraryResourceConstPtr     resourceMine = nullptr;
+        LibraryUnitConstPtr         unit         = nullptr;
+    } mappings; // generated
+
+    LibraryObjectDefConstPtr get(const std::string& substitutionId) const noexcept
+    {
+        if (substitutionId.empty())
+            return this;
+        auto it = substitutions.find(substitutionId);
+        return it == substitutions.cend() ? this : it->second;
+    }
+};
+
+struct ObjectDefIndex {
+    std::string variant;
+    std::string substitution;
+};
+
+struct ObjectDefMappings {
+    using Map = std::map<std::string, LibraryObjectDefConstPtr>;
+
+    Map variants;
+
+    LibraryObjectDefConstPtr get(const ObjectDefIndex& index) const noexcept
+    {
+        auto it = variants.find(index.variant);
+        if (it == variants.cend()) {
+            return index.variant.empty() ? nullptr : get({ "", index.substitution });
+        }
+        return it->second->get(index.substitution);
+    }
 };
 
 }

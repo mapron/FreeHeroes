@@ -44,7 +44,8 @@ int main(int argc, char** argv)
 
     Core::CoreApplication fhCoreApp;
     fhCoreApp.initLogger();
-    fhCoreApp.load();
+    if (!fhCoreApp.load())
+        return 1;
 
     auto makePaths = [&parser](const std::string& prefix) -> MapConverter::PathsSet {
         const std::string fhMap      = parser.getArg(prefix + "fhMap");

@@ -37,7 +37,7 @@ public:
 
     void initLogger(int debugLevel = 5) const;
 
-    void load();
+    bool load();
 
     const IResourceLibrary* getResourceLibrary() const
     {

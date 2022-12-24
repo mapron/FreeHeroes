@@ -387,4 +387,39 @@
 
 }
 
+},
+
+
+{
+"scope": "mapBanks",
+
+"records" : {
+
+"sod.map.crypt"                      : { "pres": { "order":1    } },
+"sod.map.utopia"                     : { "pres": { "order":2    } },
+"sod.map.derelictShip"               : { "pres": { "order":1001 } },
+"sod.map.shipwreck"                  : { "pres": { "order":1002 } },
+"hota.map.blackTower"                : { "pres": { "order":3    } },
+"hota.map.mansion"                   : { "pres": { "order":4    } },
+"hota.map.beholderSanctuary"         : { "pres": { "order":5    } },
+"hota.map.templeSea"                 : { "pres": { "order":1003 } },
+"hota.map.churchyard"                : { "pres": { "order":6    } },
+"sod.map.conservatory"               : { "pres": { "order":100  } },
+"sod.map.hive"                       : { "pres": { "order":101  } },
+"hota.map.experimentalShop"          : { "pres": { "order":102  } },
+"hota.map.wolfRaiderPicket"          : { "pres": { "order":103  } },
+"hota.map.vermilionTower"            : { "pres": { "order":104  } },
+"hota.map.pirateCave"                : { "pres": { "order":105  } },
+"hota.map.ivoryTower"                : { "pres": { "order":106  } },
+
+"sod.map.impCache"                   : { "pres": { "order":200  } },
+"sod.map.dwarvenTreasury"            : { "pres": { "order":201  } },
+"sod.map.medusaStores"               : { "pres": { "order":202  } },
+"sod.map.cyclopsStockpile"           : { "pres": { "order":203  } },
+"sod.map.nagaBank"                   : { "pres": { "order":204  } },
+"hota.map.spit"                      : { "pres": { "order":205  } },
+"hota.map.ruins"                     : { "pres": { "order":206  } }
+
+}
+
 }]

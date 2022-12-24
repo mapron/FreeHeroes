@@ -204,7 +204,7 @@ enum class MapObjectType
     //    SUBTERRANEAN_GATE           = 103,
     //    UNIVERSITY                  = 104,
     //    WAGON                       = 105,
-    //    WAR_MACHINE_FACTORY         = 106,
+    WAR_MACHINE_FACTORY = 106,
     //    SCHOOL_OF_WAR               = 107,
     //    WARRIORS_TOMB               = 108,
     //    WATER_WHEEL                 = 109,
@@ -272,7 +272,7 @@ enum class MapObjectType
     RANDOM_MONSTER_L6 = 163,
     RANDOM_MONSTER_L7 = 164,
 
-    //    BORDER_GATE                 = 212,
+    BORDER_GATE = 212,
     //    FREELANCERS_GUILD           = 213,
     HERO_PLACEHOLDER        = 214,
     QUEST_GUARD             = 215,
@@ -304,7 +304,7 @@ struct IMapObject {
     virtual void toJson(PropertyTree& data) const                     = 0;
     virtual void fromJson(const PropertyTree& data)                   = 0;
 
-    static std::unique_ptr<IMapObject> Create(MapObjectType type, MapFormatFeaturesPtr features);
+    static std::unique_ptr<IMapObject> Create(MapObjectType type, uint32_t subid, MapFormatFeaturesPtr features);
 };
 
 struct StackBasicDescriptor {

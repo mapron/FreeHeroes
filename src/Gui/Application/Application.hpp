@@ -66,7 +66,7 @@ public:
     {}
     ~Application();
 
-    void load();
+    bool load();
 
     IGraphicsLibrary& getGraphicsLibrary() const
     {

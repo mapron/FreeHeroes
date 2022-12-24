@@ -202,7 +202,7 @@ public:
         m_buf.checkRemain(0);
     }
 
-    void readBits(std::vector<uint8_t>& bitArray, bool invert = false)
+    void readBits(std::vector<uint8_t>& bitArray, bool invert = false, bool inverseArrayIndex = false)
     {
         const uint8_t invertByte = invert;
         const size_t  bitCount   = bitArray.size();
@@ -212,8 +212,10 @@ public:
             const size_t  bitCountInByte = std::min(size_t(8), bitCount - bitOffset);
             const uint8_t mask           = this->readScalar<uint8_t>();
             for (size_t bit = 0; bit < bitCountInByte; ++bit) {
-                const uint8_t flag        = static_cast<bool>(mask & (1 << bit));
-                bitArray[bitOffset + bit] = flag ^ invertByte;
+                const uint8_t flag          = static_cast<bool>(mask & (1 << bit));
+                const size_t  bitArrayIndex = bitOffset + bit;
+
+                bitArray[inverseArrayIndex ? (bitCount - bitArrayIndex - 1) : bitArrayIndex] = flag ^ invertByte;
             }
         }
     }
@@ -331,7 +333,7 @@ public:
         m_buf.checkRemain(0);
     }
 
-    void writeBits(const std::vector<uint8_t>& bitArray, bool invert = false)
+    void writeBits(const std::vector<uint8_t>& bitArray, bool invert = false, bool inverseArrayIndex = false)
     {
         const uint8_t invertByte = invert;
         const size_t  bitCount   = bitArray.size();
@@ -341,7 +343,8 @@ public:
             const size_t bitCountInByte = std::min(size_t(8), bitCount - bitOffset);
             uint8_t      mask           = 0;
             for (size_t bit = 0; bit < bitCountInByte; ++bit) {
-                const uint8_t flag = bitArray[bitOffset + bit] ^ invertByte;
+                const size_t  bitArrayIndex = bitOffset + bit;
+                const uint8_t flag          = bitArray[inverseArrayIndex ? (bitCount - bitArrayIndex - 1) : bitArrayIndex] ^ invertByte;
                 if (flag)
                     mask |= (1 << bit);
             }

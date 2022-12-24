@@ -61,6 +61,7 @@ template<> struct LibraryContainerKey<LibrarySpell         > { static constexpr 
 template<> struct LibraryContainerKey<LibraryTerrain       > { static constexpr const char * scopeName = "terrains" ; };
 template<> struct LibraryContainerKey<LibraryUnit          > { static constexpr const char * scopeName = "units" ; };
 // clang-format on
+
 }
 
 struct GameDatabase::Impl {
@@ -197,6 +198,7 @@ struct GameDatabase::Impl {
     template<typename T>
     T* findMutable(const T* obj)
     {
+        assert(obj);
         return getContainer<T>().findMutable(obj->id);
     }
 };
@@ -426,6 +428,12 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
     if (!Reflection::deserialize(this, m_impl->m_gameRules, recordObjectMaps["gameRules"][""]))
         return false;
 
+    auto checkLink = []<typename T>(const auto* id, const T* context) {
+        if (id)
+            return;
+        throw std::runtime_error("Link check violated, id == nullptr, scope '" + std::string(LibraryContainerKey<T>::scopeName) + "', context=" + context->id);
+    };
+
     // making object links.
     for (auto spec : m_impl->m_heroSpecs.m_unsorted) {
         if (spec->type == LibraryHeroSpec::Type::Unit
@@ -433,28 +441,28 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
             || spec->type == LibraryHeroSpec::Type::UnitNonStd
             || spec->type == LibraryHeroSpec::Type::SpecialCannon
             || spec->type == LibraryHeroSpec::Type::SpecialBallista) {
-            assert(spec->unit);
+            checkLink(spec->unit, spec);
         }
         if (spec->type == LibraryHeroSpec::Type::Skill) {
-            assert(spec->skill);
+            checkLink(spec->skill, spec);
         }
         if (spec->type == LibraryHeroSpec::Type::Spell) {
-            assert(spec->spell);
+            checkLink(spec->spell, spec);
         }
     }
-    for ([[maybe_unused]] auto unit : m_impl->m_units.m_unsorted) {
-        assert(unit->faction); // actually missing faction is error
+    for (auto* unit : m_impl->m_units.m_unsorted) {
+        checkLink(unit->faction, unit); // actually missing faction is error
         assert(!unit->faction->id.empty());
     }
-    for (auto hero : m_impl->m_heroes.m_unsorted) {
-        assert(hero->faction);
-        assert(hero->spec);
+    for (auto* hero : m_impl->m_heroes.m_unsorted) {
+        checkLink(hero->faction, hero);
+        checkLink(hero->spec, hero);
 
         for ([[maybe_unused]] auto& subSkill : hero->secondarySkills) {
-            assert(subSkill.skill);
+            checkLink(subSkill.skill, hero);
         }
         for ([[maybe_unused]] auto& unit : hero->startStacks) {
-            assert(unit.unit);
+            checkLink(unit.unit, hero);
         }
     }
     // factions postproc
@@ -488,7 +496,7 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
     });
 
     int index = 0;
-    for (auto faction : sortedFactions) {
+    for (auto* faction : sortedFactions) {
         faction->generatedOrder = index++;
         for (auto* skill : m_impl->m_skills.m_unsorted) {
             assert(skill);
@@ -521,6 +529,14 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
             copyHeroDef(faction->mageClass.presentationParams.adventureSpriteFemale);
             copyHeroDef(faction->warriorClass.presentationParams.adventureSpriteMale);
             copyHeroDef(faction->warriorClass.presentationParams.adventureSpriteFemale);
+        }
+
+        for (const auto& [key, objConst] : faction->objectDefs.variants) {
+            checkLink(objConst, faction);
+            auto* objMutable                 = m_impl->findMutable(objConst);
+            objMutable->mappings.factionTown = faction;
+            assert(objMutable->mappings.key.empty());
+            objMutable->mappings.key = key;
         }
 
         m_impl->m_factions.m_sorted.push_back(faction);
@@ -564,7 +580,7 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
         art.presentationParams.orderGroup    = 0;
         art.presentationParams.orderCategory = LibraryArtifact::OrderCategory::Scrolls;
         art.treasureClass                    = LibraryArtifact::TreasureClass::Scroll;
-        art.mapObjectDef                     = m_impl->m_objectDefs.find("ava0001");
+        art.objectDefs                       = ObjectDefMappings{ .variants = { { "", m_impl->m_objectDefs.find("ava0001") } } };
         m_impl->m_artifacts.insertObject(art.id, std::move(art));
     }
 
@@ -580,6 +596,14 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
             m_impl->findMutable(upgUnit)->prevUpgrade = unit;
         }
 
+        for (const auto& [key, objConst] : unit->objectDefs.variants) {
+            checkLink(objConst, unit);
+            auto* objMutable          = m_impl->findMutable(objConst);
+            objMutable->mappings.unit = unit;
+            assert(objMutable->mappings.key.empty());
+            objMutable->mappings.key = key;
+        }
+
         m_impl->m_units.m_sorted.push_back(unit);
         m_impl->findMutable(unit->faction)->units.push_back(unit);
     }
@@ -588,6 +612,7 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
         while (unitIt->prevUpgrade) {
             unitIt = unitIt->prevUpgrade;
         }
+
         unit->baseUpgrade = unitIt;
     }
     // spec postproc - do we need an order at all?
@@ -613,6 +638,14 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
         auto cache                   = artifact->provideSpells.filterPossible(m_impl->m_spells.m_unsorted);
         artifact->provideSpellsCache = std::set<LibrarySpellConstPtr>(cache.cbegin(), cache.cend());
 
+        for (const auto& [key, objConst] : artifact->objectDefs.variants) {
+            checkLink(objConst, artifact);
+            auto* obj              = m_impl->findMutable(objConst);
+            obj->mappings.artifact = artifact;
+            assert(obj->mappings.key.empty());
+            obj->mappings.key = key;
+        }
+
         m_impl->m_artifacts.m_sorted.push_back(artifact);
     }
     // heroes postproc
@@ -633,6 +666,21 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
         return l->presentationParams.orderKingdom < r->presentationParams.orderKingdom;
     });
     for (auto* resource : m_impl->m_resources.m_unsorted) {
+        for (const auto& [key, objConst] : resource->objectDefs.variants) {
+            checkLink(objConst, resource);
+            auto* obj              = m_impl->findMutable(objConst);
+            obj->mappings.resource = resource;
+            assert(obj->mappings.key.empty());
+            obj->mappings.key = key;
+        }
+        for (const auto& [key, objConst] : resource->minesDefs.variants) {
+            checkLink(objConst, resource);
+            auto* obj = m_impl->findMutable(objConst);
+            assert(obj->mappings.key.empty());
+            obj->mappings.resourceMine = resource;
+            obj->mappings.key          = key;
+        }
+
         m_impl->m_resources.m_sorted.push_back(resource);
     }
     // terrain postproc
@@ -648,23 +696,62 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
     });
     for (auto* obj : m_impl->m_mapBanks.m_unsorted) {
         for (auto& variant : obj->variants) {
-            for ([[maybe_unused]] auto& guard : variant.guards) {
-                assert(guard.unit);
+            for (auto& guard : variant.guards) {
+                checkLink(guard.unit, obj);
             }
+        }
+        for (const auto& [key, objConst] : obj->objectDefs.variants) {
+            checkLink(objConst, obj);
+            auto* objMutable             = m_impl->findMutable(objConst);
+            objMutable->mappings.mapBank = obj;
+            assert(objMutable->mappings.key.empty());
+            objMutable->mappings.key = key;
         }
         m_impl->m_mapBanks.m_sorted.push_back(obj);
     }
     for (auto* obj : m_impl->m_mapObstacles.m_unsorted) {
+        for (const auto& [key, objConst] : obj->objectDefs.variants) {
+            checkLink(objConst, obj);
+            auto* objMutable                 = m_impl->findMutable(objConst);
+            objMutable->mappings.mapObstacle = obj;
+            assert(objMutable->mappings.key.empty());
+            objMutable->mappings.key = key;
+        }
         m_impl->m_mapObstacles.m_sorted.push_back(obj);
     }
     for (auto* obj : m_impl->m_mapVisitables.m_unsorted) {
+        for (const auto& [key, objConst] : obj->objectDefs.variants) {
+            checkLink(objConst, obj);
+            auto* objMutable                  = m_impl->findMutable(objConst);
+            objMutable->mappings.mapVisitable = obj;
+            assert(objMutable->mappings.key.empty());
+            objMutable->mappings.key = key;
+        }
         m_impl->m_mapVisitables.m_sorted.push_back(obj);
     }
-    for (auto* d : m_impl->m_dwellings.m_unsorted) {
-        m_impl->m_dwellings.m_sorted.push_back(d);
+    for (auto* obj : m_impl->m_dwellings.m_unsorted) {
+        for (const auto& [key, objConst] : obj->objectDefs.variants) {
+            checkLink(objConst, obj);
+            auto* objMutable              = m_impl->findMutable(objConst);
+            objMutable->mappings.dwelling = obj;
+            assert(objMutable->mappings.key.empty());
+            objMutable->mappings.key = key;
+        }
+        m_impl->m_dwellings.m_sorted.push_back(obj);
     }
-    for (auto* d : m_impl->m_objectDefs.m_unsorted) {
-        m_impl->m_objectDefs.m_sorted.push_back(d);
+    const size_t terrainsSize = m_impl->m_terrains.legacyOrderedRecords().size();
+    for (auto* obj : m_impl->m_objectDefs.m_unsorted) {
+        if (!obj->substituteKey.empty()) {
+            checkLink(obj->substituteFor, obj);
+            m_impl->findMutable(obj->substituteFor)->substitutions[obj->substituteKey] = obj;
+        }
+        std::reverse(obj->terrainsHard.begin(), obj->terrainsHard.end());
+        std::reverse(obj->terrainsSoft.begin(), obj->terrainsSoft.end());
+        obj->terrainsHard.resize(terrainsSize);
+        obj->terrainsSoft.resize(terrainsSize);
+        std::reverse(obj->terrainsHard.begin(), obj->terrainsHard.end());
+        std::reverse(obj->terrainsSoft.begin(), obj->terrainsSoft.end());
+        m_impl->m_objectDefs.m_sorted.push_back(obj);
     }
 
     return true;

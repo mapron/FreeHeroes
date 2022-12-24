@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "LibraryFwd.hpp"
+#include "LibraryObjectDef.hpp"
 
 #include "Reward.hpp"
 
@@ -41,8 +41,8 @@ struct LibraryMapBank {
     struct Presentation {
         int order = 0;
     };
-    Presentation                          presentationParams;
-    std::vector<LibraryObjectDefConstPtr> mapObjectDefs;
+    Presentation      presentationParams;
+    ObjectDefMappings objectDefs;
 };
 
 }

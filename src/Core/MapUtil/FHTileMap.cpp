@@ -59,6 +59,8 @@ struct TileNeightbours {
      */
     TileInfo TL, TR, BL, BR;
 
+    TileInfo TC, CL, CR, BC;
+
     TileInfo T2, L2, R2, B2;
 
     bool m_coastal = false;
@@ -97,6 +99,11 @@ struct TileNeightbours {
         BL.EQ = terrBL == tileXX.m_terrain;
         BR.EQ = terrBR == tileXX.m_terrain;
 
+        TC.EQ = terrTC == tileXX.m_terrain;
+        CL.EQ = terrCL == tileXX.m_terrain;
+        CR.EQ = terrCR == tileXX.m_terrain;
+        BC.EQ = terrBC == tileXX.m_terrain;
+
         T2.EQ = terrT2 == tileXX.m_terrain;
         L2.EQ = terrL2 == tileXX.m_terrain;
         R2.EQ = terrR2 == tileXX.m_terrain;
@@ -122,40 +129,55 @@ struct TileNeightbours {
             return *this;
         if (vertical && horizontal)
             return TileNeightbours{
-                .TL            = this->BR,
-                .TR            = this->BL,
-                .BL            = this->TR,
-                .BR            = this->TL,
-                .T2            = this->B2,
-                .L2            = this->R2,
-                .R2            = this->L2,
-                .B2            = this->T2,
+                .TL = this->BR,
+                .TR = this->BL,
+                .BL = this->TR,
+                .BR = this->TL,
+                .TC = this->BC,
+                .CL = this->CR,
+                .CR = this->CL,
+                .BC = this->TC,
+                .T2 = this->B2,
+                .L2 = this->R2,
+                .R2 = this->L2,
+                .B2 = this->T2,
+
                 .m_flippedHor  = !this->m_flippedHor,
                 .m_flippedVert = !this->m_flippedVert,
             };
         if (vertical)
             return TileNeightbours{
-                .TL            = this->BL,
-                .TR            = this->BR,
-                .BL            = this->TL,
-                .BR            = this->TR,
-                .T2            = this->B2,
-                .L2            = this->L2,
-                .R2            = this->R2,
-                .B2            = this->T2,
+                .TL = this->BL,
+                .TR = this->BR,
+                .BL = this->TL,
+                .BR = this->TR,
+                .TC = this->BC,
+                .CL = this->CL,
+                .CR = this->CR,
+                .BC = this->TC,
+                .T2 = this->B2,
+                .L2 = this->L2,
+                .R2 = this->R2,
+                .B2 = this->T2,
+
                 .m_flippedHor  = false,
                 .m_flippedVert = !this->m_flippedVert,
             };
         if (horizontal)
             return TileNeightbours{
-                .TL            = this->TR,
-                .TR            = this->TL,
-                .BL            = this->BR,
-                .BR            = this->BL,
-                .T2            = this->T2,
-                .L2            = this->R2,
-                .R2            = this->L2,
-                .B2            = this->B2,
+                .TL = this->TR,
+                .TR = this->TL,
+                .BL = this->BR,
+                .BR = this->BL,
+                .TC = this->TC,
+                .CL = this->CR,
+                .CR = this->CL,
+                .BC = this->BC,
+                .T2 = this->T2,
+                .L2 = this->R2,
+                .R2 = this->L2,
+                .B2 = this->B2,
+
                 .m_flippedHor  = !this->m_flippedHor,
                 .m_flippedVert = false,
             };
@@ -358,7 +380,7 @@ const std::vector<PatternMatcher> g_matchers{
             return true
                    && t.TL.D && t.TR.D
                    && t.BL.D && t.BR.D
-                   && t.R2.EQ && t.B2.EQ;
+                   && t.CR.EQ && t.BC.EQ;
         },
     },
     PatternMatcher{
@@ -369,7 +391,7 @@ const std::vector<PatternMatcher> g_matchers{
             return true
                    && t.TL.S && t.TR.S
                    && t.BL.S && t.BR.S
-                   && t.R2.EQ && t.B2.EQ;
+                   && t.CR.EQ && t.BC.EQ;
         },
     },
     PatternMatcher{
@@ -683,12 +705,12 @@ void FHTileMap::correctRoads()
         const auto& B  = getNeighbour(pos, flipHor ? +0 : +0, flipVert ? -1 : +1, def);
         // const auto& BR = getNeighbour(pos, flipHor ? -1 : +1, flipVert ? -1 : +1);
 
-        const auto eR  = X.m_roadType == R.m_roadType && &X != &R;
-        const auto eL  = X.m_roadType == L.m_roadType && &X != &L;
-        const auto eT  = X.m_roadType == T.m_roadType && &X != &T;
-        const auto eB  = X.m_roadType == B.m_roadType && &X != &B;
-        const auto eTR = X.m_roadType == TR.m_roadType && &X != &TR;
-        const auto eBL = X.m_roadType == BL.m_roadType && &X != &BL;
+        const auto eR  = X.m_roadType == R.m_roadType;
+        const auto eL  = X.m_roadType == L.m_roadType;
+        const auto eT  = X.m_roadType == T.m_roadType;
+        const auto eB  = X.m_roadType == B.m_roadType;
+        const auto eTR = X.m_roadType == TR.m_roadType;
+        const auto eBL = X.m_roadType == BL.m_roadType;
 
         auto setView = [&X, flipHor, flipVert](uint8_t min, uint8_t max) {
             X.m_roadViewMin  = min;
@@ -716,6 +738,10 @@ void FHTileMap::correctRoads()
             setView(14, 14);
         } else if (order == 2 && eR && !eL && !eT && !eB) {
             setView(15, 15);
+        } else if (order == 2 && !eR && !eL && !eT && !eB) {
+            setView(14, 14);
+            X.m_roadFlipHor  = false;
+            X.m_roadFlipVert = true;
         } else {
             return false;
         }
@@ -772,10 +798,10 @@ void FHTileMap::correctRivers()
         const auto& B = getNeighbour(pos, flipHor ? +0 : +0, flipVert ? -1 : +1, def);
         //const auto& BR = getNeighbour(pos, flipHor ? -1 : +1, flipVert ? -1 : +1);
 
-        const auto eR = X.m_riverType == R.m_riverType && &X != &R;
-        const auto eL = X.m_riverType == L.m_riverType && &X != &L;
-        const auto eT = X.m_riverType == T.m_riverType && &X != &T;
-        const auto eB = X.m_riverType == B.m_riverType && &X != &B;
+        const auto eR = X.m_riverType == R.m_riverType;
+        const auto eL = X.m_riverType == L.m_riverType;
+        const auto eT = X.m_riverType == T.m_riverType;
+        const auto eB = X.m_riverType == B.m_riverType;
 
         auto setView = [&X, flipHor, flipVert](uint8_t min, uint8_t max) {
             X.m_riverViewMin  = min;
