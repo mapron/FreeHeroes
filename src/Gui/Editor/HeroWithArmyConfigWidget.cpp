@@ -195,16 +195,16 @@ void HeroWithArmyConfigWidget::refresh()
     }
 }
 
-void HeroWithArmyConfigWidget::setModels(LibraryModelsProvider& modelProvider, Core::IRandomGenerator* randomGenerator)
+void HeroWithArmyConfigWidget::setModels(const LibraryModelsProvider* modelProvider, Core::IRandomGenerator* randomGenerator)
 {
-    m_ui->stackEditorPack->setUnitsModel(modelProvider.units());
+    m_ui->stackEditorPack->setUnitsModel(modelProvider->units());
 
-    m_modelProvider   = &modelProvider;
+    m_modelProvider   = modelProvider;
     m_randomGenerator = randomGenerator;
 
     m_ui->comboBoxHeroIdentity->setIconSize({ 48, 32 });
 
-    HeroesComboModel* comboModel = new HeroesComboModel(modelProvider.heroes(), m_ui->comboBoxHeroIdentity);
+    HeroesComboModel* comboModel = new HeroesComboModel(modelProvider->heroes(), m_ui->comboBoxHeroIdentity);
 
     m_ui->comboBoxHeroIdentity->setModel(comboModel);
 }

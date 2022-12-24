@@ -46,16 +46,16 @@ public:
     using LibrarySpellConstPtr = Core::LibrarySpellConstPtr;
     using DamageResult         = Core::DamageResult;
 
-    BattleFieldItem(ICursorLibrary&        cursorLibrary,
-                    Sound::IMusicBox&      musicBox,
-                    LibraryModelsProvider& modelsProvider,
+    BattleFieldItem(const ICursorLibrary*        cursorLibrary,
+                    Sound::IMusicBox*            musicBox,
+                    const LibraryModelsProvider* modelsProvider,
 
                     Core::IBattleView&               battleView,
                     Core::IBattleControl&            battleControl,
                     const Core::BattleFieldGeometry& battleGeometry,
                     BattleControlPlan&               controlPlan,
 
-                    Gui::IAppSettings& appSettings,
+                    Gui::IAppSettings* appSettings,
                     QGraphicsItem*     parent = nullptr);
     ~BattleFieldItem();
 
@@ -112,16 +112,16 @@ private:
     void addSpriteForBattleStack(BattleStackConstPtr stack);
 
 private:
-    ICursorLibrary&        m_cursorLibrary;
-    Sound::IMusicBox&      m_musicBox;
-    LibraryModelsProvider& m_modelsProvider;
+    const ICursorLibrary*        m_cursorLibrary;
+    Sound::IMusicBox*            m_musicBox;
+    const LibraryModelsProvider* m_modelsProvider;
 
     Core::IBattleView&               m_battleView;
     Core::IBattleControl&            m_battleControl;
     const Core::BattleFieldGeometry& m_battleGeometry;
     BattleControlPlan&               m_controlPlan;
 
-    IAppSettings&        m_appSettings;
+    IAppSettings*        m_appSettings;
     SporadicOrchestrator m_sporadicOrchestrator;
 
     struct UnitGraphics {

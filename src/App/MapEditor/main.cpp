@@ -5,14 +5,30 @@
  */
 #include <QApplication>
 
+#include <iostream>
+
 #include "CoreApplication.hpp"
+#include "CommandLineUtils.hpp"
 #include "Application.hpp"
 
-#include "MapGenTestWidget.hpp"
+#include "MapEditorWidget.hpp"
 
 int main(int argc, char* argv[])
 {
     using namespace FreeHeroes;
+
+    AbstractCommandLine parser({
+                                   "input-fhMap",
+                               },
+                               {});
+    parser.markRequired({ "input-fhMap" });
+    if (!parser.parseArgs(std::cerr, argc, argv)) {
+        std::cerr << "Map utils invocation failed, correct usage is:\n";
+        std::cerr << parser.getHelp();
+        return 1;
+    }
+
+    const std::string input = parser.getArg("input-fhMap");
 
     Core::CoreApplication fhCoreApp({ Core::CoreApplication::Option::ResourceLibraryApp,
                                       Core::CoreApplication::Option::ResourceLibraryLocalData,
@@ -23,7 +39,11 @@ int main(int argc, char* argv[])
 
     fhApp.load();
 
-    MapGenTestWidget dlg(fhApp.getGraphicsLibrary(), fhApp.getGameDatabase(), fhApp.getModelsProvider());
+    MapEditorWidget dlg(
+        fhCoreApp.getDatabaseContainer(),
+        fhCoreApp.getRandomGeneratorFactory(),
+        fhApp.getGraphicsLibrary(),
+        fhApp.getModelsProvider());
     dlg.show();
 
     return app.exec();

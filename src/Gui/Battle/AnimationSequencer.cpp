@@ -101,7 +101,7 @@ void AnimationSequencer::AnimationSequencerHandle::playEffect(BattleAnimation ty
                    .setFadeIn(soundType == AnimationSequencer::BattleSound::Move ? 200 : 0)
                    .setFadeOut(soundType == AnimationSequencer::BattleSound::Move ? 200 : 100);
 
-    parent->m_musicBox.effectPrepare(eff)->play();
+    parent->m_musicBox->effectPrepare(eff)->play();
 }
 
 void AnimationSequencer::AnimationSequencerHandle::queueChangeAnim(BattleAnimation type, int pauseDuration, bool reverse)
@@ -248,7 +248,7 @@ SpriteItem::AnimGroupSettings AnimationSequencer::AnimationSequencerHandle::getA
 
 //// --------------------------  Sequencer -------------------------------
 
-AnimationSequencer::AnimationSequencer(const Gui::IAppSettings::Battle& battleSettings, Sound::IMusicBox& musicBox)
+AnimationSequencer::AnimationSequencer(const Gui::IAppSettings::Battle& battleSettings, Sound::IMusicBox* musicBox)
     : m_battleSettings(battleSettings)
     , m_musicBox(musicBox)
 {}
@@ -275,7 +275,7 @@ void AnimationSequencer::playEffect(const std::string& soundId, int expectedDura
                    .setExpectedDuration(expectedDuration)
                    .setLoopAround(false);
 
-    m_musicBox.effectPrepare(eff)->play();
+    m_musicBox->effectPrepare(eff)->play();
 }
 void AnimationSequencer::queuePlayEffect(const std::string& soundId, int expectedDuration, int pauseDuration)
 {

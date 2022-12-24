@@ -14,7 +14,7 @@
 
 namespace FreeHeroes {
 
-SoundTestWidget::SoundTestWidget(Sound::IMusicBox& musicBox)
+SoundTestWidget::SoundTestWidget(Sound::IMusicBox* musicBox)
     : QDialog(nullptr)
 {
     QVBoxLayout* layout = new QVBoxLayout(this);
@@ -27,7 +27,7 @@ SoundTestWidget::SoundTestWidget(Sound::IMusicBox& musicBox)
         auto musicVolumeSlider = new QSlider(this);
         musicVolumeSlider->setOrientation(Qt::Horizontal);
         musicVolumeSlider->setMaximum(100);
-        musicVolumeSlider->setValue(musicBox.getMusicVolume());
+        musicVolumeSlider->setValue(musicBox->getMusicVolume());
         layoutMusic->addWidget(musicVolumeSlider);
         layoutMusic->addStretch();
 
@@ -41,10 +41,10 @@ SoundTestWidget::SoundTestWidget(Sound::IMusicBox& musicBox)
         connect(pbPlayMusic, &QPushButton::clicked, this, [&musicBox, currentMusicIndex, musicList]() mutable {
             currentMusicIndex++;
             currentMusicIndex = currentMusicIndex % musicList.size();
-            musicBox.musicPrepare(musicList[currentMusicIndex])->play();
+            musicBox->musicPrepare(musicList[currentMusicIndex])->play();
         });
         connect(musicVolumeSlider, &QSlider::sliderReleased, this, [musicVolumeSlider, &musicBox] {
-            musicBox.setMusicVolume(musicVolumeSlider->value());
+            musicBox->setMusicVolume(musicVolumeSlider->value());
         });
     }
 
@@ -57,7 +57,7 @@ SoundTestWidget::SoundTestWidget(Sound::IMusicBox& musicBox)
         auto effectsVolumeSlider = new QSlider(this);
         effectsVolumeSlider->setOrientation(Qt::Horizontal);
         effectsVolumeSlider->setMaximum(100);
-        effectsVolumeSlider->setValue(musicBox.getEffectsVolume());
+        effectsVolumeSlider->setValue(musicBox->getEffectsVolume());
         layoutEffects->addWidget(effectsVolumeSlider);
         layoutEffects->addStretch();
 
@@ -108,10 +108,10 @@ SoundTestWidget::SoundTestWidget(Sound::IMusicBox& musicBox)
             currentEffectIndex++;
             currentEffectIndex = currentEffectIndex % effectGroupList.size();
             for (const auto& eff : effectGroupList[currentEffectIndex])
-                musicBox.effectPrepare(eff)->play();
+                musicBox->effectPrepare(eff)->play();
         });
         connect(effectsVolumeSlider, &QSlider::sliderReleased, this, [effectsVolumeSlider, &musicBox] {
-            musicBox.setEffectsVolume(effectsVolumeSlider->value());
+            musicBox->setEffectsVolume(effectsVolumeSlider->value());
         });
     }
 

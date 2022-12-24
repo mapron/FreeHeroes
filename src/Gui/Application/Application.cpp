@@ -145,7 +145,7 @@ bool Application::load()
         m_graphicsLibrary = std::make_shared<GraphicsLibrary>(m_impl->coreApp->getResourceLibrary());
 
     if (m_options.contains(Option::CursorLibrary))
-        m_cursorLibrary = std::make_shared<CursorLibrary>(*m_graphicsLibrary);
+        m_cursorLibrary = std::make_shared<CursorLibrary>(m_graphicsLibrary.get());
 
     if (m_options.contains(Option::MusicBox)) {
         auto randomGeneratorUi = m_impl->coreApp->getRandomGeneratorFactory()->create();
@@ -193,7 +193,7 @@ bool Application::load()
 
     if (m_options.contains(Option::LibraryModels)) {
         ProfilerScope scope("LibraryModels load");
-        m_modelsProvider = std::make_shared<LibraryModelsProvider>(m_gameDatabaseUi, *m_musicBox, *m_graphicsLibrary);
+        m_modelsProvider = std::make_shared<LibraryModelsProvider>(m_gameDatabaseUi, m_musicBox.get(), m_graphicsLibrary.get());
     }
 
     if (m_options.contains(Option::AppStyle)) {
@@ -204,9 +204,9 @@ bool Application::load()
     return true;
 }
 
-IAppSettings& Application::getAppSettings()
+IAppSettings* Application::getAppSettings()
 {
-    return *m_impl->appConfig.get();
+    return m_impl->appConfig.get();
 }
 
 }

@@ -38,6 +38,8 @@ ENUM_REFLECTION_STRINGIY(MapConverter::Task,
                          ConvertJsonToH3M,
                          ConvertH3SVGToJson,
                          ConvertJsonToH3SVG,
+                         LoadFH,
+                         SaveFH,
                          FHMapToH3M,
                          H3MToFHMap,
                          H3MRoundTripJson,
@@ -154,12 +156,23 @@ void MapConverter::run(Task task, int recurse) noexcept(false)
                 setOutput(m_outputs.m_h3svg.m_binary);
                 runMember(writeBinaryBufferData);
             } break;
-            case Task::FHMapToH3M:
+            case Task::LoadFH:
             {
                 setInput(m_inputs.m_fhMap);
                 runMember(readJsonToProperty);
 
                 runMember(propertyDeserializeFH);
+            } break;
+            case Task::SaveFH:
+            {
+                runMember(propertySerializeFH);
+                setOutput(m_outputs.m_fhMap);
+                runMember(writeJsonFromProperty);
+            } break;
+            case Task::FHMapToH3M:
+            {
+                run(Task::LoadFH, recurse + 1);
+
                 runMember(convertFHtoH3M);
                 if (m_settings.m_dumpBinaryDataJson) {
                     runMember(propertySerializeH3M);
@@ -197,10 +210,7 @@ void MapConverter::run(Task task, int recurse) noexcept(false)
                     runMember(writeJsonFromProperty);
                 }
                 runMember(convertH3MtoFH);
-                runMember(propertySerializeFH);
-                setOutput(m_outputs.m_fhMap);
-                runMember(writeJsonFromProperty);
-                ;
+                run(Task::SaveFH, recurse + 1);
             } break;
             case Task::H3MRoundTripJson:
             {

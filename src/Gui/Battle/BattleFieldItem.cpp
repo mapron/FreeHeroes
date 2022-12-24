@@ -79,16 +79,16 @@ BattleAnimation animationForRangedDirection(BattleDirectionPrecise direction)
 
 }
 
-BattleFieldItem::BattleFieldItem(ICursorLibrary&        cursorLibrary,
-                                 Sound::IMusicBox&      musicBox,
-                                 LibraryModelsProvider& modelsProvider,
+BattleFieldItem::BattleFieldItem(const ICursorLibrary*        cursorLibrary,
+                                 Sound::IMusicBox*            musicBox,
+                                 const LibraryModelsProvider* modelsProvider,
 
                                  Core::IBattleView&               battleView,
                                  Core::IBattleControl&            battleControl,
                                  const Core::BattleFieldGeometry& battleGeometry,
                                  BattleControlPlan&               controlPlan,
 
-                                 Gui::IAppSettings& appSettings,
+                                 Gui::IAppSettings* appSettings,
                                  QGraphicsItem*     parent)
     : QGraphicsObject(parent)
     , m_cursorLibrary(cursorLibrary)
@@ -115,7 +115,7 @@ BattleFieldItem::BattleFieldItem(ICursorLibrary&        cursorLibrary,
     }
 
     auto makeHeroSpriteObj = [this](BattleHeroConstPtr hero, const QPointF& pos) -> SpriteItemObj* {
-        auto sprite = m_modelsProvider.heroes()->find(hero->library)->getBattleSprite();
+        auto sprite = m_modelsProvider->heroes()->find(hero->library)->getBattleSprite();
         Q_ASSERT(sprite);
 
         auto* heroSprite = new SpriteItemObj(this);
@@ -125,7 +125,7 @@ BattleFieldItem::BattleFieldItem(ICursorLibrary&        cursorLibrary,
         heroSprite->setAnimGroup(SpriteItem::AnimGroupSettings{ 1, 1500 }.setLoopOver());
         heroSprite->setPos(pos);
         heroSprite->setAcceptHoverEvents(true);
-        heroSprite->setCursor(m_cursorLibrary.getOther(ICursorLibrary::Type::HeroView));
+        heroSprite->setCursor(m_cursorLibrary->getOther(ICursorLibrary::Type::HeroView));
         m_heroes << heroSprite;
         return heroSprite;
     };
@@ -200,7 +200,7 @@ void BattleFieldItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* o
         painter->drawPolygon(defaultGeometry.getHexPolygon(pos, scale));
     };
     painter->setBrush(QBrush(Qt::NoBrush));
-    painter->setPen(m_appSettings.battle().displayGrid ? QPen(mainGrid, 0.0) : Qt::NoPen);
+    painter->setPen(m_appSettings->battle().displayGrid ? QPen(mainGrid, 0.0) : Qt::NoPen);
 
     auto getAvailableMovement = [this](BattleStackConstPtr stack) -> QSet<BattlePosition> {
         if (!stack)
@@ -261,7 +261,7 @@ void BattleFieldItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* o
                 brush = shadowAvailable;
 
             painter->setBrush(brush);
-            drawCellBorder(pos, m_appSettings.battle().displayGrid ? 1. : 0.95);
+            drawCellBorder(pos, m_appSettings->battle().displayGrid ? 1. : 0.95);
         }
     }
 
@@ -271,7 +271,7 @@ void BattleFieldItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* o
         drawCellBorder(pos, 0.7);
     }
 
-    if (m_appSettings.battle().displayPath) {
+    if (m_appSettings->battle().displayPath) {
         painter->setPen(QPen(pathTrace, 3, Qt::DotLine));
         if (m_controlPlan.m_planMove.isValid() && !m_controlPlan.m_planMove.m_walkPath.empty()) {
             QVector<QLineF> lines;
@@ -606,7 +606,7 @@ void BattleFieldItem::beforeAttackRanged(BattleStackConstPtr stack, const Affect
 
     const GuiSpell* splashSpell = nullptr;
     if (stack->library->abilities.splashSpell)
-        splashSpell = m_modelsProvider.spells()->find(stack->library->abilities.splashSpell);
+        splashSpell = m_modelsProvider->spells()->find(stack->library->abilities.splashSpell);
 
     SpriteItemObj* splashItem = nullptr;
 
@@ -782,7 +782,7 @@ void BattleFieldItem::onStackUnderEffect(BattleStackConstPtr stack, Effect effec
     affected.area.push_back(stack->pos.mainPos());
     CastPresentation pres;
 
-    pres.spell         = m_modelsProvider.spells()->find(res[index]);
+    pres.spell         = m_modelsProvider->spells()->find(res[index]);
     pres.soundDuration = durations.value(index, 1800);
 
     onCastInternal({}, affected, pres);
@@ -793,7 +793,7 @@ void BattleFieldItem::onCast(const Caster& caster, const AffectedMagic& affected
     const int        soundDuration = 1500; // @todo: ?
     CastPresentation pres;
     pres.soundDuration = soundDuration;
-    pres.spell         = m_modelsProvider.spells()->find(spell);
+    pres.spell         = m_modelsProvider->spells()->find(spell);
     onCastInternal(caster, affected, pres);
     m_controlPlan.m_planCast = {};
 }
@@ -804,9 +804,9 @@ void BattleFieldItem::onSummon(const Caster&, LibrarySpellConstPtr spell, Battle
     BattleStackSpriteItem* item = m_unitGraphics[stack].spriteItem;
     item->setOpacity(0);
 
-    auto* guiSpell = m_modelsProvider.spells()->find(spell);
+    auto* guiSpell = m_modelsProvider->spells()->find(spell);
 
-    const int animationDuration       = std::max(1, 1500 * m_appSettings.battle().otherTimePercent / 100);
+    const int animationDuration       = std::max(1, 1500 * m_appSettings->battle().otherTimePercent / 100);
     const int animationDurationExtend = animationDuration + 2000;
     const int soundDurationMax        = std::min(1500, animationDurationExtend);
 
@@ -860,7 +860,7 @@ void BattleFieldItem::onCastInternal(const Caster& caster, const AffectedMagic& 
     auto sequencer = makeSequencer();
     (void) caster;
 
-    const int animationDuration       = std::max(1, 1500 * m_appSettings.battle().otherTimePercent / 100);
+    const int animationDuration       = std::max(1, 1500 * m_appSettings->battle().otherTimePercent / 100);
     const int animationDurationExtend = animationDuration + 2000;
     const int soundDurationMax        = std::min(pres.soundDuration, animationDurationExtend);
 
@@ -1088,21 +1088,21 @@ void BattleFieldItem::refreshHoveringState()
 
 void BattleFieldItem::updateCursorsToPlan()
 {
-    QCursor cursor = m_cursorLibrary.getOther(ICursorLibrary::Type::Stop);
+    QCursor cursor = m_cursorLibrary->getOther(ICursorLibrary::Type::Stop);
     if (m_controlPlan.m_planCastParams.isActive()) {
-        QCursor castCur = m_cursorLibrary.getCast().value(0);
-        cursor          = m_controlPlan.m_planCast.m_isValid ? castCur : m_cursorLibrary.getOther(ICursorLibrary::Type::Stop);
+        QCursor castCur = m_cursorLibrary->getCast().value(0);
+        cursor          = m_controlPlan.m_planCast.m_isValid ? castCur : m_cursorLibrary->getOther(ICursorLibrary::Type::Stop);
 
     } else if (m_controlPlan.m_planAttackParams.isActive() && m_controlPlan.m_planMove.isValid()) {
         if (m_controlPlan.m_planMove.m_attackMode == BattlePlanMove::Attack::Ranged)
-            cursor = m_cursorLibrary.getOther(m_controlPlan.m_planMove.m_rangedAttackDenominator == 1 ? ICursorLibrary::Type::RangeAttack : ICursorLibrary::Type::RangeAttackBroken);
+            cursor = m_cursorLibrary->getOther(m_controlPlan.m_planMove.m_rangedAttackDenominator == 1 ? ICursorLibrary::Type::RangeAttack : ICursorLibrary::Type::RangeAttackBroken);
         else if (m_controlPlan.m_planMove.m_attackMode == BattlePlanMove::Attack::Melee)
-            cursor = m_cursorLibrary.getAttackCursor(getCursorDirection(m_controlPlan.m_planAttackParams.m_attackDirection));
+            cursor = m_cursorLibrary->getAttackCursor(getCursorDirection(m_controlPlan.m_planAttackParams.m_attackDirection));
     } else if (m_controlPlan.m_planMoveParams.isActive() && m_controlPlan.m_planMove.isValid()) {
-        cursor = m_cursorLibrary.getOther(m_controlPlan.m_selectedStack->library->traits.fly ? ICursorLibrary::Type::Fly : ICursorLibrary::Type::Walk);
+        cursor = m_cursorLibrary->getOther(m_controlPlan.m_selectedStack->library->traits.fly ? ICursorLibrary::Type::Fly : ICursorLibrary::Type::Walk);
     } else {
         if (m_controlPlan.m_hoveredStack)
-            cursor = m_cursorLibrary.getOther(ICursorLibrary::Type::Question);
+            cursor = m_cursorLibrary->getOther(ICursorLibrary::Type::Question);
     }
     this->setCursor(cursor);
 }
@@ -1135,7 +1135,7 @@ void BattleFieldItem::updateUnitHighlights()
         const bool    newHovered = hovered.count(stack) > 0;
         graphics.spriteItem->setHighlight(BattleStackSpriteItem::Highlight::Selected, (stack == m_controlPlan.m_selectedStack));
         graphics.spriteItem->setHighlight(BattleStackSpriteItem::Highlight::Hovered, newHovered);
-        if (m_appSettings.battle().counterDamageHint)
+        if (m_appSettings->battle().counterDamageHint)
             graphics.spriteItem->setCounterExtra(-hovered[stack]);
 
         graphics.sporadic.cfg.enabled = stack->isAlive() && m_controlAvailable; // @todo: not alive, but can move maybe.
@@ -1146,14 +1146,14 @@ void BattleFieldItem::updateUnitHighlights()
 
 std::unique_ptr<AnimationSequencer> BattleFieldItem::makeSequencer()
 {
-    auto sequencer = std::make_unique<AnimationSequencer>(m_appSettings.battle(), m_musicBox);
+    auto sequencer = std::make_unique<AnimationSequencer>(m_appSettings->battle(), m_musicBox);
     sequencer->enableSuperSpeed(m_superspeed);
     return sequencer;
 }
 
 void BattleFieldItem::addSpriteForBattleStack(BattleStackConstPtr stack)
 {
-    auto guiUnit = m_modelsProvider.units()->find(stack->library);
+    auto guiUnit = m_modelsProvider->units()->find(stack->library);
 
     auto sprite = guiUnit->getBattleSprite();
     Q_ASSERT(sprite);

@@ -17,10 +17,10 @@ public:
     GraphicsLibrary(const Core::IResourceLibrary* resourceLibrary);
     ~GraphicsLibrary();
 
-    IAsyncSpritePtr getObjectAnimation(const std::string& resourceName) override;
-    IAsyncPixmapPtr getPixmapByKey(const PixmapKey& resourceCode) override;
-    IAsyncMoviePtr  getVideo(const std::string& resourceName) override;
-    IAsyncIconPtr   getIcon(const PixmapKeyList& resourceCodes) override;
+    IAsyncSpritePtr getObjectAnimation(const std::string& resourceName) const override;
+    IAsyncPixmapPtr getPixmapByKey(const PixmapKey& resourceCode) const override;
+    IAsyncMoviePtr  getVideo(const std::string& resourceName) const override;
+    IAsyncIconPtr   getIcon(const PixmapKeyList& resourceCodes) const override;
 
     PixmapKey splitKeyFromString(const std::string& resourceName) const override;
 

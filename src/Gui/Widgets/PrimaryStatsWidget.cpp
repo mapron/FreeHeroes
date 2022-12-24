@@ -82,7 +82,7 @@ PrimaryStatsWidget::PrimaryStatsWidget(QWidget* parent)
         botLayout->setStretchFactor(label, 1);
 }
 
-void PrimaryStatsWidget::setParams(const HeroPrimaryParams& primary, LibraryModelsProvider* modelsProvider)
+void PrimaryStatsWidget::setParams(const HeroPrimaryParams& primary, const LibraryModelsProvider* modelsProvider)
 {
     QStringList values{
         QString("%1").arg(primary.ad.attack),

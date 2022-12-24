@@ -62,8 +62,8 @@ void DialogUtils::commonDialogSetup(QDialog* parent)
 
 FlatButton* DialogUtils::makeAcceptButton(QDialog* parent, FlatButton* alreadyAllocated, bool isWide)
 {
-    auto& modelProvider = loadDependency<LibraryModelsProvider>(parent);
-    auto& buttons       = modelProvider.ui()->buttons;
+    auto* modelProvider = loadDependency<LibraryModelsProvider>(parent);
+    auto& buttons       = modelProvider->ui()->buttons;
 
     FlatButton* btn = alreadyAllocated ? alreadyAllocated : new FlatButton(parent);
     setupClickSound(btn);
@@ -74,15 +74,15 @@ FlatButton* DialogUtils::makeAcceptButton(QDialog* parent, FlatButton* alreadyAl
     btn->setIcon(isWide ? buttons.okWide->get() : buttons.close->get());
     btn->setFixedSize(size);
     btn->enableHoverTracking(true);
-    btn->setProperty("hoverName", modelProvider.ui()->getCommonString(UiCommonModel::UIString::Close));
+    btn->setProperty("hoverName", modelProvider->ui()->getCommonString(UiCommonModel::UIString::Close));
 
     return btn;
 }
 
 FlatButton* DialogUtils::makeRejectButton(QDialog* parent, FlatButton* alreadyAllocated)
 {
-    auto& modelProvider = loadDependency<LibraryModelsProvider>(parent);
-    auto& buttons       = modelProvider.ui()->buttons;
+    auto* modelProvider = loadDependency<LibraryModelsProvider>(parent);
+    auto& buttons       = modelProvider->ui()->buttons;
 
     const QSize size(64, 30);
     FlatButton* btn = alreadyAllocated ? alreadyAllocated : new FlatButton(parent);
@@ -93,16 +93,16 @@ FlatButton* DialogUtils::makeRejectButton(QDialog* parent, FlatButton* alreadyAl
     btn->setIcon(icn);
     btn->setFixedSize(size);
     btn->enableHoverTracking(true);
-    btn->setProperty("hoverName", modelProvider.ui()->getCommonString(UiCommonModel::UIString::Cancel));
+    btn->setProperty("hoverName", modelProvider->ui()->getCommonString(UiCommonModel::UIString::Cancel));
 
     return btn;
 }
 
 void DialogUtils::setupClickSound(QPushButton* button)
 {
-    auto& modelProvider = loadDependency<LibraryModelsProvider>(button);
+    auto* modelProvider = loadDependency<LibraryModelsProvider>(button);
     QObject::connect(button, &QPushButton::clicked, button, [&modelProvider] {
-        modelProvider.ui()->clickEffect->play();
+        modelProvider->ui()->clickEffect->play();
     });
 }
 

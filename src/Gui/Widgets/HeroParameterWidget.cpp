@@ -46,15 +46,15 @@ QString toString(const Core::BonusRatio& bonus, bool plus = true, int digits = 0
 }
 
 struct HeroParameterWidget::Impl {
-    Core::AdventureHeroConstPtr m_hero = nullptr;
-    LibraryModelsProvider&      m_modelsProvider;
-    UiCommonModel*              m_ui = nullptr;
-    QList<ZeroCallback>         m_onRefresh;
+    Core::AdventureHeroConstPtr  m_hero = nullptr;
+    const LibraryModelsProvider* m_modelsProvider;
+    UiCommonModel*               m_ui = nullptr;
+    QList<ZeroCallback>          m_onRefresh;
 
     Impl(QWidget* parent)
         : m_modelsProvider(loadDependency<LibraryModelsProvider>(parent))
     {
-        m_ui = m_modelsProvider.ui();
+        m_ui = m_modelsProvider->ui();
     }
 };
 
@@ -222,7 +222,7 @@ HeroParameterWidget::HeroParameterWidget(QWidget* parent)
         if (!total)
             return {};
         for (auto& p : weights) {
-            auto skillName = m_impl->m_modelsProvider.skills()->find(p.first)->getName();
+            auto skillName = m_impl->m_modelsProvider->skills()->find(p.first)->getName();
             auto skillProb = toString(Core::BonusRatio(p.second, total), false);
             result << QString("%1: %2").arg(skillName).arg(skillProb);
         }

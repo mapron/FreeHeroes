@@ -313,6 +313,25 @@ AddTarget(TYPE shared NAME MapUtil
         frozen
     )
 
+AddTarget(TYPE shared NAME MapUtilGui
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/MapUtilGui
+    EXPORT_INCLUDES
+    LINK_LIBRARIES
+        CorePlatform
+        GuiInt
+        SoundInt
+        GameObjects
+        GameInt
+
+        GuiWidgets
+        GuiEditor
+        GuiBattle
+        GuiGameWrappers
+        CoreLogic
+        MapUtil
+    QT_MODULES Widgets
+    )
+
 # App
 
 AddTarget( TYPE app_ui NAME LegacyConverter
@@ -355,19 +374,11 @@ AddTarget(TYPE app_ui NAME MapEditor
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/MapEditor
     LINK_LIBRARIES
         CorePlatform
-        GuiInt
-        SoundInt
-        GameObjects
-        GameInt
 
         CoreApplication
         GuiApplication
-        GuiWidgets
-        GuiEditor
-        GuiBattle
-        GuiGameWrappers
-        CoreLogic
-        BattleLogic
+        GameInt
+        MapUtilGui
     QT_MODULES Widgets
     )
 

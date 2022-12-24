@@ -85,12 +85,12 @@ private:
 };
 
 class HeroInfoWidget : public QWidget {
-    DarkFrameLabelIcon*    m_portrait;
-    QList<QLabel*>         m_primaryStats;
-    QList<QLabel*>         m_rngStats;
-    QList<QLabel*>         m_rngStatsIcons;
-    QLabel*                m_manaValue;
-    LibraryModelsProvider& m_modelsProvider;
+    DarkFrameLabelIcon*          m_portrait;
+    QList<QLabel*>               m_primaryStats;
+    QList<QLabel*>               m_rngStats;
+    QList<QLabel*>               m_rngStatsIcons;
+    QLabel*                      m_manaValue;
+    const LibraryModelsProvider* m_modelsProvider;
 
 public:
     HeroInfoWidget(QStringList paramLabels, QWidget* parent)
@@ -198,7 +198,7 @@ public:
 
     void updateInfo(BattleHeroConstPtr hero, const IAppSettings::UI& uiSettings)
     {
-        m_portrait->setPixmap(m_modelsProvider.heroes()->find(hero->library)->getPortraitLarge());
+        m_portrait->setPixmap(m_modelsProvider->heroes()->find(hero->library)->getPortraitLarge());
         const int currentSP = hero->estimated.primary.magic.spellPower;
         const int advSP     = hero->adventure->estimated.primary.magic.spellPower;
 
@@ -219,20 +219,20 @@ public:
             m_rngStats[1]->setText(QString("%1").arg(luckDisplay));
         }
 
-        m_rngStatsIcons[0]->setPixmap(m_modelsProvider.ui()->morale.small[moraleClamped]->get());
-        m_rngStatsIcons[1]->setPixmap(m_modelsProvider.ui()->luck.small[luckClamped]->get());
+        m_rngStatsIcons[0]->setPixmap(m_modelsProvider->ui()->morale.small[moraleClamped]->get());
+        m_rngStatsIcons[1]->setPixmap(m_modelsProvider->ui()->luck.small[luckClamped]->get());
 
         m_manaValue->setText(QString("%1/%2").arg(hero->mana).arg(hero->adventure->estimated.maxMana));
     }
 };
 
-BattleWidget::BattleWidget(IBattleView&                     battleView,
-                           IBattleControl&                  battleControl,
-                           IAIFactory&                      aiFactory,
-                           LibraryModelsProvider&           modelsProvider,
+BattleWidget::BattleWidget(Core::IBattleView&               battleView,
+                           Core::IBattleControl&            battleControl,
+                           Core::IAIFactory&                aiFactory,
+                           const LibraryModelsProvider*     modelsProvider,
                            const Core::BattleFieldGeometry& battleGeometry,
 
-                           Gui::IAppSettings& appSettings,
+                           Gui::IAppSettings* appSettings,
                            QWidget*           parent)
     : QDialog(parent)
     , m_controlPlan(new BattleControlPlan(this))
@@ -258,7 +258,7 @@ BattleWidget::BattleWidget(IBattleView&                     battleView,
     m_battleControlWidget = new FreeHeroes::Gui::BattleControlWidget(battleView, battleControl, aiFactory, *m_controlPlan, m_modelsProvider, this);
     layout->addWidget(m_battleControlWidget);
 
-    this->setCursor(m_cursorLibrary.getOther(ICursorLibrary::Type::PlainArrow));
+    this->setCursor(m_cursorLibrary->getOther(ICursorLibrary::Type::PlainArrow));
 
     m_scene.reset(new GridScene(0, 0, 800, 556));
 
@@ -342,7 +342,7 @@ BattleWidget::~BattleWidget() = default;
 
 void BattleWidget::showSettingsDialog()
 {
-    m_appSettings.showSettingsEditor(this);
+    m_appSettings->showSettingsEditor(this);
     this->update();
 }
 
@@ -387,8 +387,8 @@ void BattleWidget::showEvent(QShowEvent* event)
     //resize(1050, 720);
     m_animationTimer.start(15); // we really don't care for real timer resolution. if we get at leat 50 fps, that's perfect.
     QDialog::showEvent(event);
-    m_musicBox.musicPrepare(Sound::IMusicBox::MusicSet::Battle)->play();
-    m_musicBox.effectPrepare({ Sound::IMusicBox::EffectSet::Battle })->play();
+    m_musicBox->musicPrepare(Sound::IMusicBox::MusicSet::Battle)->play();
+    m_musicBox->effectPrepare({ Sound::IMusicBox::EffectSet::Battle })->play();
 }
 
 void BattleWidget::onBattleFinished(BattleResult)
@@ -406,7 +406,7 @@ void BattleWidget::showInfoWidget(BattleStackConstPtr stack, QPoint pos)
 
     m_infoWidget.reset(new UnitInfoWidget(stack,
                                           stack->adventure,
-                                          &m_modelsProvider,
+                                          m_modelsProvider,
                                           false,
                                           this));
     DialogUtils::moveWidgetWithinVisible(m_infoWidget.get(), pos + this->pos() + QPoint(40, 100));
@@ -425,7 +425,7 @@ void BattleWidget::heroInfoShow(bool attacker, bool defender)
 {
     if (attacker) {
         auto hero = m_battleView.getHero(BattleStack::Side::Attacker);
-        m_heroInfoWidgetAttacker->updateInfo(hero, m_appSettings.ui());
+        m_heroInfoWidgetAttacker->updateInfo(hero, m_appSettings->ui());
         m_heroInfoWidgetAttacker->move(this->mapToGlobal({ -m_heroInfoWidgetAttacker->sizeHint().width() - 2, 0 }));
         m_heroInfoWidgetAttacker->show();
     } else {
@@ -434,7 +434,7 @@ void BattleWidget::heroInfoShow(bool attacker, bool defender)
 
     if (defender) {
         auto hero = m_battleView.getHero(BattleStack::Side::Defender);
-        m_heroInfoWidgetDefender->updateInfo(hero, m_appSettings.ui());
+        m_heroInfoWidgetDefender->updateInfo(hero, m_appSettings->ui());
         m_heroInfoWidgetDefender->move(this->mapToGlobal({ this->sizeHint().width() + 2, 0 }));
         m_heroInfoWidgetDefender->show();
     } else {

@@ -94,18 +94,18 @@ void ArmyConfigWidget::refresh()
         m_tmpRefresh();
 }
 
-void ArmyConfigWidget::setModels(LibraryModelsProvider& modelProvider, Core::IRandomGenerator* randomGenerator)
+void ArmyConfigWidget::setModels(const LibraryModelsProvider* modelProvider, Core::IRandomGenerator* randomGenerator)
 {
     m_ui->heroWithArmyConfigWidget->setModels(modelProvider, randomGenerator);
     m_ui->monsterSquadConfigWidget->setModels(modelProvider);
-    m_modelProvider   = &modelProvider;
+    m_modelProvider   = modelProvider;
     m_randomGenerator = randomGenerator;
 
     m_unitsFilter = new UnitsFilterModel(this);
     m_unitsFilter->setSourceModel(m_modelProvider->units());
 
     FactionsFilterModel* factionsFilter = new FactionsFilterModel(this);
-    factionsFilter->setSourceModel(modelProvider.factions());
+    factionsFilter->setSourceModel(modelProvider->factions());
     FactionsComboModel* factionsCombo = new FactionsComboModel(factionsFilter, this);
     m_ui->comboBoxFactionSelect->setModel(factionsCombo);
 }

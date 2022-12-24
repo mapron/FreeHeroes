@@ -42,9 +42,9 @@ inline IGraphicsLibrary::PixmapKey primaryHeroStatResourceId(Core::HeroPrimaryPa
 
 }
 
-UiCommonModel::UiCommonModel(Sound::IMusicBox& musicBox,
-                             IGraphicsLibrary& graphicsLibrary,
-                             QObject*          parent)
+UiCommonModel::UiCommonModel(Sound::IMusicBox*       musicBox,
+                             const IGraphicsLibrary* graphicsLibrary,
+                             QObject*                parent)
     : QObject(parent)
 {
     auto getTypeTranslation = [](Core::HeroPrimaryParamType type) -> QString {
@@ -87,55 +87,55 @@ UiCommonModel::UiCommonModel(Sound::IMusicBox& musicBox,
         skillInfo[type] = PrimarySkillInfo{
             getTypeTranslation(type),
             FormatUtils::prepareDescription(getTypeDescription(type)),
-            graphicsLibrary.getPixmapByKey(primaryHeroStatResourceId(type, IconSize::Small)),
-            graphicsLibrary.getPixmapByKey(primaryHeroStatResourceId(type, IconSize::Medium)),
-            graphicsLibrary.getPixmapByKey(primaryHeroStatResourceId(type, IconSize::Large))
+            graphicsLibrary->getPixmapByKey(primaryHeroStatResourceId(type, IconSize::Small)),
+            graphicsLibrary->getPixmapByKey(primaryHeroStatResourceId(type, IconSize::Medium)),
+            graphicsLibrary->getPixmapByKey(primaryHeroStatResourceId(type, IconSize::Large))
         };
     }
 
-    spellbook.background = graphicsLibrary.getPixmapByKey({ "spelbk2" });
+    spellbook.background = graphicsLibrary->getPixmapByKey({ "spelbk2" });
 
     // In resource file, tabs come not in order...
     std::vector tabIndices{ 0, 3, 1, 2, 4 };
     std::vector schoolsIndices{ 0, 3, 1, 2 };
     for (int i = 0; i < 5; i++) {
-        spellbook.spelltabs << graphicsLibrary.getPixmapByKey({ "speltab", 0, tabIndices[i] });
+        spellbook.spelltabs << graphicsLibrary->getPixmapByKey({ "speltab", 0, tabIndices[i] });
         if (i < 4) {
-            spellbook.spellTitles << graphicsLibrary.getPixmapByKey({ "schools", 0, schoolsIndices[i] });
+            spellbook.spellTitles << graphicsLibrary->getPixmapByKey({ "schools", 0, schoolsIndices[i] });
         }
     }
-    spellbook.prevPage = graphicsLibrary.getPixmapByKey({ "speltrnl" });
-    spellbook.nextPage = graphicsLibrary.getPixmapByKey({ "speltrnr" });
+    spellbook.prevPage = graphicsLibrary->getPixmapByKey({ "speltrnl" });
+    spellbook.nextPage = graphicsLibrary->getPixmapByKey({ "speltrnr" });
 
-    disbandStack   = graphicsLibrary.getPixmapByKey({ "iviewcr2" });
-    buttons.close  = graphicsLibrary.getIcon("hsbtns", 2);
-    buttons.okWide = graphicsLibrary.getIcon("iokay", 3);
-    buttons.cancel = graphicsLibrary.getIcon("icancel", 3); // really 4, but we don't use fourth
+    disbandStack   = graphicsLibrary->getPixmapByKey({ "iviewcr2" });
+    buttons.close  = graphicsLibrary->getIcon("hsbtns", 2);
+    buttons.okWide = graphicsLibrary->getIcon("iokay", 3);
+    buttons.cancel = graphicsLibrary->getIcon("icancel", 3); // really 4, but we don't use fourth
 
-    buttons.scrollLeft  = graphicsLibrary.getIcon("hsbtns3", 3);
-    buttons.scrollRight = graphicsLibrary.getIcon("hsbtns5", 3);
+    buttons.scrollLeft  = graphicsLibrary->getIcon("hsbtns3", 3);
+    buttons.scrollRight = graphicsLibrary->getIcon("hsbtns5", 3);
 
-    clickEffect = musicBox.effectPrepare({ Sound::IMusicBox::EffectSet::Click });
+    clickEffect = musicBox->effectPrepare({ Sound::IMusicBox::EffectSet::Click });
 
-    heroDialog.distantIcons = graphicsLibrary.getIcon({ { "hsbtns6", 0, 0 }, { "hsbtns6", 0, 3 } });
-    heroDialog.compactIcons = graphicsLibrary.getIcon({ { "hsbtns7", 0, 0 }, { "hsbtns7", 0, 3 } });
-    heroDialog.tacticsIcons = graphicsLibrary.getIcon("hsbtns8", 3);
-    heroDialog.stackSplit   = graphicsLibrary.getIcon("hsbtns9", 3);
+    heroDialog.distantIcons = graphicsLibrary->getIcon({ { "hsbtns6", 0, 0 }, { "hsbtns6", 0, 3 } });
+    heroDialog.compactIcons = graphicsLibrary->getIcon({ { "hsbtns7", 0, 0 }, { "hsbtns7", 0, 3 } });
+    heroDialog.tacticsIcons = graphicsLibrary->getIcon("hsbtns8", 3);
+    heroDialog.stackSplit   = graphicsLibrary->getIcon("hsbtns9", 3);
 
-    heroDialog.deleteHero = graphicsLibrary.getIcon("hsbtns2", 3);
-    heroDialog.bag        = graphicsLibrary.getIcon("bckpck", 2);
-    heroDialog.listInfo   = graphicsLibrary.getIcon("hsbtns4", 2);
+    heroDialog.deleteHero = graphicsLibrary->getIcon("hsbtns2", 3);
+    heroDialog.bag        = graphicsLibrary->getIcon("bckpck", 2);
+    heroDialog.listInfo   = graphicsLibrary->getIcon("hsbtns4", 2);
 
-    heroDialog.labelFlag = graphicsLibrary.getPixmapByKey({ "crest58" });
+    heroDialog.labelFlag = graphicsLibrary->getPixmapByKey({ "crest58" });
 
     for (int i = -3; i <= +3; i++) {
-        luck.large[i]  = graphicsLibrary.getPixmapByKey({ "ilck82", 0, i + 3 });
-        luck.medium[i] = graphicsLibrary.getPixmapByKey({ "ilck42", 0, i + 3 });
-        luck.small[i]  = graphicsLibrary.getPixmapByKey({ "ilck22", 0, i + 3 });
+        luck.large[i]  = graphicsLibrary->getPixmapByKey({ "ilck82", 0, i + 3 });
+        luck.medium[i] = graphicsLibrary->getPixmapByKey({ "ilck42", 0, i + 3 });
+        luck.small[i]  = graphicsLibrary->getPixmapByKey({ "ilck22", 0, i + 3 });
 
-        morale.large[i]  = graphicsLibrary.getPixmapByKey({ "imrl82", 0, i + 3 });
-        morale.medium[i] = graphicsLibrary.getPixmapByKey({ "imrl42", 0, i + 3 });
-        morale.small[i]  = graphicsLibrary.getPixmapByKey({ "imrl22", 0, i + 3 });
+        morale.large[i]  = graphicsLibrary->getPixmapByKey({ "imrl82", 0, i + 3 });
+        morale.medium[i] = graphicsLibrary->getPixmapByKey({ "imrl42", 0, i + 3 });
+        morale.small[i]  = graphicsLibrary->getPixmapByKey({ "imrl22", 0, i + 3 });
     }
 
     // losecslp => lose on siege loop;
@@ -144,22 +144,22 @@ UiCommonModel::UiCommonModel(Sound::IMusicBox& musicBox,
     // lbloop  => lose loop
     // rtloop  => retreat loop
     // win3 => ok loop
-    win.anim  = graphicsLibrary.getVideo("win3");
-    lose.anim = graphicsLibrary.getVideo("lbloop");
+    win.anim  = graphicsLibrary->getVideo("win3");
+    lose.anim = graphicsLibrary->getVideo("lbloop");
 
-    win.music  = musicBox.musicPrepare(Sound::IMusicBox::MusicSettings{ Sound::IMusicBox::MusicSet::Win }.setLoopAround(false));
-    lose.music = musicBox.musicPrepare(Sound::IMusicBox::MusicSettings{ Sound::IMusicBox::MusicSet::Lose }.setLoopAround(false));
+    win.music  = musicBox->musicPrepare(Sound::IMusicBox::MusicSettings{ Sound::IMusicBox::MusicSet::Win }.setLoopAround(false));
+    lose.music = musicBox->musicPrepare(Sound::IMusicBox::MusicSettings{ Sound::IMusicBox::MusicSet::Lose }.setLoopAround(false));
 
-    battleControl.wait       = graphicsLibrary.getIcon({ "icm0060", "icm0061", "icm0062" });
-    battleControl.guard      = graphicsLibrary.getIcon({ "icm0070", "icm0071", "icm0072" });
-    battleControl.spellBook  = graphicsLibrary.getIcon({ "icm0050", "icm0051", "icm0052" });
-    battleControl.surrender  = graphicsLibrary.getIcon({ "icm0010", "icm0011", "icm0012" });
-    battleControl.autoCombat = graphicsLibrary.getIcon({ "icm0040", "icm0041", "icm0042" });
-    battleControl.settings   = graphicsLibrary.getIcon({ "icm0030", "icm0031", "icm0032" });
+    battleControl.wait       = graphicsLibrary->getIcon({ "icm0060", "icm0061", "icm0062" });
+    battleControl.guard      = graphicsLibrary->getIcon({ "icm0070", "icm0071", "icm0072" });
+    battleControl.spellBook  = graphicsLibrary->getIcon({ "icm0050", "icm0051", "icm0052" });
+    battleControl.surrender  = graphicsLibrary->getIcon({ "icm0010", "icm0011", "icm0012" });
+    battleControl.autoCombat = graphicsLibrary->getIcon({ "icm0040", "icm0041", "icm0042" });
+    battleControl.settings   = graphicsLibrary->getIcon({ "icm0030", "icm0031", "icm0032" });
 
-    battleControl.unitCast    = graphicsLibrary.getIcon({ "icmalt030", "icmalt031", "icmalt032" });
-    battleControl.rangeAttack = graphicsLibrary.getIcon({ "icmalt020", "icmalt021", "icmalt022" });
-    battleControl.meleeAttack = graphicsLibrary.getIcon({ "icmalt010", "icmalt011", "icmalt012" });
+    battleControl.unitCast    = graphicsLibrary->getIcon({ "icmalt030", "icmalt031", "icmalt032" });
+    battleControl.rangeAttack = graphicsLibrary->getIcon({ "icmalt020", "icmalt021", "icmalt022" });
+    battleControl.meleeAttack = graphicsLibrary->getIcon({ "icmalt010", "icmalt011", "icmalt012" });
 }
 
 QString UiCommonModel::getCommonString(UiCommonModel::UIString common) const

@@ -49,10 +49,10 @@ QString toString(const Core::BonusRatio& bonus, bool plus = true, int digits = 0
 }
 
 struct UnitInfoWidget::Impl {
-    bool                   showModal;
-    DarkFrameLabel*        hoverTooltip;
-    HoverHelper*           hoverHelper;
-    LibraryModelsProvider* modelsProvider;
+    bool                         showModal;
+    DarkFrameLabel*              hoverTooltip;
+    HoverHelper*                 hoverHelper;
+    const LibraryModelsProvider* modelsProvider;
 };
 class EffectsButton : public QLabel {
 public:
@@ -118,7 +118,7 @@ public:
 
 UnitInfoWidget::UnitInfoWidget(Core::BattleStackConstPtr    battle,
                                Core::AdventureStackConstPtr adventure,
-                               LibraryModelsProvider*       modelsProvider,
+                               const LibraryModelsProvider* modelsProvider,
                                bool                         showModal,
                                QWidget*                     parent)
     : QDialog(parent)

@@ -58,14 +58,14 @@ namespace FreeHeroes::BattleEmulator {
 using namespace Core;
 using namespace Gui;
 
-EmulatorMainWidget::EmulatorMainWidget(IGraphicsLibrary&              graphicsLibrary,
-                                       ICursorLibrary&                cursorLibrary,
-                                       const IGameDatabase*           gameDatabase,
-                                       const IRandomGeneratorFactory* randomGeneratorFactory,
-                                       Sound::IMusicBox&              musicBox,
-                                       IAppSettings&                  appSettings,
-                                       LibraryModelsProvider&         modelsProvider,
-                                       QWidget*                       parent)
+EmulatorMainWidget::EmulatorMainWidget(const Gui::IGraphicsLibrary*         graphicsLibrary,
+                                       const Gui::ICursorLibrary*           cursorLibrary,
+                                       const Core::IGameDatabase*           gameDatabase,
+                                       const Core::IRandomGeneratorFactory* randomGeneratorFactory,
+                                       Sound::IMusicBox*                    musicBox,
+                                       Gui::IAppSettings*                   appSettings,
+                                       const Gui::LibraryModelsProvider*    modelsProvider,
+                                       QWidget*                             parent)
     : QWidget(parent)
     , m_ui(std::make_unique<Ui::EmulatorMainWidget>())
     , m_graphicsLibrary(graphicsLibrary)
@@ -112,8 +112,8 @@ EmulatorMainWidget::EmulatorMainWidget(IGraphicsLibrary&              graphicsLi
     m_ui->armyConfigAtt->setModels(modelsProvider, m_uiRng.get());
     m_ui->armyConfigDef->setModels(modelsProvider, m_uiRng.get());
 
-    m_guiAdventureArmyAtt = std::make_unique<GuiAdventureArmy>(*modelsProvider.units(), *modelsProvider.heroes(), &m_adventureState->m_att);
-    m_guiAdventureArmyDef = std::make_unique<GuiAdventureArmy>(*modelsProvider.units(), *modelsProvider.heroes(), &m_adventureState->m_def);
+    m_guiAdventureArmyAtt = std::make_unique<GuiAdventureArmy>(modelsProvider->units(), modelsProvider->heroes(), &m_adventureState->m_att);
+    m_guiAdventureArmyDef = std::make_unique<GuiAdventureArmy>(modelsProvider->units(), modelsProvider->heroes(), &m_adventureState->m_def);
 
     m_ui->armyConfigAtt->setSource(m_guiAdventureArmyAtt.get());
     m_ui->armyConfigDef->setSource(m_guiAdventureArmyDef.get());
@@ -121,7 +121,7 @@ EmulatorMainWidget::EmulatorMainWidget(IGraphicsLibrary&              graphicsLi
     m_ui->armyConfigDef->setAIControl(true);
 
     auto* terrainsFilter = new TerrainsFilterModel(this);
-    terrainsFilter->setSourceModel(modelsProvider.terrains());
+    terrainsFilter->setSourceModel(modelsProvider->terrains());
     m_ui->comboBoxTerrain->setModel(new TerrainsComboModel(terrainsFilter, this));
     m_ui->comboBoxTerrain->setIconSize({ 24, 24 });
     for (int i = 0; i < m_ui->comboBoxTerrain->count(); ++i) {
@@ -132,7 +132,7 @@ EmulatorMainWidget::EmulatorMainWidget(IGraphicsLibrary&              graphicsLi
         }
     }
     connect(m_ui->comboBoxTerrain, qOverload<int>(&QComboBox::currentIndexChanged), this, &EmulatorMainWidget::onTerrainChanged);
-    auto* comboModel   = new MapBanksComboModel(modelsProvider.mapBanks(), this);
+    auto* comboModel   = new MapBanksComboModel(modelsProvider->mapBanks(), this);
     auto* mapBanksTree = new MapBanksTreeModel(comboModel, this);
     m_ui->comboBoxObjectPreset->setModel(mapBanksTree);
     m_ui->comboBoxObjectPreset->setIconSize({ 32, 24 });
@@ -216,16 +216,16 @@ void EmulatorMainWidget::startReplay()
 
 void EmulatorMainWidget::showSettings()
 {
-    m_appSettings.showSettingsEditor(this);
+    m_appSettings->showSettingsEditor(this);
 }
 
 void EmulatorMainWidget::show()
 {
     QWidget::show();
-    m_musicBox.musicPrepare(Sound::IMusicBox::MusicSettings{
-                                Sound::IMusicBox::MusicSet::Intro }
-                                .setDelay(1000)
-                                .setFadeIn(3000))
+    m_musicBox->musicPrepare(Sound::IMusicBox::MusicSettings{
+                                 Sound::IMusicBox::MusicSet::Intro }
+                                 .setDelay(1000)
+                                 .setFadeIn(3000))
         ->play();
 }
 
@@ -244,7 +244,7 @@ void EmulatorMainWidget::onAttDataChanged(bool forcedUpdate)
     m_adventureKingdom->weekIncome = m_adventureState->m_att.estimated.weekIncomeMax;
     m_ui->kingdomStatusWidget->update(*m_adventureKingdom);
 
-    m_ui->kingdomStatusWidget->setResourceIcons(m_modelsProvider.ui()->resourceIconsSmall);
+    m_ui->kingdomStatusWidget->setResourceIcons(m_modelsProvider->ui()->resourceIconsSmall);
 
     m_ui->armyConfigAtt->refresh();
 }
@@ -286,7 +286,7 @@ void EmulatorMainWidget::makeNewDay()
 
     *m_adventureStatePrev = *m_adventureState;
 
-    m_musicBox.effectPrepare({ "newday" })->play();
+    m_musicBox->effectPrepare({ "newday" })->play();
 }
 
 void EmulatorMainWidget::makeManaRegen()
@@ -305,7 +305,7 @@ void EmulatorMainWidget::makeManaRegen()
         onDefDataChanged(true);
     }
     if (playEffect)
-        m_musicBox.effectPrepare({ "treasure" })->play();
+        m_musicBox->effectPrepare({ "treasure" })->play();
 }
 
 void EmulatorMainWidget::onTerrainChanged()
@@ -392,9 +392,9 @@ void EmulatorMainWidget::applyCurrentObjectRewards(QString defenderName)
 
         for (auto* art : artRewards) {
             m_adventureState->m_att.hero.artifactsBag[art]++;
-            auto name   = m_modelsProvider.artifacts()->find(art)->getName();
+            auto name   = m_modelsProvider->artifacts()->find(art)->getName();
             auto iconId = art->presentationParams.iconStash;
-            auto pix    = m_graphicsLibrary.getPixmap(iconId)->get();
+            auto pix    = m_graphicsLibrary->getPixmap(iconId)->get();
             items << GeneralPopupDialog::Item{ pix, name, true };
             rewardDescriptionTitles << name;
         }
@@ -404,7 +404,7 @@ void EmulatorMainWidget::applyCurrentObjectRewards(QString defenderName)
             rewardDescriptionTitles << QString("%1 %2").arg(resReward.amount).arg(resReward.name);
             auto res    = m_gameDatabase->resources()->find(resReward.id.toStdString());
             auto iconId = isSingleReward ? res->presentationParams.iconLarge : res->presentationParams.icon;
-            auto pix    = m_graphicsLibrary.getPixmap(iconId)->get();
+            auto pix    = m_graphicsLibrary->getPixmap(iconId)->get();
             items << GeneralPopupDialog::Item{ pix, QString("%1").arg(resReward.amount), false };
         }
         for (const auto& unit : reward.units) {
@@ -412,10 +412,10 @@ void EmulatorMainWidget::applyCurrentObjectRewards(QString defenderName)
             (void) haveRoom;
             m_guiAdventureArmyAtt->getSquad()->updateGuiState();
             m_guiAdventureArmyAtt->getSquad()->emitChanges();
-            auto name = m_modelsProvider.units()->find(unit.unit)->getNameWithCount(unit.count);
+            auto name = m_modelsProvider->units()->find(unit.unit)->getNameWithCount(unit.count);
             rewardDescriptionTitles << name;
             auto iconId = unit.unit->presentationParams.portrait;
-            auto pix    = m_graphicsLibrary.getPixmap(iconId)->get();
+            auto pix    = m_graphicsLibrary->getPixmap(iconId)->get();
             items << GeneralPopupDialog::Item{ pix, name, true };
             onAttDataChanged(true);
         }
@@ -528,7 +528,7 @@ int EmulatorMainWidget::execBattle(bool isReplay, bool isQuick)
 
         auto terrain = replayData.m_adv.m_terrain;
         assert(terrain);
-        QPixmap back = m_graphicsLibrary.getPixmap(terrain->presentationParams.backgroundsBattle[0])->get();
+        QPixmap back = m_graphicsLibrary->getPixmap(terrain->presentationParams.backgroundsBattle[0])->get();
         battleWidget->setBackground(back);
     }
     if (!isReplay) {
@@ -571,7 +571,7 @@ int EmulatorMainWidget::execBattle(bool isReplay, bool isQuick)
                 for (auto& unitLoss : batInfo.units) {
                     CasualtiesWidget::LossInfo widgetInfo;
                     widgetInfo.count    = unitLoss.loss;
-                    widgetInfo.portrait = m_modelsProvider.units()->find(unitLoss.unit)->getPortraitSmall();
+                    widgetInfo.portrait = m_modelsProvider->units()->find(unitLoss.unit)->getPortraitSmall();
                     widgetInfo.isDead   = unitLoss.isDead;
                     result.units.push_front(widgetInfo);
                 }
@@ -589,8 +589,8 @@ int EmulatorMainWidget::execBattle(bool isReplay, bool isQuick)
                 BattleArmy& army    = *armies[i];
                 auto&       side    = resultInfo.sides[i];
                 auto        batInfo = army.squad->estimateLoss();
-                auto        heroUI  = m_modelsProvider.heroes()->find(army.adventure->hero.library);
-                auto        unitUI  = m_modelsProvider.units()->find(batInfo.strongestUnit);
+                auto        heroUI  = m_modelsProvider->heroes()->find(army.adventure->hero.library);
+                auto        unitUI  = m_modelsProvider->units()->find(batInfo.strongestUnit);
 
                 QString heroName = army.adventure->hasHero() ? heroUI->getName() : "";
                 QString unitName = batInfo.strongestUnit ? unitUI->getName() : "";
@@ -627,7 +627,7 @@ int EmulatorMainWidget::execBattle(bool isReplay, bool isQuick)
             }
         }
     }
-    m_musicBox.musicPrepare(Sound::IMusicBox::MusicSet::Intro)->play();
+    m_musicBox->musicPrepare(Sound::IMusicBox::MusicSet::Intro)->play();
     return result;
 }
 
@@ -643,7 +643,7 @@ void EmulatorMainWidget::checkForHeroLevelUps(bool fromDebugWidget)
             decision.heroHame     = guiAdvHero->getName();
             decision.heroClass    = guiAdvHero->getClassName();
             decision.heroPortrait = guiAdvHero->getGuiHero()->getPortraitLarge();
-            decision.expIcon      = m_modelsProvider.ui()->skillInfo[HeroPrimaryParamType::Experience].iconLarge->get();
+            decision.expIcon      = m_modelsProvider->ui()->skillInfo[HeroPrimaryParamType::Experience].iconLarge->get();
             auto rng              = m_randomGeneratorFactory->create();
             rng->makeGoodSeed();
             HeroLevelupDialog   dlg(this);
@@ -651,7 +651,7 @@ void EmulatorMainWidget::checkForHeroLevelUps(bool fromDebugWidget)
 
             while ((result = estimation.calculateHeroLevelUp(hero, *rng)).isValid()) {
                 decision.choices.clear();
-                const auto& statInfo     = m_modelsProvider.ui()->skillInfo[result.primarySkillUpdated];
+                const auto& statInfo     = m_modelsProvider->ui()->skillInfo[result.primarySkillUpdated];
                 decision.primaryStatName = statInfo.name;
                 decision.primaryStatIcon = statInfo.iconMedium->get();
                 decision.level           = result.newLevel;
@@ -660,7 +660,7 @@ void EmulatorMainWidget::checkForHeroLevelUps(bool fromDebugWidget)
                     auto                      choice     = result.choices[i];
                     int                       skillLevel = result.choicesLevels[i];
                     HeroLevelupDialog::Choice guiChoice;
-                    auto                      guiSkill = m_modelsProvider.skills()->find(choice);
+                    auto                      guiSkill = m_modelsProvider->skills()->find(choice);
                     guiChoice.icon                     = guiSkill->getIconMedium(skillLevel);
                     guiChoice.skillLevelName           = GuiSkill::getSkillLevelName(skillLevel);
                     guiChoice.skillName                = guiSkill->getName();
@@ -669,7 +669,7 @@ void EmulatorMainWidget::checkForHeroLevelUps(bool fromDebugWidget)
 
                 dlg.setInfo(decision);
                 dlg.show();
-                m_musicBox.effectPrepare({ "nwherolv" })->play();
+                m_musicBox->effectPrepare({ "nwherolv" })->play();
 
                 QEventLoop loop;
                 connect(&dlg, &QDialog::accepted, &loop, &QEventLoop::quit);

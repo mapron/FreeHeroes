@@ -28,7 +28,7 @@ class GUIWIDGETS_EXPORT UnitInfoWidget : public QDialog {
 public:
     UnitInfoWidget(Core::BattleStackConstPtr    battle,
                    Core::AdventureStackConstPtr adventure,
-                   LibraryModelsProvider*       modelsProvider,
+                   const LibraryModelsProvider* modelsProvider,
                    bool                         showModal,
                    QWidget*                     parent = nullptr);
     ~UnitInfoWidget();

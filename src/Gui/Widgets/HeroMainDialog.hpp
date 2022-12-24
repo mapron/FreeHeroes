@@ -44,7 +44,7 @@ public:
     void setSource(const GuiAdventureArmy*       heroArmy,
                    Core::IAdventureSquadControl* adventureSquadControl,
                    Core::IAdventureHeroControl*  adventureHeroControl,
-                   LibraryModelsProvider*        modelsProvider);
+                   const LibraryModelsProvider*  modelsProvider);
 
 private:
     void updateHeroAppearence();
@@ -62,7 +62,7 @@ private:
     const GuiAdventureHero*       m_hero                  = nullptr;
     Core::IAdventureSquadControl* m_adventureSquadControl = nullptr;
     Core::IAdventureHeroControl*  m_adventureHeroControl  = nullptr;
-    LibraryModelsProvider*        m_modelsProvider        = nullptr;
+    const LibraryModelsProvider*  m_modelsProvider        = nullptr;
 
     std::unique_ptr<UnitInfoWidget> m_infoWidget;
 

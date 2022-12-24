@@ -7,11 +7,11 @@
 
 namespace FreeHeroes::Gui {
 
-CursorLibrary::CursorLibrary(IGraphicsLibrary& graphicsLibrary)
+CursorLibrary::CursorLibrary(const IGraphicsLibrary* graphicsLibrary)
 {
     // crdeflt  cradvntr
-    auto sprite    = graphicsLibrary.getObjectAnimation("wrcombat")->get();
-    auto spellCast = graphicsLibrary.getObjectAnimation("crspell")->get();
+    auto sprite    = graphicsLibrary->getObjectAnimation("wrcombat")->get();
+    auto spellCast = graphicsLibrary->getObjectAnimation("crspell")->get();
     if (!sprite || !spellCast)
         return;
     auto frames                           = sprite->getFramesForGroup(0);

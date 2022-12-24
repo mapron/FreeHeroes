@@ -29,7 +29,7 @@ public:
     using WrapperTypePtr = const WrapperType*;
     using SrcTypePtr     = const SrcType*;
 
-    AbstractGuiWrapperListModel(Sound::IMusicBox& musicBox, IGraphicsLibrary& graphicsLibrary, QObject* parent);
+    AbstractGuiWrapperListModel(Sound::IMusicBox* musicBox, const IGraphicsLibrary* graphicsLibrary, QObject* parent);
     ~AbstractGuiWrapperListModel();
 
     void           clear();
@@ -54,15 +54,15 @@ public:
 
 private:
     struct Impl;
-    std::unique_ptr<Impl> m_impl;
-    IGraphicsLibrary&     m_graphicsLibrary;
-    Sound::IMusicBox&     m_musicBox;
+    std::unique_ptr<Impl>   m_impl;
+    const IGraphicsLibrary* m_graphicsLibrary;
+    Sound::IMusicBox*       m_musicBox;
 };
 
 class GUIGAMEWRAPPERS_EXPORT ArtifactsModel : public AbstractGuiWrapperListModel<GuiArtifact> {
 public:
     using Base = AbstractGuiWrapperListModel<GuiArtifact>;
-    ArtifactsModel(Sound::IMusicBox& musicBox, IGraphicsLibrary& graphicsLibrary, QObject* parent);
+    ArtifactsModel(Sound::IMusicBox* musicBox, const IGraphicsLibrary* graphicsLibrary, QObject* parent);
 
     QVariant data(const QModelIndex& index, int role) const override;
 
@@ -216,10 +216,12 @@ class GUIGAMEWRAPPERS_EXPORT LibraryModelsProvider : public QObject {
     Q_OBJECT
 public:
     LibraryModelsProvider(const Core::IGameDatabase* gameDatabase,
-                          Sound::IMusicBox&          musicBox,
-                          IGraphicsLibrary&          graphicsLibrary,
+                          Sound::IMusicBox*          musicBox,
+                          const IGraphicsLibrary*    graphicsLibrary,
                           QObject*                   parent = nullptr);
 
+    // setModel(QAbstractModel*) need non-const model pointer.
+    // that's why all models here are non-const.
     // clang-format off
     ArtifactsModel   * artifacts  () const noexcept { return m_artifacts;}
     UnitsModel       * units      () const noexcept { return m_units;}

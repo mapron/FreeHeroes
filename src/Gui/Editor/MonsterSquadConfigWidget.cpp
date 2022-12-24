@@ -37,9 +37,9 @@ MonsterSquadConfigWidget::MonsterSquadConfigWidget(QWidget* parent)
     }
 }
 
-void MonsterSquadConfigWidget::setModels(LibraryModelsProvider& modelProvider)
+void MonsterSquadConfigWidget::setModels(const LibraryModelsProvider* modelProvider)
 {
-    m_ui->stackEditorPack->setUnitsModel(modelProvider.units());
+    m_ui->stackEditorPack->setUnitsModel(modelProvider->units());
 }
 
 MonsterSquadConfigWidget::~MonsterSquadConfigWidget() = default;

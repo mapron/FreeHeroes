@@ -159,7 +159,7 @@ HeroMainDialog::~HeroMainDialog() = default;
 void HeroMainDialog::setSource(const GuiAdventureArmy*       heroArmy,
                                Core::IAdventureSquadControl* adventureSquadControl,
                                Core::IAdventureHeroControl*  adventureHeroControl,
-                               LibraryModelsProvider*        modelsProvider)
+                               const LibraryModelsProvider*  modelsProvider)
 {
     m_heroArmy              = heroArmy;
     m_hero                  = m_heroArmy->getHero();

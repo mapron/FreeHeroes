@@ -4,11 +4,13 @@
  * See LICENSE file for details.
  */
 
-#include "MapGenTestWidget.hpp"
+#include "MapEditorWidget.hpp"
 
-#include "AdventureMap.hpp"
-#include "AdventureMapItem.hpp"
-#include "TerrainGenerator.hpp"
+#include "FHMap.hpp"
+#include "MapConverter.hpp"
+
+#include "SpriteMap.hpp"
+#include "FHMapToSpriteMap.hpp"
 
 #include "IGameDatabase.hpp"
 
@@ -24,18 +26,22 @@
 
 namespace FreeHeroes {
 
-MapGenTestWidget::MapGenTestWidget(Gui::IGraphicsLibrary&      graphicsLibrary,
-                                   const Core::IGameDatabase*  gameDatabase,
-                                   Gui::LibraryModelsProvider& modelsProvider)
-    : m_graphicsLibrary(graphicsLibrary)
-    , m_gameDatabase(gameDatabase)
+MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDatabaseContainer,
+                                 const Core::IRandomGeneratorFactory* rngFactory,
+                                 const Gui::IGraphicsLibrary*         graphicsLibrary,
+                                 const Gui::LibraryModelsProvider*    modelsProvider)
+    : m_gameDatabaseContainer(gameDatabaseContainer)
+    , m_rngFactory(rngFactory)
+    , m_graphicsLibrary(graphicsLibrary)
     , m_modelsProvider(modelsProvider)
+    , m_map(std::make_unique<FHMap>())
+    , m_spriteMap(std::make_unique<SpriteMap>())
 {
     QVBoxLayout* layout    = new QVBoxLayout(this);
     QHBoxLayout* layoutTop = new QHBoxLayout();
     layout->addLayout(layoutTop);
     QPushButton* testPB = new QPushButton("test", this);
-    connect(testPB, &QPushButton::clicked, this, &MapGenTestWidget::generateMap);
+    connect(testPB, &QPushButton::clicked, this, &MapEditorWidget::generateMap);
     layoutTop->addWidget(testPB);
     layoutTop->addStretch();
 
@@ -47,26 +53,56 @@ MapGenTestWidget::MapGenTestWidget(Gui::IGraphicsLibrary&      graphicsLibrary,
     m_view->setScene(m_scene);
     layout->addWidget(m_view);
 
-    m_hero = std::make_unique<Core::AdventureArmy>();
-    m_hero->hero.reset(m_gameDatabase->heroes()->find("sod.hero.castle.kn000"));
+    //m_hero = std::make_unique<Core::AdventureArmy>();
+    //m_hero->hero.reset(m_gameDatabase->heroes()->find("sod.hero.castle.kn000"));
 
-    m_adventureMap = std::make_unique<AdventureMap>(width, height, 1);
-    generateMap();
+    // m_adventureMap = std::make_unique<AdventureMap>(width, height, 1);
+    //generateMap();
 
-    AdventureMapItem* item = new AdventureMapItem(*m_adventureMap, m_modelsProvider);
+    //AdventureMapItem* item = new AdventureMapItem(*m_adventureMap, m_modelsProvider);
 
-    m_scene->addItem(item);
+    //m_scene->addItem(item);
     //
 
     m_view->setMinimumSize(400, 400);
 }
 
-MapGenTestWidget::~MapGenTestWidget()
+void MapEditorWidget::load(const std::string& filename)
+{
+    std::ostringstream os;
+
+    MapConverter::Settings sett{
+        .m_inputs                  = { .m_fhMap = filename },
+        .m_outputs                 = {},
+        .m_dumpUncompressedBuffers = false,
+        .m_dumpBinaryDataJson      = false,
+    };
+
+    MapConverter converter(os,
+                           m_gameDatabaseContainer,
+                           m_rngFactory,
+                           sett);
+
+    converter.run(MapConverter::Task::LoadFH);
+
+    *m_map = std::move(converter.m_mapFH);
+
+    updateMap();
+}
+
+void MapEditorWidget::updateMap()
+{
+    MapRenderer renderer;
+    *m_spriteMap = renderer.render(*m_map, m_graphicsLibrary);
+}
+
+MapEditorWidget::~MapEditorWidget()
 {
 }
 
-void MapGenTestWidget::generateMap()
+void MapEditorWidget::generateMap()
 {
+    /*
     const int    width  = m_adventureMap->width();
     const int    height = m_adventureMap->height();
     TerrainPlane plane(width, height);
@@ -103,7 +139,7 @@ void MapGenTestWidget::generateMap()
     h.m_army      = m_hero.get();
     h.m_direction = HeroDirection::BR;
 
-    m_adventureMap->m_heroes.push_back(h);
+    m_adventureMap->m_heroes.push_back(h);*/
 
     m_scene->update();
 }

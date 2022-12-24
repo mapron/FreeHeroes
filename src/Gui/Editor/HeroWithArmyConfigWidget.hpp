@@ -35,7 +35,7 @@ public:
 
     void refresh();
 
-    void setModels(LibraryModelsProvider& modelProvider, Core::IRandomGenerator* randomGenerator);
+    void setModels(const LibraryModelsProvider* modelProvider, Core::IRandomGenerator* randomGenerator);
     void setSource(GuiAdventureArmy* adventureArmy);
     void initHero();
 
@@ -71,9 +71,9 @@ private:
 
     Core::IRandomGenerator* m_randomGenerator = nullptr;
 
-    GuiAdventureArmy*      m_adventureArmy = nullptr;
-    GuiAdventureHero*      m_hero          = nullptr;
-    LibraryModelsProvider* m_modelProvider = nullptr;
+    GuiAdventureArmy*            m_adventureArmy = nullptr;
+    GuiAdventureHero*            m_hero          = nullptr;
+    const LibraryModelsProvider* m_modelProvider = nullptr;
 
     ArtifactQuickFilterModel* m_artifactsFilter = nullptr;
 };

@@ -68,27 +68,27 @@ public:
 
     bool load();
 
-    IGraphicsLibrary& getGraphicsLibrary() const
+    const IGraphicsLibrary* getGraphicsLibrary() const
     {
-        return *m_graphicsLibrary;
+        return m_graphicsLibrary.get();
     }
-    Sound::IMusicBox& getMusicBox() const
+    Sound::IMusicBox* getMusicBox() const
     {
-        return *m_musicBox;
+        return m_musicBox.get();
     }
-    ICursorLibrary& getCursorLibrary() const
+    const ICursorLibrary* getCursorLibrary() const
     {
-        return *m_cursorLibrary;
+        return m_cursorLibrary.get();
     }
-    LibraryModelsProvider& getModelsProvider() const
+    const LibraryModelsProvider* getModelsProvider() const
     {
-        return *m_modelsProvider;
+        return m_modelsProvider.get();
     }
     const Core::IGameDatabase* getGameDatabase() const
     {
         return m_gameDatabaseUi;
     }
-    Gui::IAppSettings& getAppSettings();
+    Gui::IAppSettings* getAppSettings();
 
 private:
     struct Impl;

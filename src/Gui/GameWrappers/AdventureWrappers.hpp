@@ -137,8 +137,8 @@ private:
 class GUIGAMEWRAPPERS_EXPORT GuiAdventureArmy : public QObject {
     Q_OBJECT
 public:
-    GuiAdventureArmy(GuiUnitProvider&              unitProvider,
-                     GuiHeroProvider&              heroProvider,
+    GuiAdventureArmy(GuiUnitProvider*              unitProvider,
+                     GuiHeroProvider*              heroProvider,
                      Core::AdventureArmyMutablePtr source);
 
     const GuiAdventureSquad* getSquad() const { return &m_squad; }

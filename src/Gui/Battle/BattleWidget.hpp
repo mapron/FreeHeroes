@@ -48,10 +48,10 @@ public:
     explicit BattleWidget(Core::IBattleView&               battleView,
                           Core::IBattleControl&            battleControl,
                           Core::IAIFactory&                aiFactory,
-                          LibraryModelsProvider&           modelsProvider,
+                          const LibraryModelsProvider*     modelsProvider,
                           const Core::BattleFieldGeometry& battleGeometry,
 
-                          Gui::IAppSettings& appSettings,
+                          Gui::IAppSettings* appSettings,
                           QWidget*           parent = 0);
     ~BattleWidget();
 
@@ -79,15 +79,15 @@ protected:
 private:
     BattleControlPlan* m_controlPlan = nullptr;
 
-    ICursorLibrary&   m_cursorLibrary;
-    Sound::IMusicBox& m_musicBox;
+    const ICursorLibrary* m_cursorLibrary;
+    Sound::IMusicBox*     m_musicBox;
 
-    Core::IBattleView&     m_battleView;
-    Core::IBattleControl&  m_battleControl;
-    LibraryModelsProvider& m_modelsProvider;
-    Core::IReplayHandle*   m_replayHandle = nullptr;
+    Core::IBattleView&           m_battleView;
+    Core::IBattleControl&        m_battleControl;
+    const LibraryModelsProvider* m_modelsProvider;
+    Core::IReplayHandle*         m_replayHandle = nullptr;
 
-    Gui::IAppSettings& m_appSettings;
+    Gui::IAppSettings* m_appSettings;
 
     std::unique_ptr<GridScene>       m_scene;
     std::unique_ptr<BattleFieldItem> m_battlefield;

@@ -21,7 +21,7 @@ class GUIRESOURCE_EXPORT CursorLibrary : public ICursorLibrary {
     QList<QCursor>                 cast;
 
 public:
-    CursorLibrary(IGraphicsLibrary& graphicsLibrary);
+    CursorLibrary(const IGraphicsLibrary* graphicsLibrary);
 
     QCursor        getAttackCursor(BattleDirection direction) const override { return attackCursors.value(direction); }
     QCursor        getOther(Type type) const override { return otherCursors.value(type); }

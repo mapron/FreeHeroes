@@ -36,13 +36,13 @@ class ReplayFileManager;
 class EmulatorMainWidget : public QWidget {
     Q_OBJECT
 public:
-    EmulatorMainWidget(Gui::IGraphicsLibrary&               graphicsLibrary,
-                       Gui::ICursorLibrary&                 cursorLibrary,
+    EmulatorMainWidget(const Gui::IGraphicsLibrary*         graphicsLibrary,
+                       const Gui::ICursorLibrary*           cursorLibrary,
                        const Core::IGameDatabase*           gameDatabase,
                        const Core::IRandomGeneratorFactory* randomGeneratorFactory,
-                       Sound::IMusicBox&                    musicBox,
-                       Gui::IAppSettings&                   appSettings,
-                       Gui::LibraryModelsProvider&          modelsProvider,
+                       Sound::IMusicBox*                    musicBox,
+                       Gui::IAppSettings*                   appSettings,
+                       const Gui::LibraryModelsProvider*    modelsProvider,
                        QWidget*                             parent = nullptr);
     ~EmulatorMainWidget();
 
@@ -70,13 +70,13 @@ private:
 private:
     std::unique_ptr<Ui::EmulatorMainWidget> m_ui;
 
-    Gui::IGraphicsLibrary&               m_graphicsLibrary;
-    Gui::ICursorLibrary&                 m_cursorLibrary;
+    const Gui::IGraphicsLibrary*         m_graphicsLibrary;
+    const Gui::ICursorLibrary*           m_cursorLibrary;
     const Core::IGameDatabase*           m_gameDatabase;
     const Core::IRandomGeneratorFactory* m_randomGeneratorFactory;
-    Sound::IMusicBox&                    m_musicBox;
-    Gui::IAppSettings&                   m_appSettings;
-    Gui::LibraryModelsProvider&          m_modelsProvider;
+    Sound::IMusicBox*                    m_musicBox;
+    Gui::IAppSettings*                   m_appSettings;
+    const Gui::LibraryModelsProvider*    m_modelsProvider;
 
     std::unique_ptr<Core::AdventureState>   m_adventureState;
     std::unique_ptr<Core::AdventureState>   m_adventureStatePrev;

@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
     QApplication          app(argc, argv);
 
     fhApp.load();
-    auto&           musicBox = fhApp.getMusicBox();
+    auto*           musicBox = fhApp.getMusicBox();
     SoundTestWidget dlg(musicBox);
     dlg.show();
 

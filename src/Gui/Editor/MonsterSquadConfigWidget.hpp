@@ -29,7 +29,7 @@ public:
     ~MonsterSquadConfigWidget();
 
 public:
-    void setModels(LibraryModelsProvider& modelProvider);
+    void setModels(const LibraryModelsProvider* modelProvider);
     void setSource(GuiAdventureArmy* adventureArmy);
 
 private:

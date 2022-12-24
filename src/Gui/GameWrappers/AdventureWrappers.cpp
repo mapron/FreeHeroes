@@ -296,12 +296,12 @@ void GuiAdventureHero::externalChange()
     emitChanges();
 }
 
-GuiAdventureArmy::GuiAdventureArmy(GuiUnitProvider&              unitProvider,
-                                   GuiHeroProvider&              heroProvider,
+GuiAdventureArmy::GuiAdventureArmy(GuiUnitProvider*              unitProvider,
+                                   GuiHeroProvider*              heroProvider,
                                    Core::AdventureArmyMutablePtr source)
     : m_source(source)
-    , m_squad(unitProvider, &source->squad)
-    , m_hero(heroProvider, &source->hero)
+    , m_squad(*unitProvider, &source->squad)
+    , m_hero(*heroProvider, &source->hero)
 {
     connect(&m_squad, &GuiAdventureSquad::dataChanged, this, &GuiAdventureArmy::dataChanged);
     connect(&m_hero, &GuiAdventureHero::dataChanged, this, &GuiAdventureArmy::dataChanged);

@@ -50,7 +50,7 @@ class GUIGAMEWRAPPERS_EXPORT GuiArtifact : public QObject
     using Base = AbstractGuiWrapper<GuiArtifact, Core::LibraryArtifact>;
 
 public:
-    GuiArtifact(Sound::IMusicBox& musicBox, IGraphicsLibrary& graphicsLibrary, Core::LibraryArtifactConstPtr source);
+    GuiArtifact(Sound::IMusicBox* musicBox, const IGraphicsLibrary* graphicsLibrary, Core::LibraryArtifactConstPtr source);
 
     QString getName(int n = -1) const;
     QString getDescr() const;
@@ -73,7 +73,7 @@ class GUIGAMEWRAPPERS_EXPORT GuiUnit : public QObject
     using Base = AbstractGuiWrapper<GuiUnit, Core::LibraryUnit>;
 
 public:
-    GuiUnit(Sound::IMusicBox& musicBox, IGraphicsLibrary& graphicsLibrary, Core::LibraryUnitConstPtr source);
+    GuiUnit(Sound::IMusicBox* musicBox, const IGraphicsLibrary* graphicsLibrary, Core::LibraryUnitConstPtr source);
 
     enum class Variation
     {
@@ -110,7 +110,7 @@ class GUIGAMEWRAPPERS_EXPORT GuiHero : public QObject
     using Base = AbstractGuiWrapper<GuiHero, Core::LibraryHero>;
 
 public:
-    GuiHero(Sound::IMusicBox& musicBox, IGraphicsLibrary& graphicsLibrary, Core::LibraryHeroConstPtr source);
+    GuiHero(Sound::IMusicBox* musicBox, const IGraphicsLibrary* graphicsLibrary, Core::LibraryHeroConstPtr source);
 
     QPixmap getPortraitSmall() const { return m_portraitSmall->get(); }
     QPixmap getPortraitLarge() const { return m_portraitLarge->get(); }
@@ -143,7 +143,7 @@ class GUIGAMEWRAPPERS_EXPORT GuiSkill : public QObject
     using Base = AbstractGuiWrapper<GuiSkill, Core::LibrarySecondarySkill>;
 
 public:
-    GuiSkill(Sound::IMusicBox& musicBox, IGraphicsLibrary& graphicsLibrary, Core::LibrarySecondarySkillConstPtr source);
+    GuiSkill(Sound::IMusicBox* musicBox, const IGraphicsLibrary* graphicsLibrary, Core::LibrarySecondarySkillConstPtr source);
 
     QPixmap getIconSmall(int level) const { return m_iconSmall[level]->get(); }
     QPixmap getIconMedium(int level) const { return m_iconMedium[level]->get(); }
@@ -171,7 +171,7 @@ class GUIGAMEWRAPPERS_EXPORT GuiSpell : public QObject
     using Base = AbstractGuiWrapper<GuiSpell, Core::LibrarySpell>;
 
 public:
-    GuiSpell(Sound::IMusicBox& musicBox, IGraphicsLibrary& graphicsLibrary, Core::LibrarySpellConstPtr source);
+    GuiSpell(Sound::IMusicBox* musicBox, const IGraphicsLibrary* graphicsLibrary, Core::LibrarySpellConstPtr source);
 
     QPixmap getIconBonus() const { return m_iconBonus->get(); }
     QPixmap getIconInt() const { return m_iconInt->get(); }
@@ -217,7 +217,7 @@ class GUIGAMEWRAPPERS_EXPORT GuiFaction : public QObject
     using Base = AbstractGuiWrapper<GuiFaction, Core::LibraryFaction>;
 
 public:
-    GuiFaction(Sound::IMusicBox& musicBox, IGraphicsLibrary& graphicsLibrary, Core::LibraryFactionConstPtr source);
+    GuiFaction(Sound::IMusicBox* musicBox, const IGraphicsLibrary* graphicsLibrary, Core::LibraryFactionConstPtr source);
 
     SpritePtr getUnitBackground() const { return m_unitBackground->get(); }
 
@@ -237,14 +237,14 @@ class GUIGAMEWRAPPERS_EXPORT GuiTerrain : public QObject
     using Base = AbstractGuiWrapper<GuiTerrain, Core::LibraryTerrain>;
 
 public:
-    GuiTerrain(Sound::IMusicBox& musicBox, IGraphicsLibrary& graphicsLibrary, Core::LibraryTerrainConstPtr source);
+    GuiTerrain(Sound::IMusicBox* musicBox, const IGraphicsLibrary* graphicsLibrary, Core::LibraryTerrainConstPtr source);
 
     QPixmap getIcon() const { return m_icon->get(); }
     QPixmap getTile(int variant) const;
 
 private:
-    IAsyncPixmapPtr   m_icon;
-    IGraphicsLibrary& m_graphicsLibrary;
+    IAsyncPixmapPtr         m_icon;
+    const IGraphicsLibrary* m_graphicsLibrary;
 };
 using GuiTerrainConstPtr = const GuiTerrain*;
 class GuiTerrainProvider {
@@ -259,7 +259,7 @@ class GUIGAMEWRAPPERS_EXPORT GuiMapBank : public QObject
     using Base = AbstractGuiWrapper<GuiMapBank, Core::LibraryMapBank>;
 
 public:
-    GuiMapBank(Sound::IMusicBox& musicBox, IGraphicsLibrary& graphicsLibrary, Core::LibraryMapBankConstPtr source);
+    GuiMapBank(Sound::IMusicBox* musicBox, const IGraphicsLibrary* graphicsLibrary, Core::LibraryMapBankConstPtr source);
 
     QPixmap            getIcon() const { return m_icon->get(); }
     const QStringList& getVariantNames() const { return m_variantNames; }

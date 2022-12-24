@@ -26,9 +26,9 @@ class IGraphicsLibrary;
 class GUIGAMEWRAPPERS_EXPORT UiCommonModel : public QObject {
     Q_OBJECT
 public:
-    UiCommonModel(Sound::IMusicBox& musicBox,
-                  IGraphicsLibrary& graphicsLibrary,
-                  QObject*          parent);
+    UiCommonModel(Sound::IMusicBox*       musicBox,
+                  const IGraphicsLibrary* graphicsLibrary,
+                  QObject*                parent);
     ~UiCommonModel();
 
     enum class UIString

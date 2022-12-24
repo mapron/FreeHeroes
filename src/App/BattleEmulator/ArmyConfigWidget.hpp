@@ -47,7 +47,7 @@ signals:
 public:
     void refresh();
 
-    void setModels(Gui::LibraryModelsProvider& modelProvider, Core::IRandomGenerator* randomGenerator);
+    void setModels(const Gui::LibraryModelsProvider* modelProvider, Core::IRandomGenerator* randomGenerator);
     void setSource(Gui::GuiAdventureArmy* army);
     void initHero();
 
@@ -60,7 +60,7 @@ private:
     std::unique_ptr<Ui::ArmyConfigWidget> m_ui;
     Core::IRandomGenerator*               m_randomGenerator = nullptr;
     Gui::GuiAdventureArmy*                m_army            = nullptr;
-    Gui::LibraryModelsProvider*           m_modelProvider   = nullptr;
+    const Gui::LibraryModelsProvider*     m_modelProvider   = nullptr;
     Gui::UnitsFilterModel*                m_unitsFilter     = nullptr;
 
     std::unique_ptr<AdventureControl> m_adventureControl;

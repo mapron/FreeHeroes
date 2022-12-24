@@ -94,7 +94,7 @@ public:
         int                           getAnimDuration(BattleAnimation type) const;
         SpriteItem::AnimGroupSettings getAnimSettings(BattleAnimation type) const;
     };
-    AnimationSequencer(const Gui::IAppSettings::Battle& battleSettings, Sound::IMusicBox& musicBox);
+    AnimationSequencer(const Gui::IAppSettings::Battle& battleSettings, Sound::IMusicBox* musicBox);
 
     AnimationSequencerHandle* addHandle(BattleStackSpriteItemPtr item, BattleStackConstPtr stack);
 
@@ -120,7 +120,7 @@ public:
 private:
     QList<AnimationSequencerHandle> m_handles;
     const Gui::IAppSettings::Battle m_battleSettings;
-    Sound::IMusicBox&               m_musicBox;
+    Sound::IMusicBox*               m_musicBox;
     Gui::AnimationTree              m_tree;
     bool                            m_superspeed = false;
 };

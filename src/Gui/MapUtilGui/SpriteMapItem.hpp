@@ -17,12 +17,11 @@ namespace Gui {
 class LibraryModelsProvider;
 }
 
-class AdventureMap;
-class AdventureMapItem : public QGraphicsItem {
+struct SpriteMap;
+class SpriteMapItem : public QGraphicsItem {
 public:
-    AdventureMapItem(AdventureMap& adventureMap, Gui::LibraryModelsProvider& modelsProvider)
-        : m_adventureMap(adventureMap)
-        , m_modelsProvider(modelsProvider)
+    SpriteMapItem(const SpriteMap* spriteMap)
+        : m_spriteMap(spriteMap)
     {
     }
 
@@ -32,10 +31,9 @@ public:
     void   paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
 private:
-    const AdventureMap&         m_adventureMap;
-    Gui::LibraryModelsProvider& m_modelsProvider;
-    static constexpr qreal      tileWidth      = 32.;
-    int                         m_currentDepth = 0;
+    const SpriteMap* const m_spriteMap;
+    static constexpr qreal tileWidth      = 32.;
+    int                    m_currentDepth = 0;
 };
 
 }

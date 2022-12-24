@@ -19,7 +19,7 @@
 namespace FreeHeroes::Gui {
 
 struct BattleResultDialog::Impl {
-    LibraryModelsProvider& m_modelsProvider;
+    const LibraryModelsProvider* m_modelsProvider;
     struct SideWidgets {
         DarkFrameLabel*   portrait = nullptr;
         DarkFrameLabel*   name     = nullptr;
@@ -32,12 +32,12 @@ struct BattleResultDialog::Impl {
     DarkFrameLabel*          resultDescription = nullptr;
     Sound::ISoundResourcePtr m_music;
 
-    Impl(LibraryModelsProvider& modelsProvider)
+    Impl(const LibraryModelsProvider* modelsProvider)
         : m_modelsProvider(modelsProvider)
     {}
 };
 
-BattleResultDialog::BattleResultDialog(LibraryModelsProvider& modelsProvider, QWidget* parent)
+BattleResultDialog::BattleResultDialog(const LibraryModelsProvider* modelsProvider, QWidget* parent)
     : QDialog(parent)
     , m_impl(std::make_unique<Impl>(modelsProvider))
 
@@ -190,7 +190,7 @@ void BattleResultDialog::setResultInfo(const BattleResultDialog::ResultInfo& inf
 
     if (m_impl->animationMovie)
         m_impl->animationMovie->deleteLater();
-    auto ui = m_impl->m_modelsProvider.ui();
+    auto ui = m_impl->m_modelsProvider->ui();
 
     auto animPtr           = (info.goodResult ? ui->win.anim : ui->lose.anim);
     m_impl->animationMovie = animPtr->exists() ? animPtr->create(this) : nullptr;

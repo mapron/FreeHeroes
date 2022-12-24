@@ -18,9 +18,9 @@ namespace FreeHeroes::Gui {
 
 RngLabel::RngLabel(QWidget* parent)
     : DarkFrameLabelIcon(parent)
-    , m_ui(*loadDependency<LibraryModelsProvider>(parent).ui())
+    , m_ui(*loadDependency<LibraryModelsProvider>(parent)->ui())
 {
-    auto ui       = loadDependency<IAppSettings>(parent).ui();
+    auto ui       = loadDependency<IAppSettings>(parent)->ui();
     m_displayText = ui.displayAbsMoraleLuck;
     m_clampText   = ui.clampAbsMoraleLuck;
 }

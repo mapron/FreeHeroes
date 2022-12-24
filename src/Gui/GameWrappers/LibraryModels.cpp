@@ -29,7 +29,7 @@ struct AbstractGuiWrapperListModel<WrapperType>::Impl {
 };
 
 template<typename T>
-AbstractGuiWrapperListModel<T>::AbstractGuiWrapperListModel(Sound::IMusicBox& musicBox, IGraphicsLibrary& graphicsLibrary, QObject* parent)
+AbstractGuiWrapperListModel<T>::AbstractGuiWrapperListModel(Sound::IMusicBox* musicBox, const IGraphicsLibrary* graphicsLibrary, QObject* parent)
     : QAbstractListModel(parent)
     , m_impl(std::make_unique<Impl>())
     , m_graphicsLibrary(graphicsLibrary)
@@ -106,10 +106,10 @@ int AbstractGuiWrapperListModel<WrapperType>::rowCount(const QModelIndex&) const
 const std::string ArtifactsModel::s_catapult  = "sod.artifact.battleMachine.catapult";
 const std::string ArtifactsModel::s_spellbook = "sod.artifact.special.spellbook";
 
-ArtifactsModel::ArtifactsModel(Sound::IMusicBox& musicBox, IGraphicsLibrary& graphicsLibrary, QObject* parent)
+ArtifactsModel::ArtifactsModel(Sound::IMusicBox* musicBox, const IGraphicsLibrary* graphicsLibrary, QObject* parent)
     : Base(musicBox, graphicsLibrary, parent)
 {
-    m_lock = graphicsLibrary.getPixmapByKey({ "sod.sprites.artifactsInventory", 0, 145 });
+    m_lock = graphicsLibrary->getPixmapByKey({ "sod.sprites.artifactsInventory", 0, 145 });
 }
 
 QVariant ArtifactsModel::data(const QModelIndex& index, int role) const
@@ -299,10 +299,10 @@ QVariant MapBanksModel::data(const QModelIndex& index, int role) const
     return Base::data(index, role);
 }
 
-LibraryModelsProvider::LibraryModelsProvider(const IGameDatabase* gameDatabase,
-                                             Sound::IMusicBox&    musicBox,
-                                             IGraphicsLibrary&    graphicsLibrary,
-                                             QObject*             parent)
+LibraryModelsProvider::LibraryModelsProvider(const IGameDatabase*    gameDatabase,
+                                             Sound::IMusicBox*       musicBox,
+                                             const IGraphicsLibrary* graphicsLibrary,
+                                             QObject*                parent)
     : QObject(parent)
 {
     m_artifacts = new ArtifactsModel(musicBox, graphicsLibrary, this);
@@ -334,7 +334,7 @@ LibraryModelsProvider::LibraryModelsProvider(const IGameDatabase* gameDatabase,
 
     QMap<QString, QPixmap> resourceIcons;
     for (auto* res : gameDatabase->resources()->records()) {
-        auto pix                                                        = graphicsLibrary.getPixmap(res->presentationParams.icon)->get();
+        auto pix                                                        = graphicsLibrary->getPixmap(res->presentationParams.icon)->get();
         m_uiCommon->resourceIcons[QString::fromStdString(res->id)]      = pix;
         m_uiCommon->resourceIconsSmall[QString::fromStdString(res->id)] = resizePixmap(pix, { 24, 24 });
     }

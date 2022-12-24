@@ -31,7 +31,7 @@ public:
     PrimaryStatsWidget(QWidget* parent = nullptr);
     ~PrimaryStatsWidget();
 
-    void setParams(const Core::HeroPrimaryParams& primary, LibraryModelsProvider* modelsProvider);
+    void setParams(const Core::HeroPrimaryParams& primary, const LibraryModelsProvider* modelsProvider);
 
     void setHoverLabel(QLabel* hoverLabel);
 

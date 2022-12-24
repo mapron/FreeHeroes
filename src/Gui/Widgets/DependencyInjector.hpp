@@ -17,57 +17,59 @@
 
 #include <stdexcept>
 
+//Q_DECLARE_METATYPE(const FreeHeroes::Gui::ICursorLibrary*)
 Q_DECLARE_METATYPE(FreeHeroes::Gui::ICursorLibrary*)
 Q_DECLARE_METATYPE(FreeHeroes::Gui::IAppSettings*)
 Q_DECLARE_METATYPE(FreeHeroes::Sound::IMusicBox*)
 Q_DECLARE_METATYPE(FreeHeroes::Gui::LibraryModelsProvider*)
+//Q_DECLARE_METATYPE(const FreeHeroes::Gui::LibraryModelsProvider*)
 
 namespace FreeHeroes::Gui {
 
-inline void storeDependency(QWidget* widget, ICursorLibrary& library)
+inline void storeDependency(QWidget* widget, const ICursorLibrary* library)
 {
-    widget->setProperty("ICursorLibrary", QVariant::fromValue(&library));
+    widget->setProperty("ICursorLibrary", QVariant::fromValue(const_cast<ICursorLibrary*>(library)));
 }
-inline void storeDependency(QWidget* widget, LibraryModelsProvider& library)
+inline void storeDependency(QWidget* widget, const LibraryModelsProvider* library)
 {
-    widget->setProperty("LibraryModelsProvider", QVariant::fromValue(&library));
+    widget->setProperty("LibraryModelsProvider", QVariant::fromValue(const_cast<LibraryModelsProvider*>(library)));
 }
-inline void storeDependency(QWidget* widget, Sound::IMusicBox& musicBox)
+inline void storeDependency(QWidget* widget, Sound::IMusicBox* musicBox)
 {
-    widget->setProperty("IMusicBox", QVariant::fromValue(&musicBox));
+    widget->setProperty("IMusicBox", QVariant::fromValue(musicBox));
 }
-inline void storeDependency(QWidget* widget, IAppSettings& appSettings)
+inline void storeDependency(QWidget* widget, IAppSettings* appSettings)
 {
-    widget->setProperty("IAppSettings", QVariant::fromValue(&appSettings));
+    widget->setProperty("IAppSettings", QVariant::fromValue(appSettings));
 }
 
 GUIWIDGETS_EXPORT QVariant loadDependencyData(QWidget* widget, const char* propName);
 
 template<typename T>
-inline T& loadDependency(QWidget*)
+inline T* loadDependency(QWidget*)
 {
     static_assert(sizeof(T) == 3);
 }
 
 template<>
-inline ICursorLibrary& loadDependency<ICursorLibrary>(QWidget* widget)
+inline ICursorLibrary* loadDependency<ICursorLibrary>(QWidget* widget)
 {
-    return *loadDependencyData(widget, "ICursorLibrary").value<ICursorLibrary*>();
+    return loadDependencyData(widget, "ICursorLibrary").value<ICursorLibrary*>();
 }
 template<>
-inline LibraryModelsProvider& loadDependency<LibraryModelsProvider>(QWidget* widget)
+inline LibraryModelsProvider* loadDependency<LibraryModelsProvider>(QWidget* widget)
 {
-    return *loadDependencyData(widget, "LibraryModelsProvider").value<LibraryModelsProvider*>();
+    return loadDependencyData(widget, "LibraryModelsProvider").value<LibraryModelsProvider*>();
 }
 template<>
-inline Sound::IMusicBox& loadDependency<Sound::IMusicBox>(QWidget* widget)
+inline Sound::IMusicBox* loadDependency<Sound::IMusicBox>(QWidget* widget)
 {
-    return *loadDependencyData(widget, "IMusicBox").value<Sound::IMusicBox*>();
+    return loadDependencyData(widget, "IMusicBox").value<Sound::IMusicBox*>();
 }
 template<>
-inline IAppSettings& loadDependency<IAppSettings>(QWidget* widget)
+inline IAppSettings* loadDependency<IAppSettings>(QWidget* widget)
 {
-    return *loadDependencyData(widget, "IAppSettings").value<IAppSettings*>();
+    return loadDependencyData(widget, "IAppSettings").value<IAppSettings*>();
 }
 
 }

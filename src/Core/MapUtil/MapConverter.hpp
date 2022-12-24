@@ -69,6 +69,8 @@ public:
         ConvertJsonToH3M,
         ConvertH3SVGToJson,
         ConvertJsonToH3SVG,
+        LoadFH,
+        SaveFH,
         FHMapToH3M,
         H3MToFHMap,
         H3MRoundTripJson,

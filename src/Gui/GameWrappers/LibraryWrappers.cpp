@@ -98,11 +98,11 @@ QString AbstractGuiWrapper<WrapperType, SrcType>::getName(int n) const
     return name;
 }
 
-GuiArtifact::GuiArtifact(Sound::IMusicBox&, IGraphicsLibrary& graphicsLibrary, Core::LibraryArtifactConstPtr source)
+GuiArtifact::GuiArtifact(Sound::IMusicBox*, const IGraphicsLibrary* graphicsLibrary, Core::LibraryArtifactConstPtr source)
     : QObject(nullptr)
     , Base(source)
-    , m_iconStash(graphicsLibrary.getPixmap(source->presentationParams.iconStash))
-    , m_iconBonus(graphicsLibrary.getPixmap(source->presentationParams.iconBonus))
+    , m_iconStash(graphicsLibrary->getPixmap(source->presentationParams.iconStash))
+    , m_iconBonus(graphicsLibrary->getPixmap(source->presentationParams.iconBonus))
 {
 }
 
@@ -154,24 +154,24 @@ QString GuiArtifact::localizedDisassemblySetDescr() const
     return prepareDescription(localizedDescr);
 }
 
-GuiUnit::GuiUnit(Sound::IMusicBox&, IGraphicsLibrary& graphicsLibrary, Core::LibraryUnitConstPtr source)
+GuiUnit::GuiUnit(Sound::IMusicBox*, const IGraphicsLibrary* graphicsLibrary, Core::LibraryUnitConstPtr source)
     : QObject(nullptr)
     , Base(source)
-    , m_portraitSmall(graphicsLibrary.getPixmap(source->presentationParams.portraitSmall))
-    , m_portraitLarge(graphicsLibrary.getPixmap(source->presentationParams.portrait))
-    , m_battleSprite(graphicsLibrary.getObjectAnimation(source->presentationParams.spriteBattle))
-    , m_projectileSprite(graphicsLibrary.getObjectAnimation(source->presentationParams.spriteProjectile))
+    , m_portraitSmall(graphicsLibrary->getPixmap(source->presentationParams.portraitSmall))
+    , m_portraitLarge(graphicsLibrary->getPixmap(source->presentationParams.portrait))
+    , m_battleSprite(graphicsLibrary->getObjectAnimation(source->presentationParams.spriteBattle))
+    , m_projectileSprite(graphicsLibrary->getObjectAnimation(source->presentationParams.spriteProjectile))
 {
     std::string splashButtons = source->abilities.splashButtons;
     QStringList icns          = QString::fromStdString(splashButtons).split(",");
-    m_splashControl           = graphicsLibrary.getIcon(icns);
+    m_splashControl           = graphicsLibrary->getIcon(icns);
     if (!m_battleSprite->exists()) {
         const bool isWide = source->traits.large;
-        m_battleSprite    = graphicsLibrary.getObjectAnimation(isWide ? "stubs.unit_wide" : "stubs.unit_normal");
+        m_battleSprite    = graphicsLibrary->getObjectAnimation(isWide ? "stubs.unit_wide" : "stubs.unit_normal");
         Q_ASSERT(m_battleSprite->exists());
     }
     if (!source->presentationParams.spriteProjectile.empty() && !m_projectileSprite->exists()) {
-        m_projectileSprite = graphicsLibrary.getObjectAnimation("stubs.projectile");
+        m_projectileSprite = graphicsLibrary->getObjectAnimation("stubs.projectile");
         Q_ASSERT(m_projectileSprite->exists());
     }
 }
@@ -193,22 +193,22 @@ QIcon GuiUnit::getSplashControl() const
     return m_splashControl->get();
 }
 
-GuiHero::GuiHero(Sound::IMusicBox&, IGraphicsLibrary& graphicsLibrary, Core::LibraryHeroConstPtr source)
+GuiHero::GuiHero(Sound::IMusicBox*, const IGraphicsLibrary* graphicsLibrary, Core::LibraryHeroConstPtr source)
     : QObject(nullptr)
     , Base(source)
-    , m_portraitSmall(graphicsLibrary.getPixmap(source->presentationParams.portraitSmall))
-    , m_portraitLarge(graphicsLibrary.getPixmap(source->presentationParams.portrait))
-    , m_specIcon(graphicsLibrary.getPixmap(source->spec->presentationParams.icon))
+    , m_portraitSmall(graphicsLibrary->getPixmap(source->presentationParams.portraitSmall))
+    , m_portraitLarge(graphicsLibrary->getPixmap(source->presentationParams.portrait))
+    , m_specIcon(graphicsLibrary->getPixmap(source->spec->presentationParams.icon))
 {
     auto hClass        = source->heroClass();
     auto resNameBattle = source->presentationParams.gender == Core::LibraryHero::Presentation::Gender::Male ? hClass->presentationParams.battleSpriteMale : hClass->presentationParams.battleSpriteFemale;
     auto resNameAdv    = source->presentationParams.gender == Core::LibraryHero::Presentation::Gender::Male ? hClass->presentationParams.adventureSpriteMale : hClass->presentationParams.adventureSpriteFemale;
-    m_battleSprite     = graphicsLibrary.getObjectAnimation(resNameBattle);
+    m_battleSprite     = graphicsLibrary->getObjectAnimation(resNameBattle);
     if (!m_battleSprite->exists()) {
-        m_battleSprite = graphicsLibrary.getObjectAnimation("stubs.hero");
+        m_battleSprite = graphicsLibrary->getObjectAnimation("stubs.hero");
         Q_ASSERT(m_battleSprite->exists());
     }
-    m_adventureSprite = graphicsLibrary.getObjectAnimation(resNameAdv);
+    m_adventureSprite = graphicsLibrary->getObjectAnimation(resNameAdv);
     Q_ASSERT(m_adventureSprite->exists());
 }
 
@@ -254,23 +254,23 @@ QString GuiHero::getSpecName() const
     return QString::fromStdString(spec->id);
 }
 
-GuiSkill::GuiSkill(Sound::IMusicBox&, IGraphicsLibrary& graphicsLibrary, Core::LibrarySecondarySkillConstPtr source)
+GuiSkill::GuiSkill(Sound::IMusicBox*, const IGraphicsLibrary* graphicsLibrary, Core::LibrarySecondarySkillConstPtr source)
     : QObject(nullptr)
     , Base(source)
     , m_iconSmall{ {
-          graphicsLibrary.getPixmap(source->presentationParams.levels[0].iconSmall),
-          graphicsLibrary.getPixmap(source->presentationParams.levels[1].iconSmall),
-          graphicsLibrary.getPixmap(source->presentationParams.levels[2].iconSmall),
+          graphicsLibrary->getPixmap(source->presentationParams.levels[0].iconSmall),
+          graphicsLibrary->getPixmap(source->presentationParams.levels[1].iconSmall),
+          graphicsLibrary->getPixmap(source->presentationParams.levels[2].iconSmall),
       } }
     , m_iconMedium{ {
-          graphicsLibrary.getPixmap(source->presentationParams.levels[0].iconMedium),
-          graphicsLibrary.getPixmap(source->presentationParams.levels[1].iconMedium),
-          graphicsLibrary.getPixmap(source->presentationParams.levels[2].iconMedium),
+          graphicsLibrary->getPixmap(source->presentationParams.levels[0].iconMedium),
+          graphicsLibrary->getPixmap(source->presentationParams.levels[1].iconMedium),
+          graphicsLibrary->getPixmap(source->presentationParams.levels[2].iconMedium),
       } }
     , m_iconLarge{ {
-          graphicsLibrary.getPixmap(source->presentationParams.levels[0].iconLarge),
-          graphicsLibrary.getPixmap(source->presentationParams.levels[1].iconLarge),
-          graphicsLibrary.getPixmap(source->presentationParams.levels[2].iconLarge),
+          graphicsLibrary->getPixmap(source->presentationParams.levels[0].iconLarge),
+          graphicsLibrary->getPixmap(source->presentationParams.levels[1].iconLarge),
+          graphicsLibrary->getPixmap(source->presentationParams.levels[2].iconLarge),
       } }
 {
 }
@@ -290,17 +290,17 @@ QString GuiSkill::getSkillLevelName(int level)
     return levels.value(level + 1);
 }
 
-GuiSpell::GuiSpell(Sound::IMusicBox& musicBox, IGraphicsLibrary& graphicsLibrary, Core::LibrarySpellConstPtr source)
+GuiSpell::GuiSpell(Sound::IMusicBox* musicBox, const IGraphicsLibrary* graphicsLibrary, Core::LibrarySpellConstPtr source)
     : QObject(nullptr)
     , Base(source)
-    , m_iconBonus{ graphicsLibrary.getPixmap(source->presentationParams.iconBonus) }
-    , m_iconInt{ graphicsLibrary.getPixmap(source->presentationParams.iconInt) }
-    , m_iconTrans{ graphicsLibrary.getPixmap(source->presentationParams.iconTrans) }
-    , m_iconScroll{ graphicsLibrary.getPixmap(source->presentationParams.iconScroll) }
-    , m_animation{ graphicsLibrary.getObjectAnimation(source->presentationParams.animation) }
-    , m_bottomAnimation{ graphicsLibrary.getObjectAnimation(source->presentationParams.bottomAnimation) }
-    , m_projectile{ graphicsLibrary.getObjectAnimation(source->presentationParams.projectile) }
-    , m_sound{ musicBox.effectPrepare(Sound::IMusicBox::EffectSettings{ source->presentationParams.sound }.setFadeIn(100).setFadeOut(100)) }
+    , m_iconBonus{ graphicsLibrary->getPixmap(source->presentationParams.iconBonus) }
+    , m_iconInt{ graphicsLibrary->getPixmap(source->presentationParams.iconInt) }
+    , m_iconTrans{ graphicsLibrary->getPixmap(source->presentationParams.iconTrans) }
+    , m_iconScroll{ graphicsLibrary->getPixmap(source->presentationParams.iconScroll) }
+    , m_animation{ graphicsLibrary->getObjectAnimation(source->presentationParams.animation) }
+    , m_bottomAnimation{ graphicsLibrary->getObjectAnimation(source->presentationParams.bottomAnimation) }
+    , m_projectile{ graphicsLibrary->getObjectAnimation(source->presentationParams.projectile) }
+    , m_sound{ musicBox->effectPrepare(Sound::IMusicBox::EffectSettings{ source->presentationParams.sound }.setFadeIn(100).setFadeOut(100)) }
 {
 }
 
@@ -329,17 +329,17 @@ QString GuiSpell::spellBookInfo(int manaCost, bool shortFormat) const
     return prepareDescription(descr);
 }
 
-GuiFaction::GuiFaction(Sound::IMusicBox&, IGraphicsLibrary& graphicsLibrary, Core::LibraryFactionConstPtr source)
+GuiFaction::GuiFaction(Sound::IMusicBox*, const IGraphicsLibrary* graphicsLibrary, Core::LibraryFactionConstPtr source)
     : QObject(nullptr)
     , Base(source)
-    , m_unitBackground(graphicsLibrary.getObjectAnimation(source->presentationParams.unitBackground))
+    , m_unitBackground(graphicsLibrary->getObjectAnimation(source->presentationParams.unitBackground))
 {
 }
 
-GuiTerrain::GuiTerrain(Sound::IMusicBox&, IGraphicsLibrary& graphicsLibrary, Core::LibraryTerrainConstPtr source)
+GuiTerrain::GuiTerrain(Sound::IMusicBox*, const IGraphicsLibrary* graphicsLibrary, Core::LibraryTerrainConstPtr source)
     : QObject(nullptr)
     , Base(source)
-    , m_icon(graphicsLibrary.getPixmapByKey(getTerrainKey(source, source->presentationParams.centerTilesOffset)))
+    , m_icon(graphicsLibrary->getPixmapByKey(getTerrainKey(source, source->presentationParams.centerTilesOffset)))
     , m_graphicsLibrary(graphicsLibrary)
 {
 }
@@ -349,16 +349,16 @@ QPixmap GuiTerrain::getTile(int variant) const
     const auto centerTilesCount = getSource()->presentationParams.centerTilesCount;
     variant                     = variant % centerTilesCount;
     const auto key              = getTerrainKey(getSource(), getSource()->presentationParams.centerTilesOffset + variant);
-    auto       terrainPixAsync  = m_graphicsLibrary.getPixmapByKey(key);
+    auto       terrainPixAsync  = m_graphicsLibrary->getPixmapByKey(key);
     assert(terrainPixAsync && terrainPixAsync->exists());
     auto pix = terrainPixAsync->get();
     return pix;
 }
 
-GuiMapBank::GuiMapBank(Sound::IMusicBox&, IGraphicsLibrary& graphicsLibrary, Core::LibraryMapBankConstPtr source)
+GuiMapBank::GuiMapBank(Sound::IMusicBox*, const IGraphicsLibrary* graphicsLibrary, Core::LibraryMapBankConstPtr source)
     : QObject(nullptr)
     , Base(source)
-    , m_icon(graphicsLibrary.getPixmapByKey(IGraphicsLibrary::PixmapKey(source->objectDefs.get({})->id, 0, 0)))
+    , m_icon(graphicsLibrary->getPixmapByKey(IGraphicsLibrary::PixmapKey(source->objectDefs.get({})->id, 0, 0)))
 {
     for (auto& variant : source->variants)
         m_variantNames << QString::fromStdString(variant.name);

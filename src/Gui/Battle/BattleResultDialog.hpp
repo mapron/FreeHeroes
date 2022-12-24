@@ -17,7 +17,7 @@ class LibraryModelsProvider;
 class GUIBATTLE_EXPORT BattleResultDialog : public QDialog {
     Q_OBJECT
 public:
-    BattleResultDialog(LibraryModelsProvider& modelsProvider, QWidget* parent);
+    BattleResultDialog(const LibraryModelsProvider* modelsProvider, QWidget* parent);
 
     struct SideInfo {
         QString                name;

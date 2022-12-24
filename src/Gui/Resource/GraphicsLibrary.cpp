@@ -124,22 +124,22 @@ GraphicsLibrary::~GraphicsLibrary()
 {
 }
 
-IAsyncSpritePtr GraphicsLibrary::getObjectAnimation(const std::string& resourceName)
+IAsyncSpritePtr GraphicsLibrary::getObjectAnimation(const std::string& resourceName) const
 {
     return std::make_shared<AsyncSprite>(m_impl.get(), resourceName);
 }
 
-IAsyncPixmapPtr GraphicsLibrary::getPixmapByKey(const PixmapKey& resourceCode)
+IAsyncPixmapPtr GraphicsLibrary::getPixmapByKey(const PixmapKey& resourceCode) const
 {
     return std::make_shared<AsyncPixmap>(m_impl.get(), resourceCode);
 }
 
-IAsyncMoviePtr GraphicsLibrary::getVideo(const std::string& resourceName)
+IAsyncMoviePtr GraphicsLibrary::getVideo(const std::string& resourceName) const
 {
     return std::make_shared<AsyncMovie>(m_impl.get(), resourceName);
 }
 
-IAsyncIconPtr GraphicsLibrary::getIcon(const PixmapKeyList& resourceCodes)
+IAsyncIconPtr GraphicsLibrary::getIcon(const PixmapKeyList& resourceCodes) const
 {
     return std::make_shared<AsyncIcon>(m_impl.get(), resourceCodes);
 }
