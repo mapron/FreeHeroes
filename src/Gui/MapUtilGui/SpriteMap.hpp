@@ -13,22 +13,51 @@
 namespace FreeHeroes {
 
 struct SpriteMap {
+    enum class Layer
+    {
+        Invalid,
+        Town,
+        Hero,
+        Resource,
+        Artifact,
+        Monster,
+        Dwelling,
+        Bank,
+        Mine,
+        Pandora,
+        Shrine,
+        SkillHut,
+        Scholar,
+        QuestHut,
+        GeneralVisitable,
+        Decoration,
+    };
+
     struct Item {
         Gui::IAsyncSpritePtr m_sprite;
-        int                  m_spriteGroup     = 0;
-        int                  m_animationOffset = 0;
-        bool                 m_flipHor         = false;
-        bool                 m_flipVert        = false;
+
+        Layer m_layer           = Layer::Invalid;
+        int   m_spriteGroup     = 0;
+        int   m_animationOffset = 0;
+        bool  m_flipHor         = false;
+        bool  m_flipVert        = false;
+        bool  m_shiftHalfTile   = false;
+        int   m_width           = 1;
+        int   m_height          = 1;
+    };
+
+    struct Cell {
+        std::vector<Item> m_items;
+    };
+    struct Row {
+        std::map<int, Cell> m_cells;
+    };
+    struct LayerGrid {
+        std::map<int, Row> m_rows;
     };
 
     struct Plane {
-        struct Row {
-            struct Cell {
-                std::map<int, std::vector<Item>> m_items; // item by draw priority
-            };
-            std::map<int, Cell> m_cells;
-        };
-        std::map<int, Row> m_rows;
+        std::map<int, LayerGrid> m_grids; // item by draw priority
     };
 
     std::vector<Plane> m_planes;
@@ -42,7 +71,27 @@ struct SpritePaintSettings {
     bool m_animateTerrain = false;
     bool m_animateObjects = false;
     bool m_grid           = false;
+    bool m_gridOnTop      = false;
+    int  m_gridOpacity    = 110;
     int  m_tileSize       = 32;
+
+    enum class ContourStyle
+    {
+        None,
+        Rect,
+        Diamond,
+        Cross,
+    };
+
+    struct LayerRules {
+        bool         m_visible      = true;
+        bool         m_showContour  = true;
+        ContourStyle m_contourStyle = ContourStyle::None;
+    };
+
+    LayerRules m_globalRules;
+
+    std::map<SpriteMap::Layer, LayerRules> m_specificRules;
 };
 
 struct SpriteRenderSettings {

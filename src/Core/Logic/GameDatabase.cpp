@@ -739,7 +739,31 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
         }
         m_impl->m_dwellings.m_sorted.push_back(obj);
     }
-    const size_t terrainsSize = m_impl->m_terrains.legacyOrderedRecords().size();
+    const size_t terrainsSize   = m_impl->m_terrains.legacyOrderedRecords().size();
+    auto         makePlanarMask = [](const std::vector<uint8_t>& data, bool invert) -> LibraryObjectDef::PlanarMask {
+        LibraryObjectDef::PlanarMask res;
+        for (size_t x = 0; x < 8; ++x) {
+            for (size_t y = 0; y < 6; ++y) {
+                uint8_t bit = data[y * 6 + x] ^ uint8_t(invert);
+                if (bit) {
+                    res.width  = std::max(res.width, x + 1);
+                    res.height = std::max(res.height, y + 1);
+                }
+            }
+        }
+        res.data.resize(res.height);
+        for (auto& row : res.data)
+            row.resize(res.width);
+        for (size_t x = 0; x < 8; ++x) {
+            for (size_t y = 0; y < 6; ++y) {
+                uint8_t bit = data[y * 6 + x] ^ uint8_t(invert);
+                if (bit) {
+                    res.data[res.height - y - 1][res.width - x - 1] = 1;
+                }
+            }
+        }
+        return res;
+    };
     for (auto* obj : m_impl->m_objectDefs.m_unsorted) {
         if (!obj->substituteKey.empty()) {
             checkLink(obj->substituteFor, obj);
@@ -751,6 +775,10 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
         obj->terrainsSoft.resize(terrainsSize);
         std::reverse(obj->terrainsHard.begin(), obj->terrainsHard.end());
         std::reverse(obj->terrainsSoft.begin(), obj->terrainsSoft.end());
+
+        obj->blockMapPlanar = makePlanarMask(obj->blockMap, true);
+        obj->visitMapPlanar = makePlanarMask(obj->visitMap, false);
+
         m_impl->m_objectDefs.m_sorted.push_back(obj);
     }
 

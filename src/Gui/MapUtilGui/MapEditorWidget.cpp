@@ -37,15 +37,20 @@ const uint32_t g_mapAnimationInterval = 125;
 MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDatabaseContainer,
                                  const Core::IRandomGeneratorFactory* rngFactory,
                                  const Gui::IGraphicsLibrary*         graphicsLibrary,
-                                 const Gui::LibraryModelsProvider*    modelsProvider)
-    : QDialog(nullptr)
+                                 const Gui::LibraryModelsProvider*    modelsProvider,
+
+                                 QWidget* parent)
+    : QMainWindow(parent)
     , m_gameDatabaseContainer(gameDatabaseContainer)
     , m_rngFactory(rngFactory)
     , m_graphicsLibrary(graphicsLibrary)
     , m_modelsProvider(modelsProvider)
     , m_map(std::make_unique<FHMap>())
 {
-    QVBoxLayout* layout    = new QVBoxLayout(this);
+    QWidget* w = new QWidget(this);
+    setCentralWidget(w);
+
+    QVBoxLayout* layout    = new QVBoxLayout(w);
     QHBoxLayout* layoutTop = new QHBoxLayout();
     layout->addLayout(layoutTop);
     {

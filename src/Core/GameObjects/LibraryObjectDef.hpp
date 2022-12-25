@@ -49,6 +49,16 @@ struct LibraryObjectDef {
         LibraryUnitConstPtr         unit         = nullptr;
     } mappings; // generated
 
+    struct PlanarMask {
+        std::vector<std::vector<uint8_t>> data; // rows of cols of bits.  from top left corner, to right and then to bottom.
+
+        size_t width  = 0;
+        size_t height = 0;
+    };
+
+    PlanarMask blockMapPlanar;
+    PlanarMask visitMapPlanar;
+
     LibraryObjectDefConstPtr get(const std::string& substitutionId) const noexcept
     {
         if (substitutionId.empty())

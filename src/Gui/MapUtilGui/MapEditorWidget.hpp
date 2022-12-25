@@ -4,7 +4,7 @@
  * See LICENSE file for details.
  */
 
-#include <QDialog>
+#include <QMainWindow>
 
 #include <memory>
 
@@ -27,13 +27,15 @@ class LibraryModelsProvider;
 }
 class SpriteMapItem;
 
-class MAPUTILGUI_EXPORT MapEditorWidget : public QDialog {
+class MAPUTILGUI_EXPORT MapEditorWidget : public QMainWindow {
 public:
     MapEditorWidget(
         const Core::IGameDatabaseContainer*  gameDatabaseContainer,
         const Core::IRandomGeneratorFactory* rngFactory,
         const Gui::IGraphicsLibrary*         graphicsLibrary,
-        const Gui::LibraryModelsProvider*    modelsProvider);
+        const Gui::LibraryModelsProvider*    modelsProvider,
+
+        QWidget* parent = nullptr);
 
     void load(const std::string& filename);
 
