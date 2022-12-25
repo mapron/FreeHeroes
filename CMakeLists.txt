@@ -378,6 +378,7 @@ AddTarget(TYPE app_ui NAME MapEditor
         CoreApplication
         GuiApplication
         GameInt
+        GuiInt
         MapUtilGui
     QT_MODULES Widgets
     )

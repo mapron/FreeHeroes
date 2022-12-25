@@ -77,16 +77,7 @@ QString prepareDescription(QString description)
 
 IGraphicsLibrary::PixmapKey getTerrainKey(Core::LibraryTerrainConstPtr terrain, int variant)
 {
-    if (terrain->presentationParams.defFileSplit) {
-        IGraphicsLibrary::PixmapKey result;
-        auto                        suffix = std::to_string(variant);
-        while (suffix.size() < 3)
-            suffix = "0" + suffix;
-        result.resourceName = terrain->presentationParams.defFile + suffix;
-        return result;
-    }
-    const bool isAnimated = terrain->presentationParams.isAnimated;
-    return IGraphicsLibrary::PixmapKey(terrain->presentationParams.defFile, isAnimated ? variant : 0, isAnimated ? 0 : variant);
+    return IGraphicsLibrary::PixmapKey(terrain->presentationParams.defFile, variant, 0);
 }
 
 }

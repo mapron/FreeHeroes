@@ -5,9 +5,10 @@
  */
 #pragma once
 
+#include "SpriteMap.hpp"
+
 namespace FreeHeroes {
 
-struct SpriteMap;
 struct FHMap;
 namespace Gui {
 class IGraphicsLibrary;
@@ -15,7 +16,14 @@ class IGraphicsLibrary;
 
 class MapRenderer {
 public:
-    SpriteMap render(const FHMap& fhMap, const Gui::IGraphicsLibrary* graphicsLibrary, int z) const;
+    MapRenderer(const SpriteRenderSettings& renderSettings)
+        : m_settings(renderSettings)
+    {}
+
+    SpriteMap render(const FHMap& fhMap, const Gui::IGraphicsLibrary* graphicsLibrary) const;
+
+private:
+    const SpriteRenderSettings m_settings;
 };
 
 }

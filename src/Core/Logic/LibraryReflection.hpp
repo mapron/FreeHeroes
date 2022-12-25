@@ -164,8 +164,6 @@ STRUCT_REFLECTION_PAIRED(
     "backgroundsBattle",           backgroundsBattle,
     "order",                       order,
     "defFile",                     defFile,
-    "defFileSplit",                defFileSplit,
-    "isAnimated",                  isAnimated,
     "dirtBorderTilesOffset",       dirtBorderTilesOffset,
     "sandBorderTilesOffset",       sandBorderTilesOffset,
     "mixedBorderTilesOffset",      mixedBorderTilesOffset,

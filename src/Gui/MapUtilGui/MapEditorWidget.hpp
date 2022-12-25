@@ -8,6 +8,8 @@
 
 #include <memory>
 
+#include "SpriteMap.hpp"
+
 #include "MapUtilGuiExport.hpp"
 
 class QGraphicsView;
@@ -15,7 +17,6 @@ class QGraphicsScene;
 
 namespace FreeHeroes {
 struct FHMap;
-struct SpriteMap;
 namespace Core {
 class IGameDatabaseContainer;
 class IRandomGeneratorFactory;
@@ -24,6 +25,7 @@ namespace Gui {
 class IGraphicsLibrary;
 class LibraryModelsProvider;
 }
+class SpriteMapItem;
 
 class MAPUTILGUI_EXPORT MapEditorWidget : public QDialog {
 public:
@@ -41,6 +43,8 @@ public:
 
 private:
     void generateMap();
+    void showCurrentItem();
+    void updateAll();
 
 private:
     QGraphicsView*  m_view  = nullptr;
@@ -52,8 +56,14 @@ private:
     const Gui::IGraphicsLibrary*      m_graphicsLibrary;
     const Gui::LibraryModelsProvider* m_modelsProvider;
 
-    std::unique_ptr<FHMap>     m_map;
-    std::unique_ptr<SpriteMap> m_spriteMap;
+    std::unique_ptr<FHMap> m_map;
+    SpriteMap              m_spriteMap;
+    SpritePaintSettings    m_paintSettings;
+    SpriteRenderSettings   m_renderSettings;
+
+    std::vector<SpriteMapItem*> m_mapSprites;
+
+    int m_depth = 0;
 };
 
 }

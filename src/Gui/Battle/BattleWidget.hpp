@@ -11,7 +11,6 @@
 
 #include <QDialog>
 #include <QStringList>
-#include <QTimer>
 
 #include <memory>
 
@@ -91,8 +90,6 @@ private:
 
     std::unique_ptr<GridScene>       m_scene;
     std::unique_ptr<BattleFieldItem> m_battlefield;
-
-    QTimer m_animationTimer;
 
     bool m_battleFinished = false;
 

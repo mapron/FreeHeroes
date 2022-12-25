@@ -312,11 +312,17 @@ void ConverterDialog::run()
 
     statusUpdate(tr("Translation generation..."));
 
+    const std::vector<std::string> s_transposings{ "tshrc", "tshre", "dirttl", "edg", "grastl", "lavatl", "rocktl", "rougtl", "sandtl", "snowtl", "subbtl", "swmptl", "watrtl", "icyrvr", "gravrd", "cobbrd", "dirtrd" };
+
     if (sodExists) {
         Logger(Logger::Info) << "SoD";
         LocalizationConverter converter(*sodLibrary, baseExtractSOD, hotaDb, sodDb);
         converter.extractSOD("txt");
 
+        Logger(Logger::Info) << "SoD PP";
+        ResourcePostprocess pp;
+        for (const auto& id : s_transposings)
+            pp.transposeSprite(*sodLibrary, id);
         sodLibrary->saveIndex();
     }
 
@@ -329,6 +335,11 @@ void ConverterDialog::run()
         Logger(Logger::Info) << "HotA PP";
         ResourcePostprocess pp;
         pp.concatSprites(*hotaLibrary, { "cmbkhlmt0", "cmbkhlmt1", "cmbkhlmt2", "cmbkhlmt3", "cmbkhlmt4" }, "cmbkhlmt", true);
+        for (const auto& id : s_transposings)
+            pp.transposeSprite(*hotaLibrary, id);
+
+        pp.concatTilesSprite(*hotaLibrary, "hglnt", "highlands", 124);
+        pp.concatTilesSprite(*hotaLibrary, "wstlt", "wastelands", 124);
         hotaLibrary->saveIndex();
     }
     if (hdExists) {

@@ -411,7 +411,7 @@ void BattleFieldItem::hoverCell(BattlePosition battlePos, const QPointF posInCel
     }
 }
 
-void BattleFieldItem::tick(int msElapsed)
+void BattleFieldItem::tick(uint32_t msElapsed)
 {
     for (auto& item : m_unitGraphics) {
         if (!item.animationEnabled)

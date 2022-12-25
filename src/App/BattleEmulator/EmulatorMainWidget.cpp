@@ -52,6 +52,7 @@
 /// @todo some  AppLocationManager for paths??
 #include <QStandardPaths>
 #include <QSet>
+#include <QTimer>
 
 namespace FreeHeroes::BattleEmulator {
 

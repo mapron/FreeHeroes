@@ -14,14 +14,14 @@ namespace FreeHeroes::Conversion {
 using namespace Core;
 using namespace Gui;
 namespace {
-QImage getImage(Core::IResourceLibrary& resources, std::string id)
+QPixmap getPixmap(Core::IResourceLibrary& resources, std::string id)
 {
     const auto& resource = resources.getMedia(ResourceMedia::Type::Sprite, id);
     auto        sprite   = loadSprite(std_path(resource.getFullPath()));
     Q_ASSERT(sprite && sprite->getGroupsCount() > 0);
 
     auto seq = sprite->getFramesForGroup(0);
-    return seq->frames[0].frame.toImage();
+    return seq->frames[0].frame;
 }
 }
 
@@ -33,7 +33,7 @@ void ResourcePostprocess::concatSprites(Core::IResourceLibrary&         resource
     auto resource         = resources.getMedia(ResourceMedia::Type::Sprite, in[0]);
     resource.id           = out;
     auto str              = makeJsonFilename(out);
-    resource.mainFilename = str; // string_view, cannon make temporary here!
+    resource.mainFilename = str; // string_view, cannot make temporary here!
     if (resources.mediaExists(ResourceMedia::Type::Sprite, out))
         return;
 
@@ -42,7 +42,7 @@ void ResourcePostprocess::concatSprites(Core::IResourceLibrary&         resource
     QList<QImage> imgs;
     QSize         size(0, 0);
     for (auto& resId : in) {
-        auto img = getImage(resources, resId);
+        auto img = getPixmap(resources, resId).toImage();
         imgs << img;
         if (vertical) {
             size.setWidth(std::max(size.width(), img.width()));
@@ -68,6 +68,67 @@ void ResourcePostprocess::concatSprites(Core::IResourceLibrary&         resource
 
     SpritePtr sprite = Sprite::fromPixmap(QPixmap::fromImage(result));
     saveSprite(sprite, std_path(resource.getFullPath()));
+}
+
+void ResourcePostprocess::transposeSprite(Core::IResourceLibrary& resources, const std::string& id)
+{
+    if (!resources.mediaExists(ResourceMedia::Type::Sprite, id))
+        return;
+    const auto& resource   = resources.getMedia(ResourceMedia::Type::Sprite, id);
+    const auto& path       = std_path(resource.getFullPath());
+    auto        spriteOrig = loadSprite(path);
+    Q_ASSERT(spriteOrig && spriteOrig->getGroupsCount() > 0);
+    if (spriteOrig->getGroupsCount() > 1)
+        return;
+
+    SpriteLoader result;
+    for (int groupId : spriteOrig->getGroupsIds()) {
+        const SpriteSequencePtr pg      = spriteOrig->getFramesForGroup(groupId);
+        int                     counter = 0;
+        for (const auto& frame : pg->frames) {
+            result.addFrame(counter, frame.frame, frame.paddingLeftTop);
+            result.addGroup(counter,
+                            { counter },
+                            pg->boundarySize,
+                            pg->params);
+            counter++;
+        }
+    }
+
+    auto sharedSprite = std::make_shared<const Sprite>(std::move(result));
+
+    saveSprite(sharedSprite, path, {});
+}
+
+void ResourcePostprocess::concatTilesSprite(Core::IResourceLibrary& resources, const std::string& base, const std::string& out, int tilesCount)
+{
+    auto makeId = [base](int i) {
+        auto idSuffix = std::to_string(i);
+        while (idSuffix.size() < 3)
+            idSuffix = "0" + idSuffix;
+        return base + idSuffix;
+    };
+
+    auto resource         = resources.getMedia(ResourceMedia::Type::Sprite, makeId(0));
+    resource.id           = out;
+    auto str              = makeJsonFilename(out);
+    resource.subdir       = "Sprites/AdventureTiles/";
+    resource.mainFilename = str; // string_view, cannot make temporary here!
+    if (resources.mediaExists(ResourceMedia::Type::Sprite, out))
+        return;
+
+    resources.registerResource(resource);
+
+    SpriteLoader result;
+    for (int i = 0; i < tilesCount; ++i) {
+        QPixmap pix = getPixmap(resources, makeId(i));
+        result.addFrame(i, pix, {});
+        result.addGroup(i, { i }, pix.size(), {});
+    }
+    auto sharedSprite = std::make_shared<const Sprite>(std::move(result));
+
+    const auto& path = std_path(resource.getFullPath());
+    saveSprite(sharedSprite, path, {});
 }
 
 }

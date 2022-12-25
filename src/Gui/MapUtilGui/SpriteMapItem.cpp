@@ -7,54 +7,39 @@
 #include "SpriteMapItem.hpp"
 #include "SpriteMap.hpp"
 
-#include "IGraphicsLibrary.hpp"
-#include "ISprites.hpp"
-
 #include "SpriteMapPainter.hpp"
-
-#include <QPainter>
 
 namespace FreeHeroes {
 
-namespace {
-struct DrawHint {
-    int  group;
-    bool mirror;
-};
-/*
-DrawHint directionToHint(HeroDirection direction)
+void SpriteMapItem::tick(uint32_t msecElapsed)
 {
-    switch (direction) {
-        case HeroDirection::T:
-            return { 0, false };
-        case HeroDirection::TR:
-            return { 1, false };
-        case HeroDirection::R:
-            return { 2, false };
-        case HeroDirection::BR:
-            return { 3, false };
-        case HeroDirection::B:
-            return { 4, false };
-        case HeroDirection::BL:
-            return { 3, true };
-        case HeroDirection::L:
-            return { 2, true };
-        case HeroDirection::TL:
-            return { 1, true };
-    }
-    return {};
-}*/
+    m_animationTick += msecElapsed;
+
+    uint32_t frameTick = m_animationTick / m_animationFrameDurationMs;
+    m_animationTick -= frameTick * m_animationFrameDurationMs;
+
+    if (!frameTick)
+        return;
+    if (!m_spritePaintSettings->m_animateTerrain && m_spritePaintSettings->m_animateObjects)
+        return;
+
+    if (m_spritePaintSettings->m_animateTerrain)
+        m_animationFrameOffsetTerrain += frameTick;
+    if (m_spritePaintSettings->m_animateObjects)
+        m_animationFrameOffsetObjects += frameTick;
+
+    update();
 }
 
 QRectF SpriteMapItem::boundingRect() const
 {
-    return QRectF{ QPointF{ 0., 0. }, QSizeF(m_spriteMap->m_width, m_spriteMap->m_height) * tileWidth };
+    return QRectF{ QPointF{ 0., 0. }, QSizeF(m_spriteMap->m_width, m_spriteMap->m_height) * m_spritePaintSettings->m_tileSize };
 }
 
 void SpriteMapItem::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
-    SpriteMapPainter p;
-    p.paint(painter, m_spriteMap);
+    SpriteMapPainter p(m_spritePaintSettings, m_currentDepth);
+    p.paint(painter, m_spriteMap, m_animationFrameOffsetTerrain, m_animationFrameOffsetObjects);
 }
 
 }

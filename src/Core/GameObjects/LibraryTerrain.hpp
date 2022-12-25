@@ -68,8 +68,6 @@ struct LibraryTerrain {
         std::string              music;
         std::vector<std::string> backgroundsBattle;
         std::string              defFile;
-        bool                     defFileSplit = false; // HotA terrain like wstlt077
-        bool                     isAnimated   = false;
 
         int dirtBorderTilesOffset    = -1;
         int sandBorderTilesOffset    = -1;

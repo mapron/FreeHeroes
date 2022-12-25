@@ -12,31 +12,45 @@
 
 namespace FreeHeroes {
 
-void SpriteMapPainter::paint(QPainter* painter, const SpriteMap* spriteMap) const
+void SpriteMapPainter::paint(QPainter*        painter,
+                             const SpriteMap* spriteMap,
+                             uint32_t         animationFrameOffsetTerrain,
+                             uint32_t         animationFrameOffsetObjects) const
 {
     painter->setRenderHint(QPainter::SmoothPixmapTransform, true);
+    const int tileSize = m_settings->m_tileSize;
+    const int width    = spriteMap->m_width;
+    const int height   = spriteMap->m_height;
 
-    int animatedFrame = 0;
-    for (const auto& [rowIndex, row] : spriteMap->m_rows) {
+    for (const auto& [rowIndex, row] : spriteMap->m_planes[m_depth].m_rows) {
         for (const auto& [colIndex, cell] : row.m_cells) {
-            for (const auto& item : cell.m_items) {
-                auto                   sprite = item.m_sprite->get();
-                Gui::SpriteSequencePtr seq    = sprite->getFramesForGroup(item.m_isAnimated ? item.m_spriteGroup : 0);
+            for (const auto& [priority, items] : cell.m_items) {
+                for (const auto& item : items) {
+                    auto                   sprite = item.m_sprite->get();
+                    Gui::SpriteSequencePtr seq    = sprite->getFramesForGroup(item.m_spriteGroup);
 
-                const auto frameIndex = item.m_isAnimated ? 0 : item.m_animationOffset + animatedFrame;
-                const auto frame      = seq->frames[frameIndex % seq->frames.size()];
+                    const size_t frameIndex = item.m_animationOffset + animationFrameOffsetTerrain;
+                    const auto   frame      = seq->frames[frameIndex % seq->frames.size()];
 
-                auto oldTransform = painter->transform();
-                if (item.m_flipHor || item.m_flipVert) {
-                    auto t2 = oldTransform;
-                    t2.scale(item.m_flipHor ? -1 : 1, item.m_flipVert ? -1 : 1);
-                    painter->setTransform(t2);
+                    const QSize boundingSize = seq->boundarySize;
+
+                    auto oldTransform = painter->transform();
+                    painter->translate(colIndex * tileSize, rowIndex * tileSize);
+                    // @todo:
+                    //painter->translate(frame.paddingLeftTop.x(), frame.paddingLeftTop.y());
+                    painter->scale(item.m_flipHor ? -1 : 1, item.m_flipVert ? -1 : 1);
+
+                    if (item.m_flipHor) {
+                        painter->translate(-boundingSize.width(), 0);
+                    }
+                    if (item.m_flipVert) {
+                        painter->translate(0, -boundingSize.height());
+                    }
+
+                    painter->drawPixmap(frame.paddingLeftTop, frame.frame);
+
+                    painter->setTransform(oldTransform);
                 }
-
-                //const auto offset = m_boundingOrigin + m_pixmapPadding;
-                painter->drawPixmap(QPoint(rowIndex * 32, colIndex * 32) + frame.paddingLeftTop, frame.frame);
-
-                painter->setTransform(oldTransform);
             }
         }
     }
@@ -102,16 +116,18 @@ void SpriteMapPainter::paint(QPainter* painter, const SpriteMap* spriteMap) cons
         painter->setTransform(oldTransform);
     }
 
-    painter->setPen(QColor(0, 0, 0, 50));
-
-    // grid
-    for (int y = 0; y < m_adventureMap.height(); ++y) {
-        painter->drawLine(QLineF(0, y * tileWidth, m_adventureMap.width() * tileWidth, y * tileWidth));
+    
+*/
+    if (m_settings->m_grid) {
+        painter->setPen(QColor(0, 0, 0, 150));
+        // grid
+        for (int y = 0; y < height; ++y) {
+            painter->drawLine(QLineF(0, y * tileSize, width * tileSize, y * tileSize));
+        }
+        for (int x = 0; x < width; ++x) {
+            painter->drawLine(QLineF(x * tileSize, 0, x * tileSize, height * tileSize));
+        }
     }
-    for (int x = 0; x < m_adventureMap.width(); ++x) {
-        painter->drawLine(QLineF(x * tileWidth, 0, x * tileWidth, m_adventureMap.height() * tileWidth));
-    }
-    */
 }
 
 }

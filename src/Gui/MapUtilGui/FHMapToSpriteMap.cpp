@@ -13,44 +13,56 @@
 namespace FreeHeroes {
 
 namespace {
+const int g_terrainPriority = -1;
 
-Gui::IGraphicsLibrary::PixmapKey getTerrainKey(Core::LibraryTerrainConstPtr terrain, int variant)
+/*
+DrawHint directionToHint(HeroDirection direction)
 {
-    if (terrain->presentationParams.defFileSplit) {
-        Gui::IGraphicsLibrary::PixmapKey result;
-        auto                             suffix = std::to_string(variant);
-        while (suffix.size() < 3)
-            suffix = "0" + suffix;
-        result.resourceName = terrain->presentationParams.defFile + suffix;
-        return result;
+    switch (direction) {
+        case HeroDirection::T:
+            return { 0, false };
+        case HeroDirection::TR:
+            return { 1, false };
+        case HeroDirection::R:
+            return { 2, false };
+        case HeroDirection::BR:
+            return { 3, false };
+        case HeroDirection::B:
+            return { 4, false };
+        case HeroDirection::BL:
+            return { 3, true };
+        case HeroDirection::L:
+            return { 2, true };
+        case HeroDirection::TL:
+            return { 1, true };
     }
-    const bool isAnimated = terrain->presentationParams.isAnimated;
-    return Gui::IGraphicsLibrary::PixmapKey(terrain->presentationParams.defFile, isAnimated ? variant : 0, isAnimated ? 0 : variant);
+    return {};
+}*/
 }
 
-}
-
-SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* graphicsLibrary, int z) const
+SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* graphicsLibrary) const
 {
     SpriteMap result;
-    fhMap.m_tileMap.eachPosTile([&result, graphicsLibrary, z](const FHPos& pos, const FHTileMap::Tile& tile) {
-        if (pos.m_z != z)
-            return;
+    result.m_planes.resize(fhMap.m_tileMap.m_depth);
 
-        auto& destTile = result.m_rows[pos.m_y].m_cells[pos.m_y];
+    auto placeItem = [&result](SpriteMap::Item item, const FHPos& pos, int priority = 0) {
+        auto& cell = result.m_planes[pos.m_z].m_rows[pos.m_y].m_cells[pos.m_x];
+        cell.m_items[priority].push_back(std::move(item));
+    };
 
-        {
-            auto                       key    = getTerrainKey(tile.m_terrain, tile.m_view);
-            auto                       sprite = graphicsLibrary->getObjectAnimation(key.resourceName);
-            SpriteMap::Row::Cell::Item item;
-            item.m_sprite      = sprite;
-            item.m_isAnimated  = tile.m_terrain->presentationParams.isAnimated;
-            item.m_spriteGroup = key.group;
-            item.m_flipHor     = tile.m_flipHor;
-            item.m_flipVert    = tile.m_flipVert;
-            destTile.m_items.push_back(item);
-        }
+    fhMap.m_tileMap.eachPosTile([&placeItem, graphicsLibrary](const FHPos& pos, const FHTileMap::Tile& tile) {
+        auto            sprite = graphicsLibrary->getObjectAnimation(tile.m_terrain->presentationParams.defFile);
+        SpriteMap::Item item;
+        item.m_sprite      = sprite;
+        item.m_spriteGroup = tile.m_view;
+        item.m_flipHor     = tile.m_flipHor;
+        item.m_flipVert    = tile.m_flipVert;
+        placeItem(std::move(item), pos, g_terrainPriority);
     });
+
+    result.m_width  = fhMap.m_tileMap.m_width;
+    result.m_height = fhMap.m_tileMap.m_height;
+    result.m_depth  = fhMap.m_tileMap.m_depth;
 
     return result;
 }

@@ -20,6 +20,7 @@
 #include "DependencyInjector.hpp"
 #include "LibraryModels.hpp"
 #include "UiCommonModel.hpp"
+#include "TickTimer.hpp"
 
 // Core
 #include "BattleHero.hpp"
@@ -271,18 +272,8 @@ BattleWidget::BattleWidget(Core::IBattleView&               battleView,
 
     m_scene->addItem(m_battlefield.get());
 
-    QElapsedTimer elapsed;
-    qint64        last = 0;
-
-    connect(&m_animationTimer, &QTimer::timeout, this, [this, elapsed, last]() mutable {
-        if (!elapsed.isValid()) {
-            elapsed.start();
-            last = 0;
-        }
-        const auto elapsedMs = elapsed.elapsed();
-        m_battlefield->tick(elapsedMs - last);
-        last = elapsedMs;
-    });
+    auto* timer = new Gui::TickTimer(this);
+    connect(timer, &Gui::TickTimer::tick, m_battlefield.get(), &BattleFieldItem::tick);
 
     m_battlefield->selectCurrentStack();
 
@@ -384,8 +375,6 @@ void BattleWidget::keyReleaseEvent(QKeyEvent* event)
 
 void BattleWidget::showEvent(QShowEvent* event)
 {
-    //resize(1050, 720);
-    m_animationTimer.start(15); // we really don't care for real timer resolution. if we get at leat 50 fps, that's perfect.
     QDialog::showEvent(event);
     m_musicBox->musicPrepare(Sound::IMusicBox::MusicSet::Battle)->play();
     m_musicBox->effectPrepare({ Sound::IMusicBox::EffectSet::Battle })->play();

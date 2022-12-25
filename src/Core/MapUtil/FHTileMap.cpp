@@ -606,7 +606,7 @@ void FHTileMap::correctTerrainTypes(Core::LibraryTerrainConstPtr dirtTerrain,
     });
 
     eachPos([this](const FHPos& pos) {
-        FHTileMap::Tile& XX = get(pos);
+        [[maybe_unused]] FHTileMap::Tile& XX = get(pos);
 
         assert(XX.TL != SubtileType::Invalid);
         assert(XX.TR != SubtileType::Invalid);

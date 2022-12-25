@@ -67,7 +67,7 @@ public:
 
     void hoverCell(Core::BattlePosition pos, const QPointF posInCell);
 
-    void tick(int msElapsed);
+    void tick(uint32_t msElapsed);
 
     void selectCurrentStack();
 

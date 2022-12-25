@@ -15,6 +15,14 @@ public:
                        const std::vector<std::string>& in,
                        const std::string&              out,
                        bool                            vertical);
+
+    void transposeSprite(Core::IResourceLibrary& resources,
+                         const std::string&      id);
+
+    void concatTilesSprite(Core::IResourceLibrary& resources,
+                           const std::string&      base,
+                           const std::string&      out,
+                           int                     tilesCount);
 };
 
 }

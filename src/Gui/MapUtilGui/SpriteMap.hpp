@@ -13,25 +13,39 @@
 namespace FreeHeroes {
 
 struct SpriteMap {
-    struct Row {
-        struct Cell {
-            struct Item {
-                Gui::IAsyncSpritePtr m_sprite;
-                bool                 m_isAnimated      = false;
-                int                  m_spriteGroup     = 0;
-                int                  m_animationOffset = 0;
-                bool                 m_flipHor         = false;
-                bool                 m_flipVert        = false;
-            };
-
-            std::vector<Item> m_items;
-        };
-        std::map<int, Cell> m_cells;
+    struct Item {
+        Gui::IAsyncSpritePtr m_sprite;
+        int                  m_spriteGroup     = 0;
+        int                  m_animationOffset = 0;
+        bool                 m_flipHor         = false;
+        bool                 m_flipVert        = false;
     };
-    std::map<int, Row> m_rows;
+
+    struct Plane {
+        struct Row {
+            struct Cell {
+                std::map<int, std::vector<Item>> m_items; // item by draw priority
+            };
+            std::map<int, Cell> m_cells;
+        };
+        std::map<int, Row> m_rows;
+    };
+
+    std::vector<Plane> m_planes;
 
     int m_width  = 0;
     int m_height = 0;
+    int m_depth  = 0;
+};
+
+struct SpritePaintSettings {
+    bool m_animateTerrain = false;
+    bool m_animateObjects = false;
+    bool m_grid           = false;
+    int  m_tileSize       = 32;
+};
+
+struct SpriteRenderSettings {
 };
 
 }

@@ -16,8 +16,10 @@
 #include "IRandomGenerator.hpp"
 #include "IGameDatabase.hpp"
 
+#include "TickTimer.hpp"
+
 #include <QBoxLayout>
-#include <QPushButton>
+#include <QCheckBox>
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include <QGraphicsItem>
@@ -28,42 +30,59 @@
 
 namespace FreeHeroes {
 
+namespace {
+const uint32_t g_mapAnimationInterval = 125;
+}
+
 MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDatabaseContainer,
                                  const Core::IRandomGeneratorFactory* rngFactory,
                                  const Gui::IGraphicsLibrary*         graphicsLibrary,
                                  const Gui::LibraryModelsProvider*    modelsProvider)
-    : m_gameDatabaseContainer(gameDatabaseContainer)
+    : QDialog(nullptr)
+    , m_gameDatabaseContainer(gameDatabaseContainer)
     , m_rngFactory(rngFactory)
     , m_graphicsLibrary(graphicsLibrary)
     , m_modelsProvider(modelsProvider)
     , m_map(std::make_unique<FHMap>())
-    , m_spriteMap(std::make_unique<SpriteMap>())
 {
     QVBoxLayout* layout    = new QVBoxLayout(this);
     QHBoxLayout* layoutTop = new QHBoxLayout();
     layout->addLayout(layoutTop);
-    QPushButton* testPB = new QPushButton("test", this);
-    connect(testPB, &QPushButton::clicked, this, &MapEditorWidget::generateMap);
-    layoutTop->addWidget(testPB);
+    {
+        QCheckBox* grid        = new QCheckBox("Show grid", this);
+        QCheckBox* animateTerr = new QCheckBox("Animate terrain", this);
+        QCheckBox* animateObj  = new QCheckBox("Animate objects", this);
+        connect(grid, &QCheckBox::toggled, this, [this](bool state) {
+            m_paintSettings.m_grid = state;
+            updateAll();
+        });
+        connect(animateTerr, &QCheckBox::toggled, this, [this](bool state) {
+            m_paintSettings.m_animateTerrain = state;
+            updateAll();
+        });
+        connect(animateObj, &QCheckBox::toggled, this, [this](bool state) {
+            m_paintSettings.m_animateObjects = state;
+            updateAll();
+        });
+        layoutTop->addWidget(grid);
+        layoutTop->addWidget(animateTerr);
+        layoutTop->addWidget(animateObj);
+    }
     layoutTop->addStretch();
 
-    const int width  = 20;
-    const int height = 20;
-
-    m_scene = new QGraphicsScene(0, 0, width * 32, height * 32, this);
+    m_scene = new QGraphicsScene(this);
     m_view  = new QGraphicsView(this);
     m_view->setScene(m_scene);
+    m_view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    m_view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    m_view->setBackgroundBrush(QColor(Qt::black));
+    m_view->setDragMode(QGraphicsView::DragMode::ScrollHandDrag);
+
     layout->addWidget(m_view);
 
-    //m_hero = std::make_unique<Core::AdventureArmy>();
-    //m_hero->hero.reset(m_gameDatabase->heroes()->find("sod.hero.castle.kn000"));
+    m_view->setMinimumSize(320, 320);
 
-    // m_adventureMap = std::make_unique<AdventureMap>(width, height, 1);
-    //generateMap();
-
-    //
-
-    m_view->setMinimumSize(400, 400);
+    resize(1000, 800);
 }
 
 void MapEditorWidget::load(const std::string& filename)
@@ -95,17 +114,29 @@ void MapEditorWidget::load(const std::string& filename)
     m_map->m_tileMap.rngTiles(rng.get());
 
     updateMap();
+
+    auto* timer = new Gui::TickTimer(this);
+    connect(timer, &Gui::TickTimer::tick, this, [this](uint32_t tick) {
+        for (auto* sprite : m_mapSprites)
+            sprite->tick(tick);
+    });
 }
 
 void MapEditorWidget::updateMap()
 {
-    MapRenderer renderer;
-    *m_spriteMap = renderer.render(*m_map, m_graphicsLibrary, 0);
+    MapRenderer renderer(m_renderSettings);
+    m_spriteMap = renderer.render(*m_map, m_graphicsLibrary);
 
-    SpriteMapItem* item = new SpriteMapItem(m_spriteMap.get());
+    m_scene->clear();
+    for (int d = 0; d < m_spriteMap.m_depth; ++d) {
+        SpriteMapItem* item = new SpriteMapItem(&m_spriteMap, &m_paintSettings, d, g_mapAnimationInterval);
+        m_mapSprites.push_back(item);
+        m_scene->addItem(item);
+    }
+    m_depth = 0;
+    showCurrentItem();
 
-    m_scene->addItem(item);
-    m_scene->setSceneRect(QRectF(0, 0, m_spriteMap->m_width * 32, m_spriteMap->m_height * 32));
+    m_scene->setSceneRect(QRectF(0, 0, m_spriteMap.m_width * m_paintSettings.m_tileSize, m_spriteMap.m_height * m_paintSettings.m_tileSize));
 }
 
 MapEditorWidget::~MapEditorWidget()
@@ -154,6 +185,19 @@ void MapEditorWidget::generateMap()
     m_adventureMap->m_heroes.push_back(h);*/
 
     m_scene->update();
+}
+
+void MapEditorWidget::showCurrentItem()
+{
+    for (auto* s : m_mapSprites)
+        s->hide();
+    m_mapSprites[m_depth]->show();
+}
+
+void MapEditorWidget::updateAll()
+{
+    for (auto* s : m_mapSprites)
+        s->update();
 }
 
 }

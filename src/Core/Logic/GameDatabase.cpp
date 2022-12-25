@@ -91,7 +91,7 @@ struct GameDatabase::Impl {
             const auto               records = legacyOrderedRecords();
             std::vector<std::string> result(records.size());
             for (size_t i = 0; i < records.size(); ++i)
-                result[i] = records[i]->id;
+                result[i] = records[i] ? records[i]->id : "";
             return result;
         }
 
