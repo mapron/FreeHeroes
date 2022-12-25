@@ -3,20 +3,16 @@
  * SPDX-License-Identifier: MIT
  * See LICENSE file for details.
  */
+#pragma once
 
 #include <QMainWindow>
 
 #include <memory>
 
-#include "SpriteMap.hpp"
-
 #include "MapUtilGuiExport.hpp"
 
-class QGraphicsView;
-class QGraphicsScene;
-
 namespace FreeHeroes {
-struct FHMap;
+
 namespace Core {
 class IGameDatabaseContainer;
 class IRandomGeneratorFactory;
@@ -25,7 +21,6 @@ namespace Gui {
 class IGraphicsLibrary;
 class LibraryModelsProvider;
 }
-class SpriteMapItem;
 
 class MAPUTILGUI_EXPORT MapEditorWidget : public QMainWindow {
 public:
@@ -37,35 +32,28 @@ public:
 
         QWidget* parent = nullptr);
 
+    ~MapEditorWidget();
+
+    void loadConfig();
+    void saveConfig();
+
     void load(const std::string& filename);
 
     void updateMap();
 
-    ~MapEditorWidget();
-
 private:
-    void generateMap();
     void showCurrentItem();
     void updateAll();
 
 private:
-    QGraphicsView*  m_view  = nullptr;
-    QGraphicsScene* m_scene = nullptr;
+    struct Impl;
+    std::unique_ptr<Impl> m_impl;
 
     const Core::IGameDatabaseContainer* const  m_gameDatabaseContainer;
     const Core::IRandomGeneratorFactory* const m_rngFactory;
 
-    const Gui::IGraphicsLibrary*      m_graphicsLibrary;
-    const Gui::LibraryModelsProvider* m_modelsProvider;
-
-    std::unique_ptr<FHMap> m_map;
-    SpriteMap              m_spriteMap;
-    SpritePaintSettings    m_paintSettings;
-    SpriteRenderSettings   m_renderSettings;
-
-    std::vector<SpriteMapItem*> m_mapSprites;
-
-    int m_depth = 0;
+    const Gui::IGraphicsLibrary* const      m_graphicsLibrary;
+    const Gui::LibraryModelsProvider* const m_modelsProvider;
 };
 
 }

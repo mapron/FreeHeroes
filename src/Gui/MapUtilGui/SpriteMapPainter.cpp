@@ -20,12 +20,14 @@ void SpriteMapPainter::paint(QPainter*        painter,
     painter->setRenderHint(QPainter::SmoothPixmapTransform, true);
     const int tileSize = m_settings->m_tileSize;
 
-    auto drawCell = [painter, tileSize, animationFrameOffsetTerrain](const SpriteMap::Cell& cell, int x, int y) {
+    auto drawCell = [painter, tileSize, animationFrameOffsetTerrain, animationFrameOffsetObjects](const SpriteMap::Cell& cell, int x, int y) {
         for (const auto& item : cell.m_items) {
             auto                   sprite = item.m_sprite->get();
             Gui::SpriteSequencePtr seq    = sprite->getFramesForGroup(item.m_spriteGroup);
 
-            const size_t frameIndex = item.m_animationOffset + animationFrameOffsetTerrain;
+            const auto psrHash = item.m_x * 7U + item.m_y * 13U;
+
+            const size_t frameIndex = psrHash + (item.m_layer == SpriteMap::Layer::Terrain ? animationFrameOffsetTerrain : animationFrameOffsetObjects);
             const auto   frame      = seq->frames[frameIndex % seq->frames.size()];
 
             const QSize boundingSize = seq->boundarySize;
@@ -104,6 +106,22 @@ void SpriteMapPainter::paint(QPainter*        painter,
     if (m_settings->m_grid && m_settings->m_gridOnTop) {
         drawGrid(QColor(0, 0, 0), m_settings->m_gridOpacity);
     }
+}
+
+void SpriteMapPainter::paintMinimap(QPainter* painter, const SpriteMap* spriteMap, QSize minimapSize) const
+{
+    QPixmap pixmap(spriteMap->m_width, spriteMap->m_height);
+    auto    img = pixmap.toImage();
+    for (const auto& [priority, grid] : spriteMap->m_planes[m_depth].m_grids) {
+        if (priority != -3) // @todo!
+            continue;
+        for (const auto& [y, row] : grid.m_rows) {
+            for (const auto& [x, cell] : row.m_cells) {
+                img.setPixelColor(x, y, cell.m_colorUnblocked);
+            }
+        }
+    }
+    painter->drawPixmap(QRect(QPoint(0, 0), minimapSize), QPixmap::fromImage(img));
 }
 
 }

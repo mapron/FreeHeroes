@@ -112,6 +112,9 @@ struct LibraryTerrain {
         BTMap borderSpecialOffsets;
 
         bool hasRotations = false;
+
+        std::vector<int> minimapBlocked;
+        std::vector<int> minimapUnblocked;
     };
     struct Bonus {
         RngChanceMultiplier rngMult;

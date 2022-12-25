@@ -185,8 +185,8 @@
 "hota.terrain.highland" : { "pres":
 {
     "order": 20,
-    "minimapUnblocked" : [ 0, 65, 0 ],
-    "minimapBlocked"   : [ 0, 48, 0 ],
+    "minimapUnblocked" : [ 41, 115, 23 ],
+    "minimapBlocked"   : [ 34, 82, 16 ],
     "music" : "highlands",
     "backgroundsBattle" : ["cmbkhlmt"],
     "defFile": "highlands",
@@ -210,8 +210,8 @@
 "hota.terrain.wasteland" : { "pres":
 {
     "order": 21,
-    "minimapUnblocked" : [ 0, 65, 0 ],
-    "minimapBlocked"   : [ 0, 48, 0 ],
+    "minimapUnblocked" : [ 189, 90, 8 ],
+    "minimapBlocked"   : [ 156, 65, 8 ],
     "music" : "wasteland",
     "backgroundsBattle" : ["cmbkwstp"],
     "defFile": "wastelands",

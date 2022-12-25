@@ -158,22 +158,24 @@ ENUM_REFLECTION_STRINGIY(LibraryTerrain::BorderType,
 )
 
 
-STRUCT_REFLECTION_PAIRED(
+STRUCT_REFLECTION_STRINGIFY(
     LibraryTerrain::Presentation,
-    "music",                       music,
-    "backgroundsBattle",           backgroundsBattle,
-    "order",                       order,
-    "defFile",                     defFile,
-    "dirtBorderTilesOffset",       dirtBorderTilesOffset,
-    "sandBorderTilesOffset",       sandBorderTilesOffset,
-    "mixedBorderTilesOffset",      mixedBorderTilesOffset,
-    "specialBorderTilesOffset",    specialBorderTilesOffset,
-    "centerTilesOffset",           centerTilesOffset,
-    "centerTilesCount",            centerTilesCount,
-    "borderCounts",                borderCounts,
-    "borderMixedCounts",           borderMixedCounts,
-    "borderSpecialCounts",         borderSpecialCounts,
-    "hasRotations",                hasRotations
+    music,
+    backgroundsBattle,
+    order,
+    defFile,
+    dirtBorderTilesOffset,
+    sandBorderTilesOffset,
+    mixedBorderTilesOffset,
+    specialBorderTilesOffset,
+    centerTilesOffset,
+    centerTilesCount,
+    borderCounts,
+    borderMixedCounts,
+    borderSpecialCounts,
+    hasRotations,
+    minimapBlocked,
+    minimapUnblocked
 )
 
 STRUCT_REFLECTION_PAIRED(

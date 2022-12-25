@@ -23,6 +23,10 @@ public:
                uint32_t         animationFrameOffsetTerrain,
                uint32_t         animationFrameOffsetObjects) const;
 
+    void paintMinimap(QPainter*        painter,
+                      const SpriteMap* spriteMap,
+                      QSize            minimapSize) const;
+
 private:
     const SpritePaintSettings* m_settings;
     const int                  m_depth;

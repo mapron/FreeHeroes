@@ -9,6 +9,8 @@
 
 #include "SpriteMapPainter.hpp"
 
+#include <QDebug>
+
 namespace FreeHeroes {
 
 void SpriteMapItem::tick(uint32_t msecElapsed)
@@ -20,7 +22,7 @@ void SpriteMapItem::tick(uint32_t msecElapsed)
 
     if (!frameTick)
         return;
-    if (!m_spritePaintSettings->m_animateTerrain && m_spritePaintSettings->m_animateObjects)
+    if (!m_spritePaintSettings->m_animateTerrain && !m_spritePaintSettings->m_animateObjects)
         return;
 
     if (m_spritePaintSettings->m_animateTerrain)

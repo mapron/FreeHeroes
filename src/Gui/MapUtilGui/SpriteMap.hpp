@@ -16,6 +16,7 @@ struct SpriteMap {
     enum class Layer
     {
         Invalid,
+        Terrain,
         Town,
         Hero,
         Resource,
@@ -33,21 +34,41 @@ struct SpriteMap {
         Decoration,
     };
 
+    struct BlockMask {
+        struct Cell {
+            bool m_visitable = false;
+            bool m_blocked   = false;
+        };
+
+        struct Row {
+            std::vector<Cell> m_cells;
+        };
+        std::vector<Row> m_rows;
+    };
+
     struct Item {
         Gui::IAsyncSpritePtr m_sprite;
 
-        Layer m_layer           = Layer::Invalid;
-        int   m_spriteGroup     = 0;
-        int   m_animationOffset = 0;
-        bool  m_flipHor         = false;
-        bool  m_flipVert        = false;
-        bool  m_shiftHalfTile   = false;
-        int   m_width           = 1;
-        int   m_height          = 1;
+        Layer m_layer         = Layer::Invalid;
+        int   m_spriteGroup   = 0;
+        bool  m_flipHor       = false;
+        bool  m_flipVert      = false;
+        bool  m_shiftHalfTile = false;
+        int   m_width         = 1;
+        int   m_height        = 1;
+
+        int m_x        = 0;
+        int m_y        = 0;
+        int m_z        = 0;
+        int m_priority = 0;
+
+        BlockMask m_blockMask;
     };
 
     struct Cell {
         std::vector<Item> m_items;
+        QColor            m_colorUnblocked;
+        QColor            m_colorBlocked;
     };
     struct Row {
         std::map<int, Cell> m_cells;
@@ -65,6 +86,18 @@ struct SpriteMap {
     int m_width  = 0;
     int m_height = 0;
     int m_depth  = 0;
+
+    Cell& getCell(const Item& item)
+    {
+        auto& cell = m_planes[item.m_z].m_grids[item.m_priority].m_rows[item.m_y].m_cells[item.m_x];
+        return cell;
+    }
+
+    void addItem(Item item)
+    {
+        auto& cell = getCell(item);
+        cell.m_items.push_back(std::move(item));
+    }
 };
 
 struct SpritePaintSettings {
