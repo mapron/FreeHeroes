@@ -67,8 +67,6 @@ struct SpriteMap {
 
     struct Cell {
         std::vector<Item> m_items;
-        QColor            m_colorUnblocked;
-        QColor            m_colorBlocked;
     };
     struct Row {
         std::map<int, Cell> m_cells;
@@ -77,7 +75,22 @@ struct SpriteMap {
         std::map<int, Row> m_rows;
     };
 
+    struct CellIntegral {
+        QColor m_colorUnblocked;
+        QColor m_colorBlocked;
+
+        bool m_blocked   = false;
+        bool m_visitable = false;
+    };
+    struct RowIntegral {
+        std::map<int, CellIntegral> m_cells;
+    };
+    struct LayerGridIntegral {
+        std::map<int, RowIntegral> m_rows;
+    };
+
     struct Plane {
+        LayerGridIntegral        m_merged;
         std::map<int, LayerGrid> m_grids; // item by draw priority
     };
 
@@ -87,9 +100,20 @@ struct SpriteMap {
     int m_height = 0;
     int m_depth  = 0;
 
+    [[maybe_unused]] static constexpr const int s_terrainPriority = -1000;
+    [[maybe_unused]] static constexpr const int s_riverPriority   = s_terrainPriority + 1;
+    [[maybe_unused]] static constexpr const int s_roadPriority    = s_riverPriority + 1;
+
+    [[maybe_unused]] static constexpr const int s_objectMaxPriority = 1000;
+
     Cell& getCell(const Item& item)
     {
         auto& cell = m_planes[item.m_z].m_grids[item.m_priority].m_rows[item.m_y].m_cells[item.m_x];
+        return cell;
+    }
+    CellIntegral& getCellMerged(const Item& item)
+    {
+        auto& cell = m_planes[item.m_z].m_merged.m_rows[item.m_y].m_cells[item.m_x];
         return cell;
     }
 
@@ -101,6 +125,10 @@ struct SpriteMap {
 };
 
 struct SpritePaintSettings {
+    int  m_viewScalePercent = 100;
+    bool m_doubleScale      = false;
+    bool m_doubleScaleTmp   = false;
+
     bool m_animateTerrain = false;
     bool m_animateObjects = false;
     bool m_grid           = false;
@@ -125,6 +153,16 @@ struct SpritePaintSettings {
     LayerRules m_globalRules;
 
     std::map<SpriteMap::Layer, LayerRules> m_specificRules;
+
+    int getEffectiveScale() const noexcept
+    {
+        int percent = m_viewScalePercent;
+        if (m_doubleScale)
+            percent *= 2;
+        if (m_doubleScaleTmp)
+            percent *= 2;
+        return percent;
+    }
 };
 
 struct SpriteRenderSettings {

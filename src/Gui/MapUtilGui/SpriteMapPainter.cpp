@@ -9,6 +9,7 @@
 #include "SpriteMap.hpp"
 
 #include <QPainter>
+#include <QDebug>
 
 namespace FreeHeroes {
 
@@ -17,7 +18,7 @@ void SpriteMapPainter::paint(QPainter*        painter,
                              uint32_t         animationFrameOffsetTerrain,
                              uint32_t         animationFrameOffsetObjects) const
 {
-    painter->setRenderHint(QPainter::SmoothPixmapTransform, true);
+    painter->setRenderHint(QPainter::SmoothPixmapTransform, m_settings->getEffectiveScale() < 100);
     const int tileSize = m_settings->m_tileSize;
 
     auto drawCell = [painter, tileSize, animationFrameOffsetTerrain, animationFrameOffsetObjects](const SpriteMap::Cell& cell, int x, int y) {
@@ -34,6 +35,11 @@ void SpriteMapPainter::paint(QPainter*        painter,
 
             auto oldTransform = painter->transform();
             painter->translate(x * tileSize, y * tileSize);
+
+            if (item.m_shiftHalfTile) {
+                painter->translate(0, tileSize / 2);
+            }
+
             // @todo:
             //painter->translate(frame.paddingLeftTop.x(), frame.paddingLeftTop.y());
             painter->scale(item.m_flipHor ? -1 : 1, item.m_flipVert ? -1 : 1);
@@ -47,7 +53,6 @@ void SpriteMapPainter::paint(QPainter*        painter,
             if (boundingSize.width() > tileSize || boundingSize.height() > tileSize) {
                 painter->translate(-boundingSize.width() + tileSize, -boundingSize.height() + tileSize);
             }
-
             painter->drawPixmap(frame.paddingLeftTop, frame.frame);
 
             // debug diamond
@@ -87,15 +92,11 @@ void SpriteMapPainter::paint(QPainter*        painter,
         }
     };
 
-    int prevPriority = -100;
-    for (const auto& [priority, grid] : spriteMap->m_planes[m_depth].m_grids) {
-        if (prevPriority < 0 && priority >= 0) {
-            if (m_settings->m_grid && !m_settings->m_gridOnTop) {
-                drawGrid(QColor(0, 0, 0), m_settings->m_gridOpacity);
-            }
-        }
-        prevPriority = priority;
+    // low level (terrains/roads) paint
 
+    for (const auto& [priority, grid] : spriteMap->m_planes[m_depth].m_grids) {
+        if (priority >= 0)
+            break;
         for (const auto& [rowIndex, row] : grid.m_rows) {
             for (const auto& [colIndex, cell] : row.m_cells) {
                 drawCell(cell, colIndex, rowIndex);
@@ -103,6 +104,23 @@ void SpriteMapPainter::paint(QPainter*        painter,
         }
     }
 
+    // middle-layer paint
+    if (m_settings->m_grid && !m_settings->m_gridOnTop) {
+        drawGrid(QColor(0, 0, 0), m_settings->m_gridOpacity);
+    }
+
+    // top-level (objects) paint
+    for (const auto& [priority, grid] : spriteMap->m_planes[m_depth].m_grids) {
+        if (priority < 0)
+            continue;
+        for (const auto& [rowIndex, row] : grid.m_rows) {
+            for (const auto& [colIndex, cell] : row.m_cells) {
+                drawCell(cell, colIndex, rowIndex);
+            }
+        }
+    }
+
+    // top-level UI paint
     if (m_settings->m_grid && m_settings->m_gridOnTop) {
         drawGrid(QColor(0, 0, 0), m_settings->m_gridOpacity);
     }
@@ -112,15 +130,13 @@ void SpriteMapPainter::paintMinimap(QPainter* painter, const SpriteMap* spriteMa
 {
     QPixmap pixmap(spriteMap->m_width, spriteMap->m_height);
     auto    img = pixmap.toImage();
-    for (const auto& [priority, grid] : spriteMap->m_planes[m_depth].m_grids) {
-        if (priority != -3) // @todo!
-            continue;
-        for (const auto& [y, row] : grid.m_rows) {
-            for (const auto& [x, cell] : row.m_cells) {
-                img.setPixelColor(x, y, cell.m_colorUnblocked);
-            }
+
+    for (const auto& [y, row] : spriteMap->m_planes[m_depth].m_merged.m_rows) {
+        for (const auto& [x, cell] : row.m_cells) {
+            img.setPixelColor(x, y, cell.m_blocked ? cell.m_colorBlocked : cell.m_colorUnblocked);
         }
     }
+
     painter->drawPixmap(QRect(QPoint(0, 0), minimapSize), QPixmap::fromImage(img));
 }
 

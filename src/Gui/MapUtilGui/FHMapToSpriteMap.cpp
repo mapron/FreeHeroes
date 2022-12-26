@@ -18,10 +18,6 @@
 namespace FreeHeroes {
 
 namespace {
-const int g_terrainPriority = -3;
-const int g_riverPriority   = -2;
-const int g_roadPriority    = -1;
-const int g_objPriority     = 10;
 
 QColor makeColor(const std::vector<int>& rgb)
 {
@@ -65,7 +61,7 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         item.m_x        = pos.m_x;
         item.m_y        = pos.m_y;
         item.m_z        = pos.m_z;
-        item.m_priority = g_objPriority - priority;
+        item.m_priority = SpriteMap::s_objectMaxPriority - priority;
         return item;
     };
 
@@ -93,10 +89,10 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
             item.m_spriteGroup   = tile.m_view;
             item.m_flipHor       = tile.m_flipHor;
             item.m_flipVert      = tile.m_flipVert;
-            item.m_priority      = g_terrainPriority;
+            item.m_priority      = SpriteMap::s_terrainPriority;
 
-            result.getCell(item).m_colorBlocked   = makeColor(tile.m_terrain->presentationParams.minimapBlocked);
-            result.getCell(item).m_colorUnblocked = makeColor(tile.m_terrain->presentationParams.minimapUnblocked);
+            result.getCellMerged(item).m_colorBlocked   = makeColor(tile.m_terrain->presentationParams.minimapBlocked);
+            result.getCellMerged(item).m_colorUnblocked = makeColor(tile.m_terrain->presentationParams.minimapUnblocked);
             result.addItem(std::move(item));
         }
         if (tile.m_riverType != FHRiverType::Invalid) {
@@ -116,7 +112,7 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
             item.m_spriteGroup = tile.m_riverView;
             item.m_flipHor     = tile.m_riverFlipHor;
             item.m_flipVert    = tile.m_riverFlipVert;
-            item.m_priority    = g_riverPriority;
+            item.m_priority    = SpriteMap::s_riverPriority;
             result.addItem(std::move(item));
         }
         if (tile.m_roadType != FHRoadType::Invalid) {
@@ -134,7 +130,7 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
             item.m_flipHor       = tile.m_roadFlipHor;
             item.m_flipVert      = tile.m_roadFlipVert;
             item.m_shiftHalfTile = true;
-            item.m_priority      = g_roadPriority;
+            item.m_priority      = SpriteMap::s_roadPriority;
             result.addItem(std::move(item));
         }
     });
@@ -204,7 +200,7 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         pos.m_x += monsterXOffset;
 
         auto* def = obj.m_id->objectDefs.get({});
-        result.addItem(makeItemByDef(SpriteMap::Layer::Monster, def, obj.m_pos));
+        result.addItem(makeItemByDef(SpriteMap::Layer::Monster, def, pos));
     }
 
     for (auto& obj : fhMap.m_objects.m_dwellings) {

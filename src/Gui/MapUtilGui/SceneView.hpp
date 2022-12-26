@@ -8,36 +8,47 @@
 #include <QGraphicsView>
 
 class QComboBox;
+class QCheckBox;
 
 namespace FreeHeroes {
+
+struct SpritePaintSettings;
 
 class ScaleWidget : public QWidget {
     Q_OBJECT
 public:
-    ScaleWidget(QWidget* parent);
+    ScaleWidget(SpritePaintSettings* settings, QWidget* parent);
 
-    int  getScale() const;
-    void setScale(int percent);
+    void scaleChangeProcess(int delta);
+
+signals:
+    void scaleChanged();
+
+private:
+    void setBaseScale(int percent);
 
     void scaleIncrease();
     void scaleDecrease();
     void resetScale();
 
-signals:
-    void scaleChanged(int percent);
-
 private:
-    QComboBox* m_comboBox = nullptr;
+    SpritePaintSettings* const m_settings = nullptr;
+    QComboBox* const           m_comboBox = nullptr;
+    QCheckBox* const           m_check    = nullptr;
 };
 
 class SceneView : public QGraphicsView {
     Q_OBJECT
 public:
-    SceneView(QWidget* parent);
+    SceneView(SpritePaintSettings* settings, QWidget* parent);
     ~SceneView();
 
-    void setScaleWidget(ScaleWidget* scaleWidget);
+    void refreshScale();
 
+signals:
+    void scaleChangeRequested(int delta);
+
+protected:
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
     void mouseDoubleClickEvent(QMouseEvent* event) override;
@@ -45,7 +56,7 @@ public:
     void wheelEvent(QWheelEvent* event) override;
 
 private:
-    ScaleWidget* m_scaleWidget = nullptr;
+    SpritePaintSettings* const m_settings = nullptr;
 };
 
 }

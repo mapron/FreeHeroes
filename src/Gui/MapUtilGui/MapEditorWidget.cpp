@@ -38,7 +38,7 @@
 namespace FreeHeroes {
 
 namespace {
-const uint32_t g_mapAnimationInterval = 125;
+const uint32_t g_mapAnimationInterval = 160;
 }
 
 struct MapEditorWidget::Impl {
@@ -80,7 +80,7 @@ MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDataba
     QVBoxLayout* layoutSide   = new QVBoxLayout();
     layoutSide->setSpacing(15);
 
-    auto* scaleWidget            = new ScaleWidget(this);
+    auto* scaleWidget            = new ScaleWidget(&m_impl->m_viewSettings.m_paintSettings, this);
     m_impl->m_minimapWidget      = new MiniMapWidget(&m_impl->m_viewSettings.m_paintSettings, &m_impl->m_spriteMap, this);
     m_impl->m_viewSettingsWidget = new ViewSettingsWidget(&m_impl->m_viewSettings, this);
     m_impl->m_inspectorWidget    = new InspectorWidget(this);
@@ -119,9 +119,8 @@ MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDataba
     layoutTop->addStretch();
 
     m_impl->m_scene = new QGraphicsScene(this);
-    m_impl->m_view  = new SceneView(this);
+    m_impl->m_view  = new SceneView(&m_impl->m_viewSettings.m_paintSettings, this);
     m_impl->m_view->setScene(m_impl->m_scene);
-    m_impl->m_view->setScaleWidget(scaleWidget);
 
     layoutBottom->addWidget(m_impl->m_view, 1);
     layoutBottom->addLayout(layoutSide);
@@ -135,6 +134,8 @@ MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDataba
     connect(m_impl->m_viewSettingsWidget, &IEditor::dataChanged, this, [this]() {
         updateAll();
     });
+    connect(scaleWidget, &ScaleWidget::scaleChanged, m_impl->m_view, &SceneView::refreshScale);
+    connect(m_impl->m_view, &SceneView::scaleChangeRequested, scaleWidget, &ScaleWidget::scaleChangeProcess);
 
     resize(1000, 800);
 }

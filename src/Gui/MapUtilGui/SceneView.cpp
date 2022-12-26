@@ -5,42 +5,60 @@
  */
 #include "SceneView.hpp"
 
+#include "SpriteMap.hpp"
+
 #include <QComboBox>
+#include <QCheckBox>
 #include <QBoxLayout>
 #include <QMouseEvent>
 #include <QDebug>
 
 namespace FreeHeroes {
 
-ScaleWidget::ScaleWidget(QWidget* parent)
+ScaleWidget::ScaleWidget(SpritePaintSettings* settings, QWidget* parent)
     : QWidget(parent)
+    , m_settings(settings)
     , m_comboBox(new QComboBox(this))
+    , m_check(new QCheckBox("2X", this))
 {
     m_comboBox->setInsertPolicy(QComboBox::NoInsert);
     m_comboBox->setEditable(false);
     auto* layout = new QHBoxLayout(this);
     layout->setMargin(0);
-    for (int percent : { 5, 6, 7, 8, 10, 12, 15, 18, 21, 25, 29, 33, 37, 43, 50, 56, 62, 68, 75, 87, 100, 112, 125, 150, 200 })
+    for (int percent : { 5, 6, 7, 8, 10, 12, 15, 18, 21, 25, 29, 33, 37, 43, 50, 56, 62, 68, 75, 87, 100 })
         m_comboBox->addItem(QString("%1%").arg(percent), percent);
 
-    setScale(100);
-    connect(m_comboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {
-        auto percent = getScale();
-        //qWarning() << "scalePercent=" << percent;
-        emit scaleChanged(percent);
-    });
+    setBaseScale(m_settings->m_viewScalePercent);
+    m_check->setChecked(m_settings->m_doubleScale);
+
     layout->addWidget(m_comboBox);
+
+    layout->addWidget(m_check);
+
+    connect(m_comboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {
+        const int percent              = m_comboBox->currentData().toInt();
+        m_settings->m_viewScalePercent = percent;
+        //qWarning() << "scalePercent=" << percent;
+        emit scaleChanged();
+    });
+    connect(m_check, &QCheckBox::clicked, this, [this](bool state) {
+        m_settings->m_doubleScale = state;
+        emit scaleChanged();
+    });
 }
 
-int ScaleWidget::getScale() const
+void ScaleWidget::scaleChangeProcess(int delta)
 {
-    const int percent = m_comboBox->currentData().toInt();
-    return percent;
+    if (delta > 0)
+        scaleIncrease();
+    else if (delta < 0)
+        scaleDecrease();
+    else
+        resetScale();
 }
 
-void ScaleWidget::setScale(int percent)
+void ScaleWidget::setBaseScale(int percent)
 {
-    QSignalBlocker lock(m_comboBox);
     for (int i = 0, cnt = m_comboBox->count(); i < cnt; ++i) {
         if (m_comboBox->itemData(i).toInt() == percent) {
             m_comboBox->setCurrentIndex(i);
@@ -65,12 +83,12 @@ void ScaleWidget::scaleDecrease()
 
 void ScaleWidget::resetScale()
 {
-    setScale(100);
-    scaleChanged(100);
+    setBaseScale(100);
 }
 
-SceneView::SceneView(QWidget* parent)
+SceneView::SceneView(SpritePaintSettings* settings, QWidget* parent)
     : QGraphicsView(parent)
+    , m_settings(settings)
 {
     this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
@@ -84,15 +102,11 @@ SceneView::~SceneView()
 {
 }
 
-void SceneView::setScaleWidget(ScaleWidget* scaleWidget)
+void SceneView::refreshScale()
 {
-    m_scaleWidget = scaleWidget;
-    connect(scaleWidget, &ScaleWidget::scaleChanged, this, [this](int percent) {
-        const auto ratio = static_cast<double>(percent) / 100.;
-        //qWarning() << "scale=" << ratio;
-        this->resetTransform();
-        this->scale(ratio, ratio);
-    });
+    const auto ratio = static_cast<double>(m_settings->getEffectiveScale()) / 100.;
+    this->resetTransform();
+    this->scale(ratio, ratio);
 }
 
 void SceneView::mousePressEvent(QMouseEvent* event)
@@ -100,6 +114,11 @@ void SceneView::mousePressEvent(QMouseEvent* event)
     if ((event->modifiers() & Qt::ControlModifier) || event->button() == Qt::MiddleButton) {
         this->setDragMode(ScrollHandDrag);
         if (event->button() == Qt::MiddleButton) {
+            if ((event->modifiers() & Qt::ControlModifier)) {
+                m_settings->m_doubleScaleTmp = true;
+                refreshScale();
+                return;
+            }
             QMouseEvent pressEvent(QEvent::MouseButtonPress, event->localPos(), Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
             mousePressEvent(&pressEvent);
             return;
@@ -112,22 +131,26 @@ void SceneView::mouseReleaseEvent(QMouseEvent* event)
 {
     QGraphicsView::mouseReleaseEvent(event);
     this->setDragMode(NoDrag);
+    if (m_settings->m_doubleScaleTmp) {
+        m_settings->m_doubleScaleTmp = false;
+        refreshScale();
+    }
 }
 
 void SceneView::mouseDoubleClickEvent(QMouseEvent* event)
 {
     QGraphicsView::mouseDoubleClickEvent(event);
-    if (m_scaleWidget)
-        m_scaleWidget->resetScale();
+    if ((event->modifiers() & Qt::ControlModifier) || event->button() == Qt::MiddleButton)
+        emit scaleChangeRequested(0);
 }
 
 void SceneView::wheelEvent(QWheelEvent* event)
 {
-    if (m_scaleWidget && (event->modifiers() & Qt::ControlModifier)) {
+    if (event->modifiers() & Qt::ControlModifier) {
         if (event->angleDelta().y() > 0) {
-            m_scaleWidget->scaleIncrease();
+            emit scaleChangeRequested(+1);
         } else if (event->angleDelta().y() < 0) {
-            m_scaleWidget->scaleDecrease();
+            emit scaleChangeRequested(-1);
         }
     }
     QFrame::wheelEvent(event);
