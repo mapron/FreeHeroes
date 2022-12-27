@@ -6,15 +6,22 @@
 #pragma once
 
 #include <QWidget>
+#include <QVBoxLayout>
 
 namespace FreeHeroes {
-
+struct SpriteMap;
 class InspectorWidget : public QWidget {
+    Q_OBJECT
 public:
-    InspectorWidget(QWidget* parent);
+    InspectorWidget(const SpriteMap* spriteMap, QWidget* parent);
     ~InspectorWidget();
 
+    void clear();
+    void displayInfo(int x, int y, int depth);
+
 private:
+    const SpriteMap* const m_spriteMap;
+    QVBoxLayout*           m_layout = nullptr;
 };
 
 }

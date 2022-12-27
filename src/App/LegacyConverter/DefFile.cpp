@@ -73,7 +73,7 @@ struct Palette {
             qRgba(   0,   0,   0,  0),// 100% - transparency
             qRgba(   0,   0,   0,  32),//  75% - shadow border,
             qRgba(   0,   0,   0,  64),// TODO: find exact value
-            qRgba(   0,   0,   0, 128),// TODO: for transparency
+            qRgba(   0,   0,   0,   0),// TODO: for transparency
             qRgba(   0,   0,   0, 128),//  50% - shadow body
             qRgba(   0,   0,   0,   0),// 100% - selection highlight
             qRgba(   0,   0,   0, 128),//  50% - shadow body   below selection
@@ -102,6 +102,8 @@ struct Palette {
             case DefType::MAP_HERO:
                 colors[0] = H3Palette[0];
                 colors[1] = H3Palette[1];
+                colors[2] = H3Palette[2];
+                colors[3] = H3Palette[3];
                 colors[4] = H3Palette[4];
 
                 colors[5] = qRgba(0, 0, 0, 1); // owner;

@@ -22,6 +22,7 @@
 #include "SceneView.hpp"
 #include "InspectorWidget.hpp"
 #include "MiniMapWidget.hpp"
+#include "MapScene.hpp"
 
 #include "ViewSettings.hpp"
 
@@ -42,8 +43,8 @@ const uint32_t g_mapAnimationInterval = 160;
 }
 
 struct MapEditorWidget::Impl {
-    SceneView*      m_view  = nullptr;
-    QGraphicsScene* m_scene = nullptr;
+    SceneView* m_view  = nullptr;
+    MapScene*  m_scene = nullptr;
 
     MiniMapWidget*      m_minimapWidget      = nullptr;
     ViewSettingsWidget* m_viewSettingsWidget = nullptr;
@@ -83,7 +84,7 @@ MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDataba
     auto* scaleWidget            = new ScaleWidget(&m_impl->m_viewSettings.m_paintSettings, this);
     m_impl->m_minimapWidget      = new MiniMapWidget(&m_impl->m_viewSettings.m_paintSettings, &m_impl->m_spriteMap, this);
     m_impl->m_viewSettingsWidget = new ViewSettingsWidget(&m_impl->m_viewSettings, this);
-    m_impl->m_inspectorWidget    = new InspectorWidget(this);
+    m_impl->m_inspectorWidget    = new InspectorWidget(&m_impl->m_spriteMap, this);
     {
         QCheckBox* viewUnderground = new QCheckBox(tr("Underground"), this);
         QCheckBox* showMinimap     = new QCheckBox(tr("Minimap"), this);
@@ -118,7 +119,7 @@ MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDataba
     layout->addLayout(layoutBottom, 1);
     layoutTop->addStretch();
 
-    m_impl->m_scene = new QGraphicsScene(this);
+    m_impl->m_scene = new MapScene(&m_impl->m_viewSettings.m_paintSettings, this);
     m_impl->m_view  = new SceneView(&m_impl->m_viewSettings.m_paintSettings, this);
     m_impl->m_view->setScene(m_impl->m_scene);
 
@@ -136,6 +137,14 @@ MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDataba
     });
     connect(scaleWidget, &ScaleWidget::scaleChanged, m_impl->m_view, &SceneView::refreshScale);
     connect(m_impl->m_view, &SceneView::scaleChangeRequested, scaleWidget, &ScaleWidget::scaleChangeProcess);
+    connect(m_impl->m_scene, &MapScene::cellHover, this, [this](int x, int y, int z) {
+        if (m_impl->m_viewSettings.m_inspectByHover)
+            m_impl->m_inspectorWidget->displayInfo(x, y, z);
+    });
+    connect(m_impl->m_scene, &MapScene::cellPress, this, [this](int x, int y, int z) {
+        if (!m_impl->m_viewSettings.m_inspectByHover)
+            m_impl->m_inspectorWidget->displayInfo(x, y, z);
+    });
 
     resize(1000, 800);
 }
@@ -218,6 +227,7 @@ void MapEditorWidget::showCurrentItem()
     if (m_impl->m_depth < (int) m_impl->m_mapSprites.size()) {
         m_impl->m_mapSprites[m_impl->m_depth]->show();
         m_impl->m_minimapWidget->setDepth(m_impl->m_depth);
+        m_impl->m_scene->setCurrentDepth(m_impl->m_depth);
     }
 }
 

@@ -44,6 +44,8 @@ ViewSettingsWidget::ViewSettingsWidget(ViewSettings* settings, QWidget* parent)
     addEditor(new CheckBoxEditor(&settings->m_paintSettings.m_animateObjects, tr("Animate objects"), this));
     addEditor(new CheckBoxEditor(&settings->m_paintSettings.m_animateTerrain, tr("Animate terrain"), this));
 
+    addEditor(new CheckBoxEditor(&settings->m_inspectByHover, tr("Inspect by hover"), this));
+
     connect(this, &IEditor::needUpdateUI, this, [this]() {
         for (auto* ed : m_editors)
             ed->updateUI();

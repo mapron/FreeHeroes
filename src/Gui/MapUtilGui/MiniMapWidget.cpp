@@ -45,9 +45,9 @@ void MiniMapWidget::paintEvent(QPaintEvent* e)
     const QSize minimapSize(minDimension, minDimension);
 
     if (opt.rect.size().width() > minDimension)
-        offset.rx() += opt.rect.size().width() / 2;
+        offset.rx() += (opt.rect.size().width() - minDimension) / 2;
     if (opt.rect.size().height() > minDimension)
-        offset.ry() += opt.rect.size().height() / 2;
+        offset.ry() += (opt.rect.size().height() - minDimension) / 2;
 
     p.translate(offset);
     SpriteMapPainter spainter(m_settings, m_depth);

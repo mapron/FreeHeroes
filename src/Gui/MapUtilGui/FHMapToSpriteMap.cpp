@@ -72,6 +72,7 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         auto sprite        = graphicsLibrary->getObjectAnimation(id);
         item.m_sprite      = sprite;
         item.m_spriteGroup = 0;
+        item.addInfo("def", id);
         return item;
     };
 
@@ -80,6 +81,8 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         auto item          = makeItemById(layer, resourceIdDef->id, pos, def->priority);
         item.m_width       = def->blockMapPlanar.width;
         item.m_height      = def->blockMapPlanar.height;
+        if (def != resourceIdDef)
+            item.addInfo("substDef", def->id);
         return item;
     };
 
@@ -90,6 +93,10 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
             item.m_flipHor       = tile.m_flipHor;
             item.m_flipVert      = tile.m_flipVert;
             item.m_priority      = SpriteMap::s_terrainPriority;
+            item.addInfo("id", tile.m_terrain->id);
+            item.addInfo("view", std::to_string(tile.m_view));
+            item.addInfo("flipHor", item.m_flipHor ? "true" : "false");
+            item.addInfo("flipVert", item.m_flipVert ? "true" : "false");
 
             result.getCellMerged(item).m_colorBlocked   = makeColor(tile.m_terrain->presentationParams.minimapBlocked);
             result.getCellMerged(item).m_colorUnblocked = makeColor(tile.m_terrain->presentationParams.minimapUnblocked);
@@ -113,6 +120,9 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
             item.m_flipHor     = tile.m_riverFlipHor;
             item.m_flipVert    = tile.m_riverFlipVert;
             item.m_priority    = SpriteMap::s_riverPriority;
+
+            item.addInfo("flipHor", item.m_flipHor ? "true" : "false");
+            item.addInfo("flipVert", item.m_flipVert ? "true" : "false");
             result.addItem(std::move(item));
         }
         if (tile.m_roadType != FHRoadType::Invalid) {
@@ -131,6 +141,9 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
             item.m_flipVert      = tile.m_roadFlipVert;
             item.m_shiftHalfTile = true;
             item.m_priority      = SpriteMap::s_roadPriority;
+
+            item.addInfo("flipHor", item.m_flipHor ? "true" : "false");
+            item.addInfo("flipVert", item.m_flipVert ? "true" : "false");
             result.addItem(std::move(item));
         }
     });
@@ -167,7 +180,7 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
 
     for (auto& obj : fhMap.m_objects.m_artifacts) {
         auto* def = obj.m_id->objectDefs.get({});
-        result.addItem(makeItemByDef(SpriteMap::Layer::Artifact, def, obj.m_pos));
+        result.addItem(makeItemByDef(SpriteMap::Layer::Artifact, def, obj.m_pos).addInfo("id", obj.m_id->id));
     }
     for (auto& obj : fhMap.m_objects.m_artifactsRandom) {
         std::string id = "";
@@ -200,46 +213,46 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         pos.m_x += monsterXOffset;
 
         auto* def = obj.m_id->objectDefs.get({});
-        result.addItem(makeItemByDef(SpriteMap::Layer::Monster, def, pos));
+        result.addItem(makeItemByDef(SpriteMap::Layer::Monster, def, pos).addInfo("id", obj.m_id->id));
     }
 
     for (auto& obj : fhMap.m_objects.m_dwellings) {
         auto* def = obj.m_id->objectDefs.get(obj.m_defIndex);
-        result.addItem(makeItemByDef(SpriteMap::Layer::Dwelling, def, obj.m_pos));
+        result.addItem(makeItemByDef(SpriteMap::Layer::Dwelling, def, obj.m_pos).addInfo("id", obj.m_id->id));
     }
     for (auto& obj : fhMap.m_objects.m_mines) {
         auto* def = obj.m_id->minesDefs.get(obj.m_defIndex);
-        result.addItem(makeItemByDef(SpriteMap::Layer::Mine, def, obj.m_pos));
+        result.addItem(makeItemByDef(SpriteMap::Layer::Mine, def, obj.m_pos).addInfo("id", obj.m_id->id));
     }
 
     for (auto& obj : fhMap.m_objects.m_banks) {
         auto* def = obj.m_id->objectDefs.get(obj.m_defIndex);
-        result.addItem(makeItemByDef(SpriteMap::Layer::Bank, def, obj.m_pos));
+        result.addItem(makeItemByDef(SpriteMap::Layer::Bank, def, obj.m_pos).addInfo("id", obj.m_id->id));
     }
     for (auto& obj : fhMap.m_objects.m_obstacles) {
         auto* def = obj.m_id->objectDefs.get(obj.m_defIndex);
-        result.addItem(makeItemByDef(SpriteMap::Layer::Decoration, def, obj.m_pos));
+        result.addItem(makeItemByDef(SpriteMap::Layer::Decoration, def, obj.m_pos).addInfo("id", obj.m_id->id));
     }
     for (auto& obj : fhMap.m_objects.m_visitables) {
         auto* def = obj.m_visitableId->objectDefs.get(obj.m_defIndex);
-        result.addItem(makeItemByDef(SpriteMap::Layer::GeneralVisitable, def, obj.m_pos));
+        result.addItem(makeItemByDef(SpriteMap::Layer::GeneralVisitable, def, obj.m_pos).addInfo("id", obj.m_visitableId->id));
     }
     for (auto& obj : fhMap.m_objects.m_shrines) {
         auto* def = obj.m_visitableId->objectDefs.get(obj.m_defIndex);
-        result.addItem(makeItemByDef(SpriteMap::Layer::Shrine, def, obj.m_pos));
+        result.addItem(makeItemByDef(SpriteMap::Layer::Shrine, def, obj.m_pos).addInfo("id", obj.m_visitableId->id));
     }
     for (auto& obj : fhMap.m_objects.m_skillHuts) {
         auto* def = obj.m_visitableId->objectDefs.get(obj.m_defIndex);
-        result.addItem(makeItemByDef(SpriteMap::Layer::SkillHut, def, obj.m_pos));
+        result.addItem(makeItemByDef(SpriteMap::Layer::SkillHut, def, obj.m_pos).addInfo("id", obj.m_visitableId->id));
     }
     for (auto& obj : fhMap.m_objects.m_scholars) {
         auto* def = obj.m_visitableId->objectDefs.get(obj.m_defIndex);
-        result.addItem(makeItemByDef(SpriteMap::Layer::Scholar, def, obj.m_pos));
+        result.addItem(makeItemByDef(SpriteMap::Layer::Scholar, def, obj.m_pos).addInfo("id", obj.m_visitableId->id));
     }
 
     for (auto& obj : fhMap.m_objects.m_questHuts) {
         auto* def = obj.m_visitableId->objectDefs.get(obj.m_defIndex);
-        result.addItem(makeItemByDef(SpriteMap::Layer::QuestHut, def, obj.m_pos));
+        result.addItem(makeItemByDef(SpriteMap::Layer::QuestHut, def, obj.m_pos).addInfo("id", obj.m_visitableId->id));
     }
 
     for (auto& obj : fhMap.m_objects.m_pandoras) {

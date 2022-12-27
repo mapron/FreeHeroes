@@ -9,6 +9,7 @@
 
 #include <vector>
 #include <map>
+#include <string>
 
 namespace FreeHeroes {
 
@@ -63,6 +64,14 @@ struct SpriteMap {
         int m_priority = 0;
 
         BlockMask m_blockMask;
+
+        std::vector<std::pair<std::string, std::string>> m_info;
+
+        Item& addInfo(std::string a, std::string b)
+        {
+            m_info.push_back({ std::move(a), std::move(b) });
+            return *this;
+        }
     };
 
     struct Cell {
@@ -117,11 +126,30 @@ struct SpriteMap {
         return cell;
     }
 
+    std::vector<const Cell*> findCells(int x, int y, int z) const
+    {
+        std::vector<const Cell*> res;
+        if (z >= (int) m_planes.size())
+            return {};
+
+        for (const auto& [priority, grid] : m_planes[z].m_grids) {
+            if (!grid.m_rows.contains(y))
+                continue;
+            const auto& row = grid.m_rows.at(y);
+            if (!row.m_cells.contains(x))
+                continue;
+            res.push_back(&row.m_cells.at(x));
+        }
+        return res;
+    }
+
     void addItem(Item item)
     {
         auto& cell = getCell(item);
         cell.m_items.push_back(std::move(item));
     }
+
+    static QString layerTypeToString(Layer layer);
 };
 
 struct SpritePaintSettings {

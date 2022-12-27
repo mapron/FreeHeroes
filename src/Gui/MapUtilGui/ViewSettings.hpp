@@ -12,6 +12,8 @@ namespace FreeHeroes {
 struct ViewSettings {
     SpriteRenderSettings m_renderSettings;
     SpritePaintSettings  m_paintSettings;
+
+    bool m_inspectByHover;
 };
 
 }
