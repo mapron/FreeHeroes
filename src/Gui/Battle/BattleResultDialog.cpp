@@ -202,7 +202,8 @@ void BattleResultDialog::setResultInfo(const BattleResultDialog::ResultInfo& inf
 void BattleResultDialog::showEvent(QShowEvent* ev)
 {
     QDialog::showEvent(ev);
-    m_impl->animationMovie->start();
+    if (m_impl->animationMovie)
+        m_impl->animationMovie->start();
     m_impl->m_music->play();
 }
 

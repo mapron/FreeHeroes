@@ -7,7 +7,11 @@
 
 #include "FsUtilsQt.hpp"
 #include "ISprites.hpp"
+#include "PropertyTree.hpp"
 
+namespace FreeHeroes::Core {
+class IResourceLibrary;
+}
 namespace FreeHeroes::Conversion {
 
 Gui::SpritePtr loadSpriteLegacy(const Core::std_path& defFilePath);
@@ -16,6 +20,6 @@ Gui::SpritePtr loadPcx(const Core::std_path& pcxFilePath);
 
 Gui::SpritePtr loadBmp(const Core::std_path& bmpFilePath);
 
-Gui::SpritePtr postProcessSprite(Gui::SpritePtr sprite, const std::string& routine, const std::vector<std::string>& params);
+Gui::SpritePtr postProcessSprite(const Core::std_path& spritePath, Gui::SpritePtr sprite, const PropertyTreeMap& params, Core::IResourceLibrary* library);
 
 }

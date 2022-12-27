@@ -101,7 +101,7 @@ FlatButton* DialogUtils::makeRejectButton(QDialog* parent, FlatButton* alreadyAl
 void DialogUtils::setupClickSound(QPushButton* button)
 {
     auto* modelProvider = loadDependency<LibraryModelsProvider>(button);
-    QObject::connect(button, &QPushButton::clicked, button, [&modelProvider] {
+    QObject::connect(button, &QPushButton::clicked, button, [modelProvider] {
         modelProvider->ui()->clickEffect->play();
     });
 }

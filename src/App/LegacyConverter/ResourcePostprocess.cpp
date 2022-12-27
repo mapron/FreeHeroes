@@ -70,36 +70,6 @@ void ResourcePostprocess::concatSprites(Core::IResourceLibrary&         resource
     saveSprite(sprite, std_path(resource.getFullPath()));
 }
 
-void ResourcePostprocess::transposeSprite(Core::IResourceLibrary& resources, const std::string& id)
-{
-    if (!resources.mediaExists(ResourceMedia::Type::Sprite, id))
-        return;
-    const auto& resource   = resources.getMedia(ResourceMedia::Type::Sprite, id);
-    const auto& path       = std_path(resource.getFullPath());
-    auto        spriteOrig = loadSprite(path);
-    Q_ASSERT(spriteOrig && spriteOrig->getGroupsCount() > 0);
-    if (spriteOrig->getGroupsCount() > 1)
-        return;
-
-    SpriteLoader result;
-    for (int groupId : spriteOrig->getGroupsIds()) {
-        const SpriteSequencePtr pg      = spriteOrig->getFramesForGroup(groupId);
-        int                     counter = 0;
-        for (const auto& frame : pg->frames) {
-            result.addFrame(counter, frame.frame, frame.paddingLeftTop);
-            result.addGroup(counter,
-                            { counter },
-                            pg->boundarySize,
-                            pg->params);
-            counter++;
-        }
-    }
-
-    auto sharedSprite = std::make_shared<const Sprite>(std::move(result));
-
-    saveSprite(sharedSprite, path, {});
-}
-
 void ResourcePostprocess::concatTilesSprite(Core::IResourceLibrary& resources, const std::string& base, const std::string& out, int tilesCount)
 {
     auto makeId = [base](int i) {

@@ -109,7 +109,7 @@ const std::string ArtifactsModel::s_spellbook = "sod.artifact.special.spellbook"
 ArtifactsModel::ArtifactsModel(Sound::IMusicBox* musicBox, const IGraphicsLibrary* graphicsLibrary, QObject* parent)
     : Base(musicBox, graphicsLibrary, parent)
 {
-    m_lock = graphicsLibrary->getPixmapByKey({ "sod.sprites.artifactsInventory", 0, 145 });
+    m_lock = graphicsLibrary->getPixmapByKey({ "artifactsInventoryLock" });
 }
 
 QVariant ArtifactsModel::data(const QModelIndex& index, int role) const

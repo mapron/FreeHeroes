@@ -10,9 +10,9 @@
 #include <QColor>
 #include <QtEndian>
 #include <QPainter>
+#include <QDebug>
 
 #include <set>
-#include <iostream>
 
 #include <cstdint>
 
@@ -103,7 +103,8 @@ struct Palette {
                 colors[0] = H3Palette[0];
                 colors[1] = H3Palette[1];
                 colors[4] = H3Palette[4];
-                //5 = owner flag, handled separately
+
+                colors[5] = qRgba(0, 0, 0, 1); // owner;
                 break;
             case DefType::TERRAIN:
                 colors[0] = H3Palette[0];
@@ -131,6 +132,17 @@ struct Palette {
                 // @todo: error reporter interface here!
                 //logAnim->error("Unknown def type %d", type);
                 break;
+        }
+
+        if (0) {
+            colors[0] = qRgba(255, 0, 0, 128);
+            colors[1] = qRgba(230, 0, 0, 128);
+            colors[2] = qRgba(210, 0, 0, 128);
+            colors[3] = qRgba(190, 0, 0, 128);
+            colors[4] = qRgba(170, 0, 0, 128);
+            colors[5] = qRgba(150, 0, 0, 128);
+            colors[6] = qRgba(130, 0, 0, 128);
+            colors[7] = qRgba(120, 0, 0, 128);
         }
     }
 };
@@ -188,7 +200,6 @@ public:
     void LoadLine(bool compressedLength, const int baseOffset = 0)
     {
         int TotalRowLength = 0;
-        //std::cerr << "start offs:" << (m_ds.device()->pos() ) << "\n";
 
         while (TotalRowLength < m_spriteSize.width()) {
             uint8_t  segmentType;
@@ -213,12 +224,9 @@ public:
                 this->Load(length);
             else
                 this->Load(length, code);
-            //std::cerr << "\n";
+
             TotalRowLength += length;
-            //auto currentOffset = m_ds.device()->pos();
-            //std::cerr << "length=" << int(length) << ", x=" << m_x << "/" << m_spriteSize.width() << ", offs:" << (currentOffset ) << "\n";
         }
-        //exit(0);
     }
 
     QPixmap LoadAll(int format)
@@ -236,7 +244,6 @@ public:
             }
             case 1:
             {
-                //std::cerr << "start offs0:" << (m_ds.device()->pos() ) << "\n";
                 //for each line we have offset of pixel data
                 QVector<uint32_t> offsets(m_spriteSize.height());
                 for (uint32_t& offset : offsets)
@@ -273,18 +280,13 @@ public:
                     m_ds >> offset2;
                     m_ds.device()->seek(baseOffset + offset2);
 
-                    //size_t offset1 = i*2*(m_spriteSize.width()/32);
-                    // uint16_t offset2 = qFromLittleEndian<uint16_t>(fdef + baseOffset+offset1);
-                    //auto currentOffset = baseOffset + offset2;
-                    //std::cerr << "offset1=" << offset1 << ", offset2=" << offset2 << ", currentOffset:" << currentOffset << "\n";
-
                     this->LoadLine(true, baseOffset);
                     this->EndLine();
                 }
                 break;
             }
             default:
-                // @todo: logger interface;
+                qWarning() << "unknown def pix format=" << format;
                 break;
         }
         QPixmap result = QPixmap::fromImage(m_tmpImage.convertToFormat(QImage::Format_RGBA8888));

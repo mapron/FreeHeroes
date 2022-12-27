@@ -5,12 +5,8 @@
  */
 #include "KnownResources.hpp"
 
-#include "StringUtils.hpp"
-
-#include <vector>
-#include <unordered_map>
-#include <fstream>
-#include <sstream>
+#include "FileIOUtils.hpp"
+#include "FileFormatJson.hpp"
 
 namespace FreeHeroes::Conversion {
 
@@ -22,27 +18,26 @@ const KnownResource* KnownResources::find(const std::string& legacyId) const
 
 KnownResources::KnownResources(const Core::std_path& config)
 {
-    std::ifstream ifs(config, std::ios::in | std::ios::binary);
-    std::string   line;
+    std::string buffer   = Core::readFileIntoBufferThrow(config);
+    auto        jsonData = Core::readJsonFromBufferThrow(buffer);
     m_resources.reserve(10000);
-    std::vector<std::string> tokens;
-    std::vector<std::string> params;
 
-    while (std::getline(ifs, line)) {
-        if (line.empty())
-            continue;
-        tokens = Core::splitLine(line, '\t', true);
-        if (tokens.empty())
-            continue;
-        if (tokens.size() < 6)
-            tokens.resize(6);
-
-        params = Core::splitLine(tokens[5], ';', true);
-        KnownResource res{ tokens[0], tokens[1], tokens[2], tokens[3], tokens[4], params };
-        m_resources.emplace_back(std::move(res));
+    for (const auto& [key, row] : jsonData.getMap()) {
+        const auto    rowArr = row.getList();
+        KnownResource res;
+        res.legacyId = key;
+        rowArr[0].getScalar().convertTo(res.newId);
+        rowArr[1].getScalar().convertTo(res.destinationSubfolder);
+        rowArr[2].getScalar().convertTo(res.filenameReplace);
+        if (rowArr.size() > 3) {
+            res.handlers = rowArr[3].getMap();
+        }
+        m_resources.push_back(std::move(res));
     }
-    for (const auto& res : m_resources)
+
+    for (const auto& res : m_resources) {
         m_index[res.legacyId] = &res;
+    }
 }
 
 }

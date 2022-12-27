@@ -119,23 +119,23 @@ ArchiveParser::ArchiveParser(KnownResources&           knownResources,
 int ArchiveParser::estimateExtractCount(const ExtractionList& extractionList)
 {
     int              total = 0;
-    CallbackInserter cbList;
+    CallbackInserter cbList, ppList;
     for (const auto& task : extractionList) {
         int count = 0;
-        proceed(task, cbList, &count);
+        proceed(task, cbList, ppList, &count);
         total += count;
     }
     return total;
 }
 
-void ArchiveParser::prepareExtractTasks(const ExtractionList& extractionList, CallbackInserter& conversion)
+void ArchiveParser::prepareExtractTasks(const ExtractionList& extractionList, CallbackInserter& conversion, CallbackInserter& postprocess)
 {
     for (const auto& task : extractionList) {
-        proceed(task, conversion, nullptr);
+        proceed(task, conversion, postprocess, nullptr);
     }
 }
 
-bool ArchiveParser::proceed(const ExtractionTask& task, CallbackInserter& conversion, int* estimate)
+bool ArchiveParser::proceed(const ExtractionTask& task, CallbackInserter& conversion, CallbackInserter& postprocess, int* estimate)
 {
     if (!estimate) {
         ensureDirExistence(task.destResourceRoot);
@@ -157,7 +157,7 @@ bool ArchiveParser::proceed(const ExtractionTask& task, CallbackInserter& conver
 
     // clang-format off
     switch(task.type) {
-        case TaskType::LOD: return extractLOD(task, conversion, estimate);
+        case TaskType::LOD: return extractLOD(task, conversion, postprocess, estimate);
         case TaskType::SND: return extractSND(task, conversion, estimate);
         case TaskType::VID: return extractVID(task, conversion, estimate);
         case TaskType::HDAT: return extractHDAT(task, conversion, estimate);
@@ -244,7 +244,7 @@ bool ArchiveParser::copyDef(const ArchiveParser::ExtractionTask& task, CallbackI
     return true;
 }
 
-bool ArchiveParser::extractLOD(const ExtractionTask& task, CallbackInserter& conversion, int* estimate)
+bool ArchiveParser::extractLOD(const ExtractionTask& task, CallbackInserter& conversion, CallbackInserter& postprocess, int* estimate)
 {
     uint32_t totalFiles = 0;
     m_ds.skipRawData(8);
@@ -338,21 +338,44 @@ bool ArchiveParser::extractLOD(const ExtractionTask& task, CallbackInserter& con
         const std_path destFilePath = destRoot / mainResourceName;
 
         if (type == ResourceMedia::Type::Sprite) {
-            auto conversionRoutine = [isPcx, srcFilePath, destFilePath, knownResource, keepTmp = m_keepTmp] {
+            auto conversionRoutine = [isPcx, srcFilePath, destFilePath, keepTmp = m_keepTmp] {
                 SpritePtr sprite;
                 if (!isPcx) {
                     sprite = loadSpriteLegacy(srcFilePath);
                 } else {
                     sprite = loadPcx(srcFilePath);
                 }
-                if (knownResource && !knownResource->postprocessUtility.empty()) {
-                    sprite = postProcessSprite(sprite, std::string(knownResource->postprocessUtility), knownResource->params);
-                }
                 saveSprite(sprite, destFilePath);
                 if (!keepTmp) {
                     std_fs::remove(srcFilePath);
                 }
             };
+
+            if (knownResource && !knownResource->handlers.empty()) {
+                auto ppRoutine = [knownResource, destFilePath, isHota = task.isHota, library = task.resources]() {
+                    auto handlers = knownResource->handlers;
+
+                    const std::vector<std::string> names{ "make_transparent", "unpack" };
+                    for (const auto& name : names) {
+                        if (handlers.contains(name + "_hota")) {
+                            if (isHota) {
+                                handlers[name] = handlers[name + "_hota"];
+                            }
+                            handlers.erase(name + "_hota");
+                        }
+                        if (handlers.contains(name + "_sod")) {
+                            if (!isHota) {
+                                handlers[name] = handlers[name + "_sod"];
+                            }
+                            handlers.erase(name + "_sod");
+                        }
+                    }
+                    auto sprite   = loadSprite(destFilePath);
+                    auto ppSprite = postProcessSprite(destFilePath, sprite, handlers, library);
+                    saveSprite(ppSprite, destFilePath);
+                };
+                postprocess(ppRoutine);
+            }
             conversion(conversionRoutine);
         }
 

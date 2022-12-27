@@ -176,24 +176,32 @@ void ConverterDialog::run()
                                        hotaInstallDirData,
                                        "Heroes3.snd",
                                        baseExtractSOD,
-                                       sodLibrary.get() });
+                                       sodLibrary.get(),
+                                       true,
+                                       false });
             extractionList.push_back({ ArchiveParser::TaskType::VID,
                                        hotaInstallDirData,
                                        "VIDEO.VID",
                                        baseExtractSOD,
-                                       sodLibrary.get() });
+                                       sodLibrary.get(),
+                                       true,
+                                       false });
         }
 
         extractionList.push_back({ ArchiveParser::TaskType::LOD,
                                    hotaInstallDirData,
                                    "H3sprite.lod",
                                    baseExtractSOD,
-                                   sodLibrary.get() });
+                                   sodLibrary.get(),
+                                   true,
+                                   false });
         extractionList.push_back({ ArchiveParser::TaskType::LOD,
                                    hotaInstallDirData,
                                    "H3bitmap.lod",
                                    baseExtractSOD,
-                                   sodLibrary.get() });
+                                   sodLibrary.get(),
+                                   true,
+                                   false });
 
         // workaround: sometimes folder called 'Mp3' in the distribution.
         auto mp3path = m_hotaInstallDir / "MP3";
@@ -215,31 +223,41 @@ void ConverterDialog::run()
                                        hotaInstallDirData,
                                        "HotA.snd",
                                        baseExtractHOTA,
-                                       hotaLibrary.get() });
+                                       hotaLibrary.get(),
+                                       false,
+                                       true });
             extractionList.push_back({ ArchiveParser::TaskType::VID,
                                        hotaInstallDirData,
                                        "HotA.vid",
                                        baseExtractHOTA,
-                                       hotaLibrary.get() });
+                                       hotaLibrary.get(),
+                                       false,
+                                       true });
         }
 
         extractionList.push_back({ ArchiveParser::TaskType::LOD,
                                    hotaInstallDirData,
                                    "HotA.lod",
                                    baseExtractHOTA,
-                                   hotaLibrary.get() });
+                                   hotaLibrary.get(),
+                                   false,
+                                   true });
 
         extractionList.push_back({ ArchiveParser::TaskType::LOD,
                                    hotaInstallDirData,
                                    "HotA_lng.lod",
                                    baseExtractHOTA,
-                                   hotaLibrary.get() });
+                                   hotaLibrary.get(),
+                                   false,
+                                   true });
 
         extractionList.push_back({ ArchiveParser::TaskType::HDAT,
                                    m_hotaInstallDir,
                                    "HotA.dat",
                                    baseExtractHOTA,
-                                   hotaLibrary.get() });
+                                   hotaLibrary.get(),
+                                   false,
+                                   true });
     }
     if (hdExists) {
         hdLibrary = std::make_unique<ResourceLibrary>("hdmod");
@@ -266,7 +284,7 @@ void ConverterDialog::run()
 
     statusUpdate(tr("Extracting files..."));
 
-    KnownResources knownResources(QString2stdPath(QApplication::applicationDirPath()) / "gameResources" / "knownResources.txt");
+    KnownResources knownResources(QString2stdPath(QApplication::applicationDirPath()) / "gameResources" / "knownResources.json");
     auto           lastUpd     = std::chrono::milliseconds{ 0 };
     int            doneExtract = 0;
     ArchiveParser  parser(knownResources,
@@ -288,41 +306,49 @@ void ConverterDialog::run()
 
     statusUpdate(tr("Preparing conversion list..."));
 
-    ThreadPoolExecutor              executor;
-    ArchiveParser::CallbackInserter inserter([&executor](auto task) {
-        executor.add(task);
+    ThreadPoolExecutor              executorMain, executorPP;
+    ArchiveParser::CallbackInserter inserterMain([&executorMain](auto task) {
+        executorMain.add(task);
     });
-    parser.prepareExtractTasks(extractionList, inserter);
+    ArchiveParser::CallbackInserter inserterPP([&executorPP](auto task) {
+        executorPP.add(task);
+    });
+    parser.prepareExtractTasks(extractionList, inserterMain, inserterPP);
 
     Q_ASSERT(doneExtract == total);
 
     statusUpdate(tr("Conversion of media..."));
 
     m_ui->progressBar->setValue(0);
-    m_ui->progressBar->setMaximum(executor.getQueueSize());
+    m_ui->progressBar->setMaximum(executorMain.getQueueSize());
 
-    QEventLoop loop;
-    connect(&executor, &ThreadPoolExecutor::finished, &loop, &QEventLoop::quit);
-    connect(&executor, &ThreadPoolExecutor::progress, m_ui->progressBar, &QProgressBar::setValue);
-    executor.start(std::chrono::milliseconds{ 100 });
+    {
+        QEventLoop loop;
+        connect(&executorMain, &ThreadPoolExecutor::finished, &loop, &QEventLoop::quit);
+        connect(&executorMain, &ThreadPoolExecutor::progress, m_ui->progressBar, &QProgressBar::setValue);
+        executorMain.start(std::chrono::milliseconds{ 100 });
 
-    Logger(Logger::Info) << "Event loop start";
-    loop.exec(QEventLoop::ExcludeUserInputEvents);
-    Logger(Logger::Info) << "Event loop end";
+        Logger(Logger::Info) << "Event loop start";
+        loop.exec(QEventLoop::ExcludeUserInputEvents);
+        Logger(Logger::Info) << "Event loop end";
+    }
+    {
+        QEventLoop loop;
+        connect(&executorPP, &ThreadPoolExecutor::finished, &loop, &QEventLoop::quit);
+        executorPP.start(std::chrono::milliseconds{ 100 });
+
+        Logger(Logger::Info) << "Event loop start";
+        loop.exec(QEventLoop::ExcludeUserInputEvents);
+        Logger(Logger::Info) << "Event loop end";
+    }
 
     statusUpdate(tr("Translation generation..."));
-
-    const std::vector<std::string> s_transposings{ "tshrc", "tshre", "dirttl", "edg", "grastl", "lavatl", "rocktl", "rougtl", "sandtl", "snowtl", "subbtl", "swmptl", "watrtl", "icyrvr", "gravrd", "cobbrd", "dirtrd" };
 
     if (sodExists) {
         Logger(Logger::Info) << "SoD";
         LocalizationConverter converter(*sodLibrary, baseExtractSOD, hotaDb, sodDb);
         converter.extractSOD("txt");
 
-        Logger(Logger::Info) << "SoD PP";
-        ResourcePostprocess pp;
-        for (const auto& id : s_transposings)
-            pp.transposeSprite(*sodLibrary, id);
         sodLibrary->saveIndex();
     }
 
@@ -335,9 +361,6 @@ void ConverterDialog::run()
         Logger(Logger::Info) << "HotA PP";
         ResourcePostprocess pp;
         pp.concatSprites(*hotaLibrary, { "cmbkhlmt0", "cmbkhlmt1", "cmbkhlmt2", "cmbkhlmt3", "cmbkhlmt4" }, "cmbkhlmt", true);
-        for (const auto& id : s_transposings)
-            pp.transposeSprite(*hotaLibrary, id);
-
         pp.concatTilesSprite(*hotaLibrary, "hglnt", "highlands", 124);
         pp.concatTilesSprite(*hotaLibrary, "wstlt", "wastelands", 124);
         hotaLibrary->saveIndex();

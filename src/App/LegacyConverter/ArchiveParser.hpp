@@ -41,6 +41,8 @@ public:
         std_path                srcFilename;
         std_path                destResourceRoot;
         Core::IResourceLibrary* resources;
+        bool                    isSod  = false;
+        bool                    isHota = false;
     };
     using ExtractionList = std::vector<ExtractionTask>;
 
@@ -50,13 +52,13 @@ public:
 
     int estimateExtractCount(const ExtractionList& extractionList);
 
-    void prepareExtractTasks(const ExtractionList& extractionList, CallbackInserter& conversion);
+    void prepareExtractTasks(const ExtractionList& extractionList, CallbackInserter& conversion, CallbackInserter& postprocess);
 
 private:
-    bool proceed(const ExtractionTask& task, CallbackInserter& conversion, int* estimate);
+    bool proceed(const ExtractionTask& task, CallbackInserter& conversion, CallbackInserter& postprocess, int* estimate);
     bool copyMusic(const ExtractionTask& task, CallbackInserter& conversion, int* estimate);
     bool copyDef(const ExtractionTask& task, CallbackInserter& conversion, int* estimate);
-    bool extractLOD(const ExtractionTask& task, CallbackInserter& conversion, int* estimate);
+    bool extractLOD(const ExtractionTask& task, CallbackInserter& conversion, CallbackInserter& postprocess, int* estimate);
     bool extractHDAT(const ExtractionTask& task, CallbackInserter& conversion, int* estimate);
     bool extractSND(const ExtractionTask& task, CallbackInserter& conversion, int* estimate);
     bool extractVID(const ExtractionTask& task, CallbackInserter& conversion, int* estimate);

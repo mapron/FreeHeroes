@@ -6,7 +6,12 @@
 #include "SpriteParserLegacy.hpp"
 #include "DefFile.hpp"
 
+#include "IResourceLibrary.hpp"
+
 #include <QFile>
+#include <QDebug>
+
+#include <set>
 
 inline Q_DECL_PURE_FUNCTION uint qHash(const QPoint& key, uint seed = 0) Q_DECL_NOTHROW
 {
@@ -17,7 +22,21 @@ namespace FreeHeroes::Conversion {
 using namespace Core;
 using namespace Gui;
 
+struct color_compare {
+    bool operator()(QColor const& a, QColor const& b) const noexcept { return a.rgba() < b.rgba(); }
+};
+using QColorSet = std::set<QColor, color_compare>;
+
 namespace {
+
+struct UnpackTask {
+    std::string tpl;
+    std::string subdir;
+    int         idOffset   = 0;
+    int         startFrame = 0;
+    int         endFrame   = 0;
+};
+using UnpackTaskList = std::vector<UnpackTask>;
 
 AnimationPaletteConfig getConfigForResource(const std_path& resource)
 {
@@ -35,13 +54,12 @@ AnimationPaletteConfig getConfigForResource(const std_path& resource)
     return cfg;
 }
 
-void floodFillImageFromEdge(QImage& img, const QList<QColor>& keyColors, const QColor& destColor)
+void floodFillImageFromEdge(QImage& img, const QColorSet& keyColors, const QColor& destColor)
 {
     const int maxW        = img.width();
     const int maxH        = img.height();
-    auto      isMaskColor = [&img, &keyColors](const QPoint p) {
-        const auto& c = img.pixelColor(p);
-        return keyColors.contains(c);
+    auto      isMaskColor = [&img, &keyColors](const QPoint& p) {
+        return keyColors.contains(img.pixelColor(p));
     };
 
     auto getAdjacentSet = [maxW, maxH](const QPoint& start) {
@@ -61,9 +79,7 @@ void floodFillImageFromEdge(QImage& img, const QList<QColor>& keyColors, const Q
 
     auto floodFill = [&img, &isMaskColor, &getAdjacentSet, &destColor](const QSet<QPoint>& start) {
         QSet<QPoint> edge = start;
-        int          step = 0;
         while (!edge.empty()) {
-            ++step;
             QSet<QPoint> nextEdge;
             for (const auto edgePos : edge) {
                 if (!isMaskColor(edgePos))
@@ -95,7 +111,7 @@ void floodFillImageFromEdge(QImage& img, const QList<QColor>& keyColors, const Q
     floodFill(floodStart);
 }
 
-void replaceImageColors(QImage& img, const QList<QColor>& keyColors, const QColor& destColor)
+void replaceImageColors(QImage& img, const QColorSet& keyColors, const QColor& destColor)
 {
     for (int h = 0; h < img.height(); ++h) {
         for (int w = 0; w < img.width(); ++w) {
@@ -106,33 +122,80 @@ void replaceImageColors(QImage& img, const QList<QColor>& keyColors, const QColo
     }
 }
 
-void postProcessSpriteMakeTransparent(int groupIndex, SpriteSequence& seq, const std::vector<int>& params)
+void postProcessSpriteMakeTransparent(SpriteSequence& seq, const PropertyTree& params)
 {
-    (void) groupIndex;
-    int                 frameIndex = 0;
-    const QList<QColor> keyColors{ QColor(255, 255, 255), QColor(250, 250, 250), QColor(245, 245, 245), QColor(0, 255, 255) };
+    std::set<int> floodIndexes, trWhiteIndexes;
+    if (params.contains("flood")) {
+        for (const auto& val : params.getMap().at("flood").getList())
+            floodIndexes.insert(val.getScalar().toInt());
+    }
+    if (params.contains("tr_to_white")) {
+        for (const auto& val : params.getMap().at("tr_to_white").getList())
+            trWhiteIndexes.insert(val.getScalar().toInt());
+    }
+    int       frameIndex = 0;
+    QColorSet keyColors{ QColor(255, 255, 255), QColor(250, 250, 250), QColor(245, 245, 245) };
+
     for (auto& frame : seq.frames) {
-        QPixmap& p    = frame.frame;
-        QImage   img1 = p.toImage();
-        QImage   img(img1.width(), img1.height(), QImage::Format_RGBA8888);
+        QPixmap& p = frame.frame;
+        if (p.isNull())
+            continue;
+        QImage imgOldPixFmt = p.toImage();
+        QImage img(imgOldPixFmt.width(), imgOldPixFmt.height(), QImage::Format_RGBA8888);
         for (int h = 0; h < img.height(); ++h) {
             for (int w = 0; w < img.width(); ++w) {
-                img.setPixelColor(w, h, img1.pixelColor(w, h));
+                img.setPixelColor(w, h, imgOldPixFmt.pixelColor(w, h));
             }
         }
+        auto keyColorsFrame = keyColors;
 
-        const bool replaceColors = !params.empty() && std::find(params.cbegin(), params.cend(), frameIndex) != params.cend();
-        if (replaceColors)
-            replaceImageColors(img, keyColors, Qt::transparent);
+        std::map<QColor, int, color_compare> cornerColors;
+        cornerColors[img.pixelColor(0, 0)]++;
+        cornerColors[img.pixelColor(0, img.height() - 1)]++;
+        cornerColors[img.pixelColor(img.width() - 1, 0)]++;
+        cornerColors[img.pixelColor(img.width() - 1, img.height() - 1)]++;
+        if (cornerColors.size() == 1) {
+            keyColorsFrame.insert(cornerColors.begin()->first);
+        }
+        if (cornerColors.size() == 2) {
+            auto aClr = cornerColors.begin()->first;
+            auto aCnt = cornerColors.begin()->second;
+            auto bClr = cornerColors.rbegin()->first;
+            auto bCnt = cornerColors.rbegin()->second;
+            if (aCnt != bCnt) {
+                keyColorsFrame.insert(aCnt > bCnt ? aClr : bClr);
+            }
+        }
+        if (cornerColors.size() == 3) {
+            for (const auto& [clr, cnt] : cornerColors) {
+                if (cnt == 2)
+                    keyColorsFrame.insert(clr);
+            }
+        }
+        if (trWhiteIndexes.contains(frameIndex)) {
+            replaceImageColors(img, { Qt::transparent }, Qt::white);
+        }
+        if (floodIndexes.contains(frameIndex))
+            floodFillImageFromEdge(img, keyColorsFrame, Qt::transparent);
         else
-            floodFillImageFromEdge(img, keyColors, Qt::transparent);
+            replaceImageColors(img, keyColorsFrame, Qt::transparent);
 
         p = QPixmap::fromImage(img);
         frameIndex++;
     }
 }
 
-void postProcessSpriteGroupBattler(int groupIndex, SpriteSequence& seq, const std::vector<int>& params)
+void postProcessSpriteFlipVertical(SpriteSequence& seq)
+{
+    for (auto& frame : seq.frames) {
+        QPixmap& p = frame.frame;
+        if (p.isNull())
+            continue;
+        p = p.transformed(QTransform().scale(1, -1));
+    }
+}
+
+void postProcessSpriteGroupBattler(int groupIndex, SpriteSequence& seq, const PropertyTree& params)
 {
     enum class BattleAnimation
     {
@@ -157,9 +220,28 @@ void postProcessSpriteGroupBattler(int groupIndex, SpriteSequence& seq, const st
         MoveFinish   = 21,
     };
     assert(groupIndex <= 21);
-    const BattleAnimation type = static_cast<BattleAnimation>(groupIndex);
+    const BattleAnimation type   = static_cast<BattleAnimation>(groupIndex);
+    bool                  isWide = false;
+    if (params.contains("wide")) {
+        isWide = params["wide"].getScalar().toBool();
+    }
+    std::vector<int> relativeSpeeds;
+    if (params.contains("speed")) {
+        for (const auto& val : params.getMap().at("speed").getList())
+            relativeSpeeds.push_back(val.getScalar().toInt());
+    }
+    std::vector<int> actionPoints;
+    int              special = -1;
+    if (params.contains("actionPoints")) {
+        special = 4;
+        for (const auto& val : params.getMap().at("actionPoints").getList())
+            actionPoints.push_back(val.getScalar().toInt());
+    }
+    if (params.contains("special")) {
+        special = params["special"].getScalar().toInt();
+    }
 
-    auto getAnimDuration = [&params, &type](int frames) {
+    auto getAnimDuration = [&relativeSpeeds, &type](int frames) {
         int duration = 1000;
         switch (type) {
             case BattleAnimation::Move:
@@ -212,11 +294,11 @@ void postProcessSpriteGroupBattler(int groupIndex, SpriteSequence& seq, const st
         if (type == BattleAnimation::Move
             || type == BattleAnimation::MoveStart
             || type == BattleAnimation::MoveFinish)
-            relativeSpeed = params[1];
+            relativeSpeed = relativeSpeeds[0];
         else if (type == BattleAnimation::StandStill)
-            relativeSpeed = params[2];
+            relativeSpeed = relativeSpeeds[1];
         else if (type == BattleAnimation::Nervous)
-            relativeSpeed = params[3];
+            relativeSpeed = relativeSpeeds[2];
 
         return duration * relativeSpeed / 100;
     };
@@ -224,19 +306,19 @@ void postProcessSpriteGroupBattler(int groupIndex, SpriteSequence& seq, const st
     // [34, -71, 38, -61, 17, -53]   , 7
 
     seq.params.animationCycleDuration = getAnimDuration(seq.frames.size());
-    if (params.size() > 4) {
+    if (!actionPoints.empty()) {
         if (type == BattleAnimation::RangedUp)
-            seq.params.actionPoint = { params[4], params[5] };
+            seq.params.actionPoint = { actionPoints[0], actionPoints[1] };
         else if (type == BattleAnimation::RangedCenter)
-            seq.params.actionPoint = { params[6], params[7] };
+            seq.params.actionPoint = { actionPoints[2], actionPoints[3] };
         else if (type == BattleAnimation::RangedDown)
-            seq.params.actionPoint = { params[8], params[9] };
+            seq.params.actionPoint = { actionPoints[4], actionPoints[5] };
+
         if (!seq.params.actionPoint.isNull())
-            seq.params.specialFrameIndex = params[10];
+            seq.params.specialFrameIndex = special;
     }
-    const bool wide = params[0];
     for (auto& frame : seq.frames) {
-        if (wide) {
+        if (isWide) {
             frame.paddingLeftTop += QPoint(6, -10); // That's strange, but Battle sprites not perfectly centered. That's unconvenient.
         } else {
             frame.paddingLeftTop += QPoint(30, -10);
@@ -351,30 +433,93 @@ std::vector<int> paramsToInt(const std::vector<std::string>& params)
     return res;
 }
 
-SpritePtr postProcessSprite(SpritePtr sprite, const std::string& routine, const std::vector<std::string>& params)
+SpritePtr postProcessSprite(const Core::std_path& spritePath, SpritePtr sprite, const PropertyTreeMap& params, Core::IResourceLibrary* library)
 {
     std::shared_ptr<SpriteLoader> result           = std::make_shared<SpriteLoader>();
-    bool                          optimizeBoundary = routine == "optimize_boundary";
-    int                           maxWidth         = 0;
-    int                           maxHeigth        = 0;
-    int                           minPaddingWidth  = 100000;
-    int                           minPaddingHeight = 100000;
+    bool                          optimizeBoundary = params.contains("optimize_boundary");
+    bool                          doTranspose      = params.contains("transpose");
+
+    UnpackTaskList unpackTasks;
+    if (params.contains("unpack")) {
+        for (const auto& task : params.at("unpack").getList()) {
+            const std::string tpl    = task["template"].getScalar().toString();
+            const std::string subdir = task["subdir"].getScalar().toString();
+
+            int idOffset   = task["idOffset"].getScalar().toInt();
+            int startFrame = task["startFrame"].getScalar().toInt();
+            int endFrame   = task["endFrame"].getScalar().toInt();
+            unpackTasks.push_back({ tpl, subdir, idOffset, startFrame, endFrame });
+        }
+    }
+
+    int maxWidth         = 0;
+    int maxHeigth        = 0;
+    int minPaddingWidth  = 100000;
+    int minPaddingHeight = 100000;
     for (int g : sprite->getGroupsIds()) {
-        auto seqPtr    = sprite->getFramesForGroup(g);
-        auto newSeqPtr = std::make_shared<SpriteSequence>(*seqPtr);
-        if (routine == "battle_unit") {
-            postProcessSpriteGroupBattler(g, *newSeqPtr, paramsToInt(params));
-        } else if (routine == "make_transparent") {
-            postProcessSpriteMakeTransparent(g, *newSeqPtr, paramsToInt(params));
+        auto oldSeqPtr = sprite->getFramesForGroup(g);
+        auto newSeqPtr = std::make_shared<SpriteSequence>(*oldSeqPtr);
+        for (const auto& [key, routineParam] : params) {
+            if (key == "battle_unit") {
+                postProcessSpriteGroupBattler(g, *newSeqPtr, routineParam);
+            } else if (key == "make_transparent") {
+                postProcessSpriteMakeTransparent(*newSeqPtr, routineParam);
+            } else if (key == "flip_vertical") {
+                postProcessSpriteFlipVertical(*newSeqPtr);
+            }
         }
         if (optimizeBoundary) {
-            for (auto& f : seqPtr->frames) {
+            for (auto& f : newSeqPtr->frames) {
                 maxWidth         = std::max(maxWidth, f.frame.width() + f.paddingLeftTop.x());
                 maxHeigth        = std::max(maxHeigth, f.frame.height() + f.paddingLeftTop.y());
                 minPaddingWidth  = std::min(minPaddingWidth, f.paddingLeftTop.x());
                 minPaddingHeight = std::min(minPaddingHeight, f.paddingLeftTop.y());
             }
             continue;
+        }
+        if (doTranspose) {
+            int counter = 0;
+            for (const auto& frame : oldSeqPtr->frames) {
+                result->addFrame(counter, frame.frame, frame.paddingLeftTop);
+                result->addGroup(counter,
+                                 { counter },
+                                 oldSeqPtr->boundarySize,
+                                 oldSeqPtr->params);
+                counter++;
+            }
+
+            continue;
+        }
+        for (const auto& utask : unpackTasks) {
+            const QString tpl    = QString::fromStdString(utask.tpl);
+            std::string   subdir = utask.subdir;
+            if (!subdir.empty() && !subdir.ends_with('/'))
+                subdir += '/';
+            int idOffset   = utask.idOffset;
+            int startFrame = utask.startFrame;
+            int endFrame   = utask.endFrame;
+            for (int f = startFrame, i = 0; f <= endFrame; ++f, ++i) {
+                const int            id         = idOffset + i;
+                const std::string    filename   = (tpl.contains("%1") ? tpl.arg(id) : tpl).toStdString();
+                const std::string    filenameJs = filename + ".fh.json";
+                const Core::std_path path       = spritePath.parent_path() / Core::string2path(filenameJs);
+                const SpriteFrame&   frame      = newSeqPtr->frames[f];
+
+                {
+                    auto spriteLoader = std::make_shared<SpriteLoader>();
+                    spriteLoader->addFrame(0, frame.frame, frame.paddingLeftTop);
+                    spriteLoader->addGroup(0, { 0 }, newSeqPtr->boundarySize, {});
+                    saveSprite(spriteLoader, path, {});
+                }
+                {
+                    ResourceMedia resource;
+                    resource.type         = ResourceMedia::Type::Sprite;
+                    resource.id           = filename;
+                    resource.mainFilename = filenameJs;
+                    resource.subdir       = subdir;
+                    library->registerResource(resource);
+                }
+            }
         }
         result->addGroupSeq(g, newSeqPtr);
     }

@@ -7,6 +7,8 @@
 
 #include "FsUtils.hpp"
 
+#include "PropertyTree.hpp"
+
 #include <string_view>
 #include <vector>
 #include <unordered_map>
@@ -14,12 +16,12 @@
 namespace FreeHeroes::Conversion {
 
 struct KnownResource {
-    std::string              legacyId;
-    std::string              newId;
-    std::string              destinationSubfolder;
-    std::string              filenameReplace;
-    std::string              postprocessUtility;
-    std::vector<std::string> params;
+    std::string legacyId;
+    std::string newId;
+    std::string destinationSubfolder;
+    std::string filenameReplace;
+
+    PropertyTreeMap handlers;
 };
 
 class KnownResources {

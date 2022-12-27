@@ -23,8 +23,12 @@ void SpriteMapPainter::paint(QPainter*        painter,
 
     auto drawCell = [painter, tileSize, animationFrameOffsetTerrain, animationFrameOffsetObjects](const SpriteMap::Cell& cell, int x, int y) {
         for (const auto& item : cell.m_items) {
-            auto                   sprite = item.m_sprite->get();
-            Gui::SpriteSequencePtr seq    = sprite->getFramesForGroup(item.m_spriteGroup);
+            auto sprite = item.m_sprite->get();
+            if (!sprite)
+                continue;
+            Gui::SpriteSequencePtr seq = sprite->getFramesForGroup(item.m_spriteGroup);
+            if (!seq)
+                continue;
 
             const auto psrHash = item.m_x * 7U + item.m_y * 13U;
 

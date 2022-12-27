@@ -6,6 +6,7 @@
 #include "SpriteSerialization.hpp"
 
 #include <QPainter>
+#include <QDebug>
 
 #include "FileFormatJson.hpp"
 #include "FileIOUtils.hpp"
@@ -62,6 +63,8 @@ bool saveSprite(const SpritePtr& spriteSet, const std_path& jsonFilePath, const 
 
     int totalWidth  = 0;
     int totalHeight = 0;
+
+    //qWarning() << "saveSprite=" << resourceName.c_str() << "(folder=" << Core::path2string(folder).c_str();
 
     PropertyTree       groupsMap;
     QMap<int, QPixmap> framesMap;
@@ -149,11 +152,10 @@ bool saveSprite(const SpritePtr& spriteSet, const std_path& jsonFilePath, const 
                 if (!img.save(stdPath2QString(outImagePath)))
                     return false;
 
-            } else {
+            } else if (!frame.frame.isNull()) {
                 QPainter painter(&out);
                 painter.drawPixmap(QPoint(x, y), frame.frame);
             }
-
             x += frame.frame.width();
         }
         y += height;
@@ -173,7 +175,7 @@ bool saveSprite(const SpritePtr& spriteSet, const std_path& jsonFilePath, const 
     root["groups"]        = std::move(groupsMap);
     root["splitToFolder"] = PropertyTreeScalar(options.splitIntoPngFiles);
 
-    return Core::writeJsonToBuffer(buffer, root) && Core::writeFileFromBuffer(jsonFilePath, buffer);
+    return Core::writeJsonToBuffer(buffer, root, true) && Core::writeFileFromBuffer(jsonFilePath, buffer);
 }
 
 namespace {
@@ -191,6 +193,8 @@ SpritePtr loadSprite(const std_path& jsonFilePath)
 {
     const std_path    folder       = jsonFilePath.parent_path();
     const std::string resourceName = Core::path2string(jsonFilePath.filename().stem().stem());
+
+    //qWarning() << "loadSprite=" << resourceName.c_str() << "(folder=" << Core::path2string(folder).c_str();
 
     std::string buffer;
     if (!Core::readFileIntoBuffer(jsonFilePath, buffer))
@@ -255,7 +259,7 @@ SpritePtr loadSprite(const std_path& jsonFilePath)
                 auto   pngFilename = folder / resourceName / (std::to_string(id) + imageExtension);
                 QImage inData(stdPath2QString(pngFilename));
                 framePix = QPixmap::fromImage(inData);
-            } else {
+            } else if (w > 0 && h > 0) {
                 framePix = inPix.copy(xOffset, pixHeightOffset, w, h);
             }
             xOffset += w;
