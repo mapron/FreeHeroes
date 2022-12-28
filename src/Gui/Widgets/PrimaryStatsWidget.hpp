@@ -28,14 +28,15 @@ class HoverHelper;
 class GUIWIDGETS_EXPORT PrimaryStatsWidget : public QWidget {
     Q_OBJECT
 public:
-    PrimaryStatsWidget(QWidget* parent = nullptr);
+    PrimaryStatsWidget(const LibraryModelsProvider* modelsProvider, QWidget* parent = nullptr);
     ~PrimaryStatsWidget();
 
-    void setParams(const Core::HeroPrimaryParams& primary, const LibraryModelsProvider* modelsProvider);
+    void setParams(const Core::HeroPrimaryParams& primary);
 
     void setHoverLabel(QLabel* hoverLabel);
 
 private:
+    const LibraryModelsProvider* const m_modelsProvider;
     std::array<QLabel*, 4>             m_valueTxt;
     std::array<QLabel*, 4>             m_titleTxt;
     std::array<DarkFrameLabelIcon*, 4> m_iconsLabels;

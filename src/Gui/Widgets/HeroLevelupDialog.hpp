@@ -14,11 +14,11 @@
 #include <memory>
 
 namespace FreeHeroes::Gui {
-
+class LibraryModelsProvider;
 class GUIWIDGETS_EXPORT HeroLevelupDialog : public QDialog {
     Q_OBJECT
 public:
-    HeroLevelupDialog(QWidget* parent);
+    HeroLevelupDialog(const LibraryModelsProvider* modelProvider, QWidget* parent);
     ~HeroLevelupDialog();
 
     struct Choice {

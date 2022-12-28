@@ -46,7 +46,7 @@ int pluralSelector_PL(int n, int availableSize)
     return availableSize > 3 ? 3 : 1;
 }
 
-// Polish
+// Russian
 // 0 - singular, 1 - plural, [2 - 2..4 ] [3 - 5+ ]
 // default is plural.
 int pluralSelector_RU(int n, int availableSize)

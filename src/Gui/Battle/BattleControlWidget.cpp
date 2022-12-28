@@ -10,6 +10,7 @@
 #include "BattleHero.hpp"
 #include "BattleControlPlan.hpp"
 
+#include "IAppSettings.hpp"
 #include "IReplayHandle.hpp"
 
 #include "SpellBookDialog.hpp"
@@ -60,10 +61,11 @@ BattleControlWidget::BattleControlWidget(Core::IBattleView&           battleView
                                          Core::IAIFactory&            aiFactory,
                                          BattleControlPlan&           controlPlan,
                                          const LibraryModelsProvider* modelsProvider,
-                                         QWidget*                     parent)
+
+                                         QWidget* parent)
     : QWidget(parent)
     , m_ui(std::make_unique<Ui::BattleControlWidget>())
-    , m_appSettings(loadDependency<IAppSettings>(parent))
+    , m_appSettings(modelsProvider->appSettings())
     , m_battleView(battleView)
     , m_battleControl(battleControl)
     , m_aiFactory(aiFactory)
@@ -631,7 +633,13 @@ void BattleControlWidget::showSpellBook()
     auto battleHero = m_battleView.getHero(m_battleView.getCurrentSide());
     if (!battleHero)
         return;
-    SpellBookDialog dlg(battleHero->estimated.availableSpells, m_modelsProvider->spells(), m_modelsProvider->ui(), battleHero->mana, false, true, this);
+    SpellBookDialog dlg(battleHero->estimated.availableSpells,
+                        m_modelsProvider,
+
+                        battleHero->mana,
+                        false,
+                        true,
+                        this);
     dlg.exec();
 
     if (dlg.getSelectedSpell()) {
@@ -661,7 +669,7 @@ void BattleControlWidget::showPopupLogs()
     mainLayout->addLayout(bottomButtons);
     bottomButtons->addStretch();
     bottomButtons->addSpacing(50);
-    bottomButtons->addWidget(DialogUtils::makeAcceptButton(&dlg));
+    bottomButtons->addWidget(DialogUtils::makeAcceptButton(m_modelsProvider, &dlg));
     bottomButtons->addSpacing(50);
     bottomButtons->addStretch();
     dlg.updateGeometry();

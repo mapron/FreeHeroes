@@ -18,18 +18,16 @@ class QLabel;
 namespace FreeHeroes {
 namespace Core {
 class IAdventureHeroControl;
-
 }
 
 namespace Gui {
-class ArtifactsModel;
 class GuiAdventureHero;
-class UiCommonModel;
+class LibraryModelsProvider;
 
 class GUIWIDGETS_EXPORT ArtifactPuppetWidget : public QWidget {
     Q_OBJECT
 public:
-    ArtifactPuppetWidget(QWidget* parent = nullptr);
+    ArtifactPuppetWidget(const LibraryModelsProvider* modelProvider, QWidget* parent = nullptr);
     ~ArtifactPuppetWidget();
 
     void refresh();
@@ -37,8 +35,6 @@ public:
     void setHoverLabel(QLabel* hoverLabel);
 
     void setSource(const GuiAdventureHero*      hero,
-                   const ArtifactsModel*        artifactsModel,
-                   const UiCommonModel*         ui,
                    Core::IAdventureHeroControl* adventureHeroControl);
 
 signals:

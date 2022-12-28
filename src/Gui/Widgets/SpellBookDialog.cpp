@@ -224,19 +224,20 @@ struct SpellBookDialog::Impl {
 };
 
 SpellBookDialog::SpellBookDialog(const Core::AdventureHero::SpellList& spellList,
-                                 const SpellsModel*                    spellsModel,
-                                 const UiCommonModel*                  ui,
+                                 const LibraryModelsProvider*          modelProvider,
                                  int                                   mana,
                                  bool                                  allowAdventureCast,
                                  bool                                  allowBattleCast,
                                  QWidget*                              parent)
     : QDialog(parent)
-    , m_impl(std::make_unique<Impl>(spellsModel))
+    , m_impl(std::make_unique<Impl>(modelProvider->spells()))
 {
     setWindowFlag(Qt::FramelessWindowHint, true);
     this->setFixedSize(800 + 2, 600 - 2);
 
-    m_impl->hoverHelper = new HoverHelper(this);
+    auto* ui = modelProvider->ui();
+
+    m_impl->hoverHelper = new HoverHelper(modelProvider, this);
     m_impl->spellBg     = new SpellBg(this);
     m_impl->spellBg->move(5, 5);
 

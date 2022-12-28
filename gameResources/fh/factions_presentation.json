@@ -138,7 +138,6 @@
 },
 
 "sod.faction.fortress"             : {
-    "untranslatedName" : "Fortress",
     "nativeTerrain": "sod.terrain.swamp",
     "goesAfterId":"sod.faction.stronghold",
     "warriorClass": { "pres": {
@@ -203,7 +202,6 @@
 },
 "sod.faction.special" : {
     "pres": { "unitBackground":"crbkgneu" },
-    "untranslatedName" : "Special Objects",
     "alignment":"special"
 }
 

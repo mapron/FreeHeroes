@@ -41,7 +41,7 @@ function(CreateUiRules outfiles extraIncludes extraPostprocess)
         
         set(postprocessArgs)
         foreach(cmakeScript ${extraPostprocess})
-            append(postprocessArgs COMMAND ${CMAKE_COMMAND} ARGS -DINPUT=${outfile} -P ${cmakeScript})
+            list(APPEND postprocessArgs COMMAND ${CMAKE_COMMAND} ARGS -DINPUT=${outfile} -P ${cmakeScript})
         endforeach()
 
         list(APPEND includes ${incl_path} )

@@ -88,8 +88,7 @@ BattleFieldItem::BattleFieldItem(const ICursorLibrary*        cursorLibrary,
                                  const Core::BattleFieldGeometry& battleGeometry,
                                  BattleControlPlan&               controlPlan,
 
-                                 Gui::IAppSettings* appSettings,
-                                 QGraphicsItem*     parent)
+                                 QGraphicsItem* parent)
     : QGraphicsObject(parent)
     , m_cursorLibrary(cursorLibrary)
     , m_musicBox(musicBox)
@@ -99,9 +98,6 @@ BattleFieldItem::BattleFieldItem(const ICursorLibrary*        cursorLibrary,
     , m_battleControl(battleControl)
     , m_battleGeometry(battleGeometry)
     , m_controlPlan(controlPlan)
-
-    , m_appSettings(appSettings)
-
 {
     m_unitGroup = new QGraphicsItemGroup(this);
     {
@@ -200,7 +196,7 @@ void BattleFieldItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* o
         painter->drawPolygon(defaultGeometry.getHexPolygon(pos, scale));
     };
     painter->setBrush(QBrush(Qt::NoBrush));
-    painter->setPen(m_appSettings->battle().displayGrid ? QPen(mainGrid, 0.0) : Qt::NoPen);
+    painter->setPen(m_modelsProvider->appSettings()->battle().displayGrid ? QPen(mainGrid, 0.0) : Qt::NoPen);
 
     auto getAvailableMovement = [this](BattleStackConstPtr stack) -> QSet<BattlePosition> {
         if (!stack)
@@ -261,7 +257,7 @@ void BattleFieldItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* o
                 brush = shadowAvailable;
 
             painter->setBrush(brush);
-            drawCellBorder(pos, m_appSettings->battle().displayGrid ? 1. : 0.95);
+            drawCellBorder(pos, m_modelsProvider->appSettings()->battle().displayGrid ? 1. : 0.95);
         }
     }
 
@@ -271,7 +267,7 @@ void BattleFieldItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* o
         drawCellBorder(pos, 0.7);
     }
 
-    if (m_appSettings->battle().displayPath) {
+    if (m_modelsProvider->appSettings()->battle().displayPath) {
         painter->setPen(QPen(pathTrace, 3, Qt::DotLine));
         if (m_controlPlan.m_planMove.isValid() && !m_controlPlan.m_planMove.m_walkPath.empty()) {
             QVector<QLineF> lines;
@@ -806,7 +802,7 @@ void BattleFieldItem::onSummon(const Caster&, LibrarySpellConstPtr spell, Battle
 
     auto* guiSpell = m_modelsProvider->spells()->find(spell);
 
-    const int animationDuration       = std::max(1, 1500 * m_appSettings->battle().otherTimePercent / 100);
+    const int animationDuration       = std::max(1, 1500 * m_modelsProvider->appSettings()->battle().otherTimePercent / 100);
     const int animationDurationExtend = animationDuration + 2000;
     const int soundDurationMax        = std::min(1500, animationDurationExtend);
 
@@ -860,7 +856,7 @@ void BattleFieldItem::onCastInternal(const Caster& caster, const AffectedMagic& 
     auto sequencer = makeSequencer();
     (void) caster;
 
-    const int animationDuration       = std::max(1, 1500 * m_appSettings->battle().otherTimePercent / 100);
+    const int animationDuration       = std::max(1, 1500 * m_modelsProvider->appSettings()->battle().otherTimePercent / 100);
     const int animationDurationExtend = animationDuration + 2000;
     const int soundDurationMax        = std::min(pres.soundDuration, animationDurationExtend);
 
@@ -1135,7 +1131,7 @@ void BattleFieldItem::updateUnitHighlights()
         const bool    newHovered = hovered.count(stack) > 0;
         graphics.spriteItem->setHighlight(BattleStackSpriteItem::Highlight::Selected, (stack == m_controlPlan.m_selectedStack));
         graphics.spriteItem->setHighlight(BattleStackSpriteItem::Highlight::Hovered, newHovered);
-        if (m_appSettings->battle().counterDamageHint)
+        if (m_modelsProvider->appSettings()->battle().counterDamageHint)
             graphics.spriteItem->setCounterExtra(-hovered[stack]);
 
         graphics.sporadic.cfg.enabled = stack->isAlive() && m_controlAvailable; // @todo: not alive, but can move maybe.
@@ -1146,7 +1142,7 @@ void BattleFieldItem::updateUnitHighlights()
 
 std::unique_ptr<AnimationSequencer> BattleFieldItem::makeSequencer()
 {
-    auto sequencer = std::make_unique<AnimationSequencer>(m_appSettings->battle(), m_musicBox);
+    auto sequencer = std::make_unique<AnimationSequencer>(m_modelsProvider->appSettings()->battle(), m_musicBox);
     sequencer->enableSuperSpeed(m_superspeed);
     return sequencer;
 }

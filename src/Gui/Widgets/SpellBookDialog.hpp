@@ -14,18 +14,17 @@
 #include <memory>
 
 namespace FreeHeroes::Gui {
-class SpellsModel;
-class UiCommonModel;
+class LibraryModelsProvider;
 class GUIWIDGETS_EXPORT SpellBookDialog : public QDialog {
     Q_OBJECT
 public:
     SpellBookDialog(const Core::AdventureHero::SpellList& spellList,
-                    const SpellsModel*                    spellsModel,
-                    const UiCommonModel*                  ui,
-                    int                                   mana,
-                    bool                                  allowAdventureCast,
-                    bool                                  allowBattleCast,
-                    QWidget*                              parent);
+                    const LibraryModelsProvider*          modelProvider,
+
+                    int      mana,
+                    bool     allowAdventureCast,
+                    bool     allowBattleCast,
+                    QWidget* parent);
     ~SpellBookDialog();
 
     Core::LibrarySpellConstPtr getSelectedSpell() const;

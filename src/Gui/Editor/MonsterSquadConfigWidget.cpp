@@ -7,16 +7,16 @@
 
 #include "ui_MonsterSquadConfigWidget.h"
 
-#include "AdventureArmy.hpp"
 #include "AdventureWrappers.hpp"
 #include "LibraryModels.hpp"
 
 namespace FreeHeroes::Gui {
 using namespace Core;
 
-MonsterSquadConfigWidget::MonsterSquadConfigWidget(QWidget* parent)
+MonsterSquadConfigWidget::MonsterSquadConfigWidget(const LibraryModelsProvider* modelProvider, QWidget* parent)
     : QWidget(parent)
     , m_ui(std::make_unique<Ui::MonsterSquadConfigWidget>())
+    , m_modelProvider(modelProvider)
 {
     m_ui->setupUi(this);
 
@@ -37,9 +37,9 @@ MonsterSquadConfigWidget::MonsterSquadConfigWidget(QWidget* parent)
     }
 }
 
-void MonsterSquadConfigWidget::setModels(const LibraryModelsProvider* modelProvider)
+void MonsterSquadConfigWidget::setModels()
 {
-    m_ui->stackEditorPack->setUnitsModel(modelProvider->units());
+    m_ui->stackEditorPack->setUnitsModel(m_modelProvider->units());
 }
 
 MonsterSquadConfigWidget::~MonsterSquadConfigWidget() = default;

@@ -16,11 +16,12 @@ class QLabel;
 class QWidget;
 namespace FreeHeroes::Gui {
 class GeneralPopupDialog;
+class LibraryModelsProvider;
 class GUIWIDGETS_EXPORT HoverHelper : public QObject
 
 {
 public:
-    HoverHelper(QWidget* parent);
+    HoverHelper(const LibraryModelsProvider* modelProvider, QWidget* parent);
     ~HoverHelper();
 
     void addWidgets(const QList<QWidget*>& watch);
@@ -34,10 +35,11 @@ public:
     bool hidePopup(QWidget* what);
 
 private:
-    QLabel*                      m_hoverLabel = nullptr;
-    QWidget*                     m_parent     = nullptr;
-    QPointer<GeneralPopupDialog> m_dialog;
-    QMap<QWidget*, QWidget*>     m_aliases;
+    const LibraryModelsProvider* const m_modelProvider;
+    QLabel*                            m_hoverLabel = nullptr;
+    QWidget*                           m_parent     = nullptr;
+    QPointer<GeneralPopupDialog>       m_dialog;
+    QMap<QWidget*, QWidget*>           m_aliases;
 };
 
 }

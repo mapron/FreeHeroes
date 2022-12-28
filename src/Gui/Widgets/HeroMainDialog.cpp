@@ -33,13 +33,14 @@ namespace {
 const QString formatTwoLine = QString("<p style=\"line-height:70%\"><font color=\"#EDD57A\">%1</font></p><p>%2</p>");
 }
 
-HeroMainDialog::HeroMainDialog(QWidget* parent)
+HeroMainDialog::HeroMainDialog(const LibraryModelsProvider* modelsProvider, QWidget* parent)
     : QDialog(parent)
     , m_ui(std::make_unique<Ui::HeroMainDialog>())
+    , m_modelsProvider(modelsProvider)
 {
     setWindowFlag(Qt::FramelessWindowHint, true);
-    m_ui->setupUi(this);
-    m_hoverHelper = std::make_unique<HoverHelper>(this);
+    m_ui->setupUi(this, std::tuple{ modelsProvider });
+    m_hoverHelper = std::make_unique<HoverHelper>(modelsProvider, this);
 
     QFont f = m_ui->labelHeroName->font();
     if (f.pixelSize() != -1)
@@ -120,7 +121,7 @@ HeroMainDialog::HeroMainDialog(QWidget* parent)
                        m_ui->pushButtonDeleteHero,
                        m_ui->pushButtonBag,
                        m_ui->pushButtonListInfo })
-        DialogUtils::setupClickSound(btn);
+        DialogUtils::setupClickSound(modelsProvider, btn);
 
     m_ui->pushButtonTacticsDisable->setEnabled(false); // @todo: tactics someday disablement.
     m_ui->pushButtonSplit->setEnabled(false);          // @todo: split
@@ -130,7 +131,7 @@ HeroMainDialog::HeroMainDialog(QWidget* parent)
     m_ui->pushButtonTacticsDisable->setProperty("hoverName", tr("Disable tactics formation"));
     m_ui->pushButtonSplit->setProperty("hoverName", tr("Split squad"));
 
-    DialogUtils::makeAcceptButton(this, m_ui->pushButtonClose, false);
+    DialogUtils::makeAcceptButton(modelsProvider, this, m_ui->pushButtonClose, false);
     connect(m_ui->armyControlWidget, &ArmyControlWidget::showInfo, this, &HeroMainDialog::showInfo);
     connect(m_ui->armyControlWidget, &ArmyControlWidget::hideInfo, this, &HeroMainDialog::hideInfo);
 
@@ -158,17 +159,15 @@ HeroMainDialog::~HeroMainDialog() = default;
 
 void HeroMainDialog::setSource(const GuiAdventureArmy*       heroArmy,
                                Core::IAdventureSquadControl* adventureSquadControl,
-                               Core::IAdventureHeroControl*  adventureHeroControl,
-                               const LibraryModelsProvider*  modelsProvider)
+                               Core::IAdventureHeroControl*  adventureHeroControl)
 {
     m_heroArmy              = heroArmy;
     m_hero                  = m_heroArmy->getHero();
     m_adventureSquadControl = adventureSquadControl;
     m_adventureHeroControl  = adventureHeroControl;
-    m_modelsProvider        = modelsProvider;
 
     m_ui->armyControlWidget->setSource(heroArmy->getSquad(), adventureSquadControl);
-    m_ui->artifactPuppetWidget->setSource(m_hero, m_modelsProvider->artifacts(), m_modelsProvider->ui(), adventureHeroControl);
+    m_ui->artifactPuppetWidget->setSource(m_hero, adventureHeroControl);
     m_ui->pageStatsList->setSource(m_hero->getSource());
 
     m_ui->ftopMain->setProperty("specialColor", QColor(230, 0, 0, 128)); // @todo: player color.
@@ -203,7 +202,7 @@ void HeroMainDialog::updateHeroAppearence()
     m_ui->labelMoraleIcon->setDetails(m_heroArmy->getSource()->squad.estimated.moraleDetails);
     m_ui->labelLuckIcon->setDetails(m_heroArmy->getSource()->squad.estimated.luckDetails);
 
-    m_ui->primaryStatsWidget->setParams(m_hero->getSource()->estimated.primary, m_modelsProvider);
+    m_ui->primaryStatsWidget->setParams(m_hero->getSource()->estimated.primary);
 
     auto& expInfo  = m_modelsProvider->ui()->skillInfo[Core::HeroPrimaryParamType::Experience];
     auto& manaInfo = m_modelsProvider->ui()->skillInfo[Core::HeroPrimaryParamType::Mana];
@@ -269,8 +268,7 @@ void HeroMainDialog::openSpellBook()
     auto spells = m_hero->getSource()->estimated.availableSpells;
 
     SpellBookDialog dlg(spells,
-                        m_modelsProvider->spells(),
-                        m_modelsProvider->ui(),
+                        m_modelsProvider,
                         m_hero->getSource()->mana,
                         false,
                         false,

@@ -37,7 +37,8 @@ public:
                                  Core::IAIFactory&            aiFactory,
                                  BattleControlPlan&           controlPlan,
                                  const LibraryModelsProvider* modelsProvider,
-                                 QWidget*                     parent = nullptr);
+
+                                 QWidget* parent = nullptr);
     ~BattleControlWidget();
 
     void setAI(bool attacker, bool defender);
@@ -97,13 +98,13 @@ private:
 
 private:
     std::unique_ptr<Ui::BattleControlWidget> m_ui;
-    IAppSettings*                            m_appSettings;
+    const IAppSettings* const                m_appSettings;
 
-    Core::IBattleView&           m_battleView;
-    Core::IBattleControl&        m_battleControl;
-    Core::IAIFactory&            m_aiFactory;
-    BattleControlPlan&           m_controlPlan;
-    const LibraryModelsProvider* m_modelsProvider;
+    Core::IBattleView&                 m_battleView;
+    Core::IBattleControl&              m_battleControl;
+    Core::IAIFactory&                  m_aiFactory;
+    BattleControlPlan&                 m_controlPlan;
+    const LibraryModelsProvider* const m_modelsProvider;
 
     Core::IReplayHandle*       m_replayHandle = nullptr;
     std::unique_ptr<Core::IAI> m_ai;

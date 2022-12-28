@@ -216,6 +216,8 @@ AddTarget(TYPE shared NAME GuiResource OUTPUT_PREFIX FH
     LINK_LIBRARIES
         GuiInt CorePlatform
     QT_MODULES Widgets
+    UIC_POSTPROCESS_SCRIPTS
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
 
 AddTarget(TYPE shared NAME GuiLocalization OUTPUT_PREFIX FH
@@ -224,6 +226,8 @@ AddTarget(TYPE shared NAME GuiLocalization OUTPUT_PREFIX FH
     LINK_LIBRARIES
         GuiInt CorePlatform GameObjects
     QT_MODULES Widgets
+    UIC_POSTPROCESS_SCRIPTS
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
 
 AddTarget(TYPE shared NAME GuiGameWrappers OUTPUT_PREFIX FH
@@ -233,6 +237,8 @@ AddTarget(TYPE shared NAME GuiGameWrappers OUTPUT_PREFIX FH
         GuiInt CorePlatform GameInt SoundInt
         GameObjects GuiResource CoreResource GuiUtils
     QT_MODULES Widgets
+    UIC_POSTPROCESS_SCRIPTS
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
 
 AddTarget(TYPE shared NAME GuiUtils OUTPUT_PREFIX FH
@@ -241,6 +247,8 @@ AddTarget(TYPE shared NAME GuiUtils OUTPUT_PREFIX FH
     LINK_LIBRARIES
         GuiInt
     QT_MODULES Widgets
+    UIC_POSTPROCESS_SCRIPTS
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
 
 AddTarget(TYPE shared NAME GuiWidgets OUTPUT_PREFIX FH
@@ -251,6 +259,8 @@ AddTarget(TYPE shared NAME GuiWidgets OUTPUT_PREFIX FH
 
         GuiGameWrappers GuiUtils
     QT_MODULES Widgets
+    UIC_POSTPROCESS_SCRIPTS
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
 
 AddTarget(TYPE shared NAME GuiEditor OUTPUT_PREFIX FH
@@ -262,6 +272,8 @@ AddTarget(TYPE shared NAME GuiEditor OUTPUT_PREFIX FH
 
         GuiWidgets GuiUtils
     QT_MODULES Widgets
+    UIC_POSTPROCESS_SCRIPTS
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
 
 AddTarget(TYPE shared NAME GuiBattle OUTPUT_PREFIX FH
@@ -275,6 +287,8 @@ AddTarget(TYPE shared NAME GuiBattle OUTPUT_PREFIX FH
         GuiWidgets
         GuiGameWrappers
     QT_MODULES Widgets
+    UIC_POSTPROCESS_SCRIPTS
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
 
 AddTarget(TYPE shared NAME GuiApplication OUTPUT_PREFIX FH
@@ -298,6 +312,8 @@ AddTarget(TYPE shared NAME GuiApplication OUTPUT_PREFIX FH
         GuiGameWrappers
         SoundPlayer
     QT_MODULES Widgets
+    UIC_POSTPROCESS_SCRIPTS
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
 
 AddTarget(TYPE shared NAME MapUtil
@@ -330,6 +346,8 @@ AddTarget(TYPE shared NAME MapUtilGui
         CoreLogic
         MapUtil
     QT_MODULES Widgets
+    UIC_POSTPROCESS_SCRIPTS
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
 
 # App
@@ -349,6 +367,8 @@ AddTarget( TYPE app_ui NAME LegacyConverter
 
     zlib ${PTHREAD}
     QT_MODULES Widgets
+    UIC_POSTPROCESS_SCRIPTS
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
 AddTarget(TYPE app_ui NAME BattleEmulator
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/BattleEmulator
@@ -368,6 +388,8 @@ AddTarget(TYPE app_ui NAME BattleEmulator
         CoreLogic
         BattleLogic
     QT_MODULES Widgets
+    UIC_POSTPROCESS_SCRIPTS
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
 
 AddTarget(TYPE app_ui NAME MapEditor
@@ -381,6 +403,8 @@ AddTarget(TYPE app_ui NAME MapEditor
         GuiInt
         MapUtilGui
     QT_MODULES Widgets
+    UIC_POSTPROCESS_SCRIPTS
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
 
 AddTarget(TYPE app_ui NAME MapToolUI
@@ -402,6 +426,8 @@ AddTarget(TYPE app_ui NAME MapToolUI
         BattleLogic
         MapUtil
     QT_MODULES Widgets
+    UIC_POSTPROCESS_SCRIPTS
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
 
 AddTarget(TYPE app_console NAME MapToolCLI
@@ -418,15 +444,21 @@ AddTarget(TYPE app_console NAME MapToolCLI
 AddTarget(TYPE app_ui NAME Launcher
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/Launcher
     LINK_LIBRARIES
+        GuiInt
         CorePlatform
     QT_MODULES Widgets
+    UIC_POSTPROCESS_SCRIPTS
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
 
 AddTarget(TYPE app_ui NAME PostInstallSetup
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/PostInstallSetup
     LINK_LIBRARIES
+        GuiInt
         CorePlatform
     QT_MODULES Widgets
+    UIC_POSTPROCESS_SCRIPTS
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
 
 # tests
@@ -454,6 +486,8 @@ AddTarget(TYPE app_ui NAME SoundTests OUTPUT_NAME Tests_Sound
         GuiApplication
 
     QT_MODULES Widgets
+    UIC_POSTPROCESS_SCRIPTS
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
 
 

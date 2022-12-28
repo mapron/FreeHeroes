@@ -22,10 +22,11 @@ namespace Gui {
 class DarkFrameLabelIcon;
 class HoverHelper;
 class GuiAdventureHero;
+class LibraryModelsProvider;
 class GUIWIDGETS_EXPORT SkillsGridWidget : public QWidget {
     Q_OBJECT
 public:
-    SkillsGridWidget(QWidget* parent = nullptr);
+    SkillsGridWidget(const LibraryModelsProvider* modelProvider, QWidget* parent = nullptr);
     ~SkillsGridWidget();
 
     void setParams(const GuiAdventureHero* hero);

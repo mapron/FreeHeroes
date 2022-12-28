@@ -302,8 +302,10 @@ QVariant MapBanksModel::data(const QModelIndex& index, int role) const
 LibraryModelsProvider::LibraryModelsProvider(const IGameDatabase*    gameDatabase,
                                              Sound::IMusicBox*       musicBox,
                                              const IGraphicsLibrary* graphicsLibrary,
+                                             const IAppSettings*     appSettings,
                                              QObject*                parent)
     : QObject(parent)
+    , m_appSettings(appSettings)
 {
     m_artifacts = new ArtifactsModel(musicBox, graphicsLibrary, this);
     m_units     = new UnitsModel(musicBox, graphicsLibrary, this);

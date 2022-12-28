@@ -274,8 +274,9 @@ struct ArtifactPuppetWidget::Impl {
     AdventureHeroConstPtr  m_hero                 = nullptr;
     IAdventureHeroControl* m_adventureHeroControl = nullptr;
 
-    const ArtifactsModel* m_artifactsModel = nullptr;
-    BagListModel*         m_listModel      = nullptr;
+    const LibraryModelsProvider* const m_modelProvider  = nullptr;
+    const ArtifactsModel* const        m_artifactsModel = nullptr;
+    BagListModel*                      m_listModel      = nullptr;
 
     FlatButton*  m_scrollLeft   = nullptr;
     FlatButton*  m_scrollRight  = nullptr;
@@ -292,8 +293,10 @@ struct ArtifactPuppetWidget::Impl {
 
     HoverHelper* m_hoverHelper = nullptr;
 
-    Impl(ArtifactPuppetWidget* parent)
+    Impl(const LibraryModelsProvider* modelProvider, ArtifactPuppetWidget* parent)
         : m_parent(parent)
+        , m_modelProvider(modelProvider)
+        , m_artifactsModel(modelProvider->artifacts())
     {}
 
     void startDrag(LibraryArtifactConstPtr art, Core::ArtifactSlotType slot, bool fromBag)
@@ -326,14 +329,14 @@ struct ArtifactPuppetWidget::Impl {
     }
 };
 
-ArtifactPuppetWidget::ArtifactPuppetWidget(QWidget* parent)
+ArtifactPuppetWidget::ArtifactPuppetWidget(const LibraryModelsProvider* modelProvider, QWidget* parent)
     : QWidget(parent)
-    , m_impl(std::make_unique<Impl>(this))
+    , m_impl(std::make_unique<Impl>(modelProvider, this))
 {
     QVBoxLayout* layout = new QVBoxLayout(this);
     layout->setMargin(0);
     m_impl->m_puppetWidget = new PuppetBack(this);
-    m_impl->m_hoverHelper  = new HoverHelper(this);
+    m_impl->m_hoverHelper  = new HoverHelper(modelProvider, this);
     //puppetWidget->setFixedHeight(150);
     layout->addWidget(m_impl->m_puppetWidget, 1);
 
@@ -446,6 +449,17 @@ ArtifactPuppetWidget::ArtifactPuppetWidget(QWidget* parent)
         if (m_impl->m_hero->hasSpellBook)
             emit openSpellBook();
     };
+
+    for (auto& btn : m_impl->m_buttons) {
+        btn->m_artifactsModel = m_impl->m_artifactsModel;
+    }
+
+    for (auto& btn : m_impl->m_buttonsBag) {
+        btn->m_artifactsModel = m_impl->m_artifactsModel;
+    }
+
+    m_impl->m_scrollLeft->setIcon(modelProvider->ui()->buttons.scrollLeft->get());
+    m_impl->m_scrollRight->setIcon(modelProvider->ui()->buttons.scrollRight->get());
 }
 
 void ArtifactPuppetWidget::refresh()
@@ -472,25 +486,18 @@ void ArtifactPuppetWidget::setHoverLabel(QLabel* hoverLabel)
 }
 
 void ArtifactPuppetWidget::setSource(const GuiAdventureHero*      hero,
-                                     const ArtifactsModel*        artifactsModel,
-                                     const UiCommonModel*         ui,
                                      Core::IAdventureHeroControl* adventureHeroControl)
 {
     m_impl->m_hero = hero->getSource();
     m_impl->m_listModel->setHero(hero->getSource());
-    m_impl->m_artifactsModel       = artifactsModel;
+
     m_impl->m_adventureHeroControl = adventureHeroControl;
 
-    m_impl->m_scrollLeft->setIcon(ui->buttons.scrollLeft->get());
-    m_impl->m_scrollRight->setIcon(ui->buttons.scrollRight->get());
-
     for (auto& btn : m_impl->m_buttons) {
-        btn->m_artifactsModel = artifactsModel;
         btn->setHero(hero->getSource());
     }
 
     for (auto& btn : m_impl->m_buttonsBag) {
-        btn->m_artifactsModel = artifactsModel;
         btn->setHero(hero->getSource());
     }
 }

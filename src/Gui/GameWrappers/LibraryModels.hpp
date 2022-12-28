@@ -212,12 +212,14 @@ public:
 };
 
 class UiCommonModel;
+class IAppSettings;
 class GUIGAMEWRAPPERS_EXPORT LibraryModelsProvider : public QObject {
     Q_OBJECT
 public:
     LibraryModelsProvider(const Core::IGameDatabase* gameDatabase,
                           Sound::IMusicBox*          musicBox,
                           const IGraphicsLibrary*    graphicsLibrary,
+                          const IAppSettings*        appSettings,
                           QObject*                   parent = nullptr);
 
     // setModel(QAbstractModel*) need non-const model pointer.
@@ -233,6 +235,7 @@ public:
     MapBanksModel    * mapBanks   () const noexcept { return m_mapBanks;}
     UiCommonModel    * ui         () const noexcept { return m_uiCommon;}
     // clang-format on
+    const IAppSettings* appSettings() const noexcept { return m_appSettings; }
 
 private:
     ArtifactsModel* m_artifacts;
@@ -244,6 +247,8 @@ private:
     TerrainsModel*  m_terrains;
     MapBanksModel*  m_mapBanks;
     UiCommonModel*  m_uiCommon;
+
+    const IAppSettings* const m_appSettings;
 };
 
 }

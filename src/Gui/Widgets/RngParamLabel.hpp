@@ -12,6 +12,7 @@
 #include "Stat.hpp"
 
 namespace FreeHeroes::Gui {
+class LibraryModelsProvider;
 class UiCommonModel;
 class GUIWIDGETS_EXPORT RngLabel : public DarkFrameLabelIcon {
 protected:
@@ -22,7 +23,7 @@ protected:
     bool           m_clampText   = false;
 
 public:
-    RngLabel(QWidget* parent = nullptr);
+    RngLabel(const LibraryModelsProvider* modelProvider, QWidget* parent = nullptr);
     ~RngLabel();
 
     void setValue(int bonusValue);
@@ -31,7 +32,7 @@ public:
 class LuckLabel : public RngLabel {
     Q_OBJECT
 public:
-    LuckLabel(QWidget* parent = nullptr);
+    LuckLabel(const LibraryModelsProvider* modelProvider, QWidget* parent = nullptr);
 
     void setDetails(const Core::LuckDetails& details);
 };
@@ -39,7 +40,7 @@ public:
 class MoraleLabel : public RngLabel {
     Q_OBJECT
 public:
-    MoraleLabel(QWidget* parent = nullptr);
+    MoraleLabel(const LibraryModelsProvider* modelProvider, QWidget* parent = nullptr);
 
     void setDetails(const Core::MoraleDetails& details);
 };

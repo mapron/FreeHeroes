@@ -193,7 +193,7 @@ bool Application::load()
 
     if (m_options.contains(Option::LibraryModels)) {
         ProfilerScope scope("LibraryModels load");
-        m_modelsProvider = std::make_shared<LibraryModelsProvider>(m_gameDatabaseUi, m_musicBox.get(), m_graphicsLibrary.get());
+        m_modelsProvider = std::make_shared<LibraryModelsProvider>(m_gameDatabaseUi, m_musicBox.get(), m_graphicsLibrary.get(), m_impl->appConfig.get());
     }
 
     if (m_options.contains(Option::AppStyle)) {

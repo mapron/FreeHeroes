@@ -18,9 +18,10 @@
 namespace FreeHeroes::Gui {
 using namespace Core;
 
-PrimaryStatsWidget::PrimaryStatsWidget(QWidget* parent)
+PrimaryStatsWidget::PrimaryStatsWidget(const LibraryModelsProvider* modelsProvider, QWidget* parent)
     : QWidget(parent)
-    , m_hoverHelper(std::make_unique<HoverHelper>(this))
+    , m_modelsProvider(modelsProvider)
+    , m_hoverHelper(std::make_unique<HoverHelper>(modelsProvider, this))
 {
     m_params = { Core::HeroPrimaryParamType::Attack, Core::HeroPrimaryParamType::Defense, Core::HeroPrimaryParamType::SpellPower, Core::HeroPrimaryParamType::Intelligence };
 
@@ -80,9 +81,18 @@ PrimaryStatsWidget::PrimaryStatsWidget(QWidget* parent)
         botLayout->addWidget(label);
     for (auto* label : m_valueTxt)
         botLayout->setStretchFactor(label, 1);
+
+    auto& statsMap = m_modelsProvider->ui()->skillInfo;
+    for (int i = 0; i < 4; ++i) {
+        auto& skillInfo = statsMap[m_params[i]];
+        m_titleTxt[i]->setText(skillInfo.name);
+        m_titleTxt[i]->setProperty("popupPixmap", skillInfo.iconLarge->get());
+        m_titleTxt[i]->setProperty("popupDescr", skillInfo.descr);
+        m_iconsLabels[i]->setPixmap(skillInfo.iconMedium->get());
+    }
 }
 
-void PrimaryStatsWidget::setParams(const HeroPrimaryParams& primary, const LibraryModelsProvider* modelsProvider)
+void PrimaryStatsWidget::setParams(const HeroPrimaryParams& primary)
 {
     QStringList values{
         QString("%1").arg(primary.ad.attack),
@@ -90,15 +100,9 @@ void PrimaryStatsWidget::setParams(const HeroPrimaryParams& primary, const Libra
         QString("%1").arg(primary.magic.spellPower),
         QString("%1").arg(primary.magic.intelligence),
     };
-    auto& statsMap = modelsProvider->ui()->skillInfo;
     for (int i = 0; i < 4; ++i) {
-        auto& skillInfo = statsMap[m_params[i]];
         m_valueTxt[i]->setText(values[i]);
-        m_titleTxt[i]->setText(skillInfo.name);
         m_titleTxt[i]->setProperty("popupBottom", values[i] + " " + m_titleTxt[i]->text());
-        m_titleTxt[i]->setProperty("popupPixmap", skillInfo.iconLarge->get());
-        m_titleTxt[i]->setProperty("popupDescr", skillInfo.descr);
-        m_iconsLabels[i]->setPixmap(skillInfo.iconMedium->get());
     }
 }
 

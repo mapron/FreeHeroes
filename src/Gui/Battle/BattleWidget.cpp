@@ -94,9 +94,9 @@ class HeroInfoWidget : public QWidget {
     const LibraryModelsProvider* m_modelsProvider;
 
 public:
-    HeroInfoWidget(QStringList paramLabels, QWidget* parent)
+    HeroInfoWidget(const LibraryModelsProvider* modelProvider, QStringList paramLabels, QWidget* parent)
         : QWidget(parent, Qt::Window | Qt::FramelessWindowHint)
-        , m_modelsProvider(loadDependency<LibraryModelsProvider>(parent))
+        , m_modelsProvider(modelProvider)
     {
         setAttribute(Qt::WA_ShowWithoutActivating);
 
@@ -233,12 +233,15 @@ BattleWidget::BattleWidget(Core::IBattleView&               battleView,
                            const LibraryModelsProvider*     modelsProvider,
                            const Core::BattleFieldGeometry& battleGeometry,
 
+                           const ICursorLibrary* cursorLibrary,
+                           Sound::IMusicBox*     musicBox,
+
                            Gui::IAppSettings* appSettings,
                            QWidget*           parent)
     : QDialog(parent)
     , m_controlPlan(new BattleControlPlan(this))
-    , m_cursorLibrary(loadDependency<ICursorLibrary>(parent))
-    , m_musicBox(loadDependency<Sound::IMusicBox>(parent))
+    , m_cursorLibrary(cursorLibrary)
+    , m_musicBox(musicBox)
 
     , m_battleView(battleView)
     , m_battleControl(battleControl)
@@ -251,7 +254,7 @@ BattleWidget::BattleWidget(Core::IBattleView&               battleView,
     auto* layout = DialogUtils::makeMainDialogFrame(this, true);
     layout->setSpacing(0);
 
-    m_battlefield.reset(new BattleFieldItem(m_cursorLibrary, m_musicBox, m_modelsProvider, m_battleView, m_battleControl, battleGeometry, *m_controlPlan, m_appSettings));
+    m_battlefield.reset(new BattleFieldItem(m_cursorLibrary, m_musicBox, m_modelsProvider, m_battleView, m_battleControl, battleGeometry, *m_controlPlan));
 
     BattleView* battleViewWidget = new FreeHeroes::Gui::BattleView(this);
     layout->addWidget(battleViewWidget);
@@ -298,8 +301,8 @@ BattleWidget::BattleWidget(Core::IBattleView&               battleView,
         tr("Mana", "short version")
     };
 
-    m_heroInfoWidgetAttacker = std::make_unique<HeroInfoWidget>(paramLabels, this);
-    m_heroInfoWidgetDefender = std::make_unique<HeroInfoWidget>(paramLabels, this);
+    m_heroInfoWidgetAttacker = std::make_unique<HeroInfoWidget>(m_modelsProvider, paramLabels, this);
+    m_heroInfoWidgetDefender = std::make_unique<HeroInfoWidget>(m_modelsProvider, paramLabels, this);
     m_heroInfoWidgetAttacker->hide();
     m_heroInfoWidgetDefender->hide();
 }

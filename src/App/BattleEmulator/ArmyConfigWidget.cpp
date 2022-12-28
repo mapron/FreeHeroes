@@ -29,12 +29,16 @@ namespace FreeHeroes::BattleEmulator {
 using namespace Core;
 using namespace Gui;
 
-ArmyConfigWidget::ArmyConfigWidget(QWidget* parent)
+ArmyConfigWidget::ArmyConfigWidget(const Gui::LibraryModelsProvider* modelProvider,
+                                   Core::IRandomGenerator*           randomGenerator,
+                                   QWidget*                          parent)
     : QWidget(parent)
     , m_ui(std::make_unique<Ui::ArmyConfigWidget>())
+    , m_modelProvider(modelProvider)
+    , m_randomGenerator(randomGenerator)
 {
     ProfilerScope scope("ArmyConfigWidget()");
-    m_ui->setupUi(this);
+    m_ui->setupUi(this, std::tuple{ modelProvider, randomGenerator });
     ProfilerScope scope2("ArmyConfigWidget() - after ui");
 
     connect(m_ui->pushButtonGenerateArmy, &QPushButton::clicked, this, &ArmyConfigWidget::generate);
@@ -94,18 +98,16 @@ void ArmyConfigWidget::refresh()
         m_tmpRefresh();
 }
 
-void ArmyConfigWidget::setModels(const LibraryModelsProvider* modelProvider, Core::IRandomGenerator* randomGenerator)
+void ArmyConfigWidget::setModels()
 {
-    m_ui->heroWithArmyConfigWidget->setModels(modelProvider, randomGenerator);
-    m_ui->monsterSquadConfigWidget->setModels(modelProvider);
-    m_modelProvider   = modelProvider;
-    m_randomGenerator = randomGenerator;
+    m_ui->heroWithArmyConfigWidget->setModels();
+    m_ui->monsterSquadConfigWidget->setModels();
 
     m_unitsFilter = new UnitsFilterModel(this);
     m_unitsFilter->setSourceModel(m_modelProvider->units());
 
     FactionsFilterModel* factionsFilter = new FactionsFilterModel(this);
-    factionsFilter->setSourceModel(modelProvider->factions());
+    factionsFilter->setSourceModel(m_modelProvider->factions());
     FactionsComboModel* factionsCombo = new FactionsComboModel(factionsFilter, this);
     m_ui->comboBoxFactionSelect->setModel(factionsCombo);
 }
@@ -164,11 +166,11 @@ void ArmyConfigWidget::generate()
 
 void ArmyConfigWidget::showHeroDialog()
 {
-    HeroMainDialog dlg(this);
+    HeroMainDialog dlg(m_modelProvider, this);
     m_tmpRefresh = [&dlg] {
         dlg.refresh();
     };
-    dlg.setSource(m_army, m_adventureControl.get(), m_adventureControl.get(), m_modelProvider);
+    dlg.setSource(m_army, m_adventureControl.get(), m_adventureControl.get());
     dlg.refresh();
     dlg.exec();
 

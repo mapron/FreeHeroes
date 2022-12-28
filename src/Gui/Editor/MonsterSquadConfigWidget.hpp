@@ -25,15 +25,16 @@ class GuiAdventureArmy;
 class GUIEDITOR_EXPORT MonsterSquadConfigWidget : public QWidget {
     Q_OBJECT
 public:
-    MonsterSquadConfigWidget(QWidget* parent = nullptr);
+    MonsterSquadConfigWidget(const LibraryModelsProvider* modelProvider, QWidget* parent = nullptr);
     ~MonsterSquadConfigWidget();
 
 public:
-    void setModels(const LibraryModelsProvider* modelProvider);
+    void setModels();
     void setSource(GuiAdventureArmy* adventureArmy);
 
 private:
     std::unique_ptr<Ui::MonsterSquadConfigWidget> m_ui;
+    const LibraryModelsProvider* const            m_modelProvider;
 };
 
 }

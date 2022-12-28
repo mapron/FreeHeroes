@@ -39,15 +39,19 @@ using namespace Core;
 struct HeroWithArmyConfigWidget::Impl {
 };
 
-HeroWithArmyConfigWidget::HeroWithArmyConfigWidget(QWidget* parent)
+HeroWithArmyConfigWidget::HeroWithArmyConfigWidget(const LibraryModelsProvider* modelProvider,
+                                                   Core::IRandomGenerator*      randomGenerator,
+                                                   QWidget*                     parent)
     : QWidget(parent)
     , m_impl(std::make_unique<Impl>())
     , m_ui(std::make_unique<Ui::HeroWithArmyConfigWidget>())
+    , m_modelProvider(modelProvider)
+    , m_randomGenerator(randomGenerator)
 {
     ProfilerScope scope("HeroWithArmyConfigWidget()");
     {
         ProfilerScope scope3("setupUi");
-        m_ui->setupUi(this);
+        m_ui->setupUi(this, std::tuple{ modelProvider });
     }
     ProfilerScope scope2("remain");
 
@@ -195,16 +199,13 @@ void HeroWithArmyConfigWidget::refresh()
     }
 }
 
-void HeroWithArmyConfigWidget::setModels(const LibraryModelsProvider* modelProvider, Core::IRandomGenerator* randomGenerator)
+void HeroWithArmyConfigWidget::setModels()
 {
-    m_ui->stackEditorPack->setUnitsModel(modelProvider->units());
-
-    m_modelProvider   = modelProvider;
-    m_randomGenerator = randomGenerator;
+    m_ui->stackEditorPack->setUnitsModel(m_modelProvider->units());
 
     m_ui->comboBoxHeroIdentity->setIconSize({ 48, 32 });
 
-    HeroesComboModel* comboModel = new HeroesComboModel(modelProvider->heroes(), m_ui->comboBoxHeroIdentity);
+    HeroesComboModel* comboModel = new HeroesComboModel(m_modelProvider->heroes(), m_ui->comboBoxHeroIdentity);
 
     m_ui->comboBoxHeroIdentity->setModel(comboModel);
 }

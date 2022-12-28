@@ -19,7 +19,7 @@ class LibraryModelsProvider;
 class GUIWIDGETS_EXPORT HeroParameterWidget : public QWidget {
     Q_OBJECT
 public:
-    HeroParameterWidget(QWidget* parent = nullptr);
+    HeroParameterWidget(const LibraryModelsProvider* modelProvider, QWidget* parent = nullptr);
     ~HeroParameterWidget();
 
     void refresh();

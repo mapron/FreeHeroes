@@ -5,7 +5,7 @@
  */
 #include "DialogUtils.hpp"
 
-#include "DependencyInjector.hpp"
+#include "LibraryModels.hpp"
 #include "CustomFrames.hpp"
 #include "UiCommonModel.hpp"
 
@@ -60,13 +60,12 @@ void DialogUtils::commonDialogSetup(QDialog* parent)
     parent->setWindowFlag(Qt::FramelessWindowHint, true);
 }
 
-FlatButton* DialogUtils::makeAcceptButton(QDialog* parent, FlatButton* alreadyAllocated, bool isWide)
+FlatButton* DialogUtils::makeAcceptButton(const LibraryModelsProvider* modelProvider, QDialog* parent, FlatButton* alreadyAllocated, bool isWide)
 {
-    auto* modelProvider = loadDependency<LibraryModelsProvider>(parent);
-    auto& buttons       = modelProvider->ui()->buttons;
+    auto& buttons = modelProvider->ui()->buttons;
 
     FlatButton* btn = alreadyAllocated ? alreadyAllocated : new FlatButton(parent);
-    setupClickSound(btn);
+    setupClickSound(modelProvider, btn);
     QObject::connect(btn, &QPushButton::clicked, parent, &QDialog::accept);
 
     const QSize size = isWide ? QSize(64, 30) : QSize(52, 36);
@@ -79,14 +78,13 @@ FlatButton* DialogUtils::makeAcceptButton(QDialog* parent, FlatButton* alreadyAl
     return btn;
 }
 
-FlatButton* DialogUtils::makeRejectButton(QDialog* parent, FlatButton* alreadyAllocated)
+FlatButton* DialogUtils::makeRejectButton(const LibraryModelsProvider* modelProvider, QDialog* parent, FlatButton* alreadyAllocated)
 {
-    auto* modelProvider = loadDependency<LibraryModelsProvider>(parent);
-    auto& buttons       = modelProvider->ui()->buttons;
+    auto& buttons = modelProvider->ui()->buttons;
 
     const QSize size(64, 30);
     FlatButton* btn = alreadyAllocated ? alreadyAllocated : new FlatButton(parent);
-    setupClickSound(btn);
+    setupClickSound(modelProvider, btn);
     QObject::connect(btn, &QPushButton::clicked, parent, &QDialog::reject);
     QIcon icn = buttons.cancel->get();
 
@@ -98,9 +96,8 @@ FlatButton* DialogUtils::makeRejectButton(QDialog* parent, FlatButton* alreadyAl
     return btn;
 }
 
-void DialogUtils::setupClickSound(QPushButton* button)
+void DialogUtils::setupClickSound(const LibraryModelsProvider* modelProvider, QPushButton* button)
 {
-    auto* modelProvider = loadDependency<LibraryModelsProvider>(button);
     QObject::connect(button, &QPushButton::clicked, button, [modelProvider] {
         modelProvider->ui()->clickEffect->play();
     });

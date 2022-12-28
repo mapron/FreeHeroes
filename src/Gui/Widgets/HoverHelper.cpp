@@ -16,8 +16,9 @@
 
 namespace FreeHeroes::Gui {
 
-HoverHelper::HoverHelper(QWidget* parent)
+HoverHelper::HoverHelper(const LibraryModelsProvider* modelProvider, QWidget* parent)
     : QObject(parent)
+    , m_modelProvider(modelProvider)
     , m_parent(parent)
 {
 }
@@ -110,7 +111,7 @@ bool HoverHelper::showPopup(QWidget* what, bool isModal)
     if (m_dialog) {
         m_dialog->deleteLater();
     }
-    m_dialog = new GeneralPopupDialog(popupDescr, { { popupIcon, popupBottom } }, isModal, false, m_parent);
+    m_dialog = new GeneralPopupDialog(m_modelProvider, popupDescr, { { popupIcon, popupBottom } }, isModal, false, m_parent);
 
     QSize  s         = m_dialog->sizeHint();
     QPoint globalPos = m_parent->mapToGlobal(offset);

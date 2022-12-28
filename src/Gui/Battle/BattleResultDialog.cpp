@@ -5,7 +5,7 @@
  */
 #include "BattleResultDialog.hpp"
 
-#include "DependencyInjector.hpp"
+#include "LibraryModels.hpp"
 #include "DialogUtils.hpp"
 #include "CustomFrames.hpp"
 #include "FormatUtils.hpp"
@@ -170,12 +170,12 @@ BattleResultDialog::BattleResultDialog(const LibraryModelsProvider* modelsProvid
     {
         QHBoxLayout* bottomButtons = new QHBoxLayout();
         mainLayout->addLayout(bottomButtons);
-        bottomButtons->addWidget(DialogUtils::makeRejectButton(this));
+        bottomButtons->addWidget(DialogUtils::makeRejectButton(modelsProvider, this));
         auto* resultQuestion = new QLabel(tr("Save battle results?"), this);
         enlargeLabel(resultQuestion, 2, false);
         resultQuestion->setAlignment(Qt::AlignCenter);
         bottomButtons->addWidget(resultQuestion, 1);
-        bottomButtons->addWidget(DialogUtils::makeAcceptButton(this));
+        bottomButtons->addWidget(DialogUtils::makeAcceptButton(modelsProvider, this));
     }
 }
 

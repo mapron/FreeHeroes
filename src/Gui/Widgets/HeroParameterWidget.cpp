@@ -6,6 +6,7 @@
 #include "HeroParameterWidget.hpp"
 
 #include "DependencyInjector.hpp"
+#include "LibraryModels.hpp"
 #include "UiCommonModel.hpp"
 #include "FormatUtils.hpp"
 
@@ -50,18 +51,15 @@ struct HeroParameterWidget::Impl {
     const LibraryModelsProvider* m_modelsProvider;
     UiCommonModel*               m_ui = nullptr;
     QList<ZeroCallback>          m_onRefresh;
-
-    Impl(QWidget* parent)
-        : m_modelsProvider(loadDependency<LibraryModelsProvider>(parent))
-    {
-        m_ui = m_modelsProvider->ui();
-    }
 };
 
-HeroParameterWidget::HeroParameterWidget(QWidget* parent)
+HeroParameterWidget::HeroParameterWidget(const LibraryModelsProvider* modelProvider, QWidget* parent)
     : QWidget(parent)
-    , m_impl(std::make_unique<Impl>(parent))
+    , m_impl(std::make_unique<Impl>())
 {
+    m_impl->m_modelsProvider = modelProvider;
+    m_impl->m_ui             = modelProvider->ui();
+
     ProfilerScope scope("HeroParameterWidget");
     QHBoxLayout*  proxylayout = new QHBoxLayout(this);
     proxylayout->setMargin(0);

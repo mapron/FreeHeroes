@@ -5,9 +5,9 @@
  */
 #include "RngParamLabel.hpp"
 
-#include "DependencyInjector.hpp"
 #include "LibraryModels.hpp"
 #include "UiCommonModel.hpp"
+#include "IAppSettings.hpp"
 
 #include <QKeyEvent>
 #include <QPainter>
@@ -16,13 +16,12 @@
 
 namespace FreeHeroes::Gui {
 
-RngLabel::RngLabel(QWidget* parent)
+RngLabel::RngLabel(const LibraryModelsProvider* modelProvider, QWidget* parent)
     : DarkFrameLabelIcon(parent)
-    , m_ui(*loadDependency<LibraryModelsProvider>(parent)->ui())
+    , m_ui(*modelProvider->ui())
 {
-    auto ui       = loadDependency<IAppSettings>(parent)->ui();
-    m_displayText = ui.displayAbsMoraleLuck;
-    m_clampText   = ui.clampAbsMoraleLuck;
+    m_displayText = modelProvider->appSettings()->ui().displayAbsMoraleLuck;
+    m_clampText   = modelProvider->appSettings()->ui().clampAbsMoraleLuck;
 }
 
 RngLabel::~RngLabel() = default;
@@ -75,8 +74,8 @@ void RngLabel::setValue(int bonusValue)
     this->setPixmap(pix);
 }
 
-LuckLabel::LuckLabel(QWidget* parent)
-    : RngLabel(parent)
+LuckLabel::LuckLabel(const LibraryModelsProvider* modelProvider, QWidget* parent)
+    : RngLabel(modelProvider, parent)
 {
     m_isLuck = true;
 }
@@ -106,8 +105,8 @@ void LuckLabel::setDetails(const Core::LuckDetails& details)
     setProperty("popupAllowModal", true);
 }
 
-MoraleLabel::MoraleLabel(QWidget* parent)
-    : RngLabel(parent)
+MoraleLabel::MoraleLabel(const LibraryModelsProvider* modelProvider, QWidget* parent)
+    : RngLabel(modelProvider, parent)
 {
     m_isLuck = false;
 }

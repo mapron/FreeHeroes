@@ -35,7 +35,7 @@ class LibraryModelsProvider;
 class GUIWIDGETS_EXPORT HeroMainDialog : public QDialog {
     Q_OBJECT
 public:
-    HeroMainDialog(QWidget* parent = nullptr);
+    HeroMainDialog(const LibraryModelsProvider* modelsProvider, QWidget* parent = nullptr);
     ~HeroMainDialog();
 
 public:
@@ -43,8 +43,7 @@ public:
 
     void setSource(const GuiAdventureArmy*       heroArmy,
                    Core::IAdventureSquadControl* adventureSquadControl,
-                   Core::IAdventureHeroControl*  adventureHeroControl,
-                   const LibraryModelsProvider*  modelsProvider);
+                   Core::IAdventureHeroControl*  adventureHeroControl);
 
 private:
     void updateHeroAppearence();
@@ -58,11 +57,11 @@ private:
 private:
     std::unique_ptr<Ui::HeroMainDialog> m_ui;
 
-    const GuiAdventureArmy*       m_heroArmy              = nullptr;
-    const GuiAdventureHero*       m_hero                  = nullptr;
-    Core::IAdventureSquadControl* m_adventureSquadControl = nullptr;
-    Core::IAdventureHeroControl*  m_adventureHeroControl  = nullptr;
-    const LibraryModelsProvider*  m_modelsProvider        = nullptr;
+    const GuiAdventureArmy*            m_heroArmy              = nullptr;
+    const GuiAdventureHero*            m_hero                  = nullptr;
+    Core::IAdventureSquadControl*      m_adventureSquadControl = nullptr;
+    Core::IAdventureHeroControl*       m_adventureHeroControl  = nullptr;
+    const LibraryModelsProvider* const m_modelsProvider        = nullptr;
 
     std::unique_ptr<UnitInfoWidget> m_infoWidget;
 

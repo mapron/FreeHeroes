@@ -81,10 +81,6 @@ EmulatorMainWidget::EmulatorMainWidget(const Gui::IGraphicsLibrary*         grap
     , m_adventureKingdom(std::make_unique<AdventureKingdom>())
 {
     ProfilerScope scope("EmulatorMainWidget()");
-    storeDependency(this, modelsProvider);
-    storeDependency(this, cursorLibrary);
-    storeDependency(this, musicBox);
-    storeDependency(this, appSettings);
 
     m_uiRng = m_randomGeneratorFactory->create();
     m_uiRng->makeGoodSeed();
@@ -97,7 +93,7 @@ EmulatorMainWidget::EmulatorMainWidget(const Gui::IGraphicsLibrary*         grap
 
     {
         ProfilerScope scope3("setupUI");
-        m_ui->setupUi(this);
+        m_ui->setupUi(this, std::tuple{ m_modelsProvider, m_uiRng.get() });
     }
 
     ProfilerScope scope1("after setupUI");
@@ -110,8 +106,8 @@ EmulatorMainWidget::EmulatorMainWidget(const Gui::IGraphicsLibrary*         grap
     m_adventureState->m_att.squad.stacks.resize(m_gameDatabase->gameRules()->limits.stacks);
     m_adventureState->m_def.squad.stacks.resize(m_gameDatabase->gameRules()->limits.stacks);
 
-    m_ui->armyConfigAtt->setModels(modelsProvider, m_uiRng.get());
-    m_ui->armyConfigDef->setModels(modelsProvider, m_uiRng.get());
+    m_ui->armyConfigAtt->setModels();
+    m_ui->armyConfigDef->setModels();
 
     m_guiAdventureArmyAtt = std::make_unique<GuiAdventureArmy>(modelsProvider->units(), modelsProvider->heroes(), &m_adventureState->m_att);
     m_guiAdventureArmyDef = std::make_unique<GuiAdventureArmy>(modelsProvider->units(), modelsProvider->heroes(), &m_adventureState->m_def);
@@ -434,7 +430,7 @@ void EmulatorMainWidget::applyCurrentObjectRewards(QString defenderName)
 
     const QString rewardDescription = tr("%1 is no problem anymore, and %2 now in your hands.").arg(defenderName).arg(rewardDescriptionTitlesJoined);
 
-    GeneralPopupDialog dlg(rewardDescription, items, true, false, this);
+    GeneralPopupDialog dlg(m_modelsProvider, rewardDescription, items, true, false, this);
     dlg.adjustSize();
     dlg.exec();
 
@@ -520,6 +516,10 @@ int EmulatorMainWidget::execBattle(bool isReplay, bool isQuick)
                                                       *aiFactory,
                                                       m_modelsProvider,
                                                       replayData.m_adv.m_field.field,
+
+                                                      m_cursorLibrary,
+                                                      m_musicBox,
+
                                                       m_appSettings,
                                                       this);
         if (isReplay)
@@ -550,7 +550,7 @@ int EmulatorMainWidget::execBattle(bool isReplay, bool isQuick)
         auto          ai = battle.makeAI(params, *battleControl);
         limitStepCheck   = ai->run(limitStepCheck);
         if (!limitStepCheck) {
-            GeneralPopupDialog::messageBox(tr("AI reached step limit: that probably an error."), this);
+            GeneralPopupDialog::messageBox(m_modelsProvider, tr("AI reached step limit: that probably an error."), this);
             return 0;
         }
         Logger(Logger::Info) << ai->getProfiling();
@@ -647,7 +647,7 @@ void EmulatorMainWidget::checkForHeroLevelUps(bool fromDebugWidget)
             decision.expIcon      = m_modelsProvider->ui()->skillInfo[HeroPrimaryParamType::Experience].iconLarge->get();
             auto rng              = m_randomGeneratorFactory->create();
             rng->makeGoodSeed();
-            HeroLevelupDialog   dlg(this);
+            HeroLevelupDialog   dlg(m_modelsProvider, this);
             AdventureEstimation estimation(m_gameDatabase->gameRules());
 
             while ((result = estimation.calculateHeroLevelUp(hero, *rng)).isValid()) {

@@ -32,9 +32,9 @@ const QString formatTwoLine = QString("<p style=\"line-height:60%\">%1</p><p>%2<
 
 }
 
-SkillsGridWidget::SkillsGridWidget(QWidget* parent)
+SkillsGridWidget::SkillsGridWidget(const LibraryModelsProvider* modelProvider, QWidget* parent)
     : QWidget(parent)
-    , m_hoverHelper(std::make_unique<HoverHelper>(this))
+    , m_hoverHelper(std::make_unique<HoverHelper>(modelProvider, this))
 {
     QGridLayout* layout = new QGridLayout(this);
     for (int r = 0; r < rows; r++) {

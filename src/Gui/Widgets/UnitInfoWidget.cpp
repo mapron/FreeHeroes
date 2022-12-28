@@ -126,7 +126,7 @@ UnitInfoWidget::UnitInfoWidget(Core::BattleStackConstPtr    battle,
 {
     setWindowFlag(Qt::FramelessWindowHint, true);
     m_impl->showModal      = showModal;
-    m_impl->hoverHelper    = new HoverHelper(this);
+    m_impl->hoverHelper    = new HoverHelper(modelsProvider, this);
     m_impl->modelsProvider = modelsProvider;
 
     QFrame*      outerFrame       = new QFrame(this);
@@ -262,8 +262,8 @@ UnitInfoWidget::UnitInfoWidget(Core::BattleStackConstPtr    battle,
     layoutMoralAndControl->setSpacing(2);
     {
         const auto rng             = battle ? battle->current.rngParams : adventure->estimated.rngParams;
-        auto*      labelMoraleIcon = new MoraleLabel(this);
-        auto*      labelLuckIcon   = new LuckLabel(this);
+        auto*      labelMoraleIcon = new MoraleLabel(modelsProvider, this);
+        auto*      labelLuckIcon   = new LuckLabel(modelsProvider, this);
         labelMoraleIcon->setValue(rng.morale);
         labelLuckIcon->setValue(rng.luck);
         labelLuckIcon->setDetails(adventure->estimated.luckDetails);
@@ -294,8 +294,8 @@ UnitInfoWidget::UnitInfoWidget(Core::BattleStackConstPtr    battle,
             btn->setIcon(pixmap);
             btn->setFixedSize(pixmap.size());
             layoutMoralAndControl->addWidget(btn);
-            connect(btn, &QPushButton::clicked, this, [this, adventure] {
-                if (GeneralPopupDialog::confirmRequest(tr("Are you sure to disband this squad?"), this)) {
+            connect(btn, &QPushButton::clicked, this, [this, modelsProvider, adventure] {
+                if (GeneralPopupDialog::confirmRequest(modelsProvider, tr("Are you sure to disband this squad?"), this)) {
                     emit deleteStack(adventure);
                     this->close();
                 }
@@ -341,7 +341,7 @@ UnitInfoWidget::UnitInfoWidget(Core::BattleStackConstPtr    battle,
         bottom->addWidget(descLabelFrame);
         bottom->addLayout(bottom2);
 
-        FlatButton* btn = DialogUtils::makeAcceptButton(this);
+        FlatButton* btn = DialogUtils::makeAcceptButton(modelsProvider, this);
         m_impl->hoverHelper->addWidgets({ btn });
         layoutMoralAndControl->addWidget(btn);
 

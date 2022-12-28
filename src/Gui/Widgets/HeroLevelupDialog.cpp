@@ -37,7 +37,7 @@ struct HeroLevelupDialog::Impl {
     std::array<QLabel*, 2>     choiceDescrs;
 };
 
-HeroLevelupDialog::HeroLevelupDialog(QWidget* parent)
+HeroLevelupDialog::HeroLevelupDialog(const LibraryModelsProvider* modelProvider, QWidget* parent)
     : QDialog(parent)
     , m_impl(std::make_unique<Impl>())
 
@@ -154,7 +154,7 @@ HeroLevelupDialog::HeroLevelupDialog(QWidget* parent)
     {
         QHBoxLayout* bottomButtons = new QHBoxLayout();
         bottomButtons->addStretch();
-        m_impl->closeButton = DialogUtils::makeAcceptButton(this);
+        m_impl->closeButton = DialogUtils::makeAcceptButton(modelProvider, this);
         bottomButtons->addWidget(m_impl->closeButton);
         mainLayout->addLayout(bottomButtons);
         m_impl->closeButton->setFocusPolicy(Qt::NoFocus);
@@ -164,8 +164,8 @@ HeroLevelupDialog::HeroLevelupDialog(QWidget* parent)
     //    for (auto * lbl : {m_impl->title, m_impl->levelAndClass, m_impl->statPrimaryTxt}) {
     //        lbl->setMinimumWidth(this->sizeHint().width())
     //    }
-    DialogUtils::setupClickSound(m_impl->leftChoice);
-    DialogUtils::setupClickSound(m_impl->rightChoice);
+    DialogUtils::setupClickSound(modelProvider, m_impl->leftChoice);
+    DialogUtils::setupClickSound(modelProvider, m_impl->rightChoice);
     connect(m_impl->leftChoice, &QPushButton::clicked, this, [this] {m_impl->m_currentChoice = 0; m_impl->closeButton->setEnabled(true); });
     connect(m_impl->rightChoice, &QPushButton::clicked, this, [this] {m_impl->m_currentChoice = 1; m_impl->closeButton->setEnabled(true); });
     for (auto* btn : m_impl->choiceBtns)

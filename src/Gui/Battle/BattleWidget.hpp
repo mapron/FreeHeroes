@@ -50,6 +50,9 @@ public:
                           const LibraryModelsProvider*     modelsProvider,
                           const Core::BattleFieldGeometry& battleGeometry,
 
+                          const ICursorLibrary* cursorLibrary,
+                          Sound::IMusicBox*     musicBox,
+
                           Gui::IAppSettings* appSettings,
                           QWidget*           parent = 0);
     ~BattleWidget();

@@ -14,6 +14,7 @@
 class QHBoxLayout;
 namespace FreeHeroes::Gui {
 
+class LibraryModelsProvider;
 class GUIWIDGETS_EXPORT GeneralPopupDialog : public QDialog {
     Q_OBJECT
 public:
@@ -23,24 +24,24 @@ public:
         bool    addBorder = false;
     };
     using Items = QList<Item>;
-    GeneralPopupDialog(QString      description,
-                       const Items& items,
-                       bool         isModal,
-                       bool         hasCancel,
-                       QWidget*     parent = nullptr);
+    GeneralPopupDialog(const LibraryModelsProvider* modelProvider,
+                       QString                      description,
+                       const Items&                 items,
+                       bool                         isModal,
+                       bool                         hasCancel,
+                       QWidget*                     parent = nullptr);
 
     void mouseReleaseEvent(QMouseEvent* ev);
 
     void closeNonModal();
 
-    static bool confirmRequest(const QString& message, QWidget* parent);
-    static void messageBox(const QString& message, QWidget* parent);
+    static bool confirmRequest(const LibraryModelsProvider* modelProvider, const QString& message, QWidget* parent);
+    static void messageBox(const LibraryModelsProvider* modelProvider, const QString& message, QWidget* parent);
 
 private:
-    //struct Impl;
-    // std::unique_ptr<Impl> m_impl;
-    bool         m_isModal = false;
-    QHBoxLayout* m_bottomButtons;
+    const LibraryModelsProvider* const m_modelProvider;
+    bool                               m_isModal = false;
+    QHBoxLayout*                       m_bottomButtons;
 };
 
 }

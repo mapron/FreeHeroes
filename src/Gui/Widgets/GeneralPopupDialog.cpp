@@ -16,12 +16,14 @@
 
 namespace FreeHeroes::Gui {
 
-GeneralPopupDialog::GeneralPopupDialog(QString      description,
-                                       const Items& items,
-                                       bool         isModal,
-                                       bool         hasCancel,
-                                       QWidget*     parent)
+GeneralPopupDialog::GeneralPopupDialog(const LibraryModelsProvider* modelProvider,
+                                       QString                      description,
+                                       const Items&                 items,
+                                       bool                         isModal,
+                                       bool                         hasCancel,
+                                       QWidget*                     parent)
     : QDialog(parent)
+    , m_modelProvider(modelProvider)
     , m_isModal(isModal)
 {
     setWindowFlag(Qt::Popup, true);
@@ -85,10 +87,10 @@ GeneralPopupDialog::GeneralPopupDialog(QString      description,
         mainLayout->addLayout(bottomButtons);
         bottomButtons->addStretch();
         if (hasCancel) {
-            bottomButtons->addWidget(DialogUtils::makeRejectButton(this));
+            bottomButtons->addWidget(DialogUtils::makeRejectButton(m_modelProvider, this));
             bottomButtons->addSpacing(10);
         }
-        bottomButtons->addWidget(DialogUtils::makeAcceptButton(this));
+        bottomButtons->addWidget(DialogUtils::makeAcceptButton(m_modelProvider, this));
         bottomButtons->addStretch();
     }
 }
@@ -110,7 +112,7 @@ void GeneralPopupDialog::closeNonModal()
     }
 }
 
-bool GeneralPopupDialog::confirmRequest(const QString& message, QWidget* parent)
+bool GeneralPopupDialog::confirmRequest(const LibraryModelsProvider* modelProvider, const QString& message, QWidget* parent)
 {
     QDialog dlg(parent);
     dlg.setWindowFlag(Qt::Popup, true);
@@ -141,10 +143,10 @@ bool GeneralPopupDialog::confirmRequest(const QString& message, QWidget* parent)
     mainLayout->addLayout(bottomButtons);
     bottomButtons->addStretch();
     bottomButtons->addSpacing(50);
-    bottomButtons->addWidget(DialogUtils::makeRejectButton(&dlg));
+    bottomButtons->addWidget(DialogUtils::makeRejectButton(modelProvider, &dlg));
     bottomButtons->addSpacing(10);
 
-    bottomButtons->addWidget(DialogUtils::makeAcceptButton(&dlg));
+    bottomButtons->addWidget(DialogUtils::makeAcceptButton(modelProvider, &dlg));
     bottomButtons->addSpacing(50);
     bottomButtons->addStretch();
     dlg.resize(dlg.sizeHint());
@@ -152,9 +154,9 @@ bool GeneralPopupDialog::confirmRequest(const QString& message, QWidget* parent)
     return result == QDialog::Accepted;
 }
 
-void GeneralPopupDialog::messageBox(const QString& message, QWidget* parent)
+void GeneralPopupDialog::messageBox(const LibraryModelsProvider* modelProvider, const QString& message, QWidget* parent)
 {
-    GeneralPopupDialog dlg(message, {}, true, false, parent);
+    GeneralPopupDialog dlg(modelProvider, message, {}, true, false, parent);
     dlg.exec();
 }
 

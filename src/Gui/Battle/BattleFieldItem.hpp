@@ -55,8 +55,7 @@ public:
                     const Core::BattleFieldGeometry& battleGeometry,
                     BattleControlPlan&               controlPlan,
 
-                    Gui::IAppSettings* appSettings,
-                    QGraphicsItem*     parent = nullptr);
+                    QGraphicsItem* parent = nullptr);
     ~BattleFieldItem();
 
     QRectF boundingRect() const override;
@@ -121,7 +120,6 @@ private:
     const Core::BattleFieldGeometry& m_battleGeometry;
     BattleControlPlan&               m_controlPlan;
 
-    IAppSettings*        m_appSettings;
     SporadicOrchestrator m_sporadicOrchestrator;
 
     struct UnitGraphics {
