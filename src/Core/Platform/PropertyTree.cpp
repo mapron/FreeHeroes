@@ -28,6 +28,8 @@ void printJsonString(std::ostream& os, const std::string& value, bool addQuotes,
             uint8_t byte = c;
             if (byte < 0x20) {
                 os << "\\u00" << toHex(byte / 16) << toHex(byte % 16);
+            } else if (byte == '\\') {
+                os << "\\\\";
             } else {
                 os << c;
             }

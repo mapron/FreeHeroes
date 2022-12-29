@@ -34,11 +34,18 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_isPadding)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    Archive::HdatRecord,
+    m_filename,
+    m_filenameAlt,
+    m_params,
+    m_hasBlob)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     Archive,
     m_format,
     m_records,
+    m_hdatRecords,
     m_lodFormat,
-    m_lodHeader,
-    m_lodDataPadding)
+    m_lodHeader)
 
 }

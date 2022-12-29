@@ -41,9 +41,19 @@ public:
     };
     std::vector<Record> m_records;
 
+    struct HdatRecord {
+        std::string              m_filename;
+        std::string              m_filenameAlt;
+        std::vector<std::string> m_txtChapters;
+
+        bool                  m_hasBlob = false;
+        std::vector<uint8_t>  m_blob;
+        std::vector<uint32_t> m_params;
+    };
+    std::vector<HdatRecord> m_hdatRecords;
+
     uint32_t             m_lodFormat = 0;
     std::vector<uint8_t> m_lodHeader;
-    uint32_t             m_lodDataPadding = 0;
 
 public:
     void detectFormat(const Core::std_path& path, ByteOrderDataStreamReader& stream);
@@ -56,7 +66,6 @@ public:
 
     void convertToBinary();
     void convertFromBinary();
-    void recalcOffsets();
 
 private:
     void readBinaryLOD(ByteOrderDataStreamReader& stream);

@@ -7,6 +7,7 @@
 
 #include "FileFormatJson.hpp"
 #include "FileIOUtils.hpp"
+#include "StringUtils.hpp"
 
 #include "Reflection/PropertyTreeReader.hpp"
 #include "Reflection/PropertyTreeWriter.hpp"
@@ -24,6 +25,8 @@ const std_path g_indexFileName = "archive_index.fh.json";
 constexpr const std::array<uint8_t, 4> g_lodSignature{ { 0x4C, 0x4F, 0x44, 0x00 } };  // 'LOD\0'
 constexpr const std::array<uint8_t, 4> g_hdatSignature{ { 0x48, 0x44, 0x41, 0x54 } }; // 'HDAT'
 constexpr const size_t                 g_strSize = 16;
+
+constexpr const std::string_view g_hdatChapterSeparator{ "\r\n=============================\r\n" };
 }
 
 void Archive::detectFormat(const std_path& path, ByteOrderDataStreamReader& stream)
@@ -116,6 +119,27 @@ void Archive::saveToFolder(const std_path& path, bool skipExisting) const
             continue;
         writeFileFromHolderThrow(out, rec.m_buffer);
     }
+
+    for (const HdatRecord& rec : m_hdatRecords) {
+        if (!rec.m_blob.empty()) {
+            const auto out = path / string2path(rec.m_filename + ".bin");
+            if (skipExisting && std_fs::exists(out))
+                continue;
+            ByteArrayHolder buf;
+            buf.ref() = rec.m_blob;
+            writeFileFromHolderThrow(out, buf);
+        }
+
+        {
+            const auto out = path / string2path(rec.m_filename + ".txt");
+            if (skipExisting && std_fs::exists(out))
+                continue;
+
+            const auto chaptersStr = joinString(rec.m_txtChapters, std::string(g_hdatChapterSeparator));
+
+            writeFileFromBufferThrow(out, chaptersStr);
+        }
+    }
 }
 
 void Archive::loadFromFolder(const std_path& path)
@@ -134,6 +158,20 @@ void Archive::loadFromFolder(const std_path& path)
         const auto out = path / string2path(rec.m_filename);
         rec.m_buffer   = readFileIntoHolderThrow(out);
     }
+
+    for (HdatRecord& rec : m_hdatRecords) {
+        if (rec.m_hasBlob) {
+            const auto      in  = path / string2path(rec.m_filename + ".bin");
+            ByteArrayHolder buf = readFileIntoHolderThrow(in);
+            rec.m_blob          = buf.ref();
+        }
+
+        {
+            const auto        in          = path / string2path(rec.m_filename + ".txt");
+            const std::string chaptersStr = readFileIntoBufferThrow(in);
+            rec.m_txtChapters             = splitLine(chaptersStr, std::string(g_hdatChapterSeparator));
+        }
+    }
 }
 
 void Archive::convertToBinary()
@@ -141,6 +179,9 @@ void Archive::convertToBinary()
     if (m_isBinary)
         throw std::runtime_error("Archive is already in binary format, no need for convertToBinary()");
     m_isBinary = true;
+
+    if (m_format == BinaryFormat::HDAT)
+        return;
 
     m_binaryRecords.clear();
     m_binaryRecordsUnnamed.clear();
@@ -191,8 +232,7 @@ void Archive::convertToBinary()
                                   + sizeof(m_lodFormat)
                                   + sizeof(uint32_t) // size
                                   + m_lodHeader.size()
-                                  + 32 * m_binaryRecords.size()
-                                  + m_lodDataPadding;
+                                  + 32 * m_binaryRecords.size();
 
         size_t offset = baseOffset;
 
@@ -208,6 +248,9 @@ void Archive::convertFromBinary()
     if (!m_isBinary)
         throw std::runtime_error("Archive is already in non-binary format, no need for convertToBinary()");
     m_isBinary = false;
+
+    if (m_format == BinaryFormat::HDAT)
+        return;
 
     m_records.clear();
     m_records.reserve(m_binaryRecords.size());
@@ -239,10 +282,6 @@ void Archive::convertFromBinary()
         rec.m_buffer                            = brec.m_buffer;
         m_records.push_back(std::move(rec));
     }
-}
-
-void Archive::recalcOffsets()
-{
 }
 
 void Archive::readBinaryLOD(ByteOrderDataStreamReader& stream)
@@ -315,22 +354,35 @@ void Archive::readBinaryLOD(ByteOrderDataStreamReader& stream)
         }
     }
     updateIndex();
-    {
-        size_t i = 0;
-        for (auto* brec : m_binaryRecordsSortedByOffset)
-            brec->m_binaryDataOrder = i++;
-    }
 
+    //std::cerr << "firstRecordOffset=" << firstRecordOffset << '\n';
     const auto currentOffset = stream.getBuffer().getOffsetRead();
     if (firstRecordOffset < currentOffset)
         throw std::runtime_error("First record offset [" + std::to_string(firstRecordOffset) + "] is less than current offset [" + std::to_string(currentOffset) + "]");
-    stream.zeroPaddingChecked(firstRecordOffset - currentOffset, true);
-    m_lodDataPadding = static_cast<uint32_t>(firstRecordOffset - currentOffset);
+    if (firstRecordOffset > currentOffset) {
+        size_t paddingSize = firstRecordOffset - currentOffset;
 
+        ByteArrayHolder blob;
+        blob.resize(paddingSize);
+        BinaryRecord padbrec;
+        padbrec.m_filename = "__PAD";
+        padbrec.m_size     = paddingSize;
+        padbrec.m_fullSize = paddingSize;
+        padbrec.m_buffer   = blob;
+        padbrec.m_offset   = currentOffset;
+
+        std::cerr << "detected GAP in binary data at [" << currentOffset << "], creating padding blob '" << padbrec.m_filename << "' of size=" << paddingSize << '\n';
+
+        m_binaryRecordsUnnamed.push_back(std::move(padbrec));
+        updateIndex();
+    }
+
+    size_t i = 0;
     for (auto* brec : m_binaryRecordsSortedByOffset) {
-        const auto offset = stream.getBuffer().getOffsetRead();
+        brec->m_binaryDataOrder = i++;
+        const auto offset       = stream.getBuffer().getOffsetRead();
         if (0)
-            std::cerr << "name=" << brec->m_filename << ", exp=" << brec->m_offset << ", s=" << brec->m_buffer.size() << ", current=" << offset << '\n';
+            std::cerr << "i= " << (i - 1) << " name=" << brec->m_filename << ", exp=" << brec->m_offset << ", s=" << brec->m_buffer.size() << ", current=" << offset << '\n';
         if (brec->m_offset == offset) {
             stream.readBlock(brec->m_buffer.data(), brec->m_buffer.size());
             continue;
@@ -352,8 +404,6 @@ void Archive::writeBinaryLOD(ByteOrderDataStreamWriter& stream) const
         stream << rec;
     }
 
-    stream.zeroPadding(m_lodDataPadding);
-
     for (auto* brec : m_binaryRecordsSortedByOffset) {
         stream.writeBlock(brec->m_buffer.data(), brec->m_buffer.size());
     }
@@ -361,10 +411,48 @@ void Archive::writeBinaryLOD(ByteOrderDataStreamWriter& stream) const
 
 void Archive::readBinaryHDAT(ByteOrderDataStreamReader& stream)
 {
+    std::array<uint8_t, 4> signature;
+    stream >> signature;
+    if (signature != g_hdatSignature)
+        throw std::runtime_error("HDAT signature is not found");
+
+    uint32_t recordsCount;
+    stream >> m_lodFormat >> recordsCount;
+
+    m_hdatRecords.resize(recordsCount);
+    for (HdatRecord& rec : m_hdatRecords) {
+        stream >> rec.m_filename;
+        stream >> rec.m_filenameAlt;
+
+        stream >> rec.m_txtChapters;
+
+        stream >> rec.m_hasBlob;
+        if (rec.m_hasBlob) {
+            stream >> rec.m_blob;
+        }
+        stream >> rec.m_params;
+    }
 }
 
 void Archive::writeBinaryHDAT(ByteOrderDataStreamWriter& stream) const
 {
+    stream << g_hdatSignature;
+
+    stream << m_lodFormat;
+    stream.writeSize(m_hdatRecords.size());
+
+    for (const HdatRecord& rec : m_hdatRecords) {
+        stream << rec.m_filename;
+        stream << rec.m_filenameAlt;
+
+        stream << rec.m_txtChapters;
+
+        stream << rec.m_hasBlob;
+        if (rec.m_hasBlob) {
+            stream << rec.m_blob;
+        }
+        stream << rec.m_params;
+    }
 }
 
 void Archive::readBinarySND(ByteOrderDataStreamReader& stream)

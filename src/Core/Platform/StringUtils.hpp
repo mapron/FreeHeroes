@@ -39,4 +39,31 @@ inline std::vector<std::string> splitLine(const std::string& line, char sep, boo
     return result;
 }
 
+inline std::vector<std::string> splitLine(std::string line, const std::string& delimiter, bool skipEmpty = false)
+{
+    std::vector<std::string> result;
+    size_t                   pos = 0;
+    std::string              token;
+    while ((pos = line.find(delimiter)) != std::string::npos) {
+        token = line.substr(0, pos);
+        result.push_back(token);
+        line.erase(0, pos + delimiter.length());
+    }
+    result.push_back(line);
+    return result;
+}
+
+inline std::string joinString(const std::vector<std::string>& parts, const std::string& glue)
+{
+    std::string result;
+    bool        started = false;
+    for (const auto& part : parts) {
+        if (started)
+            result += glue;
+        result += part;
+        started = true;
+    }
+    return result;
+}
+
 }
