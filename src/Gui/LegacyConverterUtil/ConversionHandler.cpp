@@ -10,6 +10,8 @@
 #include "IGameDatabase.hpp"
 #include "FileIOUtils.hpp"
 #include "Compression.hpp"
+#include "SpriteParserLegacy.hpp"
+#include "SpriteSerialization.hpp"
 
 #include <iostream>
 
@@ -95,22 +97,29 @@ void ConversionHandler::run(Task task, int recurse) noexcept(false)
             case Task::ConvertDefToPng:
             {
                 setInput(m_inputs.m_defFile);
-                runMember(readBinaryBufferData);
+                std::string ext = Core::path2string(m_inputFilename.extension());
+                std::transform(ext.begin(), ext.end(), ext.begin(), [](unsigned char c) { return std::tolower(c); });
 
-                //
+                if (ext == ".pcx")
+                    m_sprite = Conversion::loadPcx(m_inputFilename);
+                else if (ext == ".bmp")
+                    m_sprite = Conversion::loadBmp(m_inputFilename);
+                else
+                    m_sprite = Conversion::loadSpriteLegacy(m_inputFilename);
 
-                setOutput(m_outputs.m_pngFile);
-                runMember(writeBinaryBufferData);
+                makeJsonDefName();
+
+                setOutput(m_outputs.m_pngJsonFile);
+                Gui::saveSprite(m_sprite, m_outputFilename);
             } break;
             case Task::ConvertPngToDef:
             {
-                setInput(m_inputs.m_pngFile);
-                runMember(readBinaryBufferData);
-
-                //
+                makeJsonDefName();
+                setInput(m_inputs.m_pngJsonFile);
+                m_sprite = Gui::loadSprite(m_settings.m_inputs.m_pngJsonFile);
 
                 setOutput(m_outputs.m_defFile);
-                runMember(writeBinaryBufferData);
+                Conversion::saveSpriteLegacy(m_sprite, m_outputFilename);
             } break;
             case Task::DefRoundTripPng:
             {
@@ -211,7 +220,6 @@ void ConversionHandler::binaryDeserializeArchive()
         m_archive.detectFormat(m_inputFilename, reader);
         reader.getBuffer().setOffsetRead(0);
         reader >> m_archive;
-        //m_ignoredOffsets = m_mapH3M.m_ignoredOffsets;
     }
     catch (std::exception& ex) {
         throw std::runtime_error(ex.what() + std::string(", offset=") + std::to_string(bobuffer.getOffsetRead()));
@@ -234,11 +242,14 @@ void ConversionHandler::convertArchiveToBinary()
 
 void ConversionHandler::convertArchiveFromBinary()
 {
-    m_archive.convertFromBinary();
+    m_archive.convertFromBinary(m_settings.m_uncompress);
 }
 
 void ConversionHandler::writeArchiveToFolder()
 {
+    if (m_settings.m_cleanupFolder) {
+        Core::std_fs::remove_all(m_outputFilename);
+    }
     m_archive.saveToFolder(m_outputFilename, !m_settings.m_forceWrite);
 }
 
@@ -246,6 +257,18 @@ void ConversionHandler::readArchiveFromFolder()
 {
     m_archive = {};
     m_archive.loadFromFolder(m_inputFilename);
+}
+
+void ConversionHandler::makeJsonDefName()
+{
+    auto repl = [](const Core::std_path& path) {
+        const auto        folder       = path.parent_path();
+        const std::string resourceName = Core::path2string(path.filename().stem());
+
+        return folder / (Core::string2path(resourceName).concat(".fh.json"));
+    };
+    m_settings.m_inputs.m_pngJsonFile  = repl(m_settings.m_inputs.m_pngFile);
+    m_settings.m_outputs.m_pngJsonFile = repl(m_settings.m_outputs.m_pngFile);
 }
 
 void ConversionHandler::checkBinaryInputOutputEquality()

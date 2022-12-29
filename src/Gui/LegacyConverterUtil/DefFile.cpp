@@ -482,12 +482,19 @@ void DefParser::loadHotA()
     ds.setByteOrder(QDataStream::LittleEndian);
     uint32_t version, count1, width, height;
     ds >> version >> count1 >> width >> height;
+    assert(24 == count1);
 
     uint32_t u1, u2, u3;
     ds >> u1 >> u2 >> u3;
+    assert(u1 == 1);
+    assert(u2 == 8);
+    assert(u3 == 1);
 
-    uint32_t u4, u5, frameCount, u7;
-    ds >> u4 >> u5 >> frameCount >> u7;
+    uint32_t headerTotal, u5, frameCount, u7;
+    ds >> headerTotal >> u5 >> frameCount >> u7;
+    assert(u5 == 0);
+    assert(headerTotal == 17 * frameCount + 16);
+    assert(u7 == 4);
 
     ds.skipRawData(13 * frameCount); // image string names, like "frame001\0"
 
@@ -495,7 +502,7 @@ void DefParser::loadHotA()
 
     struct SpriteDef {
         uint32_t format;
-        uint32_t size;
+        int32_t  size;
         int32_t  fullWidth;
         int32_t  fullHeight;
         int32_t  width;
@@ -521,13 +528,23 @@ void DefParser::loadHotA()
             >> def.topMargin
             >> def.u0
             >> def.u1;
+        bool isEmpty = def.fullWidth == 0 || def.fullHeight == 0;
+        if (isEmpty)
+            assert(def.u0 == 0);
+        else
+            assert(def.u0 == 8);
+        assert(def.u1 == 0);
+        assert(def.size == def.width * def.height * 4);
+
+        if (!isEmpty)
+            assert(def.format == 32);
 
         QImage tmp(def.width, def.height, QImage::Format_RGBA8888);
         for (int32_t h = 0; h < def.height; h++)
             for (int32_t w = 0; w < def.width; w++) {
                 uint8_t r, g, b, a;
                 ds >> b >> g >> r >> a;
-                tmp.setPixelColor(w, def.height - h - 1, qRgba(r, g, b, a));
+                tmp.setPixelColor(w, def.height - h - 1, QColor(r, g, b, a));
             }
 
         ParsedFrame info;

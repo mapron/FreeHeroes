@@ -6,6 +6,8 @@
 
 #include <iostream>
 
+#include <QGuiApplication>
+
 #include "CoreApplication.hpp"
 #include "CommandLineUtils.hpp"
 
@@ -26,6 +28,7 @@ int main(int argc, char** argv)
         "output-def",
         "output-png",
         "force",
+        "uncompress",
         "cleanupFolder",
     });
     parser.markRequired({ "task" });
@@ -37,12 +40,15 @@ int main(int argc, char** argv)
 
     const std::string taskStr       = parser.getArg("task");
     const bool        forceWrite    = parser.getArg("force") == "1";
+    const bool        uncompress    = parser.getArg("uncompress") == "1";
     const bool        cleanupFolder = parser.getArg("cleanupFolder") == "1";
 
-    Core::CoreApplication fhCoreApp;
+    Core::CoreApplication fhCoreApp(std::set<Core::CoreApplication::Option>{});
     fhCoreApp.initLogger();
     if (!fhCoreApp.load())
         return 1;
+
+    QGuiApplication guiApp(argc, argv);
 
     auto makePaths = [&parser](const std::string& prefix) -> ConversionHandler::PathsSet {
         const std::string dat    = parser.getArg(prefix + "dat");
@@ -65,6 +71,7 @@ int main(int argc, char** argv)
                                     .m_outputs       = makePaths("output-"),
                                     .m_forceWrite    = forceWrite,
                                     .m_cleanupFolder = cleanupFolder,
+                                    .m_uncompress    = uncompress,
                                 });
 
     const ConversionHandler::Task task = stringToTask(taskStr);

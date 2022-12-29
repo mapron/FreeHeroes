@@ -65,7 +65,7 @@ public:
     void loadFromFolder(const Core::std_path& path);
 
     void convertToBinary();
-    void convertFromBinary();
+    void convertFromBinary(bool uncompress);
 
 private:
     void readBinaryLOD(ByteOrderDataStreamReader& stream);

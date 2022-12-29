@@ -14,6 +14,10 @@
 
 #include "ArchiveReflection.hpp"
 
+#include "SpriteParserLegacy.hpp"
+
+#include "Compression.hpp"
+
 #include <iostream>
 
 namespace FreeHeroes {
@@ -117,7 +121,21 @@ void Archive::saveToFolder(const std_path& path, bool skipExisting) const
         const auto out = path / string2path(rec.m_filename);
         if (skipExisting && std_fs::exists(out))
             continue;
-        writeFileFromHolderThrow(out, rec.m_buffer);
+
+        ByteArrayHolder buf = rec.m_buffer;
+
+        if (!rec.m_compressOnDisk && rec.m_compressInArchive) {
+            ByteArrayHolder uncomp;
+            uncompressDataBuffer(buf, uncomp, { .m_type = CompressionType::Zlib, .m_skipCRC = false });
+            buf                                    = uncomp;
+            [[maybe_unused]] const size_t unpacked = uncomp.size();
+            assert(rec.m_uncompressedSizeCache == unpacked);
+        }
+        if (rec.m_compressOnDisk && !rec.m_compressInArchive) {
+            assert(0);
+        }
+
+        writeFileFromHolderThrow(out, buf);
     }
 
     for (const HdatRecord& rec : m_hdatRecords) {
@@ -157,6 +175,15 @@ void Archive::loadFromFolder(const std_path& path)
     for (Record& rec : m_records) {
         const auto out = path / string2path(rec.m_filename);
         rec.m_buffer   = readFileIntoHolderThrow(out);
+
+        if (!rec.m_compressOnDisk && rec.m_compressInArchive) {
+            ByteArrayHolder comp;
+            compressDataBuffer(rec.m_buffer, comp, { .m_type = CompressionType::Zlib, .m_skipCRC = false });
+            rec.m_buffer = comp;
+        }
+        if (rec.m_compressOnDisk && !rec.m_compressInArchive) {
+            assert(0);
+        }
     }
 
     for (HdatRecord& rec : m_hdatRecords) {
@@ -243,7 +270,7 @@ void Archive::convertToBinary()
     }
 }
 
-void Archive::convertFromBinary()
+void Archive::convertFromBinary(bool uncompress)
 {
     if (!m_isBinary)
         throw std::runtime_error("Archive is already in non-binary format, no need for convertToBinary()");
@@ -267,7 +294,7 @@ void Archive::convertFromBinary()
 
         std::transform(rec.m_filename.begin(), rec.m_filename.end(), rec.m_filename.begin(), [](unsigned char c) { return std::tolower(c); });
         rec.m_compressInArchive     = brec.m_compressedSize > 0;
-        rec.m_compressOnDisk        = rec.m_compressInArchive;
+        rec.m_compressOnDisk        = rec.m_compressInArchive && !uncompress;
         rec.m_uncompressedSizeCache = rec.m_compressInArchive ? brec.m_fullSize : 0;
 
         if (rec.m_compressOnDisk)

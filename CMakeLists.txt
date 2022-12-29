@@ -398,7 +398,7 @@ AddTarget( TYPE app_console NAME LegacyConverterCLI
         CoreApplication
         LegacyConverterUtil
 
-    QT_MODULES Core
+    QT_MODULES Gui
     UIC_POSTPROCESS_SCRIPTS
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )

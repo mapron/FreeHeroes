@@ -29,20 +29,20 @@ const size_t CHUNK = 16384;
    level is supplied, Z_VERSION_ERROR if the version of zlib.h and the
    version of the library linked do not match, or Z_ERRNO if there is
    an error reading or writing the files. */
-int def(std::istream& source, std::vector<uint8_t>& dest, int level)
+int def(std::istream& source, std::vector<uint8_t>& dest, bool useGzipWindow, int level)
 {
-    int           ret, flush;
-    unsigned      have;
-    z_stream      strm;
-    unsigned char in[CHUNK];
-    unsigned char out[CHUNK];
+    int      ret, flush;
+    uint32_t have;
+    z_stream strm;
+    uint8_t  in[CHUNK];
+    uint8_t  out[CHUNK];
 
     /* allocate deflate state */
     strm.zalloc = Z_NULL;
     strm.zfree  = Z_NULL;
     strm.opaque = Z_NULL;
 
-    ret = deflateInit2(&strm, level, Z_DEFLATED, 15 | 16, 8, Z_DEFAULT_STRATEGY);
+    ret = deflateInit2(&strm, level, Z_DEFLATED, useGzipWindow ? (16 | MAX_WBITS) : (MAX_WBITS), 8, Z_DEFAULT_STRATEGY);
 
     if (ret != Z_OK)
         return ret;
@@ -85,33 +85,31 @@ int def(std::istream& source, std::vector<uint8_t>& dest, int level)
    invalid or incomplete, Z_VERSION_ERROR if the version of zlib.h and
    the version of the library linked do not match, or Z_ERRNO if there
    is an error reading or writing the files. */
-int inf(const std::vector<uint8_t>& source, bool skipCRC, std::ostream& dest)
+int inf(const std::vector<uint8_t>& source, bool useGzipWindow, bool skipCRC, std::vector<uint8_t>& dest)
 {
-    int      ret;
-    unsigned have;
-    z_stream strm;
-    //unsigned char in[CHUNK];
-    unsigned char  out[CHUNK];
+    int            ret;
+    uint32_t       have;
+    z_stream       strm;
+    uint8_t        out[CHUNK];
     size_t         remainSize = source.size();
     const uint8_t* sourceData = source.data();
 
     /* allocate inflate state */
+
     strm.zalloc   = Z_NULL;
     strm.zfree    = Z_NULL;
     strm.opaque   = Z_NULL;
     strm.avail_in = 0;
     strm.next_in  = Z_NULL;
 
-    int wbits = 16 + MAX_WBITS;
-
-    ret = inflateInit2(&strm, wbits);
+    ret = inflateInit2(&strm, useGzipWindow ? (16 | MAX_WBITS) : (MAX_WBITS));
 
     if (ret != Z_OK)
         return ret;
 
-    /* decompress until deflate stream ends or end of file */
+    // decompress until deflate stream ends or end of file
     do {
-        strm.avail_in = std::min(remainSize, size_t(CHUNK)); //fread(in, 1, CHUNK, source);
+        strm.avail_in = std::min(remainSize, size_t(CHUNK));
         remainSize -= strm.avail_in;
 
         if (strm.avail_in == 0)
@@ -119,7 +117,7 @@ int inf(const std::vector<uint8_t>& source, bool skipCRC, std::ostream& dest)
         strm.next_in = (decltype(strm.next_in)) sourceData;
         sourceData += strm.avail_in;
 
-        /* run inflate() on input until output buffer not full */
+        // run inflate() on input until output buffer not full
         do {
             strm.avail_out = CHUNK;
             strm.next_out  = out;
@@ -138,43 +136,18 @@ int inf(const std::vector<uint8_t>& source, bool skipCRC, std::ostream& dest)
                     return ret;
             }
             have = CHUNK - strm.avail_out;
-            dest.write(reinterpret_cast<const char*>(out), have);
-            if (dest.fail()) {
-                (void) inflateEnd(&strm);
-                return Z_ERRNO;
-            }
+            dest.insert(dest.end(), out, out + have);
         } while (strm.avail_out == 0);
 
-        /* done when inflate() says it's done */
+        //done when inflate() says it's done
     } while (ret != Z_STREAM_END);
 
-    /* clean up and return */
+    // clean up and return
     (void) inflateEnd(&strm);
     return ret == Z_STREAM_END ? Z_OK : Z_DATA_ERROR;
 }
 
 #endif
-
-struct ByteArrayHolderBufWriter : std::basic_streambuf<char, typename std::char_traits<char>> {
-    using base_type   = std::basic_streambuf<char, typename std::char_traits<char>>;
-    using int_type    = typename base_type::int_type;
-    using traits_type = typename base_type::traits_type;
-
-    ByteArrayHolderBufWriter(ByteArrayHolder& holder)
-        : m_holder(holder)
-    {}
-
-    int_type overflow(int_type ch) override
-    {
-        if (traits_type::eq_int_type(ch, traits_type::eof()))
-            return traits_type::eof();
-        m_holder.ref().push_back(traits_type::to_char_type(ch));
-        return ch;
-    }
-
-protected:
-    ByteArrayHolder& m_holder;
-};
 
 struct ByteArrayHolderBufReader : std::streambuf {
     ByteArrayHolderBufReader(const ByteArrayHolder& data)
@@ -191,11 +164,13 @@ void uncompressDataBuffer(const ByteArrayHolder& input, ByteArrayHolder& output,
     }
 #ifdef USE_ZLIB
     else if (compressionInfo.m_type == CompressionType::Gzip) {
-        ByteArrayHolderBufWriter outBuffer(output);
-        std::ostream             outBufferStream(&outBuffer);
-        auto                     infResult = inf(input.ref(), compressionInfo.m_skipCRC, outBufferStream);
+        auto infResult = inf(input.ref(), true, compressionInfo.m_skipCRC, output.ref());
         if (infResult != Z_OK)
             throw std::runtime_error("Gzip inflate failed:" + std::to_string(infResult));
+    } else if (compressionInfo.m_type == CompressionType::Zlib) {
+        auto infResult = inf(input.ref(), false, compressionInfo.m_skipCRC, output.ref());
+        if (infResult != Z_OK)
+            throw std::runtime_error("Zlib inflate failed:" + std::to_string(infResult));
     }
 #endif
 #ifdef USE_ZSTD
@@ -231,9 +206,15 @@ void compressDataBuffer(const ByteArrayHolder& input, ByteArrayHolder& output, C
     else if (compressionInfo.m_type == CompressionType::Gzip) {
         ByteArrayHolderBufReader inBuffer(input);
         std::istream             inBufferStream(&inBuffer);
-        auto                     result = def(inBufferStream, output.ref(), compressionInfo.m_level);
+        auto                     result = def(inBufferStream, output.ref(), true, compressionInfo.m_level);
         if (result != Z_OK)
             throw std::runtime_error("Gzip deflate failed:" + std::to_string(result));
+    } else if (compressionInfo.m_type == CompressionType::Zlib) {
+        ByteArrayHolderBufReader inBuffer(input);
+        std::istream             inBufferStream(&inBuffer);
+        auto                     result = def(inBufferStream, output.ref(), false, compressionInfo.m_level);
+        if (result != Z_OK)
+            throw std::runtime_error("Zlib deflate failed:" + std::to_string(result));
     }
 #endif
 #ifdef USE_ZSTD

@@ -8,7 +8,6 @@
 #include "FsUtils.hpp"
 #include "Profiler.hpp"
 #include "ByteBuffer.hpp"
-#include "PropertyTree.hpp"
 
 #include "Archive.hpp"
 
@@ -19,6 +18,11 @@
 namespace FreeHeroes {
 namespace Core {
 class IGameDatabaseContainer;
+}
+
+namespace Gui {
+class ISprite;
+using SpritePtr = std::shared_ptr<const ISprite>;
 }
 
 class LEGACYCONVERTERUTIL_EXPORT ConversionHandler {
@@ -42,6 +46,7 @@ public:
         PathsSet m_outputs;
         bool     m_forceWrite    = false;
         bool     m_cleanupFolder = false;
+        bool     m_uncompress    = false;
     };
 
     enum class Task
@@ -69,6 +74,7 @@ public:
 public:
     Archive         m_archive;
     ByteArrayHolder m_binaryBuffer;
+    Gui::SpritePtr  m_sprite;
 
 private:
     using MemberProc = void (ConversionHandler::*)(void);
@@ -91,6 +97,8 @@ private:
 
     void writeArchiveToFolder();
     void readArchiveFromFolder();
+
+    void makeJsonDefName();
 
     void checkBinaryInputOutputEquality();
 
@@ -119,7 +127,6 @@ private:
     std::string    m_currentTask;
     Core::std_path m_inputFilename;
     Core::std_path m_outputFilename;
-    bool           m_autoUncompress = false;
 };
 
 LEGACYCONVERTERUTIL_EXPORT std::string taskToString(ConversionHandler::Task task);

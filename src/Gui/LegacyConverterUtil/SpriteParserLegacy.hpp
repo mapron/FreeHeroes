@@ -14,6 +14,8 @@ class IResourceLibrary;
 }
 namespace FreeHeroes::Conversion {
 
+void saveSpriteLegacy(Gui::SpritePtr sprite, const Core::std_path& defFilePath);
+
 Gui::SpritePtr loadSpriteLegacy(const Core::std_path& defFilePath);
 
 Gui::SpritePtr loadPcx(const Core::std_path& pcxFilePath);

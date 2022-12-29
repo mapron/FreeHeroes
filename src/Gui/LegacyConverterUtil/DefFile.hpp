@@ -7,6 +7,8 @@
 
 #include "SpriteSerialization.hpp"
 
+#include "ByteOrderStream.hpp"
+
 #include <QVector>
 #include <QBuffer>
 
