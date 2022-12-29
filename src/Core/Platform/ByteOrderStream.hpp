@@ -171,6 +171,13 @@ public:
         return *this;
     }
 
+    template<size_t size>
+    inline ByteOrderDataStreamReader& operator>>(std::array<uint8_t, size>& data)
+    {
+        this->readBlock(data.data(), size);
+        return *this;
+    }
+
     std::string readPascalString()
     {
         auto size = readSize();
@@ -200,6 +207,17 @@ public:
     {
         m_buf.markRead(size);
         m_buf.checkRemain(0);
+    }
+
+    void zeroPaddingChecked(ptrdiff_t size, bool check)
+    {
+        if (!check)
+            return zeroPadding(size);
+        for (ptrdiff_t i = 0; i < size; ++i) {
+            const auto byte = this->readScalar<uint8_t>();
+            if (byte != 0)
+                throw std::runtime_error("zeroPadding contains non-zero byte at [" + std::to_string(i) + "] = " + std::to_string(int(byte)));
+        }
     }
 
     void readBits(std::vector<uint8_t>& bitArray, bool invert = false, bool inverseArrayIndex = false)
@@ -296,6 +314,13 @@ public:
     inline ByteOrderDataStreamWriter& operator<<(const HasWrite auto& data)
     {
         data.writeBinary(*this);
+        return *this;
+    }
+
+    template<size_t size>
+    inline ByteOrderDataStreamWriter& operator<<(const std::array<uint8_t, size>& data)
+    {
+        this->writeBlock(data.data(), size);
         return *this;
     }
 

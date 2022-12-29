@@ -7,9 +7,11 @@
 
 #include "IResourceLibrary.hpp"
 
+#include "LegacyConverterUtilExport.hpp"
+
 namespace FreeHeroes::Conversion {
 
-class ResourcePostprocess {
+class LEGACYCONVERTERUTIL_EXPORT ResourcePostprocess {
 public:
     void concatSprites(Core::IResourceLibrary&         resources,
                        const std::vector<std::string>& in,

@@ -8,6 +8,8 @@
 #include "FsUtils.hpp"
 #include "IResourceLibrary.hpp"
 
+#include "LegacyConverterUtilExport.hpp"
+
 #include <QList>
 #include <QByteArray>
 
@@ -16,7 +18,7 @@ class IGameDatabase;
 }
 namespace FreeHeroes::Conversion {
 
-class LocalizationConverter {
+class LEGACYCONVERTERUTIL_EXPORT LocalizationConverter {
 public:
     using std_path = Core::std_path;
 

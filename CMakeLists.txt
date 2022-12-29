@@ -350,23 +350,55 @@ AddTarget(TYPE shared NAME MapUtilGui
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
 
+AddTarget(TYPE shared NAME LegacyConverterUtil
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/LegacyConverterUtil
+    EXPORT_INCLUDES
+    LINK_LIBRARIES
+        CoreLogic
+        CorePlatform
+        GameInt
+        GuiInt
+        GuiResource
+        GameObjects
+    
+        CoreResource
+    
+        zlib ${PTHREAD} frozen
+    QT_MODULES Core
+    )
+
 # App
 
 AddTarget( TYPE app_ui NAME LegacyConverter
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/LegacyConverter
     LINK_LIBRARIES
-    CorePlatform
-    GuiInt
-    GameInt
-    GameObjects
+        CorePlatform
+        GuiInt
+        GameInt
+        GameObjects
+    
+        CoreResource
+        CoreApplication
+        GuiApplication
+        GuiResource
+        LegacyConverterUtil
 
-    CoreResource
-    CoreApplication
-    GuiApplication
-    GuiResource
-
-    zlib ${PTHREAD}
     QT_MODULES Widgets
+    UIC_POSTPROCESS_SCRIPTS
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
+    )
+AddTarget( TYPE app_console NAME LegacyConverterCLI
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/LegacyConverterCLI
+    LINK_LIBRARIES
+        CorePlatform
+        GameInt
+        GameObjects
+    
+        CoreResource
+        CoreApplication
+        LegacyConverterUtil
+
+    QT_MODULES Core
     UIC_POSTPROCESS_SCRIPTS
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )

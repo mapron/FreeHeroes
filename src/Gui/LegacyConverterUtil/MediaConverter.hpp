@@ -9,9 +9,11 @@
 
 #include "FsUtils.hpp"
 
+#include "LegacyConverterUtilExport.hpp"
+
 namespace FreeHeroes::Conversion {
 
-class MediaConverter {
+class LEGACYCONVERTERUTIL_EXPORT MediaConverter {
 public:
     MediaConverter();
 

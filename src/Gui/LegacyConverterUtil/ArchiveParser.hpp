@@ -8,6 +8,8 @@
 #include "FsUtilsQt.hpp"
 #include "IResourceLibrary.hpp"
 
+#include "LegacyConverterUtilExport.hpp"
+
 #include <functional>
 
 #include <QSet>
@@ -23,7 +25,7 @@ inline Q_DECL_PURE_FUNCTION uint qHash(const ResourceMedia::Type& key, uint seed
 
 namespace FreeHeroes::Conversion {
 class KnownResources;
-class ArchiveParser {
+class LEGACYCONVERTERUTIL_EXPORT ArchiveParser {
 public:
     using std_path           = Core::std_path;
     using ExtractCallbackInc = std::function<void()>;

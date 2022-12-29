@@ -9,6 +9,8 @@
 
 #include "PropertyTree.hpp"
 
+#include "LegacyConverterUtilExport.hpp"
+
 #include <string_view>
 #include <vector>
 #include <unordered_map>
@@ -24,7 +26,7 @@ struct KnownResource {
     PropertyTreeMap handlers;
 };
 
-class KnownResources {
+class LEGACYCONVERTERUTIL_EXPORT KnownResources {
 public:
     KnownResources(const Core::std_path& config);
     const KnownResource* find(const std::string& legacyId) const;

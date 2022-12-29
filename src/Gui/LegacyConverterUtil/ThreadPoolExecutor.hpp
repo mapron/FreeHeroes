@@ -13,9 +13,11 @@
 #include <mutex>
 #include <chrono>
 
+#include "LegacyConverterUtilExport.hpp"
+
 namespace FreeHeroes::Conversion {
 
-class ThreadPoolExecutor : public QObject {
+class LEGACYCONVERTERUTIL_EXPORT ThreadPoolExecutor : public QObject {
     Q_OBJECT
 public:
     using Task = std::function<void()>;
