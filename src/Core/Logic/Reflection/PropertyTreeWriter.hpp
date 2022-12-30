@@ -18,8 +18,8 @@ namespace FreeHeroes::Core::Reflection {
 
 class PropertyTreeWriter {
 public:
-    template<HasFields T>
-    void valueToJson(const T& value, PropertyTree& result)
+    template<class T>
+    void valueToJsonUsingMeta(const T& value, PropertyTree& result)
     {
         result = {};
         result.convertToMap();
@@ -32,6 +32,12 @@ public:
         };
 
         std::apply([&visitor](auto&&... field) { ((visitor(field)), ...); }, MetaInfo::s_fields<T>);
+    }
+
+    template<HasFieldsForWrite T>
+    void valueToJson(const T& value, PropertyTree& result)
+    {
+        valueToJsonUsingMeta(value, result);
     }
 
     void valueToJson(const PropertyTreeScalarHeld auto& value, PropertyTree& result)
@@ -49,6 +55,21 @@ public:
     {
         const auto str = EnumTraits::enumToString(value);
         result         = PropertyTreeScalar(std::string(str.begin(), str.end()));
+    }
+
+    template<HasCustomTransformWrite T>
+    void valueToJson(const T& value, PropertyTree& result)
+    {
+        valueToJsonUsingMeta(value, result);
+        PropertyTree tmp;
+        if (MetaInfo::transformTreeWrite<T>(result, tmp))
+            result = std::move(tmp);
+    }
+
+    template<HasToStringWrite T>
+    void valueToJson(const T& value, PropertyTree& result)
+    {
+        result = PropertyTreeScalar(value.toString());
     }
 
     template<NonAssociative Container>

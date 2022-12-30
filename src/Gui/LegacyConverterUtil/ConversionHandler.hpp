@@ -8,22 +8,16 @@
 #include "FsUtils.hpp"
 #include "Profiler.hpp"
 #include "ByteBuffer.hpp"
-
-#include "Archive.hpp"
+#include "PropertyTree.hpp"
 
 #include "LegacyConverterUtilExport.hpp"
 
 #include <iosfwd>
 
 namespace FreeHeroes {
-namespace Core {
-class IGameDatabaseContainer;
-}
 
-namespace Gui {
-class ISprite;
-using SpritePtr = std::shared_ptr<const ISprite>;
-}
+class Archive;
+class SpriteFile;
 
 class LEGACYCONVERTERUTIL_EXPORT ConversionHandler {
 public:
@@ -47,34 +41,45 @@ public:
         bool     m_forceWrite    = false;
         bool     m_cleanupFolder = false;
         bool     m_uncompress    = false;
+        bool     m_prettyJson    = false;
     };
 
     enum class Task
     {
         Invalid,
 
-        UnpackDatToFolder,
-        PackFolderToDat,
-        ConvertDefToPng,
-        ConvertPngToDef,
+        ArchiveLoadDat,
+        ArchiveSaveDat,
+        ArchiveLoadFolder,
+        ArchiveSaveFolder,
 
-        DefRoundTripPng,
-        DatRoundTripFolder,
-        DatRoundTripMemory,
-        DatRoundTripMemoryWithConvert,
+        ArchiveRoundTripFolder,
+        ArchiveRoundTripMemory,
+        ArchiveRoundTripMemoryWithConvert,
+
+        SpriteLoadDef,
+        SpriteSaveDef,
+        SpriteLoadFlat,
+        SpriteSaveFlat,
+        SpriteLoadPng,
+        SpriteSavePng,
+
+        SpriteRoundTripPng,
+        SpriteRoundTripFlat,
     };
 
 public:
-    ConversionHandler(std::ostream&                       logOutput,
-                      const Core::IGameDatabaseContainer* databaseContainer,
-                      Settings                            settings);
+    ConversionHandler(std::ostream& logOutput,
+                      Settings      settings);
+    ~ConversionHandler();
 
     void run(Task command, int recurse = 0) noexcept(false);
 
 public:
-    Archive         m_archive;
-    ByteArrayHolder m_binaryBuffer;
-    Gui::SpritePtr  m_sprite;
+    std::unique_ptr<Archive>    m_archive;
+    std::unique_ptr<SpriteFile> m_sprite;
+    ByteArrayHolder             m_binaryBuffer;
+    PropertyTree                m_json;
 
 private:
     using MemberProc = void (ConversionHandler::*)(void);
@@ -88,6 +93,10 @@ private:
     void readBinaryBufferData();
     void writeBinaryBufferData();
 
+    // text I/O
+    void readJsonToProperty();
+    void writeJsonFromProperty();
+
     // Primitive tasks
     void binaryDeserializeArchive();
     void binarySerializeArchive();
@@ -98,7 +107,11 @@ private:
     void writeArchiveToFolder();
     void readArchiveFromFolder();
 
-    void makeJsonDefName();
+    void binaryDeserializeSprite();
+    void binarySerializeSprite();
+
+    void propertySerializeSprite();
+    void propertyDeserializeSprite();
 
     void checkBinaryInputOutputEquality();
 
@@ -106,8 +119,7 @@ private:
     void safeCopy(const Core::std_path& src, const Core::std_path& dest);
 
 private:
-    std::ostream&                             m_logOutput;
-    const Core::IGameDatabaseContainer* const m_databaseContainer;
+    std::ostream& m_logOutput;
 
     class ScopeLogger {
     public:

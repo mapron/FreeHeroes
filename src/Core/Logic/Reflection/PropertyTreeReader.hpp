@@ -38,7 +38,7 @@ public:
         std::apply([&visitor](auto&&... field) { ((visitor(field)), ...); }, MetaInfo::s_fields<T>);
     }
 
-    template<HasFields T>
+    template<HasFieldsForRead T>
     void jsonToValue(const PropertyTree& json, T& value)
     {
         jsonToValueUsingMeta(json, value);
@@ -64,24 +64,24 @@ public:
         value          = EnumTraits::stringToEnum<Enum>({ str.c_str(), str.size() });
     }
 
-    template<HasCustomTransform T>
+    template<HasCustomTransformRead T>
     void jsonToValue(const PropertyTree& json, T& value)
     {
         PropertyTree tmp;
-        if (MetaInfo::transformTree<T>(json, tmp))
+        if (MetaInfo::transformTreeRead<T>(json, tmp))
             jsonToValueUsingMeta(tmp, value);
         else
             jsonToValueUsingMeta(json, value);
     }
 
-    template<HasFromString T>
+    template<HasFromStringRead T>
     void jsonToValue(const PropertyTree& json, T& value)
     {
         if (!json.isScalar() || !json.getScalar().isString())
             return jsonToValueUsingMeta(json, value);
 
-        const std::string tmp = json.getScalar().toString();
-        value                 = MetaInfo::fromString<T>(tmp);
+        std::string tmp = json.getScalar().toString();
+        value.fromString(std::move(tmp));
     }
 
     template<NonAssociative Container>

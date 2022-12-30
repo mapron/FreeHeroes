@@ -307,8 +307,9 @@ struct GroupOffsetList {
 
 } // namespace
 
-DefParser::DefParser(const char* dataPtr, int size, const AnimationPaletteConfig& animConfig)
+DefParser::DefParser(const char* dataPtr, int size, const AnimationPaletteConfig& animConfig, const std::string& resourceName)
     : m_data(QByteArray::fromRawData(dataPtr, size))
+    , m_resourceName(QString::fromStdString(resourceName))
     , m_animConfig(animConfig)
 {
     m_dataBuffer.setData(m_data);
@@ -323,7 +324,6 @@ DefParser::DefParser(const char* dataPtr, int size, const AnimationPaletteConfig
     ds >> type;
     if (type == 0x46323344U) { // 'D32F'
         loadHotA();
-        //std::cerr << "Unsuppoerted HotA format\n";
         //return;
     } else {
         loadSoD(type);

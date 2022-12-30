@@ -11,6 +11,7 @@
 
 #include <QVector>
 #include <QBuffer>
+#include <QSet>
 
 namespace FreeHeroes::Conversion {
 
@@ -27,7 +28,7 @@ struct AnimationPaletteConfig {
 
 class DefParser {
 public:
-    DefParser(const char* dataPtr, int size, const AnimationPaletteConfig& animConfig);
+    DefParser(const char* dataPtr, int size, const AnimationPaletteConfig& animConfig, const std::string& resourceName);
     ~DefParser() = default;
 
     struct ParsedFrame {
@@ -53,14 +54,16 @@ public:
 
 private:
     QByteArray                   m_data;
+    QString                      m_resourceName;
     QBuffer                      m_dataBuffer;
     const AnimationPaletteConfig m_animConfig;
 
     QVector<ParsedFrame> m_parsedFrames;
     QVector<ParsedGroup> m_parsedGroups;
 
-    bool    m_status = false;
-    QString m_type;
+    bool           m_status = false;
+    QString        m_type;
+    QSet<uint32_t> m_usedFormats;
 
     ParsedFrame loadFrame(uint32_t offset, const Palette& palette);
 

@@ -996,36 +996,31 @@ STRUCT_REFLECTION_PAIRED(
 )
 
 // clang-format on
-template<>
-inline constexpr const bool MetaInfo::s_useFromString<BonusRatio>{ true };
 
 template<>
-CORELOGIC_EXPORT BonusRatio MetaInfo::fromString(const std::string& value);
+inline constexpr const bool MetaInfo::s_useCustomTransformRead<LibraryUnit::Traits>{ true };
+template<>
+CORELOGIC_EXPORT bool MetaInfo::transformTreeRead<LibraryUnit::Traits>(const PropertyTree& treeIn, PropertyTree& treeOut);
 
 template<>
-inline constexpr const bool MetaInfo::s_useCustomTransform<LibraryUnit::Traits>{ true };
+inline constexpr const bool MetaInfo::s_useCustomTransformRead<ResourceAmount>{ true };
 template<>
-CORELOGIC_EXPORT bool MetaInfo::transformTree<LibraryUnit::Traits>(const PropertyTree& treeIn, PropertyTree& treeOut);
+CORELOGIC_EXPORT bool MetaInfo::transformTreeRead<ResourceAmount>(const PropertyTree& treeIn, PropertyTree& treeOut);
 
 template<>
-inline constexpr const bool MetaInfo::s_useCustomTransform<ResourceAmount>{ true };
+inline constexpr const bool MetaInfo::s_useCustomTransformRead<UnitWithCount>{ true };
 template<>
-CORELOGIC_EXPORT bool MetaInfo::transformTree<ResourceAmount>(const PropertyTree& treeIn, PropertyTree& treeOut);
+CORELOGIC_EXPORT bool MetaInfo::transformTreeRead<UnitWithCount>(const PropertyTree& treeIn, PropertyTree& treeOut);
 
 template<>
-inline constexpr const bool MetaInfo::s_useCustomTransform<UnitWithCount>{ true };
+inline constexpr const bool MetaInfo::s_useCustomTransformRead<LibraryHero::StartStack>{ true };
 template<>
-CORELOGIC_EXPORT bool MetaInfo::transformTree<UnitWithCount>(const PropertyTree& treeIn, PropertyTree& treeOut);
+CORELOGIC_EXPORT bool MetaInfo::transformTreeRead<LibraryHero::StartStack>(const PropertyTree& treeIn, PropertyTree& treeOut);
 
 template<>
-inline constexpr const bool MetaInfo::s_useCustomTransform<LibraryHero::StartStack>{ true };
+inline constexpr const bool MetaInfo::s_useCustomTransformRead<ObjectDefMappings>{ true };
 template<>
-CORELOGIC_EXPORT bool MetaInfo::transformTree<LibraryHero::StartStack>(const PropertyTree& treeIn, PropertyTree& treeOut);
-
-template<>
-inline constexpr const bool MetaInfo::s_useCustomTransform<ObjectDefMappings>{ true };
-template<>
-CORELOGIC_EXPORT bool MetaInfo::transformTree<ObjectDefMappings>(const PropertyTree& treeIn, PropertyTree& treeOut);
+CORELOGIC_EXPORT bool MetaInfo::transformTreeRead<ObjectDefMappings>(const PropertyTree& treeIn, PropertyTree& treeOut);
 
 template<>
 inline constexpr const bool MetaInfo::s_isStringMap<LibraryFactionHeroClass::SkillWeights>{ true };

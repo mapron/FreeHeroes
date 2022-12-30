@@ -7,11 +7,13 @@
 
 #include "Reflection/EnumTraitsMacro.hpp"
 
-#include "IGameDatabase.hpp"
+#include "ByteOrderStream.hpp"
+
+#include "Archive.hpp"
+#include "SpriteFile.hpp"
+
 #include "FileIOUtils.hpp"
-#include "Compression.hpp"
-#include "SpriteParserLegacy.hpp"
-#include "SpriteSerialization.hpp"
+#include "FileFormatJson.hpp"
 
 #include <iostream>
 
@@ -30,15 +32,24 @@ namespace Core::Reflection {
 ENUM_REFLECTION_STRINGIY(ConversionHandler::Task,
                          Invalid,
                          Invalid,
-                         UnpackDatToFolder,
-                         PackFolderToDat,
-                         ConvertDefToPng,
-                         ConvertPngToDef,
+                         ArchiveLoadDat,
+                         ArchiveSaveDat,
+                         ArchiveLoadFolder,
+                         ArchiveSaveFolder,
 
-                         DefRoundTripPng,
-                         DatRoundTripFolder,
-                         DatRoundTripMemory,
-                         DatRoundTripMemoryWithConvert)
+                         ArchiveRoundTripFolder,
+                         ArchiveRoundTripMemory,
+                         ArchiveRoundTripMemoryWithConvert,
+
+                         SpriteLoadDef,
+                         SpriteSaveDef,
+                         SpriteLoadFlat,
+                         SpriteSaveFlat,
+                         SpriteLoadPng,
+                         SpriteSavePng,
+
+                         SpriteRoundTripPng,
+                         SpriteRoundTripFlat)
 
 }
 
@@ -52,14 +63,16 @@ ConversionHandler::Task stringToTask(const std::string& str)
     return Core::Reflection::EnumTraits::stringToEnum<ConversionHandler::Task>({ str.c_str(), str.size() });
 }
 
-ConversionHandler::ConversionHandler(std::ostream&                       logOutput,
-                                     const Core::IGameDatabaseContainer* databaseContainer,
-                                     Settings                            settings)
-    : m_logOutput(logOutput)
-    , m_databaseContainer(databaseContainer)
+ConversionHandler::ConversionHandler(std::ostream& logOutput,
+                                     Settings      settings)
+    : m_archive(std::make_unique<Archive>())
+    , m_sprite(std::make_unique<SpriteFile>())
+    , m_logOutput(logOutput)
     , m_settings(std::move(settings))
 {
 }
+
+ConversionHandler::~ConversionHandler() = default;
 
 void ConversionHandler::run(Task task, int recurse) noexcept(false)
 {
@@ -72,84 +85,56 @@ void ConversionHandler::run(Task task, int recurse) noexcept(false)
             {
                 throw std::runtime_error("Can't execute invalid task.");
             }
-            case Task::UnpackDatToFolder:
+                // ============================================
+
+            case Task::ArchiveLoadDat:
             {
                 setInput(m_inputs.m_datFile);
                 runMember(readBinaryBufferData);
 
                 runMember(binaryDeserializeArchive);
                 runMember(convertArchiveFromBinary);
-
-                setOutput(m_outputs.m_folder);
-                runMember(writeArchiveToFolder);
             } break;
-            case Task::PackFolderToDat:
+            case Task::ArchiveSaveDat:
             {
-                setInput(m_inputs.m_folder);
-                runMember(readArchiveFromFolder);
-
                 runMember(convertArchiveToBinary);
                 runMember(binarySerializeArchive);
 
                 setOutput(m_outputs.m_datFile);
                 runMember(writeBinaryBufferData);
             } break;
-            case Task::ConvertDefToPng:
+
+            case Task::ArchiveLoadFolder:
             {
-                setInput(m_inputs.m_defFile);
-                std::string ext = Core::path2string(m_inputFilename.extension());
-                std::transform(ext.begin(), ext.end(), ext.begin(), [](unsigned char c) { return std::tolower(c); });
-
-                if (ext == ".pcx")
-                    m_sprite = Conversion::loadPcx(m_inputFilename);
-                else if (ext == ".bmp")
-                    m_sprite = Conversion::loadBmp(m_inputFilename);
-                else
-                    m_sprite = Conversion::loadSpriteLegacy(m_inputFilename);
-
-                makeJsonDefName();
-
-                setOutput(m_outputs.m_pngJsonFile);
-                Gui::saveSprite(m_sprite, m_outputFilename);
+                setInput(m_inputs.m_folder);
+                runMember(readArchiveFromFolder);
             } break;
-            case Task::ConvertPngToDef:
+            case Task::ArchiveSaveFolder:
             {
-                makeJsonDefName();
-                setInput(m_inputs.m_pngJsonFile);
-                m_sprite = Gui::loadSprite(m_settings.m_inputs.m_pngJsonFile);
-
-                setOutput(m_outputs.m_defFile);
-                Conversion::saveSpriteLegacy(m_sprite, m_outputFilename);
+                setOutput(m_outputs.m_folder);
+                runMember(writeArchiveToFolder);
             } break;
-            case Task::DefRoundTripPng:
-            {
-                run(Task::ConvertDefToPng, recurse + 1);
-                safeCopy(m_settings.m_outputs.m_pngFile, m_settings.m_inputs.m_pngFile);
-                safeCopy(m_settings.m_outputs.m_pngJsonFile, m_settings.m_inputs.m_pngJsonFile);
-                run(Task::ConvertPngToDef, recurse + 1);
 
-                setInput(m_inputs.m_defFile);
-                setOutput(m_outputs.m_defFile);
-                runMember(checkBinaryInputOutputEquality);
-            } break;
-            case Task::DatRoundTripFolder:
+            case Task::ArchiveRoundTripFolder:
             {
-                run(Task::UnpackDatToFolder, recurse + 1);
+                run(Task::ArchiveLoadDat, recurse + 1);
+                run(Task::ArchiveSaveFolder, recurse + 1);
                 m_settings.m_inputs.m_folder = m_settings.m_outputs.m_folder;
-                run(Task::PackFolderToDat, recurse + 1);
+                run(Task::ArchiveLoadFolder, recurse + 1);
+                run(Task::ArchiveSaveDat, recurse + 1);
 
                 setInput(m_inputs.m_datFile);
                 setOutput(m_outputs.m_datFile);
                 runMember(checkBinaryInputOutputEquality);
             } break;
-            case Task::DatRoundTripMemory:
-            case Task::DatRoundTripMemoryWithConvert:
+            case Task::ArchiveRoundTripMemory:
+            case Task::ArchiveRoundTripMemoryWithConvert:
             {
                 setInput(m_inputs.m_datFile);
                 runMember(readBinaryBufferData);
 
                 runMember(binaryDeserializeArchive);
-                if (task == Task::DatRoundTripMemoryWithConvert) {
+                if (task == Task::ArchiveRoundTripMemoryWithConvert) {
                     runMember(convertArchiveFromBinary);
                     runMember(convertArchiveToBinary);
                 }
@@ -160,6 +145,66 @@ void ConversionHandler::run(Task task, int recurse) noexcept(false)
 
                 setInput(m_inputs.m_datFile);
                 setOutput(m_outputs.m_datFile);
+                runMember(checkBinaryInputOutputEquality);
+            } break;
+
+                // ============================================
+
+            case Task::SpriteLoadDef:
+            {
+                setInput(m_inputs.m_defFile);
+                runMember(readBinaryBufferData);
+
+                runMember(binaryDeserializeSprite);
+            } break;
+            case Task::SpriteSaveDef:
+            {
+                runMember(binarySerializeSprite);
+
+                setOutput(m_outputs.m_defFile);
+                runMember(writeBinaryBufferData);
+            } break;
+
+            case Task::SpriteSaveFlat:
+            {
+                runMember(propertySerializeSprite);
+
+                setOutput(m_outputs.m_pngJsonFile);
+                runMember(writeJsonFromProperty);
+            } break;
+
+            case Task::SpriteLoadFlat:
+            {
+                setInput(m_inputs.m_pngJsonFile);
+                runMember(readJsonToProperty);
+
+                runMember(propertyDeserializeSprite);
+            } break;
+
+            case Task::SpriteLoadPng:
+            {
+                setInput(m_inputs.m_pngFile);
+            } break;
+            case Task::SpriteSavePng:
+            {
+                setOutput(m_outputs.m_pngFile);
+            } break;
+
+            case Task::SpriteRoundTripPng:
+            {
+                assert(0);
+            } break;
+            case Task::SpriteRoundTripFlat:
+            {
+                run(Task::SpriteLoadDef, recurse + 1);
+                run(Task::SpriteSaveFlat, recurse + 1);
+                //safeCopy(m_settings.m_outputs.m_pngFile, m_settings.m_inputs.m_pngFile);
+                safeCopy(m_settings.m_outputs.m_pngJsonFile, m_settings.m_inputs.m_pngJsonFile);
+                run(Task::SpriteLoadFlat, recurse + 1);
+                run(Task::SpriteSaveDef, recurse + 1);
+
+                setInput(m_inputs.m_defFile);
+                setOutput(m_outputs.m_defFile);
                 runMember(checkBinaryInputOutputEquality);
             } break;
         }
@@ -210,16 +255,28 @@ void ConversionHandler::writeBinaryBufferData()
     Core::writeFileFromHolderThrow(m_outputFilename, m_binaryBuffer);
 }
 
+void ConversionHandler::readJsonToProperty()
+{
+    std::string buffer = Core::readFileIntoBufferThrow(m_inputFilename);
+    m_json             = Core::readJsonFromBufferThrow(buffer);
+}
+
+void ConversionHandler::writeJsonFromProperty()
+{
+    std::string buffer = Core::writeJsonToBufferThrow(m_json, m_settings.m_prettyJson);
+    Core::writeFileFromBufferThrow(m_outputFilename, buffer);
+}
+
 void ConversionHandler::binaryDeserializeArchive()
 {
     ByteOrderBuffer           bobuffer(m_binaryBuffer);
-    ByteOrderDataStreamReader reader(bobuffer, ByteOrderDataStream::createByteorderMask(ORDER_LE, ORDER_LE, ORDER_LE));
+    ByteOrderDataStreamReader reader(bobuffer, ByteOrderDataStream::LITTLE_ENDIAN);
 
     try {
-        m_archive = {};
-        m_archive.detectFormat(m_inputFilename, reader);
+        *m_archive = Archive{};
+        m_archive->detectFormat(m_inputFilename, reader);
         reader.getBuffer().setOffsetRead(0);
-        reader >> m_archive;
+        reader >> *m_archive;
     }
     catch (std::exception& ex) {
         throw std::runtime_error(ex.what() + std::string(", offset=") + std::to_string(bobuffer.getOffsetRead()));
@@ -230,19 +287,19 @@ void ConversionHandler::binarySerializeArchive()
 {
     m_binaryBuffer = {};
     ByteOrderBuffer           bobuffer(m_binaryBuffer);
-    ByteOrderDataStreamWriter writer(bobuffer, ByteOrderDataStream::createByteorderMask(ORDER_LE, ORDER_LE, ORDER_LE));
+    ByteOrderDataStreamWriter writer(bobuffer, ByteOrderDataStream::LITTLE_ENDIAN);
 
-    writer << m_archive;
+    writer << *m_archive;
 }
 
 void ConversionHandler::convertArchiveToBinary()
 {
-    m_archive.convertToBinary();
+    m_archive->convertToBinary();
 }
 
 void ConversionHandler::convertArchiveFromBinary()
 {
-    m_archive.convertFromBinary(m_settings.m_uncompress);
+    m_archive->convertFromBinary(m_settings.m_uncompress);
 }
 
 void ConversionHandler::writeArchiveToFolder()
@@ -250,25 +307,51 @@ void ConversionHandler::writeArchiveToFolder()
     if (m_settings.m_cleanupFolder) {
         Core::std_fs::remove_all(m_outputFilename);
     }
-    m_archive.saveToFolder(m_outputFilename, !m_settings.m_forceWrite);
+    m_archive->saveToFolder(m_outputFilename, !m_settings.m_forceWrite);
 }
 
 void ConversionHandler::readArchiveFromFolder()
 {
-    m_archive = {};
-    m_archive.loadFromFolder(m_inputFilename);
+    *m_archive = Archive{};
+    m_archive->loadFromFolder(m_inputFilename);
 }
 
-void ConversionHandler::makeJsonDefName()
+void ConversionHandler::binaryDeserializeSprite()
 {
-    auto repl = [](const Core::std_path& path) {
-        const auto        folder       = path.parent_path();
-        const std::string resourceName = Core::path2string(path.filename().stem());
+    ByteOrderBuffer           bobuffer(m_binaryBuffer);
+    ByteOrderDataStreamReader reader(bobuffer, ByteOrderDataStream::LITTLE_ENDIAN);
 
-        return folder / (Core::string2path(resourceName).concat(".fh.json"));
-    };
-    m_settings.m_inputs.m_pngJsonFile  = repl(m_settings.m_inputs.m_pngFile);
-    m_settings.m_outputs.m_pngJsonFile = repl(m_settings.m_outputs.m_pngFile);
+    try {
+        *m_sprite = SpriteFile{};
+        m_sprite->detectFormat(m_inputFilename, reader);
+        reader.getBuffer().setOffsetRead(0);
+        reader >> *m_sprite;
+    }
+    catch (std::exception& ex) {
+        throw std::runtime_error(ex.what() + std::string(", offset=") + std::to_string(bobuffer.getOffsetRead()));
+    }
+}
+
+void ConversionHandler::binarySerializeSprite()
+{
+    m_binaryBuffer = {};
+    ByteOrderBuffer           bobuffer(m_binaryBuffer);
+    ByteOrderDataStreamWriter writer(bobuffer, ByteOrderDataStream::LITTLE_ENDIAN);
+
+    writer << *m_sprite;
+}
+
+void ConversionHandler::propertySerializeSprite()
+{
+    m_sprite->toJson(m_json);
+    m_sprite->bitmapsToJson(m_json);
+}
+
+void ConversionHandler::propertyDeserializeSprite()
+{
+    *m_sprite = SpriteFile{};
+    m_sprite->fromJson(m_json);
+    m_sprite->bitmapsFromJson(m_json);
 }
 
 void ConversionHandler::checkBinaryInputOutputEquality()

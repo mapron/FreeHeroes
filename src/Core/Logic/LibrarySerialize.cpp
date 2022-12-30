@@ -199,19 +199,7 @@ bool serialize(const SkillHeroItem& obj, PropertyTree& jsonObj)
 }
 
 template<>
-BonusRatio MetaInfo::fromString(const std::string& value)
-{
-    auto parts = splitLine(value, '/', true);
-    if (parts.size() == 2) {
-        int n = std::atoi(parts[0].c_str());
-        int d = std::atoi(parts[1].c_str());
-        if (d != 0)
-            return { n, d };
-    }
-    return {};
-}
-template<>
-bool MetaInfo::transformTree<LibraryUnit::Traits>(const PropertyTree& treeIn, PropertyTree& treeOut)
+bool MetaInfo::transformTreeRead<LibraryUnit::Traits>(const PropertyTree& treeIn, PropertyTree& treeOut)
 {
     if (!treeIn.isList())
         return false;
@@ -222,7 +210,7 @@ bool MetaInfo::transformTree<LibraryUnit::Traits>(const PropertyTree& treeIn, Pr
 }
 
 template<>
-bool MetaInfo::transformTree<ResourceAmount>(const PropertyTree& treeIn, PropertyTree& treeOut)
+bool MetaInfo::transformTreeRead<ResourceAmount>(const PropertyTree& treeIn, PropertyTree& treeOut)
 {
     if (!treeIn.isScalar())
         return false;
@@ -256,7 +244,7 @@ bool MetaInfo::transformTree<ResourceAmount>(const PropertyTree& treeIn, Propert
 }
 
 template<>
-bool MetaInfo::transformTree<UnitWithCount>(const PropertyTree& treeIn, PropertyTree& treeOut)
+bool MetaInfo::transformTreeRead<UnitWithCount>(const PropertyTree& treeIn, PropertyTree& treeOut)
 {
     if (!treeIn.isScalar())
         return false;
@@ -280,7 +268,7 @@ bool MetaInfo::transformTree<UnitWithCount>(const PropertyTree& treeIn, Property
     return true;
 }
 template<>
-bool MetaInfo::transformTree<LibraryHero::StartStack>(const PropertyTree& treeIn, PropertyTree& treeOut)
+bool MetaInfo::transformTreeRead<LibraryHero::StartStack>(const PropertyTree& treeIn, PropertyTree& treeOut)
 {
     if (!treeIn.isScalar())
         return false;
@@ -308,7 +296,7 @@ bool MetaInfo::transformTree<LibraryHero::StartStack>(const PropertyTree& treeIn
 }
 
 template<>
-bool MetaInfo::transformTree<ObjectDefMappings>(const PropertyTree& treeIn, PropertyTree& treeOut)
+bool MetaInfo::transformTreeRead<ObjectDefMappings>(const PropertyTree& treeIn, PropertyTree& treeOut)
 {
     if (!treeIn.isScalar())
         return false;

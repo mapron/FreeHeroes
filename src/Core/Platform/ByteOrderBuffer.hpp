@@ -82,6 +82,12 @@ public:
     inline void setOffsetRead(ptrdiff_t offset) { m_posRead = offset; }
     inline void setOffsetWrite(ptrdiff_t offset) { m_posWrite = offset; }
 
+    inline void extendWriteToCurrentOffset()
+    {
+        if (getRemainWrite() <= 0)
+            setSize(m_posWrite + 1);
+    }
+
     inline void resetRead()
     {
         m_posRead = 0;

@@ -26,6 +26,11 @@ concept HasWrite = requires(T t, ByteOrderDataStreamWriter& writer)
     t.writeBinary(writer);
 };
 
+inline constexpr uint_fast8_t createByteorderMask(uint_fast8_t endiannes8, uint_fast8_t endiannes16, uint_fast8_t endiannes32)
+{
+    return endiannes8 | (endiannes16 << 1) | (endiannes32 << 2);
+}
+
 /**
  * @brief Data stream which can have any byte order.
  *
@@ -43,7 +48,7 @@ concept HasWrite = requires(T t, ByteOrderDataStreamWriter& writer)
 class ByteOrderDataStream {
 public:
     /// Creates stream object. ProtocolMask sets actual stream byte order: for byte, words and dwords. Default is Big Endian for all.
-    inline ByteOrderDataStream(ByteOrderBuffer& buf, uint_fast8_t ProtocolMask = createByteorderMask(ORDER_BE, ORDER_BE, ORDER_BE))
+    inline ByteOrderDataStream(ByteOrderBuffer& buf, uint_fast8_t ProtocolMask)
         : m_buf(buf)
     {
         setMask(ProtocolMask);
@@ -52,7 +57,7 @@ public:
     inline ByteOrderBuffer&       getBuffer() { return m_buf; }
     inline const ByteOrderBuffer& getBuffer() const { return m_buf; }
 
-    /// Set byteorder settings for stream. To create actual value, use CreateByteorderMask.
+    /// Set byteorder settings for stream. To create actual value, use createByteorderMask.
     inline void setMask(uint_fast8_t protocolMask)
     {
         protocolMask &= 7;
@@ -64,10 +69,6 @@ public:
         m_maskFloat  = m_maskDouble & 3;
     }
     /// Creating mask description of byteorder. endiannes8 - byte order in word, endiannes16 - word order in dword, endiannes32 - dword order in qword.
-    static inline uint_fast8_t createByteorderMask(uint_fast8_t endiannes8, uint_fast8_t endiannes16, uint_fast8_t endiannes32)
-    {
-        return endiannes8 | (endiannes16 << 1) | (endiannes32 << 2);
-    }
     template<typename T>
     inline uint_fast8_t getTypeMask() const
     {
@@ -86,6 +87,9 @@ public:
         m_containerSizeBytes = size;
         return { this, prev };
     }
+
+    static constexpr const uint_fast8_t BIG_ENDIAN    = createByteorderMask(ORDER_BE, ORDER_BE, ORDER_BE);
+    static constexpr const uint_fast8_t LITTLE_ENDIAN = createByteorderMask(ORDER_LE, ORDER_LE, ORDER_LE);
 
 protected:
     ByteOrderDataStream(const ByteOrderDataStream& another) = delete;
@@ -201,6 +205,19 @@ public:
     void readBlock(char* data, ptrdiff_t size)
     {
         readBlock(reinterpret_cast<uint8_t*>(data), size);
+    }
+    template<size_t strSize>
+    void readStringWithGarbagePadding(std::string& str, std::vector<uint8_t>& strGarbagePadding)
+    {
+        std::array<char, strSize + 1> strBuffer{};
+        this->readBlock(strBuffer.data(), strSize);
+        str = strBuffer.data();
+        if (str.size() < strSize - 1) {
+            strGarbagePadding.resize(strSize - str.size() - 1);
+            std::memcpy(strGarbagePadding.data(), strBuffer.data() + str.size() + 1, strGarbagePadding.size());
+            while (!strGarbagePadding.empty() && (*strGarbagePadding.rbegin() == 0))
+                strGarbagePadding.pop_back();
+        }
     }
 
     void zeroPadding(ptrdiff_t size)
@@ -346,6 +363,18 @@ public:
     void writeBlock(const char* data, ptrdiff_t size)
     {
         writeBlock(reinterpret_cast<const uint8_t*>(data), size);
+    }
+    template<size_t sizeStr>
+    void writeStringWithGarbagePadding(const std::string& str, const std::vector<uint8_t>& strGarbagePadding)
+    {
+        if (str.size() > sizeStr)
+            throw std::runtime_error("String must be at most " + std::to_string(sizeStr) + " symbols: " + str);
+
+        std::array<char, sizeStr + 1> strBuffer{};
+        std::memcpy(strBuffer.data(), str.data(), str.size());
+        if (strGarbagePadding.size())
+            std::memcpy(strBuffer.data() + str.size() + 1, strGarbagePadding.data(), strGarbagePadding.size());
+        this->writeBlock(strBuffer.data(), sizeStr);
     }
 
     void zeroPadding(size_t count)

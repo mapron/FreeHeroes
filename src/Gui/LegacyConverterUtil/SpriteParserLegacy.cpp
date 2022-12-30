@@ -342,7 +342,7 @@ SpritePtr loadSpriteLegacy(const std_path& defFilePath)
     defFile.close();
     const std::string resourceName = path2string(defFilePath.filename().stem());
 
-    DefParser cdefFile(defData.data(), defData.size(), getConfigForResource(resourceName));
+    DefParser cdefFile(defData.data(), defData.size(), getConfigForResource(resourceName), resourceName);
     if (!cdefFile.status())
         return {};
 
@@ -547,127 +547,9 @@ void saveSpriteLegacy(Gui::SpritePtr sprite, const Core::std_path& defFilePath)
 {
     ByteArrayHolder           m_binaryBuffer;
     ByteOrderBuffer           bobuffer(m_binaryBuffer);
-    ByteOrderDataStreamWriter stream(bobuffer, ByteOrderDataStream::createByteorderMask(ORDER_LE, ORDER_LE, ORDER_LE));
+    ByteOrderDataStreamWriter stream(bobuffer, ByteOrderDataStream::LITTLE_ENDIAN);
 
     auto seq = sprite->getFramesForGroup(0);
-
-    uint32_t sig, version, count1, width, height;
-    sig     = 0x46323344U;
-    version = 1;
-    count1  = 24;
-    width   = seq->boundarySize.width();
-    height  = seq->boundarySize.height();
-    stream << sig << version << count1 << width << height;
-
-    assert(24 == count1);
-
-    uint32_t u1 = 1, u2 = 8, u3 = 1;
-    stream << u1 << u2 << u3;
-
-    uint32_t headerTotal, u5, frameCount, u7;
-    frameCount  = seq->frames.size();
-    u5          = 0;
-    headerTotal = 17 * frameCount + 16;
-    u7          = 4;
-    stream << headerTotal << u5 << frameCount << u7;
-
-    std::string basename = Core::path2string(defFilePath.filename().stem());
-    if (1) {
-        basename = "CPrSm";
-    }
-
-    for (uint32_t i = 0; i < frameCount; ++i) {
-        std::array<uint8_t, 13> strBuffer{};
-        std::string             suffix = std::to_string(i);
-        while (suffix.size() < 3)
-            suffix = "0" + suffix;
-        std::string fullname = basename + suffix;
-        std::memcpy(strBuffer.data(), fullname.c_str(), std::min(size_t(12), fullname.size()));
-        stream << strBuffer;
-    }
-
-    //stream.zeroPadding(13 * frameCount); // image string names, like "frame001\0"
-    std::vector<uint32_t> offsets;
-    const auto            offsetsOffset = stream.getBuffer().getOffsetWrite();
-    stream.zeroPadding(4 * frameCount); // offsets in file (not exact, like + 6 bytes - weird)
-
-    struct SpriteDef {
-        uint32_t format     = 0;
-        int32_t  size       = 0;
-        int32_t  fullWidth  = 0;
-        int32_t  fullHeight = 0;
-        int32_t  width      = 0;
-        int32_t  height     = 0;
-        int32_t  leftMargin = 0;
-        int32_t  topMargin  = 0;
-        uint32_t u0         = 0;
-        uint32_t u1         = 0;
-    };
-
-    for (uint32_t i = 0; i < frameCount; ++i) {
-        offsets.push_back((uint32_t) stream.getBuffer().getOffsetWrite());
-        SpriteDef def;
-        if (!seq->frames[i].frame.isNull()) {
-            def.fullWidth  = width;
-            def.fullHeight = height;
-            def.leftMargin = seq->frames[i].paddingLeftTop.x();
-            def.topMargin  = seq->frames[i].paddingLeftTop.y();
-            def.width      = seq->frames[i].frame.width();
-            def.height     = seq->frames[i].frame.height();
-            def.size       = def.width * def.height * 4;
-            def.u0         = 8;
-            def.format     = 32;
-        }
-        stream
-            << def.format
-            << def.size
-            << def.fullWidth
-            << def.fullHeight
-            << def.width
-            << def.height
-            << def.leftMargin
-            << def.topMargin
-            << def.u0
-            << def.u1;
-
-        //qWarning() << "!!!" << i;
-
-        if (!seq->frames[i].frame.isNull()) {
-            QImage tmp = seq->frames[i].frame.toImage();
-            for (int32_t h = 0; h < def.height; h++)
-                for (int32_t w = 0; w < def.width; w++) {
-                    QColor  clr = tmp.pixelColor(w, def.height - h - 1);
-                    uint8_t r, g, b, a;
-                    r = clr.red();
-                    g = clr.green();
-                    b = clr.blue();
-                    a = clr.alpha();
-                    if (a == 0) {
-                        r = g = b = 0xff;
-                    }
-                    stream << b << g << r << a;
-                }
-        }
-
-        //if (i == frameCount - 1)
-        //    stream << 0xCCCCCCCCU;
-        /*
-        ParsedFrame info;
-        info.frameId        = i;
-        info.boundarySize   = QSize{ def.fullWidth, def.fullHeight };
-        info.paddingLeftTop = QPoint{ def.leftMargin, def.topMargin };
-        info.data           = QPixmap::fromImage(tmp);
-        group.boundarySize  = info.boundarySize;
-        group.frameIds << i;*/
-        //m_parsedFrames << info;
-    }
-    //group.boundarySize = QSize(width, height);
-
-    //m_parsedGroups << group;
-    //m_binaryBuffer.resize(stream.getBuffer().getOffsetWrite());
-    stream.getBuffer().setOffsetWrite(offsetsOffset);
-    for (auto& o : offsets)
-        stream << o;
 
     Core::writeFileFromHolderThrow(defFilePath, m_binaryBuffer);
 }

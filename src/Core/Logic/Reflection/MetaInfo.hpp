@@ -208,10 +208,10 @@ struct MetaInfo {
     };
 
     template<class Parent>
-    static inline constexpr const bool s_useFromString{ false };
+    static inline constexpr const bool s_useCustomTransformRead{ false };
 
     template<class Parent>
-    static inline constexpr const bool s_useCustomTransform{ false };
+    static inline constexpr const bool s_useCustomTransformWrite{ false };
 
     template<class Parent>
     static inline constexpr const bool s_fields{ false };
@@ -220,20 +220,48 @@ struct MetaInfo {
     static inline constexpr const bool s_isStringMap{ false };
 
     template<class Parent>
-    static inline Parent fromString(const std::string& value);
+    static inline bool transformTreeRead(const PropertyTree& treeIn, PropertyTree& treeOut);
 
     template<class Parent>
-    static inline bool transformTree(const PropertyTree& treeIn, PropertyTree& treeOut);
+    static inline bool transformTreeWrite(const PropertyTree& treeIn, PropertyTree& treeOut);
 };
+
+template<class T>
+concept HasFromJsonRead = requires(T t, const PropertyTree& data)
+{
+    t.convertFromJson(data);
+};
+template<class T>
+concept HasToJsonWrite = requires(T t, PropertyTree& data)
+{
+    t.converToJson(data);
+};
+
+template<class T>
+concept HasFromStringRead = requires(T t, const std::string& data)
+{
+    t.fromString(data);
+};
+template<class T>
+concept HasToStringWrite = requires(T t, std::string& data)
+{
+    data = t.toString();
+};
+
+template<typename T>
+concept HasCustomTransformRead = MetaInfo::s_useCustomTransformRead<T>;
+
+template<typename T>
+concept HasCustomTransformWrite = MetaInfo::s_useCustomTransformWrite<T>;
 
 template<typename T>
 concept HasFields = !std::is_same_v<std::remove_cvref_t<decltype(MetaInfo::s_fields<T>)>, bool>;
 
 template<typename T>
-concept HasFromString = HasFields<T> && MetaInfo::s_useFromString<T>;
+concept HasFieldsForRead = HasFields<T> && !HasCustomTransformRead<T> && !HasFromStringRead<T> && !HasFromJsonRead<T>;
 
 template<typename T>
-concept HasCustomTransform = HasFields<T> && MetaInfo::s_useCustomTransform<T>;
+concept HasFieldsForWrite = HasFields<T> && !HasCustomTransformWrite<T> && !HasToStringWrite<T> && !HasToJsonWrite<T>;
 
 template<typename T>
 concept IsStringMap = IsMap<T> && MetaInfo::s_isStringMap<T>;

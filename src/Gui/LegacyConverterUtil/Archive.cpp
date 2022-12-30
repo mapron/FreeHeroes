@@ -54,7 +54,7 @@ void Archive::detectFormat(const std_path& path, ByteOrderDataStreamReader& stre
     } else if (ext == ".vid") {
         m_format = BinaryFormat::VID;
     } else {
-        throw std::runtime_error("Filed to detect binary format for:" + path2string(path));
+        throw std::runtime_error("Failed to detect binary format for:" + path2string(path));
     }
 }
 
@@ -508,15 +508,7 @@ void Archive::BinaryRecord::readBinary(ByteOrderDataStreamReader& stream)
     // 14,15 - valid null padding.
     // we will save '~~~' as 3 garbage bytes after null nerminator.
 
-    std::array<char, g_strSize + 1> strBuffer{};
-    stream.readBlock(strBuffer.data(), g_strSize);
-    m_filename = strBuffer.data();
-    if (m_filename.size() < g_strSize - 1) {
-        m_filenameGarbage.resize(g_strSize - m_filename.size() - 1);
-        std::memcpy(m_filenameGarbage.data(), strBuffer.data() + m_filename.size() + 1, m_filenameGarbage.size());
-        while (!m_filenameGarbage.empty() && (*m_filenameGarbage.rbegin() == 0))
-            m_filenameGarbage.pop_back();
-    }
+    stream.readStringWithGarbagePadding<g_strSize>(m_filename, m_filenameGarbage);
 
     stream >> m_offset >> m_fullSize >> m_unknown1 >> m_compressedSize;
     m_size = m_compressedSize ? m_compressedSize : m_fullSize;
@@ -524,14 +516,7 @@ void Archive::BinaryRecord::readBinary(ByteOrderDataStreamReader& stream)
 
 void Archive::BinaryRecord::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
-    if (m_filename.size() > g_strSize)
-        throw std::runtime_error("Format support filenames with at most " + std::to_string(g_strSize) + " symbols: " + m_filename);
-
-    std::array<char, g_strSize + 1> strBuffer{};
-    std::memcpy(strBuffer.data(), m_filename.data(), m_filename.size());
-    if (m_filenameGarbage.size())
-        std::memcpy(strBuffer.data() + m_filename.size() + 1, m_filenameGarbage.data(), m_filenameGarbage.size());
-    stream.writeBlock(strBuffer.data(), g_strSize);
+    stream.writeStringWithGarbagePadding<g_strSize>(m_filename, m_filenameGarbage);
     stream << m_offset << m_fullSize << m_unknown1 << m_compressedSize;
 }
 

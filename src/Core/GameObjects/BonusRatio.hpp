@@ -10,6 +10,8 @@
 #include <cstdint>
 #include <algorithm>
 
+#include <string>
+
 namespace FreeHeroes::Core {
 
 class BonusRatio {
@@ -20,6 +22,19 @@ public:
         , m_denom(d)
     {
         simplifyRatio();
+    }
+
+    void fromString(std::string value)
+    {
+        *this          = {};
+        const auto pos = value.find('/');
+        if (pos == std::string::npos)
+            return;
+        value[pos] = 0;
+        int n      = std::atoi(value.c_str());
+        int d      = std::atoi(value.c_str() + pos + 1);
+        if (d != 0)
+            *this = { n, d };
     }
 
     constexpr bool isValid() const { return m_denom != 0; }
