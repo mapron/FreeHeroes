@@ -75,27 +75,18 @@ public:
 
         std::vector<RLEItem> m_items;
 
-        int32_t m_rle3offset1rel  = 0;
-        int32_t m_rle3offset1base = 0;
-        int32_t m_rle3offset2rel  = 0;
-        int32_t m_rle3offset2base = 0;
-
-        int32_t m_currentBased1 = 0;
-        int32_t m_currentBased2 = 0;
-        int32_t m_rleSize       = 0;
-
         void readBinary(ByteOrderDataStreamReader& stream, bool compressedLength, int width);
         void writeBinary(ByteOrderDataStreamWriter& stream, bool compressedLength, int width) const;
     };
 
     struct RLEData {
         std::vector<uint32_t> m_rle1offsets;
-        int32_t               m_rle2offset1base = 0;
-        int32_t               m_rle2offset1rel  = 0;
+        std::vector<uint16_t> m_rle2offsets;
+        std::vector<uint16_t> m_rle3offsets;
 
         std::vector<RLERow> m_rleRows;
-        int32_t             m_offsetBaseAbs = 0;
-        int32_t             m_offsetBaseRel = 0;
+
+        int32_t m_size = 0;
     };
 
     Palette m_palette;
@@ -103,8 +94,7 @@ public:
     using PixelRow = std::vector<Pixel>;
     std::vector<PixelRow> m_rows;
 
-    std::vector<uint8_t> m_rleBlob;
-    //RLEData m_rleData;
+    RLEData m_rleData;
 
     std::shared_ptr<QPixmap> m_pixmapQt;
 

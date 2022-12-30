@@ -196,16 +196,31 @@ void ConversionHandler::run(Task task, int recurse) noexcept(false)
             } break;
             case Task::SpriteRoundTripFlat:
             {
-                run(Task::SpriteLoadDef, recurse + 1);
-                run(Task::SpriteSaveFlat, recurse + 1);
-                //safeCopy(m_settings.m_outputs.m_pngFile, m_settings.m_inputs.m_pngFile);
-                safeCopy(m_settings.m_outputs.m_pngJsonFile, m_settings.m_inputs.m_pngJsonFile);
-                run(Task::SpriteLoadFlat, recurse + 1);
-                run(Task::SpriteSaveDef, recurse + 1);
+                std::vector<Core::std_path> paths;
+                if (!m_settings.m_inputs.m_defFile.has_extension()) {
+                    m_logOutput << "Enable wildcard checking\n";
+                    for (auto&& it : Core::std_fs::recursive_directory_iterator(m_settings.m_inputs.m_defFile)) {
+                        if (it.is_regular_file() && it.path().extension() == ".def") {
+                            paths.push_back(it.path());
+                        }
+                    }
+                } else {
+                    paths.push_back(m_settings.m_inputs.m_defFile);
+                }
+                for (const auto& path : paths) {
+                    m_logOutput << "round-trip check:" << path << '\n';
+                    m_settings.m_inputs.m_defFile = path;
+                    run(Task::SpriteLoadDef, recurse + 1);
+                    run(Task::SpriteSaveFlat, recurse + 1);
+                    //safeCopy(m_settings.m_outputs.m_pngFile, m_settings.m_inputs.m_pngFile);
+                    safeCopy(m_settings.m_outputs.m_pngJsonFile, m_settings.m_inputs.m_pngJsonFile);
+                    run(Task::SpriteLoadFlat, recurse + 1);
+                    run(Task::SpriteSaveDef, recurse + 1);
 
-                setInput(m_inputs.m_defFile);
-                setOutput(m_outputs.m_defFile);
-                runMember(checkBinaryInputOutputEquality);
+                    setInput(m_inputs.m_defFile);
+                    setOutput(m_outputs.m_defFile);
+                    runMember(checkBinaryInputOutputEquality);
+                }
             } break;
         }
         scope.markDone();

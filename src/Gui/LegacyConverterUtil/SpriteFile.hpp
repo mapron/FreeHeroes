@@ -59,6 +59,7 @@ public:
         uint32_t m_originalOffset = 0;
         uint32_t m_originalSize   = 0;
         size_t   m_index          = 0;
+        size_t   m_sortedIndex    = 0;
 
         bool   m_isDuplicate    = false;
         size_t m_duplicateIndex = 0;
@@ -77,10 +78,11 @@ public:
 
     std::vector<BitmapFile> m_bitmaps;
 
-    //std::vector<Frame> m_frames;
     std::vector<Group> m_groups;
 
     BitmapFile::Palette m_palette;
+
+    std::vector<std::string> m_tralilingData;
 
     void detectFormat(const Core::std_path& path, ByteOrderDataStreamReader& stream);
 

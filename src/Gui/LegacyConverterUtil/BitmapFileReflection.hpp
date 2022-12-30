@@ -52,23 +52,15 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     BitmapFile::RLERow,
     m_rle0,
-    // m_items,
-    m_rle3offset1rel,
-    m_rle3offset1base,
-    m_rle3offset2rel,
-    m_rle3offset2base,
-    m_currentBased1,
-    m_currentBased2,
-    m_rleSize)
+    m_items)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     BitmapFile::RLEData,
     m_rle1offsets,
-    m_rle2offset1base,
-    m_rle2offset1rel,
+    m_rle2offsets,
+    m_rle3offsets,
     m_rleRows,
-    m_offsetBaseAbs,
-    m_offsetBaseRel)
+    m_size)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     BitmapFile,
@@ -79,6 +71,6 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_inverseRowOrder,
     m_palette,
     m_rows,
-    m_rleBlob)
+    m_rleData)
 
 }

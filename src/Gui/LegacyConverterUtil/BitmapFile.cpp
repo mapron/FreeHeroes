@@ -26,36 +26,6 @@ char toHex(uint8_t c)
 {
     return (c <= 9) ? '0' + c : 'a' + c - 10;
 }
-
-class OffsetCalculationReader {
-    ByteOrderDataStreamReader& m_stream;
-    int32_t                    m_base = 0;
-
-public:
-    OffsetCalculationReader(ByteOrderDataStreamReader& stream)
-        : m_stream(stream)
-    {
-    }
-
-    int32_t currentAbs() const
-    {
-        return m_stream.getBuffer().getOffsetRead();
-    }
-    void setCurrentAsBase()
-    {
-        m_base = currentAbs();
-    }
-    int32_t currentBased() const
-    {
-        return currentAbs() - m_base;
-    }
-
-    int32_t makeRelativeFromBased(int32_t offset) const
-    {
-        return offset - currentBased();
-    }
-};
-
 }
 
 std::string BitmapFile::Pixel::toString() const
@@ -88,54 +58,6 @@ BitmapFile::BitmapFile()
 
 BitmapFile::~BitmapFile()
 {
-    /*
-    //load size raw pixels from data
-    inline void Load(size_t size)
-    {
-        for (size_t i = 0; i < size; ++i) {
-            uint8_t byte;
-            m_ds >> byte;
-            LoadPixel(byte);
-        }
-    }
-
-    inline void Load(size_t size, uint8_t color)
-    {
-        for (size_t i = 0; i < size; ++i)
-            LoadPixel(color);
-    }
-
-    inline void LoadPixel(uint8_t color)
-    {
-        assert(m_x < m_tmpImage.width());
-        m_tmpImage.setPixel(m_x, m_y, color);
-        m_x++;
-        //  if (color == 5)
-        //       m_flagColorUsed = true;
-    }
-    inline void EndLine()
-    {
-        m_y++;
-        m_x = 0;
-    }
-
-    void LoadLine(bool compressedLength, const int baseOffset = 0)
-    {
-        
-    }
-
-    QPixmap LoadAll(int format)
-    {
-        const auto baseOffset = m_ds.device()->pos();
-        switch (format) {
-            
-            default:
-                qWarning() << "unknown def pix format=" << format;
-                break;
-        }
-        QPixmap result = QPixmap::fromImage(m_tmpImage.convertToFormat(QImage::Format_RGBA8888));
-        return result;
-    }*/
 }
 
 void BitmapFile::readBinary(ByteOrderDataStreamReader& stream)
@@ -144,66 +66,60 @@ void BitmapFile::readBinary(ByteOrderDataStreamReader& stream)
         throw std::runtime_error("Need to specify bitmap Compression and PixFormat");
 
     if (m_compression >= Compression::RLE1 && m_compression <= Compression::RLE3) {
-        stream.readBlock(m_rleBlob.data(), m_rleBlob.size());
-        //m_rleData.m_rleRows.resize(m_height);
-        //OffsetCalculationReader offsetCalc(stream);
-        //offsetCalc.setCurrentAsBase();
-        //m_rleData.m_offsetBaseAbs = offsetCalc.currentAbs();
+        m_rleData.m_rleRows.resize(m_height);
 
-        /*
+        ByteArrayHolder rleBlob;
+        rleBlob.resize(m_rleData.m_size);
+        stream.readBlock(rleBlob.data(), rleBlob.size());
+        ByteOrderBuffer           bobuffer(rleBlob);
+        ByteOrderDataStreamReader rleStream(bobuffer, ByteOrderDataStream::LITTLE_ENDIAN);
+
         if (m_compression == Compression::RLE1) {
             //for each line we have offset of pixel data
             m_rleData.m_rle1offsets.resize(m_height);
             for (auto& offset : m_rleData.m_rle1offsets)
-                stream >> offset;
+                rleStream >> offset;
 
             for (uint32_t y = 0; y < m_height; y++) {
                 const auto rowIndex      = m_inverseRowOrder ? m_height - y - 1 : y;
                 RLERow&    row           = m_rleData.m_rleRows[rowIndex];
-                auto       currentOffset = m_rleData.m_offsetBaseAbs + m_rleData.m_rle1offsets[y];
-                stream.getBuffer().setOffsetRead(currentOffset);
-                row.readBinary(stream, false, m_width);
+                auto       currentOffset = m_rleData.m_rle1offsets[y];
+                rleStream.getBuffer().setOffsetRead(currentOffset);
+                row.readBinary(rleStream, false, m_width);
             }
         } else if (m_compression == Compression::RLE2) {
-            {
-                m_rleData.m_rle2offset1base = stream.readScalar<uint16_t>();
-                m_rleData.m_rle2offset1rel  = offsetCalc.makeRelativeFromBased(m_rleData.m_rle2offset1base);
-                stream.getBuffer().markRead(m_rleData.m_rle2offset1rel);
+            m_rleData.m_rle2offsets.resize(m_height);
+            for (auto& offset : m_rleData.m_rle2offsets)
+                rleStream >> offset;
+            if (m_rleData.m_rle2offsets[0] != rleStream.getBuffer().getOffsetRead()) {
+                m_rleData.m_rle2offsets.push_back(rleStream.readScalar<uint16_t>());
             }
 
             for (uint32_t y = 0; y < m_height; y++) {
                 const auto rowIndex = m_inverseRowOrder ? m_height - y - 1 : y;
                 RLERow&    row      = m_rleData.m_rleRows[rowIndex];
 
-                OffsetCalculationReader r2(stream);
-                row.readBinary(stream, true, m_width);
-                row.m_rleSize = r2.currentBased();
+                row.readBinary(rleStream, true, m_width);
             }
         } else if (m_compression == Compression::RLE3) {
+            m_rleData.m_rle3offsets.resize(m_height * (m_width / 32));
+            for (auto& offset : m_rleData.m_rle3offsets)
+                rleStream >> offset;
+            if (m_rleData.m_rle3offsets[0] != rleStream.getBuffer().getOffsetRead()) {
+                m_rleData.m_rle3offsets.push_back(rleStream.readScalar<uint16_t>());
+            }
+
             for (uint32_t y = 0; y < m_height; y++) {
                 const auto rowIndex = m_inverseRowOrder ? m_height - y - 1 : y;
                 RLERow&    row      = m_rleData.m_rleRows[rowIndex];
-
-                row.m_currentBased1 = offsetCalc.currentBased();
                 {
-                    row.m_rle3offset1base = y * 2 * (m_width / 32);
-                    row.m_rle3offset1rel  = offsetCalc.makeRelativeFromBased(row.m_rle3offset1base);
-                    stream.getBuffer().markRead(row.m_rle3offset1rel);
+                    auto rle3offset2base = m_rleData.m_rle3offsets[y * (m_width / 32)];
+                    rleStream.getBuffer().setOffsetRead(rle3offset2base);
                 }
 
-                row.m_currentBased2 = offsetCalc.currentBased();
-                {
-                    row.m_rle3offset2base = stream.readScalar<uint16_t>();
-                    row.m_rle3offset2rel  = offsetCalc.makeRelativeFromBased(row.m_rle3offset2base);
-                    stream.getBuffer().markRead(row.m_rle3offset2rel);
-                }
-
-                OffsetCalculationReader r2(stream);
-                r2.setCurrentAsBase();
-                row.readBinary(stream, true, m_width);
-                row.m_rleSize = r2.currentBased();
+                row.readBinary(rleStream, true, m_width);
             }
-        }*/
+        }
 
         return;
     }
@@ -238,46 +154,50 @@ void BitmapFile::writeBinary(ByteOrderDataStreamWriter& stream) const
         throw std::runtime_error("Need to specify bitmap Compression and PixFormat");
 
     if (m_compression >= Compression::RLE1 && m_compression <= Compression::RLE3) {
-        stream.writeBlock(m_rleBlob.data(), m_rleBlob.size());
-        /*
-        const auto baseOffset = stream.getBuffer().getOffsetWrite();
-        assert(m_rleData.m_offsetBaseAbs == baseOffset);
+        ByteArrayHolder rleBlob;
+        rleBlob.resize(m_rleData.m_size);
+
+        ByteOrderBuffer bobuffer(rleBlob);
+        bobuffer.setResizeEnabled(false);
+        ByteOrderDataStreamWriter rleStream(bobuffer, ByteOrderDataStream::LITTLE_ENDIAN);
 
         if (m_compression == Compression::RLE1) {
             //for each line we have offset of pixel data
             for (const auto& offset : m_rleData.m_rle1offsets)
-                stream << offset;
+                rleStream << offset;
 
             for (uint32_t y = 0; y < m_height; y++) {
                 const auto    rowIndex      = m_inverseRowOrder ? m_height - y - 1 : y;
                 const RLERow& row           = m_rleData.m_rleRows[rowIndex];
-                auto          currentOffset = baseOffset + m_rleData.m_rle1offsets[y];
-                stream.getBuffer().setOffsetWrite(currentOffset);
-                stream.getBuffer().extendWriteToCurrentOffset();
-                row.writeBinary(stream, false, m_width);
+                auto          currentOffset = m_rleData.m_rle1offsets[y];
+                rleStream.getBuffer().setOffsetWrite(currentOffset);
+                row.writeBinary(rleStream, false, m_width);
             }
         } else if (m_compression == Compression::RLE2) {
-            stream << static_cast<uint16_t>(m_rleData.m_rle2offset1base);
-            stream.getBuffer().markWrite(m_rleData.m_rle2offset1rel);
-            stream.getBuffer().extendWriteToCurrentOffset();
+            for (const auto& offset : m_rleData.m_rle2offsets)
+                rleStream << offset;
 
             for (uint32_t y = 0; y < m_height; y++) {
                 const auto    rowIndex = m_inverseRowOrder ? m_height - y - 1 : y;
                 const RLERow& row      = m_rleData.m_rleRows[rowIndex];
-                row.writeBinary(stream, true, m_width);
+                row.writeBinary(rleStream, true, m_width);
             }
         } else if (m_compression == Compression::RLE3) {
+            for (auto& offset : m_rleData.m_rle3offsets)
+                rleStream << offset;
             for (uint32_t y = 0; y < m_height; y++) {
                 const auto    rowIndex = m_inverseRowOrder ? m_height - y - 1 : y;
                 const RLERow& row      = m_rleData.m_rleRows[rowIndex];
 
-                stream << static_cast<uint16_t>(row.m_rle3offset2base);
-                stream.getBuffer().markWrite(row.m_rle3offset2rel);
-                stream.getBuffer().extendWriteToCurrentOffset();
+                {
+                    auto rle3offset2base = m_rleData.m_rle3offsets[y * (m_width / 32)];
+                    rleStream.getBuffer().setOffsetWrite(rle3offset2base);
+                }
 
-                row.writeBinary(stream, true, m_width);
+                row.writeBinary(rleStream, true, m_width);
             }
-        }*/
+        }
+        stream.writeBlock(rleBlob.data(), rleBlob.size());
 
         return;
     }

@@ -75,6 +75,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_boundaryHeight,
     /*bitmaps*/
     m_groups,
-    m_palette)
+    m_palette,
+    m_tralilingData)
 
 }

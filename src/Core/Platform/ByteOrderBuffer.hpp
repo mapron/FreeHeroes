@@ -65,6 +65,9 @@ public:
     /// Try to resize buffer. If resize fails, return false.
     bool setSize(size_t sz)
     {
+        if (!m_resizeEnabled)
+            return false;
+
         if (sz != getSize())
             setMaximumSize(sz);
 
@@ -130,6 +133,11 @@ public:
         removeFromStartInternal(sz);
 
         return true;
+    }
+
+    void setResizeEnabled(bool state)
+    {
+        m_resizeEnabled = state;
     }
 
     /// debugging functions.
@@ -234,8 +242,9 @@ private:
     uint8_t*        m_beg      = nullptr;
     ptrdiff_t       m_size     = 0;
 
-    bool m_eofRead  = false;
-    bool m_eofWrite = false;
+    bool m_eofRead       = false;
+    bool m_eofWrite      = false;
+    bool m_resizeEnabled = true;
 };
 
 }

@@ -11,6 +11,7 @@
 
 #include "Reflection/PropertyTreeReader.hpp"
 #include "Reflection/PropertyTreeWriter.hpp"
+#include "StringUtils.hpp"
 
 #include <array>
 
@@ -94,6 +95,7 @@ void SpriteFile::readBinary(ByteOrderDataStreamReader& stream)
         assert(u7 == 4);
 
         m_groups.clear();
+        m_groups.resize(1);
         Group& group = m_groups[0];
 
         group.m_frames.resize(frameCount);
@@ -190,6 +192,9 @@ void SpriteFile::readBinary(ByteOrderDataStreamReader& stream)
 
         stream >> m_palette;
 
+        std::map<uint32_t, size_t> offset2frameIndex;
+        size_t                     frameIndex = 0;
+
         for (Group& group : m_groups) {
             stream >> group.m_groupId;
             const size_t totalFrames = stream.readSize();
@@ -201,20 +206,16 @@ void SpriteFile::readBinary(ByteOrderDataStreamReader& stream)
             }
 
             {
-                // @todo: global across the all groups??
-                // offsets in file from the start
-                std::map<uint32_t, size_t> offset2frameIndex;
-                size_t                     i = 0;
                 for (auto& frame : group.m_frames) {
                     stream >> frame.m_originalOffset;
                     if (offset2frameIndex.contains(frame.m_originalOffset)) {
                         frame.m_isDuplicate    = true;
                         frame.m_duplicateIndex = offset2frameIndex.at(frame.m_originalOffset);
                     } else {
-                        offset2frameIndex[frame.m_originalOffset] = i;
+                        offset2frameIndex[frame.m_originalOffset] = frameIndex;
                     }
-                    frame.m_index = i;
-                    i++;
+                    frame.m_index = frameIndex;
+                    frameIndex++;
                 }
             }
         }
@@ -229,15 +230,14 @@ void SpriteFile::readBinary(ByteOrderDataStreamReader& stream)
                 }
             }
             assert(!allFrames.empty());
-            for (size_t i = 0; i < allFrames.size() - 1; ++i) {
-                Frame* f          = allFrames[i];
-                Frame* next       = allFrames[i + 1];
-                f->m_originalSize = next->m_originalOffset - f->m_originalOffset;
-            }
-            auto* lastFrame           = allFrames[allFrames.size() - 1];
-            lastFrame->m_originalSize = stream.getBuffer().getSize() - lastFrame->m_originalOffset;
         }
 
+        std::sort(allFrames.begin(), allFrames.end(), [](Frame* l, Frame* r) {
+            return l->m_originalOffset < r->m_originalOffset;
+        });
+        for (size_t i = 0; Frame * framep : allFrames) {
+            framep->m_sortedIndex = i++;
+        }
         for (Frame* framep : allFrames) {
             Frame&         frame        = *framep;
             const uint32_t streamOffset = stream.getBuffer().getOffsetRead();
@@ -266,8 +266,7 @@ void SpriteFile::readBinary(ByteOrderDataStreamReader& stream)
             }
             const bool isEmpty = def.fullWidth == 0 || def.fullHeight == 0;
             if (!isEmpty) {
-                const uint32_t currentOffsetBitmap = stream.getBuffer().getOffsetRead();
-                BitmapFile     bitmapFile;
+                BitmapFile bitmapFile;
                 if (def.format == 0)
                     bitmapFile.m_compression = BitmapFile::Compression::None;
                 else if (def.format == 1)
@@ -282,7 +281,7 @@ void SpriteFile::readBinary(ByteOrderDataStreamReader& stream)
                 bitmapFile.m_width           = def.width;
                 bitmapFile.m_height          = def.height;
                 bitmapFile.m_inverseRowOrder = true;
-                bitmapFile.m_rleBlob.resize(def.blobSize);
+                bitmapFile.m_rleData.m_size  = def.blobSize;
                 bitmapFile.readBinary(stream);
 
                 const size_t bitmapIndex = m_bitmaps.size();
@@ -303,7 +302,19 @@ void SpriteFile::readBinary(ByteOrderDataStreamReader& stream)
             frame.m_boundaryHeight = def.fullHeight;
         }
         [[maybe_unused]] const auto remainingRead = stream.getBuffer().getRemainRead();
-        assert(remainingRead == 0);
+        if (remainingRead > 0) {
+            uint8_t a = 0, b = 0;
+            stream >> a >> b;
+            if (a == 0x0d && b == 0xa) {
+                std::string s;
+                s.resize(remainingRead - 2);
+                stream.readBlock(s.data(), remainingRead - 2);
+                m_tralilingData = splitLine(s, "\r\n");
+            } else {
+                assert(0);
+            }
+        }
+
         return;
     }
 }
@@ -393,6 +404,8 @@ void SpriteFile::writeBinary(ByteOrderDataStreamWriter& stream) const
         stream.writeSize(m_groups.size());
         stream << m_palette;
 
+        std::vector<const Frame*> sortedFrames;
+
         for (const Group& group : m_groups) {
             stream << group.m_groupId;
             stream.writeSize(group.m_frames.size());
@@ -402,57 +415,64 @@ void SpriteFile::writeBinary(ByteOrderDataStreamWriter& stream) const
                 stream.writeStringWithGarbagePadding<13>(frame.m_bitmapFilename, frame.m_bitmapFilenamePad);
             }
             for (const Frame& frame : group.m_frames) {
-                (void) frame;
-                //stream << uint32_t(0xCCCCCCCCU);
                 stream << frame.m_originalOffset;
+                if (!frame.m_isDuplicate)
+                    sortedFrames.push_back(&frame);
             }
         }
-        for (const Group& group : m_groups) {
-            for (const auto& frame : group.m_frames) {
-                if (frame.m_isDuplicate) {
-                    assert(frame.m_duplicateIndex < frame.m_index);
-                    //offsets[frame.m_index] = offsets[frame.m_duplicateIndex];
-                    continue;
-                }
+        std::sort(sortedFrames.begin(), sortedFrames.end(), [](const Frame* l, const Frame* r) { return l->m_originalOffset < r->m_originalOffset; });
 
-                const uint32_t currentOffset = stream.getBuffer().getOffsetWrite();
-                //offsets[frame.m_index]       = currentOffset;
-
-                assert(frame.m_originalOffset == currentOffset);
-
-                SpriteDef def;
-                if (frame.m_hasBitmap) {
-                    def.fullWidth                = frame.m_boundaryWidth;
-                    def.fullHeight               = frame.m_boundaryHeight;
-                    def.leftMargin               = frame.m_paddingLeft;
-                    def.topMargin                = frame.m_paddingTop;
-                    def.width                    = frame.m_bitmapWidth;
-                    def.height                   = frame.m_bitmapHeight;
-                    const BitmapFile& bitmapFile = m_bitmaps[frame.m_bitmapIndex];
-                    def.blobSize                 = bitmapFile.m_rleBlob.size();
-                    def.format                   = 0;
-                    if (bitmapFile.m_compression == BitmapFile::Compression::RLE1)
-                        def.format = 1;
-                    if (bitmapFile.m_compression == BitmapFile::Compression::RLE2)
-                        def.format = 2;
-                    if (bitmapFile.m_compression == BitmapFile::Compression::RLE3)
-                        def.format = 3;
-                }
-                stream
-                    << def.blobSize
-                    << def.format
-                    << def.fullWidth
-                    << def.fullHeight
-                    << def.width
-                    << def.height
-                    << def.leftMargin
-                    << def.topMargin;
-
-                if (frame.m_hasBitmap) {
-                    const BitmapFile& bitmapFile = m_bitmaps[frame.m_bitmapIndex];
-                    stream << bitmapFile;
-                }
+        for (const Frame* framep : sortedFrames) {
+            const Frame& frame = *framep;
+            if (frame.m_isDuplicate) {
+                assert(frame.m_duplicateIndex < frame.m_index);
+                //offsets[frame.m_index] = offsets[frame.m_duplicateIndex];
+                continue;
             }
+
+            const uint32_t currentOffset = stream.getBuffer().getOffsetWrite();
+            //offsets[frame.m_index]       = currentOffset;
+
+            assert(frame.m_originalOffset == currentOffset);
+
+            SpriteDef def;
+            if (frame.m_hasBitmap) {
+                def.fullWidth                = frame.m_boundaryWidth;
+                def.fullHeight               = frame.m_boundaryHeight;
+                def.leftMargin               = frame.m_paddingLeft;
+                def.topMargin                = frame.m_paddingTop;
+                def.width                    = frame.m_bitmapWidth;
+                def.height                   = frame.m_bitmapHeight;
+                const BitmapFile& bitmapFile = m_bitmaps[frame.m_bitmapIndex];
+                def.blobSize                 = bitmapFile.m_rleData.m_size;
+                def.format                   = 0;
+                if (bitmapFile.m_compression == BitmapFile::Compression::RLE1)
+                    def.format = 1;
+                if (bitmapFile.m_compression == BitmapFile::Compression::RLE2)
+                    def.format = 2;
+                if (bitmapFile.m_compression == BitmapFile::Compression::RLE3)
+                    def.format = 3;
+            }
+            stream
+                << def.blobSize
+                << def.format
+                << def.fullWidth
+                << def.fullHeight
+                << def.width
+                << def.height
+                << def.leftMargin
+                << def.topMargin;
+
+            if (frame.m_hasBitmap) {
+                const BitmapFile& bitmapFile = m_bitmaps[frame.m_bitmapIndex];
+                stream << bitmapFile;
+            }
+        }
+
+        if (!m_tralilingData.empty()) {
+            stream << uint8_t(0x0d) << uint8_t(0x0a);
+            auto str = joinString(m_tralilingData, "\r\n");
+            stream.writeBlock(str.c_str(), str.size());
         }
 
         return;
