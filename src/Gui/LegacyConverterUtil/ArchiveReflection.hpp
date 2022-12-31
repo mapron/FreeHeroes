@@ -23,8 +23,10 @@ ENUM_REFLECTION_STRINGIY(
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     Archive::Record,
-    m_filename,
-    m_originalFilename,
+    m_basename,
+    m_originalBasename,
+    m_extWithDot,
+    m_originalExtWithDot,
     m_compressOnDisk,
     m_compressInArchive,
     m_uncompressedSizeCache,
@@ -35,7 +37,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     Archive::HdatRecord,
-    m_filename,
+    m_basename,
     m_filenameAlt,
     m_params,
     m_hasBlob)

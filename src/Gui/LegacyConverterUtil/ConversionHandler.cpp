@@ -157,6 +157,7 @@ void ConversionHandler::run(Task task, int recurse) noexcept(false)
             {
                 setInput(m_inputs.m_defFile);
                 runMember(readBinaryBufferData);
+                //auto s = Conversion::loadSpriteLegacy(m_inputFilename);
 
                 runMember(binaryDeserializeSprite);
             } break;
@@ -191,6 +192,8 @@ void ConversionHandler::run(Task task, int recurse) noexcept(false)
             case Task::SpriteSavePng:
             {
                 m_sprite->setEmbeddedData(false);
+                if (m_settings.m_mergePng)
+                    m_sprite->mergeBitmaps();
                 setOutput(m_outputs.m_pngJsonFile);
                 runMember(propertySerializeSprite);
                 runMember(writeJsonFromProperty);
@@ -203,7 +206,7 @@ void ConversionHandler::run(Task task, int recurse) noexcept(false)
                 std::vector<Core::std_path> paths;
                 if (!m_settings.m_inputs.m_defFile.has_extension()) {
                     m_logOutput << "Enable wildcard checking\n";
-                    for (auto&& it : Core::std_fs::recursive_directory_iterator(m_settings.m_inputs.m_defFile)) {
+                    for (auto&& it : Core::std_fs::directory_iterator(m_settings.m_inputs.m_defFile)) {
                         if (it.is_regular_file() && it.path().extension() == ".def") {
                             paths.push_back(it.path());
                         }

@@ -16,6 +16,9 @@
 #include <array>
 #include <iostream>
 
+#include <QPixmap>
+#include <QPainter>
+
 namespace FreeHeroes {
 using namespace Core;
 
@@ -158,7 +161,6 @@ void SpriteFile::readBinary(ByteOrderDataStreamReader& stream)
         frame.m_bitmapWidth   = def.width;
         frame.m_bitmapHeight  = def.height;
         frame.m_bitmapOffsetX = 0;
-        frame.m_bitmapOffsetY = 0;
 
         frame.m_boundaryWidth  = def.fullWidth;
         frame.m_boundaryHeight = def.fullHeight;
@@ -583,6 +585,8 @@ void SpriteFile::compressToOriginal()
 
 void SpriteFile::unpackPalette()
 {
+    if (m_format != BinaryFormat::DEF)
+        return;
     for (auto& bitmap : m_bitmaps)
         bitmap.unpackPalette(m_palette);
 }
@@ -644,6 +648,62 @@ void SpriteFile::setEmbeddedData(bool flag)
         for (auto& bitmap : m_bitmaps)
             bitmap.toPixmapQt();
     }
+}
+
+void SpriteFile::mergeBitmaps()
+{
+    if (m_embeddedBitmapData)
+        throw std::runtime_error("Only split bitmaps can be merged");
+
+    assert(!m_bitmaps.empty());
+    if (m_bitmaps.empty())
+        return;
+
+    std::map<size_t, int> bitmapIndex2group;
+
+    struct GroupBitmaps {
+        int m_maxHeight  = 0;
+        int m_totalWidth = 0;
+        int m_x          = 0;
+    };
+    int totalHeight = 0;
+    int maxWidth    = 0;
+
+    std::map<int, GroupBitmaps> groupRowData;
+    for (Group& group : m_groups) {
+        GroupBitmaps& g = groupRowData[group.m_groupId];
+        for (const Frame& frame : group.m_frames) {
+            if (!frame.m_hasBitmap)
+                continue;
+            g.m_maxHeight = std::max(g.m_maxHeight, frame.m_bitmapHeight);
+            g.m_totalWidth += frame.m_bitmapWidth;
+        }
+        group.m_bitmapOffsetY = totalHeight;
+        totalHeight += g.m_maxHeight;
+        maxWidth = std::max(maxWidth, g.m_totalWidth);
+    }
+
+    QPixmap out(maxWidth, totalHeight);
+    out.fill(Qt::transparent);
+
+    for (Group& group : m_groups) {
+        int x = 0;
+        for (Frame& frame : group.m_frames) {
+            if (!frame.m_hasBitmap)
+                continue;
+            QPixmap pix           = *m_bitmaps[frame.m_bitmapIndex].m_pixmapQt.get();
+            frame.m_bitmapIndex   = 0;
+            frame.m_bitmapOffsetX = x;
+            x += frame.m_bitmapWidth;
+
+            QPainter painter(&out);
+            painter.drawPixmap(QPoint(frame.m_bitmapOffsetX, group.m_bitmapOffsetY), pix);
+        }
+    }
+
+    m_bitmaps.clear();
+    m_bitmaps.resize(1);
+    m_bitmaps[0].m_pixmapQt = std::make_shared<QPixmap>(std::move(out));
 }
 
 }

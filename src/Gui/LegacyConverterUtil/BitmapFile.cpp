@@ -191,6 +191,7 @@ void BitmapFile::readFromBlob(ByteArrayHolder& blob)
             m_rleData.m_rle2offsets.resize(m_height);
             for (auto& offset : m_rleData.m_rle2offsets)
                 stream >> offset;
+            // some buggy defs has one extra unused offset
             if (m_rleData.m_rle2offsets[0] != stream.getBuffer().getOffsetRead()) {
                 m_rleData.m_rle2offsets.push_back(stream.readScalar<uint16_t>());
             }
@@ -202,9 +203,10 @@ void BitmapFile::readFromBlob(ByteArrayHolder& blob)
                 row.readBinary(stream);
             }
         } else if (m_compression == Compression::RLE3) {
-            m_rleData.m_rle3offsets.resize(m_height * (m_width / 32));
+            m_rleData.m_rle3offsets.resize(m_height * ((m_width + 31) / 32));
             for (auto& offset : m_rleData.m_rle3offsets)
                 stream >> offset;
+            // some buggy defs (avlskul0) has one extra unused offset
             if (m_rleData.m_rle3offsets[0] != stream.getBuffer().getOffsetRead()) {
                 m_rleData.m_rle3offsets.push_back(stream.readScalar<uint16_t>());
             }
@@ -213,7 +215,7 @@ void BitmapFile::readFromBlob(ByteArrayHolder& blob)
                 const auto rowIndex = m_inverseRowOrder ? m_height - y - 1 : y;
                 RLERow&    row      = m_rleData.m_rleRows[rowIndex];
 
-                auto rle3offset2base = m_rleData.m_rle3offsets[y * (m_width / 32)];
+                auto rle3offset2base = m_rleData.m_rle3offsets[y * ((m_width + 31) / 32)];
                 stream.getBuffer().setOffsetRead(rle3offset2base);
 
                 row.m_isCompressedLength = true;
@@ -258,9 +260,8 @@ void BitmapFile::writeToBlob(ByteArrayHolder& blob) const
     ByteOrderDataStreamWriter stream(bobuffer, ByteOrderDataStream::LITTLE_ENDIAN);
 
     if (m_compression >= Compression::RLE1 && m_compression <= Compression::RLE3) {
-        // @todo: this is for RLE round-trip. need to remove this.
-        //bobuffer.setSize(m_rleData.m_originalSize);
-        //bobuffer.setResizeEnabled(m_rleData.m_originalSize == 0);
+        // this is for RLE round-trip only.
+        bobuffer.setSize(m_rleData.m_originalSize);
         if (m_compression == Compression::RLE1) {
             //for each line we have offset of pixel data
             for (const auto& offset : m_rleData.m_rle1offsets)
@@ -348,11 +349,15 @@ void BitmapFile::uncompress()
         uint32_t x = 0;
         for (const auto& item : rleRow.m_items) {
             if (item.m_isRaw) {
-                for (const auto& byte : item.m_raw.m_bytes)
-                    row[x++].m_alphaOrGray = byte;
+                for (const auto& byte : item.m_raw.m_bytes) {
+                    row[x].m_alphaOrGray = byte;
+                    x++;
+                }
             } else {
-                for (uint8_t i = 0; i < item.m_norm.m_length; ++i)
-                    row[x++].m_alphaOrGray = item.m_norm.m_value;
+                for (int i = 0; i < item.m_norm.m_length; ++i) {
+                    row[x].m_alphaOrGray = item.m_norm.m_value;
+                    x++;
+                }
             }
         }
     }
@@ -403,7 +408,11 @@ void BitmapFile::compressToOriginal()
 
             rleRow.m_items.insert(rleRow.m_items.end(), enc.m_rleItems.cbegin(), enc.m_rleItems.cend());
 
-            m_rleData.m_rle3offsets[y * (m_width / 32) + wpart] = offset;
+            if (m_compression == Compression::RLE1) {
+            } else if (m_compression == Compression::RLE2) {
+            } else if (m_compression == Compression::RLE3) {
+                m_rleData.m_rle3offsets[y * (m_width / 32) + wpart] = offset;
+            }
 
             offset += enc.getByteSize();
         }
@@ -608,7 +617,7 @@ void BitmapFile::RLERow::writeBinary(ByteOrderDataStreamWriter& stream) const
         }
 
         stream << segmentType;
-        if (!m_isCompressedLength)
+        if (!item.m_isCompressedLength)
             stream << length;
         if (item.m_isRaw) {
             for (auto& byte : item.m_raw.m_bytes) {

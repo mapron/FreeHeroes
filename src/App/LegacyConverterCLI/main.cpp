@@ -30,7 +30,7 @@ int main(int argc, char** argv)
                                    "uncompress",
                                    "cleanupFolder",
                                    "prettyJson",
-                                   "originalDefCompression",
+                                   "mergePng",
                                },
                                { "tasks" });
 
@@ -46,6 +46,7 @@ int main(int argc, char** argv)
     const bool                     uncompress    = parser.getArg("uncompress") == "1";
     const bool                     cleanupFolder = parser.getArg("cleanupFolder") == "1";
     const bool                     prettyJson    = parser.getArg("prettyJson") == "1";
+    const bool                     mergePng      = parser.getArg("mergePng") == "1";
 
     Core::CoreApplication fhCoreApp(std::set<Core::CoreApplication::Option>{});
     fhCoreApp.initLogger();
@@ -76,6 +77,7 @@ int main(int argc, char** argv)
                                     .m_cleanupFolder = cleanupFolder,
                                     .m_uncompress    = uncompress,
                                     .m_prettyJson    = prettyJson,
+                                    .m_mergePng      = mergePng,
                                 });
 
     for (const std::string& taskStr : tasksStr) {

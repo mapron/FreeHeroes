@@ -367,7 +367,7 @@ public:
     template<size_t sizeStr>
     void writeStringWithGarbagePadding(const std::string& str, const std::vector<uint8_t>& strGarbagePadding)
     {
-        if (str.size() > sizeStr)
+        if (str.size() + strGarbagePadding.size() > sizeStr)
             throw std::runtime_error("String must be at most " + std::to_string(sizeStr) + " symbols: " + str);
 
         std::array<char, sizeStr + 1> strBuffer{};

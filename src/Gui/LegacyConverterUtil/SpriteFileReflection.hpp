@@ -44,7 +44,6 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_bitmapWidth,
     m_bitmapHeight,
     m_bitmapOffsetX,
-    m_bitmapOffsetY,
 
     m_bitmapFilename,
     m_bitmapFilenamePad,
@@ -62,6 +61,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     SpriteFile::Group,
+    m_bitmapOffsetY,
     m_groupId,
     m_unk1,
     m_unk2,

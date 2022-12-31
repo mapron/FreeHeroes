@@ -46,7 +46,6 @@ public:
         int    m_bitmapWidth   = 0;
         int    m_bitmapHeight  = 0;
         int    m_bitmapOffsetX = 0;
-        int    m_bitmapOffsetY = 0;
 
         std::string          m_bitmapFilename;
         std::vector<uint8_t> m_bitmapFilenamePad;
@@ -67,9 +66,10 @@ public:
         uint32_t m_originalOffset = 0;
     };
     struct Group {
-        int                m_groupId = 0;
-        int                m_unk1    = 0;
-        int                m_unk2    = 0;
+        int                m_bitmapOffsetY = 0;
+        int                m_groupId       = 0;
+        int                m_unk1          = 0;
+        int                m_unk2          = 0;
         std::vector<Frame> m_frames;
     };
 
@@ -106,6 +106,8 @@ public:
     void makePalette();
 
     void setEmbeddedData(bool flag);
+
+    void mergeBitmaps();
 };
 
 }

@@ -28,7 +28,9 @@ const std_path g_indexFileName = "archive_index.fh.json";
 
 constexpr const std::array<uint8_t, 4> g_lodSignature{ { 0x4C, 0x4F, 0x44, 0x00 } };  // 'LOD\0'
 constexpr const std::array<uint8_t, 4> g_hdatSignature{ { 0x48, 0x44, 0x41, 0x54 } }; // 'HDAT'
-constexpr const size_t                 g_strSize = 16;
+constexpr const size_t                 g_strSize    = 16;
+constexpr const size_t                 g_strSndSize = 40;
+constexpr const size_t                 g_strVidSize = 40;
 
 constexpr const std::string_view g_hdatChapterSeparator{ "\r\n=============================\r\n" };
 }
@@ -62,21 +64,147 @@ void Archive::readBinary(ByteOrderDataStreamReader& stream)
 {
     switch (m_format) {
         case BinaryFormat::LOD:
-            readBinaryLOD(stream);
             break;
         case BinaryFormat::HDAT:
             readBinaryHDAT(stream);
+            m_isBinary = true;
+            return;
             break;
         case BinaryFormat::SND:
-            readBinarySND(stream);
             break;
         case BinaryFormat::VID:
-            readBinaryVID(stream);
             break;
         default:
             throw std::runtime_error("Invalid binary format is set");
     }
     m_isBinary = true;
+
+    if (m_format == BinaryFormat::LOD) {
+        std::array<uint8_t, 4> signature;
+        stream >> signature >> m_lodFormat;
+        if (signature != g_lodSignature)
+            throw std::runtime_error("LOD signature is not found");
+    }
+
+    const uint32_t binaryRecordsCommonSize = stream.readSize();
+
+    if (!binaryRecordsCommonSize)
+        throw std::runtime_error("Archive contains 0 records, probably it's corrupted");
+
+    if (m_format == BinaryFormat::LOD) {
+        m_lodHeader.resize(80);
+        stream.readBlock(m_lodHeader.data(), m_lodHeader.size());
+    }
+
+    m_binaryRecordsUnnamed.clear();
+    m_binaryRecords.resize(binaryRecordsCommonSize);
+    {
+        size_t i = 0;
+        for (auto& rec : m_binaryRecords) {
+            if (m_format == BinaryFormat::LOD) {
+                rec.readBinaryLOD(stream);
+            } else if (m_format == BinaryFormat::SND) {
+                rec.readBinarySND(stream);
+            } else if (m_format == BinaryFormat::VID) {
+                rec.readBinaryVID(stream);
+            }
+            rec.m_headerOrder = i++;
+        }
+    }
+
+    auto updateIndex = [this]() {
+        m_binaryRecordsSortedByOffset.clear();
+        for (auto& rec : m_binaryRecords) {
+            m_binaryRecordsSortedByOffset.push_back(&rec);
+        }
+        for (auto& rec : m_binaryRecordsUnnamed) {
+            m_binaryRecordsSortedByOffset.push_back(&rec);
+        }
+
+        std::sort(m_binaryRecordsSortedByOffset.begin(), m_binaryRecordsSortedByOffset.end(), [](const BinaryRecord* rh, const BinaryRecord* lh) {
+            return rh->m_offset < lh->m_offset;
+        });
+    };
+
+    updateIndex();
+
+    const ptrdiff_t firstRecordOffset = static_cast<ptrdiff_t>(m_binaryRecordsSortedByOffset[0]->m_offset);
+    const ptrdiff_t dataEndOffset     = stream.getBuffer().getSize();
+
+    {
+        for (size_t i = 0; i < m_binaryRecordsSortedByOffset.size(); ++i) {
+            const bool last     = i == m_binaryRecordsSortedByOffset.size() - 1;
+            auto*      brec     = m_binaryRecordsSortedByOffset[i];
+            auto*      brecNext = last ? nullptr : m_binaryRecordsSortedByOffset[i + 1];
+            brec->m_offsetNext  = last ? dataEndOffset : brecNext->m_offset;
+        }
+
+        size_t paddingBlobCounter = 0;
+        for (auto* brec : m_binaryRecordsSortedByOffset) {
+            if (!brec->m_size)
+                brec->m_size = brec->m_offsetNext - brec->m_offset;
+            const ptrdiff_t possiblePadding = (brec->m_offsetNext - brec->m_offset) - brec->m_size;
+            if (possiblePadding < 0) {
+                std::cerr << "Data overlap detected, archive corrupted: offset=" << brec->m_offset
+                          << ", size=" << brec->m_size << ", nextOffset=" << brec->m_offsetNext << '\n';
+            }
+            if (possiblePadding > 0) {
+                const size_t paddingSize = possiblePadding;
+
+                ByteArrayHolder blob;
+                blob.resize(paddingSize);
+                BinaryRecord padbrec;
+                padbrec.m_basename = "__PAD_" + std::to_string(paddingBlobCounter++);
+                padbrec.m_size     = paddingSize;
+                padbrec.m_fullSize = paddingSize;
+                padbrec.m_buffer   = blob;
+                padbrec.m_offset   = brec->m_offsetNext - possiblePadding;
+
+                std::cerr << "detected GAP in binary data at [" << padbrec.m_offset << ".." << brec->m_offsetNext << "], creating padding blob '" << padbrec.m_basename << "' of size=" << paddingSize << '\n';
+
+                m_binaryRecordsUnnamed.push_back(std::move(padbrec));
+            }
+
+            brec->m_buffer.resize(brec->m_size);
+        }
+    }
+    updateIndex();
+
+    //std::cerr << "firstRecordOffset=" << firstRecordOffset << '\n';
+    const auto currentOffset = stream.getBuffer().getOffsetRead();
+    if (firstRecordOffset < currentOffset)
+        throw std::runtime_error("First record offset [" + std::to_string(firstRecordOffset) + "] is less than current offset [" + std::to_string(currentOffset) + "]");
+    if (firstRecordOffset > currentOffset) {
+        size_t paddingSize = firstRecordOffset - currentOffset;
+
+        ByteArrayHolder blob;
+        blob.resize(paddingSize);
+        BinaryRecord padbrec;
+        padbrec.m_basename = "__PAD";
+        padbrec.m_size     = paddingSize;
+        padbrec.m_fullSize = paddingSize;
+        padbrec.m_buffer   = blob;
+        padbrec.m_offset   = currentOffset;
+
+        std::cerr << "detected GAP in binary data at [" << currentOffset << ".." << firstRecordOffset << "], creating padding blob '" << padbrec.m_basename << "' of size=" << paddingSize << '\n';
+
+        m_binaryRecordsUnnamed.push_back(std::move(padbrec));
+        updateIndex();
+    }
+
+    size_t i = 0;
+    for (auto* brec : m_binaryRecordsSortedByOffset) {
+        brec->m_binaryDataOrder = i++;
+        const auto offset       = stream.getBuffer().getOffsetRead();
+        if (0)
+            std::cerr << "i= " << (i - 1) << " name=" << brec->m_basename << ", exp=" << brec->m_offset << ", s=" << brec->m_buffer.size() << ", current=" << offset << '\n';
+        if (brec->m_offset == offset) {
+            stream.readBlock(brec->m_buffer.data(), brec->m_buffer.size());
+            continue;
+        }
+
+        throw std::runtime_error("Record offset mismatch for '" + brec->m_basename + "', expected=" + std::to_string(brec->m_offset) + ", but get=" + std::to_string(offset));
+    }
 }
 
 void Archive::writeBinary(ByteOrderDataStreamWriter& stream) const
@@ -86,19 +214,40 @@ void Archive::writeBinary(ByteOrderDataStreamWriter& stream) const
 
     switch (m_format) {
         case BinaryFormat::LOD:
-            writeBinaryLOD(stream);
             break;
         case BinaryFormat::HDAT:
             writeBinaryHDAT(stream);
+            return;
             break;
         case BinaryFormat::SND:
-            writeBinarySND(stream);
             break;
         case BinaryFormat::VID:
-            writeBinaryVID(stream);
             break;
         default:
             throw std::runtime_error("Invalid binary format is set");
+    }
+    if (m_format == BinaryFormat::LOD) {
+        stream << g_lodSignature << m_lodFormat;
+    }
+
+    stream.writeSize(m_binaryRecords.size());
+
+    if (m_format == BinaryFormat::LOD) {
+        stream.writeBlock(m_lodHeader.data(), m_lodHeader.size());
+    }
+
+    for (auto& rec : m_binaryRecords) {
+        if (m_format == BinaryFormat::LOD) {
+            rec.writeBinaryLOD(stream);
+        } else if (m_format == BinaryFormat::SND) {
+            rec.writeBinarySND(stream);
+        } else if (m_format == BinaryFormat::VID) {
+            rec.writeBinaryVID(stream);
+        }
+    }
+
+    for (auto* brec : m_binaryRecordsSortedByOffset) {
+        stream.writeBlock(brec->m_buffer.data(), brec->m_buffer.size());
     }
 }
 
@@ -118,7 +267,7 @@ void Archive::saveToFolder(const std_path& path, bool skipExisting) const
     writeFileFromBufferThrow(jsonFilename, buffer);
 
     for (const Record& rec : m_records) {
-        const auto out = path / string2path(rec.m_filename);
+        const auto out = path / string2path(rec.fullname());
         if (skipExisting && std_fs::exists(out))
             continue;
 
@@ -140,7 +289,7 @@ void Archive::saveToFolder(const std_path& path, bool skipExisting) const
 
     for (const HdatRecord& rec : m_hdatRecords) {
         if (!rec.m_blob.empty()) {
-            const auto out = path / string2path(rec.m_filename + ".bin");
+            const auto out = path / string2path(rec.m_basename + ".bin");
             if (skipExisting && std_fs::exists(out))
                 continue;
             ByteArrayHolder buf;
@@ -149,7 +298,7 @@ void Archive::saveToFolder(const std_path& path, bool skipExisting) const
         }
 
         {
-            const auto out = path / string2path(rec.m_filename + ".txt");
+            const auto out = path / string2path(rec.m_basename + ".txt");
             if (skipExisting && std_fs::exists(out))
                 continue;
 
@@ -173,7 +322,7 @@ void Archive::loadFromFolder(const std_path& path)
     reader.jsonToValue(data, *this);
 
     for (Record& rec : m_records) {
-        const auto out = path / string2path(rec.m_filename);
+        const auto out = path / string2path(rec.fullname());
         rec.m_buffer   = readFileIntoHolderThrow(out);
 
         if (!rec.m_compressOnDisk && rec.m_compressInArchive) {
@@ -189,16 +338,44 @@ void Archive::loadFromFolder(const std_path& path)
 
     for (HdatRecord& rec : m_hdatRecords) {
         if (rec.m_hasBlob) {
-            const auto      in  = path / string2path(rec.m_filename + ".bin");
+            const auto      in  = path / string2path(rec.m_basename + ".bin");
             ByteArrayHolder buf = readFileIntoHolderThrow(in);
             rec.m_blob          = buf.ref();
         }
 
         {
-            const auto        in          = path / string2path(rec.m_filename + ".txt");
+            const auto        in          = path / string2path(rec.m_basename + ".txt");
             const std::string chaptersStr = readFileIntoBufferThrow(in);
             rec.m_txtChapters             = splitLine(chaptersStr, std::string(g_hdatChapterSeparator));
         }
+    }
+}
+
+void Archive::createFromFolder(const Core::std_path& path, const std::vector<std::string>& extensions)
+{
+    m_format    = BinaryFormat::LOD;
+    m_lodFormat = 200;
+    m_lodHeader.resize(80);
+    m_isBinary = false;
+
+    for (auto&& it : Core::std_fs::directory_iterator(path)) {
+        if (!it.is_regular_file())
+            continue;
+        auto   filename = it.path().filename();
+        Record rec;
+        rec.m_originalExtWithDot = Core::path2string(filename.extension());
+        rec.m_extWithDot         = rec.m_originalExtWithDot;
+
+        std::transform(rec.m_extWithDot.begin(), rec.m_extWithDot.end(), rec.m_extWithDot.begin(), [](unsigned char c) { return std::tolower(c); });
+        if (std::find(extensions.cbegin(), extensions.cend(), rec.m_extWithDot) == extensions.cend())
+            continue;
+
+        rec.m_originalBasename = Core::path2string(filename.stem());
+        rec.m_basename         = rec.m_originalBasename;
+        std::transform(rec.m_basename.begin(), rec.m_basename.end(), rec.m_basename.begin(), [](unsigned char c) { return std::tolower(c); });
+
+        rec.m_buffer = readFileIntoHolderThrow(it.path());
+        m_records.push_back(std::move(rec));
     }
 }
 
@@ -218,7 +395,10 @@ void Archive::convertToBinary()
     size_t order = 0;
     for (const Record& rec : m_records) {
         BinaryRecord brec;
-        brec.m_filename        = rec.m_originalFilename;
+        brec.m_basename = rec.m_originalBasename;
+        brec.m_extNoDot = rec.m_originalExtWithDot;
+        if (!brec.m_extNoDot.empty() && brec.m_extNoDot.starts_with('.'))
+            brec.m_extNoDot.erase(0, 1);
         brec.m_filenameGarbage = rec.m_filenameGarbage;
         brec.m_unknown1        = rec.m_unknown1;
         brec.m_buffer          = rec.m_buffer;
@@ -255,12 +435,13 @@ void Archive::convertToBinary()
     updateIndex();
 
     {
-        const size_t baseOffset = 0
-                                  + sizeof(g_lodSignature)
-                                  + sizeof(m_lodFormat)
+        const size_t binaryRecordSize = m_format == BinaryFormat::LOD ? 32 : (m_format == BinaryFormat::SND ? 48 : 44);
+        const size_t baseOffset       = 0
+                                  + (m_format == BinaryFormat::LOD ? sizeof(g_lodSignature) : 0)
+                                  + (m_format == BinaryFormat::LOD ? sizeof(m_lodFormat) : 0)
                                   + sizeof(uint32_t) // size
                                   + m_lodHeader.size()
-                                  + 32 * m_binaryRecords.size();
+                                  + binaryRecordSize * m_binaryRecords.size();
 
         size_t offset = baseOffset;
 
@@ -284,156 +465,37 @@ void Archive::convertFromBinary(bool uncompress)
     m_records.reserve(m_binaryRecords.size());
     for (BinaryRecord& brec : m_binaryRecords) {
         Record rec;
-        rec.m_isPadding        = false;
-        rec.m_buffer           = brec.m_buffer;
-        rec.m_originalFilename = brec.m_filename;
-        rec.m_filename         = rec.m_originalFilename;
+        rec.m_isPadding = false;
+        rec.m_buffer    = brec.m_buffer;
+
+        rec.m_originalBasename   = brec.m_basename;
+        rec.m_basename           = rec.m_originalBasename;
+        rec.m_originalExtWithDot = brec.m_extNoDot;
+        if (!rec.m_originalExtWithDot.empty())
+            rec.m_originalExtWithDot.insert(0, ".");
+        rec.m_extWithDot = rec.m_originalExtWithDot;
+        std::transform(rec.m_basename.begin(), rec.m_basename.end(), rec.m_basename.begin(), [](unsigned char c) { return std::tolower(c); });
+        std::transform(rec.m_extWithDot.begin(), rec.m_extWithDot.end(), rec.m_extWithDot.begin(), [](unsigned char c) { return std::tolower(c); });
 
         rec.m_unknown1        = brec.m_unknown1;
         rec.m_filenameGarbage = brec.m_filenameGarbage;
         rec.m_binaryOrder     = brec.m_binaryDataOrder;
 
-        std::transform(rec.m_filename.begin(), rec.m_filename.end(), rec.m_filename.begin(), [](unsigned char c) { return std::tolower(c); });
         rec.m_compressInArchive     = brec.m_compressedSize > 0;
         rec.m_compressOnDisk        = rec.m_compressInArchive && !uncompress;
         rec.m_uncompressedSizeCache = rec.m_compressInArchive ? brec.m_fullSize : 0;
 
         if (rec.m_compressOnDisk)
-            rec.m_filename = rec.m_filename + ".gz";
+            rec.m_extWithDot += ".gz";
         m_records.push_back(std::move(rec));
     }
     for (BinaryRecord& brec : m_binaryRecordsUnnamed) {
         Record rec;
         rec.m_isPadding = true;
-        rec.m_filename = rec.m_originalFilename = brec.m_filename;
+        rec.m_basename = rec.m_originalBasename = brec.m_basename;
         rec.m_binaryOrder                       = brec.m_binaryDataOrder;
         rec.m_buffer                            = brec.m_buffer;
         m_records.push_back(std::move(rec));
-    }
-}
-
-void Archive::readBinaryLOD(ByteOrderDataStreamReader& stream)
-{
-    std::array<uint8_t, 4> signature;
-    stream >> signature >> m_lodFormat;
-    if (signature != g_lodSignature)
-        throw std::runtime_error("LOD signature is not found");
-
-    const uint32_t binaryRecordsCommonSize = stream.readSize();
-
-    if (!binaryRecordsCommonSize)
-        throw std::runtime_error("Archive contains 0 records, probably it's corrupted");
-
-    m_lodHeader.resize(80);
-    stream.readBlock(m_lodHeader.data(), m_lodHeader.size());
-
-    m_binaryRecordsUnnamed.clear();
-    m_binaryRecords.resize(binaryRecordsCommonSize);
-    {
-        size_t i = 0;
-        for (auto& rec : m_binaryRecords) {
-            stream >> rec;
-            rec.m_headerOrder = i++;
-        }
-    }
-
-    auto updateIndex = [this]() {
-        m_binaryRecordsSortedByOffset.clear();
-        for (auto& rec : m_binaryRecords) {
-            m_binaryRecordsSortedByOffset.push_back(&rec);
-        }
-        for (auto& rec : m_binaryRecordsUnnamed) {
-            m_binaryRecordsSortedByOffset.push_back(&rec);
-        }
-
-        std::sort(m_binaryRecordsSortedByOffset.begin(), m_binaryRecordsSortedByOffset.end(), [](const BinaryRecord* rh, const BinaryRecord* lh) {
-            return rh->m_offset < lh->m_offset;
-        });
-    };
-
-    updateIndex();
-
-    const ptrdiff_t firstRecordOffset = static_cast<ptrdiff_t>(m_binaryRecordsSortedByOffset[0]->m_offset);
-
-    {
-        ptrdiff_t offsetExpected = firstRecordOffset, offsetPrev = firstRecordOffset;
-        size_t    paddingBlobCounter = 0;
-        for (auto* brec : m_binaryRecordsSortedByOffset) {
-            if (offsetExpected != brec->m_offset) {
-                size_t paddingSize = brec->m_offset - offsetExpected;
-
-                ByteArrayHolder blob;
-                blob.resize(paddingSize);
-                BinaryRecord padbrec;
-                padbrec.m_filename = "__PAD_" + std::to_string(paddingBlobCounter++);
-                padbrec.m_size     = paddingSize;
-                padbrec.m_fullSize = paddingSize;
-                padbrec.m_buffer   = blob;
-                padbrec.m_offset   = offsetExpected;
-
-                std::cerr << "detected GAP in binary data at [" << brec->m_offset << "], creating padding blob '" << padbrec.m_filename << "' of size=" << paddingSize << '\n';
-
-                m_binaryRecordsUnnamed.push_back(std::move(padbrec));
-            }
-            offsetPrev     = brec->m_offset;
-            offsetExpected = offsetPrev + brec->m_size;
-
-            brec->m_buffer.resize(brec->m_size);
-        }
-    }
-    updateIndex();
-
-    //std::cerr << "firstRecordOffset=" << firstRecordOffset << '\n';
-    const auto currentOffset = stream.getBuffer().getOffsetRead();
-    if (firstRecordOffset < currentOffset)
-        throw std::runtime_error("First record offset [" + std::to_string(firstRecordOffset) + "] is less than current offset [" + std::to_string(currentOffset) + "]");
-    if (firstRecordOffset > currentOffset) {
-        size_t paddingSize = firstRecordOffset - currentOffset;
-
-        ByteArrayHolder blob;
-        blob.resize(paddingSize);
-        BinaryRecord padbrec;
-        padbrec.m_filename = "__PAD";
-        padbrec.m_size     = paddingSize;
-        padbrec.m_fullSize = paddingSize;
-        padbrec.m_buffer   = blob;
-        padbrec.m_offset   = currentOffset;
-
-        std::cerr << "detected GAP in binary data at [" << currentOffset << "], creating padding blob '" << padbrec.m_filename << "' of size=" << paddingSize << '\n';
-
-        m_binaryRecordsUnnamed.push_back(std::move(padbrec));
-        updateIndex();
-    }
-
-    size_t i = 0;
-    for (auto* brec : m_binaryRecordsSortedByOffset) {
-        brec->m_binaryDataOrder = i++;
-        const auto offset       = stream.getBuffer().getOffsetRead();
-        if (0)
-            std::cerr << "i= " << (i - 1) << " name=" << brec->m_filename << ", exp=" << brec->m_offset << ", s=" << brec->m_buffer.size() << ", current=" << offset << '\n';
-        if (brec->m_offset == offset) {
-            stream.readBlock(brec->m_buffer.data(), brec->m_buffer.size());
-            continue;
-        }
-
-        throw std::runtime_error("Record offset mismatch for '" + brec->m_filename + "', expected=" + std::to_string(brec->m_offset) + ", but get=" + std::to_string(offset));
-    }
-}
-
-void Archive::writeBinaryLOD(ByteOrderDataStreamWriter& stream) const
-{
-    stream << g_lodSignature << m_lodFormat;
-
-    stream.writeSize(m_binaryRecords.size());
-
-    stream.writeBlock(m_lodHeader.data(), m_lodHeader.size());
-
-    for (auto& rec : m_binaryRecords) {
-        stream << rec;
-    }
-
-    for (auto* brec : m_binaryRecordsSortedByOffset) {
-        stream.writeBlock(brec->m_buffer.data(), brec->m_buffer.size());
     }
 }
 
@@ -449,7 +511,7 @@ void Archive::readBinaryHDAT(ByteOrderDataStreamReader& stream)
 
     m_hdatRecords.resize(recordsCount);
     for (HdatRecord& rec : m_hdatRecords) {
-        stream >> rec.m_filename;
+        stream >> rec.m_basename;
         stream >> rec.m_filenameAlt;
 
         stream >> rec.m_txtChapters;
@@ -470,7 +532,7 @@ void Archive::writeBinaryHDAT(ByteOrderDataStreamWriter& stream) const
     stream.writeSize(m_hdatRecords.size());
 
     for (const HdatRecord& rec : m_hdatRecords) {
-        stream << rec.m_filename;
+        stream << rec.m_basename;
         stream << rec.m_filenameAlt;
 
         stream << rec.m_txtChapters;
@@ -483,23 +545,7 @@ void Archive::writeBinaryHDAT(ByteOrderDataStreamWriter& stream) const
     }
 }
 
-void Archive::readBinarySND(ByteOrderDataStreamReader& stream)
-{
-}
-
-void Archive::writeBinarySND(ByteOrderDataStreamWriter& stream) const
-{
-}
-
-void Archive::readBinaryVID(ByteOrderDataStreamReader& stream)
-{
-}
-
-void Archive::writeBinaryVID(ByteOrderDataStreamWriter& stream) const
-{
-}
-
-void Archive::BinaryRecord::readBinary(ByteOrderDataStreamReader& stream)
+void Archive::BinaryRecord::readBinaryLOD(ByteOrderDataStreamReader& stream)
 {
     // ABCDEF.DAT0~~~00
     // we can have garbade bytes after filename. In this example,
@@ -508,17 +554,74 @@ void Archive::BinaryRecord::readBinary(ByteOrderDataStreamReader& stream)
     // 11,12,13 - non-null garbage
     // 14,15 - valid null padding.
     // we will save '~~~' as 3 garbage bytes after null nerminator.
-
-    stream.readStringWithGarbagePadding<g_strSize>(m_filename, m_filenameGarbage);
+    std::string filename;
+    stream.readStringWithGarbagePadding<g_strSize>(filename, m_filenameGarbage);
+    auto parts = splitLine(filename, '.', true);
+    m_basename = parts[0];
+    if (parts.size() > 1)
+        m_extNoDot = parts[1];
 
     stream >> m_offset >> m_fullSize >> m_unknown1 >> m_compressedSize;
     m_size = m_compressedSize ? m_compressedSize : m_fullSize;
 }
 
-void Archive::BinaryRecord::writeBinary(ByteOrderDataStreamWriter& stream) const
+void Archive::BinaryRecord::writeBinaryLOD(ByteOrderDataStreamWriter& stream) const
 {
-    stream.writeStringWithGarbagePadding<g_strSize>(m_filename, m_filenameGarbage);
+    std::string filename = m_basename;
+    if (!m_extNoDot.empty())
+        filename += '.' + m_extNoDot;
+    stream.writeStringWithGarbagePadding<g_strSize>(filename, m_filenameGarbage);
     stream << m_offset << m_fullSize << m_unknown1 << m_compressedSize;
+}
+
+void Archive::BinaryRecord::readBinarySND(ByteOrderDataStreamReader& stream)
+{
+    stream.readStringWithGarbagePadding<g_strSndSize>(m_basename, m_filenameGarbage);
+
+    stream >> m_offset >> m_fullSize;
+    m_size = m_fullSize;
+    if (m_filenameGarbage.size() >= 3) {
+        m_extNoDot.resize(3);
+        for (int i = 0; i < 3; ++i) {
+            m_extNoDot[i] = static_cast<char>(m_filenameGarbage[i]);
+        }
+        m_filenameGarbage.erase(m_filenameGarbage.begin(), m_filenameGarbage.begin() + 3);
+    }
+}
+
+void Archive::BinaryRecord::writeBinarySND(ByteOrderDataStreamWriter& stream) const
+{
+    std::vector<uint8_t> padding = m_filenameGarbage;
+    if (!m_extNoDot.empty()) {
+        std::vector<uint8_t> paddingExt(m_extNoDot.size());
+        for (size_t i = 0; i < m_extNoDot.size(); ++i) {
+            paddingExt[i] = static_cast<uint8_t>(m_extNoDot[i]);
+        }
+        padding.insert(padding.begin(), paddingExt.cbegin(), paddingExt.cend());
+    }
+    stream.writeStringWithGarbagePadding<g_strSndSize>(m_basename, padding);
+    stream << m_offset << m_fullSize;
+}
+
+void Archive::BinaryRecord::readBinaryVID(ByteOrderDataStreamReader& stream)
+{
+    std::string filename;
+    stream.readStringWithGarbagePadding<g_strVidSize>(filename, m_filenameGarbage);
+    auto parts = splitLine(filename, '.', true);
+    m_basename = parts[0];
+    if (parts.size() > 1)
+        m_extNoDot = parts[1];
+
+    stream >> m_offset;
+}
+
+void Archive::BinaryRecord::writeBinaryVID(ByteOrderDataStreamWriter& stream) const
+{
+    std::string filename = m_basename;
+    if (!m_extNoDot.empty())
+        filename += '.' + m_extNoDot;
+    stream.writeStringWithGarbagePadding<g_strVidSize>(filename, m_filenameGarbage);
+    stream << m_offset;
 }
 
 }

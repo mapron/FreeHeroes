@@ -41,6 +41,7 @@ public:
         bool     m_cleanupFolder = false;
         bool     m_uncompress    = false;
         bool     m_prettyJson    = false;
+        bool     m_mergePng      = false;
     };
 
     enum class Task
