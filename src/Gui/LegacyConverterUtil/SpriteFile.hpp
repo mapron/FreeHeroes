@@ -56,13 +56,15 @@ public:
 
         int m_group = 0;
 
-        uint32_t m_originalOffset = 0;
-        uint32_t m_originalSize   = 0;
-        size_t   m_index          = 0;
-        size_t   m_sortedIndex    = 0;
-
+        size_t m_binaryOrder    = 0;
         bool   m_isDuplicate    = false;
-        size_t m_duplicateIndex = 0;
+        size_t m_dupHeaderIndex = 0;
+        size_t m_headerIndex    = 0;
+
+        bool m_shortHeaderFormat = false;
+
+        // VVV non serializable VVV
+        uint32_t m_originalOffset = 0;
     };
     struct Group {
         int                m_groupId = 0;
@@ -84,6 +86,8 @@ public:
 
     std::vector<std::string> m_tralilingData;
 
+    bool m_embeddedBitmapData = true;
+
     void detectFormat(const Core::std_path& path, ByteOrderDataStreamReader& stream);
 
     void readBinary(ByteOrderDataStreamReader& stream);
@@ -92,8 +96,16 @@ public:
     void toJson(PropertyTree& data) const;
     void fromJson(const PropertyTree& data);
 
-    void bitmapsToJson(PropertyTree& data) const;
-    void bitmapsFromJson(const PropertyTree& data);
+    void saveBitmapsData(const Core::std_path& jsonFilePath) const;
+    void loadBitmapsData(const Core::std_path& jsonFilePath);
+
+    void uncompress();
+    void compressToOriginal();
+
+    void unpackPalette();
+    void makePalette();
+
+    void setEmbeddedData(bool flag);
 };
 
 }

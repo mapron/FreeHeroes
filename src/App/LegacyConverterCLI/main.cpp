@@ -21,15 +21,16 @@ int main(int argc, char** argv)
                                    "input-dat",
                                    "input-folder",
                                    "input-def",
-                                   "input-png",
+                                   "input-json",
                                    "output-dat",
                                    "output-folder",
                                    "output-def",
-                                   "output-png",
+                                   "output-json",
                                    "force",
                                    "uncompress",
                                    "cleanupFolder",
                                    "prettyJson",
+                                   "originalDefCompression",
                                },
                                { "tasks" });
 
@@ -54,23 +55,14 @@ int main(int argc, char** argv)
     QGuiApplication guiApp(argc, argv);
 
     auto makePaths = [&parser](const std::string& prefix) -> ConversionHandler::PathsSet {
-        const auto dat    = Core::string2path(parser.getArg(prefix + "dat"));
-        const auto def    = Core::string2path(parser.getArg(prefix + "def"));
-        const auto png    = Core::string2path(parser.getArg(prefix + "png"));
-        const auto folder = Core::string2path(parser.getArg(prefix + "folder"));
-
-        Core::std_path pngJson;
-        if (!png.empty()) {
-            const auto        pngFolder    = png.parent_path();
-            const std::string resourceName = Core::path2string(png.filename().stem());
-
-            pngJson = pngFolder / (Core::string2path(resourceName).concat(".fh.json"));
-        }
+        const auto dat     = Core::string2path(parser.getArg(prefix + "dat"));
+        const auto def     = Core::string2path(parser.getArg(prefix + "def"));
+        const auto pngJson = Core::string2path(parser.getArg(prefix + "json"));
+        const auto folder  = Core::string2path(parser.getArg(prefix + "folder"));
 
         return ConversionHandler::PathsSet{
             .m_datFile     = dat,
             .m_defFile     = def,
-            .m_pngFile     = png,
             .m_pngJsonFile = pngJson,
             .m_folder      = folder,
         };

@@ -30,7 +30,6 @@ public:
     struct PathsSet {
         Core::std_path m_datFile;
         Core::std_path m_defFile;
-        Core::std_path m_pngFile;
         Core::std_path m_pngJsonFile;
         Core::std_path m_folder;
     };
@@ -110,8 +109,8 @@ private:
     void binaryDeserializeSprite();
     void binarySerializeSprite();
 
-    void propertySerializeSprite();
     void propertyDeserializeSprite();
+    void propertySerializeSprite();
 
     void checkBinaryInputOutputEquality();
 
@@ -137,6 +136,7 @@ private:
 
     Settings       m_settings;
     std::string    m_currentTask;
+    std::string    m_currentIndent;
     Core::std_path m_inputFilename;
     Core::std_path m_outputFilename;
 };

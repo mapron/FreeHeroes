@@ -42,17 +42,33 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     BitmapFile::Palette,
     m_table)
 
-STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
-    BitmapFile::RLEItem,
-    m_segmentType,
+STRUCT_REFLECTION_PAIRED(
+    BitmapFile::RLEItemRaw,
+    "data",
+    m_bytes)
+
+STRUCT_REFLECTION_PAIRED(
+    BitmapFile::RLEItemNorm,
+    "l",
     m_length,
+    "v",
+    m_value)
+
+STRUCT_REFLECTION_PAIRED(
+    BitmapFile::RLEItem,
+    "isRaw",
     m_isRaw,
-    m_raw)
+    "c",
+    m_isCompressedLength,
+    "r",
+    m_raw,
+    "n",
+    m_norm)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     BitmapFile::RLERow,
-    m_rle0,
-    m_items)
+    m_items,
+    m_width)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     BitmapFile::RLEData,
@@ -60,11 +76,12 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_rle2offsets,
     m_rle3offsets,
     m_rleRows,
-    m_size)
+    m_originalSize)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     BitmapFile,
     m_compression,
+    m_compressionOriginal,
     m_pixFormat,
     m_width,
     m_height,

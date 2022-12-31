@@ -15,6 +15,9 @@
 #include "FileIOUtils.hpp"
 #include "FileFormatJson.hpp"
 
+#include "SpriteParserLegacy.hpp"
+#include "SpriteSerialization.hpp"
+
 #include <iostream>
 
 #define runMember(name) run(&ConversionHandler::name, #name, recurse + 1)
@@ -159,43 +162,44 @@ void ConversionHandler::run(Task task, int recurse) noexcept(false)
             } break;
             case Task::SpriteSaveDef:
             {
-                runMember(binarySerializeSprite);
+                m_sprite->setEmbeddedData(true);
 
                 setOutput(m_outputs.m_defFile);
+                runMember(binarySerializeSprite);
                 runMember(writeBinaryBufferData);
-            } break;
-
-            case Task::SpriteSaveFlat:
-            {
-                runMember(propertySerializeSprite);
-
-                setOutput(m_outputs.m_pngJsonFile);
-                runMember(writeJsonFromProperty);
             } break;
 
             case Task::SpriteLoadFlat:
             {
                 setInput(m_inputs.m_pngJsonFile);
                 runMember(readJsonToProperty);
-
                 runMember(propertyDeserializeSprite);
+            } break;
+            case Task::SpriteSaveFlat:
+            {
+                setOutput(m_outputs.m_pngJsonFile);
+                runMember(propertySerializeSprite);
+                runMember(writeJsonFromProperty);
             } break;
 
             case Task::SpriteLoadPng:
             {
-                setInput(m_inputs.m_pngFile);
+                setInput(m_inputs.m_pngJsonFile);
+                runMember(readJsonToProperty);
+                runMember(propertyDeserializeSprite);
             } break;
             case Task::SpriteSavePng:
             {
-                setOutput(m_outputs.m_pngFile);
+                m_sprite->setEmbeddedData(false);
+                setOutput(m_outputs.m_pngJsonFile);
+                runMember(propertySerializeSprite);
+                runMember(writeJsonFromProperty);
             } break;
 
             case Task::SpriteRoundTripPng:
-            {
-                assert(0);
-            } break;
             case Task::SpriteRoundTripFlat:
             {
+                const bool                  isPng = task == Task::SpriteRoundTripPng;
                 std::vector<Core::std_path> paths;
                 if (!m_settings.m_inputs.m_defFile.has_extension()) {
                     m_logOutput << "Enable wildcard checking\n";
@@ -211,10 +215,10 @@ void ConversionHandler::run(Task task, int recurse) noexcept(false)
                     m_logOutput << "round-trip check:" << path << '\n';
                     m_settings.m_inputs.m_defFile = path;
                     run(Task::SpriteLoadDef, recurse + 1);
-                    run(Task::SpriteSaveFlat, recurse + 1);
+                    run(isPng ? Task::SpriteSavePng : Task::SpriteSaveFlat, recurse + 1);
                     //safeCopy(m_settings.m_outputs.m_pngFile, m_settings.m_inputs.m_pngFile);
                     safeCopy(m_settings.m_outputs.m_pngJsonFile, m_settings.m_inputs.m_pngJsonFile);
-                    run(Task::SpriteLoadFlat, recurse + 1);
+                    run(isPng ? Task::SpriteLoadPng : Task::SpriteLoadFlat, recurse + 1);
                     run(Task::SpriteSaveDef, recurse + 1);
 
                     setInput(m_inputs.m_defFile);
@@ -235,6 +239,9 @@ void ConversionHandler::run(Task task, int recurse) noexcept(false)
 
 void ConversionHandler::run(MemberProc member, const char* descr, int recurse) noexcept(false)
 {
+    m_currentIndent = "  ";
+    for (int r = 0; r < recurse; ++r)
+        m_currentIndent += "  ";
     m_currentTask = descr;
     ScopeLogger scope(descr, recurse, m_logOutput);
     (this->*member)();
@@ -263,21 +270,25 @@ void ConversionHandler::setOutputFilename(const Core::std_path& path, std::strin
 void ConversionHandler::readBinaryBufferData()
 {
     m_binaryBuffer = Core::readFileIntoHolderThrow(m_inputFilename);
+    m_logOutput << m_currentIndent << "Read " << m_binaryBuffer.size() << " bytes from: " << m_inputFilename << '\n';
 }
 
 void ConversionHandler::writeBinaryBufferData()
 {
+    m_logOutput << m_currentIndent << "Write " << m_binaryBuffer.size() << " bytes to: " << m_outputFilename << '\n';
     Core::writeFileFromHolderThrow(m_outputFilename, m_binaryBuffer);
 }
 
 void ConversionHandler::readJsonToProperty()
 {
+    m_logOutput << m_currentIndent << "Read: " << m_inputFilename << '\n';
     std::string buffer = Core::readFileIntoBufferThrow(m_inputFilename);
     m_json             = Core::readJsonFromBufferThrow(buffer);
 }
 
 void ConversionHandler::writeJsonFromProperty()
 {
+    m_logOutput << m_currentIndent << "Write: " << m_outputFilename << '\n';
     std::string buffer = Core::writeJsonToBufferThrow(m_json, m_settings.m_prettyJson);
     Core::writeFileFromBufferThrow(m_outputFilename, buffer);
 }
@@ -356,17 +367,17 @@ void ConversionHandler::binarySerializeSprite()
     writer << *m_sprite;
 }
 
-void ConversionHandler::propertySerializeSprite()
-{
-    m_sprite->toJson(m_json);
-    m_sprite->bitmapsToJson(m_json);
-}
-
 void ConversionHandler::propertyDeserializeSprite()
 {
     *m_sprite = SpriteFile{};
     m_sprite->fromJson(m_json);
-    m_sprite->bitmapsFromJson(m_json);
+    m_sprite->loadBitmapsData(m_inputFilename);
+}
+
+void ConversionHandler::propertySerializeSprite()
+{
+    m_sprite->toJson(m_json);
+    m_sprite->saveBitmapsData(m_outputFilename);
 }
 
 void ConversionHandler::checkBinaryInputOutputEquality()
@@ -402,10 +413,6 @@ void ConversionHandler::checkBinaryInputOutputEquality()
     int       diffOffsets           = 0;
     for (size_t i = 0; i < minSize; ++i) {
         if (bufferIn[i] != bufferOut[i]) {
-            //            if (m_ignoredOffsets.contains(i)) {
-            //                skippedIgnoredOffsets++;
-            //                continue;
-            //            }
             if (diffOffsets++ < maxDiffCounter)
                 m_logOutput << "difference at [" << i << " / 0x" << std::hex << std::setfill('0') << i << "], in: 0x" << std::setw(2) << int(uint8_t(bufferIn[i]))
                             << ", out: 0x" << std::setw(2) << int(uint8_t(bufferOut[i])) << "\n"

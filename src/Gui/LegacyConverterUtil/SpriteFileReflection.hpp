@@ -53,12 +53,12 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_boundaryHeight,
     m_group,
 
-    m_originalOffset,
-    m_originalSize,
-    m_index,
-
+    m_binaryOrder,
     m_isDuplicate,
-    m_duplicateIndex)
+    m_headerIndex,
+    m_dupHeaderIndex,
+
+    m_shortHeaderFormat)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     SpriteFile::Group,
@@ -76,6 +76,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     /*bitmaps*/
     m_groups,
     m_palette,
-    m_tralilingData)
+    m_tralilingData,
+    m_embeddedBitmapData)
 
 }

@@ -177,6 +177,7 @@ void Archive::loadFromFolder(const std_path& path)
         rec.m_buffer   = readFileIntoHolderThrow(out);
 
         if (!rec.m_compressOnDisk && rec.m_compressInArchive) {
+            rec.m_uncompressedSizeCache = rec.m_buffer.size();
             ByteArrayHolder comp;
             compressDataBuffer(rec.m_buffer, comp, { .m_type = CompressionType::Zlib, .m_skipCRC = false });
             rec.m_buffer = comp;
