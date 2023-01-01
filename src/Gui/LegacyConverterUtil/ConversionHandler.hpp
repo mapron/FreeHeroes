@@ -37,11 +37,12 @@ public:
     struct Settings {
         PathsSet m_inputs;
         PathsSet m_outputs;
-        bool     m_forceWrite    = false;
-        bool     m_cleanupFolder = false;
-        bool     m_uncompress    = false;
-        bool     m_prettyJson    = false;
-        bool     m_mergePng      = false;
+        bool     m_forceWrite          = false;
+        bool     m_cleanupFolder       = false;
+        bool     m_uncompressArchive   = false;
+        bool     m_prettyJson          = false;
+        bool     m_mergePng            = false;
+        bool     m_transparentKeyColor = false;
     };
 
     enum class Task
@@ -63,6 +64,7 @@ public:
         SpriteSaveFlat,
         SpriteLoadPng,
         SpriteSavePng,
+        SpriteSaveUI,
 
         SpriteRoundTripPng,
         SpriteRoundTripFlat,

@@ -138,7 +138,7 @@ public:
     void uncompress();
     void compressToOriginal();
 
-    void unpackPalette(const Palette& pal);
+    void unpackPalette(const Palette& pal, const Palette& palExtended);
     void countPalette(Palette& pal);
     void packPalette(const Palette& pal);
 

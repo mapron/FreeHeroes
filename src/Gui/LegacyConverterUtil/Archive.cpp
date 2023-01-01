@@ -35,6 +35,16 @@ constexpr const size_t                 g_strVidSize = 40;
 constexpr const std::string_view g_hdatChapterSeparator{ "\r\n=============================\r\n" };
 }
 
+Archive::Archive(std::ostream* logOutput)
+    : m_logOutput(logOutput ? logOutput : &std::cerr)
+{
+}
+
+void Archive::clear()
+{
+    *this = Archive(m_logOutput);
+}
+
 void Archive::detectFormat(const std_path& path, ByteOrderDataStreamReader& stream)
 {
     std::array<uint8_t, 4> signature;
@@ -145,8 +155,8 @@ void Archive::readBinary(ByteOrderDataStreamReader& stream)
                 brec->m_size = brec->m_offsetNext - brec->m_offset;
             const ptrdiff_t possiblePadding = (brec->m_offsetNext - brec->m_offset) - brec->m_size;
             if (possiblePadding < 0) {
-                std::cerr << "Data overlap detected, archive corrupted: offset=" << brec->m_offset
-                          << ", size=" << brec->m_size << ", nextOffset=" << brec->m_offsetNext << '\n';
+                *m_logOutput << "Data overlap detected, archive corrupted: offset=" << brec->m_offset
+                             << ", size=" << brec->m_size << ", nextOffset=" << brec->m_offsetNext << '\n';
             }
             if (possiblePadding > 0) {
                 const size_t paddingSize = possiblePadding;
@@ -160,7 +170,7 @@ void Archive::readBinary(ByteOrderDataStreamReader& stream)
                 padbrec.m_buffer   = blob;
                 padbrec.m_offset   = brec->m_offsetNext - possiblePadding;
 
-                std::cerr << "detected GAP in binary data at [" << padbrec.m_offset << ".." << brec->m_offsetNext << "], creating padding blob '" << padbrec.m_basename << "' of size=" << paddingSize << '\n';
+                *m_logOutput << "detected GAP in binary data at [" << padbrec.m_offset << ".." << brec->m_offsetNext << "], creating padding blob '" << padbrec.m_basename << "' of size=" << paddingSize << '\n';
 
                 m_binaryRecordsUnnamed.push_back(std::move(padbrec));
             }
@@ -170,7 +180,7 @@ void Archive::readBinary(ByteOrderDataStreamReader& stream)
     }
     updateIndex();
 
-    //std::cerr << "firstRecordOffset=" << firstRecordOffset << '\n';
+    //*m_logOutput << "firstRecordOffset=" << firstRecordOffset << '\n';
     const auto currentOffset = stream.getBuffer().getOffsetRead();
     if (firstRecordOffset < currentOffset)
         throw std::runtime_error("First record offset [" + std::to_string(firstRecordOffset) + "] is less than current offset [" + std::to_string(currentOffset) + "]");
@@ -186,7 +196,7 @@ void Archive::readBinary(ByteOrderDataStreamReader& stream)
         padbrec.m_buffer   = blob;
         padbrec.m_offset   = currentOffset;
 
-        std::cerr << "detected GAP in binary data at [" << currentOffset << ".." << firstRecordOffset << "], creating padding blob '" << padbrec.m_basename << "' of size=" << paddingSize << '\n';
+        *m_logOutput << "detected GAP in binary data at [" << currentOffset << ".." << firstRecordOffset << "], creating padding blob '" << padbrec.m_basename << "' of size=" << paddingSize << '\n';
 
         m_binaryRecordsUnnamed.push_back(std::move(padbrec));
         updateIndex();
@@ -197,7 +207,7 @@ void Archive::readBinary(ByteOrderDataStreamReader& stream)
         brec->m_binaryDataOrder = i++;
         const auto offset       = stream.getBuffer().getOffsetRead();
         if (0)
-            std::cerr << "i= " << (i - 1) << " name=" << brec->m_basename << ", exp=" << brec->m_offset << ", s=" << brec->m_buffer.size() << ", current=" << offset << '\n';
+            *m_logOutput << "i= " << (i - 1) << " name=" << brec->m_basename << ", exp=" << brec->m_offset << ", s=" << brec->m_buffer.size() << ", current=" << offset << '\n';
         if (brec->m_offset == offset) {
             stream.readBlock(brec->m_buffer.data(), brec->m_buffer.size());
             continue;
@@ -271,20 +281,7 @@ void Archive::saveToFolder(const std_path& path, bool skipExisting) const
         if (skipExisting && std_fs::exists(out))
             continue;
 
-        ByteArrayHolder buf = rec.m_buffer;
-
-        if (!rec.m_compressOnDisk && rec.m_compressInArchive) {
-            ByteArrayHolder uncomp;
-            uncompressDataBuffer(buf, uncomp, { .m_type = CompressionType::Zlib, .m_skipCRC = false });
-            buf                                    = uncomp;
-            [[maybe_unused]] const size_t unpacked = uncomp.size();
-            assert(rec.m_uncompressedSizeCache == unpacked);
-        }
-        if (rec.m_compressOnDisk && !rec.m_compressInArchive) {
-            assert(0);
-        }
-
-        writeFileFromHolderThrow(out, buf);
+        writeFileFromHolderThrow(out, rec.m_buffer);
     }
 
     for (const HdatRecord& rec : m_hdatRecords) {
@@ -324,16 +321,6 @@ void Archive::loadFromFolder(const std_path& path)
     for (Record& rec : m_records) {
         const auto out = path / string2path(rec.fullname());
         rec.m_buffer   = readFileIntoHolderThrow(out);
-
-        if (!rec.m_compressOnDisk && rec.m_compressInArchive) {
-            rec.m_uncompressedSizeCache = rec.m_buffer.size();
-            ByteArrayHolder comp;
-            compressDataBuffer(rec.m_buffer, comp, { .m_type = CompressionType::Zlib, .m_skipCRC = false });
-            rec.m_buffer = comp;
-        }
-        if (rec.m_compressOnDisk && !rec.m_compressInArchive) {
-            assert(0);
-        }
     }
 
     for (HdatRecord& rec : m_hdatRecords) {
@@ -411,6 +398,17 @@ void Archive::convertToBinary()
         brec.m_binaryDataOrder = rec.m_binaryOrder;
         brec.m_headerOrder     = order++;
 
+        if (!rec.m_compressOnDisk && rec.m_compressInArchive) {
+            brec.m_fullSize = rec.m_buffer.size();
+            ByteArrayHolder comp;
+            compressDataBuffer(rec.m_buffer, comp, { .m_type = CompressionType::Zlib, .m_skipCRC = false });
+            brec.m_buffer         = comp;
+            brec.m_compressedSize = brec.m_size = comp.size();
+        }
+        if (rec.m_compressOnDisk && !rec.m_compressInArchive) {
+            assert(0);
+        }
+
         if (rec.m_isPadding) {
             m_binaryRecordsUnnamed.push_back(std::move(brec));
         } else {
@@ -484,6 +482,17 @@ void Archive::convertFromBinary(bool uncompress)
         rec.m_compressInArchive     = brec.m_compressedSize > 0;
         rec.m_compressOnDisk        = rec.m_compressInArchive && !uncompress;
         rec.m_uncompressedSizeCache = rec.m_compressInArchive ? brec.m_fullSize : 0;
+
+        if (!rec.m_compressOnDisk && rec.m_compressInArchive) {
+            ByteArrayHolder uncomp;
+            uncompressDataBuffer(rec.m_buffer, uncomp, { .m_type = CompressionType::Zlib, .m_skipCRC = false });
+            rec.m_buffer                           = uncomp;
+            [[maybe_unused]] const size_t unpacked = uncomp.size();
+            assert(rec.m_uncompressedSizeCache == unpacked);
+        }
+        if (rec.m_compressOnDisk && !rec.m_compressInArchive) {
+            assert(0);
+        }
 
         if (rec.m_compressOnDisk)
             rec.m_extWithDot += ".gz";

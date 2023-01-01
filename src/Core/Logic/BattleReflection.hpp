@@ -64,9 +64,9 @@ STRUCT_REFLECTION_PAIRED(
 
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<BattlePositionExtended>{
-    SetGet("main"    , &BattlePositionExtended::setMainPos, &BattlePositionExtended::mainPos       ),
-    SetGet("sight"   , &BattlePositionExtended::setSight  , &BattlePositionExtended::sightDirection),
-    SetGet("large"   , &BattlePositionExtended::setLarge  , &BattlePositionExtended::isLarge       ),
+    SetGetNoexcept("main"    , &BattlePositionExtended::setMainPos, &BattlePositionExtended::mainPos       ),
+    SetGetNoexcept("sight"   , &BattlePositionExtended::setSight  , &BattlePositionExtended::sightDirection),
+    SetGetNoexcept("large"   , &BattlePositionExtended::setLarge  , &BattlePositionExtended::isLarge       ),
 };
 STRUCT_REFLECTION_PAIRED(
     BattleFieldGeometry,

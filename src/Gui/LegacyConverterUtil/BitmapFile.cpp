@@ -421,7 +421,7 @@ void BitmapFile::compressToOriginal()
     m_rows.clear();
 }
 
-void BitmapFile::unpackPalette(const Palette& pal)
+void BitmapFile::unpackPalette(const Palette& pal, const Palette& palExtended)
 {
     assert(m_pixFormat == PixFormat::Gray);
     m_pixFormat = PixFormat::RGBA;
@@ -430,7 +430,10 @@ void BitmapFile::unpackPalette(const Palette& pal)
         for (uint32_t x = 0; x < m_width; x++) {
             Pixel& pix = row[x];
             auto   idx = pix.m_alphaOrGray;
-            pix        = pal.m_table[idx];
+            if (idx < palExtended.m_table.size())
+                pix = palExtended.m_table[idx];
+            else
+                pix = pal.m_table[idx];
         }
     }
 }

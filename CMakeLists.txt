@@ -214,7 +214,8 @@ AddTarget(TYPE shared NAME GuiResource OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Resource
     EXPORT_INCLUDES
     LINK_LIBRARIES
-        GuiInt CorePlatform
+        GuiInt CorePlatform CoreLogic
+        frozen
     QT_MODULES Widgets
     UIC_POSTPROCESS_SCRIPTS
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
@@ -358,6 +359,7 @@ AddTarget(TYPE shared NAME LegacyConverterUtil
         CorePlatform
         GameInt
         GuiInt
+        GuiUtils
         GuiResource
         GameObjects
     
@@ -376,6 +378,7 @@ AddTarget( TYPE app_ui NAME LegacyConverter
         GuiInt
         GameInt
         GameObjects
+        GuiUtils
     
         CoreResource
         CoreApplication
@@ -399,9 +402,21 @@ AddTarget( TYPE app_console NAME LegacyConverterCLI
         LegacyConverterUtil
 
     QT_MODULES Gui
-    UIC_POSTPROCESS_SCRIPTS
-        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
+AddTarget( TYPE app_console NAME GameLegacyConverterCLI
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/GameLegacyConverterCLI
+    LINK_LIBRARIES
+        CorePlatform
+        GameInt
+        GameObjects
+    
+        CoreResource
+        CoreApplication
+        LegacyConverterUtil
+
+    QT_MODULES Gui
+    )
+
 AddTarget(TYPE app_ui NAME BattleEmulator
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/BattleEmulator
     LINK_LIBRARIES
@@ -428,6 +443,7 @@ AddTarget(TYPE app_ui NAME MapEditor
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/MapEditor
     LINK_LIBRARIES
         CorePlatform
+        GuiUtils
 
         CoreApplication
         GuiApplication
@@ -444,6 +460,7 @@ AddTarget(TYPE app_ui NAME MapToolUI
     LINK_LIBRARIES
         CorePlatform
         GuiInt
+        GuiUtils
         SoundInt
         GameObjects
         GameInt

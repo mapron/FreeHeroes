@@ -50,6 +50,7 @@ ENUM_REFLECTION_STRINGIY(ConversionHandler::Task,
                          SpriteSaveFlat,
                          SpriteLoadPng,
                          SpriteSavePng,
+                         SpriteSaveUI,
 
                          SpriteRoundTripPng,
                          SpriteRoundTripFlat)
@@ -68,7 +69,7 @@ ConversionHandler::Task stringToTask(const std::string& str)
 
 ConversionHandler::ConversionHandler(std::ostream& logOutput,
                                      Settings      settings)
-    : m_archive(std::make_unique<Archive>())
+    : m_archive(std::make_unique<Archive>(&logOutput))
     , m_sprite(std::make_unique<SpriteFile>())
     , m_logOutput(logOutput)
     , m_settings(std::move(settings))
@@ -163,7 +164,7 @@ void ConversionHandler::run(Task task, int recurse) noexcept(false)
             } break;
             case Task::SpriteSaveDef:
             {
-                m_sprite->setEmbeddedData(true);
+                m_sprite->setEmbeddedData(true, m_settings.m_transparentKeyColor);
 
                 setOutput(m_outputs.m_defFile);
                 runMember(binarySerializeSprite);
@@ -191,12 +192,18 @@ void ConversionHandler::run(Task task, int recurse) noexcept(false)
             } break;
             case Task::SpriteSavePng:
             {
-                m_sprite->setEmbeddedData(false);
+                m_sprite->setEmbeddedData(false, m_settings.m_transparentKeyColor);
                 if (m_settings.m_mergePng)
                     m_sprite->mergeBitmaps();
                 setOutput(m_outputs.m_pngJsonFile);
                 runMember(propertySerializeSprite);
                 runMember(writeJsonFromProperty);
+            } break;
+            case Task::SpriteSaveUI:
+            {
+                m_sprite->setEmbeddedData(false, m_settings.m_transparentKeyColor);
+                m_sprite->mergeBitmaps();
+                m_sprite->saveGuiSprite(m_settings.m_outputs.m_pngJsonFile);
             } break;
 
             case Task::SpriteRoundTripPng:
@@ -302,7 +309,7 @@ void ConversionHandler::binaryDeserializeArchive()
     ByteOrderDataStreamReader reader(bobuffer, ByteOrderDataStream::LITTLE_ENDIAN);
 
     try {
-        *m_archive = Archive{};
+        *m_archive = Archive{ &m_logOutput };
         m_archive->detectFormat(m_inputFilename, reader);
         reader.getBuffer().setOffsetRead(0);
         reader >> *m_archive;
@@ -328,7 +335,7 @@ void ConversionHandler::convertArchiveToBinary()
 
 void ConversionHandler::convertArchiveFromBinary()
 {
-    m_archive->convertFromBinary(m_settings.m_uncompress);
+    m_archive->convertFromBinary(m_settings.m_uncompressArchive);
 }
 
 void ConversionHandler::writeArchiveToFolder()
@@ -341,7 +348,7 @@ void ConversionHandler::writeArchiveToFolder()
 
 void ConversionHandler::readArchiveFromFolder()
 {
-    *m_archive = Archive{};
+    *m_archive = Archive{ &m_logOutput };
     m_archive->loadFromFolder(m_inputFilename);
 }
 

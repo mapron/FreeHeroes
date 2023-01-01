@@ -19,6 +19,7 @@
 // Gui
 #include "FsUtilsQt.hpp"
 #include "ResourceLibrary.hpp"
+#include "EnvDetect.hpp"
 
 // Platform
 #include "ShellUtils.hpp"
@@ -34,20 +35,6 @@
 namespace FreeHeroes::Conversion {
 using namespace Core;
 using namespace Gui;
-
-namespace {
-QString guessInstallationPath()
-{
-#ifdef _WIN32
-    QSettings reg(
-        "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\HotA + HD_is1",
-        QSettings::Registry32Format);
-    return reg.value("InstallLocation").toString();
-#else
-    return {};
-#endif
-}
-}
 
 ConverterDialog::ConverterDialog(const Core::IGameDatabaseContainer* databaseContainer, QWidget* parent)
     : QDialog(parent)
@@ -69,7 +56,7 @@ ConverterDialog::ConverterDialog(const Core::IGameDatabaseContainer* databaseCon
 
     QString path = m_converterSettings.value("srcPath").toString();
     if (path.isEmpty()) {
-        path = guessInstallationPath();
+        path = Gui::stdPath2QString(findHeroes3Installation());
         Logger(Logger::Info) << "Guessing installation directory: " << path.toStdString();
     }
     m_ui->srcPath->setText(path);

@@ -11,6 +11,8 @@
 
 #include "AppLocations.hpp"
 
+#include "EnvDetect.hpp"
+
 #include <QProcess>
 #include <QRandomGenerator64>
 #include <QSettings>
@@ -25,18 +27,6 @@ const QString g_mapEditor = "MapEditor.exe";
 #endif
 
 const QString g_reg = "HKEY_CURRENT_USER\\SOFTWARE\\FreeHeroes";
-
-QString guessInstallationPath()
-{
-#ifdef _WIN32
-    QSettings reg(
-        "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\HotA + HD_is1",
-        QSettings::Registry32Format);
-    return reg.value("InstallLocation").toString();
-#else
-    return {};
-#endif
-}
 
 }
 MapToolWindow::MapToolWindow()
@@ -60,7 +50,7 @@ MapToolWindow::MapToolWindow()
     m_ui->h3mMapPath->setText(settings.value("h3mMapPath").toString());
     m_ui->lineEditSeed->setText(settings.value("seed").toString());
 
-    Core::std_path hotaPath = Core::string2path(guessInstallationPath().toStdString());
+    Core::std_path hotaPath = findHeroes3Installation();
 
     if (m_ui->templateSettingsPath->text().isEmpty())
         m_ui->templateSettingsPath->setText(QString::fromStdString(Core::path2string(loc.getAppdataDir() / "templateSettings.json")));

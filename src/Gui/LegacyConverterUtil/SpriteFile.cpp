@@ -13,6 +13,8 @@
 #include "Reflection/PropertyTreeWriter.hpp"
 #include "StringUtils.hpp"
 
+#include "Sprites.hpp"
+
 #include <array>
 #include <iostream>
 
@@ -21,6 +23,8 @@
 
 namespace FreeHeroes {
 using namespace Core;
+
+namespace {
 
 struct SpriteDef {
     uint32_t pixelBitSize = 0; /// HOTA only
@@ -75,7 +79,164 @@ struct OffsetTracker {
     }
 };
 
-namespace {
+struct ExtendedPaletteColor {
+    size_t                        m_index;
+    BitmapFile::Pixel             m_possibleColor; // for the record
+    BitmapFile::Pixel             m_replacement;
+    std::set<SpriteFile::DefType> m_defTypes;
+    bool                          m_check = false; // check if palette contains required color
+};
+struct ExtendedPaletteColorConfig {
+    std::vector<ExtendedPaletteColor> m_table;
+
+    void extendPalette(const BitmapFile::Palette& original, BitmapFile::Palette& ext, SpriteFile::DefType type) const
+    {
+        ext.m_table.resize(8);
+        for (size_t i = 0; i < 8; i++) {
+            auto& pix = ext.m_table[i];
+            pix       = original.m_table[i];
+
+            for (const ExtendedPaletteColor& clr : m_table) {
+                if (clr.m_index == i && clr.m_defTypes.contains(type)) {
+                    if (clr.m_check && original.m_table[clr.m_index] != clr.m_possibleColor)
+                        continue;
+                    //std::cerr << "replace [" << i << "] " << pix.toString() << " -> " << clr.m_replacement.toString() << "\n";
+                    pix = clr.m_replacement;
+                }
+            }
+        }
+    }
+    void fillReverseIndex(BitmapFile::Palette& palette, SpriteFile::DefType type) const
+    {
+        for (const ExtendedPaletteColor& clr : m_table) {
+            if (clr.m_defTypes.contains(type)) {
+                if (clr.m_check && palette.m_table[clr.m_index] != clr.m_possibleColor)
+                    continue;
+                palette.m_index[clr.m_replacement] = clr.m_index;
+                if (palette.m_counter.contains(clr.m_replacement))
+                    palette.m_counter.erase(clr.m_replacement);
+            }
+        }
+    }
+};
+
+const ExtendedPaletteColorConfig g_extendedColors{ {
+    ExtendedPaletteColor{
+        // cyan    => transparent    100%
+        .m_index         = 0,
+        .m_possibleColor = { 0x00, 0xFF, 0xFF, 0xFF },
+        .m_replacement   = { 0x00, 0x00, 0x00, 0x00 },
+        .m_defTypes      = {
+            SpriteFile::DefType::BattleSpells,
+            SpriteFile::DefType::Sprite,
+            SpriteFile::DefType::BattleSprite,
+            SpriteFile::DefType::AdventureItem,
+            SpriteFile::DefType::AdventureHero,
+            SpriteFile::DefType::AdventureTerrain,
+            SpriteFile::DefType::Cursor,
+            SpriteFile::DefType::Interface,
+            SpriteFile::DefType::SpriteFrame,
+            SpriteFile::DefType::BattleHero,
+        },
+    },
+    ExtendedPaletteColor{
+        // cyan    =>  l. mag. => shadow border , 25%
+        .m_index         = 1,
+        .m_possibleColor = { 0xFF, 0x96, 0xFF, 0xFF },
+        .m_replacement   = { 0x00, 0x00, 0x00, 0x40 },
+        .m_defTypes      = {
+            SpriteFile::DefType::Sprite,
+            SpriteFile::DefType::BattleSprite,
+            SpriteFile::DefType::AdventureItem,
+            SpriteFile::DefType::AdventureHero,
+            SpriteFile::DefType::AdventureTerrain,
+            SpriteFile::DefType::Interface,
+            SpriteFile::DefType::SpriteFrame,
+            SpriteFile::DefType::BattleHero,
+        },
+    },
+    ExtendedPaletteColor{
+        // mag 1   => ???           , 30%
+        .m_index         = 2,
+        .m_possibleColor = { 0xFF, 0x64, 0xFF, 0xFF },
+        .m_replacement   = { 0x00, 0x00, 0x00, 0x50 },
+        .m_defTypes      = {
+            SpriteFile::DefType::Sprite,
+            SpriteFile::DefType::AdventureItem,
+            SpriteFile::DefType::AdventureHero,
+            SpriteFile::DefType::AdventureTerrain,
+            SpriteFile::DefType::SpriteFrame,
+        },
+        .m_check = true,
+    },
+    ExtendedPaletteColor{
+        // mag 2   => ???           , 40%
+        .m_index         = 3,
+        .m_possibleColor = { 0xFF, 0x32, 0xFF, 0xFF },
+        .m_replacement   = { 0x00, 0x00, 0x00, 0x60 },
+        .m_defTypes      = {
+            SpriteFile::DefType::Sprite,
+            SpriteFile::DefType::AdventureItem,
+            SpriteFile::DefType::AdventureHero,
+            SpriteFile::DefType::AdventureTerrain,
+            SpriteFile::DefType::SpriteFrame,
+        },
+        .m_check = true,
+    },
+    ExtendedPaletteColor{
+        // magenta => shadow body   , 50%
+        .m_index         = 4,
+        .m_possibleColor = { 0xFF, 0x00, 0xFF, 0xFF },
+        .m_replacement   = { 0x00, 0x00, 0x00, 0x80 },
+        .m_defTypes      = {
+            SpriteFile::DefType::Sprite,
+            SpriteFile::DefType::BattleSprite,
+            SpriteFile::DefType::AdventureItem,
+            SpriteFile::DefType::AdventureHero,
+            SpriteFile::DefType::AdventureTerrain,
+            SpriteFile::DefType::Interface,
+            SpriteFile::DefType::SpriteFrame,
+            SpriteFile::DefType::BattleHero,
+        },
+    },
+
+    ExtendedPaletteColor{
+        // yellow  => flag color / selection highlight. almost transparent
+        .m_index         = 5,
+        .m_possibleColor = { 0xFF, 0xFF, 0x00, 0xFF },
+        .m_replacement   = { 0x00, 0x00, 0x00, 0x01 },
+        .m_defTypes      = {
+            SpriteFile::DefType::Sprite,
+            SpriteFile::DefType::BattleSprite,
+            SpriteFile::DefType::AdventureItem,
+            SpriteFile::DefType::AdventureHero,
+            SpriteFile::DefType::SpriteFrame,
+        },
+        .m_check = true,
+    },
+    ExtendedPaletteColor{
+        // d. mag. => shadow body   + selection 50% + 1.
+        .m_index         = 6,
+        .m_possibleColor = { 0xB4, 0x00, 0xFF, 0xFF },
+        .m_replacement   = { 0x00, 0x00, 0x00, 0x81 },
+        .m_defTypes      = {
+            SpriteFile::DefType::Sprite,
+            SpriteFile::DefType::BattleSprite,
+            SpriteFile::DefType::SpriteFrame,
+        },
+    },
+    ExtendedPaletteColor{
+        // green   => shadow border + selection 25% + 1.
+        .m_index         = 7,
+        .m_possibleColor = { 0x00, 0xFF, 0x00, 0xFF },
+        .m_replacement   = { 0x00, 0x00, 0x00, 0x41 },
+        .m_defTypes      = {
+            SpriteFile::DefType::Sprite,
+            SpriteFile::DefType::BattleSprite,
+            SpriteFile::DefType::SpriteFrame,
+        },
+    },
+} };
 
 constexpr const std::array<uint8_t, 4> g_def32Signature{ { 0x44, 0x33, 0x32, 0x46 } }; // 'D32F'
 
@@ -583,12 +744,17 @@ void SpriteFile::compressToOriginal()
         bitmap.compressToOriginal();
 }
 
-void SpriteFile::unpackPalette()
+void SpriteFile::unpackPalette(bool extendPalette)
 {
     if (m_format != BinaryFormat::DEF)
         return;
+    BitmapFile::Palette paletteExtended;
+    if (extendPalette) {
+        g_extendedColors.extendPalette(m_palette, paletteExtended, m_defType);
+    }
+
     for (auto& bitmap : m_bitmaps)
-        bitmap.unpackPalette(m_palette);
+        bitmap.unpackPalette(m_palette, paletteExtended);
 }
 
 void SpriteFile::makePalette()
@@ -602,9 +768,11 @@ void SpriteFile::makePalette()
         if (palette.m_counter.contains(palette.m_table[i]))
             palette.m_counter.erase(palette.m_table[i]);
     }
+    g_extendedColors.fillReverseIndex(palette, m_defType);
     std::vector<std::pair<BitmapFile::Pixel, size_t>> counter;
-    for (auto&& [pix, cnt] : palette.m_counter)
+    for (auto&& [pix, cnt] : palette.m_counter) {
         counter.push_back({ pix, cnt });
+    }
 
     std::sort(counter.begin(), counter.end(), [](const auto& l, const auto& r) { return l.second > r.second; });
     if (counter.size() > 246) {
@@ -628,7 +796,7 @@ void SpriteFile::makePalette()
     m_palette = palette;
 }
 
-void SpriteFile::setEmbeddedData(bool flag)
+void SpriteFile::setEmbeddedData(bool flag, bool extendPalette)
 {
     if (m_embeddedBitmapData == flag)
         return;
@@ -643,7 +811,7 @@ void SpriteFile::setEmbeddedData(bool flag)
         compressToOriginal();
     } else {
         uncompress();
-        unpackPalette();
+        unpackPalette(extendPalette);
 
         for (auto& bitmap : m_bitmaps)
             bitmap.toPixmapQt();
@@ -659,6 +827,9 @@ void SpriteFile::mergeBitmaps()
     if (m_bitmaps.empty())
         return;
 
+    if (m_bitmaps.size() == 1)
+        return;
+
     std::map<size_t, int> bitmapIndex2group;
 
     struct GroupBitmaps {
@@ -672,13 +843,13 @@ void SpriteFile::mergeBitmaps()
     std::map<int, GroupBitmaps> groupRowData;
     for (Group& group : m_groups) {
         GroupBitmaps& g = groupRowData[group.m_groupId];
-        for (const Frame& frame : group.m_frames) {
+        for (Frame& frame : group.m_frames) {
             if (!frame.m_hasBitmap)
                 continue;
             g.m_maxHeight = std::max(g.m_maxHeight, frame.m_bitmapHeight);
             g.m_totalWidth += frame.m_bitmapWidth;
+            frame.m_bitmapOffsetY = totalHeight;
         }
-        group.m_bitmapOffsetY = totalHeight;
         totalHeight += g.m_maxHeight;
         maxWidth = std::max(maxWidth, g.m_totalWidth);
     }
@@ -697,13 +868,53 @@ void SpriteFile::mergeBitmaps()
             x += frame.m_bitmapWidth;
 
             QPainter painter(&out);
-            painter.drawPixmap(QPoint(frame.m_bitmapOffsetX, group.m_bitmapOffsetY), pix);
+            painter.drawPixmap(QPoint(frame.m_bitmapOffsetX, frame.m_bitmapOffsetY), pix);
         }
     }
 
     m_bitmaps.clear();
     m_bitmaps.resize(1);
     m_bitmaps[0].m_pixmapQt = std::make_shared<QPixmap>(std::move(out));
+    m_bitmaps[0].m_width    = m_bitmaps[0].m_pixmapQt->width();
+    m_bitmaps[0].m_height   = m_bitmaps[0].m_pixmapQt->height();
+}
+
+void SpriteFile::saveGuiSprite(const Core::std_path& jsonFilePath)
+{
+    if (m_embeddedBitmapData)
+        throw std::runtime_error("Only split bitmaps can be saved");
+
+    Core::std_fs::create_directories(jsonFilePath.parent_path());
+
+    assert(m_bitmaps.size() == 1);
+
+    Gui::SpriteNew uiSprite;
+    uiSprite.m_bitmap       = *m_bitmaps[0].m_pixmapQt.get();
+    uiSprite.m_boundarySize = { m_boundaryWidth, m_boundaryHeight };
+    std::vector<const Frame*> headerOrderFrames;
+    for (const Group& group : m_groups) {
+        Gui::SpriteNew::Group uiGroup;
+        uiGroup.m_groupId = group.m_groupId;
+
+        for (const Frame& frame : group.m_frames) {
+            headerOrderFrames.push_back(&frame);
+            Gui::SpriteNew::Frame uiFrame;
+            const Frame*          srcframe = &frame;
+            if (srcframe->m_isDuplicate) {
+                srcframe = headerOrderFrames[srcframe->m_dupHeaderIndex];
+            }
+            uiFrame.m_bitmapOffset = { srcframe->m_bitmapOffsetX, srcframe->m_bitmapOffsetY };
+            uiFrame.m_hasBitmap    = srcframe->m_hasBitmap;
+            uiFrame.m_bitmapSize   = { srcframe->m_bitmapWidth, srcframe->m_bitmapHeight };
+            uiFrame.m_boundarySize = { srcframe->m_boundaryWidth, srcframe->m_boundaryHeight };
+            uiFrame.m_padding      = { srcframe->m_paddingLeft, srcframe->m_paddingTop };
+
+            uiGroup.m_frames.push_back(std::move(uiFrame));
+        }
+
+        uiSprite.m_groups[group.m_groupId] = std::move(uiGroup);
+    }
+    uiSprite.save(jsonFilePath);
 }
 
 }

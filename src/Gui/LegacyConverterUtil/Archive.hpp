@@ -60,6 +60,10 @@ public:
     std::vector<uint8_t> m_lodHeader;
 
 public:
+    Archive(std::ostream* logOutput = nullptr);
+
+    void clear();
+
     void detectFormat(const Core::std_path& path, ByteOrderDataStreamReader& stream);
 
     void readBinary(ByteOrderDataStreamReader& stream);
@@ -111,6 +115,8 @@ private:
     std::vector<BinaryRecord*> m_binaryRecordsSortedByOffset;
 
     bool m_isBinary = false;
+
+    std::ostream* m_logOutput = nullptr;
 };
 
 }

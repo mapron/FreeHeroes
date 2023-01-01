@@ -153,20 +153,86 @@ struct MetaInfo {
         FieldType Parent::*m_f;
     };
 
-    template<class Parent, typename ArgTypeSetter, typename ArgTypeGetter>
-    struct SetGet {
-        using FieldType = std::remove_reference_t<std::remove_cv_t<ArgTypeGetter>>;
+    /**
+     * usage:
+     * SetGetLambda<QPoint, int>("x", [](QPoint& obj, int val){ obj.setX(val); }, [](const QPoint& obj){ return obj.x(); } );
+     * 
+     * important to have getter with second argument taking value (not const reference).
+     */
 
-        constexpr SetGet(frozen::string name, void (Parent::*setter)(ArgTypeSetter) noexcept, ArgTypeGetter (Parent::*getter)() const noexcept)
+    template<class Parent, typename FieldType>
+    struct SetGetLambda {
+        using ArgTypeSetter = void (*)(Parent&, FieldType);
+        using ArgTypeGetter = FieldType (*)(const Parent&);
+
+        constexpr SetGetLambda(frozen::string name, ArgTypeSetter setter, ArgTypeGetter getter)
             : m_name(name)
             , m_setter(setter)
             , m_getter(getter)
         {}
 
         struct ValueWriter {
-            const SetGet& m_field;
-            Parent&       m_parent;
-            FieldType     m_tmp{};
+            const SetGetLambda& m_field;
+            Parent&             m_parent;
+            FieldType           m_tmp{};
+
+            constexpr FieldType& getRef() { return m_tmp; }
+
+            constexpr ~ValueWriter()
+            {
+                m_field.set(m_parent, std::move(m_tmp));
+            }
+        };
+
+        constexpr ValueWriter makeValueWriter(Parent& parent) const noexcept
+        {
+            return { *this, parent };
+        }
+
+        constexpr FieldType get(const Parent& parent) const
+        {
+            return m_getter(parent);
+        }
+        constexpr void set(Parent& parent, FieldType value) const
+        {
+            m_setter(parent, std::move(value));
+        }
+        [[nodiscard]] bool isDefault(const FieldType& value) const noexcept
+        {
+            return false;
+        }
+        void reset(Parent&) const noexcept
+        {
+        }
+
+        [[nodiscard]] std::string name() const noexcept
+        {
+            return std::string(m_name.begin(), m_name.end()); // if this throws, we don't care, abort is fine.
+        }
+
+        frozen::string m_name;
+        ArgTypeSetter  m_setter;
+        ArgTypeGetter  m_getter;
+    };
+
+    /**
+     * usage:
+     * SetGetNoexcept("property", &MyType::setProp, &MyType::getProperty)
+     */
+    template<class Parent, typename ArgTypeSetter, typename ArgTypeGetter>
+    struct SetGetNoexcept {
+        using FieldType = std::remove_reference_t<std::remove_cv_t<ArgTypeGetter>>;
+
+        constexpr SetGetNoexcept(frozen::string name, void (Parent::*setter)(ArgTypeSetter) noexcept, ArgTypeGetter (Parent::*getter)() const noexcept)
+            : m_name(name)
+            , m_setter(setter)
+            , m_getter(getter)
+        {}
+
+        struct ValueWriter {
+            const SetGetNoexcept& m_field;
+            Parent&               m_parent;
+            FieldType             m_tmp{};
 
             constexpr FieldType& getRef() { return m_tmp; }
 

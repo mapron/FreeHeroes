@@ -31,6 +31,7 @@ int main(int argc, char** argv)
                                    "cleanupFolder",
                                    "prettyJson",
                                    "mergePng",
+                                   "transparentKeyColor",
                                },
                                { "tasks" });
 
@@ -41,12 +42,13 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    const std::vector<std::string> tasksStr      = parser.getMultiArg("tasks");
-    const bool                     forceWrite    = parser.getArg("force") == "1";
-    const bool                     uncompress    = parser.getArg("uncompress") == "1";
-    const bool                     cleanupFolder = parser.getArg("cleanupFolder") == "1";
-    const bool                     prettyJson    = parser.getArg("prettyJson") == "1";
-    const bool                     mergePng      = parser.getArg("mergePng") == "1";
+    const std::vector<std::string> tasksStr            = parser.getMultiArg("tasks");
+    const bool                     forceWrite          = parser.getArg("force") == "1";
+    const bool                     uncompress          = parser.getArg("uncompress") == "1";
+    const bool                     cleanupFolder       = parser.getArg("cleanupFolder") == "1";
+    const bool                     prettyJson          = parser.getArg("prettyJson") == "1";
+    const bool                     mergePng            = parser.getArg("mergePng") == "1";
+    const bool                     transparentKeyColor = parser.getArg("transparentKeyColor") == "1";
 
     Core::CoreApplication fhCoreApp(std::set<Core::CoreApplication::Option>{});
     fhCoreApp.initLogger();
@@ -71,13 +73,14 @@ int main(int argc, char** argv)
 
     ConversionHandler converter(std::cerr,
                                 ConversionHandler::Settings{
-                                    .m_inputs        = makePaths("input-"),
-                                    .m_outputs       = makePaths("output-"),
-                                    .m_forceWrite    = forceWrite,
-                                    .m_cleanupFolder = cleanupFolder,
-                                    .m_uncompress    = uncompress,
-                                    .m_prettyJson    = prettyJson,
-                                    .m_mergePng      = mergePng,
+                                    .m_inputs              = makePaths("input-"),
+                                    .m_outputs             = makePaths("output-"),
+                                    .m_forceWrite          = forceWrite,
+                                    .m_cleanupFolder       = cleanupFolder,
+                                    .m_uncompressArchive   = uncompress,
+                                    .m_prettyJson          = prettyJson,
+                                    .m_mergePng            = mergePng,
+                                    .m_transparentKeyColor = transparentKeyColor,
                                 });
 
     for (const std::string& taskStr : tasksStr) {

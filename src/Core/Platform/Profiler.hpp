@@ -41,6 +41,7 @@ public:
     ScopeTimer();
     explicit ScopeTimer(int64_t& out);
     ~ScopeTimer();
+    void    reset();
     int64_t elapsed() const noexcept;
 };
 

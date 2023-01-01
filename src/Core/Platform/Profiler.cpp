@@ -141,6 +141,11 @@ ScopeTimer::~ScopeTimer()
         *out = elapsed();
 }
 
+void ScopeTimer::reset()
+{
+    start = curUS();
+}
+
 int64_t ScopeTimer::elapsed() const noexcept
 {
     return curUS() - start;
