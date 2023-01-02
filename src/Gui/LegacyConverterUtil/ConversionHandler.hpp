@@ -5,10 +5,10 @@
  */
 #pragma once
 
-#include "FsUtils.hpp"
-#include "Profiler.hpp"
-#include "ByteBuffer.hpp"
-#include "PropertyTree.hpp"
+#include "MernelPlatform/FsUtils.hpp"
+#include "MernelPlatform/Profiler.hpp"
+#include "MernelPlatform/ByteBuffer.hpp"
+#include "MernelPlatform/PropertyTree.hpp"
 
 #include "LegacyConverterUtilExport.hpp"
 
@@ -22,16 +22,16 @@ class SpriteFile;
 class LEGACYCONVERTERUTIL_EXPORT ConversionHandler {
 public:
     struct BinaryPathsSet {
-        Core::std_path m_binary;
-        Core::std_path m_uncompressedBinary;
-        Core::std_path m_json;
+        Mernel::std_path m_binary;
+        Mernel::std_path m_uncompressedBinary;
+        Mernel::std_path m_json;
     };
 
     struct PathsSet {
-        Core::std_path m_datFile;
-        Core::std_path m_defFile;
-        Core::std_path m_pngJsonFile;
-        Core::std_path m_folder;
+        Mernel::std_path m_datFile;
+        Mernel::std_path m_defFile;
+        Mernel::std_path m_pngJsonFile;
+        Mernel::std_path m_folder;
     };
 
     struct Settings {
@@ -80,16 +80,16 @@ public:
 public:
     std::unique_ptr<Archive>    m_archive;
     std::unique_ptr<SpriteFile> m_sprite;
-    ByteArrayHolder             m_binaryBuffer;
-    PropertyTree                m_json;
+    Mernel::ByteArrayHolder     m_binaryBuffer;
+    Mernel::PropertyTree        m_json;
 
 private:
     using MemberProc = void (ConversionHandler::*)(void);
     void run(MemberProc member, const char* descr, int recurse) noexcept(false);
 
     // filenames
-    void setInputFilename(const Core::std_path& path, std::string_view descr);
-    void setOutputFilename(const Core::std_path& path, std::string_view descr);
+    void setInputFilename(const Mernel::std_path& path, std::string_view descr);
+    void setOutputFilename(const Mernel::std_path& path, std::string_view descr);
 
     // raw I/O
     void readBinaryBufferData();
@@ -118,7 +118,7 @@ private:
     void checkBinaryInputOutputEquality();
 
 private:
-    void safeCopy(const Core::std_path& src, const Core::std_path& dest);
+    void safeCopy(const Mernel::std_path& src, const Mernel::std_path& dest);
 
 private:
     std::ostream& m_logOutput;
@@ -130,18 +130,18 @@ private:
         void markDone() { m_done = true; }
 
     private:
-        std::string   m_currentTask;
-        int           m_indent = 0;
-        std::ostream& m_output;
-        bool          m_done = false;
-        ScopeTimer    m_timer;
+        std::string        m_currentTask;
+        int                m_indent = 0;
+        std::ostream&      m_output;
+        bool               m_done = false;
+        Mernel::ScopeTimer m_timer;
     };
 
-    Settings       m_settings;
-    std::string    m_currentTask;
-    std::string    m_currentIndent;
-    Core::std_path m_inputFilename;
-    Core::std_path m_outputFilename;
+    Settings         m_settings;
+    std::string      m_currentTask;
+    std::string      m_currentIndent;
+    Mernel::std_path m_inputFilename;
+    Mernel::std_path m_outputFilename;
 };
 
 LEGACYCONVERTERUTIL_EXPORT std::string taskToString(ConversionHandler::Task task);

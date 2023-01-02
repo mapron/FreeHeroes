@@ -6,11 +6,12 @@
 
 #include "H3MObjects.hpp"
 
-#include "Reflection/PropertyTreeReader.hpp"
-#include "Reflection/PropertyTreeWriter.hpp"
+#include "MernelReflection/PropertyTreeReader.hpp"
+#include "MernelReflection/PropertyTreeWriter.hpp"
 #include "H3MObjectsReflection.hpp"
 
 namespace FreeHeroes {
+using namespace Mernel;
 
 MapFormatFeatures::MapFormatFeatures(MapFormat format, int hotaVer1)
 {
@@ -361,13 +362,13 @@ void MapHero::writeBinary(ByteOrderDataStreamWriter& stream) const
 
 void MapHero::toJson(PropertyTree& data) const
 {
-    Core::Reflection::PropertyTreeWriter writer;
+    Mernel::Reflection::PropertyTreeWriter writer;
     writer.valueToJson(*this, data);
 }
 
 void MapHero::fromJson(const PropertyTree& data)
 {
-    Core::Reflection::PropertyTreeReader reader;
+    Mernel::Reflection::PropertyTreeReader reader;
     *this = { m_features };
     reader.jsonToValue(data, *this);
     prepareArrays();
@@ -526,13 +527,13 @@ void MapTown::writeBinary(ByteOrderDataStreamWriter& stream) const
 
 void MapTown::toJson(PropertyTree& data) const
 {
-    Core::Reflection::PropertyTreeWriter writer;
+    Mernel::Reflection::PropertyTreeWriter writer;
     writer.valueToJson(*this, data);
 }
 
 void MapTown::fromJson(const PropertyTree& data)
 {
-    Core::Reflection::PropertyTreeReader reader;
+    Mernel::Reflection::PropertyTreeReader reader;
     *this = { m_features };
     reader.jsonToValue(data, *this);
     for (auto& event : m_events) {
@@ -615,13 +616,13 @@ void MapMonster::writeBinary(ByteOrderDataStreamWriter& stream) const
 
 void MapMonster::toJson(PropertyTree& data) const
 {
-    Core::Reflection::PropertyTreeWriter writer;
+    Mernel::Reflection::PropertyTreeWriter writer;
     writer.valueToJson(*this, data);
 }
 
 void MapMonster::fromJson(const PropertyTree& data)
 {
-    Core::Reflection::PropertyTreeReader reader;
+    Mernel::Reflection::PropertyTreeReader reader;
     *this = { m_features };
     reader.jsonToValue(data, *this);
 }
@@ -692,13 +693,13 @@ void MapResource::writeBinary(ByteOrderDataStreamWriter& stream) const
 
 void MapResource::toJson(PropertyTree& data) const
 {
-    Core::Reflection::PropertyTreeWriter writer;
+    Mernel::Reflection::PropertyTreeWriter writer;
     writer.valueToJson(*this, data);
 }
 
 void MapResource::fromJson(const PropertyTree& data)
 {
-    Core::Reflection::PropertyTreeReader reader;
+    Mernel::Reflection::PropertyTreeReader reader;
     *this = { m_features };
     reader.jsonToValue(data, *this);
 }
@@ -760,13 +761,13 @@ void MapArtifact::writeBinary(ByteOrderDataStreamWriter& stream) const
 
 void MapArtifact::toJson(PropertyTree& data) const
 {
-    Core::Reflection::PropertyTreeWriter writer;
+    Mernel::Reflection::PropertyTreeWriter writer;
     writer.valueToJson(*this, data);
 }
 
 void MapArtifact::fromJson(const PropertyTree& data)
 {
-    Core::Reflection::PropertyTreeReader reader;
+    Mernel::Reflection::PropertyTreeReader reader;
     *this = { m_features, m_isSpell };
     reader.jsonToValue(data, *this);
 }
@@ -1063,13 +1064,13 @@ void MapSeerHut::writeBinary(ByteOrderDataStreamWriter& stream) const
 
 void MapSeerHut::toJson(PropertyTree& data) const
 {
-    Core::Reflection::PropertyTreeWriter writer;
+    Mernel::Reflection::PropertyTreeWriter writer;
     writer.valueToJson(*this, data);
 }
 
 void MapSeerHut::fromJson(const PropertyTree& data)
 {
-    Core::Reflection::PropertyTreeReader reader;
+    Mernel::Reflection::PropertyTreeReader reader;
     *this = { m_features };
     reader.jsonToValue(data, *this);
 }
@@ -1116,13 +1117,13 @@ void MapWitchHut::writeBinary(ByteOrderDataStreamWriter& stream) const
 
 void MapWitchHut::toJson(PropertyTree& data) const
 {
-    Core::Reflection::PropertyTreeWriter writer;
+    Mernel::Reflection::PropertyTreeWriter writer;
     writer.valueToJson(m_allowedSkills, data["allowedSkills"]);
 }
 
 void MapWitchHut::fromJson(const PropertyTree& data)
 {
-    Core::Reflection::PropertyTreeReader reader;
+    Mernel::Reflection::PropertyTreeReader reader;
     m_allowedSkills.clear();
     reader.jsonToValue(data["allowedSkills"], m_allowedSkills);
 }
@@ -1188,13 +1189,13 @@ void MapPandora::writeBinary(ByteOrderDataStreamWriter& stream) const
 
 void MapPandora::toJson(PropertyTree& data) const
 {
-    Core::Reflection::PropertyTreeWriter writer;
+    Mernel::Reflection::PropertyTreeWriter writer;
     writer.valueToJson(*this, data);
 }
 
 void MapPandora::fromJson(const PropertyTree& data)
 {
-    Core::Reflection::PropertyTreeReader reader;
+    Mernel::Reflection::PropertyTreeReader reader;
     *this = { m_features };
     reader.jsonToValue(data, *this);
 }
@@ -1225,13 +1226,13 @@ void MapGarison::writeBinary(ByteOrderDataStreamWriter& stream) const
 
 void MapGarison::toJson(PropertyTree& data) const
 {
-    Core::Reflection::PropertyTreeWriter writer;
+    Mernel::Reflection::PropertyTreeWriter writer;
     writer.valueToJson(*this, data);
 }
 
 void MapGarison::fromJson(const PropertyTree& data)
 {
-    Core::Reflection::PropertyTreeReader reader;
+    Mernel::Reflection::PropertyTreeReader reader;
     *this = { m_features };
     reader.jsonToValue(data, *this);
 }
@@ -1401,13 +1402,13 @@ void MapEvent::writeBinary(ByteOrderDataStreamWriter& stream) const
 
 void MapEvent::toJson(PropertyTree& data) const
 {
-    Core::Reflection::PropertyTreeWriter writer;
+    Mernel::Reflection::PropertyTreeWriter writer;
     writer.valueToJson(*this, data);
 }
 
 void MapEvent::fromJson(const PropertyTree& data)
 {
-    Core::Reflection::PropertyTreeReader reader;
+    Mernel::Reflection::PropertyTreeReader reader;
     *this = { m_features };
     reader.jsonToValue(data, *this);
 }
@@ -1448,13 +1449,13 @@ void MapDwelling::writeBinary(ByteOrderDataStreamWriter& stream) const
 
 void MapDwelling::toJson(PropertyTree& data) const
 {
-    Core::Reflection::PropertyTreeWriter writer;
+    Mernel::Reflection::PropertyTreeWriter writer;
     writer.valueToJson(*this, data);
 }
 
 void MapDwelling::fromJson(const PropertyTree& data)
 {
-    Core::Reflection::PropertyTreeReader reader;
+    Mernel::Reflection::PropertyTreeReader reader;
     *this = { m_features, m_objectType };
     reader.jsonToValue(data, *this);
 }
@@ -1471,13 +1472,13 @@ void MapQuestGuard::writeBinary(ByteOrderDataStreamWriter& stream) const
 
 void MapQuestGuard::toJson(PropertyTree& data) const
 {
-    Core::Reflection::PropertyTreeWriter writer;
+    Mernel::Reflection::PropertyTreeWriter writer;
     writer.valueToJson(*this, data);
 }
 
 void MapQuestGuard::fromJson(const PropertyTree& data)
 {
-    Core::Reflection::PropertyTreeReader reader;
+    Mernel::Reflection::PropertyTreeReader reader;
     *this = { m_features };
     reader.jsonToValue(data, *this);
 }

@@ -7,12 +7,12 @@
 
 #include "FHMap.hpp"
 
-#include "Reflection/EnumTraitsMacro.hpp"
-#include "Reflection/MetaInfoMacro.hpp"
+#include "MernelReflection/EnumTraitsMacro.hpp"
+#include "MernelReflection/MetaInfoMacro.hpp"
 
 #include "FHTileMapReflection.hpp"
 
-namespace FreeHeroes::Core::Reflection {
+namespace Mernel::Reflection {
 
 ENUM_REFLECTION_STRINGIY(
     FHPlayerId,

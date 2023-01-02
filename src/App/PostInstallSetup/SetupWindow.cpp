@@ -7,8 +7,8 @@
 
 #include "ui_SetupWindow.h"
 
-#include "FsUtils.hpp"
-#include "ShellUtils.hpp"
+#include "MernelPlatform/FsUtils.hpp"
+#include "MernelPlatform/ShellUtils.hpp"
 
 #include <QSettings>
 #include <QCoreApplication>
@@ -63,23 +63,23 @@ SetupWindow::~SetupWindow()
     auto      qdest = m_ui->destPath->text();
     reg.setValue(g_regKey, qdest);
 
-    const Core::std_path src  = QCoreApplication::applicationDirPath().toStdWString();
-    const Core::std_path dest = qdest.toStdWString();
+    const Mernel::std_path src  = QCoreApplication::applicationDirPath().toStdWString();
+    const Mernel::std_path dest = qdest.toStdWString();
 
-    const auto copyOptions = Core::std_fs::copy_options::overwrite_existing
-                             | Core::std_fs::copy_options::recursive;
+    const auto copyOptions = Mernel::std_fs::copy_options::overwrite_existing
+                             | Mernel::std_fs::copy_options::recursive;
 
     if (src != dest)
-        Core::std_fs::copy(src, dest, copyOptions);
+        Mernel::std_fs::copy(src, dest, copyOptions);
 
     if (src == dest) {
-        if (Core::std_fs::exists(src / g_needCleanup))
-            Core::std_fs::remove(src / g_needCleanup);
+        if (Mernel::std_fs::exists(src / g_needCleanup))
+            Mernel::std_fs::remove(src / g_needCleanup);
     }
 
     if (m_ui->checkBoxShortcut) {
         const QString desktopPath = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation) + QDir::separator();
-        Core::createShortCut(desktopPath.toStdWString(), "FreeHeroes", dest, g_launcher.toStdString(), "--shortcut");
+        Mernel::createShortCut(desktopPath.toStdWString(), "FreeHeroes", dest, g_launcher.toStdString(), "--shortcut");
     }
     if (m_ui->checkBoxStartLauncher) {
         QProcess::startDetached(g_launcher, { "--post-install" }, qdest);

@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "FsUtils.hpp"
+#include "MernelPlatform/FsUtils.hpp"
 
 #include <string>
 #include <string_view>
@@ -29,7 +29,7 @@ struct ResourceMedia {
     std::string_view mainFilename;
     // non-serializable.
     std::string_view root; // ends with '/'
-    std_path         getFullPath() const { return string2path(std::string{ root } + std::string{ subdir } + std::string{ mainFilename }); }
+    Mernel::std_path getFullPath() const { return Mernel::string2path(std::string{ root } + std::string{ subdir } + std::string{ mainFilename }); }
 };
 
 struct ResourceTranslation {

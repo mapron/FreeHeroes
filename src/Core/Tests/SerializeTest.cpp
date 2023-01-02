@@ -4,7 +4,7 @@
  * See LICENSE file for details.
  */
 
-#include "Reflection/PropertyTreeWriter.hpp"
+#include "MernelReflection/PropertyTreeWriter.hpp"
 
 #include <gtest/gtest.h>
 
@@ -17,10 +17,9 @@ struct WrapperClass {
     SomeClass m_f{ .m_one = 42 };
 };
 
-using namespace FreeHeroes;
-using namespace Core;
+using namespace Mernel;
 
-namespace FreeHeroes::Core::Reflection {
+namespace Mernel::Reflection {
 
 template<>
 inline constexpr const std::tuple MetaInfo::s_fields<SomeClass>{

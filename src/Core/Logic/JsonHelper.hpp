@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "PropertyTree.hpp"
+#include "MernelPlatform/PropertyTree.hpp"
 
 namespace FreeHeroes::Core {
 
@@ -15,7 +15,7 @@ struct ColDesc {
     std::string          key;
     std::vector<ColDesc> children;
 
-    void parseChildren(const PropertyTreeList& cols)
+    void parseChildren(const Mernel::PropertyTreeList& cols)
     {
         children.reserve(cols.size());
         for (const auto& col : cols) {
@@ -32,7 +32,7 @@ struct ColDesc {
         }
     }
 
-    void applyValue(PropertyTree& mainRecord, const PropertyTree& packedRecord) const
+    void applyValue(Mernel::PropertyTree& mainRecord, const Mernel::PropertyTree& packedRecord) const
     {
         if (!children.size()) {
             mainRecord = packedRecord;
@@ -50,7 +50,7 @@ struct ColDesc {
 
 }
 
-int addJsonObjectToIndex(PropertyTree& index, const PropertyTree& fileSections)
+int addJsonObjectToIndex(Mernel::PropertyTree& index, const Mernel::PropertyTree& fileSections)
 {
     int totalRecordsFound = 0;
     for (const auto& section : fileSections.getList()) {
@@ -78,7 +78,7 @@ int addJsonObjectToIndex(PropertyTree& index, const PropertyTree& fileSections)
 
             for (auto it = section["records"].getMap().cbegin(); it != section["records"].getMap().cend(); ++it) {
                 const std::string& id = it->first;
-                PropertyTree::mergePatch(recordObjectMap[id], it->second);
+                Mernel::PropertyTree::mergePatch(recordObjectMap[id], it->second);
                 totalRecordsFound++;
             }
             continue;

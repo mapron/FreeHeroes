@@ -5,8 +5,8 @@
  */
 #include "H3SVGMap.hpp"
 
-#include "Reflection/PropertyTreeReader.hpp"
-#include "Reflection/PropertyTreeWriter.hpp"
+#include "MernelReflection/PropertyTreeReader.hpp"
+#include "MernelReflection/PropertyTreeWriter.hpp"
 
 #include "H3MMapReflection.hpp"
 #include "H3SVGMapReflection.hpp"
@@ -84,13 +84,13 @@ void H3SVGMap::writeBinary(ByteOrderDataStreamWriter& stream) const
 
 void H3SVGMap::toJson(PropertyTree& data) const
 {
-    Core::Reflection::PropertyTreeWriter writer;
+    Mernel::Reflection::PropertyTreeWriter writer;
     writer.valueToJson(*this, data);
 }
 
 void H3SVGMap::fromJson(const PropertyTree& data)
 {
-    Core::Reflection::PropertyTreeReader reader;
+    Mernel::Reflection::PropertyTreeReader reader;
     *this = {};
     reader.jsonToValue(data, *this);
 }

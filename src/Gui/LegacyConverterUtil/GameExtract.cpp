@@ -11,20 +11,21 @@
 
 #include "Archive.hpp"
 
-#include "Profiler.hpp"
+#include "MernelPlatform/Profiler.hpp"
 
 #include <sstream>
 
 namespace FreeHeroes {
+using namespace Mernel;
 
 struct ArchiveWrapper {
     std::ostringstream                 m_converterLog;
     std::unique_ptr<ConversionHandler> m_converter;
 
-    Core::std_path m_dat;
-    Core::std_path m_folder;
-    std::string    m_datFilename;
-    std::string    m_folderName;
+    Mernel::std_path m_dat;
+    Mernel::std_path m_folder;
+    std::string      m_datFilename;
+    std::string      m_folderName;
 
     bool m_doExtract = false;
     bool m_required  = false;
@@ -32,18 +33,18 @@ struct ArchiveWrapper {
 
 namespace {
 
-Core::std_path findPathChild(const Core::std_path& parent, const std::string& lowerCaseName)
+Mernel::std_path findPathChild(const Mernel::std_path& parent, const std::string& lowerCaseName)
 {
     if (parent.empty())
         return {};
-    for (auto&& it : Core::std_fs::directory_iterator(parent)) {
+    for (auto&& it : Mernel::std_fs::directory_iterator(parent)) {
         if (it.is_regular_file() || it.is_directory()) {
-            auto name = Core::path2string(it.path().filename());
+            auto name = Mernel::path2string(it.path().filename());
             std::transform(name.begin(), name.end(), name.begin(), [](unsigned char c) { return std::tolower(c); });
             if (name == lowerCaseName) {
                 std::error_code ec;
                 if (it.is_regular_file()) {
-                    auto size = Core::std_fs::file_size(it.path(), ec);
+                    auto size = Mernel::std_fs::file_size(it.path(), ec);
                     if (size == 0 || size == uintmax_t(-1))
                         continue;
                 }
@@ -73,14 +74,14 @@ GameExtract::DetectedSources GameExtract::probe() const
         result.m_heroesRoot = findHeroes3Installation();
     }
     std::error_code ec;
-    if (result.m_heroesRoot.empty() || !Core::std_fs::exists(result.m_heroesRoot, ec))
+    if (result.m_heroesRoot.empty() || !Mernel::std_fs::exists(result.m_heroesRoot, ec))
         return result;
 
-    sendMessage("Probing path:" + Core::path2string(result.m_heroesRoot));
+    sendMessage("Probing path:" + Mernel::path2string(result.m_heroesRoot));
 
-    Core::std_path dataFolder  = findPathChild(result.m_heroesRoot, "data"),
-                   mp3Folder   = findPathChild(result.m_heroesRoot, "mp3"),
-                   hdModFolder = findPathChild(result.m_heroesRoot, "_hd3_data");
+    Mernel::std_path dataFolder  = findPathChild(result.m_heroesRoot, "data"),
+                     mp3Folder   = findPathChild(result.m_heroesRoot, "mp3"),
+                     hdModFolder = findPathChild(result.m_heroesRoot, "_hd3_data");
 
     if (dataFolder.empty())
         return result;
@@ -129,20 +130,20 @@ GameExtract::DetectedSources GameExtract::probe() const
 
     {
         // D:\Games\Heroes3_HotA\_HD3_Data\Common\Fix.Cosmetic
-        Core::std_path hdFolder = findPathChild(result.m_heroesRoot, "_hd3_data");
-        if (!hdFolder.empty() && Core::std_fs::exists(hdFolder / "Common")) {
+        Mernel::std_path hdFolder = findPathChild(result.m_heroesRoot, "_hd3_data");
+        if (!hdFolder.empty() && Mernel::std_fs::exists(hdFolder / "Common")) {
             result.m_hasHD  = true;
             auto commonPath = hdFolder / "Common";
             auto fixPath    = commonPath / "Fix.Cosmetic";
             result.m_sources[SourceType::DefCopy].push_back(DetectedPath{ .m_type = SourceType::Archive, .m_path = commonPath });
-            if (Core::std_fs::exists(commonPath)) {
+            if (Mernel::std_fs::exists(commonPath)) {
                 result.m_sources[SourceType::DefCopy].push_back(DetectedPath{ .m_type = SourceType::Archive, .m_path = fixPath });
             }
         }
     }
 
     {
-        Core::std_path mpFolder = findPathChild(result.m_heroesRoot, "mp3");
+        Mernel::std_path mpFolder = findPathChild(result.m_heroesRoot, "mp3");
         if (!mpFolder.empty())
             result.m_sources[SourceType::MusicCopy].push_back(DetectedPath{ .m_type = SourceType::MusicCopy, .m_path = mpFolder });
     }
@@ -162,18 +163,18 @@ void GameExtract::run(const DetectedSources& sources) const
 
     ScopeTimer timer;
     sendMessage("Extracting game archives...", true);
-    sendMessage("Prepare extraction of archives, from " + Core::path2string(sources.m_heroesRoot)
-                + "\n    to " + Core::path2string(m_settings.m_archiveExtractRoot));
+    sendMessage("Prepare extraction of archives, from " + Mernel::path2string(sources.m_heroesRoot)
+                + "\n    to " + Mernel::path2string(m_settings.m_archiveExtractRoot));
     for (size_t i = 0; i < archiveWrappers.size(); ++i) {
         auto& wrapper         = archiveWrappers[i];
         wrapper.m_dat         = archives[i].m_path;
-        wrapper.m_datFilename = Core::path2string(wrapper.m_dat.filename());
+        wrapper.m_datFilename = Mernel::path2string(wrapper.m_dat.filename());
         wrapper.m_folderName  = wrapper.m_datFilename;
         std::transform(wrapper.m_folderName.begin(), wrapper.m_folderName.end(), wrapper.m_folderName.begin(), [](unsigned char c) { return std::tolower(c); });
         wrapper.m_folderName.replace(wrapper.m_folderName.find('.'), 1, "_");
         wrapper.m_folder = m_settings.m_archiveExtractRoot / wrapper.m_folderName;
 
-        if (Core::std_fs::exists(wrapper.m_folder)) {
+        if (Mernel::std_fs::exists(wrapper.m_folder)) {
             if (m_settings.m_forceExtract) {
                 wrapper.m_doExtract = true;
                 sendMessage("- " + wrapper.m_folderName + " : exists, but forcing re-EXTRACT from " + wrapper.m_datFilename);
@@ -221,7 +222,7 @@ void GameExtract::run(const DetectedSources& sources) const
                 std::ostringstream os;
                 auto               extractFolder = m_settings.m_mainExtractRoot / wrapper.m_folderName;
                 auto               outputJson    = extractFolder / (file.m_basename + ".json");
-                if (Core::std_fs::exists(outputJson))
+                if (Mernel::std_fs::exists(outputJson))
                     continue;
                 ConversionHandler::Settings sett{
                     .m_inputs              = { .m_defFile = wrapper.m_folder / file.fullname() },

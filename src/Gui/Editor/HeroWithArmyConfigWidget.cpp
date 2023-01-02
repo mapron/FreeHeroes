@@ -28,7 +28,7 @@
 #include "LibraryHeroSpec.hpp"
 
 // Platform
-#include "Profiler.hpp"
+#include "MernelPlatform/Profiler.hpp"
 
 #include <QButtonGroup>
 
@@ -48,12 +48,12 @@ HeroWithArmyConfigWidget::HeroWithArmyConfigWidget(const LibraryModelsProvider* 
     , m_modelProvider(modelProvider)
     , m_randomGenerator(randomGenerator)
 {
-    ProfilerScope scope("HeroWithArmyConfigWidget()");
+    Mernel::ProfilerScope scope("HeroWithArmyConfigWidget()");
     {
-        ProfilerScope scope3("setupUi");
+        Mernel::ProfilerScope scope3("setupUi");
         m_ui->setupUi(this, std::tuple{ modelProvider });
     }
-    ProfilerScope scope2("remain");
+    Mernel::ProfilerScope scope2("remain");
 
     QList<QSpinBox*> primarySpinBoxes{ m_ui->spinBoxAttack,
                                        m_ui->spinBoxDefense,

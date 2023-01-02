@@ -5,15 +5,15 @@
  */
 #include "BitmapFile.hpp"
 
-#include "ByteOrderStream.hpp"
-#include "PropertyTree.hpp"
+#include "MernelPlatform/ByteOrderStream.hpp"
+#include "MernelPlatform/PropertyTree.hpp"
 
 #include "FsUtilsQt.hpp"
 
 #include "BitmapFileReflection.hpp"
 
-#include "Reflection/PropertyTreeReader.hpp"
-#include "Reflection/PropertyTreeWriter.hpp"
+#include "MernelReflection/PropertyTreeReader.hpp"
+#include "MernelReflection/PropertyTreeWriter.hpp"
 
 // for destructor of shared_ptr.
 #include <QPixmap>
@@ -23,7 +23,7 @@
 #include <iostream>
 
 namespace FreeHeroes {
-using namespace Core;
+using namespace Mernel;
 
 namespace {
 char toHex(uint8_t c)
@@ -522,7 +522,7 @@ void BitmapFile::fromPixmapQt()
     m_pixmapQt.reset();
 }
 
-void BitmapFile::loadPixmapQt(const Core::std_path& filename)
+void BitmapFile::loadPixmapQt(const Mernel::std_path& filename)
 {
     m_pixmapQt = std::make_shared<QPixmap>(Gui::stdPath2QString(filename));
 
@@ -530,13 +530,13 @@ void BitmapFile::loadPixmapQt(const Core::std_path& filename)
         throw std::runtime_error("Qt pixmap has wrong dimensions.");
 }
 
-void BitmapFile::savePixmapQt(const Core::std_path& filename) const
+void BitmapFile::savePixmapQt(const Mernel::std_path& filename) const
 {
     if (!m_pixmapQt)
         throw std::runtime_error("Qt pixmap is missing.");
-    Core::std_fs::create_directories(filename.parent_path());
+    Mernel::std_fs::create_directories(filename.parent_path());
     m_pixmapQt->save(Gui::stdPath2QString(filename));
-    assert(Core::std_fs::exists(filename));
+    assert(Mernel::std_fs::exists(filename));
 }
 
 void BitmapFile::Palette::readBinary(ByteOrderDataStreamReader& stream)

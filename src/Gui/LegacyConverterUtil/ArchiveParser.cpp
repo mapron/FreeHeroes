@@ -12,10 +12,10 @@
 #include "CompressionUtils.hpp"
 #include "MediaConverter.hpp"
 
-#include "FileFormatJson.hpp"
-#include "FileIOUtils.hpp"
+#include "MernelPlatform/FileFormatJson.hpp"
+#include "MernelPlatform/FileIOUtils.hpp"
 
-#include "Logger.hpp"
+#include "MernelPlatform/Logger.hpp"
 
 #include <QTextCodec>
 #include <QDataStream>
@@ -29,6 +29,7 @@ namespace FreeHeroes::Conversion {
 
 using namespace Core;
 using namespace Gui;
+using namespace Mernel;
 
 namespace {
 
@@ -484,9 +485,9 @@ bool ArchiveParser::extractHDAT(const ExtractionTask& task, CallbackInserter& co
         root["intParams"] = std::move(intParams);
         root["binData"]   = PropertyTreeScalar(rec.data.toHex().toStdString());
 
-        if (!Core::writeJsonToBuffer(buffer, root))
+        if (!Mernel::writeJsonToBuffer(buffer, root))
             return false;
-        if (!Core::writeFileFromBuffer(p, buffer))
+        if (!Mernel::writeFileFromBuffer(p, buffer))
             return false;
 
         task.resources->registerResource({ ResourceMedia::Type::Other, rec.fname.toStdString(), "json/", outFileName, {} });

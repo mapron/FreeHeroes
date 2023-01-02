@@ -7,12 +7,13 @@
 
 #include "BattleStack.hpp"
 
-#include "Profiler.hpp"
-#include "Logger.hpp"
+#include "MernelPlatform/Profiler.hpp"
+#include "MernelPlatform/Logger.hpp"
 
 #include <sstream>
 
 namespace FreeHeroes::Core {
+using namespace Mernel;
 
 static std::ostream& operator<<(std::ostream& os, const BattlePosition& pos)
 {

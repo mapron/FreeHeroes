@@ -10,7 +10,7 @@
 #include "IAI.hpp"
 #include "BattleField.hpp"
 
-#include "Profiler.hpp"
+#include "MernelPlatform/Profiler.hpp"
 
 namespace FreeHeroes::Core {
 
@@ -83,7 +83,7 @@ private:
         }
     };
     StepData                  m_stepData;
-    ProfilerContext           m_profileContext;
+    Mernel::ProfilerContext   m_profileContext;
     const BattleFieldGeometry m_field;
 };
 

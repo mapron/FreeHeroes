@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "FsUtils.hpp"
+#include "MernelPlatform/FsUtils.hpp"
 
 #include "LegacyConverterUtilExport.hpp"
 
@@ -20,11 +20,11 @@ class IGameDatabaseContainer;
 class LEGACYCONVERTERUTIL_EXPORT GameExtract {
 public:
     struct Settings {
-        Core::std_path m_heroesRoot;
-        Core::std_path m_archiveExtractRoot;
-        Core::std_path m_mainExtractRoot;
-        Core::std_path m_knownResourcesFile;
-        bool           m_forceExtract = false;
+        Mernel::std_path m_heroesRoot;
+        Mernel::std_path m_archiveExtractRoot;
+        Mernel::std_path m_mainExtractRoot;
+        Mernel::std_path m_knownResourcesFile;
+        bool             m_forceExtract = false;
     };
 
     enum class SourceType
@@ -35,8 +35,8 @@ public:
     };
 
     struct DetectedPath {
-        SourceType     m_type = SourceType::Archive;
-        Core::std_path m_path;
+        SourceType       m_type = SourceType::Archive;
+        Mernel::std_path m_path;
 
         bool m_isSod  = false;
         bool m_isHota = false;
@@ -46,7 +46,7 @@ public:
     struct DetectedSources {
         std::map<SourceType, DetectedPathList> m_sources;
 
-        Core::std_path m_heroesRoot;
+        Mernel::std_path m_heroesRoot;
 
         bool m_hasSod  = false; // has one of known SoD files
         bool m_hasHota = false; // has one of known HotA files

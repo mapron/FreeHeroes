@@ -14,7 +14,7 @@
 
 #include "AdventureStack.hpp"
 
-#include "Profiler.hpp"
+#include "MernelPlatform/Profiler.hpp"
 
 #include <QLayout>
 #include <QComboBox>

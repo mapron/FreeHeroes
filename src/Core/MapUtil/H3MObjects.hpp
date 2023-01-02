@@ -5,10 +5,13 @@
  */
 #pragma once
 
-#include "ByteOrderStream.hpp"
-#include "PropertyTree.hpp"
+#include "MernelPlatform/ByteOrderStream.hpp"
+#include "MernelPlatform/PropertyTree.hpp"
 
 namespace FreeHeroes {
+using ByteOrderDataStreamReader = Mernel::ByteOrderDataStreamReader;
+using ByteOrderDataStreamWriter = Mernel::ByteOrderDataStreamWriter;
+using PropertyTree              = Mernel::PropertyTree;
 
 enum class MapFormat
 {

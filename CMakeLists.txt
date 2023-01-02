@@ -135,6 +135,11 @@ set(INSTALL_GTEST OFF)
 set(GOOGLETEST_VERSION 1.10.0)
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 add_subdirectory(3rdparty/googletest/googletest)
+#[[
+########## Mernel ##########
+#]]
+
+include(ext/mernel/mernel.cmake)
 
 #[[
 ########## FreeHeroes code targets ##########
@@ -148,48 +153,45 @@ AddTarget(TYPE header_only GENERATE_STUB NAME SoundInt OUTPUT_PREFIX FH
     QT_MODULES Widgets)
 
 # Core
-AddTarget(TYPE shared NAME CorePlatform OUTPUT_PREFIX FH
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/Platform
-    EXPORT_INCLUDES
-    LINK_LIBRARIES rapidjson zlib)
+
 
 AddTarget(TYPE header_only GENERATE_STUB NAME GameInt OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/GameInterface
-    LINK_LIBRARIES GameObjects CorePlatform)
+    LINK_LIBRARIES GameObjects MernelPlatform)
 AddTarget(TYPE header_only GENERATE_STUB NAME GuiInt OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Interface
-    LINK_LIBRARIES CorePlatform GameObjects GameInt  OUTPUT_PREFIX FH
+    LINK_LIBRARIES MernelPlatform GameObjects GameInt  OUTPUT_PREFIX FH
     QT_MODULES Widgets) # todo: GameObjects remove for cursors.
 
 AddTarget(TYPE shared NAME CoreRng OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/Rng
     EXPORT_INCLUDES
-    LINK_LIBRARIES CorePlatform GameInt
+    LINK_LIBRARIES MernelPlatform GameInt
     )
 
 AddTarget(TYPE shared NAME CoreResource OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/Resource
     EXPORT_INCLUDES
-    LINK_LIBRARIES CorePlatform GameInt
+    LINK_LIBRARIES MernelPlatform GameInt
     )
 
 AddTarget(TYPE shared NAME CoreLogic OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/Logic
     EXPORT_INCLUDES
-    LINK_LIBRARIES CoreResource CorePlatform GameObjects GameInt sol frozen
+    LINK_LIBRARIES CoreResource MernelPlatform GameObjects GameInt sol MernelReflection
     )
 
 AddTarget(TYPE shared NAME BattleLogic OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/BattleLogic
     EXPORT_INCLUDES
-    LINK_LIBRARIES CorePlatform CoreLogic GameObjects GameInt
+    LINK_LIBRARIES MernelPlatform CoreLogic GameObjects GameInt
     )
 
 AddTarget(TYPE shared NAME CoreApplication OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/Application
     EXPORT_INCLUDES
     LINK_LIBRARIES
-        CorePlatform
+        MernelPlatform
         GameObjects
         GameInt
     
@@ -203,7 +205,7 @@ AddTarget(TYPE shared NAME CoreApplication OUTPUT_PREFIX FH
 AddTarget(TYPE shared NAME SoundPlayer OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Sound/Player
     EXPORT_INCLUDES
-    LINK_LIBRARIES SoundInt CoreResource CorePlatform GameInt
+    LINK_LIBRARIES SoundInt CoreResource MernelPlatform GameInt
     QT_MODULES Multimedia
     )
 
@@ -214,8 +216,8 @@ AddTarget(TYPE shared NAME GuiResource OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Resource
     EXPORT_INCLUDES
     LINK_LIBRARIES
-        GuiInt CorePlatform CoreLogic
-        frozen
+        GuiInt MernelPlatform CoreLogic
+        MernelReflection
     QT_MODULES Widgets
     UIC_POSTPROCESS_SCRIPTS
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
@@ -225,7 +227,7 @@ AddTarget(TYPE shared NAME GuiLocalization OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Localization
     EXPORT_INCLUDES
     LINK_LIBRARIES
-        GuiInt CorePlatform GameObjects
+        GuiInt MernelPlatform GameObjects
     QT_MODULES Widgets
     UIC_POSTPROCESS_SCRIPTS
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
@@ -235,7 +237,7 @@ AddTarget(TYPE shared NAME GuiGameWrappers OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/GameWrappers
     EXPORT_INCLUDES
     LINK_LIBRARIES
-        GuiInt CorePlatform GameInt SoundInt
+        GuiInt MernelPlatform GameInt SoundInt
         GameObjects GuiResource CoreResource GuiUtils
     QT_MODULES Widgets
     UIC_POSTPROCESS_SCRIPTS
@@ -256,7 +258,7 @@ AddTarget(TYPE shared NAME GuiWidgets OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Widgets
     EXPORT_INCLUDES
     LINK_LIBRARIES
-        GuiInt CorePlatform GameObjects GameInt SoundInt
+        GuiInt MernelPlatform GameObjects GameInt SoundInt
 
         GuiGameWrappers GuiUtils
     QT_MODULES Widgets
@@ -268,7 +270,7 @@ AddTarget(TYPE shared NAME GuiEditor OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Editor
     EXPORT_INCLUDES
     LINK_LIBRARIES
-        GuiInt CorePlatform GameObjects GameInt SoundInt
+        GuiInt MernelPlatform GameObjects GameInt SoundInt
         GuiGameWrappers
 
         GuiWidgets GuiUtils
@@ -281,7 +283,7 @@ AddTarget(TYPE shared NAME GuiBattle OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Battle
     EXPORT_INCLUDES
     LINK_LIBRARIES
-        GuiInt CorePlatform SoundInt GameObjects GameInt
+        GuiInt MernelPlatform SoundInt GameObjects GameInt
 
         CoreLogic
         GuiUtils
@@ -296,7 +298,7 @@ AddTarget(TYPE shared NAME GuiApplication OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Application
     EXPORT_INCLUDES
     LINK_LIBRARIES
-        CorePlatform
+        MernelPlatform
         GuiInt
         SoundInt
         GameObjects
@@ -321,20 +323,20 @@ AddTarget(TYPE shared NAME MapUtil
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/MapUtil
     EXPORT_INCLUDES
     LINK_LIBRARIES
-        CorePlatform
+        MernelPlatform
         GameObjects
         GameInt
 
         CoreLogic
         BattleLogic
-        frozen
+        MernelReflection
     )
 
 AddTarget(TYPE shared NAME MapUtilGui
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/MapUtilGui
     EXPORT_INCLUDES
     LINK_LIBRARIES
-        CorePlatform
+        MernelPlatform
         GuiInt
         SoundInt
         GameObjects
@@ -356,7 +358,7 @@ AddTarget(TYPE shared NAME LegacyConverterUtil
     EXPORT_INCLUDES
     LINK_LIBRARIES
         CoreLogic
-        CorePlatform
+        MernelPlatform
         GameInt
         GuiInt
         GuiUtils
@@ -365,7 +367,7 @@ AddTarget(TYPE shared NAME LegacyConverterUtil
     
         CoreResource
     
-        zlib ${PTHREAD} frozen
+        zlib ${PTHREAD} MernelReflection
     QT_MODULES Core
     )
 
@@ -374,7 +376,7 @@ AddTarget(TYPE shared NAME LegacyConverterUtil
 AddTarget( TYPE app_ui NAME LegacyConverter
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/LegacyConverter
     LINK_LIBRARIES
-        CorePlatform
+        MernelPlatform
         GuiInt
         GameInt
         GameObjects
@@ -393,7 +395,7 @@ AddTarget( TYPE app_ui NAME LegacyConverter
 AddTarget( TYPE app_console NAME LegacyConverterCLI
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/LegacyConverterCLI
     LINK_LIBRARIES
-        CorePlatform
+        MernelPlatform
         GameInt
         GameObjects
     
@@ -406,7 +408,7 @@ AddTarget( TYPE app_console NAME LegacyConverterCLI
 AddTarget( TYPE app_console NAME GameLegacyConverterCLI
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/GameLegacyConverterCLI
     LINK_LIBRARIES
-        CorePlatform
+        MernelPlatform
         GameInt
         GameObjects
     
@@ -420,7 +422,7 @@ AddTarget( TYPE app_console NAME GameLegacyConverterCLI
 AddTarget(TYPE app_ui NAME BattleEmulator
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/BattleEmulator
     LINK_LIBRARIES
-        CorePlatform
+        MernelPlatform
         GuiInt
         SoundInt
         GameObjects
@@ -442,7 +444,7 @@ AddTarget(TYPE app_ui NAME BattleEmulator
 AddTarget(TYPE app_ui NAME MapEditor
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/MapEditor
     LINK_LIBRARIES
-        CorePlatform
+        MernelPlatform
         GuiUtils
 
         CoreApplication
@@ -458,7 +460,7 @@ AddTarget(TYPE app_ui NAME MapEditor
 AddTarget(TYPE app_ui NAME MapToolUI
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/MapToolUI
     LINK_LIBRARIES
-        CorePlatform
+        MernelPlatform
         GuiInt
         GuiUtils
         SoundInt
@@ -482,7 +484,7 @@ AddTarget(TYPE app_ui NAME MapToolUI
 AddTarget(TYPE app_console NAME MapToolCLI
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/MapToolCLI
     LINK_LIBRARIES
-        CorePlatform
+        MernelPlatform
         GameObjects
         GameInt
 
@@ -494,7 +496,7 @@ AddTarget(TYPE app_ui NAME Launcher
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/Launcher
     LINK_LIBRARIES
         GuiInt
-        CorePlatform
+        MernelPlatform
     QT_MODULES Widgets
     UIC_POSTPROCESS_SCRIPTS
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
@@ -504,7 +506,7 @@ AddTarget(TYPE app_ui NAME PostInstallSetup
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/PostInstallSetup
     LINK_LIBRARIES
         GuiInt
-        CorePlatform
+        MernelPlatform
     QT_MODULES Widgets
     UIC_POSTPROCESS_SCRIPTS
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
@@ -515,19 +517,19 @@ AddTarget(TYPE app_ui NAME PostInstallSetup
 AddTarget(TYPE app_console NAME CoreTests OUTPUT_NAME Tests_CoreLogic
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/Tests
     LINK_LIBRARIES
-        CorePlatform
+        MernelPlatform
         GameObjects
         GameInt
 
         CoreLogic
 
-    gtest gtest_main frozen
+    gtest gtest_main MernelReflection
     )
 
 AddTarget(TYPE app_ui NAME SoundTests OUTPUT_NAME Tests_Sound
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Sound/Tests
     LINK_LIBRARIES
-        CorePlatform
+        MernelPlatform
         SoundInt
         GameInt
 

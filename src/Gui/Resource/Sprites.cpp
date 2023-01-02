@@ -5,18 +5,17 @@
  */
 #include "Sprites.hpp"
 
-#include "FileFormatJson.hpp"
-#include "FileIOUtils.hpp"
+#include "MernelPlatform/FileFormatJson.hpp"
+#include "MernelPlatform/FileIOUtils.hpp"
 #include "FsUtilsQt.hpp"
-#include "StringUtils.hpp"
+#include "MernelPlatform/StringUtils.hpp"
 
-#include "Reflection/PropertyTreeReader.hpp"
-#include "Reflection/PropertyTreeWriter.hpp"
+#include "MernelReflection/PropertyTreeReader.hpp"
+#include "MernelReflection/PropertyTreeWriter.hpp"
 
 #include "SpritesReflection.hpp"
 
 namespace FreeHeroes::Gui {
-using namespace Core;
 
 namespace {
 std_path makePngPath(const std_path& jsonFilePath)
@@ -50,10 +49,10 @@ void Sprite::addGroup(int groupId, SpriteSequencePtr seq)
 
 void SpriteNew::load(const std_path& jsonFilePath)
 {
-    const std::string  buffer = readFileIntoBufferThrow(jsonFilePath);
-    const PropertyTree data   = readJsonFromBufferThrow(buffer);
+    const std::string          buffer = Mernel::readFileIntoBufferThrow(jsonFilePath);
+    const Mernel::PropertyTree data   = Mernel::readJsonFromBufferThrow(buffer);
 
-    Reflection::PropertyTreeReader reader;
+    Mernel::Reflection::PropertyTreeReader reader;
     reader.jsonToValue(data, *this);
 
     m_bitmap.load(stdPath2QString(makePngPath(jsonFilePath)));
@@ -61,11 +60,11 @@ void SpriteNew::load(const std_path& jsonFilePath)
 
 void SpriteNew::save(const std_path& jsonFilePath) const
 {
-    PropertyTree                   data;
-    Reflection::PropertyTreeWriter writer;
+    Mernel::PropertyTree                   data;
+    Mernel::Reflection::PropertyTreeWriter writer;
     writer.valueToJson(*this, data);
-    std::string buffer = writeJsonToBufferThrow(data, true);
-    writeFileFromBufferThrow(jsonFilePath, buffer);
+    std::string buffer = Mernel::writeJsonToBufferThrow(data, true);
+    Mernel::writeFileFromBufferThrow(jsonFilePath, buffer);
 
     m_bitmap.save(stdPath2QString(makePngPath(jsonFilePath)));
 }

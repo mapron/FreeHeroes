@@ -6,7 +6,7 @@
 #include "SpriteParserLegacy.hpp"
 #include "DefFile.hpp"
 
-#include "FileIOUtils.hpp"
+#include "MernelPlatform/FileIOUtils.hpp"
 
 #include "IResourceLibrary.hpp"
 
@@ -24,6 +24,7 @@ inline Q_DECL_PURE_FUNCTION uint qHash(const QPoint& key, uint seed = 0) Q_DECL_
 namespace FreeHeroes::Conversion {
 using namespace Core;
 using namespace Gui;
+using namespace Mernel;
 
 struct color_compare {
     bool operator()(QColor const& a, QColor const& b) const noexcept { return a.rgba() < b.rgba(); }
@@ -355,7 +356,7 @@ SpritePtr loadSpriteLegacy(const std_path& defFilePath)
     return std::make_shared<Sprite>(std::move(loader));
 }
 
-SpritePtr loadPcx(const Core::std_path& pcxFilePath)
+SpritePtr loadPcx(const Mernel::std_path& pcxFilePath)
 {
     QFile pcxFile(stdPath2QString(pcxFilePath));
     if (!pcxFile.open(QIODevice::ReadOnly)) {
@@ -436,7 +437,7 @@ std::vector<int> paramsToInt(const std::vector<std::string>& params)
     return res;
 }
 
-SpritePtr postProcessSprite(const Core::std_path& spritePath, SpritePtr sprite, const PropertyTreeMap& params, Core::IResourceLibrary* library)
+SpritePtr postProcessSprite(const Mernel::std_path& spritePath, SpritePtr sprite, const PropertyTreeMap& params, Core::IResourceLibrary* library)
 {
     std::shared_ptr<SpriteLoader> result           = std::make_shared<SpriteLoader>();
     bool                          optimizeBoundary = params.contains("optimize_boundary");
@@ -502,11 +503,11 @@ SpritePtr postProcessSprite(const Core::std_path& spritePath, SpritePtr sprite, 
             int startFrame = utask.startFrame;
             int endFrame   = utask.endFrame;
             for (int f = startFrame, i = 0; f <= endFrame; ++f, ++i) {
-                const int            id         = idOffset + i;
-                const std::string    filename   = (tpl.contains("%1") ? tpl.arg(id) : tpl).toStdString();
-                const std::string    filenameJs = filename + ".fh.json";
-                const Core::std_path path       = spritePath.parent_path() / Core::string2path(filenameJs);
-                const SpriteFrame&   frame      = newSeqPtr->frames[f];
+                const int              id         = idOffset + i;
+                const std::string      filename   = (tpl.contains("%1") ? tpl.arg(id) : tpl).toStdString();
+                const std::string      filenameJs = filename + ".fh.json";
+                const Mernel::std_path path       = spritePath.parent_path() / Mernel::string2path(filenameJs);
+                const SpriteFrame&     frame      = newSeqPtr->frames[f];
 
                 {
                     auto spriteLoader = std::make_shared<SpriteLoader>();
@@ -543,7 +544,7 @@ SpritePtr postProcessSprite(const Core::std_path& spritePath, SpritePtr sprite, 
     return result;
 }
 
-void saveSpriteLegacy(Gui::SpritePtr sprite, const Core::std_path& defFilePath)
+void saveSpriteLegacy(Gui::SpritePtr sprite, const Mernel::std_path& defFilePath)
 {
     ByteArrayHolder           m_binaryBuffer;
     ByteOrderBuffer           bobuffer(m_binaryBuffer);
@@ -551,7 +552,7 @@ void saveSpriteLegacy(Gui::SpritePtr sprite, const Core::std_path& defFilePath)
 
     auto seq = sprite->getFramesForGroup(0);
 
-    Core::writeFileFromHolderThrow(defFilePath, m_binaryBuffer);
+    Mernel::writeFileFromHolderThrow(defFilePath, m_binaryBuffer);
 }
 
 }

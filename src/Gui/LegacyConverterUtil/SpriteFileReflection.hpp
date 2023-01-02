@@ -9,7 +9,7 @@
 
 #include "SpriteFile.hpp"
 
-namespace FreeHeroes::Core::Reflection {
+namespace Mernel::Reflection {
 
 ENUM_REFLECTION_STRINGIY(
     SpriteFile::BinaryFormat,

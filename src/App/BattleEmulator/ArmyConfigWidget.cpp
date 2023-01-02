@@ -23,7 +23,7 @@
 #include "AdventureArmy.hpp"
 
 // Platform
-#include "Profiler.hpp"
+#include "MernelPlatform/Profiler.hpp"
 
 namespace FreeHeroes::BattleEmulator {
 using namespace Core;
@@ -37,9 +37,9 @@ ArmyConfigWidget::ArmyConfigWidget(const Gui::LibraryModelsProvider* modelProvid
     , m_modelProvider(modelProvider)
     , m_randomGenerator(randomGenerator)
 {
-    ProfilerScope scope("ArmyConfigWidget()");
+    Mernel::ProfilerScope scope("ArmyConfigWidget()");
     m_ui->setupUi(this, std::tuple{ modelProvider, randomGenerator });
-    ProfilerScope scope2("ArmyConfigWidget() - after ui");
+    Mernel::ProfilerScope scope2("ArmyConfigWidget() - after ui");
 
     connect(m_ui->pushButtonGenerateArmy, &QPushButton::clicked, this, &ArmyConfigWidget::generate);
 

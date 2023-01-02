@@ -5,8 +5,8 @@
  */
 #pragma once
 
-#include "FsUtils.hpp"
-#include "Profiler.hpp"
+#include "MernelPlatform/FsUtils.hpp"
+#include "MernelPlatform/Profiler.hpp"
 
 #include "H3SVGMap.hpp"
 #include "H3MMap.hpp"
@@ -25,17 +25,17 @@ class IRandomGeneratorFactory;
 class MAPUTIL_EXPORT MapConverter {
 public:
     struct BinaryPathsSet {
-        Core::std_path m_binary;
-        Core::std_path m_uncompressedBinary;
-        Core::std_path m_json;
+        Mernel::std_path m_binary;
+        Mernel::std_path m_uncompressedBinary;
+        Mernel::std_path m_json;
     };
 
     struct PathsSet {
-        Core::std_path m_fhTemplate;
-        Core::std_path m_fhMap;
-        BinaryPathsSet m_h3m;
-        BinaryPathsSet m_h3svg;
-        Core::std_path m_jsonDiff;
+        Mernel::std_path m_fhTemplate;
+        Mernel::std_path m_fhMap;
+        BinaryPathsSet   m_h3m;
+        BinaryPathsSet   m_h3svg;
+        Mernel::std_path m_jsonDiff;
     };
 
     struct Settings {
@@ -87,21 +87,21 @@ public:
     void run(Task command, int recurse = 0) noexcept(false);
 
 public: // todo:
-    H3Map             m_mapH3M;
-    H3SVGMap          m_mapH3SVG;
-    FHMap             m_mapFH;
-    PropertyTree      m_json;
-    ByteArrayHolder   m_binaryBuffer;
-    RawState          m_rawState          = RawState::Undefined;
-    CompressionMethod m_compressionMethod = CompressionMethod::Undefined;
+    H3Map                   m_mapH3M;
+    H3SVGMap                m_mapH3SVG;
+    FHMap                   m_mapFH;
+    PropertyTree            m_json;
+    Mernel::ByteArrayHolder m_binaryBuffer;
+    RawState                m_rawState          = RawState::Undefined;
+    CompressionMethod       m_compressionMethod = CompressionMethod::Undefined;
 
 private:
     using MemberProc = void (MapConverter::*)(void);
     void run(MemberProc member, const char* descr, int recurse) noexcept(false);
 
     // filenames
-    void setInputFilename(const Core::std_path& path, std::string_view descr);
-    void setOutputFilename(const Core::std_path& path, std::string_view descr);
+    void setInputFilename(const Mernel::std_path& path, std::string_view descr);
+    void setOutputFilename(const Mernel::std_path& path, std::string_view descr);
 
     // raw I/O
     void readBinaryBufferData();
@@ -138,7 +138,7 @@ private:
     void checkJsonInputOutputEquality();
 
 private:
-    void safeCopy(const Core::std_path& src, const Core::std_path& dest);
+    void safeCopy(const Mernel::std_path& src, const Mernel::std_path& dest);
 
 private:
     std::ostream&                              m_logOutput;
@@ -152,17 +152,17 @@ private:
         void markDone() { m_done = true; }
 
     private:
-        std::string   m_currentTask;
-        int           m_indent = 0;
-        std::ostream& m_output;
-        bool          m_done = false;
-        ScopeTimer    m_timer;
+        std::string        m_currentTask;
+        int                m_indent = 0;
+        std::ostream&      m_output;
+        bool               m_done = false;
+        Mernel::ScopeTimer m_timer;
     };
 
     Settings         m_settings;
     std::string      m_currentTask;
-    Core::std_path   m_inputFilename;
-    Core::std_path   m_outputFilename;
+    Mernel::std_path m_inputFilename;
+    Mernel::std_path m_outputFilename;
     std::set<size_t> m_ignoredOffsets;
 };
 

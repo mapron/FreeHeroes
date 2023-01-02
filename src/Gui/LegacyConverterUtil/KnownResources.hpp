@@ -5,9 +5,9 @@
  */
 #pragma once
 
-#include "FsUtils.hpp"
+#include "MernelPlatform/FsUtils.hpp"
 
-#include "PropertyTree.hpp"
+#include "MernelPlatform/PropertyTree.hpp"
 
 #include "LegacyConverterUtilExport.hpp"
 
@@ -23,12 +23,12 @@ struct KnownResource {
     std::string destinationSubfolder;
     std::string filenameReplace;
 
-    PropertyTreeMap handlers;
+    Mernel::PropertyTreeMap handlers;
 };
 
 class LEGACYCONVERTERUTIL_EXPORT KnownResources {
 public:
-    KnownResources(const Core::std_path& config);
+    KnownResources(const Mernel::std_path& config);
     const KnownResource* find(const std::string& legacyId) const;
 
 private:

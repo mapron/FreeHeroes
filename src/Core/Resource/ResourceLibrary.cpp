@@ -5,9 +5,9 @@
  */
 #include "ResourceLibrary.hpp"
 
-#include "StringUtils.hpp"
-#include "Profiler.hpp"
-#include "Logger.hpp"
+#include "MernelPlatform/StringUtils.hpp"
+#include "MernelPlatform/Profiler.hpp"
+#include "MernelPlatform/Logger.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -17,6 +17,7 @@
 #include <cassert>
 
 namespace FreeHeroes::Core {
+using namespace Mernel;
 
 namespace {
 const std::string extension1 = ".txt";
@@ -201,8 +202,8 @@ ResourceLibrary::ResourceLibraryPathList ResourceLibrary::searchIndexInFolderRec
 
 std::shared_ptr<ResourceLibrary> ResourceLibrary::makeMergedLibrary(const ResourceLibraryPathList& pathList)
 {
-    ProfilerScope scope("makeMergedLibrary");
-    auto          result = std::make_shared<ResourceLibrary>();
+    Mernel::ProfilerScope scope("makeMergedLibrary");
+    auto                  result = std::make_shared<ResourceLibrary>();
     {
         for (const auto& rec : pathList.records) {
             ResourceLibrary tmp(rec.id);

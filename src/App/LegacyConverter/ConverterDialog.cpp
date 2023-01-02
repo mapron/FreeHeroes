@@ -22,8 +22,8 @@
 #include "EnvDetect.hpp"
 
 // Platform
-#include "ShellUtils.hpp"
-#include "Logger.hpp"
+#include "MernelPlatform/ShellUtils.hpp"
+#include "MernelPlatform/Logger.hpp"
 
 #include <QStandardPaths>
 #include <QFileDialog>
@@ -35,6 +35,7 @@
 namespace FreeHeroes::Conversion {
 using namespace Core;
 using namespace Gui;
+using namespace Mernel;
 
 ConverterDialog::ConverterDialog(const Core::IGameDatabaseContainer* databaseContainer, QWidget* parent)
     : QDialog(parent)

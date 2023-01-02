@@ -8,7 +8,7 @@
 #include <iostream>
 
 #include "CoreApplication.hpp"
-#include "CommandLineUtils.hpp"
+#include "MernelPlatform/CommandLineUtils.hpp"
 #include "Application.hpp"
 
 #include "MapEditorWidget.hpp"
@@ -16,6 +16,7 @@
 int main(int argc, char* argv[])
 {
     using namespace FreeHeroes;
+    using namespace Mernel;
 
     AbstractCommandLine parser({
                                    "input-fhMap",

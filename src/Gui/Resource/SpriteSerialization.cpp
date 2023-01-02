@@ -8,12 +8,13 @@
 #include <QPainter>
 #include <QDebug>
 
-#include "FileFormatJson.hpp"
-#include "FileIOUtils.hpp"
+#include "MernelPlatform/FileFormatJson.hpp"
+#include "MernelPlatform/FileIOUtils.hpp"
 
 #include <fstream>
 
 namespace FreeHeroes::Gui {
+using namespace Mernel;
 
 namespace {
 const std::string spriteJsonExtension{ ".fh.json" };
@@ -56,7 +57,7 @@ void SpriteLoader::addGroupSeq(int groupId, std::shared_ptr<SpriteSequence> seq)
 bool saveSprite(const SpritePtr& spriteSet, const std_path& jsonFilePath, const SpriteSaveOptions& options)
 {
     const std_path    folder       = jsonFilePath.parent_path();
-    const std::string resourceName = Core::path2string(jsonFilePath.filename().stem().stem());
+    const std::string resourceName = Mernel::path2string(jsonFilePath.filename().stem().stem());
 
     if (!std_fs::exists(folder))
         std_fs::create_directories(folder);
@@ -64,7 +65,7 @@ bool saveSprite(const SpritePtr& spriteSet, const std_path& jsonFilePath, const 
     int totalWidth  = 0;
     int totalHeight = 0;
 
-    //qWarning() << "saveSprite=" << resourceName.c_str() << "(folder=" << Core::path2string(folder).c_str();
+    //qWarning() << "saveSprite=" << resourceName.c_str() << "(folder=" << Mernel::path2string(folder).c_str();
 
     PropertyTree       groupsMap;
     QMap<int, QPixmap> framesMap;
@@ -175,7 +176,7 @@ bool saveSprite(const SpritePtr& spriteSet, const std_path& jsonFilePath, const 
     root["groups"]        = std::move(groupsMap);
     root["splitToFolder"] = PropertyTreeScalar(options.splitIntoPngFiles);
 
-    return Core::writeJsonToBuffer(buffer, root, true) && Core::writeFileFromBuffer(jsonFilePath, buffer);
+    return Mernel::writeJsonToBuffer(buffer, root, true) && Mernel::writeFileFromBuffer(jsonFilePath, buffer);
 }
 
 namespace {
@@ -192,16 +193,16 @@ struct GroupOffsetList {
 SpritePtr loadSprite(const std_path& jsonFilePath)
 {
     const std_path    folder       = jsonFilePath.parent_path();
-    const std::string resourceName = Core::path2string(jsonFilePath.filename().stem().stem());
+    const std::string resourceName = Mernel::path2string(jsonFilePath.filename().stem().stem());
 
-    //qWarning() << "loadSprite=" << resourceName.c_str() << "(folder=" << Core::path2string(folder).c_str();
+    //qWarning() << "loadSprite=" << resourceName.c_str() << "(folder=" << Mernel::path2string(folder).c_str();
 
     std::string buffer;
-    if (!Core::readFileIntoBuffer(jsonFilePath, buffer))
+    if (!Mernel::readFileIntoBuffer(jsonFilePath, buffer))
         return {};
 
     PropertyTree root;
-    if (!Core::readJsonFromBuffer(buffer, root))
+    if (!Mernel::readJsonFromBuffer(buffer, root))
         return {};
 
     QMap<int, QPair<QPixmap, QPoint>> pixes;

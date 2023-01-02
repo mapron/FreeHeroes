@@ -7,7 +7,7 @@
 
 #include "IRandomGenerator.hpp"
 
-#include "Logger.hpp"
+#include "MernelPlatform/Logger.hpp"
 
 #include <array>
 #include <functional>
@@ -15,6 +15,7 @@
 #include <cassert>
 
 namespace FreeHeroes {
+using namespace Mernel;
 
 namespace {
 

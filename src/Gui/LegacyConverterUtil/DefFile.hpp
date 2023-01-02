@@ -7,7 +7,7 @@
 
 #include "SpriteSerialization.hpp"
 
-#include "ByteOrderStream.hpp"
+#include "MernelPlatform/ByteOrderStream.hpp"
 
 #include <QVector>
 #include <QBuffer>

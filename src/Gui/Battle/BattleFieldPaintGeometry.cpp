@@ -7,7 +7,7 @@
 
 #include "BattleField.hpp"
 
-#include "Logger.hpp"
+#include "MernelPlatform/Logger.hpp"
 
 #include <QtMath>
 

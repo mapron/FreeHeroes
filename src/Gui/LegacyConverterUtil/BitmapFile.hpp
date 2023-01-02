@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "FsUtils.hpp"
+#include "MernelPlatform/FsUtils.hpp"
 
 #include <cstdint>
 #include <vector>
@@ -16,12 +16,14 @@
 
 class QPixmap;
 
-namespace FreeHeroes {
-
+namespace Mernel {
 class ByteOrderDataStreamReader;
 class ByteOrderDataStreamWriter;
 class PropertyTree;
 class ByteArrayHolder;
+}
+
+namespace FreeHeroes {
 
 class BitmapFile {
 public:
@@ -70,8 +72,8 @@ public:
         std::map<Pixel, size_t>  m_counter;
         std::map<Pixel, uint8_t> m_index;
 
-        void readBinary(ByteOrderDataStreamReader& stream);
-        void writeBinary(ByteOrderDataStreamWriter& stream) const;
+        void readBinary(Mernel::ByteOrderDataStreamReader& stream);
+        void writeBinary(Mernel::ByteOrderDataStreamWriter& stream) const;
     };
 
     struct RLEItemRaw {
@@ -106,8 +108,8 @@ public:
 
         bool m_isCompressedLength = true; // not serialized
 
-        void readBinary(ByteOrderDataStreamReader& stream);
-        void writeBinary(ByteOrderDataStreamWriter& stream) const;
+        void readBinary(Mernel::ByteOrderDataStreamReader& stream);
+        void writeBinary(Mernel::ByteOrderDataStreamWriter& stream) const;
     };
 
     struct RLEData {
@@ -129,11 +131,11 @@ public:
 
     std::shared_ptr<QPixmap> m_pixmapQt;
 
-    void readFromBlob(ByteArrayHolder& blob);
-    void writeToBlob(ByteArrayHolder& blob) const;
+    void readFromBlob(Mernel::ByteArrayHolder& blob);
+    void writeToBlob(Mernel::ByteArrayHolder& blob) const;
 
-    void toJson(PropertyTree& data) const;
-    void fromJson(const PropertyTree& data);
+    void toJson(Mernel::PropertyTree& data) const;
+    void fromJson(const Mernel::PropertyTree& data);
 
     void uncompress();
     void compressToOriginal();
@@ -145,8 +147,8 @@ public:
     void toPixmapQt();
     void fromPixmapQt();
 
-    void loadPixmapQt(const Core::std_path& filename);
-    void savePixmapQt(const Core::std_path& filename) const;
+    void loadPixmapQt(const Mernel::std_path& filename);
+    void savePixmapQt(const Mernel::std_path& filename) const;
 };
 
 }

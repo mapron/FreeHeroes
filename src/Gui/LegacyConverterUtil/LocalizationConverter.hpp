@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "FsUtils.hpp"
+#include "MernelPlatform/FsUtils.hpp"
 #include "IResourceLibrary.hpp"
 
 #include "LegacyConverterUtilExport.hpp"
@@ -20,7 +20,7 @@ namespace FreeHeroes::Conversion {
 
 class LEGACYCONVERTERUTIL_EXPORT LocalizationConverter {
 public:
-    using std_path = Core::std_path;
+    using std_path = Mernel::std_path;
 
     LocalizationConverter(Core::IResourceLibrary&    resources,
                           const std_path&            srcRoot,

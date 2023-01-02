@@ -45,8 +45,8 @@
 #include "AdventureKingdom.hpp"
 
 // Platform
-#include "Profiler.hpp"
-#include "Logger.hpp"
+#include "MernelPlatform/Profiler.hpp"
+#include "MernelPlatform/Logger.hpp"
 
 #include <QInputDialog>
 /// @todo some  AppLocationManager for paths??
@@ -80,7 +80,7 @@ EmulatorMainWidget::EmulatorMainWidget(const Gui::IGraphicsLibrary*         grap
     , m_adventureStatePrev(std::make_unique<AdventureState>())
     , m_adventureKingdom(std::make_unique<AdventureKingdom>())
 {
-    ProfilerScope scope("EmulatorMainWidget()");
+    Mernel::ProfilerScope scope("EmulatorMainWidget()");
 
     m_uiRng = m_randomGeneratorFactory->create();
     m_uiRng->makeGoodSeed();
@@ -92,11 +92,11 @@ EmulatorMainWidget::EmulatorMainWidget(const Gui::IGraphicsLibrary*         grap
     }
 
     {
-        ProfilerScope scope3("setupUI");
+        Mernel::ProfilerScope scope3("setupUI");
         m_ui->setupUi(this, std::tuple{ m_modelsProvider, m_uiRng.get() });
     }
 
-    ProfilerScope scope1("after setupUI");
+    Mernel::ProfilerScope scope1("after setupUI");
 
     connect(m_ui->pushButtonStart, &QPushButton::clicked, this, &EmulatorMainWidget::startBattle);
     connect(m_ui->pushButtonSettings, &QPushButton::clicked, this, &EmulatorMainWidget::showSettings);
@@ -545,7 +545,7 @@ int EmulatorMainWidget::execBattle(bool isReplay, bool isQuick)
     if (isQuick) {
         battle.start();
         int limitStepCheck = 1000;
-        Logger(Logger::Notice) << "Starting quick combat.";
+        Mernel::Logger(Mernel::Logger::Notice) << "Starting quick combat.";
         IAI::AIParams params;
         auto          ai = battle.makeAI(params, *battleControl);
         limitStepCheck   = ai->run(limitStepCheck);
@@ -553,9 +553,9 @@ int EmulatorMainWidget::execBattle(bool isReplay, bool isQuick)
             GeneralPopupDialog::messageBox(m_modelsProvider, tr("AI reached step limit: that probably an error."), this);
             return 0;
         }
-        Logger(Logger::Info) << ai->getProfiling();
+        Mernel::Logger(Mernel::Logger::Info) << ai->getProfiling();
 
-        Logger(Logger::Notice) << "Quick combat ended, " << limitStepCheck << " steps are remain.";
+        Mernel::Logger(Mernel::Logger::Notice) << "Quick combat ended, " << limitStepCheck << " steps are remain.";
     }
 
     if (!isReplay) {

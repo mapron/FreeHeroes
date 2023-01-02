@@ -5,13 +5,13 @@
  */
 #include "SpriteFile.hpp"
 
-#include "PropertyTree.hpp"
+#include "MernelPlatform/PropertyTree.hpp"
 
 #include "SpriteFileReflection.hpp"
 
-#include "Reflection/PropertyTreeReader.hpp"
-#include "Reflection/PropertyTreeWriter.hpp"
-#include "StringUtils.hpp"
+#include "MernelReflection/PropertyTreeReader.hpp"
+#include "MernelReflection/PropertyTreeWriter.hpp"
+#include "MernelPlatform/StringUtils.hpp"
 
 #include "Sprites.hpp"
 
@@ -22,7 +22,7 @@
 #include <QPainter>
 
 namespace FreeHeroes {
-using namespace Core;
+using namespace Mernel;
 
 namespace {
 
@@ -259,7 +259,7 @@ std_path makePngName(const std_path& baseName, int index)
 
 }
 
-void SpriteFile::detectFormat(const Core::std_path& path, ByteOrderDataStreamReader& stream)
+void SpriteFile::detectFormat(const Mernel::std_path& path, ByteOrderDataStreamReader& stream)
 {
     std::array<uint8_t, 4> signature;
     stream >> signature;
@@ -686,7 +686,7 @@ void SpriteFile::fromJson(const PropertyTree& data)
     }
 }
 
-void SpriteFile::saveBitmapsData(const Core::std_path& jsonFilePath) const
+void SpriteFile::saveBitmapsData(const Mernel::std_path& jsonFilePath) const
 {
     if (m_bitmaps.empty() || m_embeddedBitmapData)
         return;
@@ -709,7 +709,7 @@ void SpriteFile::saveBitmapsData(const Core::std_path& jsonFilePath) const
     }
 }
 
-void SpriteFile::loadBitmapsData(const Core::std_path& jsonFilePath)
+void SpriteFile::loadBitmapsData(const Mernel::std_path& jsonFilePath)
 {
     if (m_bitmaps.empty() || m_embeddedBitmapData)
         return;
@@ -879,12 +879,12 @@ void SpriteFile::mergeBitmaps()
     m_bitmaps[0].m_height   = m_bitmaps[0].m_pixmapQt->height();
 }
 
-void SpriteFile::saveGuiSprite(const Core::std_path& jsonFilePath)
+void SpriteFile::saveGuiSprite(const Mernel::std_path& jsonFilePath)
 {
     if (m_embeddedBitmapData)
         throw std::runtime_error("Only split bitmaps can be saved");
 
-    Core::std_fs::create_directories(jsonFilePath.parent_path());
+    Mernel::std_fs::create_directories(jsonFilePath.parent_path());
 
     assert(m_bitmaps.size() == 1);
 

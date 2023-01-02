@@ -5,18 +5,19 @@
  */
 #include "AdventureReplay.hpp"
 
-#include "Reflection/PropertyTreeReader.hpp"
-#include "Reflection/PropertyTreeWriter.hpp"
+#include "GameDatabasePropertyReader.hpp"
+#include "GameDatabasePropertyWriter.hpp"
 
 #include "BattleReplayReflection.hpp"
 
 #include "IGameDatabase.hpp"
 #include "LibraryTerrain.hpp"
-#include "PropertyTree.hpp"
-#include "FileFormatJson.hpp"
-#include "FileIOUtils.hpp"
+#include "MernelPlatform/PropertyTree.hpp"
+#include "MernelPlatform/FileFormatJson.hpp"
+#include "MernelPlatform/FileIOUtils.hpp"
 
 namespace FreeHeroes::Core {
+using namespace Mernel;
 
 bool AdventureReplayData::load(const std_path& filename, const IGameDatabase* gameDatabase)
 {
@@ -27,9 +28,9 @@ bool AdventureReplayData::load(const std_path& filename, const IGameDatabase* ga
     if (!readJsonFromBuffer(buffer, main))
         return false;
 
-    const PropertyTree&            jsonBattle  = main["bat"];
-    const PropertyTree&            jsonRecords = jsonBattle["records"];
-    Reflection::PropertyTreeReader reader(gameDatabase);
+    const PropertyTree&        jsonBattle  = main["bat"];
+    const PropertyTree&        jsonRecords = jsonBattle["records"];
+    PropertyTreeReaderDatabase reader(gameDatabase);
     if (jsonRecords.isList()) {
         for (const PropertyTree& jsonRecord : jsonRecords.getList()) {
             m_bat.m_records.push_back({});
@@ -57,7 +58,7 @@ bool AdventureReplayData::save(const std_path& filename) const
     PropertyTree& jsonBattle  = main["bat"];
     PropertyTree& jsonRecords = jsonBattle["records"];
 
-    Reflection::PropertyTreeWriter writer;
+    PropertyTreeWriterDatabase writer;
     for (const auto& record : m_bat.m_records) {
         PropertyTree row;
         writer.valueToJson(record, row);

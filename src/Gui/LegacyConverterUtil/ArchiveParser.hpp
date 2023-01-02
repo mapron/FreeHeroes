@@ -27,7 +27,7 @@ namespace FreeHeroes::Conversion {
 class KnownResources;
 class LEGACYCONVERTERUTIL_EXPORT ArchiveParser {
 public:
-    using std_path           = Core::std_path;
+    using std_path           = Mernel::std_path;
     using ExtractCallbackInc = std::function<void()>;
     ArchiveParser(KnownResources&                 knownResources,
                   QSet<Core::ResourceMedia::Type> requiredTypes,

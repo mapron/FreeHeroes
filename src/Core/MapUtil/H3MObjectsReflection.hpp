@@ -5,12 +5,13 @@
  */
 #pragma once
 
-#include "Reflection/EnumTraitsMacro.hpp"
-#include "Reflection/MetaInfoMacro.hpp"
+#include "MernelReflection/EnumTraitsMacro.hpp"
+#include "MernelReflection/MetaInfoMacro.hpp"
 
 #include "H3MObjects.hpp"
 
-namespace FreeHeroes::Core::Reflection {
+namespace Mernel::Reflection {
+using namespace FreeHeroes;
 
 ENUM_REFLECTION_STRINGIY(
     MapQuest::Mission,

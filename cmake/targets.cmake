@@ -136,6 +136,8 @@ function(AddTarget)
     set(__options
         GENERATE_STUB             # 
         EXPORT_INCLUDES           # TARGET_INCLUDE_DIRECTORIES($SOURCE_DIR)
+        EXPORT_PARENT_INCLUDES    # TARGET_INCLUDE_DIRECTORIES($SOURCE_DIR../)
+        EXPORT_LINK
         STATIC_RUNTIME            # use static runtime (/MT) (MSVC)
         EXCLUDE_FROM_ALL          # 
         SKIP_STATIC_CHECK         #
@@ -212,12 +214,18 @@ function(AddTarget)
             target_include_directories(${name} INTERFACE ${ARG_SOURCE_DIR})
         endif()
     endif()
+    if (ARG_EXPORT_PARENT_INCLUDES)
+        target_include_directories(${name} INTERFACE ${ARG_SOURCE_DIR}/..)
+    endif()
 
     if (ARG_INCLUDES)
         target_include_directories(${name} ${defaultVisibility} ${ARG_INCLUDES})
     endif()
     if (ARG_LINK_LIBRARIES)
         target_link_libraries(${name} ${defaultVisibility} ${ARG_LINK_LIBRARIES})
+        if (ARG_EXPORT_LINK)
+            target_link_libraries(${name} PUBLIC ${ARG_LINK_LIBRARIES})
+        endif()
     endif()
     if (ARG_COMPILE_OPTIONS)
         target_compile_options(${name} ${defaultVisibility} ${ARG_COMPILE_OPTIONS})

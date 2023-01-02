@@ -10,7 +10,7 @@
 #include <QSet>
 
 namespace FreeHeroes::BattleEmulator {
-using namespace Core;
+using namespace Mernel;
 
 void ReplayFileManager::setRoot(std_path replayRoot)
 {

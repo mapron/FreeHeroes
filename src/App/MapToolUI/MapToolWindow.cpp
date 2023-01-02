@@ -9,7 +9,7 @@
 
 #include "TemplateSettingsWindow.hpp"
 
-#include "AppLocations.hpp"
+#include "MernelPlatform/AppLocations.hpp"
 
 #include "EnvDetect.hpp"
 
@@ -41,7 +41,7 @@ MapToolWindow::MapToolWindow()
         w.exec();
     });
 
-    Core::AppLocations loc("FreeHeroes");
+    Mernel::AppLocations loc("FreeHeroes");
 
     QSettings settings(g_reg, QSettings::NativeFormat);
     m_ui->templatePath->setText(settings.value("templatePath").toString());
@@ -50,22 +50,22 @@ MapToolWindow::MapToolWindow()
     m_ui->h3mMapPath->setText(settings.value("h3mMapPath").toString());
     m_ui->lineEditSeed->setText(settings.value("seed").toString());
 
-    Core::std_path hotaPath = findHeroes3Installation();
+    Mernel::std_path hotaPath = findHeroes3Installation();
 
     if (m_ui->templateSettingsPath->text().isEmpty())
-        m_ui->templateSettingsPath->setText(QString::fromStdString(Core::path2string(loc.getAppdataDir() / "templateSettings.json")));
+        m_ui->templateSettingsPath->setText(QString::fromStdString(Mernel::path2string(loc.getAppdataDir() / "templateSettings.json")));
 
     if (m_ui->h3mMapPath->text().isEmpty() && !hotaPath.empty()) {
         auto out = hotaPath / "Maps" / "FreeHeroes_output.h3m";
-        m_ui->h3mMapPath->setText(QString::fromStdString(Core::path2string(out)));
+        m_ui->h3mMapPath->setText(QString::fromStdString(Mernel::path2string(out)));
     }
     if (m_ui->fhMapPath->text().isEmpty() && !hotaPath.empty()) {
         auto out = hotaPath / "Maps" / "FreeHeroes_output.json";
-        m_ui->fhMapPath->setText(QString::fromStdString(Core::path2string(out)));
+        m_ui->fhMapPath->setText(QString::fromStdString(Mernel::path2string(out)));
     }
     if (m_ui->templatePath->text().isEmpty()) {
         auto tpl = loc.getBinDir() / "gameResources" / "templates" / "jebus_balanced.json";
-        m_ui->templatePath->setText(QString::fromStdString(Core::path2string(tpl)));
+        m_ui->templatePath->setText(QString::fromStdString(Mernel::path2string(tpl)));
     }
 
     connect(m_ui->pushButtonNewSeed, &QAbstractButton::clicked, this, [this] {

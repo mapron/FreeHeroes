@@ -7,11 +7,12 @@
 #include <iostream>
 
 #include "CoreApplication.hpp"
-#include "CommandLineUtils.hpp"
+#include "MernelPlatform/CommandLineUtils.hpp"
 
 #include "MapConverter.hpp"
 
 using namespace FreeHeroes;
+using namespace Mernel;
 
 int main(int argc, char** argv)
 {

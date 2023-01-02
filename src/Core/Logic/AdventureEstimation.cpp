@@ -13,11 +13,12 @@
 
 #include "IRandomGenerator.hpp"
 
-#include "Logger.hpp"
+#include "MernelPlatform/Logger.hpp"
 
 #include <sol/sol.hpp>
 
 namespace FreeHeroes::Core {
+using namespace Mernel;
 
 namespace {
 bool isWisdom(LibrarySecondarySkillConstPtr skill)

@@ -5,13 +5,13 @@
  */
 #include "MapConverter.hpp"
 
-#include "Reflection/EnumTraitsMacro.hpp"
+#include "MernelReflection/EnumTraitsMacro.hpp"
 
 #include "IGameDatabase.hpp"
 #include "IRandomGenerator.hpp"
-#include "FileIOUtils.hpp"
-#include "FileFormatJson.hpp"
-#include "Compression.hpp"
+#include "MernelPlatform/FileIOUtils.hpp"
+#include "MernelPlatform/FileFormatJson.hpp"
+#include "MernelPlatform/Compression.hpp"
 
 #include "H3MConversion.hpp"
 
@@ -21,14 +21,8 @@
 #define setInput(name) setInputFilename(m_settings.name, #name)
 #define setOutput(name) setOutputFilename(m_settings.name, #name)
 
-namespace FreeHeroes {
-
-class ConverterExpection : public std::runtime_error {
-    using runtime_error::runtime_error;
-};
-
-namespace Core::Reflection {
-
+namespace Mernel::Reflection {
+using namespace FreeHeroes;
 ENUM_REFLECTION_STRINGIY(MapConverter::Task,
                          Invalid,
                          Invalid,
@@ -48,14 +42,21 @@ ENUM_REFLECTION_STRINGIY(MapConverter::Task,
 
 }
 
+namespace FreeHeroes {
+using namespace Mernel;
+
+class ConverterExpection : public std::runtime_error {
+    using runtime_error::runtime_error;
+};
+
 std::string taskToString(MapConverter::Task task)
 {
-    auto str = Core::Reflection::EnumTraits::enumToString(task);
+    auto str = Mernel::Reflection::EnumTraits::enumToString(task);
     return std::string(str.begin(), str.end());
 }
 MapConverter::Task stringToTask(const std::string& str)
 {
-    return Core::Reflection::EnumTraits::stringToEnum<MapConverter::Task>({ str.c_str(), str.size() });
+    return Mernel::Reflection::EnumTraits::stringToEnum<MapConverter::Task>({ str.c_str(), str.size() });
 }
 
 MapConverter::MapConverter(std::ostream&                        logOutput,
@@ -274,18 +275,18 @@ void MapConverter::run(MemberProc member, const char* descr, int recurse) noexce
     scope.markDone();
 }
 
-void MapConverter::setInputFilename(const Core::std_path& path, std::string_view descr)
+void MapConverter::setInputFilename(const Mernel::std_path& path, std::string_view descr)
 {
     if (path.empty())
         throw std::runtime_error("Path '" + std::string(descr) + "' is empty");
 
-    if (!Core::std_fs::exists(path))
-        throw std::runtime_error("Path '" + Core::path2string(path) + "' is not exist!");
+    if (!Mernel::std_fs::exists(path))
+        throw std::runtime_error("Path '" + Mernel::path2string(path) + "' is not exist!");
 
     m_inputFilename = path;
 }
 
-void MapConverter::setOutputFilename(const Core::std_path& path, std::string_view descr)
+void MapConverter::setOutputFilename(const Mernel::std_path& path, std::string_view descr)
 {
     if (path.empty())
         throw std::runtime_error("Path '" + std::string(descr) + "' is empty");
@@ -297,7 +298,7 @@ void MapConverter::readBinaryBufferData()
 {
     m_rawState = RawState::Undefined;
 
-    m_binaryBuffer = Core::readFileIntoHolderThrow(m_inputFilename);
+    m_binaryBuffer = Mernel::readFileIntoHolderThrow(m_inputFilename);
 
     m_rawState = RawState::Compressed;
 }
@@ -307,7 +308,7 @@ void MapConverter::writeBinaryBufferData()
     if (m_rawState != RawState::Compressed)
         throw std::runtime_error("Buffer needs to be in Compressed state.");
 
-    Core::writeFileFromHolderThrow(m_outputFilename, m_binaryBuffer);
+    Mernel::writeFileFromHolderThrow(m_outputFilename, m_binaryBuffer);
 }
 
 void MapConverter::writeBinaryBufferDataAsUncompressed()
@@ -315,19 +316,19 @@ void MapConverter::writeBinaryBufferDataAsUncompressed()
     if (m_rawState != RawState::Uncompressed)
         throw std::runtime_error("Buffer needs to be in Uncompressed state.");
 
-    Core::writeFileFromHolderThrow(m_outputFilename, m_binaryBuffer);
+    Mernel::writeFileFromHolderThrow(m_outputFilename, m_binaryBuffer);
 }
 
 void MapConverter::readJsonToProperty()
 {
-    std::string buffer = Core::readFileIntoBufferThrow(m_inputFilename);
-    m_json             = Core::readJsonFromBufferThrow(buffer);
+    std::string buffer = Mernel::readFileIntoBufferThrow(m_inputFilename);
+    m_json             = Mernel::readJsonFromBufferThrow(buffer);
 }
 
 void MapConverter::writeJsonFromProperty()
 {
-    std::string buffer = Core::writeJsonToBufferThrow(m_json);
-    Core::writeFileFromBufferThrow(m_outputFilename, buffer);
+    std::string buffer = Mernel::writeJsonToBufferThrow(m_json);
+    Mernel::writeFileFromBufferThrow(m_outputFilename, buffer);
 }
 
 void MapConverter::detectCompression()
@@ -358,7 +359,7 @@ void MapConverter::uncompressRaw()
     }
 
     ByteArrayHolder out;
-    Core::uncompressDataBuffer(m_binaryBuffer, out, { .m_type = Core::CompressionType::Gzip, .m_skipCRC = true }); // throws;
+    Mernel::uncompressDataBuffer(m_binaryBuffer, out, { .m_type = Mernel::CompressionType::Gzip, .m_skipCRC = true }); // throws;
     m_binaryBuffer = std::move(out);
 
     m_rawState = RawState::Uncompressed;
@@ -382,7 +383,7 @@ void MapConverter::compressRaw()
     }
 
     ByteArrayHolder out;
-    Core::compressDataBuffer(m_binaryBuffer, out, { .m_type = Core::CompressionType::Gzip }); // throws;
+    Mernel::compressDataBuffer(m_binaryBuffer, out, { .m_type = Mernel::CompressionType::Gzip }); // throws;
     m_binaryBuffer = std::move(out);
 
     m_rawState = RawState::Compressed;
@@ -501,8 +502,8 @@ void MapConverter::convertH3MtoFH()
 
 void MapConverter::checkBinaryInputOutputEquality()
 {
-    const std::string bufferIn  = Core::readFileIntoBufferThrow(m_inputFilename);
-    const std::string bufferOut = Core::readFileIntoBufferThrow(m_outputFilename);
+    const std::string bufferIn  = Mernel::readFileIntoBufferThrow(m_inputFilename);
+    const std::string bufferOut = Mernel::readFileIntoBufferThrow(m_outputFilename);
 
     m_logOutput << "(Input size=" << bufferIn.size() << ", Output size=" << bufferOut.size() << ")\n";
 
@@ -554,8 +555,8 @@ void MapConverter::checkBinaryInputOutputEquality()
 
 void MapConverter::checkJsonInputOutputEquality()
 {
-    auto jsonIn  = Core::readJsonFromBufferThrow(Core::readFileIntoBufferThrow(m_inputFilename));
-    auto jsonOut = Core::readJsonFromBufferThrow(Core::readFileIntoBufferThrow(m_outputFilename));
+    auto jsonIn  = Mernel::readJsonFromBufferThrow(Mernel::readFileIntoBufferThrow(m_inputFilename));
+    auto jsonOut = Mernel::readJsonFromBufferThrow(Mernel::readFileIntoBufferThrow(m_outputFilename));
 
     const bool result = jsonIn == jsonOut;
     m_logOutput << "Round-trip JSON result: " << (result ? "PASSED" : "FAILED") << '\n';
@@ -563,8 +564,8 @@ void MapConverter::checkJsonInputOutputEquality()
         return;
 
     {
-        Core::writeFileFromBufferThrow(m_inputFilename, Core::writeJsonToBufferThrow(jsonIn, true));
-        Core::writeFileFromBufferThrow(m_outputFilename, Core::writeJsonToBufferThrow(jsonOut, true));
+        Mernel::writeFileFromBufferThrow(m_inputFilename, Mernel::writeJsonToBufferThrow(jsonIn, true));
+        Mernel::writeFileFromBufferThrow(m_outputFilename, Mernel::writeJsonToBufferThrow(jsonOut, true));
     }
 
     const auto& jsonDiffIn  = m_settings.m_inputs.m_jsonDiff;
@@ -574,18 +575,18 @@ void MapConverter::checkJsonInputOutputEquality()
     } else {
         m_logOutput << "Saving diff to: in=" << jsonDiffIn << ", out=" << jsonDiffOut << '\n';
         PropertyTree::removeEqualValues(jsonIn, jsonOut);
-        Core::writeFileFromBufferThrow(jsonDiffIn, Core::writeJsonToBufferThrow(jsonIn, true));
-        Core::writeFileFromBufferThrow(jsonDiffOut, Core::writeJsonToBufferThrow(jsonOut, true));
+        Mernel::writeFileFromBufferThrow(jsonDiffIn, Mernel::writeJsonToBufferThrow(jsonIn, true));
+        Mernel::writeFileFromBufferThrow(jsonDiffOut, Mernel::writeJsonToBufferThrow(jsonOut, true));
     }
 
     throw std::runtime_error("Failed input == output");
 }
 
-void MapConverter::safeCopy(const Core::std_path& src, const Core::std_path& dest)
+void MapConverter::safeCopy(const Mernel::std_path& src, const Mernel::std_path& dest)
 {
     if (src != dest) {
-        Core::std_fs::remove(dest);
-        Core::std_fs::copy_file(src, dest);
+        Mernel::std_fs::remove(dest);
+        Mernel::std_fs::copy_file(src, dest);
     }
 }
 

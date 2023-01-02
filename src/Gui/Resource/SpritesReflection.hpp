@@ -7,10 +7,10 @@
 
 #include "Sprites.hpp"
 
-#include "Reflection/EnumTraitsMacro.hpp"
-#include "Reflection/MetaInfoMacro.hpp"
+#include "MernelReflection/EnumTraitsMacro.hpp"
+#include "MernelReflection/MetaInfoMacro.hpp"
 
-namespace FreeHeroes::Core::Reflection {
+namespace Mernel::Reflection {
 using namespace ::FreeHeroes::Gui;
 
 // clang-format off

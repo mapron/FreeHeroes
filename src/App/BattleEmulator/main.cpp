@@ -9,8 +9,8 @@
 #include "CoreApplication.hpp"
 
 // Platform
-#include "Profiler.hpp"
-#include "Logger.hpp"
+#include "MernelPlatform/Profiler.hpp"
+#include "MernelPlatform/Logger.hpp"
 
 #include <QApplication>
 #include <QMainWindow>
@@ -23,6 +23,7 @@ int main(int argc, char* argv[])
     using namespace FreeHeroes;
     using namespace Core;
     using namespace Gui;
+    using namespace Mernel;
 
     Core::CoreApplication fhCoreApp({ Core::CoreApplication::Option::ResourceLibraryApp,
                                       Core::CoreApplication::Option::ResourceLibraryLocalData,

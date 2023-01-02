@@ -5,7 +5,7 @@
  */
 #include "BattleFieldPathFinder.hpp"
 
-#include "Profiler.hpp"
+#include "MernelPlatform/Profiler.hpp"
 
 #include <algorithm>
 #include <unordered_set>
@@ -75,7 +75,7 @@ void BattleFieldPathFinder::floodFill(const BattlePosition start)
 
             // all this stuff is ugly way to make it as fast as possible in debug mode.
             // sets, unordered sets - all too slow when testing AI (AI calling findPAth a lot).
-            // please do not change anything without uncommenting ProfilerScope :)
+            // please do not change anything without uncommenting Mernel::ProfilerScope :)
             // clang-format off
             if (1 == remainPositions.getChecked(pos = field.neighbour(edgePos, BattleDirection::TR)) ) nextEdge.insert(pos);
             if (1 == remainPositions.getChecked(pos = field.neighbour(edgePos, BattleDirection::R )) ) nextEdge.insert(pos);

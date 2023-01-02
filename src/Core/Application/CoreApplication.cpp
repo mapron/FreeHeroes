@@ -8,12 +8,12 @@
 // Core
 #include "ResourceLibrary.hpp"
 #include "GameDatabase.hpp"
-#include "Profiler.hpp"
+#include "MernelPlatform/Profiler.hpp"
 #include "RandomGenerator.hpp"
-#include "Logger_details.hpp"
+#include "MernelPlatform/Logger_details.hpp"
 
 namespace FreeHeroes::Core {
-
+using namespace Mernel;
 namespace {
 
 constexpr const char* s_FHFolderName = "FreeHeroes";

@@ -6,26 +6,29 @@
 
 #include "FHMap.hpp"
 
-#include "Reflection/PropertyTreeReader.hpp"
-#include "Reflection/PropertyTreeWriter.hpp"
+#include "GameDatabasePropertyReader.hpp"
+#include "GameDatabasePropertyWriter.hpp"
+
+#include "IGameDatabase.hpp"
 
 #include "AdventureReflection.hpp"
 
 #include "FHMapReflection.hpp"
 
-#include "Logger.hpp"
+#include "MernelPlatform/Logger.hpp"
 
 namespace FreeHeroes {
+using namespace Mernel;
 
 void FHMap::toJson(PropertyTree& data) const
 {
-    Core::Reflection::PropertyTreeWriter writer;
+    Core::PropertyTreeWriterDatabase writer;
     writer.valueToJson(*this, data);
 }
 
 void FHMap::fromJson(const PropertyTree& data, const Core::IGameDatabase* database)
 {
-    Core::Reflection::PropertyTreeReader reader(database);
+    Core::PropertyTreeReaderDatabase reader(database);
     *this = {};
     reader.jsonToValue(data, *this);
 }

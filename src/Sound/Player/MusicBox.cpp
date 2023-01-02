@@ -5,7 +5,7 @@
  */
 #include "MusicBox.hpp"
 
-#include "Logger.hpp"
+#include "MernelPlatform/Logger.hpp"
 
 #include <QSoundEffect>
 #include <QMediaPlayer>
@@ -14,6 +14,7 @@
 #include <QMediaPlaylist>
 
 namespace FreeHeroes::Sound {
+using namespace Mernel;
 
 struct MusicBox::Impl {
     /**
@@ -177,12 +178,12 @@ void MusicBox::musicPlay(const IMusicBox::MusicSettings& music)
     if (!m_resourceLibrary->mediaExists(Core::ResourceMedia::Type::Music, id))
         return;
 
-    auto                 record   = m_resourceLibrary->getMedia(Core::ResourceMedia::Type::Music, id);
-    const Core::std_path fullPath = record.getFullPath();
+    auto                   record   = m_resourceLibrary->getMedia(Core::ResourceMedia::Type::Music, id);
+    const Mernel::std_path fullPath = record.getFullPath();
     if (fullPath.empty())
         return;
 
-    const QString path = QString::fromStdString(Core::path2string(fullPath));
+    const QString path = QString::fromStdString(Mernel::path2string(fullPath));
     m_impl->m_player.setVolume(0);
 
     m_impl->m_playlist.clear();
@@ -210,12 +211,12 @@ void MusicBox::effectPlay(const EffectSettings& effect)
     if (!m_resourceLibrary->mediaExists(Core::ResourceMedia::Type::Sound, id))
         return;
 
-    auto                 record   = m_resourceLibrary->getMedia(Core::ResourceMedia::Type::Sound, id);
-    const Core::std_path fullPath = record.getFullPath();
+    auto                   record   = m_resourceLibrary->getMedia(Core::ResourceMedia::Type::Sound, id);
+    const Mernel::std_path fullPath = record.getFullPath();
     if (fullPath.empty())
         return;
 
-    const QString path                   = QString::fromStdString(Core::path2string(fullPath));
+    const QString path                   = QString::fromStdString(Mernel::path2string(fullPath));
     const int     maxSimultaneousEffects = 3;
     QSoundEffect* qeffect                = m_impl->getEffect(id, maxSimultaneousEffects, this);
     qeffect->disconnect();

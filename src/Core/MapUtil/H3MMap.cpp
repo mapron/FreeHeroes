@@ -6,12 +6,12 @@
 
 #include "H3MMap.hpp"
 
-#include "Reflection/PropertyTreeReader.hpp"
-#include "Reflection/PropertyTreeWriter.hpp"
+#include "MernelReflection/PropertyTreeReader.hpp"
+#include "MernelReflection/PropertyTreeWriter.hpp"
 #include "H3MMapReflection.hpp"
 #include "H3MObjectsReflection.hpp"
 
-#include "Logger.hpp"
+#include "MernelPlatform/Logger.hpp"
 
 #include <set>
 
@@ -438,14 +438,14 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
                 throw std::runtime_error("Unsupported map object type:" + std::to_string(objTempl.m_id));
 
             if (0)
-                Logger(Logger::Warning) << "staring  readBinary [" << index << "]: (" << (int) obj.m_pos.m_x << "," << (int) obj.m_pos.m_y << "," << (int) obj.m_pos.m_z << ")  "
-                                        << objTempl.m_animationFile << ", type:" << objTempl.m_id << ", current offset =" << stream.getBuffer().getOffsetRead();
+                Mernel::Logger(Mernel::Logger::Warning) << "staring  readBinary [" << index << "]: (" << (int) obj.m_pos.m_x << "," << (int) obj.m_pos.m_y << "," << (int) obj.m_pos.m_z << ")  "
+                                                        << objTempl.m_animationFile << ", type:" << objTempl.m_id << ", current offset =" << stream.getBuffer().getOffsetRead();
 
             obj.m_impl->readBinary(stream);
 
             if (0)
-                Logger(Logger::Warning) << "finished readBinary [" << index << "]: (" << (int) obj.m_pos.m_x << "," << (int) obj.m_pos.m_y << "," << (int) obj.m_pos.m_z << ")  "
-                                        << objTempl.m_animationFile << ", type:" << objTempl.m_id << ", current offset =" << stream.getBuffer().getOffsetRead();
+                Mernel::Logger(Mernel::Logger::Warning) << "finished readBinary [" << index << "]: (" << (int) obj.m_pos.m_x << "," << (int) obj.m_pos.m_y << "," << (int) obj.m_pos.m_z << ")  "
+                                                        << objTempl.m_animationFile << ", type:" << objTempl.m_id << ", current offset =" << stream.getBuffer().getOffsetRead();
 
             index++;
         }
@@ -595,7 +595,7 @@ void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
 
 void H3Map::toJson(PropertyTree& data) const
 {
-    Core::Reflection::PropertyTreeWriter writer;
+    Mernel::Reflection::PropertyTreeWriter writer;
     writer.valueToJson(*this, data);
     PropertyTree& objList = data["objects"];
     objList.convertToList();
@@ -613,7 +613,7 @@ void H3Map::toJson(PropertyTree& data) const
 
 void H3Map::fromJson(const PropertyTree& data)
 {
-    Core::Reflection::PropertyTreeReader reader;
+    Mernel::Reflection::PropertyTreeReader reader;
     *this = {};
     reader.jsonToValue(data, *this);
     *m_features = MapFormatFeatures(m_format, m_hotaVer.m_ver1);

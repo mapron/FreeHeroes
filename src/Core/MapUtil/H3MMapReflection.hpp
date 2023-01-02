@@ -5,12 +5,13 @@
  */
 #pragma once
 
-#include "Reflection/EnumTraitsMacro.hpp"
-#include "Reflection/MetaInfoMacro.hpp"
+#include "MernelReflection/EnumTraitsMacro.hpp"
+#include "MernelReflection/MetaInfoMacro.hpp"
 
 #include "H3MMap.hpp"
 
-namespace FreeHeroes::Core::Reflection {
+namespace Mernel::Reflection {
+using namespace FreeHeroes;
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     H3Pos,

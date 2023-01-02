@@ -6,8 +6,8 @@
 #include "GameDatabase.hpp"
 
 #include "JsonHelper.hpp"
-#include "Logger.hpp"
-#include "Profiler.hpp"
+#include "MernelPlatform/Logger.hpp"
+#include "MernelPlatform/Profiler.hpp"
 
 #include "LibraryArtifact.hpp"
 #include "LibraryDwelling.hpp"
@@ -26,8 +26,8 @@
 #include "LibraryUnit.hpp"
 
 #include "LibrarySerialize.hpp"
-#include "FileFormatJson.hpp"
-#include "FileIOUtils.hpp"
+#include "MernelPlatform/FileFormatJson.hpp"
+#include "MernelPlatform/FileIOUtils.hpp"
 
 #include "IResourceLibrary.hpp"
 
@@ -39,6 +39,7 @@
 #include <cstddef>
 
 namespace FreeHeroes::Core {
+using namespace Mernel;
 namespace {
 template<class T>
 struct LibraryContainerKey {
@@ -144,7 +145,7 @@ struct GameDatabase::Impl {
                 auto* objRecord = findMutable(id);
                 assert(objRecord);
 
-                if (!Reflection::deserialize(idResolver, *objRecord, jsonObj))
+                if (!deserialize(idResolver, *objRecord, jsonObj))
                     return false;
             }
             return true;
@@ -352,7 +353,7 @@ LibraryGameRulesConstPtr GameDatabase::gameRules() const
 
 std::vector<GameDatabase::Resource> GameDatabase::loadLibrary(const std::string& dataBaseId, const IResourceLibrary* resourceLibrary)
 {
-    ProfilerScope                       scope("GameDatabase::loadLibrary");
+    Mernel::ProfilerScope               scope("GameDatabase::loadLibrary");
     std::vector<GameDatabase::Resource> files;
     const ResourceDatabase&             desc = resourceLibrary->getDatabase(dataBaseId);
     for (auto& f : desc.filesFullPathsWithDeps) {
@@ -425,7 +426,7 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
     if (!result)
         return false;
 
-    if (!Reflection::deserialize(this, m_impl->m_gameRules, recordObjectMaps["gameRules"][""]))
+    if (!deserialize(this, m_impl->m_gameRules, recordObjectMaps["gameRules"][""]))
         return false;
 
     auto checkLink = []<typename T>(const auto* id, const T* context) {

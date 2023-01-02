@@ -6,7 +6,7 @@
 #pragma once
 
 #include "BattleReplay.hpp"
-#include "FsUtils.hpp"
+#include "MernelPlatform/FsUtils.hpp"
 
 #include "CoreLogicExport.hpp"
 
@@ -17,8 +17,8 @@ struct CORELOGIC_EXPORT AdventureReplayData {
     BattleReplayData m_bat;
     AdventureState   m_adv;
 
-    bool load(const std_path& filename, const Core::IGameDatabase* gameDatabase);
-    bool save(const std_path& filename) const;
+    bool load(const Mernel::std_path& filename, const Core::IGameDatabase* gameDatabase);
+    bool save(const Mernel::std_path& filename) const;
 };
 
 }

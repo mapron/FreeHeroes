@@ -7,10 +7,10 @@
 
 #include "FsUtilsQt.hpp"
 #include "IGameDatabase.hpp"
-#include "Logger.hpp"
+#include "MernelPlatform/Logger.hpp"
 
-#include "FileFormatJson.hpp"
-#include "FileIOUtils.hpp"
+#include "MernelPlatform/FileFormatJson.hpp"
+#include "MernelPlatform/FileIOUtils.hpp"
 
 #include <QFile>
 #include <QTextCodec>
@@ -19,6 +19,7 @@
 
 namespace FreeHeroes::Conversion {
 using namespace Core;
+using namespace Mernel;
 
 class LocalizationConverter::TranscodedFile {
     QTextCodec*             m_inputCodec = nullptr;
@@ -201,11 +202,11 @@ void LocalizationConverter::extractHOTA(const std_path& jsonSubdir)
         auto                     filename = m_root / jsonSubdir / (prefix + std::to_string(index) + ".json");
 
         std::string buffer;
-        if (!Core::readFileIntoBuffer(filename, buffer))
+        if (!Mernel::readFileIntoBuffer(filename, buffer))
             return {};
 
         PropertyTree root;
-        if (!Core::readJsonFromBuffer(buffer, root))
+        if (!Mernel::readJsonFromBuffer(buffer, root))
             return {};
 
         const auto& strings = root["strings"].getList();

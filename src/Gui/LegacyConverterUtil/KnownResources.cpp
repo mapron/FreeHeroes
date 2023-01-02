@@ -5,8 +5,8 @@
  */
 #include "KnownResources.hpp"
 
-#include "FileIOUtils.hpp"
-#include "FileFormatJson.hpp"
+#include "MernelPlatform/FileIOUtils.hpp"
+#include "MernelPlatform/FileFormatJson.hpp"
 
 namespace FreeHeroes::Conversion {
 
@@ -16,10 +16,10 @@ const KnownResource* KnownResources::find(const std::string& legacyId) const
     return it == m_index.cend() ? nullptr : it->second;
 }
 
-KnownResources::KnownResources(const Core::std_path& config)
+KnownResources::KnownResources(const Mernel::std_path& config)
 {
-    std::string buffer   = Core::readFileIntoBufferThrow(config);
-    auto        jsonData = Core::readJsonFromBufferThrow(buffer);
+    std::string buffer   = Mernel::readFileIntoBufferThrow(config);
+    auto        jsonData = Mernel::readJsonFromBufferThrow(buffer);
     m_resources.reserve(10000);
 
     for (const auto& [key, row] : jsonData.getMap()) {

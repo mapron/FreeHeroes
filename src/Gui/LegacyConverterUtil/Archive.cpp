@@ -5,23 +5,24 @@
  */
 #include "Archive.hpp"
 
-#include "FileFormatJson.hpp"
-#include "FileIOUtils.hpp"
-#include "StringUtils.hpp"
+#include "MernelPlatform/FileFormatJson.hpp"
+#include "MernelPlatform/FileIOUtils.hpp"
+#include "MernelPlatform/StringUtils.hpp"
 
-#include "Reflection/PropertyTreeReader.hpp"
-#include "Reflection/PropertyTreeWriter.hpp"
+#include "MernelReflection/PropertyTreeReader.hpp"
+#include "MernelReflection/PropertyTreeWriter.hpp"
 
 #include "ArchiveReflection.hpp"
 
 #include "SpriteParserLegacy.hpp"
 
-#include "Compression.hpp"
+#include "MernelPlatform/Compression.hpp"
 
 #include <iostream>
 
 namespace FreeHeroes {
 using namespace Core;
+using namespace Mernel;
 
 namespace {
 const std_path g_indexFileName = "archive_index.fh.json";
@@ -338,26 +339,26 @@ void Archive::loadFromFolder(const std_path& path)
     }
 }
 
-void Archive::createFromFolder(const Core::std_path& path, const std::vector<std::string>& extensions)
+void Archive::createFromFolder(const Mernel::std_path& path, const std::vector<std::string>& extensions)
 {
     m_format    = BinaryFormat::LOD;
     m_lodFormat = 200;
     m_lodHeader.resize(80);
     m_isBinary = false;
 
-    for (auto&& it : Core::std_fs::directory_iterator(path)) {
+    for (auto&& it : Mernel::std_fs::directory_iterator(path)) {
         if (!it.is_regular_file())
             continue;
         auto   filename = it.path().filename();
         Record rec;
-        rec.m_originalExtWithDot = Core::path2string(filename.extension());
+        rec.m_originalExtWithDot = Mernel::path2string(filename.extension());
         rec.m_extWithDot         = rec.m_originalExtWithDot;
 
         std::transform(rec.m_extWithDot.begin(), rec.m_extWithDot.end(), rec.m_extWithDot.begin(), [](unsigned char c) { return std::tolower(c); });
         if (std::find(extensions.cbegin(), extensions.cend(), rec.m_extWithDot) == extensions.cend())
             continue;
 
-        rec.m_originalBasename = Core::path2string(filename.stem());
+        rec.m_originalBasename = Mernel::path2string(filename.stem());
         rec.m_basename         = rec.m_originalBasename;
         std::transform(rec.m_basename.begin(), rec.m_basename.end(), rec.m_basename.begin(), [](unsigned char c) { return std::tolower(c); });
 

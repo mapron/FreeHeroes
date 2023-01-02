@@ -7,21 +7,21 @@
 
 #include "FsUtilsQt.hpp"
 #include "ISprites.hpp"
-#include "PropertyTree.hpp"
+#include "MernelPlatform/PropertyTree.hpp"
 
 namespace FreeHeroes::Core {
 class IResourceLibrary;
 }
 namespace FreeHeroes::Conversion {
 
-void saveSpriteLegacy(Gui::SpritePtr sprite, const Core::std_path& defFilePath);
+void saveSpriteLegacy(Gui::SpritePtr sprite, const Mernel::std_path& defFilePath);
 
-Gui::SpritePtr loadSpriteLegacy(const Core::std_path& defFilePath);
+Gui::SpritePtr loadSpriteLegacy(const Mernel::std_path& defFilePath);
 
-Gui::SpritePtr loadPcx(const Core::std_path& pcxFilePath);
+Gui::SpritePtr loadPcx(const Mernel::std_path& pcxFilePath);
 
-Gui::SpritePtr loadBmp(const Core::std_path& bmpFilePath);
+Gui::SpritePtr loadBmp(const Mernel::std_path& bmpFilePath);
 
-Gui::SpritePtr postProcessSprite(const Core::std_path& spritePath, Gui::SpritePtr sprite, const PropertyTreeMap& params, Core::IResourceLibrary* library);
+Gui::SpritePtr postProcessSprite(const Mernel::std_path& spritePath, Gui::SpritePtr sprite, const Mernel::PropertyTreeMap& params, Core::IResourceLibrary* library);
 
 }

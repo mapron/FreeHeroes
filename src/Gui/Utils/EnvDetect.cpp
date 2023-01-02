@@ -10,7 +10,7 @@
 
 #ifdef _WIN32
 
-FreeHeroes::Core::std_path FreeHeroes::findHeroes3Installation(bool hotaAllowed) noexcept
+Mernel::std_path FreeHeroes::findHeroes3Installation(bool hotaAllowed) noexcept
 {
     std::vector<std::pair<QString, QString>> lookup;
     if (hotaAllowed) {
@@ -25,10 +25,10 @@ FreeHeroes::Core::std_path FreeHeroes::findHeroes3Installation(bool hotaAllowed)
         if (path.empty())
             continue;
         std::error_code ec;
-        if (!Core::std_fs::exists(path, ec))
+        if (!Mernel::std_fs::exists(path, ec))
             continue;
 
-        if (!Core::std_fs::exists(path / "Data", ec) && !Core::std_fs::exists(path / "DATA", ec) && !Core::std_fs::exists(path / "data", ec))
+        if (!Mernel::std_fs::exists(path / "Data", ec) && !Mernel::std_fs::exists(path / "DATA", ec) && !Mernel::std_fs::exists(path / "data", ec))
             continue;
 
         return path;
@@ -39,7 +39,7 @@ FreeHeroes::Core::std_path FreeHeroes::findHeroes3Installation(bool hotaAllowed)
 
 #else
 
-FreeHeroes::Core::std_path FreeHeroes::findHeroes3Installation(bool)
+Mernel::std_path FreeHeroes::findHeroes3Installation(bool)
 {
     return {};
 }

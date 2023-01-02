@@ -8,7 +8,7 @@
 #include "ISprites.hpp"
 
 #include "GuiResourceExport.hpp"
-#include "FsUtils.hpp"
+#include "MernelPlatform/FsUtils.hpp"
 
 #include <QMap>
 
@@ -69,8 +69,8 @@ struct GUIRESOURCE_EXPORT SpriteNew {
 
     std::map<int, Group> m_groups;
 
-    void load(const Core::std_path& jsonFilePath);
-    void save(const Core::std_path& jsonFilePath) const;
+    void load(const Mernel::std_path& jsonFilePath);
+    void save(const Mernel::std_path& jsonFilePath) const;
 };
 
 }

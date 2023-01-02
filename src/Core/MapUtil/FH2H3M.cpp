@@ -16,7 +16,7 @@
 #include "LibrarySecondarySkill.hpp"
 #include "LibraryTerrain.hpp"
 
-#include "Logger.hpp"
+#include "MernelPlatform/Logger.hpp"
 
 #define assume(cond) \
     if (!(cond)) \

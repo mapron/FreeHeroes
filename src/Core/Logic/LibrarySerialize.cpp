@@ -6,57 +6,57 @@
 #include "LibrarySerialize.hpp"
 #include "LibraryReflection.hpp"
 
-#include "Reflection/PropertyTreeReader.hpp"
-#include "Reflection/PropertyTreeWriter.hpp"
+#include "GameDatabasePropertyReader.hpp"
+#include "GameDatabasePropertyWriter.hpp"
 
-#include "IGameDatabase.hpp"
+#include "MernelPlatform/StringUtils.hpp"
 
-#include "StringUtils.hpp"
-
-#include "PropertyTree.hpp"
+#include "MernelPlatform/PropertyTree.hpp"
 
 #include <cassert>
 
-namespace FreeHeroes::Core::Reflection {
+namespace FreeHeroes::Core {
+using namespace Mernel;
+using namespace Reflection;
 
 bool deserialize(const IGameDatabase* gameDatabase, LibraryArtifact& artifact, const PropertyTree& jsonObj)
 {
-    PropertyTreeReader reader(gameDatabase);
+    PropertyTreeReaderDatabase reader(gameDatabase);
     reader.jsonToValue(jsonObj, artifact);
     return true;
 }
 
 bool deserialize(const IGameDatabase* gameDatabase, LibraryDwelling& dwelling, const PropertyTree& jsonObj)
 {
-    PropertyTreeReader reader(gameDatabase);
+    PropertyTreeReaderDatabase reader(gameDatabase);
     reader.jsonToValue(jsonObj, dwelling);
     return true;
 }
 
 bool deserialize(const IGameDatabase* gameDatabase, LibraryFaction& faction, const PropertyTree& jsonObj)
 {
-    PropertyTreeReader reader(gameDatabase);
+    PropertyTreeReaderDatabase reader(gameDatabase);
     reader.jsonToValue(jsonObj, faction);
     return true;
 }
 
 bool deserialize(const IGameDatabase* gameDatabase, LibraryHero& hero, const PropertyTree& jsonObj)
 {
-    PropertyTreeReader reader(gameDatabase);
+    PropertyTreeReaderDatabase reader(gameDatabase);
     reader.jsonToValue(jsonObj, hero);
     return true;
 }
 
 bool deserialize(const IGameDatabase* gameDatabase, LibraryHeroSpec& spec, const PropertyTree& jsonObj)
 {
-    PropertyTreeReader reader(gameDatabase);
+    PropertyTreeReaderDatabase reader(gameDatabase);
     reader.jsonToValue(jsonObj, spec);
     return true;
 }
 
 bool deserialize(const IGameDatabase* gameDatabase, LibraryMapBank& obj, const PropertyTree& jsonObj)
 {
-    PropertyTreeReader reader(gameDatabase);
+    PropertyTreeReaderDatabase reader(gameDatabase);
     reader.jsonToValue(jsonObj, obj);
 
     return true;
@@ -64,49 +64,49 @@ bool deserialize(const IGameDatabase* gameDatabase, LibraryMapBank& obj, const P
 
 bool deserialize(const IGameDatabase* gameDatabase, LibraryMapObstacle& obj, const PropertyTree& jsonObj)
 {
-    PropertyTreeReader reader(gameDatabase);
+    PropertyTreeReaderDatabase reader(gameDatabase);
     reader.jsonToValue(jsonObj, obj);
 
     return true;
 }
 bool deserialize(const IGameDatabase* gameDatabase, LibraryMapVisitable& obj, const PropertyTree& jsonObj)
 {
-    PropertyTreeReader reader(gameDatabase);
+    PropertyTreeReaderDatabase reader(gameDatabase);
     reader.jsonToValue(jsonObj, obj);
 
     return true;
 }
 bool deserialize(const IGameDatabase* gameDatabase, LibraryObjectDef& obj, const PropertyTree& jsonObj)
 {
-    PropertyTreeReader reader(gameDatabase);
+    PropertyTreeReaderDatabase reader(gameDatabase);
     reader.jsonToValue(jsonObj, obj);
     return true;
 }
 
 bool deserialize(const IGameDatabase* gameDatabase, LibraryResource& obj, const PropertyTree& jsonObj)
 {
-    PropertyTreeReader reader(gameDatabase);
+    PropertyTreeReaderDatabase reader(gameDatabase);
     reader.jsonToValue(jsonObj, obj);
     return true;
 }
 
 bool deserialize(const IGameDatabase* gameDatabase, LibrarySecondarySkill& skill, const PropertyTree& jsonObj)
 {
-    PropertyTreeReader reader(gameDatabase);
+    PropertyTreeReaderDatabase reader(gameDatabase);
     reader.jsonToValue(jsonObj, skill);
     return true;
 }
 
 bool deserialize(const IGameDatabase* gameDatabase, LibrarySpell& spell, const PropertyTree& jsonObj)
 {
-    PropertyTreeReader reader(gameDatabase);
+    PropertyTreeReaderDatabase reader(gameDatabase);
     reader.jsonToValue(jsonObj, spell);
     return true;
 }
 
 bool deserialize(const IGameDatabase* gameDatabase, LibraryTerrain& obj, const PropertyTree& jsonObj)
 {
-    PropertyTreeReader reader(gameDatabase);
+    PropertyTreeReaderDatabase reader(gameDatabase);
     reader.jsonToValue(jsonObj, obj);
     {
         int offset = 0;
@@ -165,7 +165,7 @@ bool deserialize(const IGameDatabase* gameDatabase, LibraryUnit& unit, const Pro
 {
     using namespace FreeHeroes::Core;
 
-    PropertyTreeReader reader(gameDatabase);
+    PropertyTreeReaderDatabase reader(gameDatabase);
     reader.jsonToValue(jsonObj, unit);
     if (unit.primary.armySpeed == 0)
         unit.primary.armySpeed = unit.primary.battleSpeed;
@@ -179,24 +179,28 @@ bool deserialize(const IGameDatabase* gameDatabase, LibraryUnit& unit, const Pro
 }
 bool deserialize(const IGameDatabase* gameDatabase, LibraryGameRules& obj, const PropertyTree& jsonObj)
 {
-    PropertyTreeReader reader(gameDatabase);
+    PropertyTreeReaderDatabase reader(gameDatabase);
     reader.jsonToValue(jsonObj, obj);
     return true;
 }
 
 bool deserialize(const IGameDatabase* gameDatabase, SkillHeroItem& obj, const PropertyTree& jsonObj)
 {
-    PropertyTreeReader reader(gameDatabase);
+    PropertyTreeReaderDatabase reader(gameDatabase);
     reader.jsonToValue(jsonObj, obj);
     return true;
 }
 
 bool serialize(const SkillHeroItem& obj, PropertyTree& jsonObj)
 {
-    PropertyTreeWriter writer;
+    PropertyTreeWriterDatabase writer;
     writer.valueToJson(obj, jsonObj);
     return true;
 }
+
+}
+
+namespace Mernel::Reflection {
 
 template<>
 bool MetaInfo::transformTreeRead<LibraryUnit::Traits>(const PropertyTree& treeIn, PropertyTree& treeOut)

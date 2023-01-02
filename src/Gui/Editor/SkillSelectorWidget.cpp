@@ -8,7 +8,7 @@
 #include "LibraryEditorModels.hpp"
 #include "LibraryWrappersMetatype.hpp"
 
-#include "Profiler.hpp"
+#include "MernelPlatform/Profiler.hpp"
 
 #include <QAbstractItemView>
 

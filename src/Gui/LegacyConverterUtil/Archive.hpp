@@ -5,8 +5,8 @@
  */
 #pragma once
 
-#include "ByteOrderStream.hpp"
-#include "FsUtils.hpp"
+#include "MernelPlatform/ByteOrderStream.hpp"
+#include "MernelPlatform/FsUtils.hpp"
 
 namespace FreeHeroes {
 
@@ -20,6 +20,8 @@ public:
         SND,
         VID
     };
+    using ByteOrderDataStreamReader = Mernel::ByteOrderDataStreamReader;
+    using ByteOrderDataStreamWriter = Mernel::ByteOrderDataStreamWriter;
 
 public:
     BinaryFormat m_format = BinaryFormat::Invalid;
@@ -39,7 +41,7 @@ public:
         size_t               m_binaryOrder = 0;
         bool                 m_isPadding   = false;
 
-        ByteArrayHolder m_buffer;
+        Mernel::ByteArrayHolder m_buffer;
 
         std::string fullname() const { return m_basename + m_extWithDot; }
     };
@@ -64,15 +66,15 @@ public:
 
     void clear();
 
-    void detectFormat(const Core::std_path& path, ByteOrderDataStreamReader& stream);
+    void detectFormat(const Mernel::std_path& path, ByteOrderDataStreamReader& stream);
 
     void readBinary(ByteOrderDataStreamReader& stream);
     void writeBinary(ByteOrderDataStreamWriter& stream) const;
 
-    void saveToFolder(const Core::std_path& path, bool skipExisting) const;
-    void loadFromFolder(const Core::std_path& path);
+    void saveToFolder(const Mernel::std_path& path, bool skipExisting) const;
+    void loadFromFolder(const Mernel::std_path& path);
 
-    void createFromFolder(const Core::std_path& path, const std::vector<std::string>& extensions);
+    void createFromFolder(const Mernel::std_path& path, const std::vector<std::string>& extensions);
 
     void convertToBinary();
     void convertFromBinary(bool uncompress);
@@ -97,7 +99,7 @@ private:
         size_t m_headerOrder     = 0;
         size_t m_binaryDataOrder = 0;
 
-        ByteArrayHolder m_buffer;
+        Mernel::ByteArrayHolder m_buffer;
 
         void readBinaryLOD(ByteOrderDataStreamReader& stream);
         void writeBinaryLOD(ByteOrderDataStreamWriter& stream) const;

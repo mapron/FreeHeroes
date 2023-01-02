@@ -9,11 +9,12 @@
 #include <QGuiApplication>
 
 #include "CoreApplication.hpp"
-#include "CommandLineUtils.hpp"
+#include "MernelPlatform/CommandLineUtils.hpp"
 
 #include "GameExtract.hpp"
 
 using namespace FreeHeroes;
+using namespace Mernel;
 
 int main(int argc, char** argv)
 {
@@ -27,10 +28,10 @@ int main(int argc, char** argv)
     }
 
     const auto settings = GameExtract::Settings{
-        .m_heroesRoot         = Core::string2path(parser.getArg("heroesRoot")),
-        .m_archiveExtractRoot = Core::string2path(parser.getArg("archiveExtractRoot")),
-        .m_mainExtractRoot    = Core::string2path(parser.getArg("mainExtractRoot")),
-        .m_knownResourcesFile = Core::string2path(parser.getArg("knownResourcesFile")),
+        .m_heroesRoot         = Mernel::string2path(parser.getArg("heroesRoot")),
+        .m_archiveExtractRoot = Mernel::string2path(parser.getArg("archiveExtractRoot")),
+        .m_mainExtractRoot    = Mernel::string2path(parser.getArg("mainExtractRoot")),
+        .m_knownResourcesFile = Mernel::string2path(parser.getArg("knownResourcesFile")),
         .m_forceExtract       = (parser.getArg("force") == "1"),
     };
 

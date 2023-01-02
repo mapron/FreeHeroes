@@ -16,14 +16,15 @@
 #include "LibraryGameRules.hpp"
 #include "BattleEstimation.hpp"
 
-#include "Logger.hpp"
-#include "Profiler.hpp"
+#include "MernelPlatform/Logger.hpp"
+#include "MernelPlatform/Profiler.hpp"
 
 #include <iostream>
 #include <algorithm>
 #include <cassert>
 
 namespace FreeHeroes::Core {
+using namespace Mernel;
 
 static std::ostream& operator<<(std::ostream& os, const FreeHeroes::Core::BattlePosition& pos)
 {

@@ -9,11 +9,12 @@
 #include <QGuiApplication>
 
 #include "CoreApplication.hpp"
-#include "CommandLineUtils.hpp"
+#include "MernelPlatform/CommandLineUtils.hpp"
 
 #include "ConversionHandler.hpp"
 
 using namespace FreeHeroes;
+using namespace Mernel;
 
 int main(int argc, char** argv)
 {
@@ -58,10 +59,10 @@ int main(int argc, char** argv)
     QGuiApplication guiApp(argc, argv);
 
     auto makePaths = [&parser](const std::string& prefix) -> ConversionHandler::PathsSet {
-        const auto dat     = Core::string2path(parser.getArg(prefix + "dat"));
-        const auto def     = Core::string2path(parser.getArg(prefix + "def"));
-        const auto pngJson = Core::string2path(parser.getArg(prefix + "json"));
-        const auto folder  = Core::string2path(parser.getArg(prefix + "folder"));
+        const auto dat     = Mernel::string2path(parser.getArg(prefix + "dat"));
+        const auto def     = Mernel::string2path(parser.getArg(prefix + "def"));
+        const auto pngJson = Mernel::string2path(parser.getArg(prefix + "json"));
+        const auto folder  = Mernel::string2path(parser.getArg(prefix + "folder"));
 
         return ConversionHandler::PathsSet{
             .m_datFile     = dat,

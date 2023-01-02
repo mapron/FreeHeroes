@@ -5,8 +5,8 @@
  */
 #pragma once
 
-#include "ByteOrderStream.hpp"
-#include "PropertyTree.hpp"
+#include "MernelPlatform/ByteOrderStream.hpp"
+#include "MernelPlatform/PropertyTree.hpp"
 #include "H3MObjects.hpp"
 
 #include <set>

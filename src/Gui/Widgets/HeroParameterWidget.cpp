@@ -14,7 +14,7 @@
 #include "AdventureSquad.hpp"
 #include "AdventureHero.hpp"
 
-#include "Profiler.hpp"
+#include "MernelPlatform/Profiler.hpp"
 
 #include <QGridLayout>
 #include <QLabel>
@@ -60,8 +60,8 @@ HeroParameterWidget::HeroParameterWidget(const LibraryModelsProvider* modelProvi
     m_impl->m_modelsProvider = modelProvider;
     m_impl->m_ui             = modelProvider->ui();
 
-    ProfilerScope scope("HeroParameterWidget");
-    QHBoxLayout*  proxylayout = new QHBoxLayout(this);
+    Mernel::ProfilerScope scope("HeroParameterWidget");
+    QHBoxLayout*          proxylayout = new QHBoxLayout(this);
     proxylayout->setMargin(0);
     proxylayout->setSpacing(0);
     QScrollArea* scrollArea = new QScrollArea(this);

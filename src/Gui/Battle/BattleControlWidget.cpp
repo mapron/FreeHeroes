@@ -6,7 +6,7 @@
 #include "BattleControlWidget.hpp"
 #include "ui_BattleControlWidget.h"
 
-#include "Logger.hpp"
+#include "MernelPlatform/Logger.hpp"
 #include "BattleHero.hpp"
 #include "BattleControlPlan.hpp"
 

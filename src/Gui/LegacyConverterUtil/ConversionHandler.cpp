@@ -5,15 +5,15 @@
  */
 #include "ConversionHandler.hpp"
 
-#include "Reflection/EnumTraitsMacro.hpp"
+#include "MernelReflection/EnumTraitsMacro.hpp"
 
-#include "ByteOrderStream.hpp"
+#include "MernelPlatform/ByteOrderStream.hpp"
 
 #include "Archive.hpp"
 #include "SpriteFile.hpp"
 
-#include "FileIOUtils.hpp"
-#include "FileFormatJson.hpp"
+#include "MernelPlatform/FileIOUtils.hpp"
+#include "MernelPlatform/FileFormatJson.hpp"
 
 #include "SpriteParserLegacy.hpp"
 #include "SpriteSerialization.hpp"
@@ -24,15 +24,9 @@
 #define setInput(name) setInputFilename(m_settings.name, #name)
 #define setOutput(name) setOutputFilename(m_settings.name, #name)
 
-namespace FreeHeroes {
+namespace Mernel::Reflection {
 
-class ConverterExpection : public std::runtime_error {
-    using runtime_error::runtime_error;
-};
-
-namespace Core::Reflection {
-
-ENUM_REFLECTION_STRINGIY(ConversionHandler::Task,
+ENUM_REFLECTION_STRINGIY(FreeHeroes::ConversionHandler::Task,
                          Invalid,
                          Invalid,
                          ArchiveLoadDat,
@@ -57,14 +51,21 @@ ENUM_REFLECTION_STRINGIY(ConversionHandler::Task,
 
 }
 
+namespace FreeHeroes {
+using namespace Mernel;
+
+class ConverterExpection : public std::runtime_error {
+    using runtime_error::runtime_error;
+};
+
 std::string taskToString(ConversionHandler::Task task)
 {
-    auto str = Core::Reflection::EnumTraits::enumToString(task);
+    auto str = Mernel::Reflection::EnumTraits::enumToString(task);
     return std::string(str.begin(), str.end());
 }
 ConversionHandler::Task stringToTask(const std::string& str)
 {
-    return Core::Reflection::EnumTraits::stringToEnum<ConversionHandler::Task>({ str.c_str(), str.size() });
+    return Mernel::Reflection::EnumTraits::stringToEnum<ConversionHandler::Task>({ str.c_str(), str.size() });
 }
 
 ConversionHandler::ConversionHandler(std::ostream& logOutput,
@@ -209,11 +210,11 @@ void ConversionHandler::run(Task task, int recurse) noexcept(false)
             case Task::SpriteRoundTripPng:
             case Task::SpriteRoundTripFlat:
             {
-                const bool                  isPng = task == Task::SpriteRoundTripPng;
-                std::vector<Core::std_path> paths;
+                const bool                    isPng = task == Task::SpriteRoundTripPng;
+                std::vector<Mernel::std_path> paths;
                 if (!m_settings.m_inputs.m_defFile.has_extension()) {
                     m_logOutput << "Enable wildcard checking\n";
-                    for (auto&& it : Core::std_fs::directory_iterator(m_settings.m_inputs.m_defFile)) {
+                    for (auto&& it : Mernel::std_fs::directory_iterator(m_settings.m_inputs.m_defFile)) {
                         if (it.is_regular_file() && it.path().extension() == ".def") {
                             paths.push_back(it.path());
                         }
@@ -258,18 +259,18 @@ void ConversionHandler::run(MemberProc member, const char* descr, int recurse) n
     scope.markDone();
 }
 
-void ConversionHandler::setInputFilename(const Core::std_path& path, std::string_view descr)
+void ConversionHandler::setInputFilename(const Mernel::std_path& path, std::string_view descr)
 {
     if (path.empty())
         throw std::runtime_error("Path '" + std::string(descr) + "' is empty");
 
-    if (!Core::std_fs::exists(path))
-        throw std::runtime_error("Path '" + Core::path2string(path) + "' is not exist!");
+    if (!Mernel::std_fs::exists(path))
+        throw std::runtime_error("Path '" + Mernel::path2string(path) + "' is not exist!");
 
     m_inputFilename = path;
 }
 
-void ConversionHandler::setOutputFilename(const Core::std_path& path, std::string_view descr)
+void ConversionHandler::setOutputFilename(const Mernel::std_path& path, std::string_view descr)
 {
     if (path.empty())
         throw std::runtime_error("Path '" + std::string(descr) + "' is empty");
@@ -279,28 +280,28 @@ void ConversionHandler::setOutputFilename(const Core::std_path& path, std::strin
 
 void ConversionHandler::readBinaryBufferData()
 {
-    m_binaryBuffer = Core::readFileIntoHolderThrow(m_inputFilename);
+    m_binaryBuffer = Mernel::readFileIntoHolderThrow(m_inputFilename);
     m_logOutput << m_currentIndent << "Read " << m_binaryBuffer.size() << " bytes from: " << m_inputFilename << '\n';
 }
 
 void ConversionHandler::writeBinaryBufferData()
 {
     m_logOutput << m_currentIndent << "Write " << m_binaryBuffer.size() << " bytes to: " << m_outputFilename << '\n';
-    Core::writeFileFromHolderThrow(m_outputFilename, m_binaryBuffer);
+    Mernel::writeFileFromHolderThrow(m_outputFilename, m_binaryBuffer);
 }
 
 void ConversionHandler::readJsonToProperty()
 {
     m_logOutput << m_currentIndent << "Read: " << m_inputFilename << '\n';
-    std::string buffer = Core::readFileIntoBufferThrow(m_inputFilename);
-    m_json             = Core::readJsonFromBufferThrow(buffer);
+    std::string buffer = Mernel::readFileIntoBufferThrow(m_inputFilename);
+    m_json             = Mernel::readJsonFromBufferThrow(buffer);
 }
 
 void ConversionHandler::writeJsonFromProperty()
 {
     m_logOutput << m_currentIndent << "Write: " << m_outputFilename << '\n';
-    std::string buffer = Core::writeJsonToBufferThrow(m_json, m_settings.m_prettyJson);
-    Core::writeFileFromBufferThrow(m_outputFilename, buffer);
+    std::string buffer = Mernel::writeJsonToBufferThrow(m_json, m_settings.m_prettyJson);
+    Mernel::writeFileFromBufferThrow(m_outputFilename, buffer);
 }
 
 void ConversionHandler::binaryDeserializeArchive()
@@ -341,7 +342,7 @@ void ConversionHandler::convertArchiveFromBinary()
 void ConversionHandler::writeArchiveToFolder()
 {
     if (m_settings.m_cleanupFolder) {
-        Core::std_fs::remove_all(m_outputFilename);
+        Mernel::std_fs::remove_all(m_outputFilename);
     }
     m_archive->saveToFolder(m_outputFilename, !m_settings.m_forceWrite);
 }
@@ -392,8 +393,8 @@ void ConversionHandler::propertySerializeSprite()
 
 void ConversionHandler::checkBinaryInputOutputEquality()
 {
-    const std::string bufferIn  = Core::readFileIntoBufferThrow(m_inputFilename);
-    const std::string bufferOut = Core::readFileIntoBufferThrow(m_outputFilename);
+    const std::string bufferIn  = Mernel::readFileIntoBufferThrow(m_inputFilename);
+    const std::string bufferOut = Mernel::readFileIntoBufferThrow(m_outputFilename);
 
     m_logOutput << "(Input size=" << bufferIn.size() << ", Output size=" << bufferOut.size() << ")\n";
 
@@ -439,11 +440,11 @@ void ConversionHandler::checkBinaryInputOutputEquality()
     return ret(false);
 }
 
-void ConversionHandler::safeCopy(const Core::std_path& src, const Core::std_path& dest)
+void ConversionHandler::safeCopy(const Mernel::std_path& src, const Mernel::std_path& dest)
 {
     if (src != dest) {
-        Core::std_fs::remove(dest);
-        Core::std_fs::copy_file(src, dest);
+        Mernel::std_fs::remove(dest);
+        Mernel::std_fs::copy_file(src, dest);
     }
 }
 

@@ -7,7 +7,7 @@
 
 #include "SpriteSerialization.hpp"
 
-#include "Logger.hpp"
+#include "MernelPlatform/Logger.hpp"
 
 #include <QBitmap>
 #include <QPainter>

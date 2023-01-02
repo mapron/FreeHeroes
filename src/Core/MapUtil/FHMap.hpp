@@ -9,7 +9,7 @@
 #include <set>
 #include <optional>
 
-#include "PropertyTree.hpp"
+#include "MernelPlatform/PropertyTree.hpp"
 #include "GameConstants.hpp"
 
 #include "AdventureArmy.hpp"
@@ -274,8 +274,8 @@ struct MAPUTIL_EXPORT FHMap {
     std::vector<Core::LibraryObjectDefConstPtr> m_initialObjectDefs; // mostly for round-trip.
     DefMap                                      m_defReplacements;   // mostly for round-trip.
 
-    void toJson(PropertyTree& data) const;
-    void fromJson(const PropertyTree& data, const Core::IGameDatabase* database);
+    void toJson(Mernel::PropertyTree& data) const;
+    void fromJson(const Mernel::PropertyTree& data, const Core::IGameDatabase* database);
 
     void initTiles(const Core::IGameDatabase* database);
 };

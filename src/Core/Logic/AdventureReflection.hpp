@@ -9,7 +9,7 @@
 
 #include "LibraryReflection.hpp"
 
-namespace FreeHeroes::Core::Reflection {
+namespace Mernel::Reflection {
 
 // clang-format off
 STRUCT_REFLECTION_PAIRED(

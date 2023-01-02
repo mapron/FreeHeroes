@@ -7,7 +7,7 @@
 
 #include <QString>
 
-#include "FsUtils.hpp"
+#include "MernelPlatform/FsUtils.hpp"
 
 #include "LegacyConverterUtilExport.hpp"
 
@@ -20,8 +20,8 @@ public:
     bool    ffmpegFound() const { return m_ffmpegFound; }
     QString ffmpegBinary() const { return m_ffmpegBinary; }
 
-    bool prepareWav(const Core::std_path& source, const Core::std_path& dest);
-    bool prepareVideo(const Core::std_path& source, const Core::std_path& dest);
+    bool prepareWav(const Mernel::std_path& source, const Mernel::std_path& dest);
+    bool prepareVideo(const Mernel::std_path& source, const Mernel::std_path& dest);
 
 private:
     bool    m_ffmpegFound = false;

@@ -10,13 +10,13 @@
 #include "GraphicsLibrary.hpp"
 #include "LocalizationManager.hpp"
 #include "CursorLibrary.hpp"
-#include "Profiler.hpp"
+#include "MernelPlatform/Profiler.hpp"
 #include "AppSettings.hpp"
 #include "LibraryModels.hpp"
 
 // Core
 #include "CoreApplication.hpp"
-#include "Logger.hpp"
+#include "MernelPlatform/Logger.hpp"
 
 // Sound
 #include "MusicBox.hpp"
@@ -34,6 +34,7 @@
 #endif
 
 namespace FreeHeroes::Gui {
+using namespace Mernel;
 
 using namespace Core;
 

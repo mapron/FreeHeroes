@@ -42,7 +42,7 @@ MediaConverter::MediaConverter()
     m_ffmpegFound = executeFFMpeg({ "-version" }, &m_ffmpegBinary);
 }
 
-bool MediaConverter::prepareWav(const Core::std_path& source, const Core::std_path& dest)
+bool MediaConverter::prepareWav(const Mernel::std_path& source, const Mernel::std_path& dest)
 {
     if (!m_ffmpegFound)
         return false;
@@ -51,7 +51,7 @@ bool MediaConverter::prepareWav(const Core::std_path& source, const Core::std_pa
     return success;
 }
 
-bool MediaConverter::prepareVideo(const Core::std_path& source, const Core::std_path& dest)
+bool MediaConverter::prepareVideo(const Mernel::std_path& source, const Mernel::std_path& dest)
 {
     if (!m_ffmpegFound)
         return false;

@@ -7,7 +7,7 @@
 
 #include "GuiLocalizationExport.hpp"
 
-#include "FsUtils.hpp"
+#include "MernelPlatform/FsUtils.hpp"
 #include "IResourceLibrary.hpp"
 
 #include <QTranslator>

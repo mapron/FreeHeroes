@@ -7,10 +7,10 @@
 
 #include "GuiUtilsExport.hpp"
 
-#include "FsUtils.hpp"
+#include "MernelPlatform/FsUtils.hpp"
 
 namespace FreeHeroes {
 
-GUIUTILS_EXPORT Core::std_path findHeroes3Installation(bool hotaAllowed = true) noexcept;
+GUIUTILS_EXPORT Mernel::std_path findHeroes3Installation(bool hotaAllowed = true) noexcept;
 
 }

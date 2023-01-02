@@ -8,7 +8,7 @@
 #include "CoreApplicationExport.hpp"
 
 #include "IGameDatabase.hpp"
-#include "AppLocations.hpp"
+#include "MernelPlatform/AppLocations.hpp"
 
 #include <memory>
 #include <map>
@@ -55,7 +55,7 @@ public:
     [[nodiscard]] const IGameDatabase* getDatabase(GameVersion version) const override;
     bool                               hasDatabases() const { return !m_gameDatabases.empty(); }
 
-    const AppLocations& getLocations() const { return m_locations; }
+    const Mernel::AppLocations& getLocations() const { return m_locations; }
 
     static const char* getAppFolder();
 
@@ -65,7 +65,7 @@ private:
     std::map<GameVersion, std::shared_ptr<IGameDatabase>> m_gameDatabases;
     std::shared_ptr<IRandomGeneratorFactory>              m_randomGeneratorFactory;
 
-    AppLocations m_locations;
+    Mernel::AppLocations m_locations;
 };
 
 }

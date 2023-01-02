@@ -7,11 +7,14 @@
 
 #include "BitmapFile.hpp"
 
-#include "ByteOrderStream.hpp"
-#include "FsUtils.hpp"
+#include "MernelPlatform/ByteOrderStream.hpp"
+#include "MernelPlatform/FsUtils.hpp"
+
+namespace Mernel {
+class PropertyTree;
+}
 
 namespace FreeHeroes {
-class PropertyTree;
 class SpriteFile {
 public:
     enum class BinaryFormat
@@ -86,16 +89,16 @@ public:
 
     bool m_embeddedBitmapData = true;
 
-    void detectFormat(const Core::std_path& path, ByteOrderDataStreamReader& stream);
+    void detectFormat(const Mernel::std_path& path, Mernel::ByteOrderDataStreamReader& stream);
 
-    void readBinary(ByteOrderDataStreamReader& stream);
-    void writeBinary(ByteOrderDataStreamWriter& stream) const;
+    void readBinary(Mernel::ByteOrderDataStreamReader& stream);
+    void writeBinary(Mernel::ByteOrderDataStreamWriter& stream) const;
 
-    void toJson(PropertyTree& data) const;
-    void fromJson(const PropertyTree& data);
+    void toJson(Mernel::PropertyTree& data) const;
+    void fromJson(const Mernel::PropertyTree& data);
 
-    void saveBitmapsData(const Core::std_path& jsonFilePath) const;
-    void loadBitmapsData(const Core::std_path& jsonFilePath);
+    void saveBitmapsData(const Mernel::std_path& jsonFilePath) const;
+    void loadBitmapsData(const Mernel::std_path& jsonFilePath);
 
     void uncompress();
     void compressToOriginal();
@@ -107,7 +110,7 @@ public:
 
     void mergeBitmaps();
 
-    void saveGuiSprite(const Core::std_path& jsonFilePath);
+    void saveGuiSprite(const Mernel::std_path& jsonFilePath);
 };
 
 }

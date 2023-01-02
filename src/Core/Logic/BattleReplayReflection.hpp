@@ -4,7 +4,7 @@
 
 #include "BattleReplay.hpp"
 
-namespace FreeHeroes::Core::Reflection {
+namespace Mernel::Reflection {
 // clang-format off
 ENUM_REFLECTION_PAIRED( BattleReplayData::EventRecord::Type,
     Guard,

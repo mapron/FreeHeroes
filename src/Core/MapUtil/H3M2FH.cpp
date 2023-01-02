@@ -14,11 +14,12 @@
 #include "LibraryObjectDef.hpp"
 #include "LibraryTerrain.hpp"
 
-#include "Logger.hpp"
+#include "MernelPlatform/Logger.hpp"
 
 #include <functional>
 
 namespace FreeHeroes {
+using namespace Mernel;
 
 namespace {
 

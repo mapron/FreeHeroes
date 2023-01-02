@@ -21,19 +21,19 @@
 #include "LibraryTerrain.hpp"
 #include "LibraryUnit.hpp"
 
-#include "Reflection/EnumTraitsMacro.hpp"
-#include "Reflection/MetaInfoMacro.hpp"
+#include "MernelReflection/EnumTraitsMacro.hpp"
+#include "MernelReflection/MetaInfoMacro.hpp"
 
-#include "StringUtils.hpp"
+#include "MernelPlatform/StringUtils.hpp"
 
 #include "CoreLogicExport.hpp"
 
-namespace FreeHeroes {
+namespace Mernel {
 class PropertyTree;
 }
 
-namespace FreeHeroes::Core::Reflection {
-
+namespace Mernel::Reflection {
+using namespace FreeHeroes::Core;
 // clang-format off
 
 STRUCT_REFLECTION_PAIRED(

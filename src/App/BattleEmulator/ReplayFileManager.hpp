@@ -5,23 +5,23 @@
  */
 #pragma once
 
-#include "FsUtils.hpp"
+#include "MernelPlatform/FsUtils.hpp"
 
 #include <QAbstractListModel>
 
 namespace FreeHeroes::BattleEmulator {
 
 class ReplayFileManager : public QAbstractListModel {
-    Core::std_path m_replayRoot;
+    Mernel::std_path m_replayRoot;
 
 public:
     struct Record {
-        QString        displayName;
-        Core::std_path battleReplay;
+        QString          displayName;
+        Mernel::std_path battleReplay;
     };
     std::vector<Record> m_records;
 
-    void setRoot(Core::std_path replayRoot);
+    void setRoot(Mernel::std_path replayRoot);
     void load();
     void clearAll();
 

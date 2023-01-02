@@ -42,9 +42,9 @@ public:
 
     struct ResourceLibraryPathList {
         struct Record {
-            std_path    path;
-            std::string id;
-            DepList     deps;
+            Mernel::std_path path;
+            std::string      id;
+            DepList          deps;
         };
         std::vector<Record> records;
         void                append(const ResourceLibraryPathList& another)
@@ -54,10 +54,10 @@ public:
         CORERESOURCE_EXPORT void topoSort();
     };
 
-    static ResourceLibraryPathList          searchIndexInFolderRecursive(const std_path& folder);
+    static ResourceLibraryPathList          searchIndexInFolderRecursive(const Mernel::std_path& folder);
     static std::shared_ptr<ResourceLibrary> makeMergedLibrary(const ResourceLibraryPathList& sortedPaths);
 
-    void setIndexFolder(const std_path& folder);
+    void setIndexFolder(const Mernel::std_path& folder);
     void addDep(std::string dep, DepsRequire require = DepsRequire::Hard);
 
     bool loadIndex(bool onlyMeta = false);
@@ -102,7 +102,7 @@ private:
     TypeMappingMedia   m_media;
     LocaleMappingTrans m_translations;
     IdMappingDatabase  m_databases;
-    std_path           m_indexFolder;
+    Mernel::std_path   m_indexFolder;
 
     struct MemoryStorage {
         std::deque<std::string> m_strStorage;

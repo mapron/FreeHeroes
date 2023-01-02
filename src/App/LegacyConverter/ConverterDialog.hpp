@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "FsUtils.hpp"
+#include "MernelPlatform/FsUtils.hpp"
 
 #include <QDialog>
 #include <QSettings>
@@ -38,7 +38,7 @@ private:
 
 private:
     std::unique_ptr<Ui::ConverterDialog>      m_ui;
-    Core::std_path                            m_hotaInstallDir;
+    Mernel::std_path                          m_hotaInstallDir;
     QSettings                                 m_converterSettings;
     const Core::IGameDatabaseContainer* const m_databaseContainer;
 };

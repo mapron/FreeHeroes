@@ -7,10 +7,10 @@
 
 #include "H3SVGMap.hpp"
 
-#include "Reflection/EnumTraits.hpp"
-#include "Reflection/MetaInfoMacro.hpp"
+#include "MernelReflection/EnumTraits.hpp"
+#include "MernelReflection/MetaInfoMacro.hpp"
 
-namespace FreeHeroes::Core::Reflection {
+namespace Mernel::Reflection {
 
 // clang-format off
 STRUCT_REFLECTION_PAIRED(

@@ -11,7 +11,7 @@
 #include "LibrarySpell.hpp"
 #include "BattleField.hpp"
 
-namespace FreeHeroes::Core::Reflection {
+namespace Mernel::Reflection {
 
 // clang-format off
 ENUM_REFLECTION_STRINGIY(BattleDirection,

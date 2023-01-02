@@ -12,7 +12,7 @@
 
 #include "AdventureSquad.hpp"
 
-#include "Profiler.hpp"
+#include "MernelPlatform/Profiler.hpp"
 
 namespace FreeHeroes::Gui {
 
@@ -22,7 +22,7 @@ StackSelectorPackWidget::StackSelectorPackWidget(QWidget* parent)
     : QWidget(parent)
     , m_ui(std::make_unique<Ui::StackSelectorPackWidget>())
 {
-    ProfilerScope scope("StackSelectorPackWidget");
+    Mernel::ProfilerScope scope("StackSelectorPackWidget");
     m_ui->setupUi(this);
     m_stackSelectors << m_ui->stackEditor1
                      << m_ui->stackEditor2

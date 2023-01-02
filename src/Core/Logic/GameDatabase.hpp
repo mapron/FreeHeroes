@@ -7,7 +7,7 @@
 
 #include "IGameDatabase.hpp"
 
-#include "PropertyTree.hpp"
+#include "MernelPlatform/PropertyTree.hpp"
 
 #include "CoreLogicExport.hpp"
 
@@ -18,8 +18,8 @@ class IResourceLibrary;
 class CORELOGIC_EXPORT GameDatabase : public IGameDatabase {
 public:
     struct Resource {
-        PropertyTree m_jsonData;
-        std::string  m_filename;
+        Mernel::PropertyTree m_jsonData;
+        std::string          m_filename;
     };
 
 public:
