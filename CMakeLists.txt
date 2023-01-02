@@ -164,13 +164,13 @@ AddTarget(TYPE header_only GENERATE_STUB NAME GuiInt OUTPUT_PREFIX FH
 AddTarget(TYPE shared NAME CoreRng OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/Rng
     EXPORT_INCLUDES
-    LINK_LIBRARIES CorePlatform
+    LINK_LIBRARIES CorePlatform GameInt
     )
 
 AddTarget(TYPE shared NAME CoreResource OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/Resource
     EXPORT_INCLUDES
-    LINK_LIBRARIES CorePlatform
+    LINK_LIBRARIES CorePlatform GameInt
     )
 
 AddTarget(TYPE shared NAME CoreLogic OUTPUT_PREFIX FH
@@ -203,7 +203,7 @@ AddTarget(TYPE shared NAME CoreApplication OUTPUT_PREFIX FH
 AddTarget(TYPE shared NAME SoundPlayer OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Sound/Player
     EXPORT_INCLUDES
-    LINK_LIBRARIES SoundInt CoreResource CorePlatform
+    LINK_LIBRARIES SoundInt CoreResource CorePlatform GameInt
     QT_MODULES Multimedia
     )
 
