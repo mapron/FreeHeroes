@@ -1,0 +1,3 @@
+[submodule "ext/mernel"]
+	path = ext/mernel
+	url = https://github.com/mapron/mernel.git
