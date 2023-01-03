@@ -5,10 +5,6 @@
  */
 #include "GameDatabase.hpp"
 
-#include "JsonHelper.hpp"
-#include "MernelPlatform/Logger.hpp"
-#include "MernelPlatform/Profiler.hpp"
-
 #include "LibraryArtifact.hpp"
 #include "LibraryDwelling.hpp"
 #include "LibraryFaction.hpp"
@@ -26,17 +22,11 @@
 #include "LibraryUnit.hpp"
 
 #include "LibrarySerialize.hpp"
-#include "MernelPlatform/FileFormatJson.hpp"
-#include "MernelPlatform/FileIOUtils.hpp"
 
-#include "IResourceLibrary.hpp"
-
-#include <fstream>
-#include <iostream>
-#include <sstream>
 #include <deque>
 #include <unordered_map>
 #include <cstddef>
+#include <stdexcept>
 
 namespace FreeHeroes::Core {
 using namespace Mernel;
@@ -131,10 +121,10 @@ struct GameDatabase::Impl {
             return insertObject(id, {});
         }
 
-        bool loadRecordList(const IGameDatabase* idResolver, const PropertyTree& recordListMap)
+        void loadRecordList(const IGameDatabase* idResolver, const PropertyTree& recordListMap)
         {
             if (!recordListMap.contains(LibraryContainerKey<T>::scopeName))
-                return true;
+                return;
             const PropertyTreeMap& recordList = recordListMap[LibraryContainerKey<T>::scopeName].getMap();
             for (auto it = recordList.cbegin(); it != recordList.cend(); ++it) {
                 const std::string& id      = it->first;
@@ -145,10 +135,8 @@ struct GameDatabase::Impl {
                 auto* objRecord = findMutable(id);
                 assert(objRecord);
 
-                if (!deserialize(idResolver, *objRecord, jsonObj))
-                    return false;
+                deserialize(idResolver, *objRecord, jsonObj);
             }
-            return true;
         }
 
         void prepareObjectKeys(const PropertyTree& recordListMap)
@@ -274,21 +262,6 @@ GameDatabase::Impl::LibraryContainer<LibraryUnit>& GameDatabase::Impl::getContai
     return m_units;
 }
 
-GameDatabase::GameDatabase(const std::vector<Resource>& resourceFiles)
-    : m_impl(std::make_unique<Impl>())
-{
-    load(resourceFiles); // @todo: exception throw??
-}
-
-GameDatabase::GameDatabase(const std::string& dataBaseId, const IResourceLibrary* resourceLibrary)
-    : GameDatabase(loadLibrary(dataBaseId, resourceLibrary))
-{
-}
-
-GameDatabase::~GameDatabase()
-{
-}
-
 IGameDatabase::LibraryArtifactContainerPtr GameDatabase::artifacts() const
 {
     return &m_impl->m_artifacts;
@@ -351,42 +324,9 @@ LibraryGameRulesConstPtr GameDatabase::gameRules() const
     return &m_impl->m_gameRules;
 }
 
-std::vector<GameDatabase::Resource> GameDatabase::loadLibrary(const std::string& dataBaseId, const IResourceLibrary* resourceLibrary)
+GameDatabase::GameDatabase(const Mernel::PropertyTree& recordObjectMaps)
+    : m_impl(std::make_unique<Impl>())
 {
-    Mernel::ProfilerScope               scope("GameDatabase::loadLibrary");
-    std::vector<GameDatabase::Resource> files;
-    const ResourceDatabase&             desc = resourceLibrary->getDatabase(dataBaseId);
-    for (auto& f : desc.filesFullPathsWithDeps) {
-        std::string    buffer;
-        const std_path path{ string2path(f) };
-        {
-            if (!readFileIntoBuffer(path, buffer)) {
-                Logger(Logger::Warning) << "Skipped file unable to read:" << f << " (exist:" << std_fs::exists(path) << ")";
-                continue;
-            }
-        }
-        PropertyTree tree;
-        {
-            if (!readJsonFromBuffer(buffer, tree)) {
-                Logger(Logger::Warning) << "Skipped invalid json file:" << f;
-                continue;
-            }
-        }
-        files.push_back({ std::move(tree), path2string(path.filename()) });
-    }
-    return files;
-}
-
-bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
-{
-    Logger(Logger::Info) << "Preparing to load GameDatabase, total files:" << resourceFiles.size();
-    PropertyTree recordObjectMaps;
-    recordObjectMaps.convertToMap();
-    for (const auto& resourceFile : resourceFiles) {
-        const int totalRecordsFound = addJsonObjectToIndex(recordObjectMaps, resourceFile.m_jsonData);
-        Logger(Logger::Info) << "Database JSON parsing finished: " << resourceFile.m_filename << ", total records:" << totalRecordsFound;
-    }
-
     // clang-format off
     m_impl->m_artifacts      .prepareObjectKeys(recordObjectMaps);
     m_impl->m_dwellings      .prepareObjectKeys(recordObjectMaps);
@@ -405,29 +345,23 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
     // clang-format on
 
     // clang-format off
-    const bool result =
-               m_impl->m_artifacts      .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_dwellings      .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_factions       .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_heroSpecs      .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_heroes         .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_mapBanks       .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_mapObstacles   .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_mapVisitables  .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_objectDefs     .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_resources      .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_skills         .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_spells         .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_terrains       .loadRecordList(this, recordObjectMaps)
-            && m_impl->m_units          .loadRecordList(this, recordObjectMaps)
-            ;
+    m_impl->m_artifacts      .loadRecordList(this, recordObjectMaps);
+    m_impl->m_dwellings      .loadRecordList(this, recordObjectMaps);
+    m_impl->m_factions       .loadRecordList(this, recordObjectMaps);
+    m_impl->m_heroSpecs      .loadRecordList(this, recordObjectMaps);
+    m_impl->m_heroes         .loadRecordList(this, recordObjectMaps);
+    m_impl->m_mapBanks       .loadRecordList(this, recordObjectMaps);
+    m_impl->m_mapObstacles   .loadRecordList(this, recordObjectMaps);
+    m_impl->m_mapVisitables  .loadRecordList(this, recordObjectMaps);
+    m_impl->m_objectDefs     .loadRecordList(this, recordObjectMaps);
+    m_impl->m_resources      .loadRecordList(this, recordObjectMaps);
+    m_impl->m_skills         .loadRecordList(this, recordObjectMaps);
+    m_impl->m_spells         .loadRecordList(this, recordObjectMaps);
+    m_impl->m_terrains       .loadRecordList(this, recordObjectMaps);
+    m_impl->m_units          .loadRecordList(this, recordObjectMaps);
     // clang-format on
 
-    if (!result)
-        return false;
-
-    if (!deserialize(this, m_impl->m_gameRules, recordObjectMaps["gameRules"][""]))
-        return false;
+    deserialize(this, m_impl->m_gameRules, recordObjectMaps["gameRules"][""]);
 
     auto checkLink = []<typename T>(const auto* id, const T* context) {
         if (id)
@@ -782,8 +716,10 @@ bool GameDatabase::load(const std::vector<Resource>& resourceFiles)
 
         m_impl->m_objectDefs.m_sorted.push_back(obj);
     }
+}
 
-    return true;
+GameDatabase::~GameDatabase()
+{
 }
 
 }

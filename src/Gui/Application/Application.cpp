@@ -107,8 +107,6 @@ Application::Application(CoreApplication*   coreApp,
     m_impl->appConfig->globalMutable().localeId = currentLocale;
     // to make user happy just edit values, not to guess keys. Do it earlier in case of crash later.
     m_impl->appConfig->save();
-
-    m_impl->appConfig->globalMutable().databaseItems << g_database_HOTA << g_database_SOD;
 }
 
 Application::~Application()
@@ -124,11 +122,24 @@ bool Application::load()
         Logger(Logger::Notice) << "Application started. Log level is " << m_impl->appConfig->global().logLevel;
         qWarning() << "checking Qt logs";
     }
+    m_impl->coreApp->setLoadUserModSequence(m_impl->appConfig->global().getResourceIds());
 
     if (!m_impl->coreApp->load())
         return false;
-    if (m_impl->coreApp->hasDatabases())
-        m_gameDatabaseUi = m_impl->coreApp->getDatabaseContainer()->getDatabase(m_impl->appConfig->global().databaseId.toStdString());
+
+    {
+        ProfilerScope scopeAll("Application game database UI");
+        m_gameDatabaseUi = m_impl->coreApp->getDatabaseContainer()->getDatabase(m_impl->appConfig->global().getDbIds());
+        if (!m_gameDatabaseUi) {
+            Logger(Logger::Err) << "Failed to load database with config:" << m_impl->appConfig->global().getDbIds() << ", resetting to default.";
+            m_impl->appConfig->globalMutable().reset();
+            m_gameDatabaseUi = m_impl->coreApp->getDatabaseContainer()->getDatabase(m_impl->appConfig->global().getDbIds());
+            if (m_gameDatabaseUi) {
+                Logger(Logger::Crit) << "Now application is totally broken, even default DB config is not loadable. Pls fix that dear developer.";
+                return false;
+            }
+        }
+    }
 
     Logger(Logger::Info) << "Application::load - start";
     QString       binDir = QString::fromStdString(path2string(m_impl->coreApp->getLocations().getBinDir()));

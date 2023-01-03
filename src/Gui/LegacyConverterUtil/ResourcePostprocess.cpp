@@ -16,8 +16,8 @@ using namespace Gui;
 namespace {
 QPixmap getPixmap(Core::IResourceLibrary& resources, std::string id)
 {
-    const auto& resource = resources.getMedia(ResourceMedia::Type::Sprite, id);
-    auto        sprite   = loadSprite(std_path(resource.getFullPath()));
+    const auto resource = resources.get(ResourceType::Sprite, id);
+    auto       sprite   = loadSprite(resource);
     Q_ASSERT(sprite && sprite->getGroupsCount() > 0);
 
     auto seq = sprite->getFramesForGroup(0);
@@ -30,14 +30,8 @@ void ResourcePostprocess::concatSprites(Core::IResourceLibrary&         resource
                                         const std::string&              out,
                                         bool                            vertical)
 {
-    auto resource         = resources.getMedia(ResourceMedia::Type::Sprite, in[0]);
-    resource.id           = out;
-    auto str              = makeJsonFilename(out);
-    resource.mainFilename = str; // string_view, cannot make temporary here!
-    if (resources.mediaExists(ResourceMedia::Type::Sprite, out))
+    if (resources.fileExists(ResourceType::Sprite, out))
         return;
-
-    resources.registerResource(resource);
 
     QList<QImage> imgs;
     QSize         size(0, 0);
@@ -66,8 +60,9 @@ void ResourcePostprocess::concatSprites(Core::IResourceLibrary&         resource
         }
     }
 
-    SpritePtr sprite = Sprite::fromPixmap(QPixmap::fromImage(result));
-    saveSprite(sprite, std_path(resource.getFullPath()));
+    // @todo: need to know where to save?
+    // SpritePtr sprite = Sprite::fromPixmap(QPixmap::fromImage(result));
+    // saveSprite(sprite, std_path(resource.getFullPath()));
 }
 
 void ResourcePostprocess::concatTilesSprite(Core::IResourceLibrary& resources, const std::string& base, const std::string& out, int tilesCount)
@@ -78,13 +73,14 @@ void ResourcePostprocess::concatTilesSprite(Core::IResourceLibrary& resources, c
             idSuffix = "0" + idSuffix;
         return base + idSuffix;
     };
-
-    auto resource         = resources.getMedia(ResourceMedia::Type::Sprite, makeId(0));
+    // @todo:
+    /*
+    auto resource         = resources.get(ResourceType::Sprite, makeId(0));
     resource.id           = out;
     auto str              = makeJsonFilename(out);
     resource.subdir       = "Sprites/AdventureTiles/";
     resource.mainFilename = str; // string_view, cannot make temporary here!
-    if (resources.mediaExists(ResourceMedia::Type::Sprite, out))
+    if (resources.mediaExists(ResourceType::Sprite, out))
         return;
 
     resources.registerResource(resource);
@@ -98,7 +94,7 @@ void ResourcePostprocess::concatTilesSprite(Core::IResourceLibrary& resources, c
     auto sharedSprite = std::make_shared<const Sprite>(std::move(result));
 
     const auto& path = std_path(resource.getFullPath());
-    saveSprite(sharedSprite, path, {});
+    saveSprite(sharedSprite, path, {});*/
 }
 
 }

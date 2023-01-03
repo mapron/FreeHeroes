@@ -84,11 +84,12 @@ LocalizationManager::LocalizationManager(QString                 localeId,
     m_pluralSelector = localeId.startsWith("ru_") ? pluralSelector_RU : localeId.startsWith("pl_") ? pluralSelector_PL
                                                                                                    : pluralSelector_EN;
 
-    for (const auto& id : resourceLibrary->getTranslationContextChildren(m_mainLocaleId, "units")) {
-        auto&                    unitMap = m_records["units"];
-        std::vector<std::string> res     = resourceLibrary->getTranslation(m_mainLocaleId, "units", id);
-        unitMap[id + ".accusative"]      = makeAccusativeForms(localeId.toStdString(), res);
-    }
+    // @todo: translations rework
+    //    for (const auto& id : resourceLibrary->getTranslationContextChildren(m_mainLocaleId, "units")) {
+    //        auto&                    unitMap = m_records["units"];
+    //        std::vector<std::string> res     = resourceLibrary->getTranslation(m_mainLocaleId, "units", id);
+    //        unitMap[id + ".accusative"]      = makeAccusativeForms(localeId.toStdString(), res);
+    //    }
 }
 
 QString LocalizationManager::translate(const char* context, const char* sourceText, const char* disambiguation, int n) const
@@ -126,7 +127,7 @@ QString LocalizationManager::translateByRecords(const char* context, const char*
 
 QString LocalizationManager::translateByLibrary(const char* context, const char* sourceText, int n) const
 {
-    std::vector<std::string> values = m_resourceLibrary->getTranslation(m_mainLocaleId, context, sourceText);
+    std::vector<std::string> values; // = m_resourceLibrary->getTranslation(m_mainLocaleId, context, sourceText);
     if (values.empty())
         return {};
     const std::string& value = values[values.size() == 1 ? 0 : m_pluralSelector(n, values.size())];

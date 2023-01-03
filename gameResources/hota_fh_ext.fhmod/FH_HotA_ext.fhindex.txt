@@ -22,4 +22,4 @@ translation	ru_RU	units
 	hota.unit.steelGolem	+	Стальных Голема	Стальных Големов	Стального Голема
 	hota.unit.cannon	+	Пушки	Пушек	Пушку
 sprites
-	resource	replacement/	resource.fh.json
+	resource	replacement/	resource.fhsprite.json

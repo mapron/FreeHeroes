@@ -64,35 +64,35 @@ struct HdatRecord {
     QVector<uint32_t> addParams;
 };
 
-const QMap<ResourceMedia::Type, std_path> defaultSubfolders{
-    { ResourceMedia::Type::Sprite, "pcx" },
-    { ResourceMedia::Type::Sound, "effects" },
-    { ResourceMedia::Type::Music, "music" },
-    { ResourceMedia::Type::Video, "video" },
-    { ResourceMedia::Type::Other, "txt" },
+const QMap<ResourceType, std_path> defaultSubfolders{
+    { ResourceType::Sprite, "pcx" },
+    { ResourceType::Sound, "effects" },
+    { ResourceType::Music, "music" },
+    { ResourceType::Video, "video" },
+    // { ResourceType::Other, "txt" },
 };
 
 // @todo: do we need: .fnt, .pal, .h3c, .ifr, .xmi ? .h3c probably yes, campaigns some day!
-ResourceMedia::Type guessType(const std_path& resourceExt, bool* isPCX)
+ResourceType guessType(const std_path& resourceExt, bool* isPCX)
 {
     if (isPCX)
         *isPCX = false;
     if (resourceExt == ".def" || resourceExt == ".d32") {
-        return ResourceMedia::Type::Sprite;
+        return ResourceType::Sprite;
     } else if (resourceExt == ".pcx" || resourceExt == ".p32") {
         if (isPCX)
             *isPCX = true;
-        return ResourceMedia::Type::Sprite;
+        return ResourceType::Sprite;
     } else if (resourceExt == ".wav") {
-        return ResourceMedia::Type::Sound;
+        return ResourceType::Sound;
     } else if (resourceExt == ".mp3") {
-        return ResourceMedia::Type::Music;
+        return ResourceType::Music;
     } else if (resourceExt == ".bik" || resourceExt == ".smk") {
-        return ResourceMedia::Type::Video;
+        return ResourceType::Video;
     } else if (resourceExt == ".txt") {
-        return ResourceMedia::Type::Other;
+        //return ResourceType::Other;
     }
-    return ResourceMedia::Type::None;
+    return ResourceType::Invalid;
 }
 
 void ensureDirExistence(const std_path& path)
@@ -104,11 +104,11 @@ void ensureDirExistence(const std_path& path)
 
 }
 
-ArchiveParser::ArchiveParser(KnownResources&           knownResources,
-                             QSet<ResourceMedia::Type> requiredTypes,
-                             bool                      overrideExisting,
-                             bool                      keepTmp,
-                             ExtractCallbackInc        extractCallbackInc)
+ArchiveParser::ArchiveParser(KnownResources&    knownResources,
+                             QSet<ResourceType> requiredTypes,
+                             bool               overrideExisting,
+                             bool               keepTmp,
+                             ExtractCallbackInc extractCallbackInc)
     : m_knownResources(knownResources)
     , m_requiredTypes(std::move(requiredTypes))
     , m_overrideExisting(overrideExisting)
@@ -171,7 +171,7 @@ bool ArchiveParser::proceed(const ExtractionTask& task, CallbackInserter& conver
 
 bool ArchiveParser::copyMusic(const ExtractionTask& task, CallbackInserter& conversion, int* estimate)
 {
-    if (!m_requiredTypes.contains(ResourceMedia::Type::Music))
+    if (!m_requiredTypes.contains(ResourceType::Music))
         return false;
 
     (void) conversion;
@@ -182,7 +182,7 @@ bool ArchiveParser::copyMusic(const ExtractionTask& task, CallbackInserter& conv
         std::error_code ec;
         const std_path  filename  = toLower(path2string(p.path().filename()));
         const std_path  resouceId = filename.stem();
-        if (needSkipResource(task, resouceId, ResourceMedia::Type::Music))
+        if (needSkipResource(task, resouceId, ResourceType::Music))
             continue;
 
         if (estimate) {
@@ -192,15 +192,15 @@ bool ArchiveParser::copyMusic(const ExtractionTask& task, CallbackInserter& conv
         m_extractCallbackInc();
 
         std_fs::copy(p.path(), dest / filename, std_fs::copy_options::overwrite_existing, ec);
-        if (!ec)
-            task.resources->registerResource(ResourceMedia{ ResourceMedia::Type::Music, path2string(resouceId), "Music/", path2string(filename), {} });
+        //if (!ec)
+        //    task.resources->registerResource(ResourceMedia{ ResourceType::Music, path2string(resouceId), "Music/", path2string(filename), {} });
     }
     return true;
 }
 
 bool ArchiveParser::copyDef(const ArchiveParser::ExtractionTask& task, CallbackInserter& conversion, int* estimate)
 {
-    if (!m_requiredTypes.contains(ResourceMedia::Type::Sprite))
+    if (!m_requiredTypes.contains(ResourceType::Sprite))
         return false;
 
     // (void)conversion;
@@ -217,7 +217,7 @@ bool ArchiveParser::copyDef(const ArchiveParser::ExtractionTask& task, CallbackI
         const bool        isDef       = ext == ".def";
         if (!isBmp && !isDef)
             continue;
-        if (needSkipResource(task, resourceId, ResourceMedia::Type::Sprite))
+        if (needSkipResource(task, resourceId, ResourceType::Sprite))
             continue;
 
         if (estimate) {
@@ -240,7 +240,7 @@ bool ArchiveParser::copyDef(const ArchiveParser::ExtractionTask& task, CallbackI
         };
         conversion(conversionRoutine);
 
-        task.resources->registerResource(ResourceMedia{ ResourceMedia::Type::Sprite, path2string(resourceId), "", destName, {} });
+        //task.resources->registerResource(ResourceMedia{ ResourceType::Sprite, path2string(resourceId), "", destName, {} });
     }
     return true;
 }
@@ -284,11 +284,11 @@ bool ArchiveParser::extractLOD(const ExtractionTask& task, CallbackInserter& con
         auto* knownResource = m_knownResources.find(path2string(resourceId));
         if (knownResource && needSkipResource(task, knownResource->newId, resourceExt))
             continue;
-        bool                      isPcx = false;
-        const ResourceMedia::Type type  = guessType(resourceExt, &isPcx);
+        bool               isPcx = false;
+        const ResourceType type  = guessType(resourceExt, &isPcx);
 
         if (estimate) {
-            if (type != ResourceMedia::Type::None)
+            if (type != ResourceType::Invalid)
                 (*estimate)++;
             continue;
         }
@@ -305,7 +305,7 @@ bool ArchiveParser::extractLOD(const ExtractionTask& task, CallbackInserter& con
         }
         ofs.close();
         extractedResources << resourceFilename;
-        if (type != ResourceMedia::Type::None)
+        if (type != ResourceType::Invalid)
             m_extractCallbackInc();
     }
     if (estimate)
@@ -317,9 +317,9 @@ bool ArchiveParser::extractLOD(const ExtractionTask& task, CallbackInserter& con
         std::string    mainResourceName = path2string(resourceFilename);
         const std_path srcFilePath      = destTmp / resourceFilename;
 
-        std_path                  subfolder;
-        bool                      isPcx = false;
-        const ResourceMedia::Type type  = guessType(resourceExt, &isPcx);
+        std_path           subfolder;
+        bool               isPcx = false;
+        const ResourceType type  = guessType(resourceExt, &isPcx);
 
         subfolder = defaultSubfolders.value(type);
 
@@ -330,15 +330,15 @@ bool ArchiveParser::extractLOD(const ExtractionTask& task, CallbackInserter& con
         if (knownResource) {
             subfolder  = knownResource->destinationSubfolder;
             fullIdStr  = knownResource->newId;
-            shortIdStr = knownResource->filenameReplace;
+            shortIdStr = knownResource->newId;
         }
-        if (type == ResourceMedia::Type::Sprite) {
+        if (type == ResourceType::Sprite) {
             mainResourceName = makeJsonFilename(shortIdStr);
         }
         const std_path destRoot     = task.destResourceRoot / subfolder;
         const std_path destFilePath = destRoot / mainResourceName;
 
-        if (type == ResourceMedia::Type::Sprite) {
+        if (type == ResourceType::Sprite) {
             auto conversionRoutine = [isPcx, srcFilePath, destFilePath, keepTmp = m_keepTmp] {
                 SpritePtr sprite;
                 if (!isPcx) {
@@ -380,26 +380,26 @@ bool ArchiveParser::extractLOD(const ExtractionTask& task, CallbackInserter& con
             conversion(conversionRoutine);
         }
 
-        if (type == ResourceMedia::Type::None)
+        if (type == ResourceType::Invalid)
             std_fs::remove(srcFilePath);
 
-        if (type == ResourceMedia::Type::None)
+        if (type == ResourceType::Invalid)
             continue;
 
-        if (type != ResourceMedia::Type::Sprite) {
+        if (type != ResourceType::Sprite) {
             std_fs::create_directories(destRoot);
             std_fs::rename(srcFilePath, destFilePath);
         }
 
-        task.resources->registerResource(ResourceMedia{ type, fullIdStr, path2string(subfolder) + "/", mainResourceName, {} });
+        //task.resources->registerResource(ResourceMedia{ type, fullIdStr, path2string(subfolder) + "/", mainResourceName, {} });
     }
     return true;
 }
 
 bool ArchiveParser::extractHDAT(const ExtractionTask& task, CallbackInserter& conversion, int* estimate)
 {
-    if (!m_requiredTypes.contains(ResourceMedia::Type::Other))
-        return false;
+    //if (!m_requiredTypes.contains(ResourceType::Other))
+    //    return false;
     (void) conversion;
 
     uint32_t signature;
@@ -490,14 +490,14 @@ bool ArchiveParser::extractHDAT(const ExtractionTask& task, CallbackInserter& co
         if (!Mernel::writeFileFromBuffer(p, buffer))
             return false;
 
-        task.resources->registerResource({ ResourceMedia::Type::Other, rec.fname.toStdString(), "json/", outFileName, {} });
+        //task.resources->registerResource({ ResourceType::Other, rec.fname.toStdString(), "json/", outFileName, {} });
     }
     return true;
 }
 
 bool ArchiveParser::extractSND(const ExtractionTask& task, CallbackInserter& conversion, int* estimate)
 {
-    const ResourceMedia::Type type = ResourceMedia::Type::Sound;
+    const ResourceType type = ResourceType::Sound;
     if (!m_requiredTypes.contains(type))
         return false;
 
@@ -533,7 +533,7 @@ bool ArchiveParser::extractSND(const ExtractionTask& task, CallbackInserter& con
             destPath        = task.destResourceRoot / subFolder;
             resourcePathOut = destPath / resourceFilenameOut;
             fullIdStr       = knownResource->newId;
-            shortIdStr      = knownResource->filenameReplace;
+            shortIdStr      = knownResource->newId;
             if (needSkipResource(task, knownResource->newId, type))
                 continue;
         }
@@ -569,14 +569,14 @@ bool ArchiveParser::extractSND(const ExtractionTask& task, CallbackInserter& con
         };
         conversion(conversionRoutine);
 
-        task.resources->registerResource({ type, fullIdStr, subFolder + "/", path2string(resourceFilenameOut), {} });
+        //task.resources->registerResource({ type, fullIdStr, subFolder + "/", path2string(resourceFilenameOut), {} });
     }
     return result;
 }
 
 bool ArchiveParser::extractVID(const ExtractionTask& task, CallbackInserter& conversion, int* estimate)
 {
-    if (!m_requiredTypes.contains(ResourceMedia::Type::Video))
+    if (!m_requiredTypes.contains(ResourceType::Video))
         return false;
 
     uint32_t recordsCount;
@@ -611,7 +611,7 @@ bool ArchiveParser::extractVID(const ExtractionTask& task, CallbackInserter& con
         it++;
         const auto fullSize = *it - rec.offset;
 
-        if (needSkipResource(task, resourceId, ResourceMedia::Type::Video))
+        if (needSkipResource(task, resourceId, ResourceType::Video))
             continue;
 
         if (estimate) {
@@ -639,24 +639,24 @@ bool ArchiveParser::extractVID(const ExtractionTask& task, CallbackInserter& con
 
         conversion(conversionRoutine);
 
-        task.resources->registerResource({ ResourceMedia::Type::Video, path2string(resourceId), "Video/", path2string(destFilename), {} });
+        //task.resources->registerResource({ ResourceType::Video, path2string(resourceId), "Video/", path2string(destFilename), {} });
     }
     return true;
 }
 
 bool ArchiveParser::needSkipResource(const ExtractionTask& task, const std_path& resourceId, const std_path& resourceExt)
 {
-    const ResourceMedia::Type type = guessType(resourceExt, nullptr);
+    const ResourceType type = guessType(resourceExt, nullptr);
     return needSkipResource(task, resourceId, type);
 }
 
-bool ArchiveParser::needSkipResource(const ExtractionTask& task, const std_path& resourceId, ResourceMedia::Type type)
+bool ArchiveParser::needSkipResource(const ExtractionTask& task, const std_path& resourceId, ResourceType type)
 {
     if (!m_requiredTypes.contains(type))
         return true;
 
     if (!m_overrideExisting) {
-        const bool alreadyExists = task.resources->mediaExists(type, path2string(resourceId));
+        const bool alreadyExists = task.resources->fileExists(type, path2string(resourceId));
         return alreadyExists;
     }
 

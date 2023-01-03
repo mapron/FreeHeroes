@@ -102,11 +102,11 @@ struct GraphicsLibrary::Impl {
 
     bool isSpriteResourceExists(const std::string& resourceName) const
     {
-        return m_resourceLibrary->mediaExists(ResourceMedia::Type::Sprite, resourceName);
+        return m_resourceLibrary->fileExists(ResourceType::Sprite, resourceName);
     }
     bool isVideoResourceExists(const std::string& resourceName)
     {
-        return m_resourceLibrary->mediaExists(ResourceMedia::Type::Video, resourceName);
+        return m_resourceLibrary->fileExists(ResourceType::Video, resourceName);
     }
 
     Impl(const Core::IResourceLibrary* resourceLibrary)
@@ -166,11 +166,11 @@ SpritePtr GraphicsLibrary::Impl::getSyncObjectAnimation(const std::string& resou
         return m_spriteCache[resourceName];
     }
     auto& sprite = m_spriteCache[resourceName];
-    if (!m_resourceLibrary->mediaExists(ResourceMedia::Type::Sprite, resourceName))
+    if (!m_resourceLibrary->fileExists(ResourceType::Sprite, resourceName))
         return sprite;
 
-    const auto& resource = m_resourceLibrary->getMedia(ResourceMedia::Type::Sprite, resourceName);
-    sprite               = loadSprite(resource.getFullPath());
+    const auto path = m_resourceLibrary->get(ResourceType::Sprite, resourceName);
+    sprite          = loadSprite(path);
     Q_ASSERT(sprite && sprite->getGroupsCount() > 0);
     if (sprite->getGroupsCount() == 0)
         sprite = nullptr;
@@ -208,9 +208,9 @@ QPixmap GraphicsLibrary::Impl::getSyncPixmapByKey(const PixmapKey& resourceCode)
 
 QMovie* GraphicsLibrary::Impl::getSyncVideo(const std::string& resourceName, QObject* parent)
 {
-    const auto& resource = m_resourceLibrary->getMedia(ResourceMedia::Type::Video, resourceName);
-    QString     path     = stdPath2QString(resource.getFullPath());
-    QMovie*     movie    = new QMovie(path, QByteArray(), parent);
+    const auto path  = m_resourceLibrary->get(ResourceType::Video, resourceName);
+    QString    qpath = stdPath2QString(path);
+    QMovie*    movie = new QMovie(qpath, QByteArray(), parent);
     return movie;
 }
 

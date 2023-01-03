@@ -17,7 +17,7 @@
 #include <QFile>
 
 namespace FreeHeroes::Core {
-inline Q_DECL_PURE_FUNCTION uint qHash(const ResourceMedia::Type& key, uint seed = 0) Q_DECL_NOTHROW
+inline Q_DECL_PURE_FUNCTION uint qHash(const ResourceType& key, uint seed = 0) Q_DECL_NOTHROW
 {
     return ::qHash(static_cast<int>(key), seed);
 }
@@ -29,11 +29,11 @@ class LEGACYCONVERTERUTIL_EXPORT ArchiveParser {
 public:
     using std_path           = Mernel::std_path;
     using ExtractCallbackInc = std::function<void()>;
-    ArchiveParser(KnownResources&                 knownResources,
-                  QSet<Core::ResourceMedia::Type> requiredTypes,
-                  bool                            overrideExisting,
-                  bool                            keepTmp,
-                  ExtractCallbackInc              extractCallbackInc);
+    ArchiveParser(KnownResources&          knownResources,
+                  QSet<Core::ResourceType> requiredTypes,
+                  bool                     overrideExisting,
+                  bool                     keepTmp,
+                  ExtractCallbackInc       extractCallbackInc);
     // clang-format off
     enum class TaskType { LOD, HDAT, SND, VID, MusicCopy, DefCopy };
     // clang-format on
@@ -66,11 +66,11 @@ private:
     bool extractVID(const ExtractionTask& task, CallbackInserter& conversion, int* estimate);
 
     bool needSkipResource(const ExtractionTask& task, const std_path& resourceId, const std_path& resourceExt);
-    bool needSkipResource(const ExtractionTask& task, const std_path& resourceId, Core::ResourceMedia::Type type);
+    bool needSkipResource(const ExtractionTask& task, const std_path& resourceId, Core::ResourceType type);
 
 private:
-    const KnownResources&                 m_knownResources;
-    const QSet<Core::ResourceMedia::Type> m_requiredTypes;
+    const KnownResources&          m_knownResources;
+    const QSet<Core::ResourceType> m_requiredTypes;
 
     const bool         m_overrideExisting = false;
     const bool         m_keepTmp          = true;

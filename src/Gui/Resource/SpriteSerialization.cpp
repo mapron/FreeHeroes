@@ -17,7 +17,7 @@ namespace FreeHeroes::Gui {
 using namespace Mernel;
 
 namespace {
-const std::string spriteJsonExtension{ ".fh.json" };
+const std::string spriteJsonExtension{ ".fhsprite.json" };
 const std::string imageExtension{ ".png" };
 }
 

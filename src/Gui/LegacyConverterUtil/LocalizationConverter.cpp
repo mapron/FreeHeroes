@@ -43,13 +43,12 @@ public:
     }
     void setLocale(const std::string& localeId) { this->m_localeId = localeId; }
     void setContext(const std::string& contextId) { this->m_contextId = contextId; }
-    void writeRow(const std::string& key, const QByteArray& value)
-    {
-        m_resources.registerResource(Core::ResourceTranslation{ m_localeId, m_contextId, key, { toString(value) } });
+    void writeRow(const std::string& key, const QByteArray& value){
+        // @todo:
+        //m_resources.registerResource(Core::ResourceTranslation{ m_localeId, m_contextId, key, { toString(value) } });
     };
-    void writeRow(const std::string& key, const QByteArray& value, const QByteArray& value2)
-    {
-        m_resources.registerResource(Core::ResourceTranslation{ m_localeId, m_contextId, key, { toString(value), toString(value2) } });
+    void writeRow(const std::string& key, const QByteArray& value, const QByteArray& value2){
+        //m_resources.registerResource(Core::ResourceTranslation{ m_localeId, m_contextId, key, { toString(value), toString(value2) } });
     };
 };
 

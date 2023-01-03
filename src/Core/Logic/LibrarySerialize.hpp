@@ -14,24 +14,24 @@ namespace FreeHeroes::Core {
 struct SkillHeroItem;
 class IGameDatabase;
 
-bool deserialize(const IGameDatabase* gameDatabase, LibraryArtifact& artifact, const Mernel::PropertyTree& jsonObj);
-bool deserialize(const IGameDatabase* gameDatabase, LibraryDwelling& dwelling, const Mernel::PropertyTree& jsonObj);
-bool deserialize(const IGameDatabase* gameDatabase, LibraryFaction& faction, const Mernel::PropertyTree& jsonObj);
-bool deserialize(const IGameDatabase* gameDatabase, LibraryHero& hero, const Mernel::PropertyTree& jsonObj);
-bool deserialize(const IGameDatabase* gameDatabase, LibraryHeroSpec& spec, const Mernel::PropertyTree& jsonObj);
-bool deserialize(const IGameDatabase* gameDatabase, LibraryMapBank& obj, const Mernel::PropertyTree& jsonObj);
-bool deserialize(const IGameDatabase* gameDatabase, LibraryMapObstacle& obj, const Mernel::PropertyTree& jsonObj);
-bool deserialize(const IGameDatabase* gameDatabase, LibraryMapVisitable& obj, const Mernel::PropertyTree& jsonObj);
-bool deserialize(const IGameDatabase* gameDatabase, LibraryObjectDef& obj, const Mernel::PropertyTree& jsonObj);
-bool deserialize(const IGameDatabase* gameDatabase, LibraryResource& obj, const Mernel::PropertyTree& jsonObj);
-bool deserialize(const IGameDatabase* gameDatabase, LibrarySecondarySkill& skill, const Mernel::PropertyTree& jsonObj);
-bool deserialize(const IGameDatabase* gameDatabase, LibrarySpell& spell, const Mernel::PropertyTree& jsonObj);
-bool deserialize(const IGameDatabase* gameDatabase, LibraryTerrain& obj, const Mernel::PropertyTree& jsonObj);
-bool deserialize(const IGameDatabase* gameDatabase, LibraryUnit& unit, const Mernel::PropertyTree& jsonObj);
-bool deserialize(const IGameDatabase* gameDatabase, SkillHeroItem& obj, const Mernel::PropertyTree& jsonObj);
+void deserialize(const IGameDatabase* gameDatabase, LibraryArtifact& artifact, const Mernel::PropertyTree& jsonObj);
+void deserialize(const IGameDatabase* gameDatabase, LibraryDwelling& dwelling, const Mernel::PropertyTree& jsonObj);
+void deserialize(const IGameDatabase* gameDatabase, LibraryFaction& faction, const Mernel::PropertyTree& jsonObj);
+void deserialize(const IGameDatabase* gameDatabase, LibraryHero& hero, const Mernel::PropertyTree& jsonObj);
+void deserialize(const IGameDatabase* gameDatabase, LibraryHeroSpec& spec, const Mernel::PropertyTree& jsonObj);
+void deserialize(const IGameDatabase* gameDatabase, LibraryMapBank& obj, const Mernel::PropertyTree& jsonObj);
+void deserialize(const IGameDatabase* gameDatabase, LibraryMapObstacle& obj, const Mernel::PropertyTree& jsonObj);
+void deserialize(const IGameDatabase* gameDatabase, LibraryMapVisitable& obj, const Mernel::PropertyTree& jsonObj);
+void deserialize(const IGameDatabase* gameDatabase, LibraryObjectDef& obj, const Mernel::PropertyTree& jsonObj);
+void deserialize(const IGameDatabase* gameDatabase, LibraryResource& obj, const Mernel::PropertyTree& jsonObj);
+void deserialize(const IGameDatabase* gameDatabase, LibrarySecondarySkill& skill, const Mernel::PropertyTree& jsonObj);
+void deserialize(const IGameDatabase* gameDatabase, LibrarySpell& spell, const Mernel::PropertyTree& jsonObj);
+void deserialize(const IGameDatabase* gameDatabase, LibraryTerrain& obj, const Mernel::PropertyTree& jsonObj);
+void deserialize(const IGameDatabase* gameDatabase, LibraryUnit& unit, const Mernel::PropertyTree& jsonObj);
+void deserialize(const IGameDatabase* gameDatabase, SkillHeroItem& obj, const Mernel::PropertyTree& jsonObj);
 
-bool deserialize(const IGameDatabase* gameDatabase, LibraryGameRules& obj, const Mernel::PropertyTree& jsonObj);
+void deserialize(const IGameDatabase* gameDatabase, LibraryGameRules& obj, const Mernel::PropertyTree& jsonObj);
 
-bool serialize(const SkillHeroItem& obj, Mernel::PropertyTree& jsonObj);
+void serialize(const SkillHeroItem& obj, Mernel::PropertyTree& jsonObj);
 
 }

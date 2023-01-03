@@ -13,6 +13,10 @@
 #include <string>
 #include <vector>
 
+namespace Mernel {
+class PropertyTree;
+}
+
 namespace FreeHeroes::Core {
 
 template<class _Ty, class... _Types>
@@ -113,13 +117,20 @@ class IGameDatabaseContainer {
 public:
     virtual ~IGameDatabaseContainer() = default;
 
-    [[nodiscard]] virtual const IGameDatabase* getDatabase(GameVersion version) const = 0;
-    [[nodiscard]] virtual const IGameDatabase* getDatabase(const std::string& version) const
+    // load these and only these.
+    using DbOrder = std::vector<std::string>;
+
+    [[nodiscard]] virtual const IGameDatabase* getDatabase(const DbOrder& dbIndexFilesList, const Mernel::PropertyTree& customSegmentData) const noexcept = 0;
+
+    [[nodiscard]] virtual const IGameDatabase* getDatabase(const DbOrder& dbIndexFilesList) const noexcept = 0;
+
+    [[nodiscard]] virtual const IGameDatabase* getDatabase(GameVersion version) const noexcept
     {
-        if (version == g_database_HOTA)
-            return getDatabase(GameVersion::HOTA);
-        if (version == g_database_SOD)
-            return getDatabase(GameVersion::SOD);
+        if (version == GameVersion::SOD)
+            return getDatabase({ std::string(g_database_SOD) });
+        if (version == GameVersion::HOTA)
+            return getDatabase({ std::string(g_database_HOTA) });
+
         return nullptr;
     }
 };

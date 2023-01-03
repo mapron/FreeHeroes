@@ -31,12 +31,11 @@ int main(int argc, char* argv[])
 
     const std::string input = parser.getArg("input-fhMap");
 
-    Core::CoreApplication fhCoreApp({ Core::CoreApplication::Option::ResourceLibraryApp,
-                                      Core::CoreApplication::Option::ResourceLibraryLocalData,
-                                      Core::CoreApplication::Option::GameDatabase,
-                                      Core::CoreApplication::Option::RNG });
-    Gui::Application      fhApp(&fhCoreApp);
-    QApplication          app(argc, argv);
+    Core::CoreApplication fhCoreApp;
+    fhCoreApp.setLoadUserMods(true);
+
+    Gui::Application fhApp(&fhCoreApp);
+    QApplication     app(argc, argv);
 
     fhApp.load();
 

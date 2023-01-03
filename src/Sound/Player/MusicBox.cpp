@@ -175,11 +175,10 @@ void MusicBox::musicPlay(const IMusicBox::MusicSettings& music)
                 break;
         }
     }
-    if (!m_resourceLibrary->mediaExists(Core::ResourceMedia::Type::Music, id))
+    if (!m_resourceLibrary->fileExists(Core::ResourceType::Music, id))
         return;
 
-    auto                   record   = m_resourceLibrary->getMedia(Core::ResourceMedia::Type::Music, id);
-    const Mernel::std_path fullPath = record.getFullPath();
+    const Mernel::std_path fullPath = m_resourceLibrary->get(Core::ResourceType::Music, id);
     if (fullPath.empty())
         return;
 
@@ -208,11 +207,10 @@ void MusicBox::effectPlay(const EffectSettings& effect)
             id = "button";
         }
     }
-    if (!m_resourceLibrary->mediaExists(Core::ResourceMedia::Type::Sound, id))
+    if (!m_resourceLibrary->fileExists(Core::ResourceType::Sound, id))
         return;
 
-    auto                   record   = m_resourceLibrary->getMedia(Core::ResourceMedia::Type::Sound, id);
-    const Mernel::std_path fullPath = record.getFullPath();
+    const Mernel::std_path fullPath = m_resourceLibrary->get(Core::ResourceType::Sound, id);
     if (fullPath.empty())
         return;
 

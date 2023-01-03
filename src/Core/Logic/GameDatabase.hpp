@@ -9,22 +9,13 @@
 
 #include "MernelPlatform/PropertyTree.hpp"
 
-#include "CoreLogicExport.hpp"
-
 #include <memory>
 
 namespace FreeHeroes::Core {
-class IResourceLibrary;
-class CORELOGIC_EXPORT GameDatabase : public IGameDatabase {
+class GameDatabase : public IGameDatabase {
 public:
-    struct Resource {
-        Mernel::PropertyTree m_jsonData;
-        std::string          m_filename;
-    };
-
 public:
-    GameDatabase(const std::vector<Resource>& resourceFiles);
-    GameDatabase(const std::string& dataBaseId, const IResourceLibrary* resourceLibrary);
+    GameDatabase(const Mernel::PropertyTree& recordObjectMaps);
     ~GameDatabase();
 
     LibraryArtifactContainerPtr       artifacts() const override;
@@ -43,10 +34,6 @@ public:
     LibraryUnitContainerPtr           units() const override;
 
     LibraryGameRulesConstPtr gameRules() const override;
-
-private:
-    static std::vector<Resource> loadLibrary(const std::string& dataBaseId, const IResourceLibrary* resourceLibrary);
-    bool                         load(const std::vector<Resource>& resourceFiles);
 
 private:
     struct Impl;

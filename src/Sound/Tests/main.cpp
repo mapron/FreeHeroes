@@ -14,9 +14,10 @@ int main(int argc, char* argv[])
 {
     using namespace FreeHeroes;
 
-    Core::CoreApplication fhCoreApp({ Core::CoreApplication::Option::ResourceLibraryApp, Core::CoreApplication::Option::ResourceLibraryLocalData, Core::CoreApplication::Option::RNG });
-    Gui::Application      fhApp(&fhCoreApp, { Gui::Application::Option::MusicBox });
-    QApplication          app(argc, argv);
+    Core::CoreApplication fhCoreApp;
+    fhCoreApp.setLoadUserMods(true);
+    Gui::Application fhApp(&fhCoreApp, { Gui::Application::Option::MusicBox });
+    QApplication     app(argc, argv);
 
     fhApp.load();
     auto*           musicBox = fhApp.getMusicBox();

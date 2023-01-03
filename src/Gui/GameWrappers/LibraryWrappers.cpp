@@ -158,11 +158,11 @@ GuiUnit::GuiUnit(Sound::IMusicBox*, const IGraphicsLibrary* graphicsLibrary, Cor
     m_splashControl           = graphicsLibrary->getIcon(icns);
     if (!m_battleSprite->exists()) {
         const bool isWide = source->traits.large;
-        m_battleSprite    = graphicsLibrary->getObjectAnimation(isWide ? "stubs.unit_wide" : "stubs.unit_normal");
+        m_battleSprite    = graphicsLibrary->getObjectAnimation(isWide ? "stub_unit_wide" : "stub_unit_normal");
         Q_ASSERT(m_battleSprite->exists());
     }
     if (!source->presentationParams.spriteProjectile.empty() && !m_projectileSprite->exists()) {
-        m_projectileSprite = graphicsLibrary->getObjectAnimation("stubs.projectile");
+        m_projectileSprite = graphicsLibrary->getObjectAnimation("stub_projectile");
         Q_ASSERT(m_projectileSprite->exists());
     }
 }
@@ -196,11 +196,11 @@ GuiHero::GuiHero(Sound::IMusicBox*, const IGraphicsLibrary* graphicsLibrary, Cor
     auto resNameAdv    = source->presentationParams.gender == Core::LibraryHero::Presentation::Gender::Male ? hClass->presentationParams.adventureSpriteMale : hClass->presentationParams.adventureSpriteFemale;
     m_battleSprite     = graphicsLibrary->getObjectAnimation(resNameBattle);
     if (!m_battleSprite->exists()) {
-        m_battleSprite = graphicsLibrary->getObjectAnimation("stubs.hero");
+        m_battleSprite = graphicsLibrary->getObjectAnimation("stub_hero");
         Q_ASSERT(m_battleSprite->exists());
     }
     m_adventureSprite = graphicsLibrary->getObjectAnimation(resNameAdv);
-    Q_ASSERT(m_adventureSprite->exists());
+    //Q_ASSERT(m_adventureSprite->exists());
 }
 
 QString GuiHero::getClassName() const

@@ -15,7 +15,9 @@ class PropertyTreeReaderDatabase : public Mernel::Reflection::PropertyTreeReader
 public:
     PropertyTreeReaderDatabase(const FreeHeroes::Core::IGameDatabase* gameDatabase)
         : m_gameDatabase(gameDatabase)
-    {}
+    {
+        assert(gameDatabase);
+    }
 
     template<GameDatabaseObject T>
     void jsonToValueImpl(const Mernel::PropertyTree& json, const T*& value)

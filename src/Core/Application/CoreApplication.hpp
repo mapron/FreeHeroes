@@ -16,26 +16,19 @@
 
 namespace FreeHeroes::Core {
 class IResourceLibrary;
-class IGameDatabase;
 class IRandomGeneratorFactory;
 class IRandomGenerator;
 
-class COREAPPLICATION_EXPORT CoreApplication : private IGameDatabaseContainer {
+class COREAPPLICATION_EXPORT CoreApplication {
 public:
-    enum class Option
-    {
-        ResourceLibraryApp,       // include files shipped with application
-        ResourceLibraryLocalData, // include user data files (after conversion)
-        GameDatabase,
-        RNG
-    };
-
-public:
-    CoreApplication(std::set<Option>   options = std::set<Option>{ Option::ResourceLibraryApp, Option::GameDatabase, Option::RNG },
-                    const std::string& appName = "");
+    CoreApplication(const std::string& appName = "");
     ~CoreApplication();
 
     void initLogger(int debugLevel = 5) const;
+
+    void setLoadAppBinMods(bool load) { m_loadAppBinMods = load; }
+    void setLoadUserMods(bool load) { m_loadUserMods = load; }
+    void setLoadUserModSequence(std::vector<std::string> order) { m_customLoadSeqence = std::move(order); }
 
     bool load();
 
@@ -49,23 +42,22 @@ public:
     }
     const IGameDatabaseContainer* getDatabaseContainer() const
     {
-        return this;
+        return m_gameDatabaseContainer.get();
     }
-
-    [[nodiscard]] const IGameDatabase* getDatabase(GameVersion version) const override;
-    bool                               hasDatabases() const { return !m_gameDatabases.empty(); }
-
     const Mernel::AppLocations& getLocations() const { return m_locations; }
 
     static const char* getAppFolder();
 
 private:
-    const std::set<Option>                                m_options;
-    std::shared_ptr<IResourceLibrary>                     m_resourceLibrary;
-    std::map<GameVersion, std::shared_ptr<IGameDatabase>> m_gameDatabases;
-    std::shared_ptr<IRandomGeneratorFactory>              m_randomGeneratorFactory;
+    std::shared_ptr<const IResourceLibrary>       m_resourceLibrary;
+    std::shared_ptr<IRandomGeneratorFactory>      m_randomGeneratorFactory;
+    std::shared_ptr<const IGameDatabaseContainer> m_gameDatabaseContainer;
 
     Mernel::AppLocations m_locations;
+
+    bool                     m_loadAppBinMods = true;
+    bool                     m_loadUserMods   = false;
+    std::vector<std::string> m_customLoadSeqence;
 };
 
 }

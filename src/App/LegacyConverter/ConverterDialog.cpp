@@ -130,21 +130,22 @@ void ConverterDialog::run()
     const bool overrideExisting = args.contains("--override-existing");
     const bool keepTmp          = args.contains("--keep-tmp");
 
-    QSet<Core::ResourceMedia::Type> requiredTypes;
+    QSet<Core::ResourceType> requiredTypes;
     if (args.contains("--audio"))
-        requiredTypes << Core::ResourceMedia::Type::Sound << Core::ResourceMedia::Type::Music;
+        requiredTypes << Core::ResourceType::Sound << Core::ResourceType::Music;
     if (args.contains("--video"))
-        requiredTypes << Core::ResourceMedia::Type::Video;
+        requiredTypes << Core::ResourceType::Video;
     if (args.contains("--sprites"))
-        requiredTypes << Core::ResourceMedia::Type::Sprite;
-    if (args.contains("--other"))
-        requiredTypes << Core::ResourceMedia::Type::Other;
+        requiredTypes << Core::ResourceType::Sprite;
+    //if (args.contains("--other"))
+    //    requiredTypes << Core::ResourceType::Other;
     if (requiredTypes.isEmpty()) {
-        requiredTypes << Core::ResourceMedia::Type::Sound
-                      << Core::ResourceMedia::Type::Music
-                      << Core::ResourceMedia::Type::Video
-                      << Core::ResourceMedia::Type::Sprite
-                      << Core::ResourceMedia::Type::Other;
+        requiredTypes << Core::ResourceType::Sound
+                      << Core::ResourceType::Music
+                      << Core::ResourceType::Video
+                      << Core::ResourceType::Sprite
+            // << Core::ResourceType::Other
+            ;
     }
 
     std::unique_ptr<ResourceLibrary> sodLibrary;
@@ -156,9 +157,9 @@ void ConverterDialog::run()
     const std_path baseExtractHOTA = baseExtract / "HOTA";
     const std_path baseExtractHD   = baseExtract / "HD";
     if (sodExists) {
-        sodLibrary = std::make_unique<ResourceLibrary>("sod");
-        sodLibrary->setIndexFolder(baseExtractSOD);
-        sodLibrary->loadIndex();
+        //sodLibrary = std::make_unique<ResourceLibrary>("sod");
+        //sodLibrary->setIndexFolder(baseExtractSOD);
+        //sodLibrary->loadIndex();
         if (ffmpegAvailable) {
             extractionList.push_back({ ArchiveParser::TaskType::SND,
                                        hotaInstallDirData,
@@ -202,10 +203,10 @@ void ConverterDialog::run()
                                    sodLibrary.get() });
     }
     if (hotaExists) {
-        hotaLibrary = std::make_unique<ResourceLibrary>("hota");
-        hotaLibrary->addDep("sod");
-        hotaLibrary->setIndexFolder(baseExtractHOTA);
-        hotaLibrary->loadIndex();
+        //hotaLibrary = std::make_unique<ResourceLibrary>("hota");
+        //hotaLibrary->addDep("sod");
+        //hotaLibrary->setIndexFolder(baseExtractHOTA);
+        //hotaLibrary->loadIndex();
         if (ffmpegAvailable) {
             extractionList.push_back({ ArchiveParser::TaskType::SND,
                                        hotaInstallDirData,
@@ -248,10 +249,10 @@ void ConverterDialog::run()
                                    true });
     }
     if (hdExists) {
-        hdLibrary = std::make_unique<ResourceLibrary>("hdmod");
-        hdLibrary->addDep("sod");
-        hdLibrary->setIndexFolder(baseExtractHD);
-        hdLibrary->loadIndex();
+        //hdLibrary = std::make_unique<ResourceLibrary>("hdmod");
+        //hdLibrary->addDep("sod");
+        //hdLibrary->setIndexFolder(baseExtractHD);
+        //hdLibrary->loadIndex();
 
         extractionList.push_back({ ArchiveParser::TaskType::DefCopy,
                                    m_hotaInstallDir / "_HD3_Data" / "Common",
@@ -337,7 +338,7 @@ void ConverterDialog::run()
         LocalizationConverter converter(*sodLibrary, baseExtractSOD, hotaDb, sodDb);
         converter.extractSOD("txt");
 
-        sodLibrary->saveIndex();
+        //sodLibrary->saveIndex();
     }
 
     if (hotaExists) {
@@ -351,10 +352,10 @@ void ConverterDialog::run()
         pp.concatSprites(*hotaLibrary, { "cmbkhlmt0", "cmbkhlmt1", "cmbkhlmt2", "cmbkhlmt3", "cmbkhlmt4" }, "cmbkhlmt", true);
         pp.concatTilesSprite(*hotaLibrary, "hglnt", "highlands", 124);
         pp.concatTilesSprite(*hotaLibrary, "wstlt", "wastelands", 124);
-        hotaLibrary->saveIndex();
+        //hotaLibrary->saveIndex();
     }
     if (hdExists) {
-        hdLibrary->saveIndex();
+        //hdLibrary->saveIndex();
     }
     m_ui->progressBar->setValue(0);
     m_ui->progressBar->setMaximum(1);

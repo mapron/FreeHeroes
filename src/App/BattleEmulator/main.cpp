@@ -25,11 +25,8 @@ int main(int argc, char* argv[])
     using namespace Gui;
     using namespace Mernel;
 
-    Core::CoreApplication fhCoreApp({ Core::CoreApplication::Option::ResourceLibraryApp,
-                                      Core::CoreApplication::Option::ResourceLibraryLocalData,
-                                      Core::CoreApplication::Option::GameDatabase,
-                                      Core::CoreApplication::Option::RNG },
-                                    "BattleEmulator");
+    Core::CoreApplication fhCoreApp("BattleEmulator");
+    fhCoreApp.setLoadUserMods(true);
 
     Application fhApp(&fhCoreApp, "BattleEmulator");
 

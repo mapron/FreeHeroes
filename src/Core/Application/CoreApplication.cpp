@@ -6,8 +6,8 @@
 #include "CoreApplication.hpp"
 
 // Core
-#include "ResourceLibrary.hpp"
-#include "GameDatabase.hpp"
+#include "ResourceLibraryFactory.hpp"
+#include "GameDatabaseContainer.hpp"
 #include "MernelPlatform/Profiler.hpp"
 #include "RandomGenerator.hpp"
 #include "MernelPlatform/Logger_details.hpp"
@@ -19,9 +19,8 @@ namespace {
 constexpr const char* s_FHFolderName = "FreeHeroes";
 }
 
-CoreApplication::CoreApplication(std::set<Option> options, const std::string& appName)
-    : m_options(std::move(options))
-    , m_locations(s_FHFolderName, appName)
+CoreApplication::CoreApplication(const std::string& appName)
+    : m_locations(s_FHFolderName, appName)
 {
 }
 
@@ -45,47 +44,31 @@ bool CoreApplication::load()
     Logger(Logger::Info) << "CoreApplication::load - start";
 
     ProfilerScope scopeAll("CoreApplication::load");
-    if (m_options.contains(Option::ResourceLibraryApp) || m_options.contains(Option::ResourceLibraryLocalData)) {
-        ResourceLibrary::ResourceLibraryPathList pathList;
-        {
-            ResourceLibrary::ResourceLibraryPathList listCfg;
-            ProfilerScope                            scope("ResourceLibrary search");
-            if (m_options.contains(Option::ResourceLibraryLocalData))
-                pathList = ResourceLibrary::searchIndexInFolderRecursive(m_locations.getAppdataDir() / "Resources");
-            if (m_options.contains(Option::ResourceLibraryApp))
-                listCfg = ResourceLibrary::searchIndexInFolderRecursive(m_locations.getBinDir() / "gameResources");
-            pathList.append(listCfg);
-            pathList.topoSort();
-        }
-        {
-            ProfilerScope scope("ResourceLibrary load");
-            m_resourceLibrary = ResourceLibrary::makeMergedLibrary(pathList);
-            auto dbIds        = m_resourceLibrary->getDatabaseIds();
-        }
+
+    ResourceLibraryFactory factory;
+    {
+        ProfilerScope scope("ResourceLibrary search");
+        if (m_loadUserMods)
+            factory.scanForMods(m_locations.getAppdataDir() / "Resources");
+
+        if (m_loadAppBinMods)
+            factory.scanForMods(m_locations.getBinDir() / "gameResources");
     }
-    if (m_options.contains(Option::RNG)) {
-        m_randomGeneratorFactory = std::make_shared<RandomGeneratorFactory>();
+    {
+        ProfilerScope scope("ResourceLibrary load");
+        factory.scanModSubfolders();
+        m_resourceLibrary = factory.create(m_customLoadSeqence);
     }
 
-    if (m_options.contains(Option::GameDatabase)) {
-        ProfilerScope scope("GameDatabase load");
-        try {
-            m_gameDatabases[GameVersion::SOD]  = std::make_shared<Core::GameDatabase>(g_database_SOD, m_resourceLibrary.get());
-            m_gameDatabases[GameVersion::HOTA] = std::make_shared<Core::GameDatabase>(g_database_HOTA, m_resourceLibrary.get());
-        }
-        catch (std::exception& ex) {
-            Logger(Logger::Err) << ex.what();
-            return false;
-        }
+    m_randomGeneratorFactory = std::make_shared<RandomGeneratorFactory>();
+
+    {
+        ProfilerScope scope("GameDatabaseContainer load");
+        m_gameDatabaseContainer = std::make_shared<GameDatabaseContainer>(m_resourceLibrary.get());
     }
 
     Logger(Logger::Info) << "CoreApplication::load - end";
     return true;
-}
-
-const Core::IGameDatabase* CoreApplication::getDatabase(GameVersion version) const
-{
-    return m_gameDatabases.at(version).get();
 }
 
 const char* CoreApplication::getAppFolder()

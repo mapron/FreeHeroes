@@ -319,7 +319,7 @@ AddTarget(TYPE shared NAME GuiApplication OUTPUT_PREFIX FH
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
 
-AddTarget(TYPE shared NAME MapUtil
+AddTarget(TYPE shared NAME MapUtil OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/MapUtil
     EXPORT_INCLUDES
     LINK_LIBRARIES
@@ -332,7 +332,7 @@ AddTarget(TYPE shared NAME MapUtil
         MernelReflection
     )
 
-AddTarget(TYPE shared NAME MapUtilGui
+AddTarget(TYPE shared NAME MapUtilGui OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/MapUtilGui
     EXPORT_INCLUDES
     LINK_LIBRARIES
@@ -353,7 +353,7 @@ AddTarget(TYPE shared NAME MapUtilGui
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
 
-AddTarget(TYPE shared NAME LegacyConverterUtil
+AddTarget(TYPE shared NAME LegacyConverterUtil OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/LegacyConverterUtil
     EXPORT_INCLUDES
     LINK_LIBRARIES

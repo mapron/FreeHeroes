@@ -505,7 +505,7 @@ SpritePtr postProcessSprite(const Mernel::std_path& spritePath, SpritePtr sprite
             for (int f = startFrame, i = 0; f <= endFrame; ++f, ++i) {
                 const int              id         = idOffset + i;
                 const std::string      filename   = (tpl.contains("%1") ? tpl.arg(id) : tpl).toStdString();
-                const std::string      filenameJs = filename + ".fh.json";
+                const std::string      filenameJs = filename + ".fhsprite.json";
                 const Mernel::std_path path       = spritePath.parent_path() / Mernel::string2path(filenameJs);
                 const SpriteFrame&     frame      = newSeqPtr->frames[f];
 
@@ -516,12 +516,12 @@ SpritePtr postProcessSprite(const Mernel::std_path& spritePath, SpritePtr sprite
                     saveSprite(spriteLoader, path, {});
                 }
                 {
-                    ResourceMedia resource;
-                    resource.type         = ResourceMedia::Type::Sprite;
+                    /*ResourceMedia resource;
+                    resource.type         = ResourceType::Sprite;
                     resource.id           = filename;
                     resource.mainFilename = filenameJs;
                     resource.subdir       = subdir;
-                    library->registerResource(resource);
+                    library->registerResource(resource);*/
                 }
             }
         }

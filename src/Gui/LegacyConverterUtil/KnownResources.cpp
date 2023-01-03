@@ -28,9 +28,8 @@ KnownResources::KnownResources(const Mernel::std_path& config)
         res.legacyId = key;
         rowArr[0].getScalar().convertTo(res.newId);
         rowArr[1].getScalar().convertTo(res.destinationSubfolder);
-        rowArr[2].getScalar().convertTo(res.filenameReplace);
-        if (rowArr.size() > 3) {
-            res.handlers = rowArr[3].getMap();
+        if (rowArr.size() > 2) {
+            res.handlers = rowArr[2].getMap();
         }
         m_resources.push_back(std::move(res));
     }

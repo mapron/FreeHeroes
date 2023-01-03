@@ -7,8 +7,8 @@
 
 namespace FreeHeroes::Core {
 
-[[maybe_unused]] constexpr const char* g_database_HOTA = "FH_HotA";
-[[maybe_unused]] constexpr const char* g_database_SOD  = "FH_SoD";
+[[maybe_unused]] constexpr const char* g_database_HOTA = "hota_base";
+[[maybe_unused]] constexpr const char* g_database_SOD  = "sod_base";
 
 enum class GameVersion
 {

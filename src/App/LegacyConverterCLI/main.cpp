@@ -51,7 +51,8 @@ int main(int argc, char** argv)
     const bool                     mergePng            = parser.getArg("mergePng") == "1";
     const bool                     transparentKeyColor = parser.getArg("transparentKeyColor") == "1";
 
-    Core::CoreApplication fhCoreApp(std::set<Core::CoreApplication::Option>{});
+    Core::CoreApplication fhCoreApp;
+    fhCoreApp.setLoadAppBinMods(false);
     fhCoreApp.initLogger();
     if (!fhCoreApp.load())
         return 1;

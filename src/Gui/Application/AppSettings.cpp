@@ -121,7 +121,7 @@ AppSettings::AppSettings(QString filename)
         "global", {
             {"logLevel", m_all.global.logLevel},
             {"localeId", m_all.global.localeId},
-            {"databaseId", m_all.global.databaseId},
+            {"databaseIdList", m_all.global.databaseIdList},
         }
     });
     m_allWrappers.push_back({

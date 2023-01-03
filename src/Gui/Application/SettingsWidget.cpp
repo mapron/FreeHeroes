@@ -8,6 +8,7 @@
 
 #include <QSettings>
 #include <QComboBox>
+#include <QCompleter>
 
 #include <functional>
 
@@ -18,16 +19,18 @@ class SettingsWidget::WidgetWrapRef {
     {
         Bool,
         Int,
-        StringCombo
+        StringCombo,
+        String,
     };
 
-    Type        type     = Type::Bool;
-    bool*       refBool  = nullptr;
-    int*        refInt   = nullptr;
-    QString*    refStr   = nullptr;
-    QCheckBox*  refCb    = nullptr;
-    QSpinBox*   refSb    = nullptr;
-    QComboBox*  refCombo = nullptr;
+    Type        type        = Type::Bool;
+    bool*       refBool     = nullptr;
+    int*        refInt      = nullptr;
+    QString*    refStr      = nullptr;
+    QCheckBox*  refCb       = nullptr;
+    QSpinBox*   refSb       = nullptr;
+    QComboBox*  refCombo    = nullptr;
+    QLineEdit*  refLineEdit = nullptr;
     QStringList items;
 
 public:
@@ -47,6 +50,11 @@ public:
         , refCombo(c)
         , items(items)
     {}
+    WidgetWrapRef(QString& value, QLineEdit* c)
+        : type(Type::String)
+        , refStr(&value)
+        , refLineEdit(c)
+    {}
 
     // clang-format off
     void read() {
@@ -56,11 +64,15 @@ public:
             refCombo->addItems(items);
             refCombo->setCurrentIndex(items.indexOf(*refStr));
         }
+        if (type == Type::String)   {
+            refLineEdit->setText(*refStr);
+        }
     }
     void write() {
         if (type == Type::Bool)         *refBool   = refCb->isChecked();
         if (type == Type::Int)          *refInt    = refSb->value();
         if (type == Type::StringCombo)  *refStr    = refCombo->currentText();
+        if (type == Type::String)       *refStr    = refLineEdit->text();
     }
     // clang-format on
 };
@@ -89,12 +101,25 @@ SettingsWidget::SettingsWidget(QSettings& uiSettings, IAppSettings::AllSettings&
 
         { settings.global.logLevel , m_ui->spinBoxLogLevel},
         { settings.global.localeId   , settings.global.localeItems   , m_ui->comboBoxLocale},
-        { settings.global.databaseId , settings.global.databaseItems , m_ui->comboBoxDatabase},
+        { settings.global.databaseIdList ,  m_ui->gameDatabaseList},
+        { settings.global.resourcesList  ,  m_ui->resourcesList},
 
         { settings.ui.displayAbsMoraleLuck , m_ui->checkBoxAbsRng},
         { settings.ui.clampAbsMoraleLuck , m_ui->checkBoxClampRng},
     };
     // clang-format on
+    {
+        QStringList wordList;
+        wordList << QString{ Core::g_database_HOTA };
+        wordList << QString{ Core::g_database_SOD };
+        m_ui->gameDatabaseList->setCompleter(new QCompleter(wordList, this));
+    }
+    {
+        QStringList wordList;
+        wordList << "sod_res,hota_res,hd_res";
+        wordList << "hota_res,sod_res,hd_res";
+        m_ui->resourcesList->setCompleter(new QCompleter(wordList, this));
+    }
 
     connect(m_ui->buttonBox, &QDialogButtonBox::accepted, this, &SettingsWidget::accept);
     connect(m_ui->buttonBox, &QDialogButtonBox::rejected, this, &SettingsWidget::reject);

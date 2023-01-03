@@ -39,8 +39,29 @@ public:
         int         logLevel = 6;
         QString     localeId = "";
         QStringList localeItems;
-        QString     databaseId = Core::g_database_HOTA;
-        QStringList databaseItems;
+        QString     databaseIdList = QString{ Core::g_database_HOTA };
+        QString     resourcesList;
+
+        void reset()
+        {
+            databaseIdList = QString{ Core::g_database_HOTA };
+        }
+        std::vector<std::string> getDbIds() const
+        {
+            std::vector<std::string> res;
+            auto                     parts = databaseIdList.split(',');
+            for (const auto& part : parts)
+                res.push_back(part.toStdString());
+            return res;
+        }
+        std::vector<std::string> getResourceIds() const
+        {
+            std::vector<std::string> res;
+            auto                     parts = resourcesList.split(',');
+            for (const auto& part : parts)
+                res.push_back(part.toStdString());
+            return res;
+        }
     };
 
     struct UI {

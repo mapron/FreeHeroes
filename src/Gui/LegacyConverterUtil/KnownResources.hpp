@@ -21,7 +21,6 @@ struct KnownResource {
     std::string legacyId;
     std::string newId;
     std::string destinationSubfolder;
-    std::string filenameReplace;
 
     Mernel::PropertyTreeMap handlers;
 };
