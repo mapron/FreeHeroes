@@ -28,12 +28,12 @@ inline constexpr const std::tuple MetaInfo::s_fields<QSize>{
 // clang-format on
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
-    SpriteNew,
+    Sprite,
     m_boundarySize,
     m_groups)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
-    SpriteNew::Frame,
+    Sprite::Frame,
     m_padding,
     m_hasBitmap,
     m_bitmapSize,
@@ -41,14 +41,14 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_boundarySize)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
-    SpriteNew::Params,
+    Sprite::Params,
     m_scaleFactorPercent,
     m_animationCycleDuration,
     m_specialFrameIndex,
     m_actionPoint)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
-    SpriteNew::Group,
+    Sprite::Group,
     m_params,
     m_groupId,
     m_frames)

@@ -11,7 +11,6 @@
 #include "LocalizationConverter.hpp"
 #include "ThreadPoolExecutor.hpp"
 #include "KnownResources.hpp"
-#include "ResourcePostprocess.hpp"
 #include "MediaConverter.hpp"
 #include "GameConstants.hpp"
 #include "IGameDatabase.hpp"
@@ -273,7 +272,7 @@ void ConverterDialog::run()
 
     statusUpdate(tr("Extracting files..."));
 
-    KnownResources knownResources(QString2stdPath(QApplication::applicationDirPath()) / "gameResources" / "knownResources.json");
+    KnownResources knownResources(QString2stdPath(QApplication::applicationDirPath()) / "gameResources" / "knownResources.json", "");
     auto           lastUpd     = std::chrono::milliseconds{ 0 };
     int            doneExtract = 0;
     ArchiveParser  parser(knownResources,
@@ -348,10 +347,10 @@ void ConverterDialog::run()
         converter.extractHOTA("json");
 
         Logger(Logger::Info) << "HotA PP";
-        ResourcePostprocess pp;
-        pp.concatSprites(*hotaLibrary, { "cmbkhlmt0", "cmbkhlmt1", "cmbkhlmt2", "cmbkhlmt3", "cmbkhlmt4" }, "cmbkhlmt", true);
-        pp.concatTilesSprite(*hotaLibrary, "hglnt", "highlands", 124);
-        pp.concatTilesSprite(*hotaLibrary, "wstlt", "wastelands", 124);
+        //        ResourcePostprocess pp;
+        //        pp.concatSprites(*hotaLibrary, { "cmbkhlmt0", "cmbkhlmt1", "cmbkhlmt2", "cmbkhlmt3", "cmbkhlmt4" }, "cmbkhlmt", true);
+        //        pp.concatTilesSprite(*hotaLibrary, "hglnt", "highlands", 124);
+        //        pp.concatTilesSprite(*hotaLibrary, "wstlt", "wastelands", 124);
         //hotaLibrary->saveIndex();
     }
     if (hdExists) {

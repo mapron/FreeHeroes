@@ -14,8 +14,6 @@ namespace FreeHeroes::Gui {
 
 struct SpriteFrame {
     QPixmap frame;
-    int32_t id        = 0;
-    bool    duplicate = false;
     QPoint  paddingLeftTop;
 };
 

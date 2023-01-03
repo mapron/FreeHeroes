@@ -5,7 +5,7 @@
  */
 #include "ThreadPoolExecutor.hpp"
 
-namespace FreeHeroes::Conversion {
+namespace FreeHeroes {
 
 namespace {
 std::chrono::milliseconds curMS()

@@ -87,7 +87,6 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_width,
     m_height,
     m_inverseRowOrder,
-    m_palette,
     m_rows,
     m_rleData)
 

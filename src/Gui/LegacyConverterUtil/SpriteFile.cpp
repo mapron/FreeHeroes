@@ -257,6 +257,156 @@ std_path makePngName(const std_path& baseName, int index)
     return name;
 }
 
+void postProcessSpriteGroupBattler(int groupIndex, Gui::Sprite::Group& seq, const PropertyTree& params)
+{
+    enum class BattleAnimation
+    {
+        Move         = 0,
+        Nervous      = 1,
+        StandStill   = 2,
+        PainRanged   = 3,
+        PainMelee    = 4,
+        Death        = 5,
+        Death2       = 6,
+        Turning      = 7,
+        MeleeUp      = 11,
+        MeleeCenter  = 12,
+        MeleeDown    = 13,
+        RangedUp     = 14,
+        RangedCenter = 15,
+        RangedDown   = 16,
+        MagicUp      = 17,
+        MagicCenter  = 18,
+        MagicDown    = 19,
+        MoveStart    = 20,
+        MoveFinish   = 21,
+    };
+    assert(groupIndex <= 21);
+    const BattleAnimation type   = static_cast<BattleAnimation>(groupIndex);
+    bool                  isWide = false;
+    if (params.contains("wide")) {
+        isWide = params["wide"].getScalar().toBool();
+    }
+    std::vector<int> relativeSpeeds;
+    if (params.contains("speed")) {
+        for (const auto& val : params.getMap().at("speed").getList())
+            relativeSpeeds.push_back(val.getScalar().toInt());
+    }
+    std::vector<int> actionPoints;
+    int              special = -1;
+    if (params.contains("actionPoints")) {
+        special = 4;
+        for (const auto& val : params.getMap().at("actionPoints").getList())
+            actionPoints.push_back(val.getScalar().toInt());
+    }
+    if (params.contains("special")) {
+        special = params["special"].getScalar().toInt();
+    }
+
+    auto getAnimDuration = [&relativeSpeeds, &type](int frames) {
+        int duration = 1000;
+        switch (type) {
+            case BattleAnimation::Move:
+                duration = 500;
+                break;
+            case BattleAnimation::Nervous:
+                duration = 100;
+                break; // per frame
+            case BattleAnimation::StandStill:
+                duration = 100;
+                break; // per frame
+            case BattleAnimation::Turning:
+                duration = 100;
+                break; // per frame
+            case BattleAnimation::MeleeUp:
+            case BattleAnimation::MeleeCenter:
+            case BattleAnimation::MeleeDown:
+            case BattleAnimation::RangedUp:
+            case BattleAnimation::RangedCenter:
+            case BattleAnimation::RangedDown:
+            case BattleAnimation::MagicUp:
+            case BattleAnimation::MagicCenter:
+            case BattleAnimation::MagicDown:
+                duration = 500;
+                break; // 400 just attack, 100 both attack and pain
+            case BattleAnimation::PainMelee:
+            case BattleAnimation::PainRanged:
+                duration = 400;
+                break;
+            case BattleAnimation::MoveStart:
+                duration = 100;
+                break; // per frame
+            case BattleAnimation::MoveFinish:
+                duration = 100;
+                break; // per frame
+            case BattleAnimation::Death:
+                duration = 600;
+                break;
+            default:
+                break;
+        }
+        const bool needMultiplyByFrames = type == BattleAnimation::Turning
+                                          || type == BattleAnimation::StandStill
+                                          || type == BattleAnimation::Nervous
+                                          || type == BattleAnimation::MoveStart
+                                          || type == BattleAnimation::MoveFinish;
+        if (needMultiplyByFrames)
+            duration *= frames;
+        int relativeSpeed = 100;
+        if (type == BattleAnimation::Move
+            || type == BattleAnimation::MoveStart
+            || type == BattleAnimation::MoveFinish)
+            relativeSpeed = relativeSpeeds[0];
+        else if (type == BattleAnimation::StandStill)
+            relativeSpeed = relativeSpeeds[1];
+        else if (type == BattleAnimation::Nervous)
+            relativeSpeed = relativeSpeeds[2];
+
+        return duration * relativeSpeed / 100;
+    };
+
+    // [34, -71, 38, -61, 17, -53]   , 7
+
+    seq.m_params.m_animationCycleDuration = getAnimDuration(seq.m_frames.size());
+    if (!actionPoints.empty()) {
+        if (type == BattleAnimation::RangedUp)
+            seq.m_params.m_actionPoint = { actionPoints[0], actionPoints[1] };
+        else if (type == BattleAnimation::RangedCenter)
+            seq.m_params.m_actionPoint = { actionPoints[2], actionPoints[3] };
+        else if (type == BattleAnimation::RangedDown)
+            seq.m_params.m_actionPoint = { actionPoints[4], actionPoints[5] };
+
+        if (!seq.m_params.m_actionPoint.isNull())
+            seq.m_params.m_specialFrameIndex = special;
+    }
+    for (auto& frame : seq.m_frames) {
+        if (isWide) {
+            frame.m_padding += QPoint(6, -10); // That's strange, but Battle sprites not perfectly centered. That's unconvenient.
+        } else {
+            frame.m_padding += QPoint(30, -10);
+        }
+    }
+}
+
+struct AnimationPaletteShift {
+    int m_from   = 0;
+    int m_length = 0;
+};
+struct AnimationPaletteConfig {
+    std::vector<AnimationPaletteShift> m_shifts;
+    int                                m_variantsCount = 0;
+
+    void shiftPalette(BitmapFile::Palette& palette) const
+    {
+        auto palCopy = palette;
+        for (const AnimationPaletteShift& shift : m_shifts) {
+            for (int i = 0; i < shift.m_length; ++i)
+                palCopy.m_table[shift.m_from + (i + 1) % shift.m_length] = palette.m_table[shift.m_from + i];
+        }
+        palette = std::move(palCopy);
+    }
+};
+
 }
 
 void SpriteFile::detectFormat(const Mernel::std_path& path, ByteOrderDataStreamReader& stream)
@@ -283,6 +433,13 @@ void SpriteFile::detectFormat(const Mernel::std_path& path, ByteOrderDataStreamR
 
 void SpriteFile::readBinary(ByteOrderDataStreamReader& stream)
 {
+    if (m_format == BinaryFormat::PCX) {
+        return readBinaryPCX(stream);
+    }
+    if (m_format == BinaryFormat::BMP) {
+        assert(false);
+        return;
+    }
     auto readFrameData = [&stream, this](Frame& frame, const SpriteDef& def) {
         const bool isEmpty = def.fullWidth == 0 || def.fullHeight == 0;
 
@@ -302,7 +459,7 @@ void SpriteFile::readBinary(ByteOrderDataStreamReader& stream)
             bitmapFile.m_pixFormat              = def.pixelBitSize == 32 ? BitmapFile::PixFormat::BGRA : BitmapFile::PixFormat::Gray;
             bitmapFile.m_width                  = def.width;
             bitmapFile.m_height                 = def.height;
-            bitmapFile.m_inverseRowOrder        = false;
+            bitmapFile.m_inverseRowOrder        = m_format == BinaryFormat::DEF32;
             bitmapFile.m_rleData.m_originalSize = bitmapFile.m_compression == BitmapFile::Compression::None ? 0 : def.blobSize;
 
             ByteArrayHolder blob;
@@ -657,6 +814,79 @@ void SpriteFile::writeBinary(ByteOrderDataStreamWriter& stream) const
     offsetTracker.writeOffsets();
 }
 
+void SpriteFile::readBinaryPCX(Mernel::ByteOrderDataStreamReader& stream)
+{
+    BitmapFile bmp;
+    uint32_t   fileSize = stream.getBuffer().getSize();
+
+    uint32_t size = 0, width = 0, height = 0;
+    stream >> size >> width >> height;
+
+    if (size == 0x46323350 && width == 0 && height == 32) // 'P32F'
+    {
+        uint32_t u1 = 0, u2 = 0, u3 = 0, u4 = 0;
+        stream >> size >> u1 >> u2 >> width >> height >> u3 >> u4;
+
+        QImage tmp(width, height, QImage::Format_RGBA8888);
+        for (uint32_t h = 0; h < height; h++)
+            for (uint32_t w = 0; w < width; w++) {
+                uint8_t r, g, b, a;
+                stream >> b >> g >> r >> a;
+                tmp.setPixelColor(w, height - h - 1, QColor(r, g, b, a));
+            }
+
+        bmp.m_pixmapQt = std::make_shared<QPixmap>(QPixmap::fromImage(tmp));
+        return fromPixmap(std::move(bmp));
+    }
+    if (width == 0 || height == 0) {
+        throw std::runtime_error("Invalid PCX.");
+    }
+
+    if (width * height * 3 == size && fileSize == size + 12) { // RGB no pallete
+        QImage tmp(width, height, QImage::Format_RGB888);
+        for (uint32_t h = 0; h < height; h++)
+            for (uint32_t w = 0; w < width; w++) {
+                uint8_t r = 0, g = 0, b = 0;
+                stream >> b >> g >> r;
+                tmp.setPixelColor(w, height - h - 1, QColor(r, g, b));
+            }
+
+        bmp.m_pixmapQt = std::make_shared<QPixmap>(QPixmap::fromImage(tmp));
+        return fromPixmap(std::move(bmp));
+    }
+
+    // PAL8 format. Pallete in the end of file.
+    QVector<QVector<uint8_t>> pal8(height);
+
+    QImage tmp(width, height, QImage::Format_RGB888);
+    for (uint32_t h = 0; h < height; h++) {
+        pal8[h].resize(width);
+        for (uint32_t w = 0; w < width; w++) {
+            stream >> pal8[h][w];
+        }
+    }
+    QVector<QColor> palette(256);
+    for (int i = 0; i < palette.size(); i++) {
+        uint8_t r = 0, g = 0, b = 0;
+        stream >> r >> g >> b;
+        palette[i] = QColor(r, g, b);
+    }
+    for (uint32_t h = 0; h < height; h++) {
+        for (uint32_t w = 0; w < width; w++)
+            tmp.setPixelColor(w, h, palette[pal8[h][w]]);
+    }
+    bmp.m_pixmapQt = std::make_shared<QPixmap>(QPixmap::fromImage(tmp));
+    fromPixmap(std::move(bmp));
+}
+
+void SpriteFile::readBMP(const Mernel::std_path& bmpFilePath)
+{
+    QImage     tmp(QString::fromStdString(path2string(bmpFilePath)));
+    BitmapFile bmp;
+    bmp.m_pixmapQt = std::make_shared<QPixmap>(QPixmap::fromImage(tmp));
+    fromPixmap(std::move(bmp));
+}
+
 void SpriteFile::toJson(PropertyTree& data) const
 {
     Reflection::PropertyTreeWriter writer;
@@ -683,6 +913,54 @@ void SpriteFile::fromJson(const PropertyTree& data)
             bitmapFile.fromJson(bitmapJson);
             m_bitmaps.push_back(std::move(bitmapFile));
         }
+    }
+}
+
+void SpriteFile::fromPixmap(BitmapFile data)
+{
+    m_embeddedBitmapData = false;
+    m_bitmaps.resize(1);
+    m_bitmaps[0] = std::move(data);
+    const auto w = m_bitmaps[0].m_pixmapQt->width();
+    const auto h = m_bitmaps[0].m_pixmapQt->height();
+
+    m_bitmaps[0].m_width  = w;
+    m_bitmaps[0].m_height = h;
+    m_boundaryHeight      = h;
+    m_boundaryWidth       = w;
+
+    m_groups.resize(1);
+    Group& group = m_groups[0];
+    group.m_frames.resize(1);
+    Frame& frame        = group.m_frames[0];
+    frame.m_bitmapIndex = 0;
+    frame.m_bitmapWidth = frame.m_boundaryWidth = w;
+    frame.m_bitmapHeight = frame.m_boundaryHeight = h;
+    frame.m_hasBitmap                             = true;
+}
+
+void SpriteFile::fromPixmapList(std::vector<BitmapFile> data)
+{
+    m_embeddedBitmapData = false;
+    m_bitmaps            = std::move(data);
+    const auto w         = m_bitmaps[0].m_pixmapQt->width();
+    const auto h         = m_bitmaps[0].m_pixmapQt->height();
+
+    m_bitmaps[0].m_width  = w;
+    m_bitmaps[0].m_height = h;
+    m_boundaryHeight      = h;
+    m_boundaryWidth       = w;
+
+    m_groups.resize(m_bitmaps.size());
+    for (int i = 0; Group & group : m_groups) {
+        group.m_groupId = i;
+        group.m_frames.resize(1);
+        Frame& frame        = group.m_frames[0];
+        frame.m_bitmapIndex = size_t(i);
+        frame.m_bitmapWidth = frame.m_boundaryWidth = w;
+        frame.m_bitmapHeight = frame.m_boundaryHeight = h;
+        frame.m_hasBitmap                             = true;
+        i++;
     }
 }
 
@@ -879,27 +1157,120 @@ void SpriteFile::mergeBitmaps()
     m_bitmaps[0].m_height   = m_bitmaps[0].m_pixmapQt->height();
 }
 
-void SpriteFile::saveGuiSprite(const Mernel::std_path& jsonFilePath)
+void SpriteFile::saveGuiSprite(const Mernel::std_path& jsonFilePath, const Mernel::PropertyTree& handlers)
 {
-    if (m_embeddedBitmapData)
+    const bool doAnimatePalette = handlers.contains("animatePalette");
+    if (m_embeddedBitmapData && !doAnimatePalette)
         throw std::runtime_error("Only split bitmaps can be saved");
+
+    if (doAnimatePalette) {
+        uncompress();
+        m_embeddedBitmapData = false;
+    }
+
+    if (handlers.contains("unpack")) {
+        auto formatFileWithIndex = [](std::string tpl, int index) {
+            const std::string from      = "%1";
+            const std::string to        = std::to_string(index);
+            size_t            start_pos = tpl.find(from);
+            if (start_pos != std::string::npos)
+                tpl.replace(start_pos, from.length(), to);
+            return tpl;
+        };
+
+        const auto parentFolder = jsonFilePath.parent_path();
+
+        for (const auto& task : handlers["unpack"].getList()) {
+            const std::string tpl        = task["template"].getScalar().toString();
+            const std::string subdir     = task["subdir"].getScalar().toString();
+            const auto        taskFolder = parentFolder / subdir;
+
+            const int idOffset   = task["idOffset"].getScalar().toInt();
+            const int startFrame = task["startFrame"].getScalar().toInt();
+            const int endFrame   = task["endFrame"].getScalar().toInt();
+
+            const Group& group = m_groups[0];
+
+            for (int f = startFrame, i = 0; f <= endFrame; ++f, ++i) {
+                const int              id         = idOffset + i;
+                const std::string      filename   = formatFileWithIndex(tpl, id);
+                const std::string      filenameJs = filename + ".fhsprite.json";
+                const Mernel::std_path path       = taskFolder / Mernel::string2path(filenameJs);
+                const Frame&           frame      = group.m_frames[f];
+                if (!frame.m_hasBitmap)
+                    continue;
+
+                SpriteFile splitted;
+                splitted.fromPixmap(m_bitmaps[frame.m_bitmapIndex]);
+                splitted.m_groups[0].m_frames[0].m_paddingLeft    = frame.m_paddingLeft;
+                splitted.m_groups[0].m_frames[0].m_paddingTop     = frame.m_paddingTop;
+                splitted.m_groups[0].m_frames[0].m_boundaryHeight = frame.m_boundaryHeight;
+                splitted.m_groups[0].m_frames[0].m_boundaryWidth  = frame.m_boundaryWidth;
+                splitted.m_boundaryHeight                         = frame.m_boundaryHeight;
+                splitted.m_boundaryWidth                          = frame.m_boundaryWidth;
+                splitted.saveGuiSprite(path, {});
+            }
+        }
+    }
+    if (handlers.contains("transpose")) {
+        const Group            groupOrig = m_groups[0];
+        AnimationPaletteConfig config; // "animatePalette": {"count": 9, "shifts": [{"from": 246, "len": 9}] } } ,
+        if (doAnimatePalette) {
+            const auto& dataPal    = handlers["animatePalette"];
+            config.m_variantsCount = dataPal["count"].getScalar().toInt();
+            for (const auto& s : dataPal["shifts"].getList()) {
+                config.m_shifts.push_back(AnimationPaletteShift{ (int) s["from"].getScalar().toInt(), (int) s["len"].getScalar().toInt() });
+            }
+        }
+        BitmapFile::Palette paletteExtended;
+        if (doAnimatePalette) {
+            g_extendedColors.extendPalette(m_palette, paletteExtended, m_defType);
+        }
+
+        m_groups.clear();
+        for (int groupId = 0; const auto& frame : groupOrig.m_frames) {
+            Group groupNew;
+            groupNew.m_groupId = groupId;
+            if (doAnimatePalette) {
+                auto palette = m_palette;
+
+                for (int i = 0; i < config.m_variantsCount; ++i) {
+                    Frame      frameCopy = frame;
+                    BitmapFile bmp       = m_bitmaps[frame.m_bitmapIndex];
+                    bmp.unpackPalette(palette, paletteExtended);
+                    bmp.toPixmapQt();
+                    frameCopy.m_bitmapIndex = m_bitmaps.size();
+                    m_bitmaps.push_back(std::move(bmp));
+                    groupNew.m_frames.push_back(frameCopy);
+                    config.shiftPalette(palette);
+                }
+            } else {
+                groupNew.m_frames.push_back(frame);
+            }
+
+            m_groups.push_back(std::move(groupNew));
+            groupId++;
+        }
+    }
+
+    mergeBitmaps();
 
     Mernel::std_fs::create_directories(jsonFilePath.parent_path());
 
     assert(m_bitmaps.size() == 1);
 
-    Gui::SpriteNew uiSprite;
+    Gui::Sprite uiSprite;
     uiSprite.m_bitmap       = *m_bitmaps[0].m_pixmapQt.get();
     uiSprite.m_boundarySize = { m_boundaryWidth, m_boundaryHeight };
     std::vector<const Frame*> headerOrderFrames;
     for (const Group& group : m_groups) {
-        Gui::SpriteNew::Group uiGroup;
+        Gui::Sprite::Group uiGroup;
         uiGroup.m_groupId = group.m_groupId;
 
         for (const Frame& frame : group.m_frames) {
             headerOrderFrames.push_back(&frame);
-            Gui::SpriteNew::Frame uiFrame;
-            const Frame*          srcframe = &frame;
+            Gui::Sprite::Frame uiFrame;
+            const Frame*       srcframe = &frame;
             if (srcframe->m_isDuplicate) {
                 srcframe = headerOrderFrames[srcframe->m_dupHeaderIndex];
             }
@@ -912,8 +1283,26 @@ void SpriteFile::saveGuiSprite(const Mernel::std_path& jsonFilePath)
             uiGroup.m_frames.push_back(std::move(uiFrame));
         }
 
+        if (handlers.isMap()) {
+            for (const auto& [key, routineParam] : handlers.getMap()) {
+                if (key == "battle_unit") {
+                    postProcessSpriteGroupBattler(group.m_groupId, uiGroup, routineParam);
+                } else if (key == "make_transparent") {
+                    // postProcessSpriteMakeTransparent(*newSeqPtr, routineParam);
+                }
+            }
+        }
+
         uiSprite.m_groups[group.m_groupId] = std::move(uiGroup);
     }
+    if (handlers.isMap()) {
+        for (const auto& [key, routineParam] : handlers.getMap()) {
+            if (key == "flip_vertical") {
+                uiSprite.m_bitmap = uiSprite.m_bitmap.transformed(QTransform().scale(1, -1));
+            }
+        }
+    }
+
     uiSprite.save(jsonFilePath);
 }
 

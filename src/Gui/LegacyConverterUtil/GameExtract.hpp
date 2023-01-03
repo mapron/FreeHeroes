@@ -11,6 +11,7 @@
 
 #include <map>
 #include <functional>
+#include <mutex>
 
 namespace FreeHeroes {
 namespace Core {
@@ -40,6 +41,7 @@ public:
 
         bool m_isSod  = false;
         bool m_isHota = false;
+        bool m_isHD   = false;
     };
     using DetectedPathList = std::vector<DetectedPath>;
 
@@ -76,6 +78,7 @@ public:
     {
         if (!m_onProgress)
             return;
+        std::lock_guard lock(m_messageMutex);
         m_onProgress(progress, total);
     }
 
@@ -83,12 +86,14 @@ public:
     {
         if (!m_onMessage)
             return;
+        std::lock_guard lock(m_messageMutex);
         m_onMessage(msg, important);
     }
     void sendError(const std::string& msg) const
     {
         if (!m_onError)
             return;
+        std::lock_guard lock(m_messageMutex);
         m_onError(msg);
     }
 
@@ -98,6 +103,7 @@ private:
     ProgressCallBack                          m_onProgress;
     ErrorCallBack                             m_onError;
     MessageCallBack                           m_onMessage;
+    mutable std::mutex                        m_messageMutex;
 };
 
 }

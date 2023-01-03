@@ -14,33 +14,7 @@
 
 namespace FreeHeroes::Gui {
 
-class GUIRESOURCE_EXPORT Sprite : public ISprite {
-public:
-    int getGroupsCount() const override
-    {
-        return m_groups.size();
-    }
-
-    QList<int> getGroupsIds() const override
-    {
-        return m_groups.keys();
-    }
-
-    SpriteSequencePtr getFramesForGroup(int group) const override
-    {
-        return m_groups.value(group);
-    }
-
-    static SpritePtr fromPixmap(QPixmap pixmap);
-
-protected:
-    void addGroup(int groupId, SpriteSequencePtr seq);
-
-private:
-    QMap<int, SpriteSequencePtr> m_groups;
-};
-
-struct GUIRESOURCE_EXPORT SpriteNew {
+struct GUIRESOURCE_EXPORT Sprite : public ISprite {
     QPixmap m_bitmap;
 
     struct Frame {
@@ -71,6 +45,10 @@ struct GUIRESOURCE_EXPORT SpriteNew {
 
     void load(const Mernel::std_path& jsonFilePath);
     void save(const Mernel::std_path& jsonFilePath) const;
+
+    int               getGroupsCount() const override { return static_cast<int>(m_groups.size()); }
+    QList<int>        getGroupsIds() const override;
+    SpriteSequencePtr getFramesForGroup(int group) const override;
 };
 
 }

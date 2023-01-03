@@ -8,7 +8,7 @@
 #include "MernelPlatform/FileIOUtils.hpp"
 #include "MernelPlatform/FileFormatJson.hpp"
 
-namespace FreeHeroes::Conversion {
+namespace FreeHeroes {
 
 const KnownResource* KnownResources::find(const std::string& legacyId) const
 {
@@ -16,26 +16,40 @@ const KnownResource* KnownResources::find(const std::string& legacyId) const
     return it == m_index.cend() ? nullptr : it->second;
 }
 
-KnownResources::KnownResources(const Mernel::std_path& config)
+Mernel::PropertyTree KnownResources::findPP(const std::string& legacyId) const
 {
-    std::string buffer   = Mernel::readFileIntoBufferThrow(config);
-    auto        jsonData = Mernel::readJsonFromBufferThrow(buffer);
-    m_resources.reserve(10000);
+    auto it = m_ppData.find(legacyId);
+    return it == m_ppData.cend() ? Mernel::PropertyTree{} : it->second;
+}
 
-    for (const auto& [key, row] : jsonData.getMap()) {
-        const auto    rowArr = row.getList();
-        KnownResource res;
-        res.legacyId = key;
-        rowArr[0].getScalar().convertTo(res.newId);
-        rowArr[1].getScalar().convertTo(res.destinationSubfolder);
-        if (rowArr.size() > 2) {
-            res.handlers = rowArr[2].getMap();
+KnownResources::KnownResources(const Mernel::std_path& config, const Mernel::std_path& ppConfig)
+{
+    {
+        std::string buffer   = Mernel::readFileIntoBufferThrow(config);
+        auto        jsonData = Mernel::readJsonFromBufferThrow(buffer);
+        m_resources.reserve(10000);
+
+        for (const auto& [key, row] : jsonData.getMap()) {
+            const auto    rowArr = row.getList();
+            KnownResource res;
+            res.legacyId = key;
+            rowArr[0].getScalar().convertTo(res.newId);
+            rowArr[1].getScalar().convertTo(res.destinationSubfolder);
+            m_resources.push_back(std::move(res));
         }
-        m_resources.push_back(std::move(res));
+
+        for (const auto& res : m_resources) {
+            m_index[res.legacyId] = &res;
+        }
     }
 
-    for (const auto& res : m_resources) {
-        m_index[res.legacyId] = &res;
+    {
+        std::string buffer   = Mernel::readFileIntoBufferThrow(ppConfig);
+        auto        jsonData = Mernel::readJsonFromBufferThrow(buffer);
+
+        for (const auto& [key, row] : jsonData.getMap()) {
+            m_ppData[key] = row.getMap();
+        }
     }
 }
 

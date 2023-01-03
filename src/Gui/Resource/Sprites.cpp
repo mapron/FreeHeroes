@@ -7,12 +7,11 @@
 
 #include "MernelPlatform/FileFormatJson.hpp"
 #include "MernelPlatform/FileIOUtils.hpp"
-#include "FsUtilsQt.hpp"
-#include "MernelPlatform/StringUtils.hpp"
 
 #include "MernelReflection/PropertyTreeReader.hpp"
 #include "MernelReflection/PropertyTreeWriter.hpp"
 
+#include "FsUtilsQt.hpp"
 #include "SpritesReflection.hpp"
 
 namespace FreeHeroes::Gui {
@@ -27,27 +26,7 @@ std_path makePngPath(const std_path& jsonFilePath)
 }
 }
 
-SpritePtr Sprite::fromPixmap(QPixmap pixmap)
-{
-    auto        seq = std::make_shared<SpriteSequence>();
-    SpriteFrame f;
-    f.frame          = pixmap;
-    f.paddingLeftTop = { 0, 0 };
-    seq->frames << f;
-
-    seq->boundarySize = pixmap.size();
-
-    Sprite result;
-    result.addGroup(0, seq);
-    return std::make_shared<Sprite>(std::move(result));
-}
-
-void Sprite::addGroup(int groupId, SpriteSequencePtr seq)
-{
-    m_groups[groupId] = seq;
-}
-
-void SpriteNew::load(const std_path& jsonFilePath)
+void Sprite::load(const std_path& jsonFilePath)
 {
     const std::string          buffer = Mernel::readFileIntoBufferThrow(jsonFilePath);
     const Mernel::PropertyTree data   = Mernel::readJsonFromBufferThrow(buffer);
@@ -58,7 +37,7 @@ void SpriteNew::load(const std_path& jsonFilePath)
     m_bitmap.load(stdPath2QString(makePngPath(jsonFilePath)));
 }
 
-void SpriteNew::save(const std_path& jsonFilePath) const
+void Sprite::save(const std_path& jsonFilePath) const
 {
     Mernel::PropertyTree                   data;
     Mernel::Reflection::PropertyTreeWriter writer;
@@ -66,7 +45,48 @@ void SpriteNew::save(const std_path& jsonFilePath) const
     std::string buffer = Mernel::writeJsonToBufferThrow(data, true);
     Mernel::writeFileFromBufferThrow(jsonFilePath, buffer);
 
+    Mernel::std_fs::create_directories(jsonFilePath.parent_path());
     m_bitmap.save(stdPath2QString(makePngPath(jsonFilePath)));
+}
+
+QList<int> Sprite::getGroupsIds() const
+{
+    QList<int> result;
+    for (const auto& [key, group] : m_groups)
+        result << key;
+    return result;
+}
+
+SpriteSequencePtr Sprite::getFramesForGroup(int groupId) const
+{
+    auto seq = std::make_shared<SpriteSequence>();
+    if (!m_groups.contains(groupId))
+        return nullptr;
+    const Group& group = m_groups.at(groupId);
+
+    seq->params = {
+        .scaleFactorPercent     = group.m_params.m_scaleFactorPercent,
+        .animationCycleDuration = group.m_params.m_animationCycleDuration,
+        .specialFrameIndex      = group.m_params.m_specialFrameIndex,
+        .actionPoint            = group.m_params.m_actionPoint,
+    };
+
+    seq->boundarySize = m_boundarySize;
+
+    for (const auto& frame : group.m_frames) {
+        if (!frame.m_hasBitmap) {
+            seq->frames << SpriteFrame{};
+            continue;
+        }
+
+        auto framePix = m_bitmap.copy(frame.m_bitmapOffset.x(),
+                                      frame.m_bitmapOffset.y(),
+                                      frame.m_bitmapSize.width(),
+                                      frame.m_bitmapSize.height());
+        seq->frames << SpriteFrame{ .frame = std::move(framePix), .paddingLeftTop = frame.m_padding };
+    }
+
+    return seq;
 }
 
 }

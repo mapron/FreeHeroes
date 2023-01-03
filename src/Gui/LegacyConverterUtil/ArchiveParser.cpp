@@ -5,9 +5,6 @@
  */
 #include "ArchiveParser.hpp"
 
-#include "SpriteSerialization.hpp"
-#include "SpriteParserLegacy.hpp"
-
 #include "KnownResources.hpp"
 #include "CompressionUtils.hpp"
 #include "MediaConverter.hpp"
@@ -19,6 +16,7 @@
 
 #include <QTextCodec>
 #include <QDataStream>
+#include <QMap>
 
 #include <fstream>
 #include <iostream>
@@ -224,6 +222,7 @@ bool ArchiveParser::copyDef(const ArchiveParser::ExtractionTask& task, CallbackI
             (*estimate)++;
             continue;
         }
+        /*
         const std::string destName     = makeJsonFilename(path2string(resourceId));
         const std_path    destFilePath = dest / destName;
         m_extractCallbackInc();
@@ -238,7 +237,7 @@ bool ArchiveParser::copyDef(const ArchiveParser::ExtractionTask& task, CallbackI
 
             saveSprite(sprite, destFilePath);
         };
-        conversion(conversionRoutine);
+        conversion(conversionRoutine);*/
 
         //task.resources->registerResource(ResourceMedia{ ResourceType::Sprite, path2string(resourceId), "", destName, {} });
     }
@@ -247,6 +246,7 @@ bool ArchiveParser::copyDef(const ArchiveParser::ExtractionTask& task, CallbackI
 
 bool ArchiveParser::extractLOD(const ExtractionTask& task, CallbackInserter& conversion, CallbackInserter& postprocess, int* estimate)
 {
+    /*
     uint32_t totalFiles = 0;
     m_ds.skipRawData(8);
 
@@ -326,6 +326,7 @@ bool ArchiveParser::extractLOD(const ExtractionTask& task, CallbackInserter& con
         std::string fullIdStr  = path2string(resourceId);
         std::string shortIdStr = fullIdStr;
         //std::string targetResourceIdStr = path2string(resourceId);
+        auto        handlersMap   = m_knownResources.findPP(fullIdStr);
         const auto* knownResource = m_knownResources.find(fullIdStr);
         if (knownResource) {
             subfolder  = knownResource->destinationSubfolder;
@@ -352,9 +353,9 @@ bool ArchiveParser::extractLOD(const ExtractionTask& task, CallbackInserter& con
                 }
             };
 
-            if (knownResource && !knownResource->handlers.empty()) {
-                auto ppRoutine = [knownResource, destFilePath, isHota = task.isHota, library = task.resources]() {
-                    auto handlers = knownResource->handlers;
+            if (knownResource && !handlersMap.empty()) {
+                auto ppRoutine = [handlersMap, destFilePath, isHota = task.isHota, library = task.resources]() {
+                    auto handlers = handlersMap;
 
                     const std::vector<std::string> names{ "make_transparent", "unpack" };
                     for (const auto& name : names) {
@@ -392,7 +393,7 @@ bool ArchiveParser::extractLOD(const ExtractionTask& task, CallbackInserter& con
         }
 
         //task.resources->registerResource(ResourceMedia{ type, fullIdStr, path2string(subfolder) + "/", mainResourceName, {} });
-    }
+    }*/
     return true;
 }
 
@@ -402,6 +403,7 @@ bool ArchiveParser::extractHDAT(const ExtractionTask& task, CallbackInserter& co
     //    return false;
     (void) conversion;
 
+    /*
     uint32_t signature;
     m_ds >> signature;
     if (signature != 0x54414448) // 'HDAT'
@@ -491,7 +493,7 @@ bool ArchiveParser::extractHDAT(const ExtractionTask& task, CallbackInserter& co
             return false;
 
         //task.resources->registerResource({ ResourceType::Other, rec.fname.toStdString(), "json/", outFileName, {} });
-    }
+    }*/
     return true;
 }
 

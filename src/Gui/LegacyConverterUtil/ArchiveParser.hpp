@@ -22,9 +22,11 @@ inline Q_DECL_PURE_FUNCTION uint qHash(const ResourceType& key, uint seed = 0) Q
     return ::qHash(static_cast<int>(key), seed);
 }
 }
-
-namespace FreeHeroes::Conversion {
+namespace FreeHeroes {
 class KnownResources;
+}
+namespace FreeHeroes::Conversion {
+
 class LEGACYCONVERTERUTIL_EXPORT ArchiveParser {
 public:
     using std_path           = Mernel::std_path;

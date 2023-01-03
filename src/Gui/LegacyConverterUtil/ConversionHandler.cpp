@@ -15,9 +15,6 @@
 #include "MernelPlatform/FileIOUtils.hpp"
 #include "MernelPlatform/FileFormatJson.hpp"
 
-#include "SpriteParserLegacy.hpp"
-#include "SpriteSerialization.hpp"
-
 #include <iostream>
 
 #define runMember(name) run(&ConversionHandler::name, #name, recurse + 1)
@@ -158,10 +155,13 @@ void ConversionHandler::run(Task task, int recurse) noexcept(false)
             case Task::SpriteLoadDef:
             {
                 setInput(m_inputs.m_defFile);
-                runMember(readBinaryBufferData);
-                //auto s = Conversion::loadSpriteLegacy(m_inputFilename);
+                if (m_sprite->m_format == SpriteFile::BinaryFormat::BMP) {
+                    m_sprite->readBMP(m_inputFilename);
+                } else {
+                    runMember(readBinaryBufferData);
 
-                runMember(binaryDeserializeSprite);
+                    runMember(binaryDeserializeSprite);
+                }
             } break;
             case Task::SpriteSaveDef:
             {
@@ -203,8 +203,7 @@ void ConversionHandler::run(Task task, int recurse) noexcept(false)
             case Task::SpriteSaveUI:
             {
                 m_sprite->setEmbeddedData(false, m_settings.m_transparentKeyColor);
-                m_sprite->mergeBitmaps();
-                m_sprite->saveGuiSprite(m_settings.m_outputs.m_pngJsonFile);
+                m_sprite->saveGuiSprite(m_settings.m_outputs.m_pngJsonFile, {});
             } break;
 
             case Task::SpriteRoundTripPng:

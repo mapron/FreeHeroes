@@ -122,7 +122,7 @@ public:
         uint32_t m_originalSize = 0;
     };
 
-    Palette m_palette;
+    //Palette m_palette;
 
     using PixelRow = std::vector<Pixel>;
     std::vector<PixelRow> m_rows;

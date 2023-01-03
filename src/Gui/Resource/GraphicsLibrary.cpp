@@ -5,7 +5,9 @@
  */
 #include "GraphicsLibrary.hpp"
 
-#include "SpriteSerialization.hpp"
+#include "Sprites.hpp"
+
+#include "FsUtilsQt.hpp"
 
 #include "MernelPlatform/Logger.hpp"
 
@@ -166,14 +168,23 @@ SpritePtr GraphicsLibrary::Impl::getSyncObjectAnimation(const std::string& resou
         return m_spriteCache[resourceName];
     }
     auto& sprite = m_spriteCache[resourceName];
-    if (!m_resourceLibrary->fileExists(ResourceType::Sprite, resourceName))
+    if (!m_resourceLibrary->fileExists(ResourceType::Sprite, resourceName)) {
+        Mernel::Logger(Mernel::Logger::Notice) << "Sprite id does not exist: " << resourceName;
         return sprite;
+    }
 
-    const auto path = m_resourceLibrary->get(ResourceType::Sprite, resourceName);
-    sprite          = loadSprite(path);
-    Q_ASSERT(sprite && sprite->getGroupsCount() > 0);
-    if (sprite->getGroupsCount() == 0)
-        sprite = nullptr;
+    const auto path       = m_resourceLibrary->get(ResourceType::Sprite, resourceName);
+    auto       spriteImpl = std::make_shared<Sprite>();
+    try {
+        spriteImpl->load(path);
+    }
+    catch (std::exception& ex) {
+        Mernel::Logger(Mernel::Logger::Err) << "Failed to load sprite:" << path << ", " << ex.what();
+    }
+
+    if (spriteImpl->getGroupsCount() > 0) {
+        sprite = spriteImpl;
+    }
 
     return sprite;
 }

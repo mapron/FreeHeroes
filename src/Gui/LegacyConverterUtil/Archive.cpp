@@ -14,14 +14,11 @@
 
 #include "ArchiveReflection.hpp"
 
-#include "SpriteParserLegacy.hpp"
-
 #include "MernelPlatform/Compression.hpp"
 
 #include <iostream>
 
 namespace FreeHeroes {
-using namespace Core;
 using namespace Mernel;
 
 namespace {

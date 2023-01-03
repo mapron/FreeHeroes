@@ -15,24 +15,25 @@
 #include <vector>
 #include <unordered_map>
 
-namespace FreeHeroes::Conversion {
+namespace FreeHeroes {
 
 struct KnownResource {
     std::string legacyId;
     std::string newId;
     std::string destinationSubfolder;
-
-    Mernel::PropertyTreeMap handlers;
 };
 
 class LEGACYCONVERTERUTIL_EXPORT KnownResources {
 public:
-    KnownResources(const Mernel::std_path& config);
+    KnownResources(const Mernel::std_path& config, const Mernel::std_path& ppConfig);
     const KnownResource* find(const std::string& legacyId) const;
+    Mernel::PropertyTree findPP(const std::string& legacyId) const;
 
 private:
     std::vector<KnownResource>                            m_resources;
     std::unordered_map<std::string, const KnownResource*> m_index;
+
+    std::unordered_map<std::string, Mernel::PropertyTree> m_ppData;
 };
 
 }

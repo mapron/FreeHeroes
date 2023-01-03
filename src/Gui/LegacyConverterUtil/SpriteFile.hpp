@@ -94,8 +94,14 @@ public:
     void readBinary(Mernel::ByteOrderDataStreamReader& stream);
     void writeBinary(Mernel::ByteOrderDataStreamWriter& stream) const;
 
+    void readBinaryPCX(Mernel::ByteOrderDataStreamReader& stream);
+    void readBMP(const Mernel::std_path& bmpFilePath);
+
     void toJson(Mernel::PropertyTree& data) const;
     void fromJson(const Mernel::PropertyTree& data);
+
+    void fromPixmap(BitmapFile data);
+    void fromPixmapList(std::vector<BitmapFile> data);
 
     void saveBitmapsData(const Mernel::std_path& jsonFilePath) const;
     void loadBitmapsData(const Mernel::std_path& jsonFilePath);
@@ -110,7 +116,7 @@ public:
 
     void mergeBitmaps();
 
-    void saveGuiSprite(const Mernel::std_path& jsonFilePath);
+    void saveGuiSprite(const Mernel::std_path& jsonFilePath, const Mernel::PropertyTree& handlers);
 };
 
 }

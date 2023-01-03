@@ -13,28 +13,13 @@ namespace {
 
 const int pulseDurationMs = 1500;
 
-QVector<QPointF> getOpaqueRegionBorder(const QImage& img, QPointF offset)
+QVector<QPointF> getSelectionRegionBorder(const QImage& img, QPointF offset)
 {
-    auto getImageOpaque = [&img](int w, int h) {
-        return (w >= 0 && h >= 0 && w < img.width() && h < img.height()) ? img.pixelColor(w, h).alpha() == 255 : false;
-    };
     QVector<QPointF> points;
-    for (int h = -1; h < img.height() + 1; ++h) {
-        for (int w = -1; w < img.width() + 1; ++w) {
-            if (getImageOpaque(w, h))
-                continue;
-            // clang-format off
-            const bool hasOpaqueNeighbour =
-                       getImageOpaque(w - 1, h - 1)
-                    || getImageOpaque(w + 0, h - 1)
-                    || getImageOpaque(w + 1, h - 1)
-                    || getImageOpaque(w - 1, h + 0)
-                    || getImageOpaque(w + 1, h + 0)
-                    || getImageOpaque(w - 1, h + 1)
-                    || getImageOpaque(w + 0, h + 1)
-                    || getImageOpaque(w + 1, h + 1);
-            // clang-format on
-            if (hasOpaqueNeighbour)
+    for (int h = 0; h < img.height(); ++h) {
+        for (int w = 0; w < img.width(); ++w) {
+            const auto alpha = img.pixelColor(w, h).alpha();
+            if (alpha % 16 == 1) // logic in SpriteFile.cpp palette stuff.
                 points << QPointF(w, h) + offset;
         }
     }
@@ -167,7 +152,7 @@ void BattleStackSpriteItem::paint(QPainter* painter, const QStyleOptionGraphicsI
 
     if (mainHightLight != Highlight::No) {
         auto       img    = m_pixmap.toImage();
-        const auto points = getOpaqueRegionBorder(img, offsetTop); // @todo: cache maybe
+        const auto points = getSelectionRegionBorder(img, offsetTop);
 
         const auto pulseColor = mainHightLight == Highlight::Selected ? QColor(255, 255, 0, 128) : QColor(0, 255, 255, 192);
         painter->setPen(linearPulse(pulseColor, 100, m_frameMsTick, pulseDurationMs));

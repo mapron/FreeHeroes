@@ -15,7 +15,7 @@
 
 #include "LegacyConverterUtilExport.hpp"
 
-namespace FreeHeroes::Conversion {
+namespace FreeHeroes {
 
 class LEGACYCONVERTERUTIL_EXPORT ThreadPoolExecutor : public QObject {
     Q_OBJECT
