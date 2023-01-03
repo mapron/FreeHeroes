@@ -18,7 +18,7 @@ using namespace Mernel;
 
 int main(int argc, char** argv)
 {
-    AbstractCommandLine parser({ "heroesRoot", "archiveExtractRoot", "mainExtractRoot", "knownResourcesFile", "force" });
+    AbstractCommandLine parser({ "heroesRoot", "archiveExtractRoot", "mainExtractRoot", "force" });
     parser.markRequired({ "archiveExtractRoot", "mainExtractRoot" });
 
     if (!parser.parseArgs(std::cerr, argc, argv)) {
@@ -31,7 +31,6 @@ int main(int argc, char** argv)
         .m_heroesRoot         = Mernel::string2path(parser.getArg("heroesRoot")),
         .m_archiveExtractRoot = Mernel::string2path(parser.getArg("archiveExtractRoot")),
         .m_mainExtractRoot    = Mernel::string2path(parser.getArg("mainExtractRoot")),
-        .m_knownResourcesFile = Mernel::string2path(parser.getArg("knownResourcesFile")),
         .m_forceExtract       = (parser.getArg("force") == "1"),
     };
 

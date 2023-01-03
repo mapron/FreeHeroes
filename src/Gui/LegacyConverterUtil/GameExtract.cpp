@@ -8,23 +8,30 @@
 #include "EnvDetect.hpp"
 
 #include "ConversionHandler.hpp"
-#include "ThreadPoolExecutor.hpp"
 #include "MernelPlatform/AppLocations.hpp"
+#include "MernelExecution/ParallelExecutor.hpp"
+#include "MernelExecution/TaskQueueWatcher.hpp"
+#include "MernelExecution/TaskQueue.hpp"
 
 #include "Archive.hpp"
 #include "SpriteFile.hpp"
 #include "KnownResources.hpp"
+#include "FsUtilsQt.hpp"
 
 #include "MernelPlatform/Profiler.hpp"
+#include "MernelPlatform/Logger.hpp"
 
 #include <sstream>
 
 #include <QEventLoop>
 #include <QImage>
 #include <QPainter>
+#include <QProcess>
 
 namespace FreeHeroes {
 using namespace Mernel;
+
+namespace {
 
 struct ArchiveWrapper {
     std::ostringstream                 m_converterLog;
@@ -44,7 +51,34 @@ struct ArchiveWrapper {
     bool m_isHD   = false;
 };
 
-namespace {
+bool executeFFMpeg(QStringList args, QString* programOut = nullptr)
+{
+    QProcess ffmpeg;
+    ffmpeg.start("ffmpeg", args);
+    if (!ffmpeg.waitForStarted())
+        return false;
+    if (programOut)
+        *programOut = ffmpeg.program();
+
+    ffmpeg.closeWriteChannel();
+
+    if (!ffmpeg.waitForFinished())
+        return false;
+
+    if (ffmpeg.exitStatus() == QProcess::CrashExit)
+        return false;
+
+    // output:
+    // Duration: 00:00:00.15
+    // .tens of milliseconds, .15 = 150-159 milliseconds.
+
+    const int rc = ffmpeg.exitCode();
+    if (rc != 0) {
+        Logger(Logger::Err) << "Failed to execute ffmpeg: " << (args.join(' ').toStdString()) << "\n"
+                            << ffmpeg.readAllStandardError().toStdString();
+    }
+    return rc == 0;
+}
 
 Mernel::std_path findPathChild(const Mernel::std_path& parent, const std::string& lowerCaseName)
 {
@@ -69,7 +103,9 @@ Mernel::std_path findPathChild(const Mernel::std_path& parent, const std::string
     return {};
 }
 
-class ConcatProcessor {
+}
+
+class GameExtract::ConcatProcessor {
 public:
     struct ConcatData {
         std::map<std_path, SpriteFile> m_sprites;
@@ -130,8 +166,6 @@ public:
     }
 };
 
-}
-
 GameExtract::GameExtract(const Core::IGameDatabaseContainer* databaseContainer, Settings settings)
     : m_databaseContainer(databaseContainer)
     , m_settings(std::move(settings))
@@ -186,8 +220,7 @@ GameExtract::DetectedSources GameExtract::probe() const
     for (const char* name : { "hota.snd",
                               "hota.lod",
                               "hota_lng.lod"
-                              "hota.vid",
-                              "video.vid" }) {
+                              "hota.vid" }) {
         auto path = findPathChild(dataFolder, name);
         if (path.empty())
             continue;
@@ -220,6 +253,12 @@ GameExtract::DetectedSources GameExtract::probe() const
         Mernel::std_path mpFolder = findPathChild(result.m_heroesRoot, "mp3");
         if (!mpFolder.empty())
             result.m_sources[SourceType::MusicCopy].push_back(DetectedPath{ .m_type = SourceType::MusicCopy, .m_path = mpFolder, .m_isSod = true });
+    }
+    {
+        QString ffmpegBinary;
+        if (executeFFMpeg({ "-version" }, &ffmpegBinary)) {
+            result.m_ffmpegPath = Gui::QString2stdPath(ffmpegBinary);
+        }
     }
 
     return result;
@@ -287,7 +326,7 @@ void GameExtract::run(const DetectedSources& sources) const
     const int total = archiveWrappers.size();
     for (int current = 0; ArchiveWrapper & wrapper : archiveWrappers) {
         try {
-            sendProgress(current++, total);
+            m_onProgress(current++, total);
             if (wrapper.m_doExtract) {
                 wrapper.m_converter->run(ConversionHandler::Task::ArchiveLoadDat);
                 wrapper.m_converter->run(ConversionHandler::Task::ArchiveSaveFolder);
@@ -306,8 +345,8 @@ void GameExtract::run(const DetectedSources& sources) const
     sendMessage("archives loaded in " + std::to_string(timer.elapsed()) + " us.");
     sendMessage("Converting data...", true);
 
-    ThreadPoolExecutor executorMain;
-    ConcatProcessor    concatProcessor;
+    TaskQueue       taskQueue;
+    ConcatProcessor concatProcessor;
 
     const auto appRoot = AppLocations("").getBinDir();
 
@@ -321,78 +360,171 @@ void GameExtract::run(const DetectedSources& sources) const
         const Mernel::std_path extractArchiveRoot = m_settings.m_mainExtractRoot / wrapper.m_resourceModName;
 
         for (const auto& file : wrapper.m_converter->m_archive->m_records) {
-            //sendMessage(file.m_extWithDot + " | " + file.m_extWithDot);
-            if (file.m_extWithDot == ".def" || file.m_extWithDot == ".d32" || file.m_extWithDot == ".pcx") {
-                auto* known    = knownResources.find(file.m_basename);
-                auto  handlers = knownResources.findPP(file.m_basename);
-                if (handlers.contains("skip"))
-                    continue;
-                auto        extractFolder = extractArchiveRoot;
-                std::string newId         = file.m_basename;
-                if (known) {
-                    newId         = known->newId;
-                    extractFolder = extractFolder / known->destinationSubfolder;
-                }
+            const auto srcPath = wrapper.m_folder / file.fullname();
+            processFile(taskQueue,
+                        knownResources,
+                        file.m_basename,
+                        file.m_extWithDot,
+                        srcPath,
+                        extractArchiveRoot,
+                        !sources.m_ffmpegPath.empty(),
+                        concatProcessor,
+                        wrapper.m_isSod,
+                        wrapper.m_isHota);
+        }
+    }
+    const DetectedPathList& defCopy = sources.m_sources.at(SourceType::DefCopy);
+    for (const auto& src : defCopy) {
+        const auto     resourceModName    = "hd_res.fhmod";
+        const std_path extractArchiveRoot = m_settings.m_mainExtractRoot / resourceModName;
+        const auto     srcFolderPath      = src.m_path;
+        for (auto&& it : std_fs::directory_iterator(srcFolderPath)) {
+            if (!it.is_regular_file())
+                continue;
+            const auto srcPath = it.path();
+            auto       ext     = path2string(srcPath.extension());
+            std::transform(ext.begin(), ext.end(), ext.begin(), [](unsigned char c) { return std::tolower(c); });
+            auto basename = path2string(srcPath.stem());
+            std::transform(basename.begin(), basename.end(), basename.begin(), [](unsigned char c) { return std::tolower(c); });
 
-                auto outputJson = extractFolder / (newId + ".fhsprite.json");
-                if (Mernel::std_fs::exists(outputJson))
-                    continue;
+            processFile(taskQueue,
+                        knownResources,
+                        basename,
+                        ext,
+                        srcPath,
+                        extractArchiveRoot,
+                        !sources.m_ffmpegPath.empty(),
+                        concatProcessor,
+                        false,
+                        false);
+        }
+    }
 
-                const std::vector<std::string> names{ "make_transparent", "unpack" };
-                for (const auto& name : names) {
-                    if (handlers.contains(name + "_hota")) {
-                        if (wrapper.m_isHota)
-                            handlers[name] = handlers[name + "_hota"];
+    const DetectedPathList& mp3Copy = sources.m_sources.at(SourceType::MusicCopy);
+    for (const auto& src : mp3Copy) {
+        const auto     resourceModName    = "sod_res.fhmod";
+        const std_path extractArchiveRoot = m_settings.m_mainExtractRoot / resourceModName;
+        std_fs::create_directories(extractArchiveRoot);
+        for (auto&& it : std_fs::directory_iterator(src.m_path)) {
+            if (!it.is_regular_file())
+                continue;
+            const auto srcPath = it.path();
+            auto       ext     = path2string(srcPath.extension());
+            std::transform(ext.begin(), ext.end(), ext.begin(), [](unsigned char c) { return std::tolower(c); });
+            auto basename = path2string(srcPath.stem());
+            std::transform(basename.begin(), basename.end(), basename.begin(), [](unsigned char c) { return std::tolower(c); });
 
-                        handlers.getMap().erase(name + "_hota");
-                    }
-                    if (handlers.contains(name + "_sod")) {
-                        if (wrapper.m_isSod)
-                            handlers[name] = handlers[name + "_sod"];
-
-                        handlers.getMap().erase(name + "_sod");
-                    }
-                }
-
-                executorMain.add([this, &wrapper, outputJson, handlers, file, &concatProcessor] {
-                    ConversionHandler::Settings sett{
-                        .m_inputs = { .m_defFile = wrapper.m_folder / file.fullname() },
-                    };
-                    std::ostringstream os;
-                    ConversionHandler  pixHandler(os, sett);
-
-                    try {
-                        pixHandler.run(ConversionHandler::Task::SpriteLoadDef);
-                        if (!handlers.contains("animatePalette"))
-                            pixHandler.m_sprite->setEmbeddedData(false, true);
-                        pixHandler.m_sprite->saveGuiSprite(outputJson, handlers);
-                        if (handlers.contains("concat")) {
-                            concatProcessor.addSprite(*pixHandler.m_sprite,
-                                                      outputJson,
-                                                      handlers["concat"]["id"].getScalar().toString(),
-                                                      handlers["concat"]["frames"].getScalar().toBool());
-                        }
-                    }
-                    catch (std::exception& ex) {
-                        sendError(wrapper.m_datFilename + " ERROR: " + ex.what() + "\n" + os.str());
-                        return;
-                    }
-                });
-            }
+            auto            destPath = extractArchiveRoot / (basename + ".mp3");
+            std::error_code ec;
+            std_fs::copy(srcPath, destPath, std_fs::copy_options::skip_existing, ec);
         }
     }
 
     {
-        const int  totalCC = executorMain.getQueueSize();
-        QEventLoop loop;
-        QObject::connect(&executorMain, &ThreadPoolExecutor::finished, &loop, &QEventLoop::quit);
-        QObject::connect(&executorMain, &ThreadPoolExecutor::progress, [this, totalCC](int done) { sendProgress(done, totalCC); });
-        executorMain.start(std::chrono::milliseconds{ 100 });
+        ParallelExecutor executor(std::thread::hardware_concurrency());
+        TaskQueueWatcher watcher(taskQueue);
+        watcher.setProgressHandler(m_onProgress);
 
-        loop.exec(QEventLoop::ExcludeUserInputEvents);
+        executor.execQueue(taskQueue);
+
+        Mernel::Logger(Mernel::Logger::Info) << "Loop finished, taskQueueSize:" << taskQueue.queueSize();
     }
 
     concatProcessor.create();
 }
 
+void GameExtract::processFile(Mernel::TaskQueue&      taskQueue,
+                              KnownResources&         knownResources,
+                              const std::string&      basename,
+                              const std::string&      extWithDot,
+                              const Mernel::std_path& srcPath,
+                              Mernel::std_path        extractFolder,
+                              bool                    hasFfmpeg,
+                              ConcatProcessor&        concatProcessor,
+
+                              bool isSod,
+                              bool isHota) const
+{
+    auto* known    = knownResources.find(basename);
+    auto  handlers = knownResources.findPP(basename);
+    if (handlers.contains("skip"))
+        return;
+
+    std::string newId = basename;
+    if (known) {
+        newId         = known->newId;
+        extractFolder = extractFolder / known->destinationSubfolder;
+    } else {
+        extractFolder = extractFolder / "Unknown";
+    }
+
+    //sendMessage(file.m_extWithDot + " | " + file.m_extWithDot);
+    if (extWithDot == ".def" || extWithDot == ".d32" || extWithDot == ".pcx" || extWithDot == ".p32" || extWithDot == ".bmp") {
+        auto outputJson = extractFolder / (newId + ".fhsprite.json");
+        if (Mernel::std_fs::exists(outputJson))
+            return;
+
+        const std::vector<std::string> names{ "make_transparent", "unpack" };
+        for (const auto& name : names) {
+            if (handlers.contains(name + "_hota")) {
+                if (isHota)
+                    handlers[name] = handlers[name + "_hota"];
+
+                handlers.getMap().erase(name + "_hota");
+            }
+            if (handlers.contains(name + "_sod")) {
+                if (isSod)
+                    handlers[name] = handlers[name + "_sod"];
+
+                handlers.getMap().erase(name + "_sod");
+            }
+        }
+
+        taskQueue.addTask([this, outputJson, handlers, srcPath, &concatProcessor] {
+            ConversionHandler::Settings sett{
+                .m_inputs = { .m_defFile = srcPath },
+            };
+            std::ostringstream os;
+            ConversionHandler  pixHandler(os, sett);
+
+            try {
+                pixHandler.run(ConversionHandler::Task::SpriteLoadDef);
+                if (!handlers.contains("animatePalette"))
+                    pixHandler.m_sprite->setEmbeddedData(false, true);
+
+                pixHandler.m_sprite->saveGuiSprite(outputJson, handlers);
+                if (handlers.contains("concat")) {
+                    concatProcessor.addSprite(*pixHandler.m_sprite,
+                                              outputJson,
+                                              handlers["concat"]["id"].getScalar().toString(),
+                                              handlers["concat"]["frames"].getScalar().toBool());
+                }
+            }
+            catch (std::exception& ex) {
+                sendError(std::string(" ERROR: ") + ex.what() + "\n" + os.str());
+                return;
+            }
+        });
+    } else if (extWithDot == ".wav") {
+        auto outputWav = extractFolder / (newId + ".wav");
+        if (!hasFfmpeg)
+            return;
+        if (std_fs::exists(outputWav))
+            return;
+        std_fs::create_directories(outputWav.parent_path());
+        taskQueue.addTask([srcPath, outputWav] {
+            executeFFMpeg({ "-y", "-i", Gui::stdPath2QString(srcPath), "-c:a", "pcm_s16le", Gui::stdPath2QString(outputWav) });
+        });
+    } else if (extWithDot == ".bik" || extWithDot == ".smk") {
+        auto outputWebp = extractFolder / (newId + ".webp");
+        if (!hasFfmpeg)
+            return;
+        if (std_fs::exists(outputWebp))
+            return;
+        std_fs::create_directories(outputWebp.parent_path());
+        taskQueue.addTask([srcPath, outputWebp] {
+            executeFFMpeg({ "-y", "-i", Gui::stdPath2QString(srcPath), "-threads", "1", Gui::stdPath2QString(outputWebp) });
+        });
+    }
+}
 }

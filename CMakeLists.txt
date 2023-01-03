@@ -367,7 +367,7 @@ AddTarget(TYPE shared NAME LegacyConverterUtil OUTPUT_PREFIX FH
     
         CoreResource
     
-        zlib ${PTHREAD} MernelReflection
+        ${PTHREAD} MernelReflection MernelExecution
     QT_MODULES Core
     )
 

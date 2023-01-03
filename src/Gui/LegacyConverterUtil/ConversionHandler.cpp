@@ -155,13 +155,11 @@ void ConversionHandler::run(Task task, int recurse) noexcept(false)
             case Task::SpriteLoadDef:
             {
                 setInput(m_inputs.m_defFile);
-                if (m_sprite->m_format == SpriteFile::BinaryFormat::BMP) {
-                    m_sprite->readBMP(m_inputFilename);
-                } else {
-                    runMember(readBinaryBufferData);
 
-                    runMember(binaryDeserializeSprite);
-                }
+                runMember(readBinaryBufferData);
+
+                runMember(binaryDeserializeSprite);
+
             } break;
             case Task::SpriteSaveDef:
             {
@@ -360,8 +358,12 @@ void ConversionHandler::binaryDeserializeSprite()
     try {
         *m_sprite = SpriteFile{};
         m_sprite->detectFormat(m_inputFilename, reader);
-        reader.getBuffer().setOffsetRead(0);
-        reader >> *m_sprite;
+        if (m_sprite->m_format == SpriteFile::BinaryFormat::BMP) {
+            m_sprite->readBMP(m_inputFilename);
+        } else {
+            reader.getBuffer().setOffsetRead(0);
+            reader >> *m_sprite;
+        }
     }
     catch (std::exception& ex) {
         throw std::runtime_error(ex.what() + std::string(", offset=") + std::to_string(bobuffer.getOffsetRead()));

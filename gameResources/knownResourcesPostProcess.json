@@ -632,5 +632,7 @@
 
 "hack"            : {"skip":{}},
 "elixir"          : {"skip":{}},
-"new"             : {"skip":{}}
+"new"             : {"skip":{}},
+"fr32_67"         : {"skip":{}},
+"spellbe"         : {"skip":{}}
 }

@@ -16,7 +16,7 @@
 namespace FreeHeroes::Core {
 class IGameDatabase;
 }
-namespace FreeHeroes::Conversion {
+namespace FreeHeroes {
 
 class LEGACYCONVERTERUTIL_EXPORT LocalizationConverter {
 public:

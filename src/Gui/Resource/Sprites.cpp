@@ -10,6 +10,7 @@
 
 #include "MernelReflection/PropertyTreeReader.hpp"
 #include "MernelReflection/PropertyTreeWriter.hpp"
+#include "MernelPlatform/Logger.hpp"
 
 #include "FsUtilsQt.hpp"
 #include "SpritesReflection.hpp"

@@ -737,7 +737,7 @@
 "sod.spell.disease"                         : [ 73 ],
 "sod.spell.paralyze"                        : [ 74 ],
 "sod.spell.age"                             : [ 75 ],
-"sod.spell.deathCloud"                      : [ 76 ],
+"sod.effect.deathCloud"                     : [ 76 ],
 "sod.spell.thunderbolt"                     : [ 77 ],
 "sod.spell.dispelHelpful"                   : [ 78 ],
 "sod.spell.deathStare"                      : [ 79 ],

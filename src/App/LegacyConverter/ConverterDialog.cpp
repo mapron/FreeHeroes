@@ -7,17 +7,12 @@
 
 #include "ui_ConverterDialog.h"
 
-#include "ArchiveParser.hpp"
-#include "LocalizationConverter.hpp"
-#include "ThreadPoolExecutor.hpp"
-#include "KnownResources.hpp"
-#include "MediaConverter.hpp"
-#include "GameConstants.hpp"
 #include "IGameDatabase.hpp"
+
+#include "GameExtract.hpp"
 
 // Gui
 #include "FsUtilsQt.hpp"
-#include "ResourceLibrary.hpp"
 #include "EnvDetect.hpp"
 
 // Platform
@@ -31,10 +26,19 @@
 
 #include <thread>
 
-namespace FreeHeroes::Conversion {
+namespace FreeHeroes {
 using namespace Core;
 using namespace Gui;
 using namespace Mernel;
+
+namespace {
+
+void displayStatus(QLabel* label, bool status)
+{
+    label->setStyleSheet(QString("QLabel { border-image: url(:/Application/%1.png); }").arg(status ? "check_icon" : "cross_icon"));
+}
+
+}
 
 ConverterDialog::ConverterDialog(const Core::IGameDatabaseContainer* databaseContainer, QWidget* parent)
     : QDialog(parent)
@@ -43,10 +47,6 @@ ConverterDialog::ConverterDialog(const Core::IGameDatabaseContainer* databaseCon
     , m_databaseContainer(databaseContainer)
 {
     m_ui->setupUi(this);
-    for (auto* cb : { m_ui->checkBoxHdFound, m_ui->checkBoxSodFound, m_ui->checkBoxHotaFound, m_ui->checkBoxFfmpegFound }) {
-        cb->setAttribute(Qt::WA_TransparentForMouseEvents);
-        cb->setFocusPolicy(Qt::NoFocus);
-    }
 
     QString localData = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
     if (localData.endsWith("/") || localData.endsWith("\\"))
@@ -73,21 +73,43 @@ ConverterDialog::ConverterDialog(const Core::IGameDatabaseContainer* databaseCon
     connect(m_ui->pushButtonShowUnpack, &QPushButton::clicked, this, [this] {
         showFolderInFileManager(Gui::QString2stdPath(m_ui->dstPath->text()));
     });
+    connect(this, &ConverterDialog::progressInternal, this, &ConverterDialog::progress, Qt::QueuedConnection);
+    connect(this, &ConverterDialog::progress, this, [this](int current, int total) {
+        m_ui->progressBar->setValue(current);
+        m_ui->progressBar->setMaximum(total);
+    });
+    connect(
+        this, &ConverterDialog::finished, this, [this] {
+            m_ui->pushButtonConvert->setEnabled(true);
+            m_ui->progressBar->setValue(0);
+            m_ui->progressBar->setMaximum(1);
+            auto elapsed = QDateTime::currentSecsSinceEpoch() - m_start;
+            statusUpdate(tr("Done in %1 seconds.").arg(elapsed));
+
+            if (m_thread.joinable())
+                m_thread.join();
+        },
+        Qt::QueuedConnection);
     connect(m_ui->pushButtonCleanupUnpack, &QPushButton::clicked, this, &ConverterDialog::cleanUnpackDestination);
     pathChanged();
 
-    MediaConverter conv;
-    const bool     ffmpegFound = conv.ffmpegFound();
+    GameExtract extractor(m_databaseContainer, GameExtract::Settings{ .m_heroesRoot = m_hotaInstallDir });
+    auto        res = extractor.probe();
+
+    const bool ffmpegFound = !res.m_ffmpegPath.empty();
+    displayStatus(m_ui->labelFfmpegFoundStatus, ffmpegFound);
     if (ffmpegFound) {
-        m_ui->labelFFMpegPath->setText(conv.ffmpegBinary());
-        m_ui->checkBoxFfmpegFound->setChecked(true);
+        m_ui->labelFFMpegPath->setText(stdPath2QString(res.m_ffmpegPath));
     } else {
-        m_ui->checkBoxFfmpegFound->setText(tr("FFmpeg not in the PATH, no effect and video will be converted."));
+        m_ui->labelFfmpegFound->setText(tr("FFmpeg not in the PATH, no effect and video will be converted."));
     }
 }
 
-ConverterDialog::~ConverterDialog() = default;
-
+ConverterDialog::~ConverterDialog()
+{
+    if (m_thread.joinable())
+        m_thread.join();
+}
 void ConverterDialog::browsePath()
 {
     QString dir = QFileDialog::getExistingDirectory(this, tr("Open HotA installation root"));
@@ -98,270 +120,35 @@ void ConverterDialog::browsePath()
 
 void ConverterDialog::pathChanged()
 {
-    m_hotaInstallDir                  = QString2stdPath(m_ui->srcPath->text());
-    const std_path hotaInstallDirData = m_hotaInstallDir / "Data";
-    const bool     sodExists          = std_fs::exists(hotaInstallDirData / "H3sprite.lod");
-    const bool     hotaExists         = std_fs::exists(hotaInstallDirData / "HotA.lod");
-    const bool     hdExists           = std_fs::exists(m_hotaInstallDir / "_HD3_Data" / "Common");
-    m_ui->checkBoxSodFound->setChecked(sodExists);
-    m_ui->checkBoxHotaFound->setChecked(hotaExists);
-    m_ui->checkBoxHdFound->setChecked(hdExists);
-    m_ui->pushButtonConvert->setEnabled(sodExists);
-    if (sodExists) {
+    m_hotaInstallDir = QString2stdPath(m_ui->srcPath->text());
+
+    GameExtract extractor(m_databaseContainer, GameExtract::Settings{ .m_heroesRoot = m_hotaInstallDir });
+    auto        res = extractor.probe();
+    displayStatus(m_ui->labelSodFoundStatus, res.m_hasSod);
+    displayStatus(m_ui->labelHotaFoundStatus, res.m_hasHota);
+    displayStatus(m_ui->labelHdFoundStatus, res.m_hasHD);
+
+    m_ui->pushButtonConvert->setEnabled(res.m_hasSod);
+    if (res.m_hasSod) {
         m_converterSettings.setValue("srcPath", m_ui->srcPath->text());
     }
 }
 
 void ConverterDialog::run()
 {
+    m_start = QDateTime::currentSecsSinceEpoch();
     m_ui->pushButtonConvert->setEnabled(false);
-    auto start = QDateTime::currentSecsSinceEpoch();
+    m_thread = std::thread([this] {
+        const std_path baseExtract = QString2stdPath(m_ui->dstPath->text());
+        const std_path archives    = baseExtract.parent_path() / "Archives";
 
-    const bool sodExists       = m_ui->checkBoxSodFound->isChecked();
-    const bool hotaExists      = m_ui->checkBoxHotaFound->isChecked();
-    const bool hdExists        = m_ui->checkBoxHdFound->isChecked();
-    const bool ffmpegAvailable = m_ui->checkBoxFfmpegFound->isChecked();
+        GameExtract extractor(m_databaseContainer, GameExtract::Settings{ .m_heroesRoot = m_hotaInstallDir, .m_archiveExtractRoot = archives, .m_mainExtractRoot = baseExtract });
+        auto        res = extractor.probe();
+        extractor.setProgressCallback([this](int current, int total) { emit progressInternal(current, total); });
+        extractor.run(res);
 
-    QStringList    args;
-    const std_path hotaInstallDirData = m_hotaInstallDir / "Data";
-    const std_path baseExtract        = QString2stdPath(m_ui->dstPath->text());
-
-    const bool overrideExisting = args.contains("--override-existing");
-    const bool keepTmp          = args.contains("--keep-tmp");
-
-    QSet<Core::ResourceType> requiredTypes;
-    if (args.contains("--audio"))
-        requiredTypes << Core::ResourceType::Sound << Core::ResourceType::Music;
-    if (args.contains("--video"))
-        requiredTypes << Core::ResourceType::Video;
-    if (args.contains("--sprites"))
-        requiredTypes << Core::ResourceType::Sprite;
-    //if (args.contains("--other"))
-    //    requiredTypes << Core::ResourceType::Other;
-    if (requiredTypes.isEmpty()) {
-        requiredTypes << Core::ResourceType::Sound
-                      << Core::ResourceType::Music
-                      << Core::ResourceType::Video
-                      << Core::ResourceType::Sprite
-            // << Core::ResourceType::Other
-            ;
-    }
-
-    std::unique_ptr<ResourceLibrary> sodLibrary;
-    std::unique_ptr<ResourceLibrary> hotaLibrary;
-    std::unique_ptr<ResourceLibrary> hdLibrary;
-    ArchiveParser::ExtractionList    extractionList;
-
-    const std_path baseExtractSOD  = baseExtract / "SOD";
-    const std_path baseExtractHOTA = baseExtract / "HOTA";
-    const std_path baseExtractHD   = baseExtract / "HD";
-    if (sodExists) {
-        //sodLibrary = std::make_unique<ResourceLibrary>("sod");
-        //sodLibrary->setIndexFolder(baseExtractSOD);
-        //sodLibrary->loadIndex();
-        if (ffmpegAvailable) {
-            extractionList.push_back({ ArchiveParser::TaskType::SND,
-                                       hotaInstallDirData,
-                                       "Heroes3.snd",
-                                       baseExtractSOD,
-                                       sodLibrary.get(),
-                                       true,
-                                       false });
-            extractionList.push_back({ ArchiveParser::TaskType::VID,
-                                       hotaInstallDirData,
-                                       "VIDEO.VID",
-                                       baseExtractSOD,
-                                       sodLibrary.get(),
-                                       true,
-                                       false });
-        }
-
-        extractionList.push_back({ ArchiveParser::TaskType::LOD,
-                                   hotaInstallDirData,
-                                   "H3sprite.lod",
-                                   baseExtractSOD,
-                                   sodLibrary.get(),
-                                   true,
-                                   false });
-        extractionList.push_back({ ArchiveParser::TaskType::LOD,
-                                   hotaInstallDirData,
-                                   "H3bitmap.lod",
-                                   baseExtractSOD,
-                                   sodLibrary.get(),
-                                   true,
-                                   false });
-
-        // workaround: sometimes folder called 'Mp3' in the distribution.
-        auto mp3path = m_hotaInstallDir / "MP3";
-        if (!std_fs::exists(mp3path))
-            mp3path = m_hotaInstallDir / "Mp3";
-        extractionList.push_back({ ArchiveParser::TaskType::MusicCopy,
-                                   mp3path,
-                                   "",
-                                   baseExtractSOD,
-                                   sodLibrary.get() });
-    }
-    if (hotaExists) {
-        //hotaLibrary = std::make_unique<ResourceLibrary>("hota");
-        //hotaLibrary->addDep("sod");
-        //hotaLibrary->setIndexFolder(baseExtractHOTA);
-        //hotaLibrary->loadIndex();
-        if (ffmpegAvailable) {
-            extractionList.push_back({ ArchiveParser::TaskType::SND,
-                                       hotaInstallDirData,
-                                       "HotA.snd",
-                                       baseExtractHOTA,
-                                       hotaLibrary.get(),
-                                       false,
-                                       true });
-            extractionList.push_back({ ArchiveParser::TaskType::VID,
-                                       hotaInstallDirData,
-                                       "HotA.vid",
-                                       baseExtractHOTA,
-                                       hotaLibrary.get(),
-                                       false,
-                                       true });
-        }
-
-        extractionList.push_back({ ArchiveParser::TaskType::LOD,
-                                   hotaInstallDirData,
-                                   "HotA.lod",
-                                   baseExtractHOTA,
-                                   hotaLibrary.get(),
-                                   false,
-                                   true });
-
-        extractionList.push_back({ ArchiveParser::TaskType::LOD,
-                                   hotaInstallDirData,
-                                   "HotA_lng.lod",
-                                   baseExtractHOTA,
-                                   hotaLibrary.get(),
-                                   false,
-                                   true });
-
-        extractionList.push_back({ ArchiveParser::TaskType::HDAT,
-                                   m_hotaInstallDir,
-                                   "HotA.dat",
-                                   baseExtractHOTA,
-                                   hotaLibrary.get(),
-                                   false,
-                                   true });
-    }
-    if (hdExists) {
-        //hdLibrary = std::make_unique<ResourceLibrary>("hdmod");
-        //hdLibrary->addDep("sod");
-        //hdLibrary->setIndexFolder(baseExtractHD);
-        //hdLibrary->loadIndex();
-
-        extractionList.push_back({ ArchiveParser::TaskType::DefCopy,
-                                   m_hotaInstallDir / "_HD3_Data" / "Common",
-                                   "",
-                                   baseExtractHD,
-                                   hdLibrary.get() });
-        extractionList.push_back({ ArchiveParser::TaskType::DefCopy,
-                                   m_hotaInstallDir / "_HD3_Data" / "Common" / "Fix.Cosmetic",
-                                   "",
-                                   baseExtractHD,
-                                   hdLibrary.get() });
-    }
-    int total = 0;
-    statusUpdate(tr("DB init..."));
-
-    auto* hotaDb = m_databaseContainer->getDatabase(GameVersion::HOTA);
-    auto* sodDb  = m_databaseContainer->getDatabase(GameVersion::SOD);
-
-    statusUpdate(tr("Extracting files..."));
-
-    KnownResources knownResources(QString2stdPath(QApplication::applicationDirPath()) / "gameResources" / "knownResources.json", "");
-    auto           lastUpd     = std::chrono::milliseconds{ 0 };
-    int            doneExtract = 0;
-    ArchiveParser  parser(knownResources,
-                         requiredTypes,
-                         overrideExisting,
-                         keepTmp,
-                         [this, &lastUpd, &doneExtract] {
-                             auto now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch());
-                             doneExtract++;
-                             if (now > lastUpd) {
-                                 m_ui->progressBar->setValue(doneExtract);
-                                 lastUpd = now + std::chrono::milliseconds{ 100 };
-                             }
-                         });
-    total = parser.estimateExtractCount(extractionList);
-
-    m_ui->progressBar->setMaximum(total);
-    m_ui->progressBar->setValue(0);
-
-    statusUpdate(tr("Preparing conversion list..."));
-
-    ThreadPoolExecutor              executorMain, executorPP;
-    ArchiveParser::CallbackInserter inserterMain([&executorMain](auto task) {
-        executorMain.add(task);
+        emit finished();
     });
-    ArchiveParser::CallbackInserter inserterPP([&executorPP](auto task) {
-        executorPP.add(task);
-    });
-    parser.prepareExtractTasks(extractionList, inserterMain, inserterPP);
-
-    Q_ASSERT(doneExtract == total);
-
-    statusUpdate(tr("Conversion of media..."));
-
-    m_ui->progressBar->setValue(0);
-    m_ui->progressBar->setMaximum(executorMain.getQueueSize());
-
-    {
-        QEventLoop loop;
-        connect(&executorMain, &ThreadPoolExecutor::finished, &loop, &QEventLoop::quit);
-        connect(&executorMain, &ThreadPoolExecutor::progress, m_ui->progressBar, &QProgressBar::setValue);
-        executorMain.start(std::chrono::milliseconds{ 100 });
-
-        Logger(Logger::Info) << "Event loop start";
-        loop.exec(QEventLoop::ExcludeUserInputEvents);
-        Logger(Logger::Info) << "Event loop end";
-    }
-    {
-        QEventLoop loop;
-        connect(&executorPP, &ThreadPoolExecutor::finished, &loop, &QEventLoop::quit);
-        executorPP.start(std::chrono::milliseconds{ 100 });
-
-        Logger(Logger::Info) << "Event loop start";
-        loop.exec(QEventLoop::ExcludeUserInputEvents);
-        Logger(Logger::Info) << "Event loop end";
-    }
-
-    statusUpdate(tr("Translation generation..."));
-
-    if (sodExists) {
-        Logger(Logger::Info) << "SoD";
-        LocalizationConverter converter(*sodLibrary, baseExtractSOD, hotaDb, sodDb);
-        converter.extractSOD("txt");
-
-        //sodLibrary->saveIndex();
-    }
-
-    if (hotaExists) {
-        Logger(Logger::Info) << "HotA";
-        LocalizationConverter converter(*hotaLibrary, baseExtractHOTA, hotaDb, sodDb);
-        converter.extractSOD("txt");
-        converter.extractHOTA("json");
-
-        Logger(Logger::Info) << "HotA PP";
-        //        ResourcePostprocess pp;
-        //        pp.concatSprites(*hotaLibrary, { "cmbkhlmt0", "cmbkhlmt1", "cmbkhlmt2", "cmbkhlmt3", "cmbkhlmt4" }, "cmbkhlmt", true);
-        //        pp.concatTilesSprite(*hotaLibrary, "hglnt", "highlands", 124);
-        //        pp.concatTilesSprite(*hotaLibrary, "wstlt", "wastelands", 124);
-        //hotaLibrary->saveIndex();
-    }
-    if (hdExists) {
-        //hdLibrary->saveIndex();
-    }
-    m_ui->progressBar->setValue(0);
-    m_ui->progressBar->setMaximum(1);
-    auto elapsed = QDateTime::currentSecsSinceEpoch() - start;
-    statusUpdate(tr("Done in %1 seconds.").arg(elapsed));
-
-    m_ui->pushButtonConvert->setEnabled(true);
 }
 
 void ConverterDialog::cleanUnpackDestination()
@@ -372,7 +159,7 @@ void ConverterDialog::cleanUnpackDestination()
 
     const std_path       baseExtract = QString2stdPath(m_ui->dstPath->text());
     std::deque<std_path> forDelete;
-    for (auto it : std_fs::recursive_directory_iterator(baseExtract)) {
+    for (auto&& it : std_fs::recursive_directory_iterator(baseExtract)) {
         if (it.is_regular_file())
             forDelete.push_back(it.path());
     }

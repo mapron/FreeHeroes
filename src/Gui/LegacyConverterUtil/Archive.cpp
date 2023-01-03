@@ -586,26 +586,13 @@ void Archive::BinaryRecord::readBinarySND(ByteOrderDataStreamReader& stream)
     stream.readStringWithGarbagePadding<g_strSndSize>(m_basename, m_filenameGarbage);
 
     stream >> m_offset >> m_fullSize;
-    m_size = m_fullSize;
-    if (m_filenameGarbage.size() >= 3) {
-        m_extNoDot.resize(3);
-        for (int i = 0; i < 3; ++i) {
-            m_extNoDot[i] = static_cast<char>(m_filenameGarbage[i]);
-        }
-        m_filenameGarbage.erase(m_filenameGarbage.begin(), m_filenameGarbage.begin() + 3);
-    }
+    m_size     = m_fullSize;
+    m_extNoDot = "wav";
 }
 
 void Archive::BinaryRecord::writeBinarySND(ByteOrderDataStreamWriter& stream) const
 {
     std::vector<uint8_t> padding = m_filenameGarbage;
-    if (!m_extNoDot.empty()) {
-        std::vector<uint8_t> paddingExt(m_extNoDot.size());
-        for (size_t i = 0; i < m_extNoDot.size(); ++i) {
-            paddingExt[i] = static_cast<uint8_t>(m_extNoDot[i]);
-        }
-        padding.insert(padding.begin(), paddingExt.cbegin(), paddingExt.cend());
-    }
     stream.writeStringWithGarbagePadding<g_strSndSize>(m_basename, padding);
     stream << m_offset << m_fullSize;
 }

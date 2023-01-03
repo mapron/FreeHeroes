@@ -13,18 +13,20 @@
 #include <functional>
 #include <mutex>
 
+namespace Mernel {
+class TaskQueue;
+}
 namespace FreeHeroes {
 namespace Core {
 class IGameDatabaseContainer;
 }
-
+class KnownResources;
 class LEGACYCONVERTERUTIL_EXPORT GameExtract {
 public:
     struct Settings {
         Mernel::std_path m_heroesRoot;
         Mernel::std_path m_archiveExtractRoot;
         Mernel::std_path m_mainExtractRoot;
-        Mernel::std_path m_knownResourcesFile;
         bool             m_forceExtract = false;
     };
 
@@ -50,6 +52,8 @@ public:
 
         Mernel::std_path m_heroesRoot;
 
+        Mernel::std_path m_ffmpegPath;
+
         bool m_hasSod  = false; // has one of known SoD files
         bool m_hasHota = false; // has one of known HotA files
 
@@ -59,7 +63,7 @@ public:
         bool isSuccess() const { return m_hasSod || m_hasHota; }
     };
 
-    using ProgressCallBack = std::function<bool(int progress, int total)>;
+    using ProgressCallBack = std::function<void(int progress, int total)>;
     using ErrorCallBack    = std::function<void(const std::string& error)>;
     using MessageCallBack  = std::function<void(const std::string& msg, bool important)>;
 
@@ -73,14 +77,6 @@ public:
     void setProgressCallback(ProgressCallBack callback) { m_onProgress = callback; }
     void setErrorCallback(ErrorCallBack callback) { m_onError = callback; }
     void setMessageCallback(MessageCallBack callback) { m_onMessage = callback; }
-
-    void sendProgress(int progress, int total) const
-    {
-        if (!m_onProgress)
-            return;
-        std::lock_guard lock(m_messageMutex);
-        m_onProgress(progress, total);
-    }
 
     void sendMessage(const std::string& msg, bool important = false) const
     {
@@ -96,6 +92,18 @@ public:
         std::lock_guard lock(m_messageMutex);
         m_onError(msg);
     }
+    class ConcatProcessor;
+
+    void processFile(Mernel::TaskQueue&      taskQueue,
+                     KnownResources&         knownResources,
+                     const std::string&      basename,
+                     const std::string&      extWithDot,
+                     const Mernel::std_path& srcPath,
+                     Mernel::std_path        extractFolder,
+                     bool                    hasFfmpeg,
+                     ConcatProcessor&        concatProcessor,
+                     bool                    isSod,
+                     bool                    isHota) const;
 
 private:
     const Core::IGameDatabaseContainer* const m_databaseContainer;

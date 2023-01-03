@@ -13,7 +13,6 @@
 int main(int argc, char* argv[])
 {
     using namespace FreeHeroes;
-    using namespace Conversion;
 
     Core::CoreApplication fhCoreApp;
 

@@ -17,7 +17,7 @@
 
 #include <fstream>
 
-namespace FreeHeroes::Conversion {
+namespace FreeHeroes {
 using namespace Core;
 using namespace Mernel;
 

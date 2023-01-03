@@ -12,6 +12,7 @@
 
 #include <memory>
 #include <functional>
+#include <thread>
 
 namespace Ui {
 class ConverterDialog;
@@ -21,13 +22,19 @@ namespace FreeHeroes::Core {
 class IGameDatabaseContainer;
 }
 
-namespace FreeHeroes::Conversion {
+namespace FreeHeroes {
+class GameExtract;
 
 class ConverterDialog : public QDialog {
     Q_OBJECT
 public:
     ConverterDialog(const Core::IGameDatabaseContainer* databaseContainer, QWidget* parent = nullptr);
     ~ConverterDialog();
+
+signals:
+    void progressInternal(int, int);
+    void progress(int, int);
+    void finished();
 
 private:
     void browsePath();
@@ -38,9 +45,12 @@ private:
 
 private:
     std::unique_ptr<Ui::ConverterDialog>      m_ui;
+    std::unique_ptr<GameExtract>              m_extract;
     Mernel::std_path                          m_hotaInstallDir;
     QSettings                                 m_converterSettings;
     const Core::IGameDatabaseContainer* const m_databaseContainer;
+    std::thread                               m_thread;
+    int                                       m_start = 0;
 };
 
 }
