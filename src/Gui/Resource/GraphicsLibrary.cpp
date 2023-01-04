@@ -17,96 +17,124 @@
 #include <QIcon>
 #include <QMovie>
 
-template<>
-bool qMapLessThanKey<FreeHeroes::Gui::IGraphicsLibrary::PixmapKey>(const FreeHeroes::Gui::IGraphicsLibrary::PixmapKey& key1, const FreeHeroes::Gui::IGraphicsLibrary::PixmapKey& key2)
-{
-    return std::tie(key1.resourceName, key1.group, key1.frame) < std::tie(key2.resourceName, key2.group, key2.frame);
-}
-
-template<>
-bool qMapLessThanKey<FreeHeroes::Gui::IGraphicsLibrary::PixmapKeyList>(const FreeHeroes::Gui::IGraphicsLibrary::PixmapKeyList& key1, const FreeHeroes::Gui::IGraphicsLibrary::PixmapKeyList& key2)
-{
-    const bool isRangeLess = std::lexicographical_compare(key1.cbegin(), key1.cend(), key2.cbegin(), key2.cend(), [](const auto& l, const auto& r) { return qMapLessThanKey(l, r); });
-    return isRangeLess;
-}
-
 namespace FreeHeroes::Gui {
 using namespace Core;
 
+template<class Key, class Object>
+class CacheContainer {
+public:
+    struct AsyncRecord {
+        Key             m_key;
+        CacheContainer* m_container = nullptr;
+        Object          m_object;
+        bool            m_exists     = false;
+        bool            m_loadCached = false;
+        bool            m_loadResult = false;
+
+        bool exists() { return m_exists; }
+        bool isLoaded() { return m_loadCached && m_loadResult; }
+        bool preload()
+        {
+            if (m_loadCached)
+                return m_loadResult;
+            m_loadResult = m_container->m_factory(m_key, m_object);
+            m_loadCached = true;
+            return m_loadResult;
+        }
+        Object get()
+        {
+            preload();
+            return m_object;
+        }
+    };
+
+    AsyncRecord& makeAsyncRecord(const Key& key)
+    {
+        auto it = m_records.find(key);
+        if (it != m_records.cend())
+            return it->second;
+
+        AsyncRecord& result = m_records[key];
+        result.m_key        = key;
+        result.m_container  = this;
+        result.m_exists     = m_existCheck(key);
+
+        return result;
+    }
+
+    std::function<bool(const Key&)>          m_existCheck;
+    std::function<bool(const Key&, Object&)> m_factory;
+    std::map<Key, AsyncRecord>               m_records;
+};
+
+using SpriteContainer = CacheContainer<std::string, SpritePtr>;
+using PixmapContainer = CacheContainer<IGraphicsLibrary::PixmapKey, QPixmap>;
+using IconContainer   = CacheContainer<IGraphicsLibrary::PixmapKeyList, QIcon>;
+
 class GraphicsLibrary::AsyncSprite : public IAsyncSprite {
 public:
-    GraphicsLibrary::Impl* m_impl;
-    std::string            m_resourceName;
-    AsyncSprite(GraphicsLibrary::Impl* impl, const std::string& resourceName)
-        : m_impl(impl)
-        , m_resourceName(resourceName)
-    {}
+    SpriteContainer::AsyncRecord& m_record;
 
-    bool      exists() const override;
-    bool      isLoaded() const override;
-    bool      preload() const override;
-    SpritePtr get() const override;
+    AsyncSprite(GraphicsLibrary::Impl* impl, const std::string& resourceName);
+
+    bool      exists() const override { return m_record.exists(); }
+    bool      isLoaded() const override { return m_record.isLoaded(); }
+    bool      preload() const override { return m_record.preload(); }
+    SpritePtr get() const override { return m_record.get(); }
 };
 class GraphicsLibrary::AsyncPixmap : public IAsyncPixmap {
 public:
-    GraphicsLibrary::Impl* m_impl;
-    const PixmapKey        m_resourceCode;
-    AsyncPixmap(GraphicsLibrary::Impl* impl, const PixmapKey& resourceCode)
-        : m_impl(impl)
-        , m_resourceCode(resourceCode)
-    {}
+    PixmapContainer::AsyncRecord& m_record;
+    AsyncPixmap(GraphicsLibrary::Impl* impl, const PixmapKey& resourceCode);
 
-    bool    exists() const override;
-    bool    isLoaded() const override;
-    bool    preload() const override;
-    QPixmap get() const override;
+    bool    exists() const override { return m_record.exists(); }
+    bool    isLoaded() const override { return m_record.isLoaded(); }
+    bool    preload() const override { return m_record.preload(); }
+    QPixmap get() const override { return m_record.get(); }
 };
+class GraphicsLibrary::AsyncIcon : public IAsyncIcon {
+public:
+    IconContainer::AsyncRecord& m_record;
+    AsyncIcon(GraphicsLibrary::Impl* impl, const PixmapKeyList& resourceCodes);
+
+    bool  exists() const override { return m_record.exists(); }
+    bool  isLoaded() const override { return m_record.isLoaded(); }
+    bool  preload() const override { return m_record.preload(); }
+    QIcon get() const override { return m_record.get(); }
+};
+
 class GraphicsLibrary::AsyncMovie : public IAsyncMovie {
 public:
     GraphicsLibrary::Impl* m_impl;
     std::string            m_resourceName;
-    AsyncMovie(GraphicsLibrary::Impl* impl, const std::string& resourceName)
-        : m_impl(impl)
-        , m_resourceName(resourceName)
-    {}
+    bool                   m_exists = false;
+    AsyncMovie(GraphicsLibrary::Impl* impl, const std::string& resourceName);
 
-    bool    exists() const override;
-    bool    isLoaded() const override;
-    bool    preload() const override;
+    bool    exists() const override { return m_exists; }
+    bool    isLoaded() const override { return true; }
+    bool    preload() const override { return true; }
     QMovie* create(QObject* parent) const override;
-};
-class GraphicsLibrary::AsyncIcon : public IAsyncIcon {
-public:
-    GraphicsLibrary::Impl* m_impl;
-    const PixmapKeyList    m_resourceCodes;
-    AsyncIcon(GraphicsLibrary::Impl* impl, const PixmapKeyList& resourceCodes)
-        : m_impl(impl)
-        , m_resourceCodes(resourceCodes)
-    {}
-
-    bool  exists() const override;
-    bool  isLoaded() const override;
-    bool  preload() const override;
-    QIcon get() const override;
 };
 
 struct GraphicsLibrary::Impl {
     const Core::IResourceLibrary* m_resourceLibrary;
-    QMap<std::string, SpritePtr>  m_spriteCache;
-    QMap<std::string, QImage>     m_imageCache;
-    QMap<PixmapKey, QPixmap>      m_pixmapCache;
-    QMap<PixmapKeyList, QIcon>    m_iconCache;
 
-    SpritePtr getSyncObjectAnimation(const std::string& resourceName);
-    QPixmap   getSyncPixmapByKey(const PixmapKey& resourceCode);
-    QMovie*   getSyncVideo(const std::string& resourceName, QObject* parent);
-    QIcon     getSyncIcon(const PixmapKeyList& resourceCodes);
+    CacheContainer<std::string, SpritePtr> m_spriteCache;
+    CacheContainer<PixmapKey, QPixmap>     m_pixmapCache;
+    CacheContainer<PixmapKeyList, QIcon>   m_iconCache;
 
-    bool isSpriteResourceExists(const std::string& resourceName) const
-    {
-        return m_resourceLibrary->fileExists(ResourceType::Sprite, resourceName);
-    }
-    bool isVideoResourceExists(const std::string& resourceName)
+    bool      createSprite(const std::string& resourceName, SpritePtr& result);
+    bool      checkSprite(const std::string& resourceName);
+    SpritePtr getCachedSprite(const std::string& resourceName);
+
+    bool    createPixmap(const PixmapKey& resourceCode, QPixmap& result);
+    QPixmap getCachedPixmap(const PixmapKey& resourceCode);
+
+    bool createIcon(const PixmapKeyList& resourceCodes, QIcon& result);
+
+    QMovie* createVideo(const std::string& resourceName, QObject* parent);
+
+    bool checkVideo(const std::string& resourceName)
     {
         return m_resourceLibrary->fileExists(ResourceType::Video, resourceName);
     }
@@ -114,6 +142,17 @@ struct GraphicsLibrary::Impl {
     Impl(const Core::IResourceLibrary* resourceLibrary)
         : m_resourceLibrary(resourceLibrary)
     {
+        m_spriteCache.m_existCheck = [this](const std::string& resourceName) { return checkSprite(resourceName); };
+        m_pixmapCache.m_existCheck = [this](const PixmapKey& resourceCode) { return checkSprite(resourceCode.resourceName); };
+        m_iconCache.m_existCheck   = [this](const PixmapKeyList& resourceCodes) {
+            for (const auto& code : resourceCodes)
+                if (!checkSprite(code.resourceName))
+                    return false;
+            return true;
+        };
+        m_spriteCache.m_factory = [this](const std::string& resourceName, SpritePtr& result) { return createSprite(resourceName, result); };
+        m_pixmapCache.m_factory = [this](const PixmapKey& resourceCode, QPixmap& result) { return createPixmap(resourceCode, result); };
+        m_iconCache.m_factory   = [this](const PixmapKeyList& resourceCodes, QIcon& result) { return createIcon(resourceCodes, result); };
     }
 };
 
@@ -162,15 +201,11 @@ IGraphicsLibrary::PixmapKey GraphicsLibrary::splitKeyFromString(const std::strin
     return PixmapKey{ resourceId, groupId, frameId };
 }
 
-SpritePtr GraphicsLibrary::Impl::getSyncObjectAnimation(const std::string& resourceName)
+bool GraphicsLibrary::Impl::createSprite(const std::string& resourceName, SpritePtr& result)
 {
-    if (m_spriteCache.contains(resourceName)) {
-        return m_spriteCache[resourceName];
-    }
-    auto& sprite = m_spriteCache[resourceName];
     if (!m_resourceLibrary->fileExists(ResourceType::Sprite, resourceName)) {
-        Mernel::Logger(Mernel::Logger::Notice) << "Sprite id does not exist: " << resourceName;
-        return sprite;
+        Mernel::Logger(Mernel::Logger::Notice) << "createSprite() failed, id does not exist: " << resourceName;
+        return false;
     }
 
     const auto path       = m_resourceLibrary->get(ResourceType::Sprite, resourceName);
@@ -180,31 +215,39 @@ SpritePtr GraphicsLibrary::Impl::getSyncObjectAnimation(const std::string& resou
     }
     catch (std::exception& ex) {
         Mernel::Logger(Mernel::Logger::Err) << "Failed to load sprite:" << path << ", " << ex.what();
+        return false;
     }
 
     if (spriteImpl->getGroupsCount() > 0) {
-        sprite = spriteImpl;
+        result = spriteImpl;
+        return true;
     }
 
-    return sprite;
+    return false;
 }
 
-QPixmap GraphicsLibrary::Impl::getSyncPixmapByKey(const PixmapKey& resourceCode)
+bool GraphicsLibrary::Impl::checkSprite(const std::string& resourceName)
 {
-    if (m_pixmapCache.contains(resourceCode)) {
-        return m_pixmapCache[resourceCode];
-    }
-    QPixmap&  result = m_pixmapCache[resourceCode];
-    SpritePtr sprite = getSyncObjectAnimation(resourceCode.resourceName);
+    return m_resourceLibrary->fileExists(ResourceType::Sprite, resourceName);
+}
+
+SpritePtr GraphicsLibrary::Impl::getCachedSprite(const std::string& resourceName)
+{
+    return m_spriteCache.makeAsyncRecord(resourceName).get();
+}
+
+bool GraphicsLibrary::Impl::createPixmap(const PixmapKey& resourceCode, QPixmap& result)
+{
+    SpritePtr sprite = getCachedSprite(resourceCode.resourceName);
     if (!sprite)
-        return result;
+        return false;
 
     if (!sprite->getGroupsIds().contains(resourceCode.group))
-        return result;
+        return false;
 
     auto seq = sprite->getFramesForGroup(resourceCode.group);
     if (resourceCode.frame >= seq->frames.size() || resourceCode.frame < 0) // @todo: maybe allow Python-like [-1] = last elem etc.
-        return result;
+        return false;
 
     result = seq->frames[resourceCode.frame].frame;
     if (seq->boundarySize != result.size()) {
@@ -214,10 +257,15 @@ QPixmap GraphicsLibrary::Impl::getSyncPixmapByKey(const PixmapKey& resourceCode)
         p.drawPixmap(seq->frames[resourceCode.frame].paddingLeftTop, result);
         result = QPixmap::fromImage(padded);
     }
-    return result;
+    return true;
 }
 
-QMovie* GraphicsLibrary::Impl::getSyncVideo(const std::string& resourceName, QObject* parent)
+QPixmap GraphicsLibrary::Impl::getCachedPixmap(const PixmapKey& resourceCode)
+{
+    return m_pixmapCache.makeAsyncRecord(resourceCode).get();
+}
+
+QMovie* GraphicsLibrary::Impl::createVideo(const std::string& resourceName, QObject* parent)
 {
     const auto path  = m_resourceLibrary->get(ResourceType::Video, resourceName);
     QString    qpath = stdPath2QString(path);
@@ -225,114 +273,54 @@ QMovie* GraphicsLibrary::Impl::getSyncVideo(const std::string& resourceName, QOb
     return movie;
 }
 
-QIcon GraphicsLibrary::Impl::getSyncIcon(const PixmapKeyList& resourceCodes)
+bool GraphicsLibrary::Impl::createIcon(const PixmapKeyList& resourceCodes, QIcon& result)
 {
-    if (m_iconCache.contains(resourceCodes)) {
-        return m_iconCache[resourceCodes];
-    }
-    QIcon& icon = m_iconCache[resourceCodes];
     // normal, pressed, disabled, hovered.
     // normal    = QIcon::Off +  QIcon::Normal
     // pressed   = QIcon::On  +  QIcon::Normal
     // disabled  = QIcon::Off +  QIcon::Disabled
     // hovered   = QIcon::Off +  QIcon::Selected
     QList<QPixmap> pixmaps;
-    for (auto& resourceId : resourceCodes)
-        pixmaps << (resourceId.resourceName.empty() ? QPixmap() : getSyncPixmapByKey(resourceId));
-    icon = QIcon(pixmaps[0]);
+    for (auto& resourceId : resourceCodes) {
+        pixmaps << (resourceId.resourceName.empty() ? QPixmap() : getCachedPixmap(resourceId));
+    }
+    result = QIcon(pixmaps[0]);
     if (pixmaps.size() > 1 && !pixmaps[1].isNull()) {
-        icon.addPixmap(pixmaps[1], QIcon::Normal, QIcon::On);
+        result.addPixmap(pixmaps[1], QIcon::Normal, QIcon::On);
     }
     if (pixmaps.size() > 2 && !pixmaps[2].isNull()) {
-        icon.addPixmap(pixmaps[2], QIcon::Disabled, QIcon::Off);
+        result.addPixmap(pixmaps[2], QIcon::Disabled, QIcon::Off);
     }
     if (pixmaps.size() > 3 && !pixmaps[3].isNull()) {
-        icon.addPixmap(pixmaps[3], QIcon::Selected, QIcon::Off);
+        result.addPixmap(pixmaps[3], QIcon::Selected, QIcon::Off);
     }
-    return icon;
-}
-
-bool GraphicsLibrary::AsyncSprite::exists() const
-{
-    return m_impl->isSpriteResourceExists(m_resourceName);
-}
-
-bool GraphicsLibrary::AsyncSprite::isLoaded() const
-{
-    return m_impl->m_spriteCache.contains(m_resourceName);
-}
-
-bool GraphicsLibrary::AsyncSprite::preload() const
-{
-    return m_impl->getSyncObjectAnimation(m_resourceName) != nullptr;
-}
-
-SpritePtr GraphicsLibrary::AsyncSprite::get() const
-{
-    return m_impl->getSyncObjectAnimation(m_resourceName);
-}
-
-bool GraphicsLibrary::AsyncPixmap::exists() const
-{
-    return m_impl->isSpriteResourceExists(m_resourceCode.resourceName);
-}
-
-bool GraphicsLibrary::AsyncPixmap::isLoaded() const
-{
-    return m_impl->m_pixmapCache.contains(m_resourceCode);
-}
-
-bool GraphicsLibrary::AsyncPixmap::preload() const
-{
-    return !m_impl->getSyncPixmapByKey(m_resourceCode).isNull();
-}
-
-QPixmap GraphicsLibrary::AsyncPixmap::get() const
-{
-    return m_impl->getSyncPixmapByKey(m_resourceCode);
-}
-
-bool GraphicsLibrary::AsyncMovie::exists() const
-{
-    return m_impl->isVideoResourceExists(m_resourceName);
-}
-
-bool GraphicsLibrary::AsyncMovie::isLoaded() const
-{
     return true;
 }
 
-bool GraphicsLibrary::AsyncMovie::preload() const
+GraphicsLibrary::AsyncSprite::AsyncSprite(Impl* impl, const std::string& resourceName)
+    : m_record(impl->m_spriteCache.makeAsyncRecord(resourceName))
 {
-    return true;
 }
+
+GraphicsLibrary::AsyncPixmap::AsyncPixmap(Impl* impl, const PixmapKey& resourceCode)
+    : m_record(impl->m_pixmapCache.makeAsyncRecord(resourceCode))
+{
+}
+
+GraphicsLibrary::AsyncIcon::AsyncIcon(Impl* impl, const PixmapKeyList& resourceCodes)
+    : m_record(impl->m_iconCache.makeAsyncRecord(resourceCodes))
+{
+}
+
+GraphicsLibrary::AsyncMovie::AsyncMovie(Impl* impl, const std::string& resourceName)
+    : m_impl(impl)
+    , m_resourceName(resourceName)
+    , m_exists(m_impl->checkVideo(m_resourceName))
+{}
 
 QMovie* GraphicsLibrary::AsyncMovie::create(QObject* parent) const
 {
-    return m_impl->getSyncVideo(m_resourceName, parent);
-}
-
-bool GraphicsLibrary::AsyncIcon::exists() const
-{
-    for (const auto& code : m_resourceCodes)
-        if (!m_impl->isSpriteResourceExists(code.resourceName))
-            return false;
-    return true;
-}
-
-bool GraphicsLibrary::AsyncIcon::isLoaded() const
-{
-    return m_impl->m_iconCache.contains(m_resourceCodes);
-}
-
-bool GraphicsLibrary::AsyncIcon::preload() const
-{
-    return !m_impl->getSyncIcon(m_resourceCodes).isNull();
-}
-
-QIcon GraphicsLibrary::AsyncIcon::get() const
-{
-    return m_impl->getSyncIcon(m_resourceCodes);
+    return m_impl->createVideo(m_resourceName, parent);
 }
 
 }

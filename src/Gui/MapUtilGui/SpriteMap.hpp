@@ -158,8 +158,8 @@ struct SpritePaintSettings {
     bool m_doubleScaleTmp   = false;
 
     bool m_animateTerrain = false;
-    bool m_animateObjects = false;
-    bool m_grid           = false;
+    bool m_animateObjects = true;
+    bool m_grid           = true;
     bool m_gridOnTop      = false;
     int  m_gridOpacity    = 110;
     int  m_tileSize       = 32;

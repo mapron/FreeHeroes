@@ -37,6 +37,8 @@ struct GUIRESOURCE_EXPORT Sprite : public ISprite {
         int                m_groupId = 0;
         Params             m_params;
         std::vector<Frame> m_frames;
+
+        mutable SpriteSequencePtr m_cache;
     };
 
     QSize m_boundarySize;

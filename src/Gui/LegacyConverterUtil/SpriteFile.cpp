@@ -1259,9 +1259,19 @@ void SpriteFile::saveGuiSprite(const Mernel::std_path& jsonFilePath, const Merne
 
     assert(m_bitmaps.size() == 1);
 
+    int boundaryPadWidth  = 0;
+    int boundaryPadHeight = 0;
+    if (handlers.contains("pad")) {
+        const auto& pad = handlers["pad"];
+        if (pad.contains("right"))
+            boundaryPadWidth = pad["right"].getScalar().toInt();
+        if (pad.contains("bottom"))
+            boundaryPadHeight = pad["bottom"].getScalar().toInt();
+    }
+
     Gui::Sprite uiSprite;
     uiSprite.m_bitmap       = *m_bitmaps[0].m_pixmapQt.get();
-    uiSprite.m_boundarySize = { m_boundaryWidth, m_boundaryHeight };
+    uiSprite.m_boundarySize = { m_boundaryWidth + boundaryPadWidth, m_boundaryHeight + boundaryPadHeight };
     std::vector<const Frame*> headerOrderFrames;
     for (const Group& group : m_groups) {
         Gui::Sprite::Group uiGroup;
@@ -1277,7 +1287,7 @@ void SpriteFile::saveGuiSprite(const Mernel::std_path& jsonFilePath, const Merne
             uiFrame.m_bitmapOffset = { srcframe->m_bitmapOffsetX, srcframe->m_bitmapOffsetY };
             uiFrame.m_hasBitmap    = srcframe->m_hasBitmap;
             uiFrame.m_bitmapSize   = { srcframe->m_bitmapWidth, srcframe->m_bitmapHeight };
-            uiFrame.m_boundarySize = { srcframe->m_boundaryWidth, srcframe->m_boundaryHeight };
+            uiFrame.m_boundarySize = { srcframe->m_boundaryWidth + boundaryPadWidth, srcframe->m_boundaryHeight + boundaryPadHeight };
             uiFrame.m_padding      = { srcframe->m_paddingLeft, srcframe->m_paddingTop };
 
             uiGroup.m_frames.push_back(std::move(uiFrame));

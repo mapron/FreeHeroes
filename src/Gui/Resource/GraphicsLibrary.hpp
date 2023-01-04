@@ -25,7 +25,6 @@ public:
     PixmapKey splitKeyFromString(const std::string& resourceName) const override;
 
 private:
-private:
     class AsyncSprite;
     class AsyncPixmap;
     class AsyncMovie;

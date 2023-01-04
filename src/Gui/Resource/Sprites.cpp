@@ -60,10 +60,12 @@ QList<int> Sprite::getGroupsIds() const
 
 SpriteSequencePtr Sprite::getFramesForGroup(int groupId) const
 {
-    auto seq = std::make_shared<SpriteSequence>();
     if (!m_groups.contains(groupId))
         return nullptr;
     const Group& group = m_groups.at(groupId);
+    if (group.m_cache)
+        return group.m_cache;
+    auto seq = std::make_shared<SpriteSequence>();
 
     seq->params = {
         .scaleFactorPercent     = group.m_params.m_scaleFactorPercent,
@@ -86,7 +88,7 @@ SpriteSequencePtr Sprite::getFramesForGroup(int groupId) const
                                       frame.m_bitmapSize.height());
         seq->frames << SpriteFrame{ .frame = std::move(framePix), .paddingLeftTop = frame.m_padding };
     }
-
+    group.m_cache = seq;
     return seq;
 }
 

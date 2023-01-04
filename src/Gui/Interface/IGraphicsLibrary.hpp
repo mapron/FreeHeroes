@@ -31,6 +31,8 @@ public:
             , group(group)
             , frame(frame)
         {}
+
+        auto operator<=>(const PixmapKey&) const noexcept = default;
     };
     using PixmapKeyList = std::vector<PixmapKey>;
 

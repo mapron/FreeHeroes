@@ -464,7 +464,7 @@ void GameExtract::processFile(Mernel::TaskQueue&      taskQueue,
         if (Mernel::std_fs::exists(outputJson))
             return;
 
-        const std::vector<std::string> names{ "make_transparent", "unpack" };
+        const std::vector<std::string> names{ "make_transparent", "unpack", "pad" };
         for (const auto& name : names) {
             if (handlers.contains(name + "_hota")) {
                 if (isHota)

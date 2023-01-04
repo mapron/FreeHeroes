@@ -25,6 +25,7 @@ CheckBoxEditor::CheckBoxEditor(bool* data, QString title, QWidget* parent)
     connect(this, &IEditor::needUpdateUI, this, [data, cb]() {
         cb->setChecked(*data);
     });
+    cb->setChecked(*data);
 }
 
 ViewSettingsWidget::ViewSettingsWidget(ViewSettings* settings, QWidget* parent)

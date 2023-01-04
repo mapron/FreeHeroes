@@ -122,17 +122,21 @@ IResourceLibrary::ConstPtr ResourceLibraryFactory::create(const ModOrder& loadOr
     scanModSubfolders();
     const std::set<std::string>       orderSet(loadOrder.cbegin(), loadOrder.cend());
     ResourceLibrary::TypeMappingMedia mapping;
+    ModOrder                          realOrder;
     for (const auto& id : loadOrder) {
         if (!m_impl->m_mods.contains(id))
             continue;
 
         mergeMappings(mapping, m_impl->m_mods[id].m_modMapping);
+        realOrder.push_back(id);
     }
     for (auto&& [id, mod] : m_impl->m_mods) {
         if (orderSet.contains(id))
             continue;
         mergeMappings(mapping, m_impl->m_mods[id].m_modMapping);
+        realOrder.push_back(id);
     }
+    Logger(Logger::Notice) << "Resource index is created, requested order: <" << loadOrder << ">, resulting order: <" << realOrder << ">";
     return std::make_shared<ResourceLibrary>(std::move(mapping));
 }
 

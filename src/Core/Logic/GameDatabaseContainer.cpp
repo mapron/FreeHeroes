@@ -74,7 +74,7 @@ struct GameDatabaseContainer::Impl {
 
             rec.m_data.convertToMap();
             const int totalRecordsFound = addJsonObjectToIndex(rec.m_data, jsonData);
-            Logger(Logger::Info) << "Database segment JSON parsing finished '" << dbSegmentId << "', total records:" << totalRecordsFound;
+            Logger() << "Database segment JSON parsing finished '" << dbSegmentId << "', total records:" << totalRecordsFound;
         }
         catch (std::exception& ex) {
             Logger(Logger::Err) << "error while loading database segment '" << dbSegmentId << "': " << ex.what();

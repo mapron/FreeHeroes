@@ -159,9 +159,10 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         assert(libraryHero);
 
         auto pos = fhHero.m_pos;
-        pos.m_x += 1;
+        if (playerIndex >= 0)
+            pos.m_x += 1;
         const std::string id = playerIndex < 0 ? "avxprsn0" : libraryHero->getAdventureSprite() + "e";
-        result.addItem(makeItemById(SpriteMap::Layer::Town, id, fhHero.m_pos));
+        result.addItem(makeItemById(SpriteMap::Layer::Town, id, pos));
     }
     for (auto& obj : fhMap.m_objects.m_resources) {
         if (obj.m_type == FHResource::Type::Resource) {
@@ -206,11 +207,9 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         result.addItem(makeItemById(SpriteMap::Layer::Artifact, id, obj.m_pos));
     }
 
-    const int monsterXOffset = fhMap.m_version == Core::GameVersion::HOTA ? 1 : 0;
-
     for (auto& obj : fhMap.m_objects.m_monsters) {
         auto pos = obj.m_pos;
-        pos.m_x += monsterXOffset;
+        pos.m_x += 1;
 
         auto* def = obj.m_id->objectDefs.get({});
         result.addItem(makeItemByDef(SpriteMap::Layer::Monster, def, pos).addInfo("id", obj.m_id->id));
