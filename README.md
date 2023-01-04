@@ -35,9 +35,9 @@ Attaching a replay file very handy when describing some battle logic bug (especi
 
 # How to build from the source
 Prerequisites:
-1. **Qt 5.15 LTS** (potentially with some patches could compile with Qt 5.13. Prior version - definitely impossible)
+1. **Qt 5.15 LTS** or **Qt 6.4** (versions between 5.15 and 6.4 can work, but untested, minimal possible version Qt 5.13 (probably) but it also untested).
 2. **CMake 3.18**  (prior version should be fine though, but for C++20 support some manual flags tuning is required).
-3. **C++20 capable compiler** (note: no full support is needed). Tested: GCC 10, Clang 10, MSVC 2019 16.6.  
+3. **C++20 capable compiler** (note: no full C++20 support is required). Tested: GCC 10, Clang 10, MSVC 16.11 (VS 2019), MSVC 17.4 (VS 2022)
 
 If requirements are met, then go "cmake/build/build install". For windows platform, "build install" creates install in binary directory with all runtime dependencies.
 
