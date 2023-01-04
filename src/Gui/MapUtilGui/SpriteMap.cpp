@@ -5,6 +5,8 @@
  */
 #include "SpriteMap.hpp"
 
+#include <QObject>
+
 namespace FreeHeroes {
 
 QString SpriteMap::layerTypeToString(Layer layer)

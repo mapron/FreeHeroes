@@ -51,7 +51,7 @@ GeneralPopupDialog::GeneralPopupDialog(const LibraryModelsProvider* modelProvide
     if (!items.isEmpty()) {
         mainLayout->addSpacing(20);
         QHBoxLayout* imgWrap = new QHBoxLayout();
-        imgWrap->setMargin(0);
+        imgWrap->setContentsMargins(0, 0, 0, 0);
         imgWrap->setSpacing(20);
         mainLayout->addLayout(imgWrap);
         imgWrap->addStretch(0);

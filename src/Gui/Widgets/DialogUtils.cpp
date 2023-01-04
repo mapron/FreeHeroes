@@ -22,7 +22,7 @@ QVBoxLayout* DialogUtils::makeMainDialogFrame(QWidget* parent, bool thin)
 {
     QFrame*      outerFrame       = new QFrame(parent);
     QVBoxLayout* outerLayoutProxy = new QVBoxLayout(parent);
-    outerLayoutProxy->setMargin(0);
+    outerLayoutProxy->setContentsMargins(0, 0, 0, 0);
     outerLayoutProxy->setSpacing(0);
     outerLayoutProxy->addWidget(outerFrame);
     outerFrame->setFrameStyle(QFrame::Box);
@@ -30,7 +30,7 @@ QVBoxLayout* DialogUtils::makeMainDialogFrame(QWidget* parent, bool thin)
     outerFrame->setProperty("borderStyle", "main");
 
     QVBoxLayout* mainLayoutProxy = new QVBoxLayout(outerFrame);
-    mainLayoutProxy->setMargin(0);
+    mainLayoutProxy->setContentsMargins(0, 0, 0, 0);
     mainLayoutProxy->setSpacing(0);
     QFrame* innerFrame = new QFrame(parent);
     innerFrame->setFrameStyle(QFrame::Box);

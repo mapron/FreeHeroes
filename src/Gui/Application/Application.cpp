@@ -81,7 +81,8 @@ struct Application::Impl {
     void addTranslator(const QString& qmPath)
     {
         auto tr = std::make_unique<QTranslator>();
-        tr->load(qmPath);
+        if (!tr->load(qmPath))
+            Logger(Logger::Warning) << "load failed:" << qmPath.toStdString();
         QApplication::installTranslator(tr.get());
         translators.emplace_back(std::move(tr));
     }

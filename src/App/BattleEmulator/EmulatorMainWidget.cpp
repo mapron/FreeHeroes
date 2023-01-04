@@ -184,7 +184,7 @@ EmulatorMainWidget::EmulatorMainWidget(const Gui::IGraphicsLibrary*         grap
     onTerrainChanged();
 
     m_replayManager = std::make_unique<ReplayFileManager>();
-    m_replayManager->setRoot(QString2stdPath(QStandardPaths::writableLocation(QStandardPaths::DataLocation)) / "Replays");
+    m_replayManager->setRoot(QString2stdPath(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation)) / "Replays");
     m_replayManager->load();
 
     m_ui->comboBoxReplaySelect->setModel(m_replayManager.get());

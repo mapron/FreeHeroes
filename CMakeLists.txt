@@ -73,8 +73,29 @@ endif()
 
 # Qt Setup
 # QtNetwork is only for QtMultimedia
+
 set(QT_MODULE_LIST Core Gui Widgets Multimedia Network)
-find_package(Qt5 COMPONENTS ${QT_MODULE_LIST} LinguistTools REQUIRED)
+set(QT_MODULE_LIST_BUILD_ONLY ${QT_MODULE_LIST} LinguistTools)
+
+find_package(Qt6 COMPONENTS ${QT_MODULE_LIST_BUILD_ONLY})
+
+if (Qt6_FOUND)
+    get_target_property(QT_MOC_EXECUTABLE ${QT_CMAKE_EXPORT_NAMESPACE}::moc IMPORTED_LOCATION_RELWITHDEBINFO)
+    find_package(Qt6 COMPONENTS Core5Compat)
+    
+    if (MSVC)
+        add_compile_options(/wd4702) # unreachable code in qanystringview.h isAsciiOnlyCharsAtCompileTime
+    endif()
+else()
+    find_package(Qt5 COMPONENTS ${QT_MODULE_LIST_BUILD_ONLY} REQUIRED)
+    
+    set(QT_CMAKE_EXPORT_NAMESPACE Qt5)
+    set(${QT_CMAKE_EXPORT_NAMESPACE}::uic ${Qt5Widgets_UIC_EXECUTABLE})
+    set(${QT_CMAKE_EXPORT_NAMESPACE}::rcc ${Qt5Core_RCC_EXECUTABLE})
+    set(${QT_CMAKE_EXPORT_NAMESPACE}::lrelease ${Qt5_LRELEASE_EXECUTABLE})
+endif()
+
+
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/mocWrapper.cmake.in ${CMAKE_BINARY_DIR}/mocWrapper.cmake @ONLY)
 
 # Zlib
@@ -369,6 +390,7 @@ AddTarget(TYPE shared NAME LegacyConverterUtil OUTPUT_PREFIX FH
     
         ${PTHREAD} MernelReflection MernelExecution
     QT_MODULES Core
+        [ QT_CMAKE_EXPORT_NAMESPACE STREQUAL Qt6 ? Core5Compat ]
     )
 
 # App

@@ -29,7 +29,7 @@ UnitAnimatedPortrait::UnitAnimatedPortrait(SpritePtr sprite, SpritePtr spriteBk,
 {
     (void) count; // some day? @todo:
     QHBoxLayout* fakeLayout = new QHBoxLayout(this);
-    fakeLayout->setMargin(0);
+    fakeLayout->setContentsMargins(0, 0, 0, 0);
     fakeLayout->setSpacing(0);
     const int width  = 100;
     const int height = 130;

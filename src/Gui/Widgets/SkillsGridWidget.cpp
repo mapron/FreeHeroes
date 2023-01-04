@@ -41,7 +41,7 @@ SkillsGridWidget::SkillsGridWidget(const LibraryModelsProvider* modelProvider, Q
         for (int c = 0; c < cols; c++) {
             QWidget*     wrap       = new QWidget(this);
             QHBoxLayout* wrapLayout = new QHBoxLayout(wrap);
-            wrapLayout->setMargin(0);
+            wrapLayout->setContentsMargins(0, 0, 0, 0);
             wrapLayout->setSpacing(0);
 
             auto icon = new DarkFrameLabelIcon(this);
@@ -67,7 +67,7 @@ SkillsGridWidget::SkillsGridWidget(const LibraryModelsProvider* modelProvider, Q
     }
     layout->setColumnStretch(1, 1);
     layout->setSpacing(0);
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
 }
 
 void SkillsGridWidget::setParams(const GuiAdventureHero* hero)

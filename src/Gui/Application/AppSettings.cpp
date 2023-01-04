@@ -161,7 +161,7 @@ void AppSettings::showSettingsEditor(QWidget* parent)
 
 std::unique_ptr<QSettings> getUiDefaultSettings()
 {
-    QString filename = QStandardPaths::writableLocation(QStandardPaths::DataLocation) + "/AppSettings.ini";
+    QString filename = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + "/AppSettings.ini";
     return std::make_unique<QSettings>(filename, QSettings::IniFormat);
 }
 

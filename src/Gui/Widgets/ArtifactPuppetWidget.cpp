@@ -334,7 +334,7 @@ ArtifactPuppetWidget::ArtifactPuppetWidget(const LibraryModelsProvider* modelPro
     , m_impl(std::make_unique<Impl>(modelProvider, this))
 {
     QVBoxLayout* layout = new QVBoxLayout(this);
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
     m_impl->m_puppetWidget = new PuppetBack(this);
     m_impl->m_hoverHelper  = new HoverHelper(modelProvider, this);
     //puppetWidget->setFixedHeight(150);
@@ -343,7 +343,7 @@ ArtifactPuppetWidget::ArtifactPuppetWidget(const LibraryModelsProvider* modelPro
     m_impl->m_bottomLayout = new QHBoxLayout();
     layout->addLayout(m_impl->m_bottomLayout);
     m_impl->m_bottomLayout->setSpacing(0);
-    m_impl->m_bottomLayout->setMargin(0);
+    m_impl->m_bottomLayout->setContentsMargins(0, 0, 0, 0);
 
     m_impl->m_scrollLeft  = new FlatButton(this);
     m_impl->m_scrollRight = new FlatButton(this);

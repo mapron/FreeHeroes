@@ -40,7 +40,7 @@ StackSelectorWidget::StackSelectorWidget(QWidget* parent)
 
     QHBoxLayout* layout = new QHBoxLayout(this);
     layout->setSpacing(10);
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(m_selectId);
     layout->addWidget(m_count);
     connect(m_selectId, qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {

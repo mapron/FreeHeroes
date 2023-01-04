@@ -46,7 +46,7 @@ function(CreateUiRules outfiles extraIncludes extraPostprocess)
 
         list(APPEND includes ${incl_path} )
         add_custom_command(OUTPUT ${outfile}
-          COMMAND ${Qt5Widgets_UIC_EXECUTABLE}
+          COMMAND ${QT_CMAKE_EXPORT_NAMESPACE}::uic
           ARGS ${ui_options} -o ${outfile} ${infile}
           ${postprocessArgs}
           MAIN_DEPENDENCY ${infile} VERBATIM)
@@ -92,7 +92,7 @@ function(AddQrcOutput rccName qrcName)
     configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/qrcTemplate.qrc.in ${qrcName} @ONLY )
     source_group("Qt Resource Files" FILES ${qrcName})
     add_custom_command(OUTPUT ${rccName}
-                       COMMAND ${Qt5Core_RCC_EXECUTABLE}
+                       COMMAND ${QT_CMAKE_EXPORT_NAMESPACE}::rcc
                        ARGS --no-compress --binary -o ${rccName} ${qrcName}
                        MAIN_DEPENDENCY ${qrcName}
                        DEPENDS ${fileListAbsConfig} VERBATIM)
@@ -144,7 +144,7 @@ function(GenerateQrcWithTranslations resourceFolder translationsRoot)
 
         #configure_file(${absFile} ${destFileAbs} COPYONLY)
         add_custom_command(OUTPUT ${qmFileAbs}
-                           COMMAND ${Qt5_LRELEASE_EXECUTABLE}
+                           COMMAND ${QT_CMAKE_EXPORT_NAMESPACE}::lrelease
                            ARGS ${tsFileAbs} -qm ${qmFileAbs}
                            MAIN_DEPENDENCY ${tsFileAbs} VERBATIM)
 

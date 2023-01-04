@@ -53,11 +53,11 @@ PrimaryStatsWidget::PrimaryStatsWidget(const LibraryModelsProvider* modelsProvid
 
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setSpacing(0);
-    mainLayout->setMargin(0);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
 
     DarkFrame*   topLayoutFrame = new DarkFrame(this);
     QHBoxLayout* topLayout      = new QHBoxLayout(topLayoutFrame);
-    topLayout->setMargin(0);
+    topLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->addWidget(topLayoutFrame);
     for (auto* label : m_titleTxt)
         topLayout->addWidget(label);
@@ -74,7 +74,7 @@ PrimaryStatsWidget::PrimaryStatsWidget(const LibraryModelsProvider* modelsProvid
 
     DarkFrame*   botLayoutFrame = new DarkFrame(this);
     QHBoxLayout* botLayout      = new QHBoxLayout(botLayoutFrame);
-    botLayout->setMargin(0);
+    botLayout->setContentsMargins(0, 0, 0, 0);
     botLayout->setSpacing(0);
     mainLayout->addWidget(botLayoutFrame);
     for (auto* label : m_valueTxt)

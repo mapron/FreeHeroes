@@ -242,7 +242,7 @@ function(AddTarget)
     endif()
     
     foreach(qt ${ARG_QT_MODULES})
-        target_link_libraries(${name} ${defaultVisibility} Qt5::${qt})
+        target_link_libraries(${name} ${defaultVisibility} Qt::${qt})
     endforeach()
     if (ARG_LINK_FLAGS)
         set_target_properties(${name} PROPERTIES LINK_FLAGS "${ARG_LINK_FLAGS}")

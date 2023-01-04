@@ -16,7 +16,7 @@ CheckBoxEditor::CheckBoxEditor(bool* data, QString title, QWidget* parent)
     QCheckBox* cb = new QCheckBox(title, this);
 
     QVBoxLayout* layout = new QVBoxLayout(this);
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(cb);
     connect(cb, &QCheckBox::clicked, this, [this, data](bool state) {
         *data = state;

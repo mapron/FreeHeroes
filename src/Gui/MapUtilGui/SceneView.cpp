@@ -24,7 +24,7 @@ ScaleWidget::ScaleWidget(SpritePaintSettings* settings, QWidget* parent)
     m_comboBox->setInsertPolicy(QComboBox::NoInsert);
     m_comboBox->setEditable(false);
     auto* layout = new QHBoxLayout(this);
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
     for (int percent : { 5, 6, 7, 8, 10, 12, 15, 18, 21, 25, 29, 33, 37, 43, 50, 56, 62, 68, 75, 87, 100 })
         m_comboBox->addItem(QString("%1%").arg(percent), percent);
 
@@ -119,7 +119,16 @@ void SceneView::mousePressEvent(QMouseEvent* event)
                 refreshScale();
                 return;
             }
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4996)
+#endif
+
             QMouseEvent pressEvent(QEvent::MouseButtonPress, event->localPos(), Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
             mousePressEvent(&pressEvent);
             return;
         }

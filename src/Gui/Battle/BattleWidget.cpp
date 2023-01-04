@@ -109,16 +109,16 @@ public:
         mainWidget->setFrameStyle(QFrame::Box);
         {
             QHBoxLayout* layoutWrap = new QHBoxLayout(this);
-            layoutWrap->setMargin(0);
+            layoutWrap->setContentsMargins(0, 0, 0, 0);
             layoutWrap->setSpacing(0);
             layoutWrap->addWidget(mainWidget);
         }
         QVBoxLayout* layout = new QVBoxLayout(mainWidget);
-        layout->setMargin(2);
+        layout->setContentsMargins(2, 2, 2, 2);
         layout->setSpacing(0);
         {
             QHBoxLayout* row = new QHBoxLayout();
-            row->setMargin(0);
+            row->setContentsMargins(0, 0, 0, 0);
             row->setSpacing(0);
             m_portrait = new DarkFrameLabelIcon(this);
             row->addStretch();
@@ -133,13 +133,13 @@ public:
             statWrap->setFixedSize(71, 55);
             layout->addWidget(statWrap);
             QVBoxLayout* layoutStat = new QVBoxLayout(statWrap);
-            layoutStat->setMargin(2);
+            layoutStat->setContentsMargins(2, 2, 2, 2);
             layoutStat->setSpacing(1);
             QStringList statTitles = paramLabels.mid(0, 4);
             for (auto title : statTitles) {
                 QHBoxLayout* row = new QHBoxLayout();
                 layoutStat->addLayout(row);
-                row->setMargin(0);
+                row->setContentsMargins(0, 0, 0, 0);
                 row->setSpacing(0);
                 QLabel* lblTitle = new QLabel(title, this);
                 row->addWidget(lblTitle, Qt::AlignLeft);
@@ -156,13 +156,13 @@ public:
             layout->addWidget(rngWrap);
             rngWrap->setFixedSize(71, 35);
             QVBoxLayout* layoutRng = new QVBoxLayout(rngWrap);
-            layoutRng->setMargin(2);
+            layoutRng->setContentsMargins(2, 2, 2, 2);
             layoutRng->setSpacing(1);
             QStringList rngTitles = paramLabels.mid(4, 2);
             for (auto title : rngTitles) {
                 QHBoxLayout* row = new QHBoxLayout();
                 layoutRng->addLayout(row);
-                row->setMargin(0);
+                row->setContentsMargins(0, 0, 0, 0);
                 row->setSpacing(0);
                 QLabel* lblTitle = new QLabel(title, this);
                 row->addWidget(lblTitle, 0);
@@ -185,7 +185,7 @@ public:
             layout->addWidget(manaWrap);
             manaWrap->setFixedSize(71, 30);
             QVBoxLayout* layoutMana = new QVBoxLayout(manaWrap);
-            layoutMana->setMargin(0);
+            layoutMana->setContentsMargins(0, 0, 0, 0);
             layoutMana->setSpacing(0);
             QLabel* manaTitle = new QLabel(paramLabels.value(6), this);
             manaTitle->setAlignment(Qt::AlignCenter);
@@ -418,7 +418,7 @@ void BattleWidget::heroInfoShow(bool attacker, bool defender)
     if (attacker) {
         auto hero = m_battleView.getHero(BattleStack::Side::Attacker);
         m_heroInfoWidgetAttacker->updateInfo(hero, m_appSettings->ui());
-        m_heroInfoWidgetAttacker->move(this->mapToGlobal({ -m_heroInfoWidgetAttacker->sizeHint().width() - 2, 0 }));
+        m_heroInfoWidgetAttacker->move(this->mapToGlobal(QPoint{ -m_heroInfoWidgetAttacker->sizeHint().width() - 2, 0 }));
         m_heroInfoWidgetAttacker->show();
     } else {
         m_heroInfoWidgetAttacker->hide();
@@ -427,7 +427,7 @@ void BattleWidget::heroInfoShow(bool attacker, bool defender)
     if (defender) {
         auto hero = m_battleView.getHero(BattleStack::Side::Defender);
         m_heroInfoWidgetDefender->updateInfo(hero, m_appSettings->ui());
-        m_heroInfoWidgetDefender->move(this->mapToGlobal({ this->sizeHint().width() + 2, 0 }));
+        m_heroInfoWidgetDefender->move(this->mapToGlobal(QPoint{ this->sizeHint().width() + 2, 0 }));
         m_heroInfoWidgetDefender->show();
     } else {
         m_heroInfoWidgetDefender->hide();

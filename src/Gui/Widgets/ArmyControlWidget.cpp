@@ -122,7 +122,7 @@ ArmyControlWidget::ArmyControlWidget(QWidget* parent)
 {
     m_impl->m_layout = new QHBoxLayout(this);
     m_impl->m_layout->setSpacing(4);
-    m_impl->m_layout->setMargin(5);
+    m_impl->m_layout->setContentsMargins(5, 5, 5, 5);
 }
 
 void ArmyControlWidget::refresh()

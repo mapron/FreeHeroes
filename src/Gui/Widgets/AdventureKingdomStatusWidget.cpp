@@ -80,7 +80,7 @@ AdventureKingdomStatusWidget::AdventureKingdomStatusWidget(QWidget* parent)
     };
 
     QHBoxLayout* layout = new QHBoxLayout(this);
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
     for (int i = 0; i < resCount + 1; i++) {
         QString          id  = m_impl->m_resIds[i];
         Impl::ResWidget& res = *m_impl->m_resLabels[i];

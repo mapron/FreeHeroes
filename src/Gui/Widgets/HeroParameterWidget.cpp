@@ -62,7 +62,7 @@ HeroParameterWidget::HeroParameterWidget(const LibraryModelsProvider* modelProvi
 
     Mernel::ProfilerScope scope("HeroParameterWidget");
     QHBoxLayout*          proxylayout = new QHBoxLayout(this);
-    proxylayout->setMargin(0);
+    proxylayout->setContentsMargins(0, 0, 0, 0);
     proxylayout->setSpacing(0);
     QScrollArea* scrollArea = new QScrollArea(this);
     scrollArea->setWidgetResizable(true);

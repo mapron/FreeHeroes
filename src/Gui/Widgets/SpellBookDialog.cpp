@@ -119,7 +119,7 @@ public:
         QVBoxLayout* layout     = new QVBoxLayout(this);
         QHBoxLayout* iconLayout = new QHBoxLayout();
         iconLayout->setSpacing(0);
-        iconLayout->setMargin(0);
+        iconLayout->setContentsMargins(0, 0, 0, 0);
         m_spellIcon  = new TransparentLabel(this);
         m_spellDescr = new TransparentLabel(this);
         QFont f      = m_spellDescr->font();
@@ -131,7 +131,7 @@ public:
         iconLayout->addSpacing(9);
         layout->addWidget(m_spellDescr);
         layout->setSpacing(1);
-        layout->setMargin(0);
+        layout->setContentsMargins(0, 0, 0, 0);
         m_spellIcon->setFixedSize(78, 65);
         m_spellDescr->setFixedWidth(96);
         m_spellDescr->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
@@ -331,7 +331,7 @@ SpellBookDialog::SpellBookDialog(const Core::AdventureHero::SpellList& spellList
     auto* hoverTooltip = new DarkFrameLabel(this);
     hoverTooltip->setProperty("borderStyle", "common2");
     hoverTooltip->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-    hoverTooltip->setMargin(0);
+    hoverTooltip->setContentsMargins(0, 0, 0, 0);
     hoverTooltip->setFixedSize(800 + 2, 22);
     hoverTooltip->move(0, 600 - 25);
     m_impl->hoverHelper->setHoverLabel(hoverTooltip);

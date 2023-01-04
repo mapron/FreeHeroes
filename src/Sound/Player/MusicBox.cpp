@@ -11,7 +11,9 @@
 #include <QMediaPlayer>
 #include <QTimer>
 #include <QPropertyAnimation>
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #include <QMediaPlaylist>
+#endif
 
 namespace FreeHeroes::Sound {
 using namespace Mernel;
@@ -33,11 +35,14 @@ struct MusicBox::Impl {
     };
     QMap<std::string, EffectCache> m_effectsCache;
 
-    QMediaPlayer   m_player;
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QMediaPlaylist m_playlist;
-    int            m_musicVolumeLog        = 100;
-    qreal          m_musicVolumeLinearBase = 1.;
-    int            m_musicVolumeFinal      = 100;
+#endif
+
+    QMediaPlayer m_player;
+    int          m_musicVolumeLog        = 100;
+    qreal        m_musicVolumeLinearBase = 1.;
+    int          m_musicVolumeFinal      = 100;
     //qreal m_musicVolumeFade = 1.0;
 
     int   m_efectsVolumeLog        = 100;
@@ -82,7 +87,9 @@ struct MusicBox::Impl {
 
     Impl()
     {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         m_player.setVolume(0);
+#endif
     }
 };
 
@@ -133,7 +140,9 @@ MusicBox::MusicBox(Core::IRandomGeneratorPtr rng, const Core::IResourceLibrary* 
     , m_rng(std::move(rng))
     , m_resourceLibrary(resourceLibrary)
 {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     m_impl->m_player.setPlaylist(&m_impl->m_playlist);
+#endif
 }
 
 MusicBox::~MusicBox()
@@ -183,11 +192,14 @@ void MusicBox::musicPlay(const IMusicBox::MusicSettings& music)
         return;
 
     const QString path = QString::fromStdString(Mernel::path2string(fullPath));
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     m_impl->m_player.setVolume(0);
 
     m_impl->m_playlist.clear();
     m_impl->m_playlist.addMedia(QMediaContent(QUrl::fromLocalFile(path)));
     m_impl->m_playlist.setPlaybackMode(music.loopAround ? QMediaPlaylist::Loop : QMediaPlaylist::CurrentItemOnce);
+#endif
     m_impl->m_player.play();
     QPropertyAnimation* volumeAnim = new QPropertyAnimation(&m_impl->m_player, "volume", this);
     volumeAnim->setEndValue(m_impl->m_musicVolumeFinal);
@@ -258,7 +270,9 @@ void MusicBox::effectPlay(const EffectSettings& effect)
 void MusicBox::setMusicVolume(int percent)
 {
     m_impl->setMusicVolumeLog(percent);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     m_impl->m_player.setVolume(m_impl->m_musicVolumeFinal);
+#endif
 }
 
 void MusicBox::setEffectsVolume(int percent)

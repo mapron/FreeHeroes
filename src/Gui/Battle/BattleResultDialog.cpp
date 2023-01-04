@@ -65,12 +65,12 @@ BattleResultDialog::BattleResultDialog(const LibraryModelsProvider* modelsProvid
     mainLayout->setContentsMargins(10, 15, 10, 10);
     {
         QHBoxLayout* portraitsAndAnim = new QHBoxLayout();
-        portraitsAndAnim->setMargin(0);
+        portraitsAndAnim->setContentsMargins(0, 0, 0, 0);
         portraitsAndAnim->setSpacing(3);
         mainLayout->addLayout(portraitsAndAnim);
         {
             QVBoxLayout* leftPortrait = new QVBoxLayout();
-            leftPortrait->setMargin(0);
+            leftPortrait->setContentsMargins(0, 0, 0, 0);
             leftPortrait->setSpacing(0);
             portraitsAndAnim->addLayout(leftPortrait);
             {
@@ -90,12 +90,12 @@ BattleResultDialog::BattleResultDialog(const LibraryModelsProvider* modelsProvid
         }
         {
             QVBoxLayout* labelsAndAnim = new QVBoxLayout();
-            labelsAndAnim->setMargin(0);
+            labelsAndAnim->setContentsMargins(0, 0, 0, 0);
             labelsAndAnim->setSpacing(10);
             portraitsAndAnim->addLayout(labelsAndAnim);
             {
                 QHBoxLayout* centerTop = new QHBoxLayout();
-                centerTop->setMargin(0);
+                centerTop->setContentsMargins(0, 0, 0, 0);
                 centerTop->setSpacing(10);
                 labelsAndAnim->addLayout(centerTop);
                 m_impl->sides[0].name = makeLabel(Qt::AlignLeft, 1);

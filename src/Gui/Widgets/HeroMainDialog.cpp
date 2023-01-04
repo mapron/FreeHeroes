@@ -64,7 +64,7 @@ HeroMainDialog::HeroMainDialog(const LibraryModelsProvider* modelsProvider, QWid
         label->setLineWidth(2);
         label->setFrameStyle(QFrame::Panel);
         label->setProperty("borderStyle", "commonDark");
-        label->setMargin(0);
+        label->setContentsMargins(0, 0, 0, 0);
     }
     for (auto* pb : { m_ui->pushButtonClose,
                       m_ui->pushButtonDeleteHero,

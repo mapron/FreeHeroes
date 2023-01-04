@@ -43,12 +43,12 @@ void displayStatus(QLabel* label, bool status)
 ConverterDialog::ConverterDialog(const Core::IGameDatabaseContainer* databaseContainer, QWidget* parent)
     : QDialog(parent)
     , m_ui(std::make_unique<Ui::ConverterDialog>())
-    , m_converterSettings(QStandardPaths::writableLocation(QStandardPaths::DataLocation) + "/ConverterSettings.ini", QSettings::IniFormat)
+    , m_converterSettings(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + "/ConverterSettings.ini", QSettings::IniFormat)
     , m_databaseContainer(databaseContainer)
 {
     m_ui->setupUi(this);
 
-    QString localData = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+    QString localData = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
     if (localData.endsWith("/") || localData.endsWith("\\"))
         localData = localData.mid(0, localData.size() - 1);
     m_ui->dstPath->setText(localData + "/Resources/Imported");

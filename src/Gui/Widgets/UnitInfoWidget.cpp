@@ -104,7 +104,7 @@ public:
         : QWidget(parent)
     {
         QGridLayout* layout = new QGridLayout(this);
-        layout->setMargin(0);
+        layout->setContentsMargins(0, 0, 0, 0);
         layout->setSpacing(1);
         for (size_t i = 0; i < effects.size(); ++i) {
             int   row = i / 3;
@@ -131,7 +131,7 @@ UnitInfoWidget::UnitInfoWidget(Core::BattleStackConstPtr    battle,
 
     QFrame*      outerFrame       = new QFrame(this);
     QVBoxLayout* outerLayoutProxy = new QVBoxLayout(this);
-    outerLayoutProxy->setMargin(0);
+    outerLayoutProxy->setContentsMargins(0, 0, 0, 0);
     outerLayoutProxy->setSpacing(0);
     outerLayoutProxy->addWidget(outerFrame);
     outerFrame->setFrameStyle(QFrame::Box);
@@ -139,7 +139,7 @@ UnitInfoWidget::UnitInfoWidget(Core::BattleStackConstPtr    battle,
     outerFrame->setProperty("borderStyle", "main");
 
     QVBoxLayout* mainLayoutProxy = new QVBoxLayout(outerFrame);
-    mainLayoutProxy->setMargin(0);
+    mainLayoutProxy->setContentsMargins(0, 0, 0, 0);
     mainLayoutProxy->setSpacing(0);
     QFrame* innerFrame = new QFrame(this);
     innerFrame->setFrameStyle(QFrame::Box);
@@ -169,7 +169,7 @@ UnitInfoWidget::UnitInfoWidget(Core::BattleStackConstPtr    battle,
 
     QHBoxLayout* paramAndPortraitLayout = new QHBoxLayout();
     paramAndPortraitLayout->setSpacing(3);
-    paramAndPortraitLayout->setMargin(0);
+    paramAndPortraitLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->addLayout(paramAndPortraitLayout);
 
     auto sprite = guiUnit->getBattleSprite();
@@ -182,7 +182,7 @@ UnitInfoWidget::UnitInfoWidget(Core::BattleStackConstPtr    battle,
     if (showModal)
         portrait->startTimer();
     QVBoxLayout* portraitWrap = new QVBoxLayout();
-    portraitWrap->setMargin(0);
+    portraitWrap->setContentsMargins(0, 0, 0, 0);
     portraitWrap->setSpacing(0);
     portraitWrap->addWidget(portrait);
     portraitWrap->addStretch();
@@ -227,13 +227,13 @@ UnitInfoWidget::UnitInfoWidget(Core::BattleStackConstPtr    battle,
         DarkFrame*   titleValue     = new DarkFrame(this);
         QHBoxLayout* paramLayoutRow = new QHBoxLayout();
         paramLayoutRow->setSpacing(0);
-        paramLayoutRow->setMargin(0);
+        paramLayoutRow->setContentsMargins(0, 0, 0, 0);
 
         paramLayout->addLayout(paramLayoutRow);
 
         QHBoxLayout* titleValueLayout = new QHBoxLayout(titleValue);
         //titleValue->setContentsMargins(5, 5, 5, 5);
-        titleValueLayout->setMargin(0);
+        titleValueLayout->setContentsMargins(0, 0, 0, 0);
         titleValueLayout->setSpacing(0);
         auto lbl1 = new QLabel(row.title, this);
         titleValueLayout->addWidget(lbl1, 1, Qt::AlignLeft);
@@ -258,7 +258,7 @@ UnitInfoWidget::UnitInfoWidget(Core::BattleStackConstPtr    battle,
     }
     QHBoxLayout* layoutMoralAndControl = new QHBoxLayout();
     mainLayout->addLayout(layoutMoralAndControl);
-    layoutMoralAndControl->setMargin(0);
+    layoutMoralAndControl->setContentsMargins(0, 0, 0, 0);
     layoutMoralAndControl->setSpacing(2);
     {
         const auto rng             = battle ? battle->current.rngParams : adventure->estimated.rngParams;
@@ -276,7 +276,7 @@ UnitInfoWidget::UnitInfoWidget(Core::BattleStackConstPtr    battle,
         }
         {
             QVBoxLayout* topAligner = new QVBoxLayout();
-            topAligner->setMargin(0);
+            topAligner->setContentsMargins(0, 0, 0, 0);
             topAligner->setSpacing(0);
             layoutMoralAndControl->addLayout(topAligner);
             QHBoxLayout* topAlignerH = new QHBoxLayout();
@@ -327,7 +327,7 @@ UnitInfoWidget::UnitInfoWidget(Core::BattleStackConstPtr    battle,
     descLabelFrame->setProperty("borderStyle", "commonDark");
     descLabelFrame->setProperty("fill", true);
     QVBoxLayout* descLabelFrameLayout = new QVBoxLayout(descLabelFrame);
-    descLabelFrameLayout->setMargin(5);
+    descLabelFrameLayout->setContentsMargins(5, 5, 5, 5);
 
     QLabel* descLabel = new QLabel(abilsTextStr, this);
     descLabel->setWordWrap(true);
@@ -353,7 +353,7 @@ UnitInfoWidget::UnitInfoWidget(Core::BattleStackConstPtr    battle,
     }
     m_impl->hoverTooltip = new DarkFrameLabel(this);
     m_impl->hoverTooltip->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-    m_impl->hoverTooltip->setMargin(2);
+    m_impl->hoverTooltip->setContentsMargins(2, 2, 2, 2);
     m_impl->hoverHelper->setHoverLabel(m_impl->hoverTooltip);
     mainLayoutProxy->addWidget(m_impl->hoverTooltip);
 }
