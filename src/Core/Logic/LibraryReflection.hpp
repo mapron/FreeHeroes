@@ -170,6 +170,7 @@ STRUCT_REFLECTION_STRINGIFY(
     specialBorderTilesOffset,
     centerTilesOffset,
     centerTilesCount,
+    centerTilesClearCount,
     borderCounts,
     borderMixedCounts,
     borderSpecialCounts,

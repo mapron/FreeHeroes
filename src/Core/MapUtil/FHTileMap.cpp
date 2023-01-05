@@ -498,10 +498,12 @@ bool FHTileMap::Tile::setViewBorderSandOrDirt(Core::LibraryTerrain::BorderType b
 
 bool FHTileMap::Tile::setViewCenter()
 {
-    auto& pp         = m_terrain->presentationParams;
-    m_tileOffset     = pp.centerTilesOffset;
-    m_tileCount      = pp.centerTilesCount;
-    m_tileCountClear = pp.centerTilesClearCount <= 0 ? m_tileCount : pp.centerTilesClearCount;
+    if (m_terrain) {
+        auto& pp         = m_terrain->presentationParams;
+        m_tileOffset     = pp.centerTilesOffset;
+        m_tileCount      = pp.centerTilesCount;
+        m_tileCountClear = pp.centerTilesClearCount;
+    }
     updateMinMax();
     return true;
 }
@@ -528,9 +530,10 @@ bool FHTileMap::Tile::setView(Core::LibraryTerrain::BorderClass bc, Core::Librar
 
 void FHTileMap::Tile::updateMinMax()
 {
-    m_viewMin = static_cast<uint8_t>(m_tileOffset);
-    m_viewMid = static_cast<uint8_t>(m_viewMin + m_tileCountClear - 1);
-    m_viewMax = static_cast<uint8_t>(m_viewMin + m_tileCount - 1);
+    m_viewMin            = static_cast<uint8_t>(m_tileOffset);
+    const int clearCount = m_tileCountClear > 0 ? m_tileCountClear : m_tileCount;
+    m_viewMid            = static_cast<uint8_t>(m_viewMin + clearCount - 1);
+    m_viewMax            = static_cast<uint8_t>(m_viewMin + m_tileCount - 1);
 }
 
 void FHTileMap::correctTerrainTypes(Core::LibraryTerrainConstPtr dirtTerrain,
@@ -869,15 +872,15 @@ void FHTileMap::correctRivers()
     }
 }
 
-void FHTileMap::rngTiles(Core::IRandomGenerator* rng)
+void FHTileMap::rngTiles(Core::IRandomGenerator* rng, int roughTileChancePercent)
 {
     auto rngView = [&rng](uint8_t min, uint8_t max) -> uint8_t {
         if (min == max)
             return min;
         uint8_t diff   = max - min;
         uint8_t result = rng->genSmall(diff);
-        if (result >= 20)
-            result = rng->genSmall(diff);
+        //if (result >= 20)
+        //    result = rng->genSmall(diff);
         return min + result;
     };
 
@@ -888,7 +891,10 @@ void FHTileMap::rngTiles(Core::IRandomGenerator* rng)
                 if (!(X.m_view >= X.m_viewMin && X.m_view <= X.m_viewMax)) {
                     if (X.m_view != 0xffU)
                         Logger(Logger::Warning) << "Change view at (" << x << "," << y << "," << int(z) << ") " << int(X.m_view) << " -> [" << int(X.m_viewMin) << " .. " << int(X.m_viewMax) << "]";
-                    X.m_view = rngView(X.m_viewMin, X.m_viewMax);
+                    if (rng->genSmall(100) < roughTileChancePercent)
+                        X.m_view = rngView(X.m_viewMin, X.m_viewMax);
+                    else
+                        X.m_view = rngView(X.m_viewMin, X.m_viewMid);
                 }
                 if (!(X.m_roadView >= X.m_roadViewMin && X.m_roadView <= X.m_roadViewMax))
                     X.m_roadView = rngView(X.m_roadViewMin, X.m_roadViewMax);

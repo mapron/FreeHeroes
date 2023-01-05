@@ -25,6 +25,10 @@ public:
         const std::string id = json.getScalar().toString();
         using ObjectType     = std::remove_cv_t<std::remove_pointer_t<std::remove_cv_t<std::remove_reference_t<decltype(value)>>>>;
         value                = m_gameDatabase->container<ObjectType>()->find(id);
+        if (!id.empty() && !value) {
+            assert(false);
+            throw std::runtime_error("Invalid object key '" + id + "' in the link.");
+        }
     }
 
 private:

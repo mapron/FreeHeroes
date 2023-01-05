@@ -86,8 +86,16 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         return item;
     };
 
+    for (auto& tile : fhMap.m_debugTiles) {
+        auto& cell    = result.m_planes[tile.m_pos.m_z].m_merged.m_rows[tile.m_pos.m_y].m_cells[tile.m_pos.m_x];
+        cell.m_debug  = true;
+        cell.m_debugA = tile.m_valueA;
+        cell.m_debugB = tile.m_valueB;
+        cell.m_debugC = tile.m_valueC;
+    }
+
     fhMap.m_tileMap.eachPosTile([&makeItemById, &result](const FHPos& pos, const FHTileMap::Tile& tile) {
-        {
+        if (tile.m_terrain) {
             SpriteMap::Item item = makeItemById(SpriteMap::Layer::Terrain, tile.m_terrain->presentationParams.defFile, pos);
             item.m_spriteGroup   = tile.m_view;
             item.m_flipHor       = tile.m_flipHor;

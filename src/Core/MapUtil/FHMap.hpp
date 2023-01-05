@@ -216,8 +216,34 @@ struct FHScholar : public FHCommonVisitable {
     Core::LibrarySpellConstPtr          m_spellId     = nullptr;
 };
 
+struct FHRngZone {
+    FHPlayerId                   m_player  = FHPlayerId::Invalid;
+    Core::LibraryFactionConstPtr m_faction = nullptr;
+    Core::LibraryTerrainConstPtr m_terrain = nullptr;
+    FHPos                        m_center;
+    int                          m_towns        = 0;
+    int                          m_relativeSize = 100;
+};
+struct FHRngConnection {
+    std::string m_from;
+    std::string m_to;
+};
+
+struct FHDebugTile {
+    FHPos m_pos;
+    int   m_valueA = 0;
+    int   m_valueB = 0;
+    int   m_valueC = 0;
+};
+
+struct FHRngOptions {
+    int m_roughTilePercentage = 12;
+};
+
 struct MAPUTIL_EXPORT FHMap {
     using PlayersMap = std::map<FHPlayerId, FHPlayer>;
+    using DefMap     = std::map<Core::LibraryObjectDefConstPtr, Core::LibraryObjectDef>;
+    using RngZoneMap = std::map<std::string, FHRngZone>;
 
     Core::GameVersion m_version = Core::GameVersion::Invalid;
     uint64_t          m_seed{ 0 };
@@ -228,10 +254,14 @@ struct MAPUTIL_EXPORT FHMap {
     std::string m_descr;
     uint8_t     m_difficulty = 0;
 
-    PlayersMap          m_players;
-    std::vector<FHHero> m_wanderingHeroes;
-    std::vector<FHTown> m_towns;
-    std::vector<FHZone> m_zones;
+    PlayersMap                   m_players;
+    std::vector<FHHero>          m_wanderingHeroes;
+    std::vector<FHTown>          m_towns;
+    std::vector<FHZone>          m_zones;
+    std::vector<FHDebugTile>     m_debugTiles;
+    RngZoneMap                   m_rngZones;
+    std::vector<FHRngConnection> m_rngConnections;
+    FHRngOptions                 m_rngOptions;
 
     struct Objects {
         std::vector<FHResource>       m_resources;
@@ -268,8 +298,6 @@ struct MAPUTIL_EXPORT FHMap {
     std::vector<Core::LibrarySecondarySkillConstPtr> m_disabledSkills;
 
     std::vector<FHHeroData> m_customHeroes;
-
-    using DefMap = std::map<Core::LibraryObjectDefConstPtr, Core::LibraryObjectDef>;
 
     std::vector<Core::LibraryObjectDefConstPtr> m_initialObjectDefs; // mostly for round-trip.
     DefMap                                      m_defReplacements;   // mostly for round-trip.

@@ -32,10 +32,12 @@ ENUM_REFLECTION_STRINGIY(MapConverter::Task,
                          ConvertJsonToH3M,
                          ConvertH3SVGToJson,
                          ConvertJsonToH3SVG,
+                         LoadFHTpl,
                          LoadFH,
                          SaveFH,
                          FHMapToH3M,
                          H3MToFHMap,
+                         FHTplToFHMap,
                          H3MRoundTripJson,
                          H3SVGRoundTripJson,
                          H3MRoundTripFH)
@@ -157,6 +159,13 @@ void MapConverter::run(Task task, int recurse) noexcept(false)
                 setOutput(m_outputs.m_h3svg.m_binary);
                 runMember(writeBinaryBufferData);
             } break;
+            case Task::LoadFHTpl:
+            {
+                setInput(m_inputs.m_fhTemplate);
+                runMember(readJsonToProperty);
+
+                runMember(propertyDeserializeFH);
+            } break;
             case Task::LoadFH:
             {
                 setInput(m_inputs.m_fhMap);
@@ -211,6 +220,14 @@ void MapConverter::run(Task task, int recurse) noexcept(false)
                     runMember(writeJsonFromProperty);
                 }
                 runMember(convertH3MtoFH);
+                run(Task::SaveFH, recurse + 1);
+            } break;
+            case Task::FHTplToFHMap:
+            {
+                run(Task::LoadFHTpl, recurse + 1);
+
+                runMember(convertFHTPLtoFH);
+
                 run(Task::SaveFH, recurse + 1);
             } break;
             case Task::H3MRoundTripJson:
@@ -269,6 +286,9 @@ void MapConverter::run(Task task, int recurse) noexcept(false)
 
 void MapConverter::run(MemberProc member, const char* descr, int recurse) noexcept(false)
 {
+    m_currentIndent = "  ";
+    for (int r = 0; r < recurse; ++r)
+        m_currentIndent += "  ";
     m_currentTask = descr;
     ScopeLogger scope(descr, recurse, m_logOutput);
     (this->*member)();
@@ -299,6 +319,7 @@ void MapConverter::readBinaryBufferData()
     m_rawState = RawState::Undefined;
 
     m_binaryBuffer = Mernel::readFileIntoHolderThrow(m_inputFilename);
+    m_logOutput << m_currentIndent << "Read " << m_binaryBuffer.size() << " bytes from: " << m_inputFilename << '\n';
 
     m_rawState = RawState::Compressed;
 }
@@ -308,6 +329,7 @@ void MapConverter::writeBinaryBufferData()
     if (m_rawState != RawState::Compressed)
         throw std::runtime_error("Buffer needs to be in Compressed state.");
 
+    m_logOutput << m_currentIndent << "Write " << m_binaryBuffer.size() << " bytes to: " << m_outputFilename << '\n';
     Mernel::writeFileFromHolderThrow(m_outputFilename, m_binaryBuffer);
 }
 
@@ -316,17 +338,20 @@ void MapConverter::writeBinaryBufferDataAsUncompressed()
     if (m_rawState != RawState::Uncompressed)
         throw std::runtime_error("Buffer needs to be in Uncompressed state.");
 
+    m_logOutput << m_currentIndent << "Write " << m_binaryBuffer.size() << " bytes to: " << m_outputFilename << '\n';
     Mernel::writeFileFromHolderThrow(m_outputFilename, m_binaryBuffer);
 }
 
 void MapConverter::readJsonToProperty()
 {
+    m_logOutput << m_currentIndent << "Read: " << m_inputFilename << '\n';
     std::string buffer = Mernel::readFileIntoBufferThrow(m_inputFilename);
     m_json             = Mernel::readJsonFromBufferThrow(buffer);
 }
 
 void MapConverter::writeJsonFromProperty()
 {
+    m_logOutput << m_currentIndent << "Write: " << m_outputFilename << '\n';
     std::string buffer = Mernel::writeJsonToBufferThrow(m_json);
     Mernel::writeFileFromBufferThrow(m_outputFilename, buffer);
 }
@@ -486,7 +511,7 @@ void MapConverter::convertFHtoH3M()
     auto* db = m_databaseContainer->getDatabase(m_mapFH.m_version);
 
     m_mapFH.initTiles(db);
-    m_mapFH.m_tileMap.rngTiles(rng.get());
+    m_mapFH.m_tileMap.rngTiles(rng.get(), m_mapFH.m_rngOptions.m_roughTilePercentage);
 
     convertFH2H3M(m_mapFH, m_mapH3M, db);
 }
@@ -498,6 +523,16 @@ void MapConverter::convertH3MtoFH()
     else
         m_mapFH.m_version = Core::GameVersion::SOD;
     convertH3M2FH(m_mapH3M, m_mapFH, m_databaseContainer->getDatabase(m_mapFH.m_version));
+}
+
+void MapConverter::convertFHTPLtoFH()
+{
+    auto rng = m_rngFactory->create();
+    if (m_settings.m_seed)
+        m_mapFH.m_seed = m_settings.m_seed;
+    rng->setSeed(m_mapFH.m_seed);
+
+    generateFromTemplate(m_mapFH, m_databaseContainer->getDatabase(m_mapFH.m_version), rng.get(), m_logOutput);
 }
 
 void MapConverter::checkBinaryInputOutputEquality()

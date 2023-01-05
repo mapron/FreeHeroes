@@ -279,6 +279,31 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_spellId)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRngZone,
+    m_player,
+    m_faction,
+    m_terrain,
+    m_center,
+    m_towns,
+    m_relativeSize)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRngConnection,
+    m_from,
+    m_to)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHDebugTile,
+    m_pos,
+    m_valueA,
+    m_valueB,
+    m_valueC)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRngOptions,
+    m_roughTilePercentage)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHMap::Objects,
     m_resources,
     m_resourcesRandom,
@@ -314,6 +339,10 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_wanderingHeroes,
     m_towns,
     m_zones,
+    m_debugTiles,
+    m_rngZones,
+    m_rngConnections,
+    m_rngOptions,
     m_objects,
     m_config,
     m_rivers,
@@ -329,6 +358,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 
 template<>
 inline constexpr const bool MetaInfo::s_isStringMap<FHMap::PlayersMap>{ true };
+template<>
+inline constexpr const bool MetaInfo::s_isStringMap<FHMap::RngZoneMap>{ true };
 template<>
 inline constexpr const bool MetaInfo::s_isStringMap<FHMap::DefMap>{ true };
 

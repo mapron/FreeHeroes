@@ -43,6 +43,7 @@ public:
         PathsSet m_outputs;
         bool     m_dumpUncompressedBuffers = false;
         bool     m_dumpBinaryDataJson      = false;
+        uint64_t m_seed                    = 0;
     };
 
     enum class RawState
@@ -69,10 +70,12 @@ public:
         ConvertJsonToH3M,
         ConvertH3SVGToJson,
         ConvertJsonToH3SVG,
+        LoadFHTpl,
         LoadFH,
         SaveFH,
         FHMapToH3M,
         H3MToFHMap,
+        FHTplToFHMap,
         H3MRoundTripJson,
         H3SVGRoundTripJson,
         H3MRoundTripFH,
@@ -133,6 +136,7 @@ private:
 
     void convertFHtoH3M();
     void convertH3MtoFH();
+    void convertFHTPLtoFH();
 
     void checkBinaryInputOutputEquality();
     void checkJsonInputOutputEquality();
@@ -161,6 +165,7 @@ private:
 
     Settings         m_settings;
     std::string      m_currentTask;
+    std::string      m_currentIndent;
     Mernel::std_path m_inputFilename;
     Mernel::std_path m_outputFilename;
     std::set<size_t> m_ignoredOffsets;

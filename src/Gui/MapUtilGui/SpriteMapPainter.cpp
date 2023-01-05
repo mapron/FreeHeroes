@@ -13,6 +13,29 @@
 
 namespace FreeHeroes {
 
+namespace {
+// just arbitrary and subjective color tables for debug paint purpose.
+
+const std::vector<QColor> g_neatDarkColors{
+    "#FF7A66",
+    "#FFC966",
+    "#87D849",
+    "#40BCBC",
+    "#5261EA",
+    "#A247C6",
+    "#6D6D6D",
+};
+const std::vector<QColor> g_neatLightColors{
+    "#FFD3CC",
+    "#FFECCC",
+    "#E2FFCC",
+    "#C0F7F7",
+    "#D9DCF9",
+    "#E3C1F2",
+    "#E0E0E0",
+};
+}
+
 void SpriteMapPainter::paint(QPainter*        painter,
                              const SpriteMap* spriteMap,
                              uint32_t         animationFrameOffsetTerrain,
@@ -124,6 +147,48 @@ void SpriteMapPainter::paint(QPainter*        painter,
         }
     }
 
+    // debug paint
+    for (const auto& [y, row] : spriteMap->m_planes[m_depth].m_merged.m_rows) {
+        for (const auto& [x, cell] : row.m_cells) {
+            if (!cell.m_debug)
+                continue;
+
+            auto darkColor  = g_neatDarkColors[cell.m_debugA * 17 % g_neatDarkColors.size()];
+            auto lightColor = g_neatLightColors[cell.m_debugA * 37 % g_neatLightColors.size()];
+
+            auto oldTransform = painter->transform();
+            painter->translate(x * tileSize, y * tileSize);
+            const auto halfTile = tileSize / 2;
+
+            for (int x1 = 0; x1 < 2; ++x1) {
+                for (int y1 = 0; y1 < 2; ++y1) {
+                    auto  color = (x1 + y1) % 2 ? darkColor : lightColor;
+                    QRect cellRect(x1 * halfTile, y1 * halfTile, halfTile, halfTile);
+                    painter->fillRect(cellRect, color);
+                }
+            }
+            QRect cellRect(0, 0, tileSize, tileSize);
+            painter->setPen(Qt::black);
+            QFont font = painter->font();
+            font.setPixelSize(8);
+            painter->setFont(font);
+            //
+            if (cell.m_debugB == 1)
+                painter->setBrush(Qt::red);
+            if (cell.m_debugB == 2)
+                painter->setBrush(Qt::blue);
+            if (cell.m_debugB == 3)
+                painter->setBrush(Qt::yellow);
+
+            if (cell.m_debugB)
+                painter->drawEllipse(cellRect);
+            else
+                painter->drawText(cellRect, Qt::AlignCenter, QString("A: %1\nB: %2\nC: %3").arg(cell.m_debugA).arg(cell.m_debugB).arg(cell.m_debugC));
+
+            painter->setTransform(oldTransform);
+        }
+    }
+
     // top-level UI paint
     if (m_settings->m_grid && m_settings->m_gridOnTop) {
         drawGrid(QColor(0, 0, 0), m_settings->m_gridOpacity);
@@ -137,7 +202,8 @@ void SpriteMapPainter::paintMinimap(QPainter* painter, const SpriteMap* spriteMa
 
     for (const auto& [y, row] : spriteMap->m_planes[m_depth].m_merged.m_rows) {
         for (const auto& [x, cell] : row.m_cells) {
-            img.setPixelColor(x, y, cell.m_blocked ? cell.m_colorBlocked : cell.m_colorUnblocked);
+            if (cell.m_colorUnblocked.isValid() && cell.m_colorBlocked.isValid())
+                img.setPixelColor(x, y, cell.m_blocked ? cell.m_colorBlocked : cell.m_colorUnblocked);
         }
     }
 

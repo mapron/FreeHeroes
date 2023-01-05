@@ -29,6 +29,7 @@ int main(int argc, char** argv)
                                    "output-diff-json",
                                    "dump-uncompressed",
                                    "dump-json",
+                                   "seed",
                                },
                                { "tasks" });
     parser.markRequired({ "tasks" });
@@ -42,6 +43,8 @@ int main(int argc, char** argv)
     const bool        dumpUncompressed = parser.getArg("dump-uncompressed") == "1";
     const bool        dumpJson         = parser.getArg("dump-json") == "1";
     const std::string diffJsonFile     = parser.getArg("diff-json-file");
+    const std::string seedStr          = parser.getArg("seed");
+    const uint64_t    seed             = std::strtoull(seedStr.c_str(), nullptr, 10);
 
     Core::CoreApplication fhCoreApp;
     fhCoreApp.initLogger();
@@ -78,6 +81,7 @@ int main(int argc, char** argv)
                                .m_outputs                 = makePaths("output-"),
                                .m_dumpUncompressedBuffers = dumpUncompressed,
                                .m_dumpBinaryDataJson      = dumpJson,
+                               .m_seed                    = seed,
                            });
 
     for (const std::string& taskStr : tasks) {

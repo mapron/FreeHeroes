@@ -177,7 +177,7 @@ struct MAPUTIL_EXPORT FHTileMap {
     void correctRoads();
     void correctRivers();
 
-    void rngTiles(Core::IRandomGenerator* rng);
+    void rngTiles(Core::IRandomGenerator* rng, int roughTileChancePercent);
 
     template<class F>
     void eachPos(F&& f) const

@@ -191,7 +191,7 @@ void MapEditorWidget::load(const std::string& filename)
     auto* db = m_gameDatabaseContainer->getDatabase(m_impl->m_map.m_version);
 
     m_impl->m_map.initTiles(db);
-    m_impl->m_map.m_tileMap.rngTiles(rng.get());
+    m_impl->m_map.m_tileMap.rngTiles(rng.get(), m_impl->m_map.m_rngOptions.m_roughTilePercentage);
 
     updateMap();
 

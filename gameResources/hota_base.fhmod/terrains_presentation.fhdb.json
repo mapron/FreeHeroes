@@ -50,7 +50,7 @@
     "defFile": "sandtl",
 	"centerTilesOffset": 0,
     "centerTilesCount": 24,
-    "centerTilesClearCount": 17
+    "centerTilesClearCount": 10
 }},
 "sod.terrain.grass" : { "pres":
 {
