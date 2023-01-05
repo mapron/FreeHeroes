@@ -147,8 +147,8 @@ protected:
     void setAnimGroupInternal();
 
 protected:
-    SpritePtr         m_sprite;
-    SpriteSequencePtr m_currentSequence;
+    SpritePtr                  m_sprite;
+    ISprite::SpriteSequencePtr m_currentSequence;
 
     DrawOriginH m_drawOriginH = DrawOriginH::Center;
     DrawOriginV m_drawOriginV = DrawOriginV::Center;

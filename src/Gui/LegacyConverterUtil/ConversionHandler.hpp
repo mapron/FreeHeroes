@@ -110,6 +110,7 @@ private:
     void readArchiveFromFolder();
 
     void binaryDeserializeSprite();
+    void binaryDeserializeSpriteMsk();
     void binarySerializeSprite();
 
     void propertyDeserializeSprite();

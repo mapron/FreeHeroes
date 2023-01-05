@@ -887,6 +887,15 @@ void SpriteFile::readBMP(const Mernel::std_path& bmpFilePath)
     fromPixmap(std::move(bmp));
 }
 
+void SpriteFile::readMSK(Mernel::ByteOrderDataStreamReader& stream)
+{
+    stream >> m_mask.m_width >> m_mask.m_height;
+    m_mask.m_draw1.resize(48);
+    m_mask.m_draw2.resize(48);
+    stream.readBits(m_mask.m_draw1);
+    stream.readBits(m_mask.m_draw2);
+}
+
 void SpriteFile::toJson(PropertyTree& data) const
 {
     Reflection::PropertyTreeWriter writer;
@@ -1279,8 +1288,8 @@ void SpriteFile::saveGuiSprite(const Mernel::std_path& jsonFilePath, const Merne
 
         for (const Frame& frame : group.m_frames) {
             headerOrderFrames.push_back(&frame);
-            Gui::Sprite::Frame uiFrame;
-            const Frame*       srcframe = &frame;
+            Gui::Sprite::FrameImpl uiFrame;
+            const Frame*           srcframe = &frame;
             if (srcframe->m_isDuplicate) {
                 srcframe = headerOrderFrames[srcframe->m_dupHeaderIndex];
             }
@@ -1312,6 +1321,12 @@ void SpriteFile::saveGuiSprite(const Mernel::std_path& jsonFilePath, const Merne
             }
         }
     }
+    uiSprite.m_mask = Gui::ISprite::SpriteSequenceMask{
+        .m_width  = m_mask.m_width,
+        .m_height = m_mask.m_height,
+        .m_draw1  = m_mask.m_draw1,
+        .m_draw2  = m_mask.m_draw2,
+    };
 
     uiSprite.save(jsonFilePath);
 }

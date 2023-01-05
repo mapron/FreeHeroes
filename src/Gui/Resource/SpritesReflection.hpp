@@ -30,10 +30,11 @@ inline constexpr const std::tuple MetaInfo::s_fields<QSize>{
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     Sprite,
     m_boundarySize,
+    m_mask,
     m_groups)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
-    Sprite::Frame,
+    Sprite::FrameImpl,
     m_padding,
     m_hasBitmap,
     m_bitmapSize,
@@ -41,11 +42,18 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_boundarySize)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
-    Sprite::Params,
+    ISprite::SpriteSequenceParams,
     m_scaleFactorPercent,
     m_animationCycleDuration,
     m_specialFrameIndex,
     m_actionPoint)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    ISprite::SpriteSequenceMask,
+    m_width,
+    m_height,
+    m_draw1,
+    m_draw2)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     Sprite::Group,

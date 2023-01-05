@@ -58,7 +58,7 @@ QList<int> Sprite::getGroupsIds() const
     return result;
 }
 
-SpriteSequencePtr Sprite::getFramesForGroup(int groupId) const
+ISprite::SpriteSequencePtr Sprite::getFramesForGroup(int groupId) const
 {
     if (!m_groups.contains(groupId))
         return nullptr;
@@ -67,18 +67,14 @@ SpriteSequencePtr Sprite::getFramesForGroup(int groupId) const
         return group.m_cache;
     auto seq = std::make_shared<SpriteSequence>();
 
-    seq->params = {
-        .scaleFactorPercent     = group.m_params.m_scaleFactorPercent,
-        .animationCycleDuration = group.m_params.m_animationCycleDuration,
-        .specialFrameIndex      = group.m_params.m_specialFrameIndex,
-        .actionPoint            = group.m_params.m_actionPoint,
-    };
+    seq->m_params = group.m_params;
 
-    seq->boundarySize = m_boundarySize;
+    seq->m_boundarySize = m_boundarySize;
+    seq->m_mask         = m_mask;
 
     for (const auto& frame : group.m_frames) {
         if (!frame.m_hasBitmap) {
-            seq->frames << SpriteFrame{};
+            seq->m_frames << SpriteFrame{};
             continue;
         }
 
@@ -86,7 +82,7 @@ SpriteSequencePtr Sprite::getFramesForGroup(int groupId) const
                                       frame.m_bitmapOffset.y(),
                                       frame.m_bitmapSize.width(),
                                       frame.m_bitmapSize.height());
-        seq->frames << SpriteFrame{ .frame = std::move(framePix), .paddingLeftTop = frame.m_padding };
+        seq->m_frames << SpriteFrame{ .m_frame = std::move(framePix), .m_paddingLeftTop = frame.m_padding };
     }
     group.m_cache = seq;
     return seq;

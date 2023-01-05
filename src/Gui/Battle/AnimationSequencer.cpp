@@ -228,7 +228,7 @@ int AnimationSequencer::AnimationSequencerHandle::getAnimDuration(BattleAnimatio
 
     const auto& sprite         = item->getSprite();
     const auto  seq            = sprite->getFramesForGroup(static_cast<int>(type));
-    const int   cycleDuration  = seq ? seq->params.animationCycleDuration : 1000;
+    const int   cycleDuration  = seq ? seq->m_params.m_animationCycleDuration : 1000;
     const int   durationResult = cycleDuration * baseSpeedup / 100;
     const bool  canBeIgnored   = type == BattleAnimation::Turning
                               || type == BattleAnimation::MoveStart

@@ -139,7 +139,7 @@ void BattleStackSpriteItem::paint(QPainter* painter, const QStyleOptionGraphicsI
     auto t  = painter->transform();
     auto t2 = t;
     //const qreal scaleDirect = m_currentSequence->params.scaleFactorPercent / 100.;
-    const qreal scaleInverse = 100. / m_currentSequence->params.scaleFactorPercent;
+    const qreal scaleInverse = 100. / m_currentSequence->m_params.m_scaleFactorPercent;
     t2.scale(scaleInverse, scaleInverse);
     if (!getTmpDirectionRight()) {
         t2.scale(-1, 1);

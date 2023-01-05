@@ -16,20 +16,20 @@ CursorLibrary::CursorLibrary(const IGraphicsLibrary* graphicsLibrary)
         return;
     auto frames                           = sprite->getFramesForGroup(0);
     auto spellCastFrames                  = spellCast->getFramesForGroup(0);
-    otherCursors[Type::Stop]              = QCursor(frames->frames[0].frame, 13, 13);
-    otherCursors[Type::Walk]              = QCursor(frames->frames[1].frame, 12, 25);
-    otherCursors[Type::Fly]               = QCursor(frames->frames[2].frame, 12, 25);
-    otherCursors[Type::RangeAttack]       = QCursor(frames->frames[3].frame, 22, 3);
-    otherCursors[Type::HeroView]          = QCursor(frames->frames[4].frame, 14, 12);
-    otherCursors[Type::Question]          = QCursor(frames->frames[5].frame, 9, 12);
-    otherCursors[Type::PlainArrow]        = QCursor(frames->frames[6].frame, 0, 0);
-    otherCursors[Type::RangeAttackBroken] = QCursor(frames->frames[15].frame, 27, 15);
+    otherCursors[Type::Stop]              = QCursor(frames->m_frames[0].m_frame, 13, 13);
+    otherCursors[Type::Walk]              = QCursor(frames->m_frames[1].m_frame, 12, 25);
+    otherCursors[Type::Fly]               = QCursor(frames->m_frames[2].m_frame, 12, 25);
+    otherCursors[Type::RangeAttack]       = QCursor(frames->m_frames[3].m_frame, 22, 3);
+    otherCursors[Type::HeroView]          = QCursor(frames->m_frames[4].m_frame, 14, 12);
+    otherCursors[Type::Question]          = QCursor(frames->m_frames[5].m_frame, 9, 12);
+    otherCursors[Type::PlainArrow]        = QCursor(frames->m_frames[6].m_frame, 0, 0);
+    otherCursors[Type::RangeAttackBroken] = QCursor(frames->m_frames[15].m_frame, 27, 15);
 
-    for (auto& f : spellCastFrames->frames) {
-        cast << QCursor(f.frame, f.frame.width() / 2, f.frame.height() - 1);
+    for (auto& f : spellCastFrames->m_frames) {
+        cast << QCursor(f.m_frame, f.m_frame.width() / 2, f.m_frame.height() - 1);
     }
 
-    QPixmap sword = frames->frames[13].frame;
+    QPixmap sword = frames->m_frames[13].m_frame;
     for (auto attackDirection : {
              BattleDirection::TR,
              BattleDirection::R,

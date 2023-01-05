@@ -246,15 +246,15 @@ bool GraphicsLibrary::Impl::createPixmap(const PixmapKey& resourceCode, QPixmap&
         return false;
 
     auto seq = sprite->getFramesForGroup(resourceCode.group);
-    if (resourceCode.frame >= seq->frames.size() || resourceCode.frame < 0) // @todo: maybe allow Python-like [-1] = last elem etc.
+    if (resourceCode.frame >= seq->m_frames.size() || resourceCode.frame < 0) // @todo: maybe allow Python-like [-1] = last elem etc.
         return false;
 
-    result = seq->frames[resourceCode.frame].frame;
-    if (seq->boundarySize != result.size()) {
-        QImage padded{ seq->boundarySize, QImage::Format_RGBA8888 };
+    result = seq->m_frames[resourceCode.frame].m_frame;
+    if (seq->m_boundarySize != result.size()) {
+        QImage padded{ seq->m_boundarySize, QImage::Format_RGBA8888 };
         padded.fill(Qt::transparent);
         QPainter p{ &padded };
-        p.drawPixmap(seq->frames[resourceCode.frame].paddingLeftTop, result);
+        p.drawPixmap(seq->m_frames[resourceCode.frame].m_paddingLeftTop, result);
         result = QPixmap::fromImage(padded);
     }
     return true;

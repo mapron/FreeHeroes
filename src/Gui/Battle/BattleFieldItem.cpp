@@ -630,8 +630,8 @@ void BattleFieldItem::beforeAttackRanged(BattleStackConstPtr stack, const Affect
     const bool turningAnimationRequired  = (itemAttacker->getTmpDirectionRight() && attackDirectionLeft) || (!itemAttacker->getTmpDirectionRight() && !attackDirectionLeft);
     const int  attackNormalDuration      = attHandle->getAnimDuration(animType);
     const auto frameGroup                = itemAttacker->getSprite()->getFramesForGroup(static_cast<int>(animType));
-    const int  attackFramesSize          = frameGroup->frames.size();
-    const int  climaxFrameIndex          = std::max(frameGroup->params.specialFrameIndex - 1, 0);
+    const int  attackFramesSize          = frameGroup->m_frames.size();
+    const int  climaxFrameIndex          = std::max(frameGroup->m_params.m_specialFrameIndex - 1, 0);
     const int  climaxFrameRepeatCount    = projectileSprite ? approxDecartDistance / 2 : 0;
     const int  climaxFrameRepeatDuration = attackNormalDuration * climaxFrameRepeatCount / attackFramesSize;
     const int  beforeClimaxDuration      = attackNormalDuration * climaxFrameIndex / attackFramesSize;
@@ -718,14 +718,14 @@ void BattleFieldItem::beforeAttackRanged(BattleStackConstPtr stack, const Affect
     }
 
     if (projectileSprite) {
-        const auto   projOffsets   = frameGroup->params.actionPoint;
+        const auto   projOffsets   = frameGroup->m_params.m_actionPoint;
         QPoint       initialOffset = projOffsets.isNull() ? QPoint{ 40, -60 } : projOffsets;
         const QPoint directionOffset{ attackDirectionLeft ? -30 : 20, 20 };
         if (attackDirectionLeft)
             initialOffset.setX(-initialOffset.x());
 
         int spriteFrame = 0;
-        if (projectileSprite->getFramesForGroup(0)->frames.size() == 9)
+        if (projectileSprite->getFramesForGroup(0)->m_frames.size() == 9)
             spriteFrame = static_cast<int>(directionTo);
 
         m_projectileItem->setSprite(projectileSprite);

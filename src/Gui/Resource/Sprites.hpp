@@ -17,7 +17,7 @@ namespace FreeHeroes::Gui {
 struct GUIRESOURCE_EXPORT Sprite : public ISprite {
     QPixmap m_bitmap;
 
-    struct Frame {
+    struct FrameImpl {
         QPoint m_padding;
         bool   m_hasBitmap = true;
 
@@ -26,22 +26,18 @@ struct GUIRESOURCE_EXPORT Sprite : public ISprite {
 
         QSize m_boundarySize;
     };
-    struct Params {
-        int    m_scaleFactorPercent     = 100;
-        int    m_animationCycleDuration = 1000;
-        int    m_specialFrameIndex      = -1;
-        QPoint m_actionPoint;
-    };
 
     struct Group {
-        int                m_groupId = 0;
-        Params             m_params;
-        std::vector<Frame> m_frames;
+        int                    m_groupId = 0;
+        SpriteSequenceParams   m_params;
+        std::vector<FrameImpl> m_frames;
 
         mutable SpriteSequencePtr m_cache;
     };
 
     QSize m_boundarySize;
+
+    SpriteSequenceMask m_mask;
 
     std::map<int, Group> m_groups;
 

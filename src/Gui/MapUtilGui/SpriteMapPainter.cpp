@@ -26,16 +26,16 @@ void SpriteMapPainter::paint(QPainter*        painter,
             auto sprite = item.m_sprite->get();
             if (!sprite)
                 continue;
-            Gui::SpriteSequencePtr seq = sprite->getFramesForGroup(item.m_spriteGroup);
+            Gui::ISprite::SpriteSequencePtr seq = sprite->getFramesForGroup(item.m_spriteGroup);
             if (!seq)
                 continue;
 
             const auto psrHash = item.m_x * 7U + item.m_y * 13U;
 
             const size_t frameIndex = psrHash + (item.m_layer == SpriteMap::Layer::Terrain ? animationFrameOffsetTerrain : animationFrameOffsetObjects);
-            const auto   frame      = seq->frames[frameIndex % seq->frames.size()];
+            const auto   frame      = seq->m_frames[frameIndex % seq->m_frames.size()];
 
-            const QSize boundingSize = seq->boundarySize;
+            const QSize boundingSize = seq->m_boundarySize;
 
             auto oldTransform = painter->transform();
             painter->translate(x * tileSize, y * tileSize);
@@ -57,7 +57,7 @@ void SpriteMapPainter::paint(QPainter*        painter,
             if (boundingSize.width() > tileSize || boundingSize.height() > tileSize) {
                 painter->translate(-boundingSize.width() + tileSize, -boundingSize.height() + tileSize);
             }
-            painter->drawPixmap(frame.paddingLeftTop, frame.frame);
+            painter->drawPixmap(frame.m_paddingLeftTop, frame.m_frame);
 
             // debug diamond
             {

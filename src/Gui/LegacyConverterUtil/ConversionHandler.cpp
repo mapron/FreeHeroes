@@ -160,6 +160,14 @@ void ConversionHandler::run(Task task, int recurse) noexcept(false)
 
                 runMember(binaryDeserializeSprite);
 
+                auto mskFilename = m_settings.m_inputs.m_defFile;
+                mskFilename.replace_extension(".msk");
+                if (std_fs::exists(mskFilename)) {
+                    m_inputFilename = mskFilename;
+                    runMember(readBinaryBufferData);
+                    runMember(binaryDeserializeSpriteMsk);
+                }
+
             } break;
             case Task::SpriteSaveDef:
             {
@@ -357,17 +365,25 @@ void ConversionHandler::binaryDeserializeSprite()
 
     try {
         *m_sprite = SpriteFile{};
+
         m_sprite->detectFormat(m_inputFilename, reader);
         if (m_sprite->m_format == SpriteFile::BinaryFormat::BMP) {
             m_sprite->readBMP(m_inputFilename);
         } else {
             reader.getBuffer().setOffsetRead(0);
-            reader >> *m_sprite;
+            m_sprite->readBinary(reader);
         }
     }
     catch (std::exception& ex) {
         throw std::runtime_error(ex.what() + std::string(", offset=") + std::to_string(bobuffer.getOffsetRead()));
     }
+}
+
+void ConversionHandler::binaryDeserializeSpriteMsk()
+{
+    ByteOrderBuffer           bobuffer(m_binaryBuffer);
+    ByteOrderDataStreamReader reader(bobuffer, ByteOrderDataStream::LITTLE_ENDIAN);
+    m_sprite->readMSK(reader);
 }
 
 void ConversionHandler::binarySerializeSprite()
@@ -376,7 +392,7 @@ void ConversionHandler::binarySerializeSprite()
     ByteOrderBuffer           bobuffer(m_binaryBuffer);
     ByteOrderDataStreamWriter writer(bobuffer, ByteOrderDataStream::LITTLE_ENDIAN);
 
-    writer << *m_sprite;
+    m_sprite->writeBinary(writer);
 }
 
 void ConversionHandler::propertyDeserializeSprite()

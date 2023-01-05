@@ -67,6 +67,13 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_frames)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    SpriteFile::Mask,
+    m_width,
+    m_height,
+    m_draw1,
+    m_draw2)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     SpriteFile,
     m_format,
     m_defType,
@@ -76,6 +83,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_groups,
     m_palette,
     m_tralilingData,
+    m_mask,
     m_embeddedBitmapData)
 
 }

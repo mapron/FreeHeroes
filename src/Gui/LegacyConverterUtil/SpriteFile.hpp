@@ -74,6 +74,13 @@ public:
         std::vector<Frame> m_frames;
     };
 
+    struct Mask {
+        uint8_t              m_width  = 0;
+        uint8_t              m_height = 0;
+        std::vector<uint8_t> m_draw1;
+        std::vector<uint8_t> m_draw2;
+    };
+
     BinaryFormat m_format         = BinaryFormat::Invalid;
     DefType      m_defType        = DefType::Invalid;
     int          m_boundaryWidth  = 0;
@@ -87,6 +94,8 @@ public:
 
     std::vector<std::string> m_tralilingData;
 
+    Mask m_mask;
+
     bool m_embeddedBitmapData = true;
 
     void detectFormat(const Mernel::std_path& path, Mernel::ByteOrderDataStreamReader& stream);
@@ -96,6 +105,8 @@ public:
 
     void readBinaryPCX(Mernel::ByteOrderDataStreamReader& stream);
     void readBMP(const Mernel::std_path& bmpFilePath);
+
+    void readMSK(Mernel::ByteOrderDataStreamReader& stream);
 
     void toJson(Mernel::PropertyTree& data) const;
     void fromJson(const Mernel::PropertyTree& data);

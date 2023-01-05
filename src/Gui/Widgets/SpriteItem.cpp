@@ -73,7 +73,7 @@ void SpriteItem::tick(int msecElapsed)
     //    return;
     const AnimGroupSettings& settings = m_inSporadic ? m_sporadicSettings : m_animSettings;
 
-    const auto size = m_currentSequence->frames.size();
+    const auto size = m_currentSequence->m_frames.size();
 
     const auto prevIndex = m_currentFrameIndex;
     m_currentFrameIndex  = m_frameMsTick * size / settings.durationMs;
@@ -108,10 +108,10 @@ void SpriteItem::tick(int msecElapsed)
 void SpriteItem::displayCurrentPixmap()
 {
     const AnimGroupSettings& settings    = m_inSporadic ? m_sporadicSettings : m_animSettings;
-    const auto               size        = m_currentSequence->frames.size();
+    const auto               size        = m_currentSequence->m_frames.size();
     const auto               index       = settings.reverse ? size - m_currentFrameIndex - 1 : m_currentFrameIndex;
-    auto&                    spriteFrame = m_currentSequence->frames[index];
-    m_pixmap                             = spriteFrame.frame;
+    auto&                    spriteFrame = m_currentSequence->m_frames[index];
+    m_pixmap                             = spriteFrame.m_frame;
 
     m_boundingOrigin = QPointF(0, 0);
     if (m_drawOriginH == DrawOriginH::Right)
@@ -124,7 +124,7 @@ void SpriteItem::displayCurrentPixmap()
     if (m_drawOriginV == DrawOriginV::Center)
         m_boundingOrigin.ry() -= m_boundingSize.height() / 2;
 
-    m_pixmapPadding = spriteFrame.paddingLeftTop;
+    m_pixmapPadding = spriteFrame.m_paddingLeftTop;
     update();
 }
 
@@ -198,12 +198,12 @@ void SpriteItem::setAnimGroupInternal()
     Q_ASSERT(settings.durationMs > 0);
     m_currentSequence   = m_sprite->getFramesForGroup(settings.group);
     m_currentFrameIndex = settings.startFrame;
-    if (m_currentFrameIndex >= m_currentSequence->frames.size())
+    if (m_currentFrameIndex >= m_currentSequence->m_frames.size())
         m_currentFrameIndex = 0;
     m_frameMsTick = 0;
 
     prepareGeometryChange();
-    m_boundingSize = m_currentSequence->boundarySize;
+    m_boundingSize = m_currentSequence->m_boundarySize;
 
     displayCurrentPixmap();
 }
