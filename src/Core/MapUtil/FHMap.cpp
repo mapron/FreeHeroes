@@ -74,5 +74,24 @@ void FHMap::initTiles(const Core::IGameDatabase* database)
     m_tileMap.correctRoads();
     m_tileMap.correctRivers();
 }
+void FHMap::rescaleToSize(int mapSize)
+{
+    int wmult = mapSize;
+    int wdiv  = m_tileMap.m_width;
+
+    int hmult = mapSize;
+    int hdiv  = m_tileMap.m_height;
+
+    m_tileMap.m_width  = mapSize;
+    m_tileMap.m_height = mapSize;
+
+    for (auto& [key, rngZone] : m_rngZones) {
+        rngZone.m_centerAvg.m_x = rngZone.m_centerAvg.m_x * wmult / wdiv;
+        rngZone.m_centerAvg.m_y = rngZone.m_centerAvg.m_y * hmult / hdiv;
+
+        rngZone.m_centerDispersion.m_x = rngZone.m_centerDispersion.m_x * wmult / wdiv;
+        rngZone.m_centerDispersion.m_y = rngZone.m_centerDispersion.m_y * hmult / hdiv;
+    }
+}
 
 }

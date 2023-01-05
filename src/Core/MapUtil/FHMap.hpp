@@ -220,9 +220,13 @@ struct FHRngZone {
     FHPlayerId                   m_player  = FHPlayerId::Invalid;
     Core::LibraryFactionConstPtr m_faction = nullptr;
     Core::LibraryTerrainConstPtr m_terrain = nullptr;
-    FHPos                        m_center;
-    int                          m_towns        = 0;
-    int                          m_relativeSize = 100;
+    int                          m_towns   = 0;
+    FHPos                        m_centerAvg;
+    FHPos                        m_centerDispersion;
+    int                          m_relativeSizeAvg        = 100;
+    int                          m_relativeSizeDispersion = 0;
+
+    bool m_greedy = true;
 };
 struct FHRngConnection {
     std::string m_from;
@@ -237,7 +241,9 @@ struct FHDebugTile {
 };
 
 struct FHRngOptions {
-    int m_roughTilePercentage = 12;
+    int  m_roughTilePercentage      = 12;
+    int  m_rotationDegreeDispersion = 0;
+    bool m_allowFlip                = false;
 };
 
 struct MAPUTIL_EXPORT FHMap {
@@ -306,6 +312,8 @@ struct MAPUTIL_EXPORT FHMap {
     void fromJson(const Mernel::PropertyTree& data, const Core::IGameDatabase* database);
 
     void initTiles(const Core::IGameDatabase* database);
+
+    void rescaleToSize(int mapSize);
 };
 
 }

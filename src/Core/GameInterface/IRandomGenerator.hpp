@@ -33,6 +33,11 @@ public:
     virtual uint8_t              genSmall(uint8_t max)                      = 0;
     virtual uint64_t             genSumSmallN(size_t n, uint8_t max)        = 0;
     virtual std::vector<uint8_t> genSmallSequence(size_t size, uint8_t max) = 0;
+
+    virtual int64_t genDispersed(int64_t avg, uint64_t dispersion)
+    {
+        return avg - dispersion + gen(dispersion * 2);
+    }
 };
 
 using IRandomGeneratorPtr = std::shared_ptr<IRandomGenerator>;

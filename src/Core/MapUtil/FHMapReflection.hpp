@@ -283,9 +283,12 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_player,
     m_faction,
     m_terrain,
-    m_center,
     m_towns,
-    m_relativeSize)
+    m_centerAvg,
+    m_centerDispersion,
+    m_relativeSizeAvg,
+    m_relativeSizeDispersion,
+    m_greedy)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngConnection,
@@ -301,7 +304,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngOptions,
-    m_roughTilePercentage)
+    m_roughTilePercentage,
+    m_rotationDegreeDispersion,
+    m_allowFlip)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHMap::Objects,

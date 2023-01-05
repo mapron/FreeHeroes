@@ -1,13 +1,13 @@
 {
 	"version": "HOTA",
 	"seed": 123,
-	"tileMap":{"depth":1,"height":72,"width":72},
+	"tileMap":{"depth":1,"height":100,"width":100},
 	"rngZones" : {
-		"P1": { "player": "Red", "faction": "sod.faction.castle"     , "terrain": "sod.terrain.grass"      , "center": {"x": 12, "y": 12}, "towns": 3 },
-		"P2": { "player": "Blue", "faction": "sod.faction.necropolis", "terrain": "sod.terrain.dirt"       , "center": {"x": 12, "y": 60}, "towns": 3 },
-		"P3": { "player": "None", "faction": ""                      , "terrain": "hota.terrain.wasteland" , "center": {"x": 60, "y": 12}, "towns": 3, "relativeSize": 50 },
-		"P4": { "player": "None", "faction": ""                      , "terrain": "sod.terrain.snow"       , "center": {"x": 60, "y": 60}, "towns": 3, "relativeSize": 10 },
-		"CC": { "player": "None", "faction": ""                      , "terrain": "sod.terrain.sand"       , "center": {"x": 36, "y": 36}, "towns": 2, "relativeSize": 150 }
+		"P1": { "player": "Red", "faction": "sod.faction.castle"     , "terrain": "sod.terrain.grass"      , "centerAvg": {"x": 20, "y": 20}, "centerDispersion": {"x": 10, "y": 10}, "towns": 3, "relativeSizeAvg": 100, "relativeSizeDispersion": 20  },
+		"P2": { "player": "Blue", "faction": "sod.faction.necropolis", "terrain": "sod.terrain.dirt"       , "centerAvg": {"x": 20, "y": 80}, "centerDispersion": {"x": 10, "y": 10}, "towns": 3, "relativeSizeAvg": 100, "relativeSizeDispersion": 20  },
+		"P3": { "player": "None", "faction": ""                      , "terrain": "hota.terrain.wasteland" , "centerAvg": {"x": 80, "y": 20}, "centerDispersion": {"x": 10, "y": 10}, "towns": 3, "relativeSizeAvg": 100, "relativeSizeDispersion": 20  },
+		"P4": { "player": "None", "faction": ""                      , "terrain": "sod.terrain.snow"       , "centerAvg": {"x": 80, "y": 80}, "centerDispersion": {"x": 10, "y": 10}, "towns": 3, "relativeSizeAvg": 100, "relativeSizeDispersion": 20  },
+		"CC": { "player": "None", "faction": ""                      , "terrain": "sod.terrain.sand"       , "centerAvg": {"x": 50, "y": 50}, "centerDispersion": {"x": 15, "y": 15}, "towns": 2, "relativeSizeAvg": 130, "relativeSizeDispersion": 30  , "greedy": false }
 	},
 	
 	"rngConnections": [
@@ -15,5 +15,9 @@
 		{ "from": "CC", "to": "P2"},
 		{ "from": "CC", "to": "P3"},
 		{ "from": "CC", "to": "P4"}
-	]
+	],
+	"rngOptions": {
+		"rotationDegreeDispersion": 40,
+		"allowFlip": true
+	}
 }

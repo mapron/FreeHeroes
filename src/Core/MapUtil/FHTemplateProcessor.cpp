@@ -45,6 +45,113 @@ FHPos neighbour(FHPos point, int dx, int dy)
     return point;
 }
 
+constexpr int rotateChebyshevArcLength(int degree, int w, int h, int padding)
+{
+    const int halfPerimeter = (w + h) - padding * 4 - 2;
+    const int arcLength     = halfPerimeter * degree / 180; // not really circle arc, but a rectangle-arc.
+    return arcLength;
+}
+
+static_assert(rotateChebyshevArcLength(90, 10, 10, 2) == 5);
+static_assert(rotateChebyshevArcLength(48, 20, 20, 2) == 8);
+static_assert(rotateChebyshevArcLength(360, 20, 20, 2) == 60);
+
+constexpr FHPos rotateChebyshev(FHPos pos, int degree, int w, int h)
+{
+    int        x       = pos.m_x;
+    int        y       = pos.m_y;
+    const bool reverse = degree < 0;
+    if (reverse)
+        degree = -degree;
+
+    int paddingX = x;
+    if (x > w / 2)
+        paddingX = w - x - 1;
+    int paddingY = y;
+    if (y > h / 2)
+        paddingY = h - x - 1;
+    const int padding   = std::min(paddingX, paddingY);
+    const int arcLength = rotateChebyshevArcLength(degree, w, h, padding);
+    for (int i = 0; i < arcLength; ++i) {
+        const bool T  = y <= h / 2;
+        const bool L  = x <= w / 2;
+        const bool R  = x > w / 2;
+        const bool B  = y > h / 2;
+        const bool TL = T && L;
+        const bool TR = T && R;
+        const bool BL = B && L;
+        const bool BR = B && R;
+
+        const int rx = w - x - 1;
+        const int ry = h - y - 1;
+
+        //std::cerr << "x=" << x << ", y=" << y << "(" << (TL ? "TL" : "") << " " << (TR ? "TR" : "") << " " << (BR ? "BR" : "") << " " << (BL ? "BL" : "") << "_" << '\n';
+
+        if (!reverse) { // clockwise
+            if (TL) {
+                if (y > x)
+                    y--;
+                else
+                    x++;
+            }
+            if (TR) {
+                if (rx > y)
+                    x++;
+                else
+                    y++;
+            }
+            if (BR) {
+                if (rx < ry)
+                    y++;
+                else
+                    x--;
+            }
+            if (BL) {
+                if (ry < x)
+                    x--;
+                else
+                    y--;
+            }
+
+        } else {
+            if (TL) {
+                if (y >= x)
+                    y++;
+                else
+                    x--;
+            }
+            if (TR) {
+                if (rx >= y)
+                    x--;
+                else
+                    y--;
+            }
+            if (BR) {
+                if (rx <= ry)
+                    y--;
+                else
+                    x++;
+            }
+            if (BL) {
+                if (ry <= x)
+                    x++;
+                else
+                    y++;
+            }
+        }
+    }
+    return FHPos{ x, y, pos.m_z };
+}
+
+static_assert(rotateChebyshev(FHPos{ 2, 2 }, 48, 20, 20) == FHPos{ 10, 2 });
+static_assert(rotateChebyshev(FHPos{ 2, 5 }, 48, 20, 20) == FHPos{ 7, 2 });
+static_assert(rotateChebyshev(FHPos{ 2, 2 }, 180, 20, 20) == FHPos{ 17, 17 });
+static_assert(rotateChebyshev(FHPos{ 2, 2 }, 360, 20, 20) == FHPos{ 2, 2 });
+
+static_assert(rotateChebyshev(FHPos{ 2, 2 }, -48, 20, 20) == FHPos{ 2, 10 });
+static_assert(rotateChebyshev(FHPos{ 2, 5 }, -48, 20, 20) == FHPos{ 2, 13 });
+static_assert(rotateChebyshev(FHPos{ 2, 2 }, -360, 20, 20) == FHPos{ 2, 2 });
+
 struct MapDraft {
     struct Tile {
         bool m_zoned     = false;
@@ -81,6 +188,16 @@ struct MapDraft {
         for (auto& [pos, cell] : m_tiles) {
             if (!cell.m_zoned)
                 throw std::runtime_error("All tiles must be zoned!");
+        }
+    }
+
+    void checkAllTerrains(const std::set<FHPos>& posPlaced)
+    {
+        //std::set<FHPos> allTiles;
+        for (auto& [pos, cell] : m_tiles) {
+            if (!posPlaced.contains(pos)) {
+                throw std::runtime_error("I forget to place tile (" + std::to_string(pos.m_x) + ", " + std::to_string(pos.m_y) + ")");
+            }
         }
     }
 
@@ -233,6 +350,11 @@ struct TileZone {
             });
 
             m_innerEdge = m_outsideEdge;
+        }
+
+        for (auto& [pos, cell] : m_map->m_tiles) {
+            if (cell.m_zoneIndex == m_index && !m_innerArea.contains(pos))
+                cell.m_zoned = false;
         }
         makeEdgeFromInnerArea();
     }
@@ -406,34 +528,49 @@ void FHTemplateProcessor::run(FHMap& map) const
     tileZones.resize(regionCount);
     for (int i = 0; const auto& [key, rngZone] : map.m_rngZones) {
         assert(rngZone.m_terrain);
-        tileZones[i].m_rngZone      = rngZone;
-        tileZones[i].m_id           = key;
-        tileZones[i].m_index        = i;
-        tileZones[i].m_rng          = m_rng;
-        tileZones[i].m_map          = &mapDraft;
-        tileZones[i].m_startTile    = rngZone.m_center;
-        tileZones[i].m_relativeArea = rngZone.m_relativeSize;
-        totalRelativeArea += rngZone.m_relativeSize;
-        if (rngZone.m_relativeSize <= 0)
+        tileZones[i].m_rngZone       = rngZone;
+        tileZones[i].m_id            = key;
+        tileZones[i].m_index         = i;
+        tileZones[i].m_rng           = m_rng;
+        tileZones[i].m_map           = &mapDraft;
+        tileZones[i].m_startTile.m_x = m_rng->genDispersed(rngZone.m_centerAvg.m_x, rngZone.m_centerDispersion.m_x);
+        tileZones[i].m_startTile.m_y = m_rng->genDispersed(rngZone.m_centerAvg.m_y, rngZone.m_centerDispersion.m_y);
+        tileZones[i].m_relativeArea  = m_rng->genDispersed(rngZone.m_relativeSizeAvg, rngZone.m_relativeSizeDispersion);
+
+        totalRelativeArea += tileZones[i].m_relativeArea;
+        if (tileZones[i].m_relativeArea <= 0)
             throw std::runtime_error("Zone: " + key + " has nonpositive relative size");
         i++;
+    }
+    if (map.m_rngOptions.m_allowFlip) {
+        bool vertical   = m_rng->genSmall(1) == 1;
+        bool horizontal = m_rng->genSmall(1) == 1;
+        for (auto& tileZone : tileZones) {
+            if (horizontal)
+                tileZone.m_startTile.m_x = w - tileZone.m_startTile.m_x - 1;
+            if (vertical)
+                tileZone.m_startTile.m_y = h - tileZone.m_startTile.m_y - 1;
+        }
+    }
+    if (map.m_rngOptions.m_rotationDegreeDispersion) {
+        const int rotationDegree = m_rng->genDispersed(0, map.m_rngOptions.m_rotationDegreeDispersion);
+        m_logOutput << "starting rotation of zones to " << rotationDegree << " degrees\n";
+        for (auto& tileZone : tileZones) {
+            auto newPos          = rotateChebyshev(tileZone.m_startTile, rotationDegree, w, h);
+            tileZone.m_startTile = newPos;
+            //m_logOutput << "rotate"
+        }
     }
     if (!totalRelativeArea)
         throw std::runtime_error("Total relative area can't be zero");
 
-    //int64_t maxRadius = 0;
     for (auto& tileZone : tileZones) {
-        tileZone.m_absoluteArea   = tileZone.m_relativeArea * area / totalRelativeArea;
+        int greedyPercent         = tileZone.m_rngZone.m_greedy ? 120 : 100;
+        tileZone.m_absoluteArea   = tileZone.m_relativeArea * area * greedyPercent / totalRelativeArea / 100;
         tileZone.m_absoluteRadius = static_cast<int64_t>(sqrt(tileZone.m_absoluteArea) / M_PI);
-        //maxRadius                 = std::max(maxRadius, tileZone.m_absoluteRadius);
 
         m_logOutput << "zone [" << tileZone.m_id << "] area=" << tileZone.m_absoluteArea << ", radius=" << tileZone.m_absoluteRadius << "\n";
     }
-    /*
-    for (auto& tileZone : tileZones) {
-        tileZone.init();
-        tileZone.grow(regionArea);
-    }*/
 
     for (auto& [pos, cell] : mapDraft.m_tiles) {
         //cell.m_zoneIndex = 1;
@@ -467,13 +604,8 @@ void FHTemplateProcessor::run(FHMap& map) const
 
     for (auto& tileZone : tileZones) {
         tileZone.readFromMap();
-        //tileZone.m_areaDeficit = tileZone.m_absoluteArea - tileZone.getPlacedArea();
 
         m_logOutput << "zone [" << tileZone.m_id << "] areaDeficit=" << tileZone.getAreaDeficit() << "\n";
-        //tileZone.grow(regionArea);
-    }
-    for (auto& [pos, cell] : mapDraft.m_tiles) {
-        cell.m_zoned = false;
     }
     for (auto& tileZone : tileZones) {
         tileZone.writeToMap();
@@ -488,6 +620,9 @@ void FHTemplateProcessor::run(FHMap& map) const
             return l->getAreaDeficit() > r->getAreaDeficit();
         });
         for (TileZone* zone : tileZonesPtrs) {
+            if (!allowConsumingNeighbours && zone->m_rngZone.m_greedy)
+                continue;
+
             zone->fillDeficit(thresholdPercent, allowConsumingNeighbours);
             if (allowConsumingNeighbours) {
                 for (auto& tileZone : tileZones) {
@@ -501,8 +636,11 @@ void FHTemplateProcessor::run(FHMap& map) const
         m_logOutput << "(before optimize) zone [" << tileZone.m_id << "] areaDeficit=" << tileZone.getAreaDeficit() << "\n";
     }
 
-    fillDeficitIteraction(20, false);
+    //fillDeficitIteraction(25, false);
+    // fillDeficitIteraction(15, false);
+    fillDeficitIteraction(20, true);
     fillDeficitIteraction(10, true);
+    //fillDeficitIteraction(5, false);
     fillDeficitIteraction(0, true);
 
     for (auto& tileZone : tileZones) {
@@ -512,9 +650,11 @@ void FHTemplateProcessor::run(FHMap& map) const
     for (TileZone* zone : tileZonesPtrs) {
         zone->fillTheRest();
     }
+    for (auto& tileZone : tileZones) {
+        tileZone.readFromMap();
+    }
 
     mapDraft.checkOrphans();
-    mapDraft.fixExclaves();
 
     for (int i = 0, limit = 10; i <= limit; ++i) {
         if (mapDraft.fixExclaves()) {
@@ -525,18 +665,29 @@ void FHTemplateProcessor::run(FHMap& map) const
             throw std::runtime_error("failed to fix all exclaves after [" + std::to_string(i) + "]  iterations!");
         }
     }
+    for (auto& tileZone : tileZones) {
+        tileZone.readFromMap();
+    }
+    for (TileZone* zone : tileZonesPtrs) {
+        zone->fillTheRest();
+    }
+
+    mapDraft.checkOrphans();
 
     // debug exclives
-    //    for (auto& [pos, cell] : mapDraft.m_tiles) {
-    //        map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = cell.m_zoneIndex, .m_valueB = cell.m_exFix ? 1 : 0 });
-    //    }
+    //for (auto& [pos, cell] : mapDraft.m_tiles) {
+    //    map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = cell.m_zoned ? cell.m_zoneIndex : 11, .m_valueB = cell.m_exFix ? 1 : 0 });
+    // }
 
     //    for (auto& tileZone : tileZones) {
 
     //    }
+    std::set<FHPos> placed;
 
     for (auto& tileZone : tileZones) {
         tileZone.readFromMap();
+
+        placed.insert(tileZone.m_innerArea.cbegin(), tileZone.m_innerArea.cend());
 
         FHZone fhZone;
         fhZone.m_tiles     = { tileZone.m_innerArea.cbegin(), tileZone.m_innerArea.cend() };
@@ -544,6 +695,8 @@ void FHTemplateProcessor::run(FHMap& map) const
         assert(fhZone.m_terrainId);
         map.m_zones.push_back(std::move(fhZone));
     }
+
+    mapDraft.checkAllTerrains(placed);
 
     /*
     for (auto& tileZone : tileZones) {

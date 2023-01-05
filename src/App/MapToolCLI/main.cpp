@@ -30,6 +30,7 @@ int main(int argc, char** argv)
                                    "dump-uncompressed",
                                    "dump-json",
                                    "seed",
+                                   "mapSize",
                                },
                                { "tasks" });
     parser.markRequired({ "tasks" });
@@ -44,6 +45,7 @@ int main(int argc, char** argv)
     const bool        dumpJson         = parser.getArg("dump-json") == "1";
     const std::string diffJsonFile     = parser.getArg("diff-json-file");
     const std::string seedStr          = parser.getArg("seed");
+    const int         mapSize          = std::atoi(parser.getArg("mapSize").c_str());
     const uint64_t    seed             = std::strtoull(seedStr.c_str(), nullptr, 10);
 
     Core::CoreApplication fhCoreApp;
@@ -82,6 +84,7 @@ int main(int argc, char** argv)
                                .m_dumpUncompressedBuffers = dumpUncompressed,
                                .m_dumpBinaryDataJson      = dumpJson,
                                .m_seed                    = seed,
+                               .m_mapSize                 = mapSize,
                            });
 
     for (const std::string& taskStr : tasks) {

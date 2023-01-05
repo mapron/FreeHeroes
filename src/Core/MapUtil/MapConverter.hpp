@@ -44,6 +44,7 @@ public:
         bool     m_dumpUncompressedBuffers = false;
         bool     m_dumpBinaryDataJson      = false;
         uint64_t m_seed                    = 0;
+        int      m_mapSize                 = 72;
     };
 
     enum class RawState

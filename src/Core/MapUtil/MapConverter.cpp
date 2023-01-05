@@ -530,6 +530,8 @@ void MapConverter::convertFHTPLtoFH()
     auto rng = m_rngFactory->create();
     if (m_settings.m_seed)
         m_mapFH.m_seed = m_settings.m_seed;
+    if (m_settings.m_mapSize)
+        m_mapFH.rescaleToSize(m_settings.m_mapSize);
     rng->setSeed(m_mapFH.m_seed);
 
     generateFromTemplate(m_mapFH, m_databaseContainer->getDatabase(m_mapFH.m_version), rng.get(), m_logOutput);
