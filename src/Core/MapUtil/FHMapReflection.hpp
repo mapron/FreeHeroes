@@ -337,6 +337,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_version,
     m_seed,
     m_tileMap,
+    m_tileMapUpdateRequired,
     m_name,
     m_descr,
     m_difficulty,

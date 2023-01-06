@@ -70,10 +70,13 @@ void FHMap::initTiles(const Core::IGameDatabase* database)
         }
     }
 
-    m_tileMap.correctTerrainTypes(dirtTerrain, sandTerrain, waterTerrain);
-    m_tileMap.correctRoads();
-    m_tileMap.correctRivers();
+    if (m_tileMapUpdateRequired) {
+        m_tileMap.correctTerrainTypes(dirtTerrain, sandTerrain, waterTerrain);
+        m_tileMap.correctRoads();
+        m_tileMap.correctRivers();
+    }
 }
+
 void FHMap::rescaleToSize(int mapSize)
 {
     int wmult = mapSize;

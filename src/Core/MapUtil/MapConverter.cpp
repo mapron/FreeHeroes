@@ -274,7 +274,6 @@ void MapConverter::run(Task task, int recurse) noexcept(false)
                 run(Task::CheckBinaryInputOutputEquality, recurse + 1);
             } break;
         }
-        scope.markDone();
     }
     catch (ConverterExpection&) {
         throw;
@@ -292,7 +291,6 @@ void MapConverter::run(MemberProc member, const char* descr, int recurse) noexce
     m_currentTask = descr;
     ScopeLogger scope(descr, recurse, m_logOutput);
     (this->*member)();
-    scope.markDone();
 }
 
 void MapConverter::setInputFilename(const Mernel::std_path& path, std::string_view descr)
@@ -534,7 +532,11 @@ void MapConverter::convertFHTPLtoFH()
         m_mapFH.rescaleToSize(m_settings.m_mapSize);
     rng->setSeed(m_mapFH.m_seed);
 
-    generateFromTemplate(m_mapFH, m_databaseContainer->getDatabase(m_mapFH.m_version), rng.get(), m_logOutput);
+    generateFromTemplate(m_mapFH,
+                         m_databaseContainer->getDatabase(m_mapFH.m_version),
+                         rng.get(),
+                         m_logOutput,
+                         m_settings.m_stopAfterStage);
 }
 
 void MapConverter::checkBinaryInputOutputEquality()

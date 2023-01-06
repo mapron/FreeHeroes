@@ -39,12 +39,13 @@ public:
     };
 
     struct Settings {
-        PathsSet m_inputs;
-        PathsSet m_outputs;
-        bool     m_dumpUncompressedBuffers = false;
-        bool     m_dumpBinaryDataJson      = false;
-        uint64_t m_seed                    = 0;
-        int      m_mapSize                 = 72;
+        PathsSet    m_inputs;
+        PathsSet    m_outputs;
+        bool        m_dumpUncompressedBuffers = false;
+        bool        m_dumpBinaryDataJson      = false;
+        uint64_t    m_seed                    = 0;
+        int         m_mapSize                 = 72;
+        std::string m_stopAfterStage;
     };
 
     enum class RawState
@@ -154,13 +155,11 @@ private:
     public:
         ScopeLogger(std::string currentTask, int indent, std::ostream& output);
         ~ScopeLogger();
-        void markDone() { m_done = true; }
 
     private:
         std::string        m_currentTask;
         int                m_indent = 0;
         std::ostream&      m_output;
-        bool               m_done = false;
         Mernel::ScopeTimer m_timer;
     };
 

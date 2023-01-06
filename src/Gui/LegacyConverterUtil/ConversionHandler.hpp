@@ -128,13 +128,11 @@ private:
     public:
         ScopeLogger(std::string currentTask, int indent, std::ostream& output);
         ~ScopeLogger();
-        void markDone() { m_done = true; }
 
     private:
         std::string        m_currentTask;
         int                m_indent = 0;
         std::ostream&      m_output;
-        bool               m_done = false;
         Mernel::ScopeTimer m_timer;
     };
 

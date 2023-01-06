@@ -243,7 +243,6 @@ void ConversionHandler::run(Task task, int recurse) noexcept(false)
                 }
             } break;
         }
-        scope.markDone();
     }
     catch (ConverterExpection&) {
         throw;
@@ -261,7 +260,6 @@ void ConversionHandler::run(MemberProc member, const char* descr, int recurse) n
     m_currentTask = descr;
     ScopeLogger scope(descr, recurse, m_logOutput);
     (this->*member)();
-    scope.markDone();
 }
 
 void ConversionHandler::setInputFilename(const Mernel::std_path& path, std::string_view descr)

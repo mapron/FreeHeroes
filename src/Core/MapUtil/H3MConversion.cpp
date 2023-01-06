@@ -23,10 +23,14 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
     converter.convertMap(src, dest);
 }
 
-void generateFromTemplate(FHMap& map, const Core::IGameDatabase* database, Core::IRandomGenerator* rng, std::ostream& logOutput)
+void generateFromTemplate(FHMap&                     map,
+                          const Core::IGameDatabase* database,
+                          Core::IRandomGenerator*    rng,
+                          std::ostream&              logOutput,
+                          const std::string&         stopAfterStage)
 {
-    FHTemplateProcessor converter(database, rng, logOutput);
-    converter.run(map);
+    FHTemplateProcessor converter(map, database, rng, logOutput);
+    converter.run(stopAfterStage);
 }
 
 }

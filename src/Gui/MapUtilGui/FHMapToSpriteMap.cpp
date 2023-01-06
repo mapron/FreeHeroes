@@ -87,11 +87,8 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     };
 
     for (auto& tile : fhMap.m_debugTiles) {
-        auto& cell    = result.m_planes[tile.m_pos.m_z].m_merged.m_rows[tile.m_pos.m_y].m_cells[tile.m_pos.m_x];
-        cell.m_debug  = true;
-        cell.m_debugA = tile.m_valueA;
-        cell.m_debugB = tile.m_valueB;
-        cell.m_debugC = tile.m_valueC;
+        auto& cell = result.m_planes[tile.m_pos.m_z].m_merged.m_rows[tile.m_pos.m_y].m_cells[tile.m_pos.m_x];
+        cell.m_debug.push_back({ tile.m_valueA, tile.m_valueB, tile.m_valueC });
     }
 
     fhMap.m_tileMap.eachPosTile([&makeItemById, &result](const FHPos& pos, const FHTileMap::Tile& tile) {

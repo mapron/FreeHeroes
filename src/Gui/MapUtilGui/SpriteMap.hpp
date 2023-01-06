@@ -91,10 +91,12 @@ struct SpriteMap {
         bool m_blocked   = false;
         bool m_visitable = false;
 
-        bool m_debug  = false;
-        int  m_debugA = 0;
-        int  m_debugB = 0;
-        int  m_debugC = 0;
+        struct DebugPiece {
+            int m_a = 0;
+            int m_b = 0;
+            int m_c = 0;
+        };
+        std::vector<DebugPiece> m_debug;
     };
     struct RowIntegral {
         std::map<int, CellIntegral> m_cells;

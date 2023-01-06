@@ -255,6 +255,7 @@ struct MAPUTIL_EXPORT FHMap {
     uint64_t          m_seed{ 0 };
 
     FHTileMap m_tileMap;
+    bool      m_tileMapUpdateRequired = true;
 
     std::string m_name;
     std::string m_descr;

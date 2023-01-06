@@ -10,17 +10,60 @@
 
 #include "FHMap.hpp"
 
+#include "FHTemplateZone.hpp"
+
+#include <stdexcept>
+
 namespace FreeHeroes {
 
 class FHTemplateProcessor {
 public:
-    FHTemplateProcessor(const Core::IGameDatabase* database, Core::IRandomGenerator* rng, std::ostream& logOutput);
+    FHTemplateProcessor(FHMap&                     map,
+                        const Core::IGameDatabase* database,
+                        Core::IRandomGenerator*    rng,
+                        std::ostream&              logOutput);
 
-    void run(FHMap& map) const;
+    enum class Stage
+    {
+        Invalid,
+        ZoneCenterPlacement,
+        ZoneTilesInitial,
+        ZoneTilesExpand,
+        ZoneTilesRefinement,
+        TownsPlacement,
+        RoadsPlacement,
+        Borders,
+    };
+
+    void run(const std::string& stopAfterStage);
 
 private:
+    void runCurrentStage();
+    void runZoneCenterPlacement();
+    void runZoneTilesInitial();
+    void runZoneTilesExpand();
+    void runZoneTilesRefinement();
+    void runTownsPlacement();
+    void runRoadsPlacement();
+    void runBorders();
+
+    void placeTerrainZones();
+    void placeDebugInfo();
+
+private:
+    MapCanvas              m_mapCanvas;
+    std::vector<TileZone>  m_tileZones;
+    std::vector<TileZone*> m_tileZonesPtrs;
+
+    int64_t m_totalRelativeArea = 0;
+
+    Stage m_currentStage = Stage::Invalid;
+    Stage m_stopAfter    = Stage::Invalid;
+
+    FHMap&                           m_map;
     const Core::IGameDatabase* const m_database;
     Core::IRandomGenerator* const    m_rng;
+    std::string                      m_indent;
     std::ostream&                    m_logOutput;
 };
 
