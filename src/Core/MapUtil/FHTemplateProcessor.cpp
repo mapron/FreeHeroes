@@ -9,6 +9,8 @@
 #include "MernelReflection/EnumTraitsMacro.hpp"
 #include "MernelPlatform/Profiler.hpp"
 
+#include "KMeans.hpp"
+
 #include <functional>
 #include <stdexcept>
 #include <iostream>
@@ -49,9 +51,9 @@ FHTemplateProcessor::Stage stringToStage(const std::string& str)
 }
 
 struct DistanceRecord {
-    int     m_zoneIndex  = 0;
-    int64_t m_distance   = 0;
-    int64_t m_zoneRadius = 0;
+    TileZone* m_zoneIndex  = nullptr;
+    int64_t   m_distance   = 0;
+    int64_t   m_zoneRadius = 0;
 
     int64_t dbr() const
     {
@@ -71,6 +73,14 @@ FHTemplateProcessor::FHTemplateProcessor(FHMap&                     map,
     , m_rng(rng)
     , m_logOutput(logOutput)
 {
+    auto& factions = m_database->factions()->records();
+    for (auto* faction : factions) {
+        if (faction->alignment == Core::LibraryFaction::Alignment::Special
+            || faction->alignment == Core::LibraryFaction::Alignment::Independent)
+            continue;
+        m_playableFactions.push_back(faction);
+    }
+    assert(!m_playableFactions.empty());
 }
 
 void FHTemplateProcessor::run(const std::string& stopAfterStage)
@@ -194,14 +204,59 @@ void FHTemplateProcessor::runZoneTilesInitial()
         m_logOutput << m_indent << "zone [" << tileZone.m_id << "] area=" << tileZone.m_absoluteArea << ", radius=" << tileZone.m_absoluteRadius << "\n";
     }
 
-    for (auto& [pos, cell] : m_mapCanvas.m_tiles) {
-        //cell.m_zoneIndex = 1;
+    // you CAN run k-means here too. But it will be pretty bad.
+    if (0) {
+        KMeansSegmentation seg;
+
+        std::map<KMeansSegmentation::Point, size_t> zonePoints;
+        for (auto& tileZone : m_tileZones) {
+            KMeansSegmentation::Point p{ tileZone.m_startTile };
+            zonePoints[p] = tileZone.m_index;
+        }
+
+        std::vector<KMeansSegmentation::Point> points;
+        std::vector<size_t>                    kIndexes;
+        seg.m_points.reserve(w * h);
+        int z = 0;
+        for (int x = 0; x < w; ++x) {
+            for (int y = 0; y < h; ++y) {
+                KMeansSegmentation::Point p(x, y, z);
+                if (zonePoints.contains(p)) {
+                    kIndexes.push_back(zonePoints[p]);
+                }
+                seg.m_points.push_back(p);
+            }
+        }
+        seg.initClustersByCentroids(kIndexes);
+        seg.m_iters = 4;
+
+        seg.run(m_logOutput);
+
+        for (KMeansSegmentation::Cluster& cluster : seg.m_clusters) {
+            size_t idx          = cluster.m_index;
+            auto&  tileZone     = m_tileZones[idx];
+            auto   centroid     = FHPos{ .m_x = cluster.getCentroid().m_x, .m_y = cluster.getCentroid().m_y };
+            tileZone.m_centroid = centroid;
+            tileZone.m_innerArea.clear();
+            //m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cpos, .m_valueA = idx, .m_valueB = 2 });
+            for (KMeansSegmentation::Point* point : cluster.m_points) {
+                auto p = FHPos{ .m_x = point->m_x, .m_y = point->m_y };
+                tileZone.m_innerArea.insert(m_mapCanvas.m_tileIndex.at(p));
+                tileZone.makeEdgeFromInnerArea();
+            }
+        }
+
+        return;
+    }
+
+    for (auto& cell : m_mapCanvas.m_tiles) {
+        const auto                  pos = cell.m_pos;
         std::vector<DistanceRecord> distances;
 
         for (auto& tileZone : m_tileZones) {
             const auto&   zonePos  = tileZone.m_startTile;
             const int64_t distance = posDistance(pos, zonePos);
-            distances.push_back({ tileZone.m_index, distance, tileZone.m_absoluteRadius });
+            distances.push_back({ &tileZone, distance, tileZone.m_absoluteRadius });
         }
         std::sort(distances.begin(), distances.end(), [](const DistanceRecord& l, const DistanceRecord& r) {
             return l.dbr() < r.dbr();
@@ -219,17 +274,13 @@ void FHTemplateProcessor::runZoneTilesInitial()
         if (distanceDiff < 2)
             continue;
 
-        cell.m_zoned     = true;
-        cell.m_zoneIndex = first.m_zoneIndex;
+        cell.m_zone = first.m_zoneIndex;
     }
 
     for (auto& tileZone : m_tileZones) {
         tileZone.readFromMap();
 
         m_logOutput << m_indent << "zone [" << tileZone.m_id << "] areaDeficit=" << tileZone.getAreaDeficit() << "\n";
-    }
-    for (auto& tileZone : m_tileZones) {
-        tileZone.writeToMap();
     }
 }
 
@@ -278,9 +329,30 @@ void FHTemplateProcessor::runZoneTilesRefinement()
         zone->fillTheRest();
     }
     for (auto& tileZone : m_tileZones) {
-        tileZone.readFromMapIfDirty();
+        tileZone.readFromMap();
+        /*
+        for (auto* cell : tileZone.m_innerArea) {
+            if (cell->m_zone != &tileZone) {
+                auto zoneStr = cell->m_zone ? std::to_string(tileZone.m_index) : std::string("NULL");
+                m_logOutput << m_indent << "Invalid zone cell:" << cell->posStr()
+                            << ", it placed in [" << tileZone.m_index << "] zone, but cell has [" << zoneStr << "] zone\n";
+            }
+        }*/
     }
-    m_mapCanvas.checkUnzoned();
+
+    auto checkUnzoned = [this]() {
+        bool result = true;
+        for (auto& cell : m_mapCanvas.m_tiles) {
+            if (!cell.m_zone) {
+                m_logOutput << m_indent << "Unzoned cell:" << cell.posStr() << "\n";
+                result = false;
+            }
+        }
+        if (!result) {
+            throw std::runtime_error("All tiles must be zoned!");
+        }
+    };
+    checkUnzoned();
 
     for (int i = 0, limit = 10; i <= limit; ++i) {
         if (m_mapCanvas.fixExclaves()) {
@@ -297,26 +369,80 @@ void FHTemplateProcessor::runZoneTilesRefinement()
     for (TileZone* zone : m_tileZonesPtrs) {
         zone->fillTheRest();
     }
-
-    m_mapCanvas.checkUnzoned();
+    checkUnzoned();
 
     // debug exclives
     //for (auto& [pos, cell] : mapDraft.m_tiles) {
     //    map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = cell.m_zoned ? cell.m_zoneIndex : 11, .m_valueB = cell.m_exFix ? 1 : 0 });
     // }
 
-    std::set<FHPos> placed;
+    std::set<MapCanvas::Tile*> placed;
     for (auto& tileZone : m_tileZones) {
         placed.insert(tileZone.m_innerArea.cbegin(), tileZone.m_innerArea.cend());
     }
 
     m_mapCanvas.checkAllTerrains(placed);
+    for (auto& tileZone : m_tileZones) {
+        int64_t sumX = 0, sumY = 0;
+        int64_t size = tileZone.m_innerArea.size();
+        for (const auto* cell : tileZone.m_innerArea) {
+            sumX += cell->m_pos.m_x;
+            sumY += cell->m_pos.m_y;
+        }
+        sumX /= size;
+        sumY /= size;
+        int z               = 0;
+        tileZone.m_centroid = FHPos{ static_cast<int>(sumX), static_cast<int>(sumY), z };
+    }
 
     m_map.m_tileMapUpdateRequired = true;
 }
 
 void FHTemplateProcessor::runTownsPlacement()
 {
+    auto placeTown = [this](FHPos pos, FHPlayerId player, Core::LibraryFactionConstPtr faction, bool hasFort) {
+        FHTown town;
+        if (!faction)
+            faction = getRandomFaction();
+        town.m_factionId = faction;
+
+        town.m_pos = pos;
+        town.m_pos.m_x += 2;
+        town.m_player  = player;
+        town.m_hasFort = hasFort;
+        if (hasFort)
+            town.m_defIndex.variant = "FORT";
+        m_map.m_towns.push_back(town);
+    };
+
+    for (auto& tileZone : m_tileZones) {
+        std::vector<FHPos> townPositions;
+        if (tileZone.m_rngZoneSettings.m_towns == 0) {
+            continue;
+        } else if (tileZone.m_rngZoneSettings.m_towns == 1) {
+            townPositions.push_back(tileZone.m_centroid);
+        } else {
+            KMeansSegmentation seg;
+            seg.m_points.reserve(tileZone.m_innerArea.size());
+            for (auto* cell : tileZone.m_innerArea)
+                seg.m_points.push_back({ cell->m_pos });
+
+            seg.initRandomClusterCentoids(tileZone.m_rngZoneSettings.m_towns, m_rng);
+            seg.run(m_logOutput);
+
+            for (KMeansSegmentation::Cluster& cluster : seg.m_clusters) {
+                townPositions.push_back(cluster.getCentroid().toPos());
+            }
+        }
+        auto mainTownFaction = tileZone.m_rngZoneSettings.m_faction;
+        if (!mainTownFaction)
+            mainTownFaction = getRandomFaction();
+
+        placeTown(townPositions[0], tileZone.m_rngZoneSettings.m_player, mainTownFaction, true);
+        for (size_t i = 1; i < townPositions.size(); ++i) {
+            placeTown(townPositions[i], tileZone.m_rngZoneSettings.m_player, nullptr, false);
+        }
+    }
 }
 
 void FHTemplateProcessor::runRoadsPlacement()
@@ -330,10 +456,12 @@ void FHTemplateProcessor::runBorders()
 void FHTemplateProcessor::placeTerrainZones()
 {
     for (auto& tileZone : m_tileZones) {
-        tileZone.readFromMap();
+        //tileZone.readFromMap();
 
         FHZone fhZone;
-        fhZone.m_tiles     = { tileZone.m_innerArea.cbegin(), tileZone.m_innerArea.cend() };
+        fhZone.m_tiles.reserve(tileZone.m_innerArea.size());
+        for (auto* cell : tileZone.m_innerArea)
+            fhZone.m_tiles.push_back(cell->m_pos);
         fhZone.m_terrainId = tileZone.m_rngZoneSettings.m_terrain;
         assert(fhZone.m_terrainId);
         m_map.m_zones.push_back(std::move(fhZone));
@@ -344,15 +472,22 @@ void FHTemplateProcessor::placeDebugInfo()
 {
     for (auto& tileZone : m_tileZones) {
         m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = tileZone.m_startTile, .m_valueA = tileZone.m_index, .m_valueB = 1 }); // red
+        m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = tileZone.m_centroid, .m_valueA = tileZone.m_index, .m_valueB = 3 });  // red
+
         if (m_stopAfter <= Stage::ZoneTilesRefinement) {
-            for (auto& pos : tileZone.m_innerEdge) {
-                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = tileZone.m_index, .m_valueB = 2 });
+            for (auto* cell : tileZone.m_innerEdge) {
+                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 2 });
             }
-            for (auto& pos : tileZone.m_outsideEdge) {
-                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = tileZone.m_index, .m_valueB = 3 });
+            for (auto* cell : tileZone.m_outsideEdge) {
+                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 3 });
             }
         }
     }
+}
+
+Core::LibraryFactionConstPtr FHTemplateProcessor::getRandomFaction()
+{
+    return m_playableFactions[m_rng->genSmall(m_playableFactions.size() - 1)];
 }
 
 }

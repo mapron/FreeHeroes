@@ -26,6 +26,33 @@ QColor makeColor(const std::vector<int>& rgb)
     return QColor();
 }
 
+QColor makePlayerColor(FHPlayerId id)
+{
+    switch (id) {
+        case FHPlayerId::Invalid:
+            return {};
+        case FHPlayerId::None:
+            return QColor("#888888");
+        case FHPlayerId::Red:
+            return QColor("#F71A0E");
+        case FHPlayerId::Blue:
+            return QColor("#1C18F4");
+        case FHPlayerId::Tan:
+            return QColor("#E7BD9C");
+        case FHPlayerId::Green:
+            return QColor("#3F7F3F");
+        case FHPlayerId::Orange:
+            return QColor("#EA6800");
+        case FHPlayerId::Purple:
+            return QColor("#7A478E");
+        case FHPlayerId::Teal:
+            return QColor("#5A9C98");
+        case FHPlayerId::Pink:
+            return QColor("#AD6373");
+    }
+    return {};
+}
+
 /*
 DrawHint directionToHint(HeroDirection direction)
 {
@@ -155,7 +182,8 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
 
     for (const auto& obj : fhMap.m_towns) {
         auto* def = obj.m_factionId->objectDefs.get(obj.m_defIndex);
-        result.addItem(makeItemByDef(SpriteMap::Layer::Town, def, obj.m_pos));
+
+        result.addItem(makeItemByDef(SpriteMap::Layer::Town, def, obj.m_pos))->m_keyColor = makePlayerColor(obj.m_player);
     }
 
     for (auto& fhHero : fhMap.m_wanderingHeroes) {

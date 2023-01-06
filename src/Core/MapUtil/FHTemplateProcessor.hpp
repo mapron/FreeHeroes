@@ -50,6 +50,8 @@ private:
     void placeTerrainZones();
     void placeDebugInfo();
 
+    Core::LibraryFactionConstPtr getRandomFaction();
+
 private:
     MapCanvas              m_mapCanvas;
     std::vector<TileZone>  m_tileZones;
@@ -65,6 +67,8 @@ private:
     Core::IRandomGenerator* const    m_rng;
     std::string                      m_indent;
     std::ostream&                    m_logOutput;
+
+    std::vector<Core::LibraryFactionConstPtr> m_playableFactions;
 };
 
 }

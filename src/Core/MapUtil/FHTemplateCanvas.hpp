@@ -9,56 +9,77 @@
 
 #include <stdexcept>
 #include <set>
+#include <unordered_map>
 
 namespace FreeHeroes {
 
+struct TileZone;
 struct MapCanvas {
     struct Tile {
-        bool m_zoned     = false;
-        int  m_zoneIndex = -1;
+        FHPos m_pos;
+
+        TileZone* m_zone = nullptr;
 
         bool m_exFix = false;
+
+        Tile* m_neighborT = nullptr;
+        Tile* m_neighborL = nullptr;
+        Tile* m_neighborR = nullptr;
+        Tile* m_neighborB = nullptr;
+
+        std::string posStr() const
+        {
+            return "(" + std::to_string(m_pos.m_x) + ", " + std::to_string(m_pos.m_y) + ", " + std::to_string(m_pos.m_z) + ")";
+        }
     };
+    std::vector<Tile> m_tiles;
 
-    std::map<FHPos, Tile> m_tiles;
+    std::unordered_map<FHPos, Tile*> m_tileIndex;
 
-    std::set<int> m_dirtyZones; // zone ids that must be re-read from the map.
+    std::set<TileZone*> m_dirtyZones; // zone ids that must be re-read from the map.
 
-    std::set<FHPos> m_edge;
+    //std::set<FHPos> m_edge;
 
     void init(int width,
               int height,
               int depth)
     {
+        m_tiles.resize(width * height * depth);
+        size_t index = 0;
         for (int z = 0; z < depth; ++z) {
             for (int y = 0; y < height; ++y) {
                 for (int x = 0; x < width; ++x) {
-                    m_tiles[FHPos{ x, y, z }] = {};
+                    Tile* tile = &m_tiles[index++];
+                    FHPos p{ x, y, z };
+                    m_tileIndex[p] = tile;
+                    tile->m_pos    = p;
                 }
-                m_edge.insert(FHPos{ 0, y, z });
-                m_edge.insert(FHPos{ width - 1, y, z });
             }
-            for (int x = 0; x < width; ++x) {
-                m_edge.insert(FHPos{ x, 0, z });
-                m_edge.insert(FHPos{ x, height - 1, z });
+        }
+        index = 0;
+        for (int z = 0; z < depth; ++z) {
+            for (int y = 0; y < height; ++y) {
+                for (int x = 0; x < width; ++x) {
+                    Tile* tile = &m_tiles[index++];
+                    if (x > 0)
+                        tile->m_neighborL = m_tileIndex.at({ x - 1, y, z });
+                    if (y > 0)
+                        tile->m_neighborT = m_tileIndex.at({ x, y - 1, z });
+                    if (x < width - 1)
+                        tile->m_neighborR = m_tileIndex.at({ x + 1, y, z });
+                    if (y < height - 1)
+                        tile->m_neighborB = m_tileIndex.at({ x, y + 1, z });
+                }
             }
         }
     }
 
-    void checkUnzoned()
-    {
-        for (auto& [pos, cell] : m_tiles) {
-            if (!cell.m_zoned)
-                throw std::runtime_error("All tiles must be zoned!");
-        }
-    }
-
-    void checkAllTerrains(const std::set<FHPos>& posPlaced)
+    void checkAllTerrains(const std::set<Tile*>& posPlaced)
     {
         //std::set<FHPos> allTiles;
-        for (auto& [pos, cell] : m_tiles) {
-            if (!posPlaced.contains(pos)) {
-                throw std::runtime_error("I forget to place tile (" + std::to_string(pos.m_x) + ", " + std::to_string(pos.m_y) + ")");
+        for (auto& cell : m_tiles) {
+            if (!posPlaced.contains(&cell)) {
+                throw std::runtime_error("I forget to place tile (" + std::to_string(cell.m_pos.m_x) + ", " + std::to_string(cell.m_pos.m_y) + ")");
             }
         }
     }
@@ -66,25 +87,25 @@ struct MapCanvas {
     bool fixExclaves() // true = nothing to fix
     {
         int fixedCount = 0;
-        for (auto& [pos, cell] : m_tiles) {
-            auto posT = posNeighbour(pos, +0, -1);
-            auto posL = posNeighbour(pos, -1, +0);
-            auto posR = posNeighbour(pos, +1, +0);
-            auto posB = posNeighbour(pos, +0, +1);
+        for (auto& cell : m_tiles) {
+            auto posT = posNeighbour(cell.m_pos, +0, -1);
+            auto posL = posNeighbour(cell.m_pos, -1, +0);
+            auto posR = posNeighbour(cell.m_pos, +1, +0);
+            auto posB = posNeighbour(cell.m_pos, +0, +1);
 
-            Tile&     tileX    = cell;
-            const int oldIndex = tileX.m_zoneIndex;
+            Tile&           tileX    = cell;
+            TileZone* const oldIndex = tileX.m_zone;
 
-            Tile& tileT = m_tiles.contains(posT) ? m_tiles[posT] : cell;
-            Tile& tileL = m_tiles.contains(posL) ? m_tiles[posL] : cell;
-            Tile& tileR = m_tiles.contains(posR) ? m_tiles[posR] : cell;
-            Tile& tileB = m_tiles.contains(posB) ? m_tiles[posB] : cell;
+            Tile& tileT = m_tileIndex.contains(posT) ? *m_tileIndex[posT] : cell;
+            Tile& tileL = m_tileIndex.contains(posL) ? *m_tileIndex[posL] : cell;
+            Tile& tileR = m_tileIndex.contains(posR) ? *m_tileIndex[posR] : cell;
+            Tile& tileB = m_tileIndex.contains(posB) ? *m_tileIndex[posB] : cell;
 
             auto processTile = [&tileX, &tileT, &tileL, &tileR, &tileB]() -> bool { // true == nothing to do
-                const bool eT        = tileX.m_zoneIndex == tileT.m_zoneIndex;
-                const bool eL        = tileX.m_zoneIndex == tileL.m_zoneIndex;
-                const bool eR        = tileX.m_zoneIndex == tileR.m_zoneIndex;
-                const bool eB        = tileX.m_zoneIndex == tileB.m_zoneIndex;
+                const bool eT        = tileX.m_zone == tileT.m_zone;
+                const bool eL        = tileX.m_zone == tileL.m_zone;
+                const bool eR        = tileX.m_zone == tileR.m_zone;
+                const bool eB        = tileX.m_zone == tileB.m_zone;
                 const int  sameCount = eT + eL + eR + eB;
                 if (sameCount >= 3) { // normal center / border - do nothing
                     return true;
@@ -93,37 +114,37 @@ struct MapCanvas {
                     if ((eT && eL) || (eT && eR) || (eB && eL) || (eB && eR))
                         return true; // corner
                     if (eT && eB) {
-                        tileX.m_zoneIndex = tileL.m_zoneIndex;
+                        tileX.m_zone = tileL.m_zone;
                         return false;
                     }
                     if (eR && eL) {
-                        tileX.m_zoneIndex = tileT.m_zoneIndex;
+                        tileX.m_zone = tileT.m_zone;
                         return false;
                     }
                 }
                 if (sameCount == 1) {
                     if (eT) {
-                        tileX.m_zoneIndex = tileB.m_zoneIndex;
+                        tileX.m_zone = tileB.m_zone;
                     } else if (eL) {
-                        tileX.m_zoneIndex = tileR.m_zoneIndex;
+                        tileX.m_zone = tileR.m_zone;
                     } else if (eR) {
-                        tileX.m_zoneIndex = tileL.m_zoneIndex;
+                        tileX.m_zone = tileL.m_zone;
                     } else if (eB) {
-                        tileX.m_zoneIndex = tileT.m_zoneIndex;
+                        tileX.m_zone = tileT.m_zone;
                     }
                     return false;
                 }
                 // 1 tile exclave.
-                if (tileT.m_zoneIndex == tileL.m_zoneIndex) {
-                    tileX.m_zoneIndex = tileT.m_zoneIndex;
-                } else if (tileT.m_zoneIndex == tileR.m_zoneIndex) {
-                    tileX.m_zoneIndex = tileT.m_zoneIndex;
-                } else if (tileB.m_zoneIndex == tileR.m_zoneIndex) {
-                    tileX.m_zoneIndex = tileB.m_zoneIndex;
-                } else if (tileB.m_zoneIndex == tileL.m_zoneIndex) {
-                    tileX.m_zoneIndex = tileB.m_zoneIndex;
+                if (tileT.m_zone == tileL.m_zone) {
+                    tileX.m_zone = tileT.m_zone;
+                } else if (tileT.m_zone == tileR.m_zone) {
+                    tileX.m_zone = tileT.m_zone;
+                } else if (tileB.m_zone == tileR.m_zone) {
+                    tileX.m_zone = tileB.m_zone;
+                } else if (tileB.m_zone == tileL.m_zone) {
+                    tileX.m_zone = tileB.m_zone;
                 } else {
-                    tileX.m_zoneIndex = tileT.m_zoneIndex;
+                    tileX.m_zone = tileT.m_zone;
                 }
                 return false;
             };
@@ -131,13 +152,13 @@ struct MapCanvas {
                 continue;
             fixedCount++;
             tileX.m_exFix = true;
-            m_dirtyZones.insert(tileX.m_zoneIndex);
-            m_dirtyZones.insert(oldIndex);
+            m_dirtyZones.insert(tileX.m_zone);
+            if (oldIndex)
+                m_dirtyZones.insert(oldIndex);
 
-            //map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = cell.m_zoneIndex, .m_valueB = 0 });
+            //map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = cell.m_zone, .m_valueB = 0 });
         }
         return (fixedCount == 0);
     }
 };
-
 }

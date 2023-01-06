@@ -81,6 +81,21 @@ void SpriteMapPainter::paint(QPainter*        painter,
                 painter->translate(-boundingSize.width() + tileSize, -boundingSize.height() + tileSize);
             }
             painter->drawPixmap(frame.m_paddingLeftTop, frame.m_frame);
+            if (item.m_keyColor.isValid()) {
+                QPixmap pix     = frame.m_frame;
+                QImage  imgOrig = pix.toImage();
+                pix.fill(Qt::transparent);
+                QImage img = pix.toImage();
+
+                for (int imgy = 0; imgy < img.height(); imgy++) {
+                    for (int imgx = 0; imgx < img.width(); imgx++) {
+                        if (imgOrig.pixelColor(imgx, imgy).alpha() == 1)
+                            img.setPixelColor(imgx, imgy, item.m_keyColor);
+                    }
+                }
+                pix = QPixmap::fromImage(img);
+                painter->drawPixmap(frame.m_paddingLeftTop, pix);
+            }
 
             // debug diamond
             {

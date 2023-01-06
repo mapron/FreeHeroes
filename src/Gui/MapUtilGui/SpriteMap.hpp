@@ -50,6 +50,8 @@ struct SpriteMap {
     struct Item {
         Gui::IAsyncSpritePtr m_sprite;
 
+        QColor m_keyColor;
+
         Layer m_layer         = Layer::Invalid;
         int   m_spriteGroup   = 0;
         bool  m_flipHor       = false;
@@ -150,10 +152,11 @@ struct SpriteMap {
         return res;
     }
 
-    void addItem(Item item)
+    Item* addItem(Item item)
     {
         auto& cell = getCell(item);
         cell.m_items.push_back(std::move(item));
+        return &cell.m_items.back();
     }
 
     static QString layerTypeToString(Layer layer);

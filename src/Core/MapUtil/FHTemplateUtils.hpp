@@ -116,4 +116,38 @@ static_assert(rotateChebyshev(FHPos{ 2, 2 }, -48, 20, 20) == FHPos{ 2, 10 });
 static_assert(rotateChebyshev(FHPos{ 2, 5 }, -48, 20, 20) == FHPos{ 2, 13 });
 static_assert(rotateChebyshev(FHPos{ 2, 2 }, -360, 20, 20) == FHPos{ 2, 2 });
 
+/// (I hope) crossplatform integral square root implementation.
+/// we need this to reproduceability between different CPU's.
+constexpr inline int64_t intSqrt(const int64_t value) noexcept
+{
+    if (value <= 0)
+        return 0;
+    if (value <= 3)
+        return 1;
+
+    int64_t result = 3;
+    if (!std::is_constant_evaluated()) { // DO NOT 'if constexpr' here! Also, replace to 'if consteval' later.
+        // speedup so runtime will only use 1-2 loop iterations.
+        result = static_cast<int64_t>(std::sqrtl(value)) - 1;
+    }
+
+    int64_t estimate = result * result;
+
+    // Starting from 1, try all numbers until
+    // i*i is greater than or equal to x.
+
+    while (estimate <= value) {
+        result++;
+        estimate = result * result;
+    }
+    return result - 1;
+}
+
+constexpr inline int64_t posDistance(const FHPos& from, const FHPos& to)
+{
+    const auto dx = from.m_x - to.m_x;
+    const auto dy = from.m_y - to.m_y;
+    return intSqrt(dx * dx + dy * dy);
+}
+
 }

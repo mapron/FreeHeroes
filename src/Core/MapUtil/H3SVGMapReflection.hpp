@@ -11,6 +11,7 @@
 #include "MernelReflection/MetaInfoMacro.hpp"
 
 namespace Mernel::Reflection {
+using namespace FreeHeroes;
 
 // clang-format off
 STRUCT_REFLECTION_PAIRED(

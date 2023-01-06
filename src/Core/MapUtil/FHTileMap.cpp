@@ -9,6 +9,8 @@
 
 #include "MernelPlatform/Logger.hpp"
 
+#include "FHTemplateUtils.hpp"
+
 #include <array>
 #include <functional>
 #include <fstream>
