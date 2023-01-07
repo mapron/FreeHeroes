@@ -76,7 +76,8 @@ public:
     struct Cluster {
         Point               m_centroid;
         std::vector<Point*> m_points;
-        size_t              m_index = 0;
+        size_t              m_index  = 0;
+        int64_t             m_radius = 100;
 
         Cluster() = default;
         Cluster(Point* centroid_)
@@ -154,6 +155,8 @@ public:
 
     void initRandomClusterCentoids(size_t K, Core::IRandomGenerator* rng)
     {
+        std::sort(m_points.begin(), m_points.end());
+
         std::set<size_t> usedPointIds;
 
         for (size_t i = 0; i < K; i++) {

@@ -288,7 +288,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_centerDispersion,
     m_relativeSizeAvg,
     m_relativeSizeDispersion,
-    m_greedy)
+    m_cornerRoads,
+    m_isNormal)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngConnection,

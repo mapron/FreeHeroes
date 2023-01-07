@@ -226,7 +226,9 @@ struct FHRngZone {
     int                          m_relativeSizeAvg        = 100;
     int                          m_relativeSizeDispersion = 0;
 
-    bool m_greedy = true;
+    int m_cornerRoads = 0;
+
+    bool m_isNormal = false;
 };
 struct FHRngConnection {
     std::string m_from;
@@ -310,7 +312,7 @@ struct MAPUTIL_EXPORT FHMap {
     DefMap                                      m_defReplacements;   // mostly for round-trip.
 
     void toJson(Mernel::PropertyTree& data) const;
-    void fromJson(const Mernel::PropertyTree& data, const Core::IGameDatabase* database);
+    void fromJson(Mernel::PropertyTree data, const Core::IGameDatabase* database);
 
     void initTiles(const Core::IGameDatabase* database);
 

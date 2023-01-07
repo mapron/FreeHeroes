@@ -26,10 +26,27 @@ void FHMap::toJson(PropertyTree& data) const
     writer.valueToJson(*this, data);
 }
 
-void FHMap::fromJson(const PropertyTree& data, const Core::IGameDatabase* database)
+void FHMap::fromJson(PropertyTree data, const Core::IGameDatabase* database)
 {
     Core::PropertyTreeReaderDatabase reader(database);
     *this = {};
+    if (data.contains("rngZones")) {
+        PropertyTreeMap baseItems;
+        for (auto& [key, item] : data["rngZones"].getMap()) {
+            if (item.contains("isNormal"))
+                continue;
+            baseItems[key] = item;
+        }
+        for (auto& [key, item] : baseItems) {
+            data["rngZones"].getMap().erase(key);
+        }
+        for (auto& [key, item] : data["rngZones"].getMap()) {
+            if (!item.contains("base"))
+                continue;
+            auto baseKey = item["base"].getScalar().toString();
+            PropertyTree::mergePatch(item, baseItems.at(baseKey));
+        }
+    }
     reader.jsonToValue(data, *this);
 }
 

@@ -8,6 +8,7 @@
 #include "FHMap.hpp"
 #include "FHTemplateCanvas.hpp"
 #include "IRandomGenerator.hpp"
+#include "FHTemplateUtils.hpp"
 
 #include <unordered_set>
 
@@ -32,6 +33,7 @@ struct TileZone {
     TileRegion m_lastGrowed;
 
     TileRegion m_roadNodes;
+    TileRegion m_roadNodesTowns;
 
     int64_t m_relativeArea   = 0;
     int64_t m_absoluteArea   = 0;
@@ -46,10 +48,34 @@ struct TileZone {
         return m_absoluteArea - getPlacedArea();
     }
 
+    int64_t getAreaDeficitPercent() const
+    {
+        return getAreaDeficit() * 100 / m_absoluteArea;
+    }
+
+    inline static FHPos makeCentroid(const TileRegion& region)
+    {
+        int64_t sumX = 0, sumY = 0;
+        int64_t size = region.size();
+        for (const auto* cell : region) {
+            sumX += cell->m_pos.m_x;
+            sumY += cell->m_pos.m_y;
+        }
+        sumX /= size;
+        sumY /= size;
+        int z = 0;
+        return FHPos{ static_cast<int>(sumX), static_cast<int>(sumY), z };
+    }
+
+    void estimateCentroid()
+    {
+        m_centroid = makeCentroid(m_innerArea);
+    }
+
     void readFromMap()
     {
         m_innerArea.clear();
-        m_innerArea.insert(m_mapCanvas->m_tileIndex.at(m_startTile));
+        m_innerArea.insert(m_mapCanvas->m_tileIndex.at(m_centroid));
 
         makeEdgeFromInnerArea();
 
@@ -59,6 +85,12 @@ struct TileZone {
             });
             if (!growResult)
                 break;
+
+            for (MapCanvas::Tile* cell : m_lastGrowed) {
+                m_innerEdge.insert(cell);
+                m_innerArea.insert(cell);
+            }
+            removeNonInnerFromInnerEdge();
         }
 
         for (auto& cell : m_mapCanvas->m_tiles) {
@@ -129,49 +161,57 @@ struct TileZone {
             if (predicate(pos)) {
                 result = true;
                 m_lastGrowed.insert(pos);
-
-                m_innerEdge.insert(pos);
-                m_innerArea.insert(pos);
             }
-        }
-        if (result) {
-            removeNonInnerFromInnerEdge();
         }
         return result;
     }
 
-    bool tryGrowOnceToUnzoned(bool allowConsumingNeighbours)
+    bool tryGrowOnceToUnzoned(size_t limit, TileZone* prioritized)
     {
-        const bool result = tryGrowOnce([this, allowConsumingNeighbours](MapCanvas::Tile* cell) {
-            return !cell->m_zone || (allowConsumingNeighbours && cell->m_zone != this);
+        const bool result = tryGrowOnce([this](MapCanvas::Tile* cell) {
+            return cell->m_zone != this;
         });
         if (!result)
             return false;
 
-        for (MapCanvas::Tile* cell : m_lastGrowed) {
+        std::vector<MapCanvas::Tile*> nextEdge(m_lastGrowed.cbegin(), m_lastGrowed.cend());
+        if (nextEdge.size() > limit && limit > 0) {
+            std::nth_element(nextEdge.begin(), nextEdge.begin() + limit, nextEdge.end(), [this, prioritized](MapCanvas::Tile* l, MapCanvas::Tile* r) {
+                if (prioritized) {
+                    if (l->m_zone == prioritized && r->m_zone != prioritized)
+                        return true;
+                    if (l->m_zone != prioritized && r->m_zone == prioritized)
+                        return false;
+                }
+                if (!l->m_zone && r->m_zone)
+                    return true;
+                if (l->m_zone && !r->m_zone)
+                    return false;
+                return posDistance(l->m_pos, this->m_centroid) < posDistance(r->m_pos, this->m_centroid);
+            });
+            nextEdge.resize(limit);
+        }
+
+        for (MapCanvas::Tile* cell : nextEdge) {
             if (cell->m_zone && cell->m_zone != this) {
                 m_mapCanvas->m_dirtyZones.insert(cell->m_zone);
             }
             cell->m_zone = this;
+
+            m_innerEdge.insert(cell);
+            m_innerArea.insert(cell);
         }
+        removeNonInnerFromInnerEdge();
         return true;
     }
 
-    void fillDeficit(int thresholdPercent, bool allowConsumingNeighbours)
+    void fillDeficit(int thresholdPercent, TileZone* prioritized)
     {
-        const int64_t allowedDeficitThreshold = m_absoluteArea * thresholdPercent / 100;
         while (true) {
-            if (getAreaDeficit() < allowedDeficitThreshold)
+            if (getAreaDeficitPercent() < thresholdPercent)
                 break;
-            if (!tryGrowOnceToUnzoned(allowConsumingNeighbours))
+            if (!tryGrowOnceToUnzoned(10, prioritized))
                 break;
-        }
-    }
-
-    void fillTheRest()
-    {
-        while (tryGrowOnceToUnzoned(false)) {
-            ;
         }
     }
 };

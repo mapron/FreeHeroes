@@ -13,11 +13,11 @@ namespace FreeHeroes {
 
 KMeansSegmentation::Cluster* KMeansSegmentation::getNearestClusterId(Point* point)
 {
-    int64_t  minDist          = m_clusters[0].getCentroid().getDistance(*point);
+    int64_t  minDist          = m_clusters[0].getCentroid().getDistance(*point) * 1000 / m_clusters[0].m_radius;
     Cluster* nearestClusterId = &m_clusters[0];
 
     for (size_t i = 1; i < m_clusters.size(); i++) {
-        const int64_t dist = m_clusters[i].getCentroid().getDistance(*point);
+        const int64_t dist = m_clusters[i].getCentroid().getDistance(*point) * 1000 / m_clusters[i].m_radius;
         if (dist < minDist) {
             minDist          = dist;
             nearestClusterId = &m_clusters[i];
@@ -74,7 +74,11 @@ void KMeansSegmentation::runIter()
 
 void KMeansSegmentation::run(std::ostream& os)
 {
-    //os << "Running K-Means Clustering.." << std::endl;
+    //os << "Before K-Means Clustering: \n";
+
+    //for (size_t i = 0; i < m_clusters.size(); i++)
+    //    os << "Cluster " << m_clusters[i].m_index << " centroid: " << m_clusters[i].getCentroidStr() << std::endl;
+
     int iter;
     for (iter = 0; iter < m_iters; ++iter) {
         runIter();
@@ -82,7 +86,7 @@ void KMeansSegmentation::run(std::ostream& os)
             break;
     }
 
-    // os << "K-Means Done on " << iter << " iteration\n";
+    //os << "K-Means Done on " << iter << " iteration\n";
 
     //for (size_t i = 0; i < m_clusters.size(); i++)
     //    os << "Cluster " << m_clusters[i].m_index << " centroid: " << m_clusters[i].getCentroidStr() << std::endl;

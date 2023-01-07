@@ -38,6 +38,8 @@ struct MapCanvas {
 
     std::set<TileZone*> m_dirtyZones; // zone ids that must be re-read from the map.
 
+    std::set<Tile*> m_blocked;
+
     //std::set<FHPos> m_edge;
 
     void init(int width,
