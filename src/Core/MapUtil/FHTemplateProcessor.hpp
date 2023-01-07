@@ -35,6 +35,9 @@ public:
         BorderRoads,
         RoadsPlacement,
         Borders,
+        InnerObstacles,
+        Rewards,
+        Guards,
     };
 
     void run(const std::string& stopAfterStage);
@@ -49,6 +52,9 @@ private:
     void runBorderRoads();
     void runRoadsPlacement();
     void runBorders();
+    void runInnerObstacles();
+    void runRewards();
+    void runGuards();
 
     void placeTerrainZones();
     void placeDebugInfo();
@@ -75,6 +81,23 @@ private:
     std::ostream&                    m_logOutput;
 
     std::vector<Core::LibraryFactionConstPtr> m_playableFactions;
+    struct Unit {
+        Core::LibraryUnitConstPtr m_id    = nullptr;
+        int64_t                   m_value = 0;
+    };
+
+    std::vector<Unit> m_guardUnits;
+
+    struct Guard {
+        int64_t     m_value           = 0;
+        int64_t     m_valueDispersion = 0;
+        std::string m_id;
+        std::string m_mirrorFromId;
+        FHPos       m_pos;
+        TileZone*   m_zone     = nullptr;
+        bool        m_joinable = false;
+    };
+    std::vector<Guard> m_guards;
 };
 
 class AstarGenerator {

@@ -27,7 +27,10 @@ ENUM_REFLECTION_STRINGIY(FHTemplateProcessor::Stage,
                          TownsPlacement,
                          BorderRoads,
                          RoadsPlacement,
-                         Borders)
+                         Borders,
+                         InnerObstacles,
+                         Rewards,
+                         Guards)
 
 }
 
@@ -82,6 +85,15 @@ FHTemplateProcessor::FHTemplateProcessor(FHMap&                     map,
         m_playableFactions.push_back(faction);
     }
     assert(!m_playableFactions.empty());
+    auto& units = m_database->units()->records();
+    for (auto* unit : units) {
+        if (unit->faction->alignment == Core::LibraryFaction::Alignment::Special)
+            continue;
+        m_guardUnits.push_back({ unit, unit->value });
+    }
+    std::sort(m_guardUnits.begin(), m_guardUnits.end(), [](const Unit& l, const Unit& r) {
+        return l.m_value > r.m_value;
+    });
 }
 
 void FHTemplateProcessor::run(const std::string& stopAfterStage)
@@ -126,7 +138,10 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
                          Stage::TownsPlacement,
                          Stage::BorderRoads,
                          Stage::RoadsPlacement,
-                         Stage::Borders }) {
+                         Stage::Borders,
+                         Stage::InnerObstacles,
+                         Stage::Rewards,
+                         Stage::Guards }) {
         m_currentStage = stage;
 
         Mernel::ScopeTimer timer;
@@ -163,6 +178,12 @@ void FHTemplateProcessor::runCurrentStage()
             return runRoadsPlacement();
         case Stage::Borders:
             return runBorders();
+        case Stage::InnerObstacles:
+            return runInnerObstacles();
+        case Stage::Rewards:
+            return runRewards();
+        case Stage::Guards:
+            return runGuards();
     }
 }
 
@@ -440,7 +461,7 @@ void FHTemplateProcessor::runBorderRoads()
         }
     }
 
-    for (const auto& connections : m_map.m_rngConnections) {
+    for (const auto& [connectionId, connections] : m_map.m_rngConnections) {
         auto&                 tileZoneFrom = findZoneById(connections.m_from);
         auto&                 tileZoneTo   = findZoneById(connections.m_to);
         auto                  key          = makeKey(tileZoneFrom, tileZoneTo);
@@ -456,6 +477,16 @@ void FHTemplateProcessor::runBorderRoads()
             });
             MapCanvas::Tile* cell = (*it);
             cell->m_zone->m_roadNodes.insert(cell);
+
+            if (connections.m_guard || !connections.m_mirrorGuard.empty()) {
+                Guard guard;
+                guard.m_id           = connectionId;
+                guard.m_value        = connections.m_guard;
+                guard.m_mirrorFromId = connections.m_mirrorGuard;
+                guard.m_pos          = cell->m_pos;
+                guard.m_zone         = &tileZoneFrom;
+                m_guards.push_back(guard);
+            }
             bool nfound         = false;
             auto checkNeighbour = [cell, &nfound](MapCanvas::Tile* ncell) {
                 if (!nfound && ncell && ncell->m_zone != cell->m_zone) {
@@ -562,6 +593,101 @@ void FHTemplateProcessor::runBorders()
 {
 }
 
+void FHTemplateProcessor::runInnerObstacles()
+{
+}
+
+void FHTemplateProcessor::runRewards()
+{
+}
+
+void FHTemplateProcessor::runGuards()
+{
+    auto makeCandidates = [this](int64_t value) {
+        std::vector<Unit*> candidates; // unit with at least 3 in the stack
+        std::vector<Unit*> candidates3to9;
+        std::vector<Unit*> candidates10to49;
+        std::vector<Unit*> candidates50to99;
+        std::vector<Unit*> candidates100plus;
+        for (Unit& unit : m_guardUnits) {
+            auto possibleCount = value / unit.m_value;
+            if (possibleCount < 3)
+                continue;
+            candidates.push_back(&unit);
+            if (possibleCount < 10)
+                candidates3to9.push_back(&unit);
+            else if (possibleCount < 50)
+                candidates10to49.push_back(&unit);
+            else if (possibleCount < 100)
+                candidates50to99.push_back(&unit);
+            else
+                candidates100plus.push_back(&unit);
+        }
+
+        // @todo: that is just a draft!
+        if (candidates10to49.size() > 10) {
+            return candidates10to49;
+        }
+        if (candidates50to99.size() > 10) {
+            return candidates50to99;
+        }
+        if (candidates3to9.size() > 5) {
+            return candidates3to9;
+        }
+        if (candidates100plus.size() > 5) {
+            return candidates100plus;
+        }
+
+        return candidates;
+    };
+
+    std::map<std::string, size_t> nameIndex;
+
+    for (auto& guard : m_guards) {
+        if (guard.m_value == 0)
+            continue;
+
+        std::vector<Unit*> candidates = makeCandidates(guard.m_value);
+
+        if (candidates.empty()) { // value is so low, nobody can guard so low value at least in group of 3
+            continue;
+        }
+        Unit* unit = candidates.size() == 1 ? candidates[0] : candidates[m_rng->gen(candidates.size() - 1)];
+
+        auto finalValue = m_rng->genDispersed(guard.m_value, guard.m_valueDispersion);
+
+        FHMonster fhMonster;
+        fhMonster.m_pos        = guard.m_pos;
+        fhMonster.m_count      = finalValue / unit->m_value;
+        fhMonster.m_id         = unit->m_id;
+        fhMonster.m_guardValue = finalValue;
+
+        if (guard.m_joinable) {
+            fhMonster.m_agressionMin = 4;
+            fhMonster.m_agressionMax = 10;
+        } else {
+            fhMonster.m_agressionMin = 10;
+            fhMonster.m_agressionMax = 10;
+        }
+
+        fhMonster.m_joinOnlyForMoney = true;
+        fhMonster.m_joinPercent      = 50;
+
+        if (!guard.m_id.empty())
+            nameIndex[guard.m_id] = m_map.m_objects.m_monsters.size();
+
+        m_map.m_objects.m_monsters.push_back(std::move(fhMonster));
+    }
+    for (auto& guard : m_guards) {
+        if (guard.m_value == 0 && !guard.m_mirrorFromId.empty()) {
+            size_t    mirrorFrom = nameIndex.at(guard.m_mirrorFromId);
+            FHMonster fhMonster  = m_map.m_objects.m_monsters[mirrorFrom];
+            fhMonster.m_pos      = guard.m_pos;
+            m_map.m_objects.m_monsters.push_back(std::move(fhMonster));
+        }
+    }
+}
+
 void FHTemplateProcessor::placeTerrainZones()
 {
     for (auto& tileZone : m_tileZones) {
@@ -592,8 +718,10 @@ void FHTemplateProcessor::placeDebugInfo()
             }
         }
 
-        for (auto* cell : tileZone.m_roadNodes) {
-            m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 1 });
+        if (m_stopAfter <= Stage::RoadsPlacement) {
+            for (auto* cell : tileZone.m_roadNodes) {
+                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 1 });
+            }
         }
     }
 }

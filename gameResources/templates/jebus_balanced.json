@@ -13,12 +13,12 @@
 		"CC": { "base": "Treasure", "isNormal": true,  "player": "None", "faction": ""                      , "terrain": "sod.terrain.sand"       , "centerAvg": {"x": 50, "y": 50}  }
 	},
 	
-	"rngConnections": [
-		{ "from": "CC", "to": "P1"},
-		{ "from": "CC", "to": "P2"},
-		{ "from": "CC", "to": "P3"},
-		{ "from": "CC", "to": "P4"}
-	],
+	"rngConnections": {
+		"CC_P1": { "from": "CC", "to": "P1", "guard": 100000 },
+		"CC_P2": { "from": "CC", "to": "P2", "mirrorGuard": "CC_P1" },
+		"CC_P3": { "from": "CC", "to": "P3", "guard": 100000 },
+		"CC_P4": { "from": "CC", "to": "P4", "guard": 100000 }
+	},
 	"rngOptions": {
 		"rotationDegreeDispersion": 50,
 		"allowFlip": true

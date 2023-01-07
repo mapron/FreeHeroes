@@ -155,7 +155,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_agressionMax,
     m_joinOnlyForMoney,
     m_joinPercent,
-    m_questIdentifier)
+    m_questIdentifier,
+    m_guardValue)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHDwelling,
@@ -294,7 +295,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngConnection,
     m_from,
-    m_to)
+    m_to,
+    m_mirrorGuard,
+    m_guard)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHDebugTile,
@@ -367,6 +370,8 @@ template<>
 inline constexpr const bool MetaInfo::s_isStringMap<FHMap::PlayersMap>{ true };
 template<>
 inline constexpr const bool MetaInfo::s_isStringMap<FHMap::RngZoneMap>{ true };
+template<>
+inline constexpr const bool MetaInfo::s_isStringMap<FHMap::RngConnectionMap>{ true };
 template<>
 inline constexpr const bool MetaInfo::s_isStringMap<FHMap::DefMap>{ true };
 

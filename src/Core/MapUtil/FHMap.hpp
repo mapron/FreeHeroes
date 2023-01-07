@@ -149,6 +149,7 @@ struct FHMonster : public FHCommonObject {
     int  m_joinPercent      = 100;
 
     uint32_t m_questIdentifier = 0;
+    int64_t  m_guardValue      = 0;
 };
 
 struct FHBank : public FHCommonObject {
@@ -233,6 +234,9 @@ struct FHRngZone {
 struct FHRngConnection {
     std::string m_from;
     std::string m_to;
+
+    std::string m_mirrorGuard;
+    int64_t     m_guard = 0;
 };
 
 struct FHDebugTile {
@@ -249,9 +253,10 @@ struct FHRngOptions {
 };
 
 struct MAPUTIL_EXPORT FHMap {
-    using PlayersMap = std::map<FHPlayerId, FHPlayer>;
-    using DefMap     = std::map<Core::LibraryObjectDefConstPtr, Core::LibraryObjectDef>;
-    using RngZoneMap = std::map<std::string, FHRngZone>;
+    using PlayersMap       = std::map<FHPlayerId, FHPlayer>;
+    using DefMap           = std::map<Core::LibraryObjectDefConstPtr, Core::LibraryObjectDef>;
+    using RngZoneMap       = std::map<std::string, FHRngZone>;
+    using RngConnectionMap = std::map<std::string, FHRngConnection>;
 
     Core::GameVersion m_version = Core::GameVersion::Invalid;
     uint64_t          m_seed{ 0 };
@@ -263,14 +268,14 @@ struct MAPUTIL_EXPORT FHMap {
     std::string m_descr;
     uint8_t     m_difficulty = 0;
 
-    PlayersMap                   m_players;
-    std::vector<FHHero>          m_wanderingHeroes;
-    std::vector<FHTown>          m_towns;
-    std::vector<FHZone>          m_zones;
-    std::vector<FHDebugTile>     m_debugTiles;
-    RngZoneMap                   m_rngZones;
-    std::vector<FHRngConnection> m_rngConnections;
-    FHRngOptions                 m_rngOptions;
+    PlayersMap               m_players;
+    std::vector<FHHero>      m_wanderingHeroes;
+    std::vector<FHTown>      m_towns;
+    std::vector<FHZone>      m_zones;
+    std::vector<FHDebugTile> m_debugTiles;
+    RngZoneMap               m_rngZones;
+    RngConnectionMap         m_rngConnections;
+    FHRngOptions             m_rngOptions;
 
     struct Objects {
         std::vector<FHResource>       m_resources;
