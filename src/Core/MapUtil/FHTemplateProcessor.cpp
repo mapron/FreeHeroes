@@ -9,6 +9,10 @@
 #include "MernelReflection/EnumTraitsMacro.hpp"
 #include "MernelPlatform/Profiler.hpp"
 
+#include "LibraryMapObstacle.hpp"
+#include "LibraryMapVisitable.hpp"
+#include "LibraryObjectDef.hpp"
+
 #include "KMeans.hpp"
 
 #include <functional>
@@ -27,9 +31,8 @@ ENUM_REFLECTION_STRINGIY(FHTemplateProcessor::Stage,
                          TownsPlacement,
                          BorderRoads,
                          RoadsPlacement,
-                         Borders,
-                         InnerObstacles,
                          Rewards,
+                         Obstacles,
                          Guards)
 
 }
@@ -63,6 +66,102 @@ struct DistanceRecord {
     {
         const int64_t distanceByRadius = m_distance * 1000 / m_zoneRadius;
         return distanceByRadius;
+    }
+};
+
+struct ObstacleBucket {
+    std::vector<Core::LibraryMapObstacleConstPtr> m_objects;
+    Core::LibraryObjectDef::PlanarMask            m_mask;
+    size_t                                        m_area = 0;
+};
+using ObstacleBucketList = std::vector<ObstacleBucket>;
+
+struct ObstacleIndex {
+    ObstacleBucketList m_bucketLists;
+
+    void add(Core::LibraryMapObstacleConstPtr obj)
+    {
+        auto* def = obj->objectDefs.get({});
+        assert(def);
+        auto mask = def->blockMapPlanar;
+        auto w    = mask.width;
+        auto h    = mask.height;
+        if (!w || !h)
+            return;
+
+        ObstacleBucketList& bucketList = m_bucketLists;
+        auto                it         = std::find_if(bucketList.begin(), bucketList.end(), [&mask](const ObstacleBucket& buck) {
+            return buck.m_mask == mask;
+        });
+        if (it != bucketList.end()) {
+            (*it).m_objects.push_back(obj);
+            return;
+        }
+        ObstacleBucket buck;
+        buck.m_mask = mask;
+        buck.m_area = mask.height * mask.width;
+        buck.m_objects.push_back(obj);
+        bucketList.push_back(std::move(buck));
+    }
+    void doSort()
+    {
+        //assert(m_bucketLists.contains(Type::Small));
+        // for (auto& bucketList : m_bucketLists) {
+        std::sort(m_bucketLists.begin(), m_bucketLists.end(), [](const ObstacleBucket& l, const ObstacleBucket& r) {
+            return l.m_area > r.m_area;
+        });
+        //}
+    }
+
+    bool isEmpty(const Core::LibraryObjectDef::PlanarMask& mask, size_t xOffset, size_t yOffset, size_t w, size_t h)
+    {
+        for (size_t y = 0; y < h && (y + yOffset) < mask.height; ++y) {
+            for (size_t x = 0; x < w && (x + xOffset) < mask.width; ++x) {
+                const uint8_t requiredBlockBit = mask.data[y + yOffset][x + xOffset];
+                if (requiredBlockBit)
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    // mask is 8x6, for example. we will search for an object that fits int top-left corner.
+    std::vector<const ObstacleBucket*> find(const Core::LibraryObjectDef::PlanarMask& mask, size_t xOffset, size_t yOffset)
+    {
+        auto w = mask.width;
+        auto h = mask.height;
+        if (!w || !h)
+            return {};
+
+        auto isMaskFit = [&mask, xOffset, yOffset](const Core::LibraryObjectDef::PlanarMask& maskObj) {
+            auto w    = mask.width - xOffset;
+            auto h    = mask.height - yOffset;
+            auto wmin = std::min(maskObj.width, w);
+            auto hmin = std::min(maskObj.height, h);
+            for (size_t y = 0; y < hmin; ++y) {
+                for (size_t x = 0; x < wmin; ++x) {
+                    const uint8_t requiredBlockBit  = mask.data[y + yOffset][x + xOffset] == 1;
+                    const uint8_t tentativeBlockBit = mask.data[y + yOffset][x + xOffset] == 2;
+                    const uint8_t objBlockBit       = maskObj.data[y][x];
+                    if (tentativeBlockBit)
+                        continue;
+                    if (requiredBlockBit && !objBlockBit) {
+                        return false;
+                    }
+                    if (!requiredBlockBit && objBlockBit) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        };
+
+        std::vector<const ObstacleBucket*> result;
+        for (const ObstacleBucket& bucket : m_bucketLists) {
+            if (isMaskFit(bucket.m_mask))
+                result.push_back(&bucket);
+        }
+        return result;
     }
 };
 
@@ -112,8 +211,17 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
 
     m_tileZones.resize(regionCount);
     for (int i = 0; const auto& [key, rngZone] : m_map.m_rngZones) {
-        auto& tileZone = m_tileZones[i];
-        assert(rngZone.m_terrain);
+        auto& tileZone     = m_tileZones[i];
+        tileZone.m_faction = rngZone.m_faction;
+        if (!tileZone.m_faction)
+            tileZone.m_faction = getRandomFaction();
+        tileZone.m_terrain = rngZone.m_terrain;
+        if (!tileZone.m_terrain)
+            tileZone.m_terrain = tileZone.m_faction->nativeTerrain;
+        int z = 0;
+        if (!z && tileZone.m_terrain->nonUnderground) {
+            tileZone.m_terrain = tileZone.m_terrain->nonUnderground;
+        }
         tileZone.m_rngZoneSettings = rngZone;
         tileZone.m_id              = key;
         tileZone.m_index           = i;
@@ -138,9 +246,8 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
                          Stage::TownsPlacement,
                          Stage::BorderRoads,
                          Stage::RoadsPlacement,
-                         Stage::Borders,
-                         Stage::InnerObstacles,
                          Stage::Rewards,
+                         Stage::Obstacles,
                          Stage::Guards }) {
         m_currentStage = stage;
 
@@ -176,12 +283,10 @@ void FHTemplateProcessor::runCurrentStage()
             return runBorderRoads();
         case Stage::RoadsPlacement:
             return runRoadsPlacement();
-        case Stage::Borders:
-            return runBorders();
-        case Stage::InnerObstacles:
-            return runInnerObstacles();
         case Stage::Rewards:
             return runRewards();
+        case Stage::Obstacles:
+            return runObstacles();
         case Stage::Guards:
             return runGuards();
     }
@@ -415,9 +520,8 @@ void FHTemplateProcessor::runTownsPlacement()
                 townPositions.push_back(cluster.getCentroid().toPos());
             }
         }
-        auto mainTownFaction = tileZone.m_rngZoneSettings.m_faction;
-        if (!mainTownFaction)
-            mainTownFaction = getRandomFaction();
+        auto mainTownFaction = tileZone.m_faction;
+        assert(mainTownFaction);
 
         placeTown(townPositions[0], tileZone.m_rngZoneSettings.m_player, mainTownFaction, true);
         for (size_t i = 1; i < townPositions.size(); ++i) {
@@ -461,6 +565,8 @@ void FHTemplateProcessor::runBorderRoads()
         }
     }
 
+    TileZone::TileRegion connectionUnblockableCells;
+
     for (const auto& [connectionId, connections] : m_map.m_rngConnections) {
         auto&                 tileZoneFrom = findZoneById(connections.m_from);
         auto&                 tileZoneTo   = findZoneById(connections.m_to);
@@ -471,34 +577,57 @@ void FHTemplateProcessor::runBorderRoads()
         }
         FHPos borderCentroid = TileZone::makeCentroid(border); // switch to k-means when we need more than one connection.
 
-        {
-            auto             it   = std::min_element(border.cbegin(), border.cend(), [&borderCentroid](MapCanvas::Tile* l, MapCanvas::Tile* r) {
-                return posDistance(borderCentroid, l->m_pos) < posDistance(borderCentroid, r->m_pos);
-            });
-            MapCanvas::Tile* cell = (*it);
-            cell->m_zone->m_roadNodes.insert(cell);
+        auto             it   = std::min_element(border.cbegin(), border.cend(), [&borderCentroid](MapCanvas::Tile* l, MapCanvas::Tile* r) {
+            return posDistance(borderCentroid, l->m_pos) < posDistance(borderCentroid, r->m_pos);
+        });
+        MapCanvas::Tile* cell = (*it);
+        cell->m_zone->m_roadNodes.insert(cell);
 
-            if (connections.m_guard || !connections.m_mirrorGuard.empty()) {
-                Guard guard;
-                guard.m_id           = connectionId;
-                guard.m_value        = connections.m_guard;
-                guard.m_mirrorFromId = connections.m_mirrorGuard;
-                guard.m_pos          = cell->m_pos;
-                guard.m_zone         = &tileZoneFrom;
-                m_guards.push_back(guard);
+        if (connections.m_guard || !connections.m_mirrorGuard.empty()) {
+            Guard guard;
+            guard.m_id           = connectionId;
+            guard.m_value        = connections.m_guard;
+            guard.m_mirrorFromId = connections.m_mirrorGuard;
+            guard.m_pos          = cell->m_pos;
+            guard.m_zone         = &tileZoneFrom;
+            m_guards.push_back(guard);
+        }
+        MapCanvas::Tile* ncellFound = nullptr;
+
+        for (MapCanvas::Tile* ncell : cell->m_allNeighbours) {
+            if (!ncellFound && ncell && ncell->m_zone != cell->m_zone) {
+                ncell->m_zone->m_roadNodes.insert(ncell);
+                ncellFound = ncell;
             }
-            bool nfound         = false;
-            auto checkNeighbour = [cell, &nfound](MapCanvas::Tile* ncell) {
-                if (!nfound && ncell && ncell->m_zone != cell->m_zone) {
-                    ncell->m_zone->m_roadNodes.insert(ncell);
-                    nfound = true;
-                }
-            };
-            checkNeighbour(cell->m_neighborB);
-            checkNeighbour(cell->m_neighborT);
-            checkNeighbour(cell->m_neighborR);
-            checkNeighbour(cell->m_neighborL);
-            assert(nfound);
+        }
+        assert(ncellFound);
+        border.erase(cell);
+        border.erase(ncellFound);
+        border.erase(cell->m_neighborT);
+        border.erase(ncellFound->m_neighborT);
+        border.erase(cell->m_neighborL);
+        border.erase(ncellFound->m_neighborL);
+        connectionUnblockableCells.insert(cell);
+    }
+    TileZone::TileRegion noExpandTiles;
+    for (MapCanvas::Tile& tile : m_mapCanvas.m_tiles) {
+        for (auto* cell : connectionUnblockableCells) {
+            if (posDistance(tile.m_pos, cell->m_pos) < 4)
+                noExpandTiles.insert(&tile);
+        }
+    }
+    for (const auto& [key, border] : borderTiles) {
+        m_mapCanvas.m_needBeBlocked.insert(border.cbegin(), border.cend());
+    }
+    for (const auto& [key, border] : borderTiles) {
+        for (auto* cell : border) {
+            for (MapCanvas::Tile* ncell : cell->m_allNeighbours) {
+                if (m_mapCanvas.m_needBeBlocked.contains(ncell))
+                    continue;
+                if (noExpandTiles.contains(ncell))
+                    continue;
+                m_mapCanvas.m_tentativeBlocked.insert(ncell);
+            }
         }
     }
 }
@@ -511,8 +640,11 @@ void FHTemplateProcessor::runRoadsPlacement()
 
             KMeansSegmentation seg;
             seg.m_points.reserve(tileZone.m_innerArea.size());
-            for (auto* cell : tileZone.m_innerArea)
+            for (auto* cell : tileZone.m_innerArea) {
+                if (m_mapCanvas.m_blocked.contains(cell) || m_mapCanvas.m_needBeBlocked.contains(cell) || m_mapCanvas.m_tentativeBlocked.contains(cell))
+                    continue;
                 seg.m_points.push_back({ cell->m_pos });
+            }
 
             seg.initRandomClusterCentoids(k, m_rng);
             seg.run(m_logOutput);
@@ -573,11 +705,25 @@ void FHTemplateProcessor::runRoadsPlacement()
             for (size_t i = 1; i < pathCopy.size(); i++) {
                 FHPos prev = pathCopy[i - 1];
                 FHPos cur  = pathCopy[i];
+                if (i % 10 == 0 && i < pathCopy.size() - 10) {
+                    connected.push_back(m_mapCanvas.m_tileIndex.at(cur));
+                }
                 if (prev.m_x != cur.m_x && prev.m_y != cur.m_y) // diagonal
                 {
                     FHPos extra = prev;
-                    extra.m_y   = cur.m_y;
-                    //extra.m_x   = cur.m_x;
+
+                    if (prev.m_x < cur.m_x && prev.m_y < cur.m_y)
+                        extra.m_y = cur.m_y;
+
+                    if (prev.m_x < cur.m_x && prev.m_y > cur.m_y)
+                        extra.m_x = cur.m_x;
+
+                    if (prev.m_x > cur.m_x && prev.m_y < cur.m_y)
+                        extra.m_y = cur.m_y;
+
+                    if (prev.m_x > cur.m_x && prev.m_y > cur.m_y)
+                        extra.m_x = cur.m_x;
+
                     path.push_back(extra);
                 }
             }
@@ -589,16 +735,181 @@ void FHTemplateProcessor::runRoadsPlacement()
     }
 }
 
-void FHTemplateProcessor::runBorders()
-{
-}
-
-void FHTemplateProcessor::runInnerObstacles()
-{
-}
-
 void FHTemplateProcessor::runRewards()
 {
+}
+
+void FHTemplateProcessor::runObstacles()
+{
+    ObstacleIndex obstacleIndex;
+    using Type = Core::LibraryMapObstacle::Type;
+    const std::set<Type> suitableObjTypes{
+        Type::BRUSH,
+        Type::BUSH,
+        Type::CACTUS,
+        Type::CANYON,
+        Type::CRATER,
+        Type::HILL,
+
+        Type::LAKE,
+        Type::LAVA_FLOW,
+        Type::LAVA_LAKE,
+        Type::MANDRAKE,
+        Type::MOUNTAIN,
+        Type::OAK_TREES,
+        Type::PINE_TREES,
+
+        Type::ROCK,
+        Type::SAND_DUNE,
+        Type::SAND_PIT,
+        Type::SHRUB,
+        Type::STALAGMITE,
+        Type::STUMP,
+        Type::TAR_PIT,
+        Type::TREES,
+        Type::VOLCANIC_VENT,
+        Type::VOLCANO,
+        Type::WILLOW_TREES,
+        Type::YUCCA_TREES,
+
+        Type::DESERT_HILLS,
+        Type::DIRT_HILLS,
+        Type::GRASS_HILLS,
+        Type::ROUGH_HILLS,
+
+        Type::SUBTERRANEAN_ROCKS,
+        Type::SWAMP_FOLIAGE,
+    };
+
+    for (auto* record : m_database->mapObstacles()->records()) {
+        if (!suitableObjTypes.contains(record->type))
+            continue;
+        obstacleIndex.add(record);
+    }
+    obstacleIndex.doSort();
+
+    Core::LibraryObjectDef::PlanarMask mapMask;
+    mapMask.width  = m_map.m_tileMap.m_width;
+    mapMask.height = m_map.m_tileMap.m_height;
+    mapMask.data.resize(mapMask.height);
+    for (auto& row : mapMask.data)
+        row.resize(mapMask.width);
+
+    for (MapCanvas::Tile* cell : m_mapCanvas.m_needBeBlocked)
+        mapMask.data[cell->m_pos.m_y][cell->m_pos.m_x] = 1;
+    for (MapCanvas::Tile* cell : m_mapCanvas.m_tentativeBlocked) {
+        mapMask.data[cell->m_pos.m_y][cell->m_pos.m_x] = 2;
+
+        //m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = 0, .m_valueB = 2 });
+    }
+
+    const size_t maxMaskLookupWidth  = 8;
+    const size_t maxMaskLookupHeight = 6;
+
+    /*
+    for (size_t y = 0; y < mapMask.height; ++y) {
+        for (size_t x = 0; x < mapMask.width; ++x) {
+            if (mapMask.data[y][x] == 0)
+                continue;
+            FHPos pos{ (int) x, (int) y, 0 };
+            m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = 0, .m_valueB = 0 });
+        }
+    }*/
+
+    for (size_t y = 0; y < mapMask.height; ++y) {
+        Core::LibraryMapObstacleConstPtr prev = nullptr;
+        for (size_t x = 0; x < mapMask.width; ++x) {
+            //if (mapMask.data[y][x] == 0)
+            //    continue;
+            if (obstacleIndex.isEmpty(mapMask, x, y, maxMaskLookupWidth, maxMaskLookupHeight))
+                continue;
+            std::vector<const ObstacleBucket*> buckets = obstacleIndex.find(mapMask, x, y);
+            if (buckets.empty())
+                continue;
+            assert(!buckets.empty());
+            int         z = 0;
+            const FHPos mapPos{ (int) x, (int) y, z };
+            //buckets = obstacleIndex.find(mapMask, x, y);
+
+            //const ObstacleBucket* firstBucket = buckets.front();
+
+            std::vector<Core::LibraryMapObstacleConstPtr> suitable;
+            for (const ObstacleBucket* bucket : buckets) {
+                for (auto* obst : bucket->m_objects) {
+                    if (obst == prev)
+                        continue;
+                    auto* def = obst->objectDefs.get({}); // @todo: substitutions?
+
+                    FHPos objPos = mapPos;
+                    objPos.m_x += def->blockMapPlanar.width - 1;
+                    objPos.m_y += def->blockMapPlanar.height - 1;
+                    if (!m_mapCanvas.m_tileIndex.contains(objPos))
+                        continue;
+
+                    Core::LibraryTerrainConstPtr requiredTerrain = m_mapCanvas.m_tileIndex.at(objPos)->m_zone->m_terrain;
+
+                    if (def->terrainsSoftCache.contains(requiredTerrain))
+                        suitable.push_back(obst);
+                }
+            }
+            //{
+            //    FHPos pos{ (int) x, (int) y, 0 };
+            //    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = 0, .m_valueB = 2 });
+            //}
+            if (suitable.empty())
+                continue;
+
+            //const auto                       bucketSize = firstBucket->m_objects.size();
+            Core::LibraryMapObstacleConstPtr obst = suitable[m_rng->gen(suitable.size() - 1)];
+            assert(obst);
+
+            prev = obst;
+
+            auto* def = obst->objectDefs.get({});
+            assert(def);
+
+            for (size_t my = 0; my < def->blockMapPlanar.height; ++my) {
+                for (size_t mx = 0; mx < def->blockMapPlanar.width; ++mx) {
+                    if (def->blockMapPlanar.data[my][mx] == 0)
+                        continue;
+                    size_t px = x + mx;
+                    size_t py = y + my;
+                    FHPos  maskBitPos{ (int) px, (int) py, 0 };
+                    if (py < mapMask.height && px < mapMask.width) {
+                        if (mapMask.data[py][px] == 2)
+                            mapMask.data[py][px] = 0;
+                        auto* cell = m_mapCanvas.m_tileIndex.at(maskBitPos);
+                        m_mapCanvas.m_needBeBlocked.erase(cell);
+                        m_mapCanvas.m_tentativeBlocked.erase(cell);
+                        m_mapCanvas.m_blocked.insert(cell);
+                    }
+                    //m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = 0, .m_valueB = 3 });
+                }
+            }
+
+            FHPos objPos = mapPos;
+            objPos.m_x += def->blockMapPlanar.width - 1;
+            objPos.m_y += def->blockMapPlanar.height - 1;
+
+            FHObstacle fhOb;
+            fhOb.m_id  = obst;
+            fhOb.m_pos = objPos;
+            m_map.m_objects.m_obstacles.push_back(std::move(fhOb));
+
+            //m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = 0, .m_valueB = 1 }); // red
+
+            //if (cnt-- <= 0)
+            //    return;
+        }
+    }
+
+    for (auto* tile : m_mapCanvas.m_needBeBlocked) {
+        m_logOutput << m_indent << "still require to be blocked: " << tile->posStr() << "\n";
+    }
+    m_mapCanvas.m_tentativeBlocked.clear();
+    if (!m_mapCanvas.m_needBeBlocked.empty()) {
+        throw std::runtime_error("Some block tiles are not set.");
+    }
 }
 
 void FHTemplateProcessor::runGuards()
@@ -695,7 +1006,7 @@ void FHTemplateProcessor::placeTerrainZones()
         fhZone.m_tiles.reserve(tileZone.m_innerArea.size());
         for (auto* cell : tileZone.m_innerArea)
             fhZone.m_tiles.push_back(cell->m_pos);
-        fhZone.m_terrainId = tileZone.m_rngZoneSettings.m_terrain;
+        fhZone.m_terrainId = tileZone.m_terrain;
         assert(fhZone.m_terrainId);
         m_map.m_zones.push_back(std::move(fhZone));
     }

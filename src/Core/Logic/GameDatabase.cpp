@@ -677,9 +677,9 @@ GameDatabase::GameDatabase(const Mernel::PropertyTree& recordObjectMaps)
     const size_t terrainsSize   = m_impl->m_terrains.legacyOrderedRecords().size();
     auto         makePlanarMask = [](const std::vector<uint8_t>& data, bool invert) -> LibraryObjectDef::PlanarMask {
         LibraryObjectDef::PlanarMask res;
-        for (size_t x = 0; x < 8; ++x) {
-            for (size_t y = 0; y < 6; ++y) {
-                uint8_t bit = data[y * 6 + x] ^ uint8_t(invert);
+        for (size_t y = 0; y < 6; ++y) {
+            for (size_t x = 0; x < 8; ++x) {
+                uint8_t bit = data[y * 8 + x] ^ uint8_t(invert);
                 if (bit) {
                     res.width  = std::max(res.width, x + 1);
                     res.height = std::max(res.height, y + 1);
@@ -691,7 +691,7 @@ GameDatabase::GameDatabase(const Mernel::PropertyTree& recordObjectMaps)
             row.resize(res.width);
         for (size_t x = 0; x < 8; ++x) {
             for (size_t y = 0; y < 6; ++y) {
-                uint8_t bit = data[y * 6 + x] ^ uint8_t(invert);
+                uint8_t bit = data[y * 8 + x] ^ uint8_t(invert);
                 if (bit) {
                     res.data[res.height - y - 1][res.width - x - 1] = 1;
                 }
@@ -713,6 +713,14 @@ GameDatabase::GameDatabase(const Mernel::PropertyTree& recordObjectMaps)
 
         obj->blockMapPlanar = makePlanarMask(obj->blockMap, true);
         obj->visitMapPlanar = makePlanarMask(obj->visitMap, false);
+
+        for (auto* terrain : m_impl->m_terrains.m_unsorted) {
+            int legacyId = terrain->legacyId;
+            if (legacyId < 0)
+                continue;
+            if (obj->terrainsSoft.at(obj->terrainsSoft.size() - legacyId - 1))
+                obj->terrainsSoftCache.insert(terrain);
+        }
 
         m_impl->m_objectDefs.m_sorted.push_back(obj);
     }

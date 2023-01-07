@@ -4,13 +4,13 @@
 	"tileMap":{"depth":1,"height":100,"width":100},
 	"rngZones" : {
 		"Common"  : { "centerDispersion": {"x": 5 , "y": 5 }, "towns": 3, "relativeSizeAvg": 100, "relativeSizeDispersion": 10, "cornerRoads": 3  },
-		"Treasure": { "centerDispersion": {"x": 15, "y": 15}, "towns": 5, "relativeSizeAvg": 130, "relativeSizeDispersion": 20 },
+		"Treasure": { "centerDispersion": {"x": 15, "y": 15}, "towns": 5, "relativeSizeAvg": 130, "relativeSizeDispersion": 20, "terrain": "sod.terrain.sand"  },
 		
-		"P1": { "base": "Common"  , "isNormal": true,  "player": "Red" , "faction": "sod.faction.castle"    , "terrain": "sod.terrain.grass"      , "centerAvg": {"x": 10, "y": 10}  },
-		"P2": { "base": "Common"  , "isNormal": true,  "player": "Blue", "faction": "sod.faction.necropolis", "terrain": "sod.terrain.dirt"       , "centerAvg": {"x": 90, "y": 90}  },
-		"P3": { "base": "Common"  , "isNormal": true,  "player": "None", "faction": ""                      , "terrain": "hota.terrain.wasteland" , "centerAvg": {"x": 90, "y": 10}  },
-		"P4": { "base": "Common"  , "isNormal": true,  "player": "None", "faction": ""                      , "terrain": "sod.terrain.snow"       , "centerAvg": {"x": 10, "y": 90}  },
-		"CC": { "base": "Treasure", "isNormal": true,  "player": "None", "faction": ""                      , "terrain": "sod.terrain.sand"       , "centerAvg": {"x": 50, "y": 50}  }
+		"P1": { "base": "Common"  , "isNormal": true,  "player": "Red" , "faction": "sod.faction.castle"    , "centerAvg": {"x": 10, "y": 10}  },
+		"P2": { "base": "Common"  , "isNormal": true,  "player": "Blue", "faction": "sod.faction.necropolis", "centerAvg": {"x": 90, "y": 90}  },
+		"P3": { "base": "Common"  , "isNormal": true,  "player": "None", "faction": ""                      , "centerAvg": {"x": 90, "y": 10}  },
+		"P4": { "base": "Common"  , "isNormal": true,  "player": "None", "faction": ""                      , "centerAvg": {"x": 10, "y": 90}  },
+		"CC": { "base": "Treasure", "isNormal": true,  "player": "None", "faction": ""                      , "centerAvg": {"x": 50, "y": 50}  }
 	},
 	
 	"rngConnections": {

@@ -194,7 +194,8 @@ STRUCT_REFLECTION_PAIRED(
     "extraLayer",                  extraLayer,
     "bonusAll",                    bonusAll,
     "pres",                        presentationParams,
-    "tileBase",                    tileBase
+    "tileBase",                    tileBase,
+    "nonUnderground",              nonUnderground
 )
 // ------------------------------------------------------------------------------------------
 

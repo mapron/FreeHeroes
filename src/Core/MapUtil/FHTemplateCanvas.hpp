@@ -27,6 +27,8 @@ struct MapCanvas {
         Tile* m_neighborR = nullptr;
         Tile* m_neighborB = nullptr;
 
+        std::vector<Tile*> m_allNeighbours;
+
         std::string posStr() const
         {
             return "(" + std::to_string(m_pos.m_x) + ", " + std::to_string(m_pos.m_y) + ", " + std::to_string(m_pos.m_z) + ")";
@@ -39,6 +41,8 @@ struct MapCanvas {
     std::set<TileZone*> m_dirtyZones; // zone ids that must be re-read from the map.
 
     std::set<Tile*> m_blocked;
+    std::set<Tile*> m_needBeBlocked;
+    std::set<Tile*> m_tentativeBlocked;
 
     //std::set<FHPos> m_edge;
 
@@ -63,14 +67,22 @@ struct MapCanvas {
             for (int y = 0; y < height; ++y) {
                 for (int x = 0; x < width; ++x) {
                     Tile* tile = &m_tiles[index++];
-                    if (x > 0)
+                    if (x > 0) {
                         tile->m_neighborL = m_tileIndex.at({ x - 1, y, z });
-                    if (y > 0)
+                        tile->m_allNeighbours.push_back(tile->m_neighborL);
+                    }
+                    if (y > 0) {
                         tile->m_neighborT = m_tileIndex.at({ x, y - 1, z });
-                    if (x < width - 1)
+                        tile->m_allNeighbours.push_back(tile->m_neighborT);
+                    }
+                    if (x < width - 1) {
                         tile->m_neighborR = m_tileIndex.at({ x + 1, y, z });
-                    if (y < height - 1)
+                        tile->m_allNeighbours.push_back(tile->m_neighborR);
+                    }
+                    if (y < height - 1) {
                         tile->m_neighborB = m_tileIndex.at({ x, y + 1, z });
+                        tile->m_allNeighbours.push_back(tile->m_neighborB);
+                    }
                 }
             }
         }

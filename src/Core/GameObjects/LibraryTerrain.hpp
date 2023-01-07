@@ -128,6 +128,8 @@ struct LibraryTerrain {
     bool        extraLayer = false;
     Bonus       bonusAll;
 
+    Core::LibraryTerrainConstPtr nonUnderground = nullptr;
+
     TileBase     tileBase = TileBase::Dirt;
     Presentation presentationParams;
 };

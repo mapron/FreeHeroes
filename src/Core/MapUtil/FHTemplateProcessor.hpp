@@ -34,9 +34,8 @@ public:
         TownsPlacement,
         BorderRoads,
         RoadsPlacement,
-        Borders,
-        InnerObstacles,
         Rewards,
+        Obstacles,
         Guards,
     };
 
@@ -51,9 +50,8 @@ private:
     void runTownsPlacement();
     void runBorderRoads();
     void runRoadsPlacement();
-    void runBorders();
-    void runInnerObstacles();
     void runRewards();
+    void runObstacles();
     void runGuards();
 
     void placeTerrainZones();

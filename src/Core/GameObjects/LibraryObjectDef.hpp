@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
 
 namespace FreeHeroes::Core {
 
@@ -35,6 +36,7 @@ struct LibraryObjectDef {
     std::string              substituteKey;
 
     std::map<std::string, LibraryObjectDefConstPtr> substitutions; // generated;
+    std::set<LibraryTerrainConstPtr>                terrainsSoftCache;
 
     struct Mappings {
         std::string                 key;
@@ -54,6 +56,8 @@ struct LibraryObjectDef {
 
         size_t width  = 0;
         size_t height = 0;
+
+        bool operator==(const PlanarMask&) const noexcept = default;
     };
 
     PlanarMask blockMapPlanar;

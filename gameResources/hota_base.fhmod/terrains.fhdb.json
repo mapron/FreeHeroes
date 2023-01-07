@@ -37,7 +37,8 @@
 "sod.terrain.subterra" :
 {
     "untranslatedName": "Subterra",
-    "moveCost" : 100
+    "moveCost" : 100,
+    "nonUnderground" : "sod.terrain.dirt"
 },
 "sod.terrain.lava" :
 {

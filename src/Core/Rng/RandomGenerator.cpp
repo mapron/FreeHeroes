@@ -128,6 +128,8 @@ public:
 
     uint64_t gen(uint64_t max) override
     {
+        if (max == 0)
+            return 0;
         return Distribution64(0, max)(engine);
     }
 
@@ -152,6 +154,8 @@ public:
 
     uint8_t genSmall(uint8_t max) override
     {
+        if (max == 0)
+            return 0;
         return Distribution8(0, max)(engine);
     }
     uint64_t genSumSmallN(size_t n, uint8_t max) override

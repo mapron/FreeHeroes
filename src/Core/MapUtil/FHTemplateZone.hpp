@@ -15,11 +15,13 @@
 namespace FreeHeroes {
 
 struct TileZone {
-    int                     m_index = 0;
-    std::string             m_id;
-    FHRngZone               m_rngZoneSettings;
-    Core::IRandomGenerator* m_rng       = nullptr;
-    MapCanvas*              m_mapCanvas = nullptr;
+    int                          m_index = 0;
+    std::string                  m_id;
+    FHRngZone                    m_rngZoneSettings;
+    Core::IRandomGenerator*      m_rng       = nullptr;
+    MapCanvas*                   m_mapCanvas = nullptr;
+    Core::LibraryTerrainConstPtr m_terrain   = nullptr;
+    Core::LibraryFactionConstPtr m_faction   = nullptr;
 
     using TileRegion = std::unordered_set<MapCanvas::Tile*>;
 
