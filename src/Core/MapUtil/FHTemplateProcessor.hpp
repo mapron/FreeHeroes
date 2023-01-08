@@ -37,6 +37,7 @@ public:
         Rewards,
         Obstacles,
         Guards,
+        PlayerInfo,
     };
 
     void run(const std::string& stopAfterStage);
@@ -53,12 +54,14 @@ private:
     void runRewards();
     void runObstacles();
     void runGuards();
+    void runPlayerInfo();
 
     void placeTerrainZones();
     void placeDebugInfo();
     void placeRoad(std::vector<FHPos> path);
 
-    Core::LibraryFactionConstPtr getRandomFaction();
+    Core::LibraryFactionConstPtr getRandomFaction(bool rewardOnly);
+    Core::LibraryHeroConstPtr    getRandomHero(Core::LibraryFactionConstPtr faction);
     TileZone&                    findZoneById(const std::string& id);
     std::vector<FHPos>           aStarPath(MapCanvas::Tile* start, MapCanvas::Tile* end);
 
@@ -79,6 +82,7 @@ private:
     std::ostream&                    m_logOutput;
 
     std::vector<Core::LibraryFactionConstPtr> m_playableFactions;
+    std::vector<Core::LibraryFactionConstPtr> m_rewardFactions;
     struct Unit {
         Core::LibraryUnitConstPtr m_id    = nullptr;
         int64_t                   m_value = 0;
@@ -96,6 +100,22 @@ private:
         bool        m_joinable = false;
     };
     std::vector<Guard> m_guards;
+
+    using HeroGeneration = FHRngUserSettings::HeroGeneration;
+    struct PlayerInfo {
+        Core::LibraryFactionConstPtr m_faction = nullptr;
+
+        bool   m_hasMainTown      = false;
+        size_t m_mainTownMapIndex = 0;
+
+        Core::LibraryHeroConstPtr m_startingHero    = nullptr;
+        Core::LibraryHeroConstPtr m_extraHero       = nullptr;
+        HeroGeneration            m_startingHeroGen = HeroGeneration::RandomStartingFaction;
+        HeroGeneration            m_extraHeroGen    = HeroGeneration::None;
+    };
+    std::map<FHPlayerId, PlayerInfo> m_playerInfo;
+
+    std::set<Core::LibraryHeroConstPtr> m_usedHeroes;
 };
 
 class AstarGenerator {

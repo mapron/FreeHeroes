@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TemplatePlayerWidget</class>
+ <widget class="QFrame" name="TemplatePlayerWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>565</width>
+    <height>22</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string/>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <property name="spacing">
+    <number>8</number>
+   </property>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QLabel" name="labelColor">
+     <property name="text">
+      <string>Red</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="FreeHeroes::Gui::ResizeableComboBox" name="comboBoxFaction">
+     <property name="maximumSize">
+      <size>
+       <width>120</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="minimumContentsLength">
+      <number>8</number>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>Main hero</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="FreeHeroes::Gui::ResizeableComboBox" name="comboBoxHeroMainPolicy">
+     <property name="maximumSize">
+      <size>
+       <width>80</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <item>
+      <property name="text">
+       <string>None</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Random - Any Faction</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Random - Starting Faction</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Fixed</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item>
+    <widget class="FreeHeroes::Gui::ResizeableComboBox" name="comboBoxHeroMain">
+     <property name="maximumSize">
+      <size>
+       <width>100</width>
+       <height>16777215</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_31">
+     <property name="text">
+      <string>Main hero</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="FreeHeroes::Gui::ResizeableComboBox" name="comboBoxHeroExtraPolicy">
+     <property name="maximumSize">
+      <size>
+       <width>80</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <item>
+      <property name="text">
+       <string>None</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Random - Any Faction</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Random - Starting Faction</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Fixed</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item>
+    <widget class="FreeHeroes::Gui::ResizeableComboBox" name="comboBoxHeroExtra">
+     <property name="maximumSize">
+      <size>
+       <width>100</width>
+       <height>16777215</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>FreeHeroes::Gui::ResizeableComboBox</class>
+   <extends>QComboBox</extends>
+   <header>CustomFrames.hpp</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

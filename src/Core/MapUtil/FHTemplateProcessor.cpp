@@ -33,7 +33,8 @@ ENUM_REFLECTION_STRINGIY(FHTemplateProcessor::Stage,
                          RoadsPlacement,
                          Rewards,
                          Obstacles,
-                         Guards)
+                         Guards,
+                         PlayerInfo)
 
 }
 
@@ -134,26 +135,30 @@ struct ObstacleIndex {
             return {};
 
         auto isMaskFit = [&mask, xOffset, yOffset](const Core::LibraryObjectDef::PlanarMask& maskObj) {
-            auto w    = mask.width - xOffset;
-            auto h    = mask.height - yOffset;
-            auto wmin = std::min(maskObj.width, w);
-            auto hmin = std::min(maskObj.height, h);
+            const auto w       = mask.width - xOffset;
+            const auto h       = mask.height - yOffset;
+            const auto wmin    = std::min(maskObj.width, w);
+            const auto hmin    = std::min(maskObj.height, h);
+            size_t     overlap = 0;
             for (size_t y = 0; y < hmin; ++y) {
+                const auto& row = mask.data[y + yOffset];
                 for (size_t x = 0; x < wmin; ++x) {
-                    const uint8_t requiredBlockBit  = mask.data[y + yOffset][x + xOffset] == 1;
-                    const uint8_t tentativeBlockBit = mask.data[y + yOffset][x + xOffset] == 2;
-                    const uint8_t objBlockBit       = maskObj.data[y][x];
-                    if (tentativeBlockBit)
-                        continue;
-                    if (requiredBlockBit && !objBlockBit) {
-                        return false;
+                    const bool emptyBlockBit    = row[x + xOffset] == 0;
+                    const bool requiredBlockBit = row[x + xOffset] == 1;
+                    //const bool tentativeBlockBit = row[x + xOffset] == 2;
+                    const bool objBlockBit = maskObj.data[y][x] == 1;
+                    if (objBlockBit) {
+                        overlap++;
+                        if (emptyBlockBit)
+                            return false;
                     }
-                    if (!requiredBlockBit && objBlockBit) {
-                        return false;
+                    if (!objBlockBit) {
+                        if (requiredBlockBit)
+                            return false;
                     }
                 }
             }
-            return true;
+            return overlap > 0;
         };
 
         std::vector<const ObstacleBucket*> result;
@@ -178,8 +183,10 @@ FHTemplateProcessor::FHTemplateProcessor(FHMap&                     map,
 {
     auto& factions = m_database->factions()->records();
     for (auto* faction : factions) {
-        if (faction->alignment == Core::LibraryFaction::Alignment::Special
-            || faction->alignment == Core::LibraryFaction::Alignment::Independent)
+        if (faction->alignment == Core::LibraryFaction::Alignment::Special)
+            continue;
+        m_rewardFactions.push_back(faction);
+        if (faction->alignment == Core::LibraryFaction::Alignment::Independent)
             continue;
         m_playableFactions.push_back(faction);
     }
@@ -205,19 +212,73 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
     if (regionCount <= 1)
         throw std::runtime_error("need at least two zones");
 
+    m_logOutput << baseIndent << "Start generating map (seed=" << m_map.m_seed << ") " << m_map.m_tileMap.m_width << "x" << m_map.m_tileMap.m_height
+                << " " << (m_map.m_tileMap.m_depth == 2 ? "+U" : "no U") << "\n";
+
     m_mapCanvas.init(m_map.m_tileMap.m_width, m_map.m_tileMap.m_height, m_map.m_tileMap.m_depth);
 
     m_totalRelativeArea = 0;
 
+    for (const auto& [playerId, info] : m_map.m_players) {
+        m_playerInfo[playerId] = {};
+    }
+    for (const auto& [key, rngZone] : m_map.m_rngZones) {
+        if (rngZone.m_player <= FHPlayerId::None)
+            continue;
+
+        if (!m_playerInfo.contains(rngZone.m_player))
+            throw std::runtime_error("You need to define all players used in zones.");
+    }
+    for (auto& [playerId, info] : m_playerInfo) {
+        if (!m_map.m_rngUserSettings.m_players.contains(playerId))
+            continue;
+        auto& pl               = m_map.m_rngUserSettings.m_players[playerId];
+        info.m_faction         = pl.m_faction;
+        info.m_startingHero    = pl.m_startingHero;
+        info.m_extraHero       = pl.m_extraHero;
+        info.m_startingHeroGen = pl.m_startingHeroGen;
+        info.m_extraHeroGen    = pl.m_extraHeroGen;
+    }
+
+    auto heroGen = [this](Core::LibraryHeroConstPtr hero, Core::LibraryFactionConstPtr faction, HeroGeneration policy) -> Core::LibraryHeroConstPtr {
+        if (policy == HeroGeneration::None)
+            return nullptr;
+        if (policy == HeroGeneration::Fixed) {
+            m_usedHeroes.insert(hero);
+            return hero;
+        }
+        return getRandomHero(policy == HeroGeneration::RandomStartingFaction ? faction : nullptr);
+    };
+
+    for (auto& [playerId, info] : m_playerInfo) {
+        if (!info.m_faction)
+            info.m_faction = getRandomFaction(false);
+        info.m_startingHero = heroGen(info.m_startingHero, info.m_faction, info.m_startingHeroGen);
+        info.m_extraHero    = heroGen(info.m_extraHero, info.m_faction, info.m_extraHeroGen);
+    }
+
     m_tileZones.resize(regionCount);
     for (int i = 0; const auto& [key, rngZone] : m_map.m_rngZones) {
-        auto& tileZone     = m_tileZones[i];
-        tileZone.m_faction = rngZone.m_faction;
-        if (!tileZone.m_faction)
-            tileZone.m_faction = getRandomFaction();
+        auto& tileZone             = m_tileZones[i];
+        tileZone.m_player          = rngZone.m_player;
+        tileZone.m_mainTownFaction = rngZone.m_mainTownFaction;
+        tileZone.m_rewardsFaction  = rngZone.m_rewardsFaction;
+        if (!tileZone.m_mainTownFaction) {
+            if (m_playerInfo.contains(tileZone.m_player)) {
+                tileZone.m_mainTownFaction = m_playerInfo[tileZone.m_player].m_faction;
+            } else {
+                //neutral zones
+                tileZone.m_mainTownFaction = getRandomFaction(false);
+            }
+        }
+        if (!tileZone.m_rewardsFaction) {
+            tileZone.m_rewardsFaction = tileZone.m_mainTownFaction;
+        }
+        assert(tileZone.m_mainTownFaction);
+        assert(tileZone.m_rewardsFaction);
         tileZone.m_terrain = rngZone.m_terrain;
         if (!tileZone.m_terrain)
-            tileZone.m_terrain = tileZone.m_faction->nativeTerrain;
+            tileZone.m_terrain = tileZone.m_mainTownFaction->nativeTerrain;
         int z = 0;
         if (!z && tileZone.m_terrain->nonUnderground) {
             tileZone.m_terrain = tileZone.m_terrain->nonUnderground;
@@ -248,7 +309,8 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
                          Stage::RoadsPlacement,
                          Stage::Rewards,
                          Stage::Obstacles,
-                         Stage::Guards }) {
+                         Stage::Guards,
+                         Stage::PlayerInfo }) {
         m_currentStage = stage;
 
         Mernel::ScopeTimer timer;
@@ -289,6 +351,8 @@ void FHTemplateProcessor::runCurrentStage()
             return runObstacles();
         case Stage::Guards:
             return runGuards();
+        case Stage::PlayerInfo:
+            return runPlayerInfo();
     }
 }
 
@@ -331,7 +395,12 @@ void FHTemplateProcessor::runZoneTilesInitial()
         tileZone.m_absoluteArea   = tileZone.m_relativeArea * area * greedyPercent / m_totalRelativeArea / 100;
         tileZone.m_absoluteRadius = static_cast<int64_t>(sqrt(tileZone.m_absoluteArea) / M_PI);
 
-        m_logOutput << m_indent << "zone [" << tileZone.m_id << "] area=" << tileZone.m_absoluteArea << ", radius=" << tileZone.m_absoluteRadius << "\n";
+        m_logOutput << m_indent << "zone [" << tileZone.m_id << "] area=" << tileZone.m_absoluteArea
+                    << ", radius=" << tileZone.m_absoluteRadius
+                    << ", townFaction=" << tileZone.m_mainTownFaction->id
+                    << ", rewardFaction=" << tileZone.m_rewardsFaction->id
+                    << ", terrain=" << tileZone.m_terrain->id
+                    << "\n";
     }
 
     KMeansSegmentation seg;
@@ -424,6 +493,9 @@ void FHTemplateProcessor::runZoneTilesRefinement()
     for (auto& tileZone : m_tileZones) {
         tileZone.readFromMap();
     }
+    for (auto& tileZone : m_tileZones) {
+        tileZone.fillUnzoned();
+    }
 
     auto checkUnzoned = [this]() {
         bool result = true;
@@ -477,18 +549,22 @@ void FHTemplateProcessor::runZoneTilesRefinement()
 
 void FHTemplateProcessor::runTownsPlacement()
 {
-    auto placeTown = [this](FHPos pos, FHPlayerId player, Core::LibraryFactionConstPtr faction, bool hasFort) {
-        FHTown town;
+    auto placeTown = [this](FHTown town, FHPos pos, FHPlayerId player, Core::LibraryFactionConstPtr faction) {
         if (!faction)
-            faction = getRandomFaction();
+            faction = getRandomFaction(false);
         town.m_factionId = faction;
 
         pos.m_x += 2;
-        town.m_pos     = pos;
-        town.m_player  = player;
-        town.m_hasFort = hasFort;
-        if (hasFort)
+        town.m_pos    = pos;
+        town.m_player = player;
+        if (town.m_hasFort)
             town.m_defIndex.variant = "FORT";
+        if (town.m_isMain && m_playerInfo.contains(player)) {
+            if (m_playerInfo[player].m_hasMainTown)
+                throw std::runtime_error("Multiple main towns is not allowed");
+            m_playerInfo[player].m_hasMainTown      = true;
+            m_playerInfo[player].m_mainTownMapIndex = m_map.m_towns.size();
+        }
         m_map.m_towns.push_back(town);
         for (int x = 0; x < 5; x++) {
             for (int y = 0; y < 3; y++) {
@@ -503,9 +579,10 @@ void FHTemplateProcessor::runTownsPlacement()
 
     for (auto& tileZone : m_tileZones) {
         std::vector<FHPos> townPositions;
-        if (tileZone.m_rngZoneSettings.m_towns == 0) {
+        const auto&        towns = tileZone.m_rngZoneSettings.m_towns;
+        if (towns.size() == 0) {
             continue;
-        } else if (tileZone.m_rngZoneSettings.m_towns == 1) {
+        } else if (towns.size() == 1) {
             townPositions.push_back(tileZone.m_centroid);
         } else {
             KMeansSegmentation seg;
@@ -513,20 +590,20 @@ void FHTemplateProcessor::runTownsPlacement()
             for (auto* cell : tileZone.m_innerArea)
                 seg.m_points.push_back({ cell->m_pos });
 
-            seg.initRandomClusterCentoids(tileZone.m_rngZoneSettings.m_towns, m_rng);
+            seg.initRandomClusterCentoids(towns.size(), m_rng);
             seg.run(m_logOutput);
 
             for (KMeansSegmentation::Cluster& cluster : seg.m_clusters) {
                 townPositions.push_back(cluster.getCentroid().toPos());
             }
         }
-        auto mainTownFaction = tileZone.m_faction;
-        assert(mainTownFaction);
 
-        placeTown(townPositions[0], tileZone.m_rngZoneSettings.m_player, mainTownFaction, true);
-        for (size_t i = 1; i < townPositions.size(); ++i) {
-            placeTown(townPositions[i], tileZone.m_rngZoneSettings.m_player, nullptr, false);
+        for (size_t i = 0; i < towns.size(); ++i) {
+            auto player  = towns[i].m_playerControlled ? tileZone.m_rngZoneSettings.m_player : FHPlayerId::None;
+            auto faction = towns[i].m_useZoneFaction ? tileZone.m_mainTownFaction : nullptr;
+            placeTown(towns[i].m_town, townPositions[i], player, faction);
         }
+
         for (auto&& pos : townPositions) {
             auto pos2 = pos;
             pos2.m_y++;
@@ -876,8 +953,8 @@ void FHTemplateProcessor::runObstacles()
                     size_t py = y + my;
                     FHPos  maskBitPos{ (int) px, (int) py, 0 };
                     if (py < mapMask.height && px < mapMask.width) {
-                        if (mapMask.data[py][px] == 2)
-                            mapMask.data[py][px] = 0;
+                        if (mapMask.data[py][px] == 1)
+                            mapMask.data[py][px] = 2;
                         auto* cell = m_mapCanvas.m_tileIndex.at(maskBitPos);
                         m_mapCanvas.m_needBeBlocked.erase(cell);
                         m_mapCanvas.m_tentativeBlocked.erase(cell);
@@ -999,6 +1076,47 @@ void FHTemplateProcessor::runGuards()
     }
 }
 
+void FHTemplateProcessor::runPlayerInfo()
+{
+    for (const auto& [playerId, info] : m_playerInfo) {
+        FHPlayer& player                = m_map.m_players[playerId];
+        player.m_startingFactions       = { info.m_faction };
+        player.m_generateHeroAtMainTown = false;
+
+        if (info.m_hasMainTown && info.m_startingHero) {
+            const FHTown& mainTown = m_map.m_towns.at(info.m_mainTownMapIndex);
+            FHPos         pos      = mainTown.m_pos;
+            pos.m_x -= 2;
+
+            FHHero fhhero;
+            fhhero.m_player = playerId;
+            fhhero.m_pos    = pos;
+            fhhero.m_isMain = true;
+
+            FHHeroData& destHero = fhhero.m_data;
+            destHero.m_army.hero = Core::AdventureHero(info.m_startingHero);
+
+            m_map.m_wanderingHeroes.push_back(std::move(fhhero));
+        }
+        if (info.m_hasMainTown && info.m_extraHero) {
+            const FHTown& mainTown = m_map.m_towns.at(info.m_mainTownMapIndex);
+
+            FHPos pos = mainTown.m_pos;
+            pos.m_x -= 2;
+            pos.m_y += 1;
+
+            FHHero fhhero;
+            fhhero.m_player = playerId;
+            fhhero.m_pos    = pos;
+
+            FHHeroData& destHero = fhhero.m_data;
+            destHero.m_army.hero = Core::AdventureHero(info.m_extraHero);
+
+            m_map.m_wanderingHeroes.push_back(std::move(fhhero));
+        }
+    }
+}
+
 void FHTemplateProcessor::placeTerrainZones()
 {
     for (auto& tileZone : m_tileZones) {
@@ -1014,6 +1132,8 @@ void FHTemplateProcessor::placeTerrainZones()
 
 void FHTemplateProcessor::placeDebugInfo()
 {
+    if (m_stopAfter == Stage::Invalid)
+        return;
     for (auto& tileZone : m_tileZones) {
         if (m_stopAfter <= Stage::TownsPlacement) {
             m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = tileZone.m_startTile, .m_valueA = tileZone.m_index, .m_valueB = 1 }); // red
@@ -1047,9 +1167,30 @@ void FHTemplateProcessor::placeRoad(std::vector<FHPos> path)
     m_map.m_roads.push_back(std::move(road));
 }
 
-Core::LibraryFactionConstPtr FHTemplateProcessor::getRandomFaction()
+Core::LibraryFactionConstPtr FHTemplateProcessor::getRandomFaction(bool rewardOnly)
 {
-    return m_playableFactions[m_rng->genSmall(m_playableFactions.size() - 1)];
+    auto& factions = rewardOnly ? m_rewardFactions : m_playableFactions;
+    return factions[m_rng->genSmall(factions.size() - 1)];
+}
+
+Core::LibraryHeroConstPtr FHTemplateProcessor::getRandomHero(Core::LibraryFactionConstPtr faction)
+{
+    if (!faction)
+        return getRandomHero(getRandomFaction(false));
+
+    std::vector<Core::LibraryHeroConstPtr> heroes;
+    std::set<Core::LibraryHeroConstPtr>    disabled(m_map.m_disabledHeroes.cbegin(), m_map.m_disabledHeroes.cend());
+
+    for (auto* hero : faction->heroes)
+        if (!disabled.contains(hero) && !m_usedHeroes.contains(hero))
+            heroes.push_back(hero);
+
+    if (heroes.empty())
+        return nullptr;
+
+    auto* hero = heroes[m_rng->gen(heroes.size() - 1)];
+    m_usedHeroes.insert(hero);
+    return hero;
 }
 
 TileZone& FHTemplateProcessor::findZoneById(const std::string& id)

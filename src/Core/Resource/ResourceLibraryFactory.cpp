@@ -93,7 +93,7 @@ struct ResourceLibraryFactory::Impl {
             if (m_mods.contains(id)) {
                 Logger(Logger::Err) << "Found duplicate paths for mod id '" << id << "', both '" << path2string(m_mods[id].m_modRoot) << "' and '" << path2string(it.path()) << "'";
             }
-            Logger(Logger::Info) << "Registered mod '" << id << "' at '" << it.path() << "'";
+            Logger(Logger::Info) << "Registered mod '" << id << "' at '" << path2string(it.path()) << "'";
             m_mods[id] = { .m_modRoot = it.path() };
         }
     }

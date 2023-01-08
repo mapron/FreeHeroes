@@ -143,7 +143,9 @@ bool Application::load()
     }
 
     Logger(Logger::Info) << "Application::load - start";
-    QString       binDir = QString::fromStdString(path2string(m_impl->coreApp->getLocations().getBinDir()));
+    const auto    binPath = m_impl->coreApp->getLocations().getBinDir();
+    QString       binDir  = QString::fromStdString(path2string(binPath));
+    QString       binDir2 = QString::fromStdWString(binPath.wstring());
     ProfilerScope scopeAll("Application::load");
     if (m_options.contains(Option::QtTranslations)) {
         ProfilerScope scope("Qt init resource");

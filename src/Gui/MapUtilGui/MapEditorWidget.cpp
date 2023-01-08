@@ -31,6 +31,7 @@
 
 #include <QGraphicsView>
 #include <QGraphicsItem>
+#include <QMessageBox>
 
 #include <vector>
 #include <set>
@@ -147,6 +148,12 @@ MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDataba
     });
 
     resize(1000, 800);
+
+    auto* timer = new Gui::TickTimer(this);
+    connect(timer, &Gui::TickTimer::tick, this, [this](uint32_t tick) {
+        for (auto* sprite : m_impl->m_mapSprites)
+            sprite->tick(tick);
+    });
 }
 MapEditorWidget::~MapEditorWidget()
 {
@@ -176,30 +183,29 @@ void MapEditorWidget::load(const std::string& filename)
         .m_dumpBinaryDataJson      = false,
     };
 
-    MapConverter converter(os,
-                           m_gameDatabaseContainer,
-                           m_rngFactory,
-                           sett);
+    try {
+        MapConverter converter(os,
+                               m_gameDatabaseContainer,
+                               m_rngFactory,
+                               sett);
 
-    converter.run(MapConverter::Task::LoadFH);
+        converter.run(MapConverter::Task::LoadFH);
 
-    m_impl->m_map = std::move(converter.m_mapFH);
+        m_impl->m_map = std::move(converter.m_mapFH);
 
-    auto rng = m_rngFactory->create();
-    rng->setSeed(m_impl->m_map.m_seed);
+        auto rng = m_rngFactory->create();
+        rng->setSeed(m_impl->m_map.m_seed);
 
-    auto* db = m_gameDatabaseContainer->getDatabase(m_impl->m_map.m_version);
+        auto* db = m_gameDatabaseContainer->getDatabase(m_impl->m_map.m_version);
 
-    m_impl->m_map.initTiles(db);
-    m_impl->m_map.m_tileMap.rngTiles(rng.get(), m_impl->m_map.m_rngOptions.m_roughTilePercentage);
+        m_impl->m_map.initTiles(db);
+        m_impl->m_map.m_tileMap.rngTiles(rng.get(), m_impl->m_map.m_rngOptions.m_roughTilePercentage);
 
-    updateMap();
-
-    auto* timer = new Gui::TickTimer(this);
-    connect(timer, &Gui::TickTimer::tick, this, [this](uint32_t tick) {
-        for (auto* sprite : m_impl->m_mapSprites)
-            sprite->tick(tick);
-    });
+        updateMap();
+    }
+    catch (std::exception& ex) {
+        QMessageBox::warning(this, tr("Error occured"), QString::fromStdString(ex.what()));
+    }
 }
 
 void MapEditorWidget::updateMap()
@@ -208,6 +214,7 @@ void MapEditorWidget::updateMap()
     m_impl->m_spriteMap = renderer.render(m_impl->m_map, m_graphicsLibrary);
 
     m_impl->m_scene->clear();
+    m_impl->m_mapSprites.clear();
     for (int d = 0; d < m_impl->m_spriteMap.m_depth; ++d) {
         SpriteMapItem* item = new SpriteMapItem(&m_impl->m_spriteMap, &m_impl->m_viewSettings.m_paintSettings, d, g_mapAnimationInterval);
         m_impl->m_mapSprites.push_back(item);

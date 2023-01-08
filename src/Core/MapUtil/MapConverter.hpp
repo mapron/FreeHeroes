@@ -39,13 +39,13 @@ public:
     };
 
     struct Settings {
-        PathsSet    m_inputs;
-        PathsSet    m_outputs;
-        bool        m_dumpUncompressedBuffers = false;
-        bool        m_dumpBinaryDataJson      = false;
-        uint64_t    m_seed                    = 0;
-        int         m_mapSize                 = 72;
-        std::string m_stopAfterStage;
+        PathsSet         m_inputs;
+        PathsSet         m_outputs;
+        bool             m_dumpUncompressedBuffers = false;
+        bool             m_dumpBinaryDataJson      = false;
+        uint64_t         m_seed                    = 0;
+        Mernel::std_path m_rngUserSettings;
+        std::string      m_stopAfterStage;
     };
 
     enum class RawState
@@ -75,6 +75,8 @@ public:
         LoadFHTpl,
         LoadFH,
         SaveFH,
+        LoadH3M,
+        SaveH3M,
         FHMapToH3M,
         H3MToFHMap,
         FHTplToFHMap,

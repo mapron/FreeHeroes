@@ -347,17 +347,17 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
             stream >> player;
     }
 
-    auto readBitsSized = [&stream](std::vector<uint8_t>& bitArray, bool sized) {
+    auto readBitsSized = [&stream](std::vector<uint8_t>& bitArray, bool sized, bool invert) {
         if (sized) {
             auto s = stream.readSize();
             if (bitArray.size() != s) {
                 throw std::runtime_error("Inconsistent bit array size, expected:" + std::to_string(bitArray.size()) + ", found:" + std::to_string(s));
             }
         }
-        stream.readBits(bitArray);
+        stream.readBits(bitArray, invert);
     };
 
-    readBitsSized(m_allowedHeroes, m_features->m_mapAllowedHeroesSized);
+    readBitsSized(m_allowedHeroes, m_features->m_mapAllowedHeroesSized, false);
 
     if (m_features->m_mapPlaceholderHeroes) {
         stream >> m_placeholderHeroes;
@@ -384,7 +384,7 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
     }
 
     if (m_features->m_mapAllowedArtifacts)
-        readBitsSized(m_allowedArtifacts, m_features->m_mapAllowedArtifactsSized);
+        readBitsSized(m_allowedArtifacts, m_features->m_mapAllowedArtifactsSized, true);
 
     if (m_features->m_mapAllowedSpells)
         stream.readBits(m_allowedSpells);

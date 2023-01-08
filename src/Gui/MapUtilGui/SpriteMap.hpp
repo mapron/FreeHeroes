@@ -74,6 +74,11 @@ struct SpriteMap {
             m_info.push_back({ std::move(a), std::move(b) });
             return *this;
         }
+        Item& setPriority(int priority)
+        {
+            m_priority = priority;
+            return *this;
+        }
     };
 
     struct Cell {

@@ -284,25 +284,25 @@ void ConversionHandler::setOutputFilename(const Mernel::std_path& path, std::str
 void ConversionHandler::readBinaryBufferData()
 {
     m_binaryBuffer = Mernel::readFileIntoHolderThrow(m_inputFilename);
-    m_logOutput << m_currentIndent << "Read " << m_binaryBuffer.size() << " bytes from: " << m_inputFilename << '\n';
+    m_logOutput << m_currentIndent << "Read " << m_binaryBuffer.size() << " bytes from: " << Mernel::path2string(m_inputFilename) << '\n';
 }
 
 void ConversionHandler::writeBinaryBufferData()
 {
-    m_logOutput << m_currentIndent << "Write " << m_binaryBuffer.size() << " bytes to: " << m_outputFilename << '\n';
+    m_logOutput << m_currentIndent << "Write " << m_binaryBuffer.size() << " bytes to: " << Mernel::path2string(m_outputFilename) << '\n';
     Mernel::writeFileFromHolderThrow(m_outputFilename, m_binaryBuffer);
 }
 
 void ConversionHandler::readJsonToProperty()
 {
-    m_logOutput << m_currentIndent << "Read: " << m_inputFilename << '\n';
+    m_logOutput << m_currentIndent << "Read: " << Mernel::path2string(m_inputFilename) << '\n';
     std::string buffer = Mernel::readFileIntoBufferThrow(m_inputFilename);
     m_json             = Mernel::readJsonFromBufferThrow(buffer);
 }
 
 void ConversionHandler::writeJsonFromProperty()
 {
-    m_logOutput << m_currentIndent << "Write: " << m_outputFilename << '\n';
+    m_logOutput << m_currentIndent << "Write: " << Mernel::path2string(m_outputFilename) << '\n';
     std::string buffer = Mernel::writeJsonToBufferThrow(m_json, m_settings.m_prettyJson);
     Mernel::writeFileFromBufferThrow(m_outputFilename, buffer);
 }

@@ -191,6 +191,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         cas1->m_hasFort         = fhTown.m_hasFort;
         cas1->m_questIdentifier = fhTown.m_questIdentifier;
         cas1->m_spellResearch   = fhTown.m_spellResearch;
+
         //cas1->m_formation       = 0xCC;
         cas1->prepareArrays();
         auto* libraryFaction = fhTown.m_factionId;
@@ -245,7 +246,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
     for (auto& allowed : dest.m_allowedHeroes)
         allowed = 1;
     for (auto& allowed : dest.m_allowedArtifacts)
-        allowed = 1;
+        allowed = 0;
     for (auto& allowed : dest.m_allowedSpells)
         allowed = 1;
     for (auto& allowed : dest.m_allowedSecSkills)
@@ -257,13 +258,13 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
     }
 
     if (src.m_version == Core::GameVersion::HOTA) {
-        // these artifact ids are just unexistent.
+        // these artifact ids are just unexistent. @todo: do I really need this logic?
         dest.m_allowedArtifacts[145] = 0;
         dest.m_allowedArtifacts[144] = 0;
     }
     for (const auto& artId : src.m_disabledArtifacts) {
         const auto legacyId               = (artId)->legacyId;
-        dest.m_allowedArtifacts[legacyId] = 0;
+        dest.m_allowedArtifacts[legacyId] = 1;
     }
 
     for (const auto& spellId : src.m_disabledSpells) {

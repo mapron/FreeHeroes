@@ -50,6 +50,12 @@ void FHMap::fromJson(PropertyTree data, const Core::IGameDatabase* database)
     reader.jsonToValue(data, *this);
 }
 
+void FHMap::applyRngUserSettings(const Mernel::PropertyTree& data, const Core::IGameDatabase* database)
+{
+    Core::PropertyTreeReaderDatabase reader(database);
+    reader.jsonToValue(data, m_rngUserSettings);
+}
+
 void FHMap::initTiles(const Core::IGameDatabase* database)
 {
     m_tileMap.updateSize();

@@ -217,6 +217,8 @@ void SpriteMapPainter::paint(QPainter*        painter,
 
 void SpriteMapPainter::paintMinimap(QPainter* painter, const SpriteMap* spriteMap, QSize minimapSize) const
 {
+    if (spriteMap->m_planes.empty())
+        return;
     QPixmap pixmap(spriteMap->m_width, spriteMap->m_height);
     auto    img = pixmap.toImage();
 

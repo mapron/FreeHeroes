@@ -1,16 +1,24 @@
 {
 	"version": "HOTA",
-	"seed": 123,
+	"seed": 0,
+	"name": "FreeHeroes generated - JC",
+	"descr": "FreeHeroes generated - JC",
 	"tileMap":{"depth":1,"height":100,"width":100},
+	"players": {
+		"Red" : {"human": true},
+		"Blue": {"human": true}
+	},
 	"rngZones" : {
-		"Common"  : { "centerDispersion": {"x": 5 , "y": 5 }, "towns": 3, "relativeSizeAvg": 100, "relativeSizeDispersion": 10, "cornerRoads": 3  },
-		"Treasure": { "centerDispersion": {"x": 15, "y": 15}, "towns": 5, "relativeSizeAvg": 130, "relativeSizeDispersion": 20, "terrain": "sod.terrain.sand"  },
-		
-		"P1": { "base": "Common"  , "isNormal": true,  "player": "Red" , "faction": "sod.faction.castle"    , "centerAvg": {"x": 10, "y": 10}  },
-		"P2": { "base": "Common"  , "isNormal": true,  "player": "Blue", "faction": "sod.faction.necropolis", "centerAvg": {"x": 90, "y": 90}  },
-		"P3": { "base": "Common"  , "isNormal": true,  "player": "None", "faction": ""                      , "centerAvg": {"x": 90, "y": 10}  },
-		"P4": { "base": "Common"  , "isNormal": true,  "player": "None", "faction": ""                      , "centerAvg": {"x": 10, "y": 90}  },
-		"CC": { "base": "Treasure", "isNormal": true,  "player": "None", "faction": ""                      , "centerAvg": {"x": 50, "y": 50}  }
+		"Common"  : { "centerDispersion": {"x": 5 , "y": 5 }, "relativeSizeAvg": 100, "relativeSizeDispersion": 10, "cornerRoads": 3,
+			"towns": [{"town":{"isMain":true, "hasFort":true},"playerControlled":true, "useZoneFaction": true}, {}, {}]	},
+		"Treasure": { "centerDispersion": {"x": 15, "y": 15}, "relativeSizeAvg": 130, "relativeSizeDispersion": 20, "terrain": "sod.terrain.sand",
+			"towns": [{"town":{"hasFort":true}, "useZoneFaction": true}, {"town":{"hasFort":true}}, {"town":{"hasFort":true}}, {"town":{"hasFort":true}}, {"town":{"hasFort":true}}]	},
+
+		"P1": { "base": "Common"  , "isNormal": true,  "player": "Red" , "centerAvg": {"x": 10, "y": 10}  },
+		"P2": { "base": "Common"  , "isNormal": true,  "player": "Blue", "centerAvg": {"x": 90, "y": 90}  },
+		"P3": { "base": "Common"  , "isNormal": true,  "player": "None", "centerAvg": {"x": 90, "y": 10} , "rewardsFaction" : "hota.faction.cove", "terrain": "hota.terrain.wasteland" },
+		"P4": { "base": "Common"  , "isNormal": true,  "player": "None", "centerAvg": {"x": 10, "y": 90} , "rewardsFaction" : "sod.faction.neutral" },
+		"CC": { "base": "Treasure", "isNormal": true,  "player": "None", "centerAvg": {"x": 50, "y": 50}  }
 	},
 	
 	"rngConnections": {
@@ -22,5 +30,68 @@
 	"rngOptions": {
 		"rotationDegreeDispersion": 50,
 		"allowFlip": true
-	}
+	},
+	"config":{
+		"allowSpecialWeeks":false,
+		"hasRoundLimit":true,
+		"roundLimit": 100
+	},
+	"disabledArtifacts": [
+		"sod.artifact.complex.allStat"         ,
+		"sod.artifact.complex.necro"           ,
+		"sod.artifact.complex.life"            ,
+		"sod.artifact.complex.debuff"          ,
+		"sod.artifact.complex.growth"          ,
+		"sod.artifact.complex.immune"          ,
+		"sod.artifact.complex.freeBolt"        ,
+		"sod.artifact.complex.fastOnboard"     ,
+		"sod.artifact.complex.noBowPenalty"    ,
+		"sod.artifact.complex.manaRegen"       ,
+		"sod.artifact.complex.spellRounds"     ,
+		"sod.artifact.complex.resources"       ,
+		"hota.artifact.complex.diplomacy"      ,
+		"hota.artifact.complex.resist"         ,
+		"hota.artifact.complex.buff"           ,
+		"hota.artifact.complex.gold"           ,
+		
+		"sod.artifact.sword.armag"             ,
+		"hota.artifact.misc.summon"            ,
+		"sod.artifact.misc.dragonStuff"        ,
+		"sod.artifact.helm.boat"               ,
+		"sod.artifact.neck.mp1"                ,
+		
+		"sod.artifact.cape.noMagic3plus"       ,
+		"sod.artifact.misc.noMagic"            ,
+		
+		"sod.artifact.misc.eagle1"             ,
+		"sod.artifact.misc.eagle2"             ,
+		"sod.artifact.misc.eagle3"             ,
+		
+		"sod.artifact.neck.resist1"            ,
+		"sod.artifact.cape.resist1"            ,
+		"sod.artifact.boots.resist1"           
+	],
+	"disabledHeroes":[
+		"sod.hero.rampart.rn020",
+		"sod.hero.castle.kn130",
+
+		"sod.hero.campaign.sh000",
+		"sod.hero.campaign.qc128",
+		"sod.hero.campaign.sh003",
+		"sod.hero.campaign.sh004",
+		"sod.hero.campaign.sh005",
+		"sod.hero.campaign.sh006",
+		"sod.hero.campaign.sh007",
+		"sod.hero.campaign.sh009",
+		"sod.hero.campaign.sh008",
+		"sod.hero.campaign.sh001",
+		"sod.hero.campaign.dm131",
+
+		"hota.hero.campaign.cvc01",
+		"hota.hero.campaign.cvc02"
+	],
+	"disabledSkills":[
+		"sod.skill.eagleEye",
+		"sod.skill.resistance"
+	]
 }

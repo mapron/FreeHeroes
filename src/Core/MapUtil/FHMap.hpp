@@ -216,16 +216,23 @@ struct FHScholar : public FHCommonVisitable {
     Core::LibrarySecondarySkillConstPtr m_skillId     = nullptr;
     Core::LibrarySpellConstPtr          m_spellId     = nullptr;
 };
+struct FHRngZoneTown {
+    FHTown m_town;
+    bool   m_playerControlled = false;
+    bool   m_useZoneFaction   = false;
+};
 
 struct FHRngZone {
-    FHPlayerId                   m_player  = FHPlayerId::Invalid;
-    Core::LibraryFactionConstPtr m_faction = nullptr;
-    Core::LibraryTerrainConstPtr m_terrain = nullptr;
-    int                          m_towns   = 0;
-    FHPos                        m_centerAvg;
-    FHPos                        m_centerDispersion;
-    int                          m_relativeSizeAvg        = 100;
-    int                          m_relativeSizeDispersion = 0;
+    FHPlayerId                   m_player          = FHPlayerId::Invalid;
+    Core::LibraryFactionConstPtr m_mainTownFaction = nullptr;
+    Core::LibraryFactionConstPtr m_rewardsFaction  = nullptr;
+    Core::LibraryTerrainConstPtr m_terrain         = nullptr;
+
+    std::vector<FHRngZoneTown> m_towns;
+    FHPos                      m_centerAvg;
+    FHPos                      m_centerDispersion;
+    int                        m_relativeSizeAvg        = 100;
+    int                        m_relativeSizeDispersion = 0;
 
     int m_cornerRoads = 0;
 
@@ -252,6 +259,31 @@ struct FHRngOptions {
     bool m_allowFlip                = false;
 };
 
+struct FHRngUserSettings {
+    enum class HeroGeneration
+    {
+        None,
+        RandomAnyFaction,
+        RandomStartingFaction,
+        Fixed
+    };
+
+    struct UserPlayer {
+        Core::LibraryFactionConstPtr m_faction         = nullptr;
+        Core::LibraryHeroConstPtr    m_startingHero    = nullptr;
+        Core::LibraryHeroConstPtr    m_extraHero       = nullptr;
+        HeroGeneration               m_startingHeroGen = HeroGeneration::RandomStartingFaction;
+        HeroGeneration               m_extraHeroGen    = HeroGeneration::None;
+    };
+    using PlayersMap = std::map<FHPlayerId, UserPlayer>;
+
+    PlayersMap m_players;
+
+    FHRoadType m_defaultRoad     = FHRoadType::Invalid;
+    int        m_difficultyScale = 100;
+    int        m_mapSize         = 144;
+};
+
 struct MAPUTIL_EXPORT FHMap {
     using PlayersMap       = std::map<FHPlayerId, FHPlayer>;
     using DefMap           = std::map<Core::LibraryObjectDefConstPtr, Core::LibraryObjectDef>;
@@ -276,6 +308,7 @@ struct MAPUTIL_EXPORT FHMap {
     RngZoneMap               m_rngZones;
     RngConnectionMap         m_rngConnections;
     FHRngOptions             m_rngOptions;
+    FHRngUserSettings        m_rngUserSettings;
 
     struct Objects {
         std::vector<FHResource>       m_resources;
@@ -318,6 +351,8 @@ struct MAPUTIL_EXPORT FHMap {
 
     void toJson(Mernel::PropertyTree& data) const;
     void fromJson(Mernel::PropertyTree data, const Core::IGameDatabase* database);
+
+    void applyRngUserSettings(const Mernel::PropertyTree& data, const Core::IGameDatabase* database);
 
     void initTiles(const Core::IGameDatabase* database);
 

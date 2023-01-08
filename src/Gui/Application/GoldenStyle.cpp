@@ -184,6 +184,10 @@ void GoldenStyle::drawPrimitive(PrimitiveElement element,
             } else {
                 brush = option->palette.button();
             }
+            if (!(option->state & (State_Enabled))) {
+                brush = option->palette.dark();
+                darker = false;
+            }
         }
 
         {

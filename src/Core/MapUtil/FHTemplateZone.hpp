@@ -18,10 +18,12 @@ struct TileZone {
     int                          m_index = 0;
     std::string                  m_id;
     FHRngZone                    m_rngZoneSettings;
-    Core::IRandomGenerator*      m_rng       = nullptr;
-    MapCanvas*                   m_mapCanvas = nullptr;
-    Core::LibraryTerrainConstPtr m_terrain   = nullptr;
-    Core::LibraryFactionConstPtr m_faction   = nullptr;
+    Core::IRandomGenerator*      m_rng             = nullptr;
+    MapCanvas*                   m_mapCanvas       = nullptr;
+    Core::LibraryTerrainConstPtr m_terrain         = nullptr;
+    Core::LibraryFactionConstPtr m_mainTownFaction = nullptr;
+    Core::LibraryFactionConstPtr m_rewardsFaction  = nullptr;
+    FHPlayerId                   m_player          = FHPlayerId::None;
 
     using TileRegion = std::unordered_set<MapCanvas::Tile*>;
 
@@ -168,7 +170,7 @@ struct TileZone {
         return result;
     }
 
-    bool tryGrowOnceToUnzoned(size_t limit, TileZone* prioritized)
+    bool tryGrowOnceToNeighbour(size_t limit, TileZone* prioritized)
     {
         const bool result = tryGrowOnce([this](MapCanvas::Tile* cell) {
             return cell->m_zone != this;
@@ -207,13 +209,38 @@ struct TileZone {
         return true;
     }
 
+    bool tryGrowOnceToUnzoned()
+    {
+        const bool result = tryGrowOnce([](MapCanvas::Tile* cell) {
+            return cell->m_zone == nullptr;
+        });
+        if (!result)
+            return false;
+
+        for (MapCanvas::Tile* cell : m_lastGrowed) {
+            cell->m_zone = this;
+
+            m_innerEdge.insert(cell);
+            m_innerArea.insert(cell);
+        }
+        removeNonInnerFromInnerEdge();
+        return true;
+    }
+
     void fillDeficit(int thresholdPercent, TileZone* prioritized)
     {
         while (true) {
             if (getAreaDeficitPercent() < thresholdPercent)
                 break;
-            if (!tryGrowOnceToUnzoned(10, prioritized))
+            if (!tryGrowOnceToNeighbour(10, prioritized))
                 break;
+        }
+    }
+
+    void fillUnzoned()
+    {
+        while (tryGrowOnceToUnzoned()) {
+            ;
         }
     }
 };

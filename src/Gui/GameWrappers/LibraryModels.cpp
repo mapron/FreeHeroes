@@ -245,8 +245,9 @@ QVariant FactionsModel::data(const QModelIndex& index, int role) const
     return Base::data(index, role);
 }
 
-FactionsFilterModel::FactionsFilterModel(QObject* parent)
+FactionsFilterModel::FactionsFilterModel(bool allowIndependent, QObject* parent)
     : QSortFilterProxyModel(parent)
+    , m_allowIndependent(allowIndependent)
 {
 }
 
@@ -257,7 +258,10 @@ bool FactionsFilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& sou
     if (!faction)
         return false;
 
-    return faction->alignment != LibraryFaction::Alignment::Special;
+    if (m_allowIndependent)
+        return faction->alignment != LibraryFaction::Alignment::Special;
+
+    return faction->alignment != LibraryFaction::Alignment::Special && faction->alignment != LibraryFaction::Alignment::Independent;
 }
 
 QVariant TerrainsModel::data(const QModelIndex& index, int role) const
@@ -306,6 +310,7 @@ LibraryModelsProvider::LibraryModelsProvider(const IGameDatabase*    gameDatabas
                                              QObject*                parent)
     : QObject(parent)
     , m_appSettings(appSettings)
+    , m_database(gameDatabase)
 {
     m_artifacts = new ArtifactsModel(musicBox, graphicsLibrary, this);
     m_units     = new UnitsModel(musicBox, graphicsLibrary, this);

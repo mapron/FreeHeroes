@@ -106,7 +106,7 @@ void ArmyConfigWidget::setModels()
     m_unitsFilter = new UnitsFilterModel(this);
     m_unitsFilter->setSourceModel(m_modelProvider->units());
 
-    FactionsFilterModel* factionsFilter = new FactionsFilterModel(this);
+    FactionsFilterModel* factionsFilter = new FactionsFilterModel(true, this);
     factionsFilter->setSourceModel(m_modelProvider->factions());
     FactionsComboModel* factionsCombo = new FactionsComboModel(factionsFilter, this);
     m_ui->comboBoxFactionSelect->setModel(factionsCombo);

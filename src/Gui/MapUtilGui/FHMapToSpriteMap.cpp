@@ -6,6 +6,7 @@
 #include "FHMapToSpriteMap.hpp"
 
 #include "FHMap.hpp"
+#include "FHMapReflection.hpp"
 #include "SpriteMap.hpp"
 
 #include "LibraryDwelling.hpp"
@@ -24,6 +25,12 @@ QColor makeColor(const std::vector<int>& rgb)
     if (rgb.size() == 3)
         return QColor(rgb[0], rgb[1], rgb[2]);
     return QColor();
+}
+
+std::string playerToString(FHPlayerId player)
+{
+    auto str = Mernel::Reflection::EnumTraits::enumToString(player);
+    return std::string(str.begin(), str.end());
 }
 
 QColor makePlayerColor(FHPlayerId id)
@@ -183,7 +190,11 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     for (const auto& obj : fhMap.m_towns) {
         auto* def = obj.m_factionId->objectDefs.get(obj.m_defIndex);
 
-        result.addItem(makeItemByDef(SpriteMap::Layer::Town, def, obj.m_pos))->m_keyColor = makePlayerColor(obj.m_player);
+        result.addItem(makeItemByDef(SpriteMap::Layer::Town, def, obj.m_pos)
+                           .addInfo("player", playerToString(obj.m_player))
+                           .addInfo("fort", (obj.m_hasFort ? "true" : "false")))
+            ->m_keyColor
+            = makePlayerColor(obj.m_player);
     }
 
     for (auto& fhHero : fhMap.m_wanderingHeroes) {
@@ -195,7 +206,9 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         if (playerIndex >= 0)
             pos.m_x += 1;
         const std::string id = playerIndex < 0 ? "avxprsn0" : libraryHero->getAdventureSprite() + "e";
-        result.addItem(makeItemById(SpriteMap::Layer::Town, id, pos));
+        result.addItem(makeItemById(SpriteMap::Layer::Hero, id, pos)
+                           .addInfo("id", libraryHero->id)
+                           .setPriority(SpriteMap::s_objectMaxPriority + 1));
     }
     for (auto& obj : fhMap.m_objects.m_resources) {
         if (obj.m_type == FHResource::Type::Resource) {

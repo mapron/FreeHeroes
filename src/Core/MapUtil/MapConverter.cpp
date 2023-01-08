@@ -35,6 +35,8 @@ ENUM_REFLECTION_STRINGIY(MapConverter::Task,
                          LoadFHTpl,
                          LoadFH,
                          SaveFH,
+                         LoadH3M,
+                         SaveH3M,
                          FHMapToH3M,
                          H3MToFHMap,
                          FHTplToFHMap,
@@ -179,29 +181,7 @@ void MapConverter::run(Task task, int recurse) noexcept(false)
                 setOutput(m_outputs.m_fhMap);
                 runMember(writeJsonFromProperty);
             } break;
-            case Task::FHMapToH3M:
-            {
-                run(Task::LoadFH, recurse + 1);
-
-                runMember(convertFHtoH3M);
-                if (m_settings.m_dumpBinaryDataJson) {
-                    runMember(propertySerializeH3M);
-                    setOutput(m_outputs.m_h3m.m_json);
-                    runMember(writeJsonFromProperty);
-                }
-
-                runMember(binarySerializeH3M);
-                if (m_settings.m_dumpUncompressedBuffers) {
-                    setOutput(m_outputs.m_h3m.m_uncompressedBinary);
-                    runMember(writeBinaryBufferDataAsUncompressed);
-                }
-
-                m_compressionMethod = CompressionMethod::Gzip;
-                runMember(compressRaw);
-                setOutput(m_outputs.m_h3m.m_binary);
-                runMember(writeBinaryBufferData);
-            } break;
-            case Task::H3MToFHMap:
+            case Task::LoadH3M:
             {
                 setInput(m_inputs.m_h3m.m_binary);
                 runMember(readBinaryBufferData);
@@ -220,6 +200,35 @@ void MapConverter::run(Task task, int recurse) noexcept(false)
                     runMember(writeJsonFromProperty);
                 }
                 runMember(convertH3MtoFH);
+            } break;
+            case Task::SaveH3M:
+            {
+                runMember(convertFHtoH3M);
+                if (m_settings.m_dumpBinaryDataJson) {
+                    runMember(propertySerializeH3M);
+                    setOutput(m_outputs.m_h3m.m_json);
+                    runMember(writeJsonFromProperty);
+                }
+
+                runMember(binarySerializeH3M);
+                if (m_settings.m_dumpUncompressedBuffers) {
+                    setOutput(m_outputs.m_h3m.m_uncompressedBinary);
+                    runMember(writeBinaryBufferDataAsUncompressed);
+                }
+
+                m_compressionMethod = CompressionMethod::Gzip;
+                runMember(compressRaw);
+                setOutput(m_outputs.m_h3m.m_binary);
+                runMember(writeBinaryBufferData);
+            } break;
+            case Task::FHMapToH3M:
+            {
+                run(Task::LoadH3M, recurse + 1);
+                run(Task::SaveH3M, recurse + 1);
+            } break;
+            case Task::H3MToFHMap:
+            {
+                run(Task::LoadFH, recurse + 1);
                 run(Task::SaveFH, recurse + 1);
             } break;
             case Task::FHTplToFHMap:
@@ -317,7 +326,7 @@ void MapConverter::readBinaryBufferData()
     m_rawState = RawState::Undefined;
 
     m_binaryBuffer = Mernel::readFileIntoHolderThrow(m_inputFilename);
-    m_logOutput << m_currentIndent << "Read " << m_binaryBuffer.size() << " bytes from: " << m_inputFilename << '\n';
+    m_logOutput << m_currentIndent << "Read " << m_binaryBuffer.size() << " bytes from: " << Mernel::path2string(m_inputFilename) << '\n';
 
     m_rawState = RawState::Compressed;
 }
@@ -327,7 +336,7 @@ void MapConverter::writeBinaryBufferData()
     if (m_rawState != RawState::Compressed)
         throw std::runtime_error("Buffer needs to be in Compressed state.");
 
-    m_logOutput << m_currentIndent << "Write " << m_binaryBuffer.size() << " bytes to: " << m_outputFilename << '\n';
+    m_logOutput << m_currentIndent << "Write " << m_binaryBuffer.size() << " bytes to: " << Mernel::path2string(m_outputFilename) << '\n';
     Mernel::writeFileFromHolderThrow(m_outputFilename, m_binaryBuffer);
 }
 
@@ -336,20 +345,20 @@ void MapConverter::writeBinaryBufferDataAsUncompressed()
     if (m_rawState != RawState::Uncompressed)
         throw std::runtime_error("Buffer needs to be in Uncompressed state.");
 
-    m_logOutput << m_currentIndent << "Write " << m_binaryBuffer.size() << " bytes to: " << m_outputFilename << '\n';
+    m_logOutput << m_currentIndent << "Write " << m_binaryBuffer.size() << " bytes to: " << Mernel::path2string(m_outputFilename) << '\n';
     Mernel::writeFileFromHolderThrow(m_outputFilename, m_binaryBuffer);
 }
 
 void MapConverter::readJsonToProperty()
 {
-    m_logOutput << m_currentIndent << "Read: " << m_inputFilename << '\n';
+    m_logOutput << m_currentIndent << "Read: " << Mernel::path2string(m_inputFilename) << '\n';
     std::string buffer = Mernel::readFileIntoBufferThrow(m_inputFilename);
     m_json             = Mernel::readJsonFromBufferThrow(buffer);
 }
 
 void MapConverter::writeJsonFromProperty()
 {
-    m_logOutput << m_currentIndent << "Write: " << m_outputFilename << '\n';
+    m_logOutput << m_currentIndent << "Write: " << Mernel::path2string(m_outputFilename) << '\n';
     std::string buffer = Mernel::writeJsonToBufferThrow(m_json);
     Mernel::writeFileFromBufferThrow(m_outputFilename, buffer);
 }
@@ -528,12 +537,22 @@ void MapConverter::convertFHTPLtoFH()
     auto rng = m_rngFactory->create();
     if (m_settings.m_seed)
         m_mapFH.m_seed = m_settings.m_seed;
-    if (m_settings.m_mapSize)
-        m_mapFH.rescaleToSize(m_settings.m_mapSize);
+
+    auto* db = m_databaseContainer->getDatabase(m_mapFH.m_version);
+
+    if (!m_settings.m_rngUserSettings.empty()) {
+        m_logOutput << m_currentIndent << "Read: " << Mernel::path2string(m_settings.m_rngUserSettings) << '\n';
+        std::string buffer       = Mernel::readFileIntoBufferThrow(m_settings.m_rngUserSettings);
+        auto        settingsJson = Mernel::readJsonFromBufferThrow(buffer);
+
+        m_mapFH.applyRngUserSettings(settingsJson, db);
+    }
+    m_mapFH.rescaleToSize(m_mapFH.m_rngUserSettings.m_mapSize);
+
     rng->setSeed(m_mapFH.m_seed);
 
     generateFromTemplate(m_mapFH,
-                         m_databaseContainer->getDatabase(m_mapFH.m_version),
+                         db,
                          rng.get(),
                          m_logOutput,
                          m_settings.m_stopAfterStage);

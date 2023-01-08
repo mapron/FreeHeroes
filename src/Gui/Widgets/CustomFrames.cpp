@@ -149,7 +149,8 @@ ResizeableComboBox::ResizeableComboBox(QWidget* parent)
 
 void ResizeableComboBox::showPopup()
 {
-    this->view()->setMinimumWidth(calculateMaxModelWidth() + this->iconSize().width() + 20);
+    int iconWidth = this->iconSize().width();
+    this->view()->setMinimumWidth(calculateMaxModelWidth() + iconWidth + 30);
     QComboBox::showPopup();
 }
 

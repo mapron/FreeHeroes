@@ -280,9 +280,16 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_spellId)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRngZoneTown,
+    m_town,
+    m_playerControlled,
+    m_useZoneFaction)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone,
     m_player,
-    m_faction,
+    m_mainTownFaction,
+    m_rewardsFaction,
     m_terrain,
     m_towns,
     m_centerAvg,
@@ -311,6 +318,29 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_roughTilePercentage,
     m_rotationDegreeDispersion,
     m_allowFlip)
+
+ENUM_REFLECTION_STRINGIY(
+    FHRngUserSettings::HeroGeneration,
+    RandomStartingFaction,
+    None,
+    RandomAnyFaction,
+    RandomStartingFaction,
+    Fixed)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRngUserSettings::UserPlayer,
+    m_faction,
+    m_startingHero,
+    m_extraHero,
+    m_startingHeroGen,
+    m_extraHeroGen)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRngUserSettings,
+    m_players,
+    m_difficultyScale,
+    m_defaultRoad,
+    m_mapSize)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHMap::Objects,
@@ -366,6 +396,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_initialObjectDefs,
     m_defReplacements)
 
+template<>
+inline constexpr const bool MetaInfo::s_isStringMap<FHRngUserSettings::PlayersMap>{ true };
 template<>
 inline constexpr const bool MetaInfo::s_isStringMap<FHMap::PlayersMap>{ true };
 template<>

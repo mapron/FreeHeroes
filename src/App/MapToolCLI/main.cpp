@@ -30,7 +30,7 @@ int main(int argc, char** argv)
                                    "dump-uncompressed",
                                    "dump-json",
                                    "seed",
-                                   "mapSize",
+                                   "rng-settings-file",
                                    "stopAfterStage",
                                },
                                { "tasks" });
@@ -47,7 +47,7 @@ int main(int argc, char** argv)
     const std::string diffJsonFile     = parser.getArg("diff-json-file");
     const std::string seedStr          = parser.getArg("seed");
     const std::string stopAfterStage   = parser.getArg("stopAfterStage");
-    const int         mapSize          = std::atoi(parser.getArg("mapSize").c_str());
+    const std::string rngUserSettings  = parser.getArg("rng-settings-file");
     const uint64_t    seed             = std::strtoull(seedStr.c_str(), nullptr, 10);
 
     Core::CoreApplication fhCoreApp;
@@ -86,7 +86,7 @@ int main(int argc, char** argv)
                                .m_dumpUncompressedBuffers = dumpUncompressed,
                                .m_dumpBinaryDataJson      = dumpJson,
                                .m_seed                    = seed,
-                               .m_mapSize                 = mapSize,
+                               .m_rngUserSettings         = rngUserSettings,
                                .m_stopAfterStage          = stopAfterStage,
                            });
 

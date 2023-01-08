@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TemplateSettingsWidget</class>
+ <widget class="QFrame" name="TemplateSettingsWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>569</width>
+    <height>263</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string/>
+  </property>
+  <layout class="QVBoxLayout" name="mainLayout">
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="FreeHeroes::TemplatePlayerWidget" name="playerWidgetRed"/>
+   </item>
+   <item>
+    <widget class="FreeHeroes::TemplatePlayerWidget" name="playerWidgetBlue"/>
+   </item>
+   <item>
+    <widget class="FreeHeroes::TemplatePlayerWidget" name="playerWidgetTan"/>
+   </item>
+   <item>
+    <widget class="FreeHeroes::TemplatePlayerWidget" name="playerWidgetGreen"/>
+   </item>
+   <item>
+    <widget class="FreeHeroes::TemplatePlayerWidget" name="playerWidgetOrange"/>
+   </item>
+   <item>
+    <widget class="FreeHeroes::TemplatePlayerWidget" name="playerWidgetPurple"/>
+   </item>
+   <item>
+    <widget class="FreeHeroes::TemplatePlayerWidget" name="playerWidgetTeal"/>
+   </item>
+   <item>
+    <widget class="FreeHeroes::TemplatePlayerWidget" name="playerWidgetPink"/>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <property name="spacing">
+      <number>10</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Map size</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="comboBoxMapSize">
+       <item>
+        <property name="text">
+         <string>36x36 (S)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>72x72 (M)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>108x108 (L)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>144x144 (XL)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>180x180 (H)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>216x216 (XH)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>252x252 (G)</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="checkBoxUnderground">
+       <property name="text">
+        <string>Has underground (not implemented)</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_32">
+     <property name="spacing">
+      <number>10</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Monster strength</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="comboBoxStrength">
+       <item>
+        <property name="text">
+         <string>25%</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>50% (Weak)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>75%</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>100% (Strong)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>125%</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>150%</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>175%</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>200%</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Roads</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="comboBoxRoads">
+       <item>
+        <property name="text">
+         <string>No</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Dirt 75%</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Gravel 65%</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Cobblestone 50%</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_31">
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButtonSave">
+       <property name="text">
+        <string>Update settings file</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>FreeHeroes::TemplatePlayerWidget</class>
+   <extends>QFrame</extends>
+   <header>TemplatePlayerWidget.hpp</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

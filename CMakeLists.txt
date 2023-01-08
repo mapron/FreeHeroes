@@ -358,6 +358,7 @@ AddTarget(TYPE shared NAME MapUtilGui OUTPUT_PREFIX FH
     EXPORT_INCLUDES
     LINK_LIBRARIES
         MernelPlatform
+        MernelReflection
         GuiInt
         SoundInt
         GameObjects
@@ -483,6 +484,7 @@ AddTarget(TYPE app_ui NAME MapToolUI
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/MapToolUI
     LINK_LIBRARIES
         MernelPlatform
+        MernelReflection
         GuiInt
         GuiUtils
         SoundInt
@@ -498,6 +500,7 @@ AddTarget(TYPE app_ui NAME MapToolUI
         CoreLogic
         BattleLogic
         MapUtil
+        MapUtilGui
     QT_MODULES Widgets
     UIC_POSTPROCESS_SCRIPTS
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake

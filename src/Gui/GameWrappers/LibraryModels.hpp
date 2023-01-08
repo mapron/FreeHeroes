@@ -174,11 +174,14 @@ public:
 
 class GUIGAMEWRAPPERS_EXPORT FactionsFilterModel : public QSortFilterProxyModel {
 public:
-    FactionsFilterModel(QObject* parent);
+    FactionsFilterModel(bool allowIndependent, QObject* parent);
 
     // QSortFilterProxyModel interface
 protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
+
+private:
+    bool m_allowIndependent;
 };
 
 class GUIGAMEWRAPPERS_EXPORT TerrainsModel : public AbstractGuiWrapperListModel<GuiTerrain> {
@@ -235,7 +238,8 @@ public:
     MapBanksModel    * mapBanks   () const noexcept { return m_mapBanks;}
     UiCommonModel    * ui         () const noexcept { return m_uiCommon;}
     // clang-format on
-    const IAppSettings* appSettings() const noexcept { return m_appSettings; }
+    const IAppSettings*        appSettings() const noexcept { return m_appSettings; }
+    const Core::IGameDatabase* database() const noexcept { return m_database; }
 
 private:
     ArtifactsModel* m_artifacts;
@@ -248,7 +252,8 @@ private:
     MapBanksModel*  m_mapBanks;
     UiCommonModel*  m_uiCommon;
 
-    const IAppSettings* const m_appSettings;
+    const IAppSettings* const        m_appSettings;
+    const Core::IGameDatabase* const m_database;
 };
 
 }
