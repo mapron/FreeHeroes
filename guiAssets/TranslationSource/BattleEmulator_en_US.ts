@@ -192,27 +192,27 @@ adventure mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="429"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="428"/>
         <source> and </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="432"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="431"/>
         <source>%1 is no problem anymore, and %2 now in your hands.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="550"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="553"/>
         <source>AI reached step limit: that probably an error.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="604"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="607"/>
         <source>Glorious victory!&lt;br&gt;For the valor in the battle, %1 recieves %2 experience</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="604"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="607"/>
         <source>Your forces have suffered a crushing defeat, and %1 now leaves you</source>
         <translation type="unfinished"></translation>
     </message>

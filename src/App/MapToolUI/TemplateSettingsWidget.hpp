@@ -23,6 +23,7 @@ enum class FHPlayerId;
 struct FHRngUserSettings;
 class TemplatePlayerWidget;
 class TemplateSettingsWidget : public QFrame {
+    Q_OBJECT
 public:
     TemplateSettingsWidget(const Gui::LibraryModelsProvider* modelsProvider, QWidget* parent);
     ~TemplateSettingsWidget();

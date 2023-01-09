@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
 
     Core::CoreApplication fhCoreApp;
 
-    Gui::Application fhApp(&fhCoreApp, { Gui::Application::Option::QtTranslations });
+    Gui::Application fhApp(&fhCoreApp, { Gui::Application::Option::QtTranslations }, "LegacyConverter");
     QApplication     app(argc, argv);
 
     fhApp.load();

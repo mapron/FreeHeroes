@@ -20,7 +20,15 @@ int main(int argc, char* argv[])
     Core::CoreApplication fhCoreApp;
     fhCoreApp.setLoadUserMods(true);
 
-    Gui::Application fhApp(&fhCoreApp);
+    Gui::Application fhApp(&fhCoreApp,
+                           { Gui::Application::Option::QtTranslations,
+                             Gui::Application::Option::Translations,
+                             Gui::Application::Option::GraphicsLibrary,
+                             Gui::Application::Option::MusicBox,
+                             Gui::Application::Option::CursorLibrary,
+                             Gui::Application::Option::LibraryModels,
+                             Gui::Application::Option::AppStyle },
+                           "MapToolUI");
     QApplication     app(argc, argv);
 
     fhApp.load();

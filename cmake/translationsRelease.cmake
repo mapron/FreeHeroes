@@ -89,6 +89,7 @@ UpdateLocales(
         [ FreeHeroesCore     DIRS Gui ]
         [ BattleEmulator     DIRS App/BattleEmulator  ]
         [ LegacyConverter    DIRS App/LegacyConverter  ]
+		[ MapToolUI          DIRS App/MapToolUI  ]
     TS_DIR
         ${CMAKE_CURRENT_SOURCE_DIR}/guiAssets/TranslationSource
     SOURCE_BASE
