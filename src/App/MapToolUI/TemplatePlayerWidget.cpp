@@ -22,9 +22,10 @@ void setHeroToCombo(Core::LibraryHeroConstPtr hero, QComboBox* combo)
     for (int i = 0; i < combo->count(); ++i) {
         if (combo->itemData(i, HeroesModel::SourceObject).value<HeroesModel::SrcTypePtr>() == hero) {
             combo->setCurrentIndex(i);
-            break;
+            return;
         }
     }
+    combo->setCurrentIndex(-1);
 }
 
 void setFactionToCombo(Core::LibraryFactionConstPtr faction, QComboBox* combo)
@@ -100,7 +101,6 @@ TemplatePlayerWidget::TemplatePlayerWidget(const Gui::LibraryModelsProvider* mod
     auto* heroFilter = new HeroFilterModel(m_ui->comboBoxFaction, this);
 
     auto* comboModel = new ComboModel("", { 32, 24 }, modelsProvider->heroes(), this);
-    //auto* comboModelExtra = new ComboModel("", { 32, 24 }, heroFilter, m_ui->comboBoxHeroExtra);
 
     heroFilter->setSourceModel(comboModel);
 
@@ -113,8 +113,34 @@ TemplatePlayerWidget::TemplatePlayerWidget(const Gui::LibraryModelsProvider* mod
     FactionsComboModel* factionsCombo = new FactionsComboModel(factionsFilter, this);
     m_ui->comboBoxFaction->setModel(factionsCombo);
 
-    connect(m_ui->comboBoxFaction, qOverload<int>(&QComboBox::currentIndexChanged), this, [heroFilter](int) {
+    connect(m_ui->comboBoxFaction, qOverload<int>(&QComboBox::currentIndexChanged), this, [heroFilter, this](int) {
         heroFilter->invalidate();
+
+        if (m_ui->comboBoxHeroMainPolicy->currentIndex() == 3 && m_ui->comboBoxHeroMain->currentIndex() == -1)
+            m_ui->comboBoxHeroMain->setCurrentIndex(0);
+        if (m_ui->comboBoxHeroExtraPolicy->currentIndex() == 3 && m_ui->comboBoxHeroExtra->currentIndex() == -1)
+            m_ui->comboBoxHeroExtra->setCurrentIndex(0);
+    });
+    connect(m_ui->comboBoxHeroMain, qOverload<int>(&QComboBox::currentIndexChanged), this, [this](int index) {
+        if (index >= 0)
+            m_ui->comboBoxHeroMainPolicy->setCurrentIndex(3);
+    });
+    connect(m_ui->comboBoxHeroExtra, qOverload<int>(&QComboBox::currentIndexChanged), this, [this](int index) {
+        if (index >= 0)
+            m_ui->comboBoxHeroExtraPolicy->setCurrentIndex(3);
+    });
+
+    connect(m_ui->comboBoxHeroMainPolicy, qOverload<int>(&QComboBox::currentIndexChanged), this, [this](int index) {
+        if (index != 3)
+            m_ui->comboBoxHeroMain->setCurrentIndex(-1);
+        if (index == 3 && m_ui->comboBoxHeroMain->currentIndex() == -1)
+            m_ui->comboBoxHeroMain->setCurrentIndex(0);
+    });
+    connect(m_ui->comboBoxHeroExtraPolicy, qOverload<int>(&QComboBox::currentIndexChanged), this, [this](int index) {
+        if (index != 3)
+            m_ui->comboBoxHeroExtra->setCurrentIndex(-1);
+        if (index == 3 && m_ui->comboBoxHeroExtra->currentIndex() == -1)
+            m_ui->comboBoxHeroExtra->setCurrentIndex(0);
     });
 }
 
@@ -124,13 +150,13 @@ TemplatePlayerWidget::~TemplatePlayerWidget()
 
 void TemplatePlayerWidget::setConfig(const FHRngUserSettings::UserPlayer& settings)
 {
-    setHeroToCombo(settings.m_startingHero, m_ui->comboBoxHeroMain);
-    setHeroToCombo(settings.m_extraHero, m_ui->comboBoxHeroExtra);
+    setFactionToCombo(settings.m_faction, m_ui->comboBoxFaction);
 
     setPolicyToCombo(settings.m_startingHeroGen, m_ui->comboBoxHeroMainPolicy);
     setPolicyToCombo(settings.m_extraHeroGen, m_ui->comboBoxHeroExtraPolicy);
 
-    setFactionToCombo(settings.m_faction, m_ui->comboBoxFaction);
+    setHeroToCombo(settings.m_startingHero, m_ui->comboBoxHeroMain);
+    setHeroToCombo(settings.m_extraHero, m_ui->comboBoxHeroExtra);
 }
 
 FHRngUserSettings::UserPlayer TemplatePlayerWidget::getConfig() const

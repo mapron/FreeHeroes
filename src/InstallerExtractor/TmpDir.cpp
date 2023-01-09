@@ -26,11 +26,9 @@ const std::wstring& TmpDir::path() const
 
 TmpDir::TmpDir()
 {
-    const std::string appData = getenv("APPDATA"); // Roaming
+    const std::wstring appData = _wgetenv(L"APPDATA"); // Roaming
 
-    const std::wstring tmpRoot(appData.cbegin(), appData.cend());
-
-    m_path = tmpRoot + L"\\FreeHeroes\\";
+    m_path = appData + L"\\FreeHeroes\\";
 
     if (!DirectoryExists(m_path.c_str()) && !CreateDirectory(m_path.c_str(), nullptr))
         throw std::runtime_error("Failed to create temporary path!");

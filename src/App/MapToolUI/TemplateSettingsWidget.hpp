@@ -28,6 +28,7 @@ public:
     ~TemplateSettingsWidget();
 
     void load(const Mernel::std_path& path);
+    void updateUI();
     void save();
 
 private:

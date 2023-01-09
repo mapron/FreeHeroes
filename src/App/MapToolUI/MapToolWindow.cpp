@@ -114,7 +114,13 @@ void MapToolWindow::generateMap()
     if (m_ui->checkBoxGenerateSeed->isChecked())
         m_ui->pushButtonNewSeed->click();
 
+    m_ui->templateSettingsWidget->save();
+
     m_ui->labelStatus->setText(tr("Generation..."));
+    m_ui->pushButtonGenerate->setEnabled(false);
+
+    m_ui->pushButtonGenerate->repaint();
+    m_ui->labelStatus->repaint();
 
     const std::string fhTpl  = m_ui->comboBoxTemplateSelect->currentData().toString().toStdString();
     const std::string fhMap  = m_ui->fhMapPath->text().toStdString();
@@ -166,6 +172,8 @@ MapToolWindow::~MapToolWindow()
 
     settings.setValue("checkBoxIncrementSeed", m_ui->checkBoxIncrementSeed->isChecked());
     settings.setValue("checkBoxGenerateSeed", m_ui->checkBoxGenerateSeed->isChecked());
+
+    m_ui->templateSettingsWidget->save();
 }
 
 }

@@ -29,8 +29,6 @@ TemplateSettingsWidget::TemplateSettingsWidget(const Gui::LibraryModelsProvider*
 {
     m_ui->setupUi(this, std::tuple{ modelsProvider });
 
-    connect(m_ui->pushButtonSave, &QAbstractButton::clicked, this, &TemplateSettingsWidget::save);
-
     std::map<FHPlayerId, QString> colorMap{
 
         { FHPlayerId::Red, tr("Red") },
@@ -66,6 +64,11 @@ TemplateSettingsWidget::TemplateSettingsWidget(const Gui::LibraryModelsProvider*
     m_ui->comboBoxMapSize->setItemData(4, 180);
     m_ui->comboBoxMapSize->setItemData(5, 216);
     m_ui->comboBoxMapSize->setItemData(6, 252);
+
+    connect(m_ui->pushButtonReset, &QAbstractButton::clicked, this, [this] {
+        *m_userSettings = {};
+        updateUI();
+    });
 }
 
 TemplateSettingsWidget::~TemplateSettingsWidget()
@@ -85,6 +88,11 @@ void TemplateSettingsWidget::load(const Mernel::std_path& path)
         reader.jsonToValue(settingsJson, *m_userSettings);
     }
 
+    updateUI();
+}
+
+void TemplateSettingsWidget::updateUI()
+{
     for (auto [id, w] : m_mapping) {
         w->setConfig(m_userSettings->m_players[id]);
     }
@@ -99,11 +107,6 @@ void TemplateSettingsWidget::load(const Mernel::std_path& path)
 
 void TemplateSettingsWidget::save()
 {
-    m_ui->pushButtonSave->setEnabled(false);
-    QTimer::singleShot(700, this, [this] {
-        m_ui->pushButtonSave->setEnabled(true);
-    });
-
     for (auto [id, w] : m_mapping) {
         m_userSettings->m_players[id] = w->getConfig();
     }
