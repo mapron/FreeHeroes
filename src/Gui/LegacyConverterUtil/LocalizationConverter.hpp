@@ -22,24 +22,17 @@ class LEGACYCONVERTERUTIL_EXPORT LocalizationConverter {
 public:
     using std_path = Mernel::std_path;
 
-    LocalizationConverter(Core::IResourceLibrary&    resources,
-                          const std_path&            srcRoot,
-                          const Core::IGameDatabase* databaseHOTA,
+    LocalizationConverter(const Core::IGameDatabase* databaseHOTA,
                           const Core::IGameDatabase* databaseSOD);
 
-    void extractSOD(const std_path& txtSubdir);
-    void extractHOTA(const std_path& jsonSubdir);
+    void extractSOD(const std_path& txtSubdir, const std_path& outJsonFilename);
+    void extractHOTA(const std_path& jsonSubdir, const std_path& outJsonFilename);
 
 private:
     using TxtRow   = QList<QByteArray>;
     using TxtTable = QList<TxtRow>;
     class TranscodedFile;
     TxtTable readTable(const std_path& filename) const;
-
-    Core::IResourceLibrary& m_resources;
-    const std_path          m_root;
-    const std_path          m_rootDest;
-    TxtTable                m_outLocalization;
 
     struct IdSet {
         std::vector<std::string> unitIds;

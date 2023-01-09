@@ -20,6 +20,7 @@
 #include "LibrarySpell.hpp"
 #include "LibraryTerrain.hpp"
 #include "LibraryUnit.hpp"
+#include "TranslationMap.hpp"
 
 #include "MernelReflection/EnumTraitsMacro.hpp"
 #include "MernelReflection/MetaInfoMacro.hpp"
@@ -176,7 +177,8 @@ STRUCT_REFLECTION_STRINGIFY(
     borderSpecialCounts,
     hasRotations,
     minimapBlocked,
-    minimapUnblocked
+    minimapUnblocked,
+    name
 )
 
 STRUCT_REFLECTION_PAIRED(
@@ -240,7 +242,8 @@ STRUCT_REFLECTION_PAIRED(
     "battleSpriteMale",            battleSpriteMale,
     "battleSpriteFemale",          battleSpriteFemale,
     "adventureSpriteMale",         adventureSpriteMale,
-    "adventureSpriteFemale",       adventureSpriteFemale
+    "adventureSpriteFemale",       adventureSpriteFemale,
+    "name",                        name
 )
 
 
@@ -269,7 +272,8 @@ STRUCT_REFLECTION_PAIRED(
     LibraryFaction::Presentation,
     
     "goesAfterId",                 goesAfterId,
-    "unitBackground",              unitBackground
+    "unitBackground",              unitBackground,
+    "name",                        name
 )
 
 STRUCT_REFLECTION_PAIRED(
@@ -306,7 +310,8 @@ ENUM_REFLECTION_PAIRED(LibrarySecondarySkill::HandlerType,
 STRUCT_REFLECTION_PAIRED(
     LibrarySecondarySkill::Presentation,
     "levels",                      levels,
-    "order",                       order
+    "order",                       order,
+    "name",                        name
 )
 
 STRUCT_REFLECTION_PAIRED(
@@ -465,7 +470,8 @@ STRUCT_REFLECTION_PAIRED(
     "soundId",                     soundId,
     "spriteProjectile",            spriteProjectile,
     "soundHasShoot",               soundHasShoot,
-    "soundHasMovementStart",       soundHasMovementStart
+    "soundHasMovementStart",       soundHasMovementStart,
+    "name",                        name
 )
 
 
@@ -565,7 +571,8 @@ STRUCT_REFLECTION_PAIRED(
     "iconBonus",                  iconBonus,
     "order",                      order,
     "orderGroup",                 orderGroup,
-    "orderCategory",              orderCategory
+    "orderCategory",              orderCategory,
+    "name",                       name
 )
 
 STRUCT_REFLECTION_PAIRED(
@@ -664,7 +671,9 @@ STRUCT_REFLECTION_PAIRED(
     "portrait",                    portrait,
     "portraitSmall",               portraitSmall,
     "order",                       order,
-    "gender",                      gender
+    "gender",                      gender,
+    "name",                        name,
+    "bio",                         bio
 )
 
 STRUCT_REFLECTION_PAIRED(
@@ -750,7 +759,8 @@ STRUCT_REFLECTION_PAIRED(
     "iconScroll",                  iconScroll,
     "configOrder",                 configOrder,
     "animation",                   animation,
-    "sound",                       sound
+    "sound",                       sound,
+    "name",                        name
 )
 
 
@@ -825,7 +835,8 @@ STRUCT_REFLECTION_STRINGIFY(
 
 STRUCT_REFLECTION_STRINGIFY(
     LibraryMapBank::Presentation,
-    order)
+    order,
+    name)
 
 STRUCT_REFLECTION_PAIRED(LibraryMapBank,
     "objectDefs"          ,        objectDefs,
@@ -996,7 +1007,10 @@ STRUCT_REFLECTION_PAIRED(
     "num",                         m_num,
     "denom",                       m_denom
 )
-
+STRUCT_REFLECTION_PAIRED(
+    TranslationMap,
+    "ts",                         ts
+)
 // clang-format on
 
 template<>
@@ -1032,5 +1046,8 @@ inline constexpr const bool MetaInfo::s_isStringMap<LibraryFactionHeroClass::Pri
 
 template<>
 inline constexpr const bool MetaInfo::s_isStringMap<ObjectDefMappings::Map>{ true };
+
+template<>
+inline constexpr const bool MetaInfo::s_isStringMap<TranslationMap::Data>{ true };
 
 }

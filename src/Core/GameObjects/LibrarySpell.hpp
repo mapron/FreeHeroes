@@ -6,6 +6,7 @@
 #pragma once
 
 #include "Stat.hpp"
+#include "TranslationMap.hpp"
 #include "LibraryFwd.hpp"
 
 #include <string>
@@ -40,6 +41,8 @@ struct LibrarySpell {
         bool        bottomPosition          = false;
         bool        animationOnMainPosition = false;
         bool        tile                    = false;
+
+        TranslationMap name;
 
         int configOrder = 0;
         int order       = 0;

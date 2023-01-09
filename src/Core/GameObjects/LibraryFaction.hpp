@@ -7,6 +7,7 @@
 
 #include "Stat.hpp"
 #include "LibraryObjectDef.hpp"
+#include "TranslationMap.hpp"
 
 #include <string>
 #include <map>
@@ -18,14 +19,16 @@ struct LibraryFactionHeroClass {
     using SkillWeights   = std::map<LibrarySecondarySkillConstPtr, int>;
     using PrimaryWeights = std::map<HeroPrimaryParamType, int>;
     struct Presentation {
-        std::string battleSpriteMale;
-        std::string battleSpriteFemale;
-        std::string adventureSpriteMale;
-        std::string adventureSpriteFemale;
+        std::string    battleSpriteMale;
+        std::string    battleSpriteFemale;
+        std::string    adventureSpriteMale;
+        std::string    adventureSpriteFemale;
+        TranslationMap name;
     };
 
-    std::string       id;
-    std::string       untranslatedName;
+    std::string id;
+    std::string untranslatedName;
+
     HeroPrimaryParams startParams;
     SkillWeights      secondarySkillWeights;
     PrimaryWeights    lowLevelIncrease;
@@ -53,8 +56,9 @@ struct LibraryFaction {
             Capitol,
         };
 
-        std::string unitBackground;
-        std::string goesAfterId;
+        std::string    unitBackground;
+        std::string    goesAfterId;
+        TranslationMap name;
     };
 
     std::string             id;

@@ -56,7 +56,7 @@ struct GameDatabaseContainer::Impl {
     // hash(PropertyTree) ???
     std::list<std::shared_ptr<const IGameDatabase>> m_patchedStorage;
 
-    bool loadDbSegmentFile(const std::string& dbSegmentId) noexcept
+    bool loadDbSegmentFile(const std::string& dbSegmentId, bool optional = false) noexcept
     {
         const bool       isInCache = m_dbSegmentFiles.contains(dbSegmentId);
         DbSegmentRecord& rec       = m_dbSegmentFiles[dbSegmentId];
@@ -66,15 +66,14 @@ struct GameDatabaseContainer::Impl {
         try {
             auto path = m_resourceLibrary->get(ResourceType::DbSegment, dbSegmentId);
             if (path.empty()) {
-                Logger(Logger::Err) << "Non-existent DB index id '" << dbSegmentId << "': ";
+                if (!optional)
+                    Logger(Logger::Err) << "Non-existent DB index id '" << dbSegmentId << "': ";
                 return false;
             }
             const auto fileBuffer = readFileIntoBufferThrow(path);
             const auto jsonData   = readJsonFromBufferThrow(fileBuffer);
 
-            rec.m_data.convertToMap();
-            const int totalRecordsFound = addJsonObjectToIndex(rec.m_data, jsonData);
-            Logger() << "Database segment JSON parsing finished '" << dbSegmentId << "', total records:" << totalRecordsFound;
+            rec.m_data = jsonData;
         }
         catch (std::exception& ex) {
             Logger(Logger::Err) << "error while loading database segment '" << dbSegmentId << "': " << ex.what();
@@ -106,7 +105,21 @@ struct GameDatabaseContainer::Impl {
                     return false;
 
                 auto& segmentJson = m_dbSegmentFiles[segmentId].m_data;
-                PropertyTree::mergePatch(rec.m_data, segmentJson);
+                rec.m_data.convertToMap();
+
+                const int totalRecordsFound = addJsonObjectToIndex(rec.m_data, segmentJson);
+                Logger() << "Database segment JSON parsing finished '" << segmentId << "', total records:" << totalRecordsFound;
+            }
+            for (const auto& item : jsonData["optional"].getList()) {
+                const std::string segmentId = item.getScalar().toString();
+                if (!loadDbSegmentFile(segmentId, true))
+                    continue;
+
+                auto& segmentJson = m_dbSegmentFiles[segmentId].m_data;
+                rec.m_data.convertToMap();
+
+                const int totalRecordsFound = addJsonObjectToIndex(rec.m_data, segmentJson);
+                Logger() << "Database segment JSON parsing finished '" << segmentId << "', total records:" << totalRecordsFound;
             }
         }
         catch (std::exception& ex) {
@@ -133,6 +146,7 @@ struct GameDatabaseContainer::Impl {
 
                 PropertyTree::mergePatch(rec.m_data, indexJson);
             }
+
             rec.m_db = std::make_shared<GameDatabase>(rec.m_data);
         }
         catch (std::exception& ex) {

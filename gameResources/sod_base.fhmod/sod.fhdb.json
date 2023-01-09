@@ -404,6 +404,28 @@
 
 
 }
+},
+
+{
+"scope": "dwellings",
+
+"records": {
+
+"hota.dw.nimph"              : null,
+"hota.dw.crewMate"           : null,
+"hota.dw.pirate"             : null,
+"hota.dw.stormbird"          : null,
+"hota.dw.seaWitch"           : null,
+"hota.dw.nix"                : null,
+"hota.dw.seaSerpent"         : null,
+
+"hota.dw.leprechaun"         : null,
+"hota.dw.satyr"              : null,
+"hota.dw.fangarm"            : null,
+
+"hota.dw.cannonBlacksmith"   : null
+
+}
 }]
 
 

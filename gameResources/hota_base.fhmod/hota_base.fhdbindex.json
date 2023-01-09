@@ -31,8 +31,15 @@
 "units",
 "units_abilities",
 "units_presentation",
+"ztranslations",
 
 "hota"
+],
+
+"optional": [
+"sod_tr_update",
+"hota_tr_update",
+"hota_trlng_update"
 ]
 
 }

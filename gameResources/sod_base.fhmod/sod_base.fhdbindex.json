@@ -31,9 +31,14 @@
 "units",
 "units_abilities",
 "units_presentation",
+"ztranslations",
 
 "sod",
 "sod_defs"
 
+],
+
+"optional": [
+"sod_tr_update"
 ]
 }

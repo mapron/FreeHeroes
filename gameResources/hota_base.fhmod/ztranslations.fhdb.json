@@ -1,0 +1,85 @@
+[{
+"scope": "mapBanks",
+
+"records": {
+
+"sod.map.crypt"                            : { "pres": {"name": {"ts": {"ru_RU": "Склеп"   } } } },
+"sod.map.utopia"                           : { "pres": {"name": {"ts": {"ru_RU": "Утопия Драконов"   } } } },
+"sod.map.derelictShip"                     : { "pres": {"name": {"ts": {"ru_RU": "Покинутый Корабль"   } } } },
+"sod.map.shipwreck"                        : { "pres": {"name": {"ts": {"ru_RU": "Обломки корабля"   } } } },
+"hota.map.blackTower"                      : { "pres": {"name": {"ts": {"ru_RU": "Чёрная Башня"   } } } },
+"hota.map.mansion"                         : { "pres": {"name": {"ts": {"ru_RU": "Особняк Вампиров"   } } } },
+"hota.map.beholderSanctuary"               : { "pres": {"name": {"ts": {"ru_RU": "Святилище Бехолдеров"   } } } },
+"hota.map.templeSea"                       : { "pres": {"name": {"ts": {"ru_RU": "Храм Моря"   } } } },
+"hota.map.churchyard"                      : { "pres": {"name": {"ts": {"ru_RU": "Погост"   } } } },
+"sod.map.conservatory"                     : { "pres": {"name": {"ts": {"ru_RU": "Консерватория Грифонов"   } } } },
+"sod.map.hive"                             : { "pres": {"name": {"ts": {"ru_RU": "Улей Змиев"   } } } },
+"hota.map.experimentalShop"                : { "pres": {"name": {"ts": {"ru_RU": "Опытный цех"   } } } },
+"hota.map.wolfRaiderPicket"                : { "pres": {"name": {"ts": {"ru_RU": "Застава Налётчиков"   } } } },
+"hota.map.vermilionTower"                  : { "pres": {"name": {"ts": {"ru_RU": "Алая Башня"   } } } },
+"hota.map.pirateCave"                      : { "pres": {"name": {"ts": {"ru_RU": "Пиратская пещера"   } } } },
+"hota.map.ivoryTower"                      : { "pres": {"name": {"ts": {"ru_RU": "Башня слоновой кости"   } } } },
+"sod.map.impCache"                         : { "pres": {"name": {"ts": {"ru_RU": "Тайник Бесов"   } } } },
+"sod.map.dwarvenTreasury"                  : { "pres": {"name": {"ts": {"ru_RU": "Сокровищница Гномов"   } } } },
+"sod.map.medusaStores"                     : { "pres": {"name": {"ts": {"ru_RU": "Кладовые Медуз"   } } } },
+"sod.map.cyclopsStockpile"                 : { "pres": {"name": {"ts": {"ru_RU": "Склад Циклопов"   } } } },
+"sod.map.nagaBank"                         : { "pres": {"name": {"ts": {"ru_RU": "Нага банк"   } } } },
+"hota.map.spit"                            : { "pres": {"name": {"ts": {"ru_RU": "Вертеп Василисков"   } } } },
+"hota.map.ruins"                           : { "pres": {"name": {"ts": {"ru_RU": "Руины"   } } } }
+
+}
+},
+
+{
+"scope": "terrains",
+
+"records": {
+
+"sod.terrain.dirt"                     : { "pres": {"name": {"ts": {"ru_RU": "Грязь"   } } } },
+"sod.terrain.sand"                     : { "pres": {"name": {"ts": {"ru_RU": "Песок"   } } } },
+"sod.terrain.grass"                    : { "pres": {"name": {"ts": {"ru_RU": "Трава"   } } } },
+"sod.terrain.lava"                     : { "pres": {"name": {"ts": {"ru_RU": "Лава"   } } } },
+"sod.terrain.subterra"                 : { "pres": {"name": {"ts": {"ru_RU": "Подземелье"   } } } },
+"sod.terrain.snow"                     : { "pres": {"name": {"ts": {"ru_RU": "Снег"   } } } },
+"sod.terrain.swamp"                    : { "pres": {"name": {"ts": {"ru_RU": "Болото"   } } } },
+"sod.terrain.rough"                    : { "pres": {"name": {"ts": {"ru_RU": "Камни"   } } } },
+"sod.terrain.water"                    : { "pres": {"name": {"ts": {"ru_RU": "Вода"   } } } },
+"sod.terrain.rock"                     : { "pres": {"name": {"ts": {"ru_RU": "Скала"   } } } },
+"hota.terrain.highland"                : { "pres": {"name": {"ts": {"ru_RU": "Высокогорье"   } } } },
+"hota.terrain.wasteland"               : { "pres": {"name": {"ts": {"ru_RU": "Пустоши"   } } } },
+"sod.terrain.magicPlains"              : { "pres": {"name": {"ts": {"ru_RU": "Магические равнины"   } } } },
+"sod.terrain.fieryFields"              : { "pres": {"name": {"ts": {"ru_RU": "Огненные поля"   } } } },
+"sod.terrain.magicClouds"              : { "pres": {"name": {"ts": {"ru_RU": "Магические облака"   } } } },
+"sod.terrain.rockyGround"              : { "pres": {"name": {"ts": {"ru_RU": "Скальная земля"   } } } },
+"sod.terrain.lucidPools"               : { "pres": {"name": {"ts": {"ru_RU": "Чистые пруды"   } } } },
+"sod.terrain.favorableWinds"           : { "pres": {"name": {"ts": {"ru_RU": "Попутный ветер"   } } } },
+"sod.terrain.holyGround"               : { "pres": {"name": {"ts": {"ru_RU": "Святая земля"   } } } },
+"sod.terrain.cloverField"              : { "pres": {"name": {"ts": {"ru_RU": "Клеверное поле"   } } } },
+"sod.terrain.evilFog"                  : { "pres": {"name": {"ts": {"ru_RU": "Дьявольский туман"   } } } },
+"sod.terrain.cursedGround"             : { "pres": {"name": {"ts": {"ru_RU": "Проклятая земля"   } } } },
+"hota.terrain.crackedIce"              : { "pres": {"name": {"ts": {"ru_RU": "Растрескавшиеся льды"   } } } },
+"hota.terrain.dunes"                   : { "pres": {"name": {"ts": {"ru_RU": "Дюны"   } } } },
+"hota.terrain.gloryFields"             : { "pres": {"name": {"ts": {"ru_RU": "Поля славы"   } } } }
+}
+},
+
+{
+"scope": "factions",
+
+"records": {
+
+"sod.faction.castle"          : { "pres": {"name": {"ts": {"ru_RU": "Замок"   } } } },
+"sod.faction.rampart"         : { "pres": {"name": {"ts": {"ru_RU": "Оплот"   } } } },
+"sod.faction.tower"           : { "pres": {"name": {"ts": {"ru_RU": "Башня"   } } } },
+"sod.faction.inferno"         : { "pres": {"name": {"ts": {"ru_RU": "Инферно"   } } } },
+"sod.faction.necropolis"      : { "pres": {"name": {"ts": {"ru_RU": "Некрополь"   } } } },
+"sod.faction.dungeon"         : { "pres": {"name": {"ts": {"ru_RU": "Подземелье"   } } } },
+"sod.faction.stronghold"      : { "pres": {"name": {"ts": {"ru_RU": "Цитадель"   } } } },
+"sod.faction.fortress"        : { "pres": {"name": {"ts": {"ru_RU": "Крепость"   } } } },
+"sod.faction.conflux"         : { "pres": {"name": {"ts": {"ru_RU": "Сопряжение"   } } } },
+"hota.faction.cove"           : { "pres": {"name": {"ts": {"ru_RU": "Причал"   } } } },
+"sod.faction.neutral"         : { "pres": {"name": {"ts": {"ru_RU": "Нейтралы"   } } } }
+
+}
+
+}]

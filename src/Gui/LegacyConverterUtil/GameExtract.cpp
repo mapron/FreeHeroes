@@ -8,16 +8,19 @@
 #include "EnvDetect.hpp"
 
 #include "ConversionHandler.hpp"
-#include "MernelPlatform/AppLocations.hpp"
+
+#include "Archive.hpp"
+#include "FsUtilsQt.hpp"
+#include "KnownResources.hpp"
+#include "LocalizationConverter.hpp"
+#include "SpriteFile.hpp"
+#include "IGameDatabase.hpp"
+
 #include "MernelExecution/ParallelExecutor.hpp"
 #include "MernelExecution/TaskQueueWatcher.hpp"
 #include "MernelExecution/TaskQueue.hpp"
 
-#include "Archive.hpp"
-#include "SpriteFile.hpp"
-#include "KnownResources.hpp"
-#include "FsUtilsQt.hpp"
-
+#include "MernelPlatform/AppLocations.hpp"
 #include "MernelPlatform/Profiler.hpp"
 #include "MernelPlatform/Logger.hpp"
 
@@ -219,7 +222,7 @@ GameExtract::DetectedSources GameExtract::probe() const
 
     for (const char* name : { "hota.snd",
                               "hota.lod",
-                              "hota_lng.lod"
+                              "hota_lng.lod",
                               "hota.vid" }) {
         auto path = findPathChild(dataFolder, name);
         if (path.empty())
@@ -431,6 +434,17 @@ void GameExtract::run(const DetectedSources& sources) const
     }
 
     concatProcessor.create();
+
+    LocalizationConverter loc(m_databaseContainer->getDatabase(Core::GameVersion::HOTA), m_databaseContainer->getDatabase(Core::GameVersion::SOD));
+
+    if (hasSod)
+        loc.extractSOD(m_settings.m_archiveExtractRoot / "h3bitmap_lod", m_settings.m_mainExtractRoot / "sod_res.fhmod" / "sod_tr_update.fhdb.json");
+    if (hasHota) {
+        loc.extractHOTA(m_settings.m_archiveExtractRoot / "hota_dat", m_settings.m_mainExtractRoot / "hota_res.fhmod" / "hota_tr_update.fhdb.json");
+        if (std_fs::exists(m_settings.m_archiveExtractRoot / "hota_lng_lod")) {
+            loc.extractSOD(m_settings.m_archiveExtractRoot / "hota_lng_lod", m_settings.m_mainExtractRoot / "hota_res.fhmod" / "hota_trlng_update.fhdb.json");
+        }
+    }
 }
 
 void GameExtract::processFile(Mernel::TaskQueue&      taskQueue,

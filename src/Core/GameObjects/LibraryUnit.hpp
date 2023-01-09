@@ -6,6 +6,7 @@
 #pragma once
 
 #include "Stat.hpp"
+#include "TranslationMap.hpp"
 
 #include "LibrarySpell.hpp"
 #include "LibraryObjectDef.hpp"
@@ -130,6 +131,8 @@ struct LibraryUnit {
         bool        soundHasMovementStart = false;
 
         std::string spriteProjectile;
+
+        TranslationMap name;
     };
 
     std::string id;

@@ -7,6 +7,7 @@
 
 #include "LibraryFwd.hpp"
 #include "Stat.hpp"
+#include "TranslationMap.hpp"
 
 #include <string>
 #include <vector>
@@ -68,6 +69,7 @@ struct LibraryTerrain {
         std::string              music;
         std::vector<std::string> backgroundsBattle;
         std::string              defFile;
+        TranslationMap           name;
 
         int dirtBorderTilesOffset    = -1;
         int sandBorderTilesOffset    = -1;

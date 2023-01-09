@@ -23,6 +23,8 @@
 
 #include "LibrarySerialize.hpp"
 
+#include "MernelPlatform/Logger.hpp"
+
 #include <deque>
 #include <unordered_map>
 #include <cstddef>

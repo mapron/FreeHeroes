@@ -9,6 +9,7 @@
 #include "LibraryFwd.hpp"
 #include "LibraryUnit.hpp"
 #include "LibraryFaction.hpp"
+#include "TranslationMap.hpp"
 
 #include <string>
 #include <vector>
@@ -47,9 +48,11 @@ struct LibraryHero {
             Unspec
         };
 
-        int         order = 0;
-        std::string portrait;
-        std::string portraitSmall;
+        int            order = 0;
+        std::string    portrait;
+        std::string    portraitSmall;
+        TranslationMap name;
+        TranslationMap bio;
 
         Gender gender = Gender::Unspec;
     };

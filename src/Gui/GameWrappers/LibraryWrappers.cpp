@@ -25,38 +25,25 @@ namespace FreeHeroes::Gui {
 
 namespace {
 
-QString translateHelper(const char*        context,
-                        const std::string& untranslatedName,
-                        const std::string& key,
-                        int                n = -1)
+QString translateHelper(const Core::TranslationMap& tsMap,
+                        const std::string&          untranslatedName,
+                        const std::string&          key,
+                        int                         n = -1)
 {
-    QString    localizedName     = qApp->translate(context, key.c_str(), "", n);
-    const bool translationFailed = localizedName.toStdString() == key;
-    if (translationFailed)
-        localizedName = untranslatedName.empty() ? QString("$(%1)").arg(key.c_str()) : QString::fromStdString(untranslatedName);
-    return localizedName;
-}
-template<typename T>
-struct TranslationContextName {
-    static void** context;
-};
-// clang-format off
-template<> struct TranslationContextName<Core::LibraryArtifact>           { static constexpr const char * context = "artifacts"; };
-template<> struct TranslationContextName<Core::LibraryFaction>            { static constexpr const char * context = "factions"; };
-template<> struct TranslationContextName<Core::LibraryFactionHeroClass>   { static constexpr const char * context = "classes"; };
-template<> struct TranslationContextName<Core::LibraryHero>               { static constexpr const char * context = "heroes"; };
-template<> struct TranslationContextName<Core::LibraryMapBank>            { static constexpr const char * context = "mapBanks"; };
-template<> struct TranslationContextName<Core::LibrarySecondarySkill>     { static constexpr const char * context = "skills"; };
-template<> struct TranslationContextName<Core::LibrarySpell>              { static constexpr const char * context = "spells"; };
-template<> struct TranslationContextName<Core::LibraryTerrain>            { static constexpr const char * context = "terrains"; };
-template<> struct TranslationContextName<Core::LibraryUnit>               { static constexpr const char * context = "units"; };
+    if (tsMap.ts.contains("ru_RU")) {
+        return QString::fromStdString(tsMap.ts.at("ru_RU"));
+    }
+    if (tsMap.ts.contains("en_US")) {
+        return QString::fromStdString(tsMap.ts.at("en_US"));
+    }
 
-// clang-format on
+    return untranslatedName.empty() ? QString("$(%1)").arg(key.c_str()) : QString::fromStdString(untranslatedName);
+}
 
 template<typename T>
 QString translateHelper(const T* obj, int n = -1)
 {
-    return translateHelper(TranslationContextName<T>::context, obj->untranslatedName, obj->id, n);
+    return translateHelper(obj->presentationParams.name, obj->untranslatedName, obj->id, n);
 }
 
 QString prepareDescription(QString description)
@@ -101,7 +88,8 @@ QString GuiArtifact::getName(int n) const
 {
     if (getSource()->scrollSpell) {
         QString spellName  = translateHelper(getSource()->scrollSpell);
-        QString scrollName = translateHelper(TranslationContextName<Core::LibraryArtifact>::context, "", "sod.artifact.special.scroll", n);
+        QString scrollName = "SCROLL";
+        //QString scrollName = translateHelper(TranslationContextName<Core::LibraryArtifact>::context, "", "sod.artifact.special.scroll", n);
         return scrollName + " \"" + spellName + "\"";
     }
 
@@ -111,9 +99,9 @@ QString GuiArtifact::getName(int n) const
 
 QString GuiArtifact::getDescr() const
 {
-    QString localizedDesc = translateHelper(TranslationContextName<Core::LibraryArtifact>::context,
+    QString localizedDesc = ""; /*= translateHelper(TranslationContextName<Core::LibraryArtifact>::context,
                                             getSource()->untranslatedName,
-                                            getSource()->id + ".descr");
+                                            getSource()->id + ".descr");*/
     return prepareDescription(localizedDesc);
 }
 
@@ -172,7 +160,7 @@ QString GuiUnit::getNameWithCount(int n, GuiUnit::Variation variation) const
     auto id = getSource()->id;
     if (variation == Variation::AsTarget)
         id = id + ".accusative";
-    QString localizedName = translateHelper(TranslationContextName<Core::LibraryUnit>::context, getSource()->untranslatedName, id, n);
+    QString localizedName = ""; //translateHelper(TranslationContextName<Core::LibraryUnit>::context, getSource()->untranslatedName, id, n);
     if (n > 0)
         return tr("%1 %2").arg(n).arg(localizedName);
 
@@ -210,7 +198,7 @@ QString GuiHero::getClassName() const
 
 QString GuiHero::getBio() const
 {
-    QString localizedDesc = translateHelper(TranslationContextName<Core::LibraryHero>::context,
+    QString localizedDesc = translateHelper(getSource()->presentationParams.bio,
                                             getSource()->untranslatedName,
                                             getSource()->id + ".bio");
     return prepareDescription(localizedDesc);
@@ -269,9 +257,9 @@ GuiSkill::GuiSkill(Sound::IMusicBox*, const IGraphicsLibrary* graphicsLibrary, C
 QString GuiSkill::getDescription(int level) const
 {
     static const QList<std::string> suffixes{ ".basic", ".advanced", ".expert" };
-    QString                         localizedDesc = translateHelper(TranslationContextName<Core::LibrarySecondarySkill>::context,
+    QString                         localizedDesc = ""; /*translateHelper(TranslationContextName<Core::LibrarySecondarySkill>::context,
                                             getSource()->untranslatedName,
-                                            getSource()->id + suffixes.value(level));
+                                            getSource()->id + suffixes.value(level));*/
     return prepareDescription(localizedDesc);
 }
 
@@ -298,9 +286,9 @@ GuiSpell::GuiSpell(Sound::IMusicBox* musicBox, const IGraphicsLibrary* graphicsL
 QString GuiSpell::getDescription(int level, int hintDamage) const
 {
     static const QList<std::string> suffixes{ ".normal", ".basic", ".advanced", ".expert" };
-    QString                         localizedDesc = translateHelper(TranslationContextName<Core::LibrarySpell>::context,
+    QString                         localizedDesc = ""; /* translateHelper(TranslationContextName<Core::LibrarySpell>::context,
                                             getSource()->untranslatedName,
-                                            getSource()->id + suffixes.value(level));
+                                            getSource()->id + suffixes.value(level));*/
     localizedDesc                                 = prepareDescription(localizedDesc);
     if (hintDamage > 0) {
         localizedDesc += "<br><br>" + tr("Inflicts damage:") + " " + QString::number(hintDamage);

@@ -8,6 +8,7 @@
 #include "LibraryObjectDef.hpp"
 
 #include "Reward.hpp"
+#include "TranslationMap.hpp"
 
 #include <string>
 #include <vector>
@@ -39,7 +40,8 @@ struct LibraryMapBank {
     Variants variants;
 
     struct Presentation {
-        int order = 0;
+        int            order = 0;
+        TranslationMap name;
     };
     Presentation      presentationParams;
     ObjectDefMappings objectDefs;

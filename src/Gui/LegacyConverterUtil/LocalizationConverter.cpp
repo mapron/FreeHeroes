@@ -11,6 +11,8 @@
 
 #include "MernelPlatform/FileFormatJson.hpp"
 #include "MernelPlatform/FileIOUtils.hpp"
+#include "MernelPlatform/PropertyTree.hpp"
+#include "MernelPlatform/StringUtils.hpp"
 
 #include <QFile>
 #include <QTextCodec>
@@ -21,18 +23,25 @@ namespace FreeHeroes {
 using namespace Core;
 using namespace Mernel;
 
+namespace {
+constexpr const std::string_view g_hdatChapterSeparator{ "\r\n=============================\r\n" };
+}
+
 class LocalizationConverter::TranscodedFile {
-    QTextCodec*             m_inputCodec = nullptr;
-    std::string             m_localeId;
-    std::string             m_contextId;
-    Core::IResourceLibrary& m_resources;
+    QTextCodec* m_inputCodec = nullptr;
+    std::string m_localeId;
+    //std::string          m_contextId;
+    Mernel::PropertyTree m_data;
+
+    Mernel::PropertyTreeMap* m_records = nullptr;
+    const std_path           m_outJsonFilename;
 
 public:
-    TranscodedFile(Core::IResourceLibrary& resources, QByteArray encoding)
+    TranscodedFile(const std_path& outJsonFilename, QByteArray encoding)
         : m_inputCodec{ QTextCodec::codecForName(encoding) }
-        , m_resources(resources)
+        , m_outJsonFilename(outJsonFilename)
     {
-        //  outFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
+        m_data.convertToList();
     }
     std::string toString(const QByteArray& value)
     {
@@ -42,27 +51,39 @@ public:
         return valueStr.toStdString();
     }
     void setLocale(const std::string& localeId) { this->m_localeId = localeId; }
-    void setContext(const std::string& contextId) { this->m_contextId = contextId; }
-    void writeRow(const std::string& key, const QByteArray& value){
-        // @todo:
-        //m_resources.registerResource(Core::ResourceTranslation{ m_localeId, m_contextId, key, { toString(value) } });
-    };
-    void writeRow(const std::string& key, const QByteArray& value, const QByteArray& value2){
-        //m_resources.registerResource(Core::ResourceTranslation{ m_localeId, m_contextId, key, { toString(value), toString(value2) } });
-    };
+    void setContext(const std::string& contextId)
+    {
+        Mernel::PropertyTree segment;
+        segment["scope"] = PropertyTreeScalar(contextId);
+        segment["records"].convertToMap();
+        m_data.append(segment);
+        m_records = &(m_data.getList().back()["records"].getMap());
+    }
+    void writeRow(const std::string& key, const QByteArray& value)
+    {
+        Mernel::PropertyTree& rec      = (*m_records)[key];
+        Mernel::PropertyTree& recPres  = rec["pres"];
+        Mernel::PropertyTree& presName = recPres["name"];
+        Mernel::PropertyTree& ts       = presName["ts"];
+        Mernel::PropertyTree& tsLoc    = ts[m_localeId];
+        tsLoc                          = PropertyTreeScalar(toString(value));
+    }
+    //void writeRow(const std::string& key, const QByteArray& value, const QByteArray& value2)
+    //{
+    //m_resources.registerResource(Core::ResourceTranslation{ m_localeId, m_contextId, key, { toString(value), toString(value2) } });
+    //}
+
+    void finish()
+    {
+        std::string buffer = Mernel::writeJsonToBufferThrow(m_data, false);
+        Mernel::writeFileFromBufferThrow(m_outJsonFilename, buffer);
+    }
 };
 
-LocalizationConverter::LocalizationConverter(IResourceLibrary&          resources,
-                                             const std_path&            srcRoot,
-                                             const Core::IGameDatabase* databaseHOTA,
+LocalizationConverter::LocalizationConverter(const Core::IGameDatabase* databaseHOTA,
                                              const Core::IGameDatabase* databaseSOD)
-    : m_resources(resources)
-    , m_root(srcRoot)
-    , m_rootDest(srcRoot / "Translation")
-{
-    if (!std_fs::exists(m_rootDest))
-        std_fs::create_directories(m_rootDest);
 
+{
     auto fillIds = [](IdSet* idSet, const Core::IGameDatabase* database) {
         idSet->unitIds     = database->units()->legacyOrderedIds();
         idSet->artifactIds = database->artifacts()->legacyOrderedIds();
@@ -75,9 +96,9 @@ LocalizationConverter::LocalizationConverter(IResourceLibrary&          resource
     fillIds(&m_idSetSOD, databaseSOD);
 }
 
-void LocalizationConverter::extractSOD(const std_path& txtSubdir)
+void LocalizationConverter::extractSOD(const std_path& txtSubdir, const std_path& outJsonFilename)
 {
-    TxtTable crtraits = readTable(m_root / txtSubdir / "crtraits.txt");
+    TxtTable crtraits = readTable(txtSubdir / "crtraits.txt");
     if (crtraits.isEmpty())
         return;
 
@@ -95,7 +116,7 @@ void LocalizationConverter::extractSOD(const std_path& txtSubdir)
     //units.create.en_US
     //<subjectName>.<localeId>
 
-    TranscodedFile outFile(m_resources, encoding);
+    TranscodedFile outFile(outJsonFilename, encoding);
     outFile.setLocale(localeId.toStdString());
 
     const size_t tableOffset = 2;
@@ -107,12 +128,13 @@ void LocalizationConverter::extractSOD(const std_path& txtSubdir)
         if (id.empty())
             continue;
 
-        outFile.writeRow(id, row[0], row[1]);
+        outFile.writeRow(id, row[0]);
+        // outFile.writeRow(id, row[0], row[1]);
     }
 
     {
         outFile.setContext("artifacts");
-        TxtTable artraits = readTable(m_root / txtSubdir / "artraits.txt");
+        TxtTable artraits = readTable(txtSubdir / "artraits.txt");
         for (size_t index = 0; index < m_idSetSOD.artifactIds.size(); index++) {
             auto& row   = artraits[tableOffset + index];
             auto& id    = m_idSetSOD.artifactIds[index];
@@ -120,40 +142,40 @@ void LocalizationConverter::extractSOD(const std_path& txtSubdir)
 
             auto& name = row[0];
             outFile.writeRow(id, name);
-            outFile.writeRow(id + ".descr", descr);
+            //outFile.writeRow(id + ".descr", descr);
         }
     }
     {
         outFile.setContext("heroes");
-        TxtTable hotraits = readTable(m_root / txtSubdir / "hotraits.txt");
-        TxtTable herobios = readTable(m_root / txtSubdir / "herobios.txt");
+        TxtTable hotraits = readTable(txtSubdir / "hotraits.txt");
+        TxtTable herobios = readTable(txtSubdir / "herobios.txt");
         for (size_t index = 0; index < m_idSetSOD.heroesIds.size(); index++) {
-            auto& rowHero     = hotraits[tableOffset + index];
-            auto& rowHeroBios = herobios[index];
-            auto& id          = m_idSetSOD.heroesIds[index];
-            auto& name        = rowHero[0];
-            auto& bio         = rowHeroBios[0];
+            auto& rowHero = hotraits[tableOffset + index];
+            //auto& rowHeroBios = herobios[index];
+            auto& id   = m_idSetSOD.heroesIds[index];
+            auto& name = rowHero[0];
+            //auto& bio         = rowHeroBios[0];
 
             outFile.writeRow(id, name);
-            outFile.writeRow(id + ".bio", bio);
+            //outFile.writeRow(id + ".bio", bio);
         }
     }
     {
         outFile.setContext("skills");
-        TxtTable sstraits = readTable(m_root / txtSubdir / "sstraits.txt");
+        TxtTable sstraits = readTable(txtSubdir / "sstraits.txt");
         for (size_t index = 0; index < m_idSetSOD.skillsIds.size(); index++) {
             auto& row = sstraits[tableOffset + index];
             auto& id  = m_idSetSOD.skillsIds[index];
 
             outFile.writeRow(id, row[0]);
-            outFile.writeRow(id + ".basic", row[1]);
-            outFile.writeRow(id + ".advanced", row[2]);
-            outFile.writeRow(id + ".expert", row[3]);
+            //outFile.writeRow(id + ".basic", row[1]);
+            //outFile.writeRow(id + ".advanced", row[2]);
+            //outFile.writeRow(id + ".expert", row[3]);
         }
     }
     {
         outFile.setContext("spells");
-        TxtTable sptraits1 = readTable(m_root / txtSubdir / "sptraits.txt");
+        TxtTable sptraits1 = readTable(txtSubdir / "sptraits.txt");
         TxtTable sptraits;
         for (auto row : sptraits1) {
             if (!row[1].isEmpty())
@@ -164,19 +186,20 @@ void LocalizationConverter::extractSOD(const std_path& txtSubdir)
             auto&  id             = m_idSetSOD.spellIds[index];
             size_t shortDescIndex = row.size() - 5;
             outFile.writeRow(id, row[0]);
-            outFile.writeRow(id + ".short", row[1]);
+            //outFile.writeRow(id + ".short", row[1]);
             if (row[shortDescIndex + 0].isEmpty())
                 continue;
 
-            outFile.writeRow(id + ".normal", row[shortDescIndex + 0]);
-            outFile.writeRow(id + ".basic", row[shortDescIndex + 1]);
-            outFile.writeRow(id + ".advanced", row[shortDescIndex + 2]);
-            outFile.writeRow(id + ".expert", row[shortDescIndex + 3]);
+            //outFile.writeRow(id + ".normal", row[shortDescIndex + 0]);
+            //outFile.writeRow(id + ".basic", row[shortDescIndex + 1]);
+            //outFile.writeRow(id + ".advanced", row[shortDescIndex + 2]);
+            //outFile.writeRow(id + ".expert", row[shortDescIndex + 3]);
         }
     }
     {
+        /*
         outFile.setContext("classes");
-        TxtTable hctraits = readTable(m_root / txtSubdir / "hctraits.txt");
+        TxtTable hctraits = readTable(txtSubdir / "hctraits.txt");
         for (size_t index = 0; index < m_idSetSOD.factionIds.size(); index++) {
             auto& id = m_idSetSOD.factionIds[index];
             {
@@ -187,30 +210,23 @@ void LocalizationConverter::extractSOD(const std_path& txtSubdir)
                 auto& row = hctraits[tableOffset + index * 2 + 1];
                 outFile.writeRow(id + ".mage", row[0]);
             }
-        }
+        }*/
     }
-
-    //  m_resources.registerResource(ResourceTranslation{resourceId, path2string(m_rootDest), path2string(mainFilename) });
+    outFile.finish();
 }
 
-void LocalizationConverter::extractHOTA(const std_path& jsonSubdir)
+void LocalizationConverter::extractHOTA(const std_path& jsonSubdir, const std_path& outJsonFilename)
 {
     TxtTable locTable;
-    auto     loadJsonRow = [this, &jsonSubdir](const std::string& prefix, size_t index) -> std::vector<std::string> {
+    auto     loadJsonRow = [&jsonSubdir](const std::string& prefix, size_t index) -> std::vector<std::string> {
         std::vector<std::string> res;
-        auto                     filename = m_root / jsonSubdir / (prefix + std::to_string(index) + ".json");
+        auto                     filename = jsonSubdir / (prefix + std::to_string(index) + ".txt");
 
-        std::string buffer;
-        if (!Mernel::readFileIntoBuffer(filename, buffer))
+        std::string chaptersStr;
+        if (!Mernel::readFileIntoBuffer(filename, chaptersStr))
             return {};
 
-        PropertyTree root;
-        if (!Mernel::readJsonFromBuffer(buffer, root))
-            return {};
-
-        const auto& strings = root["strings"].getList();
-        for (const auto& str : strings)
-            res.push_back(str.getScalar().toString());
+        res = Mernel::splitLine(chaptersStr, std::string(g_hdatChapterSeparator));
         return res;
     };
 
@@ -226,20 +242,24 @@ void LocalizationConverter::extractHOTA(const std_path& jsonSubdir)
         const std::string name2 = jsonRow[4];
         locTable.push_back({ QByteArray::fromStdString(id), QByteArray::fromStdString(name1), QByteArray::fromStdString(name2) });
     }
-    std::string      localeId = "en_US";
-    const QByteArray encoding = "utf-8";
-    if (locTable[0][1].startsWith("\xD0\x9F\xD1\x83\xD1\x88")) // "Пуш", Russian, utf-8
+    std::string localeId = "en_US";
+    QByteArray  encoding = "utf-8";
+    if (locTable[0][1].startsWith("\xcf\xf3\xf8\xea\xe0")) { // "Пушка", Russian, 1251 Х
         localeId = "ru_RU";
-    else if (locTable[0][1].startsWith("Kanone")) // German
+        encoding = "Windows-1251";
+    } else if (locTable[0][1].startsWith("Kanone")) { // German
         localeId = "de_DE";
+        encoding = "Windows-1252";
+    }
 
-    Logger() << "localeId=" << localeId;
+    Logger(Logger::Notice) << "localeId=" << localeId << ", encoding=" << encoding.toStdString();
 
-    TranscodedFile outFile(m_resources, encoding);
+    TranscodedFile outFile(outJsonFilename, encoding);
     outFile.setLocale(localeId);
     outFile.setContext("units");
     for (auto row : locTable) {
-        outFile.writeRow(row[0].toStdString(), row[1], row[2]);
+        outFile.writeRow(row[0].toStdString(), row[1]);
+        //outFile.writeRow(row[0].toStdString(), row[1], row[2]);
     }
 
     {
@@ -255,7 +275,7 @@ void LocalizationConverter::extractHOTA(const std_path& jsonSubdir)
             const std::string onGetDescr = jsonRow[2];
             const std::string descr      = jsonRow[7];
             outFile.writeRow(id, QByteArray::fromStdString(name));
-            outFile.writeRow(id + ".descr", QByteArray::fromStdString(descr));
+            //outFile.writeRow(id + ".descr", QByteArray::fromStdString(descr));
         }
     }
     {
@@ -270,7 +290,7 @@ void LocalizationConverter::extractHOTA(const std_path& jsonSubdir)
             const std::string name = jsonRow[6];
             const std::string bio  = jsonRow[7];
             outFile.writeRow(id, QByteArray::fromStdString(name));
-            outFile.writeRow(id + ".bio", QByteArray::fromStdString(bio));
+            //outFile.writeRow(id + ".bio", QByteArray::fromStdString(bio));
         }
     }
     {
@@ -294,12 +314,13 @@ void LocalizationConverter::extractHOTA(const std_path& jsonSubdir)
             exper      = exper.mid(0, exper.size() - 3);
 
             outFile.writeRow(id, QByteArray::fromStdString(name));
-            outFile.writeRow(id + ".basic", basic);
-            outFile.writeRow(id + ".advanced", advan);
-            outFile.writeRow(id + ".expert", exper);
+            //outFile.writeRow(id + ".basic", basic);
+            //outFile.writeRow(id + ".advanced", advan);
+            //outFile.writeRow(id + ".expert", exper);
         }
     }
     {
+        /*
         outFile.setContext("classes");
         for (size_t i = m_idSetSOD.factionIds.size(); i < m_idSetHOTA.factionIds.size(); ++i) {
             auto& id = m_idSetHOTA.factionIds[i];
@@ -312,8 +333,9 @@ void LocalizationConverter::extractHOTA(const std_path& jsonSubdir)
                 auto jsonRow = loadJsonRow("class", i * 2 + 1);
                 outFile.writeRow(id + ".mage", QByteArray::fromStdString(jsonRow[1]));
             }
-        }
+        }*/
     }
+    outFile.finish();
 }
 
 LocalizationConverter::TxtTable LocalizationConverter::readTable(const LocalizationConverter::std_path& filename) const

@@ -5,7 +5,8 @@
  */
 #pragma once
 
-#include <string>
+#include "TranslationMap.hpp"
+
 #include <array>
 #include <vector>
 
@@ -20,6 +21,8 @@ struct LibrarySecondarySkill {
         };
         std::array<LevelParams, 3> levels;
         int                        order = 0;
+
+        TranslationMap name;
     };
 
     std::string id;

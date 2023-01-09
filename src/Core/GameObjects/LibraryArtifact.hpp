@@ -5,6 +5,7 @@
  */
 #pragma once
 
+#include "TranslationMap.hpp"
 #include "LibraryFwd.hpp"
 #include "LibrarySpell.hpp"
 #include "LibraryObjectDef.hpp"
@@ -194,6 +195,8 @@ struct LibraryArtifact {
         int           order         = 0;
         std::string   iconStash;
         std::string   iconBonus;
+
+        TranslationMap name;
     };
 
     std::string              id;
