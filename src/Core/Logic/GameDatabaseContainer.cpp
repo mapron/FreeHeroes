@@ -70,8 +70,8 @@ struct GameDatabaseContainer::Impl {
                     Logger(Logger::Err) << "Non-existent DB index id '" << dbSegmentId << "': ";
                 return false;
             }
-            const auto fileBuffer = readFileIntoBufferThrow(path);
-            const auto jsonData   = readJsonFromBufferThrow(fileBuffer);
+            const auto fileBuffer = readFileIntoBuffer(path);
+            const auto jsonData   = readJsonFromBuffer(fileBuffer);
 
             rec.m_data = jsonData;
         }
@@ -97,8 +97,8 @@ struct GameDatabaseContainer::Impl {
                 Logger(Logger::Err) << "Non-existent DB index id '" << dbIndexId << "': ";
                 return false;
             }
-            const auto fileBuffer = readFileIntoBufferThrow(path);
-            const auto jsonData   = readJsonFromBufferThrow(fileBuffer);
+            const auto fileBuffer = readFileIntoBuffer(path);
+            const auto jsonData   = readJsonFromBuffer(fileBuffer);
             for (const auto& item : jsonData["segments"].getList()) {
                 const std::string segmentId = item.getScalar().toString();
                 if (!loadDbSegmentFile(segmentId))

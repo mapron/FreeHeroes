@@ -25,8 +25,8 @@ Mernel::PropertyTree KnownResources::findPP(const std::string& legacyId) const
 KnownResources::KnownResources(const Mernel::std_path& config, const Mernel::std_path& ppConfig)
 {
     {
-        std::string buffer   = Mernel::readFileIntoBufferThrow(config);
-        auto        jsonData = Mernel::readJsonFromBufferThrow(buffer);
+        std::string buffer   = Mernel::readFileIntoBuffer(config);
+        auto        jsonData = Mernel::readJsonFromBuffer(buffer);
         m_resources.reserve(10000);
 
         for (const auto& [key, row] : jsonData.getMap()) {
@@ -44,11 +44,11 @@ KnownResources::KnownResources(const Mernel::std_path& config, const Mernel::std
     }
 
     {
-        std::string buffer   = Mernel::readFileIntoBufferThrow(ppConfig);
-        auto        jsonData = Mernel::readJsonFromBufferThrow(buffer);
+        std::string buffer   = Mernel::readFileIntoBuffer(ppConfig);
+        auto        jsonData = Mernel::readJsonFromBuffer(buffer);
 
         for (const auto& [key, row] : jsonData.getMap()) {
-            m_ppData[key] = row.getMap();
+            m_ppData[key] = Mernel::PropertyTree(row.getMap());
         }
     }
 }

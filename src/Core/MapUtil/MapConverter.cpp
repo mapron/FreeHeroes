@@ -23,26 +23,27 @@
 
 namespace Mernel::Reflection {
 using namespace FreeHeroes;
-ENUM_REFLECTION_STRINGIY(MapConverter::Task,
-                         Invalid,
-                         Invalid,
-                         CheckBinaryInputOutputEquality,
-                         CheckJsonInputOutputEquality,
-                         ConvertH3MToJson,
-                         ConvertJsonToH3M,
-                         ConvertH3SVGToJson,
-                         ConvertJsonToH3SVG,
-                         LoadFHTpl,
-                         LoadFH,
-                         SaveFH,
-                         LoadH3M,
-                         SaveH3M,
-                         FHMapToH3M,
-                         H3MToFHMap,
-                         FHTplToFHMap,
-                         H3MRoundTripJson,
-                         H3SVGRoundTripJson,
-                         H3MRoundTripFH)
+ENUM_REFLECTION_STRINGIFY(
+    MapConverter::Task,
+    Invalid,
+    Invalid,
+    CheckBinaryInputOutputEquality,
+    CheckJsonInputOutputEquality,
+    ConvertH3MToJson,
+    ConvertJsonToH3M,
+    ConvertH3SVGToJson,
+    ConvertJsonToH3SVG,
+    LoadFHTpl,
+    LoadFH,
+    SaveFH,
+    LoadH3M,
+    SaveH3M,
+    FHMapToH3M,
+    H3MToFHMap,
+    FHTplToFHMap,
+    H3MRoundTripJson,
+    H3SVGRoundTripJson,
+    H3MRoundTripFH)
 
 }
 
@@ -325,7 +326,7 @@ void MapConverter::readBinaryBufferData()
 {
     m_rawState = RawState::Undefined;
 
-    m_binaryBuffer = Mernel::readFileIntoHolderThrow(m_inputFilename);
+    m_binaryBuffer = Mernel::readFileIntoHolder(m_inputFilename);
     m_logOutput << m_currentIndent << "Read " << m_binaryBuffer.size() << " bytes from: " << Mernel::path2string(m_inputFilename) << '\n';
 
     m_rawState = RawState::Compressed;
@@ -337,7 +338,7 @@ void MapConverter::writeBinaryBufferData()
         throw std::runtime_error("Buffer needs to be in Compressed state.");
 
     m_logOutput << m_currentIndent << "Write " << m_binaryBuffer.size() << " bytes to: " << Mernel::path2string(m_outputFilename) << '\n';
-    Mernel::writeFileFromHolderThrow(m_outputFilename, m_binaryBuffer);
+    Mernel::writeFileFromHolder(m_outputFilename, m_binaryBuffer);
 }
 
 void MapConverter::writeBinaryBufferDataAsUncompressed()
@@ -346,21 +347,21 @@ void MapConverter::writeBinaryBufferDataAsUncompressed()
         throw std::runtime_error("Buffer needs to be in Uncompressed state.");
 
     m_logOutput << m_currentIndent << "Write " << m_binaryBuffer.size() << " bytes to: " << Mernel::path2string(m_outputFilename) << '\n';
-    Mernel::writeFileFromHolderThrow(m_outputFilename, m_binaryBuffer);
+    Mernel::writeFileFromHolder(m_outputFilename, m_binaryBuffer);
 }
 
 void MapConverter::readJsonToProperty()
 {
     m_logOutput << m_currentIndent << "Read: " << Mernel::path2string(m_inputFilename) << '\n';
-    std::string buffer = Mernel::readFileIntoBufferThrow(m_inputFilename);
-    m_json             = Mernel::readJsonFromBufferThrow(buffer);
+    std::string buffer = Mernel::readFileIntoBuffer(m_inputFilename);
+    m_json             = Mernel::readJsonFromBuffer(buffer);
 }
 
 void MapConverter::writeJsonFromProperty()
 {
     m_logOutput << m_currentIndent << "Write: " << Mernel::path2string(m_outputFilename) << '\n';
-    std::string buffer = Mernel::writeJsonToBufferThrow(m_json);
-    Mernel::writeFileFromBufferThrow(m_outputFilename, buffer);
+    std::string buffer = Mernel::writeJsonToBuffer(m_json);
+    Mernel::writeFileFromBuffer(m_outputFilename, buffer);
 }
 
 void MapConverter::detectCompression()
@@ -542,8 +543,8 @@ void MapConverter::convertFHTPLtoFH()
 
     if (!m_settings.m_rngUserSettings.empty()) {
         m_logOutput << m_currentIndent << "Read: " << Mernel::path2string(m_settings.m_rngUserSettings) << '\n';
-        std::string buffer       = Mernel::readFileIntoBufferThrow(m_settings.m_rngUserSettings);
-        auto        settingsJson = Mernel::readJsonFromBufferThrow(buffer);
+        std::string buffer       = Mernel::readFileIntoBuffer(m_settings.m_rngUserSettings);
+        auto        settingsJson = Mernel::readJsonFromBuffer(buffer);
 
         m_mapFH.applyRngUserSettings(settingsJson, db);
     }
@@ -560,8 +561,8 @@ void MapConverter::convertFHTPLtoFH()
 
 void MapConverter::checkBinaryInputOutputEquality()
 {
-    const std::string bufferIn  = Mernel::readFileIntoBufferThrow(m_inputFilename);
-    const std::string bufferOut = Mernel::readFileIntoBufferThrow(m_outputFilename);
+    const std::string bufferIn  = Mernel::readFileIntoBuffer(m_inputFilename);
+    const std::string bufferOut = Mernel::readFileIntoBuffer(m_outputFilename);
 
     m_logOutput << "(Input size=" << bufferIn.size() << ", Output size=" << bufferOut.size() << ")\n";
 
@@ -613,8 +614,8 @@ void MapConverter::checkBinaryInputOutputEquality()
 
 void MapConverter::checkJsonInputOutputEquality()
 {
-    auto jsonIn  = Mernel::readJsonFromBufferThrow(Mernel::readFileIntoBufferThrow(m_inputFilename));
-    auto jsonOut = Mernel::readJsonFromBufferThrow(Mernel::readFileIntoBufferThrow(m_outputFilename));
+    auto jsonIn  = Mernel::readJsonFromBuffer(Mernel::readFileIntoBuffer(m_inputFilename));
+    auto jsonOut = Mernel::readJsonFromBuffer(Mernel::readFileIntoBuffer(m_outputFilename));
 
     const bool result = jsonIn == jsonOut;
     m_logOutput << "Round-trip JSON result: " << (result ? "PASSED" : "FAILED") << '\n';
@@ -622,8 +623,8 @@ void MapConverter::checkJsonInputOutputEquality()
         return;
 
     {
-        Mernel::writeFileFromBufferThrow(m_inputFilename, Mernel::writeJsonToBufferThrow(jsonIn, true));
-        Mernel::writeFileFromBufferThrow(m_outputFilename, Mernel::writeJsonToBufferThrow(jsonOut, true));
+        Mernel::writeFileFromBuffer(m_inputFilename, Mernel::writeJsonToBuffer(jsonIn, true));
+        Mernel::writeFileFromBuffer(m_outputFilename, Mernel::writeJsonToBuffer(jsonOut, true));
     }
 
     const auto& jsonDiffIn  = m_settings.m_inputs.m_jsonDiff;
@@ -633,8 +634,8 @@ void MapConverter::checkJsonInputOutputEquality()
     } else {
         m_logOutput << "Saving diff to: in=" << jsonDiffIn << ", out=" << jsonDiffOut << '\n';
         PropertyTree::removeEqualValues(jsonIn, jsonOut);
-        Mernel::writeFileFromBufferThrow(jsonDiffIn, Mernel::writeJsonToBufferThrow(jsonIn, true));
-        Mernel::writeFileFromBufferThrow(jsonDiffOut, Mernel::writeJsonToBufferThrow(jsonOut, true));
+        Mernel::writeFileFromBuffer(jsonDiffIn, Mernel::writeJsonToBuffer(jsonIn, true));
+        Mernel::writeFileFromBuffer(jsonDiffOut, Mernel::writeJsonToBuffer(jsonOut, true));
     }
 
     throw std::runtime_error("Failed input == output");

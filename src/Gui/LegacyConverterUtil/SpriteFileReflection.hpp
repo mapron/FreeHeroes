@@ -11,7 +11,7 @@
 
 namespace Mernel::Reflection {
 
-ENUM_REFLECTION_STRINGIY(
+ENUM_REFLECTION_STRINGIFY(
     SpriteFile::BinaryFormat,
     Invalid,
     Invalid,
@@ -19,7 +19,7 @@ ENUM_REFLECTION_STRINGIY(
     DEF32,
     BMP,
     PCX)
-ENUM_REFLECTION_STRINGIY(
+ENUM_REFLECTION_STRINGIFY(
     SpriteFile::DefType,
     Invalid,
     Invalid,

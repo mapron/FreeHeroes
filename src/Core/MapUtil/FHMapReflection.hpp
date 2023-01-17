@@ -14,7 +14,7 @@
 
 namespace Mernel::Reflection {
 
-ENUM_REFLECTION_STRINGIY(
+ENUM_REFLECTION_STRINGIFY(
     FHPlayerId,
     Invalid,
     Invalid,
@@ -28,20 +28,20 @@ ENUM_REFLECTION_STRINGIY(
     Teal,
     Pink)
 
-ENUM_REFLECTION_STRINGIY(
+ENUM_REFLECTION_STRINGIFY(
     Core::GameVersion,
     Invalid,
     SOD,
     HOTA)
 
-ENUM_REFLECTION_STRINGIY(
+ENUM_REFLECTION_STRINGIFY(
     FHResource::Type,
     Resource,
     Resource,
     TreasureChest,
     CampFire)
 
-ENUM_REFLECTION_STRINGIY(
+ENUM_REFLECTION_STRINGIFY(
     FHRandomArtifact::Type,
     Invalid,
     Any,
@@ -223,7 +223,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 
     m_skillIds)
 
-ENUM_REFLECTION_STRINGIY(
+ENUM_REFLECTION_STRINGIFY(
     FHQuest::Type,
     Invalid,
     Invalid,
@@ -258,7 +258,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_reward,
     m_quest)
 
-ENUM_REFLECTION_STRINGIY(
+ENUM_REFLECTION_STRINGIFY(
     FHScholar::Type,
     Random,
     Primary,
@@ -319,7 +319,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_rotationDegreeDispersion,
     m_allowFlip)
 
-ENUM_REFLECTION_STRINGIY(
+ENUM_REFLECTION_STRINGIFY(
     FHRngUserSettings::HeroGeneration,
     RandomStartingFaction,
     None,

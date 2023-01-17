@@ -13,7 +13,7 @@
 namespace Mernel::Reflection {
 using namespace FreeHeroes;
 
-ENUM_REFLECTION_STRINGIY(
+ENUM_REFLECTION_STRINGIFY(
     Archive::BinaryFormat,
     Invalid,
     Invalid,

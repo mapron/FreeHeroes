@@ -23,28 +23,29 @@
 
 namespace Mernel::Reflection {
 
-ENUM_REFLECTION_STRINGIY(FreeHeroes::ConversionHandler::Task,
-                         Invalid,
-                         Invalid,
-                         ArchiveLoadDat,
-                         ArchiveSaveDat,
-                         ArchiveLoadFolder,
-                         ArchiveSaveFolder,
+ENUM_REFLECTION_STRINGIFY(
+    FreeHeroes::ConversionHandler::Task,
+    Invalid,
+    Invalid,
+    ArchiveLoadDat,
+    ArchiveSaveDat,
+    ArchiveLoadFolder,
+    ArchiveSaveFolder,
 
-                         ArchiveRoundTripFolder,
-                         ArchiveRoundTripMemory,
-                         ArchiveRoundTripMemoryWithConvert,
+    ArchiveRoundTripFolder,
+    ArchiveRoundTripMemory,
+    ArchiveRoundTripMemoryWithConvert,
 
-                         SpriteLoadDef,
-                         SpriteSaveDef,
-                         SpriteLoadFlat,
-                         SpriteSaveFlat,
-                         SpriteLoadPng,
-                         SpriteSavePng,
-                         SpriteSaveUI,
+    SpriteLoadDef,
+    SpriteSaveDef,
+    SpriteLoadFlat,
+    SpriteSaveFlat,
+    SpriteLoadPng,
+    SpriteSavePng,
+    SpriteSaveUI,
 
-                         SpriteRoundTripPng,
-                         SpriteRoundTripFlat)
+    SpriteRoundTripPng,
+    SpriteRoundTripFlat)
 
 }
 
@@ -283,28 +284,28 @@ void ConversionHandler::setOutputFilename(const Mernel::std_path& path, std::str
 
 void ConversionHandler::readBinaryBufferData()
 {
-    m_binaryBuffer = Mernel::readFileIntoHolderThrow(m_inputFilename);
+    m_binaryBuffer = Mernel::readFileIntoHolder(m_inputFilename);
     m_logOutput << m_currentIndent << "Read " << m_binaryBuffer.size() << " bytes from: " << Mernel::path2string(m_inputFilename) << '\n';
 }
 
 void ConversionHandler::writeBinaryBufferData()
 {
     m_logOutput << m_currentIndent << "Write " << m_binaryBuffer.size() << " bytes to: " << Mernel::path2string(m_outputFilename) << '\n';
-    Mernel::writeFileFromHolderThrow(m_outputFilename, m_binaryBuffer);
+    Mernel::writeFileFromHolder(m_outputFilename, m_binaryBuffer);
 }
 
 void ConversionHandler::readJsonToProperty()
 {
     m_logOutput << m_currentIndent << "Read: " << Mernel::path2string(m_inputFilename) << '\n';
-    std::string buffer = Mernel::readFileIntoBufferThrow(m_inputFilename);
-    m_json             = Mernel::readJsonFromBufferThrow(buffer);
+    std::string buffer = Mernel::readFileIntoBuffer(m_inputFilename);
+    m_json             = Mernel::readJsonFromBuffer(buffer);
 }
 
 void ConversionHandler::writeJsonFromProperty()
 {
     m_logOutput << m_currentIndent << "Write: " << Mernel::path2string(m_outputFilename) << '\n';
-    std::string buffer = Mernel::writeJsonToBufferThrow(m_json, m_settings.m_prettyJson);
-    Mernel::writeFileFromBufferThrow(m_outputFilename, buffer);
+    std::string buffer = Mernel::writeJsonToBuffer(m_json, m_settings.m_prettyJson);
+    Mernel::writeFileFromBuffer(m_outputFilename, buffer);
 }
 
 void ConversionHandler::binaryDeserializeArchive()
@@ -408,8 +409,8 @@ void ConversionHandler::propertySerializeSprite()
 
 void ConversionHandler::checkBinaryInputOutputEquality()
 {
-    const std::string bufferIn  = Mernel::readFileIntoBufferThrow(m_inputFilename);
-    const std::string bufferOut = Mernel::readFileIntoBufferThrow(m_outputFilename);
+    const std::string bufferIn  = Mernel::readFileIntoBuffer(m_inputFilename);
+    const std::string bufferOut = Mernel::readFileIntoBuffer(m_outputFilename);
 
     m_logOutput << "(Input size=" << bufferIn.size() << ", Output size=" << bufferOut.size() << ")\n";
 

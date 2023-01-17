@@ -22,10 +22,10 @@ using namespace Mernel;
 bool AdventureReplayData::load(const std_path& filename, const IGameDatabase* gameDatabase)
 {
     std::string buffer;
-    if (!readFileIntoBuffer(filename, buffer))
+    if (!readFileIntoBufferNoexcept(filename, buffer))
         return false;
     PropertyTree main;
-    if (!readJsonFromBuffer(buffer, main))
+    if (!readJsonFromBufferNoexcept(buffer, main))
         return false;
 
     const PropertyTree&        jsonBattle  = main["bat"];
@@ -72,7 +72,7 @@ bool AdventureReplayData::save(const std_path& filename) const
     writer.valueToJson(m_adv.m_def, jsonAdventure["def"]);
 
     std::string buffer;
-    return writeJsonToBuffer(buffer, main) && writeFileFromBuffer(filename, buffer);
+    return writeJsonToBufferNoexcept(buffer, main) && writeFileFromBufferNoexcept(filename, buffer);
 }
 
 }

@@ -124,7 +124,7 @@ STRUCT_REFLECTION_PAIRED(
 
 template<>
 inline constexpr const bool MetaInfo::s_isStringMap<LibraryTerrain::Presentation::BTMap>{ true };
-ENUM_REFLECTION_STRINGIY(
+ENUM_REFLECTION_STRINGIFY(
     LibraryTerrain::TileBase,
     None,
     None,
@@ -132,7 +132,7 @@ ENUM_REFLECTION_STRINGIY(
     Dirt
     )
 
-ENUM_REFLECTION_STRINGIY(LibraryTerrain::BorderType,
+ENUM_REFLECTION_STRINGIFY(LibraryTerrain::BorderType,
     Invalid,
     TL,
     L,
@@ -848,7 +848,7 @@ STRUCT_REFLECTION_PAIRED(LibraryMapBank,
     "fieldLayout"         ,        fieldLayout
     )
 
-ENUM_REFLECTION_STRINGIY(LibraryMapObstacle::Type, Invalid,
+ENUM_REFLECTION_STRINGIFY(LibraryMapObstacle::Type, Invalid,
     BRUSH,
     BUSH,
     CACTUS,

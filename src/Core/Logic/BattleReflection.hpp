@@ -14,7 +14,7 @@
 namespace Mernel::Reflection {
 
 // clang-format off
-ENUM_REFLECTION_STRINGIY(BattleDirection,
+ENUM_REFLECTION_STRINGIFY(BattleDirection,
     None,
     TR,
     R,
@@ -23,7 +23,7 @@ ENUM_REFLECTION_STRINGIY(BattleDirection,
     L,
     TL
 )
-ENUM_REFLECTION_STRINGIY(BattleAttackDirection,
+ENUM_REFLECTION_STRINGIFY(BattleAttackDirection,
     None,
     TR,
     R,

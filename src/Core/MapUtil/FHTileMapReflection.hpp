@@ -14,7 +14,7 @@
 namespace Mernel::Reflection {
 using namespace FreeHeroes;
 
-ENUM_REFLECTION_STRINGIY(FHRiverType,
+ENUM_REFLECTION_STRINGIFY(FHRiverType,
                          Invalid,
                          Invalid,
                          Water,
@@ -22,7 +22,7 @@ ENUM_REFLECTION_STRINGIY(FHRiverType,
                          Mud,
                          Lava)
 
-ENUM_REFLECTION_STRINGIY(FHRoadType,
+ENUM_REFLECTION_STRINGIFY(FHRoadType,
                          Invalid,
                          Invalid,
                          Dirt,

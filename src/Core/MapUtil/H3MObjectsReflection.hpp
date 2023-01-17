@@ -13,7 +13,7 @@
 namespace Mernel::Reflection {
 using namespace FreeHeroes;
 
-ENUM_REFLECTION_STRINGIY(
+ENUM_REFLECTION_STRINGIFY(
     MapQuest::Mission,
     NONE,
     NONE,
@@ -27,14 +27,14 @@ ENUM_REFLECTION_STRINGIY(
     HERO,
     PLAYER)
 
-ENUM_REFLECTION_STRINGIY(
+ENUM_REFLECTION_STRINGIFY(
     MapQuest::Progress,
     NOT_ACTIVE,
     NOT_ACTIVE,
     IN_PROGRESS,
     COMPLETE)
 
-ENUM_REFLECTION_STRINGIY(
+ENUM_REFLECTION_STRINGIFY(
     MapSeerHut::RewardType,
     NOTHING,
     NOTHING,

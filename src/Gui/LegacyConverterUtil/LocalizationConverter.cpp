@@ -75,8 +75,8 @@ public:
 
     void finish()
     {
-        std::string buffer = Mernel::writeJsonToBufferThrow(m_data, false);
-        Mernel::writeFileFromBufferThrow(m_outJsonFilename, buffer);
+        std::string buffer = Mernel::writeJsonToBuffer(m_data, false);
+        Mernel::writeFileFromBuffer(m_outJsonFilename, buffer);
     }
 };
 
@@ -223,7 +223,7 @@ void LocalizationConverter::extractHOTA(const std_path& jsonSubdir, const std_pa
         auto                     filename = jsonSubdir / (prefix + std::to_string(index) + ".txt");
 
         std::string chaptersStr;
-        if (!Mernel::readFileIntoBuffer(filename, chaptersStr))
+        if (!Mernel::readFileIntoBufferNoexcept(filename, chaptersStr))
             return {};
 
         res = Mernel::splitLine(chaptersStr, std::string(g_hdatChapterSeparator));

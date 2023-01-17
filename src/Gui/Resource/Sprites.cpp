@@ -29,8 +29,8 @@ std_path makePngPath(const std_path& jsonFilePath)
 
 void Sprite::load(const std_path& jsonFilePath)
 {
-    const std::string          buffer = Mernel::readFileIntoBufferThrow(jsonFilePath);
-    const Mernel::PropertyTree data   = Mernel::readJsonFromBufferThrow(buffer);
+    const std::string          buffer = Mernel::readFileIntoBuffer(jsonFilePath);
+    const Mernel::PropertyTree data   = Mernel::readJsonFromBuffer(buffer);
 
     Mernel::Reflection::PropertyTreeReader reader;
     reader.jsonToValue(data, *this);
@@ -43,8 +43,8 @@ void Sprite::save(const std_path& jsonFilePath) const
     Mernel::PropertyTree                   data;
     Mernel::Reflection::PropertyTreeWriter writer;
     writer.valueToJson(*this, data);
-    std::string buffer = Mernel::writeJsonToBufferThrow(data, true);
-    Mernel::writeFileFromBufferThrow(jsonFilePath, buffer);
+    std::string buffer = Mernel::writeJsonToBuffer(data, true);
+    Mernel::writeFileFromBuffer(jsonFilePath, buffer);
 
     Mernel::std_fs::create_directories(jsonFilePath.parent_path());
     m_bitmap.save(stdPath2QString(makePngPath(jsonFilePath)));

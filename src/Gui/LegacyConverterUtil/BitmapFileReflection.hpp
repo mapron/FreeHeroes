@@ -13,7 +13,7 @@
 namespace Mernel::Reflection {
 using namespace FreeHeroes;
 
-ENUM_REFLECTION_STRINGIY(
+ENUM_REFLECTION_STRINGIFY(
     BitmapFile::Compression,
     Invalid,
     Invalid,
@@ -22,7 +22,7 @@ ENUM_REFLECTION_STRINGIY(
     RLE2,
     RLE3)
 
-ENUM_REFLECTION_STRINGIY(
+ENUM_REFLECTION_STRINGIFY(
     BitmapFile::PixFormat,
     Invalid,
     Invalid,

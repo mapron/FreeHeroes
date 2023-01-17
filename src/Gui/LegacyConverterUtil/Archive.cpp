@@ -271,15 +271,15 @@ void Archive::saveToFolder(const std_path& path, bool skipExisting) const
     Reflection::PropertyTreeWriter writer;
     writer.valueToJson(*this, data);
 
-    std::string buffer = writeJsonToBufferThrow(data, true);
-    writeFileFromBufferThrow(jsonFilename, buffer);
+    std::string buffer = writeJsonToBuffer(data, true);
+    writeFileFromBuffer(jsonFilename, buffer);
 
     for (const Record& rec : m_records) {
         const auto out = path / string2path(rec.fullname());
         if (skipExisting && std_fs::exists(out))
             continue;
 
-        writeFileFromHolderThrow(out, rec.m_buffer);
+        writeFileFromHolder(out, rec.m_buffer);
     }
 
     for (const HdatRecord& rec : m_hdatRecords) {
@@ -289,7 +289,7 @@ void Archive::saveToFolder(const std_path& path, bool skipExisting) const
                 continue;
             ByteArrayHolder buf;
             buf.ref() = rec.m_blob;
-            writeFileFromHolderThrow(out, buf);
+            writeFileFromHolder(out, buf);
         }
 
         {
@@ -299,7 +299,7 @@ void Archive::saveToFolder(const std_path& path, bool skipExisting) const
 
             const auto chaptersStr = joinString(rec.m_txtChapters, std::string(g_hdatChapterSeparator));
 
-            writeFileFromBufferThrow(out, chaptersStr);
+            writeFileFromBuffer(out, chaptersStr);
         }
     }
 }
@@ -310,27 +310,27 @@ void Archive::loadFromFolder(const std_path& path)
 
     const auto jsonFilename = path / g_indexFileName;
 
-    const std::string  buffer = readFileIntoBufferThrow(jsonFilename);
-    const PropertyTree data   = readJsonFromBufferThrow(buffer);
+    const std::string  buffer = readFileIntoBuffer(jsonFilename);
+    const PropertyTree data   = readJsonFromBuffer(buffer);
 
     Reflection::PropertyTreeReader reader;
     reader.jsonToValue(data, *this);
 
     for (Record& rec : m_records) {
         const auto out = path / string2path(rec.fullname());
-        rec.m_buffer   = readFileIntoHolderThrow(out);
+        rec.m_buffer   = readFileIntoHolder(out);
     }
 
     for (HdatRecord& rec : m_hdatRecords) {
         if (rec.m_hasBlob) {
             const auto      in  = path / string2path(rec.m_basename + ".bin");
-            ByteArrayHolder buf = readFileIntoHolderThrow(in);
+            ByteArrayHolder buf = readFileIntoHolder(in);
             rec.m_blob          = buf.ref();
         }
 
         {
             const auto        in          = path / string2path(rec.m_basename + ".txt");
-            const std::string chaptersStr = readFileIntoBufferThrow(in);
+            const std::string chaptersStr = readFileIntoBuffer(in);
             rec.m_txtChapters             = splitLine(chaptersStr, std::string(g_hdatChapterSeparator));
         }
     }
@@ -359,7 +359,7 @@ void Archive::createFromFolder(const Mernel::std_path& path, const std::vector<s
         rec.m_basename         = rec.m_originalBasename;
         std::transform(rec.m_basename.begin(), rec.m_basename.end(), rec.m_basename.begin(), [](unsigned char c) { return std::tolower(c); });
 
-        rec.m_buffer = readFileIntoHolderThrow(it.path());
+        rec.m_buffer = readFileIntoHolder(it.path());
         m_records.push_back(std::move(rec));
     }
 }

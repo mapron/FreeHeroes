@@ -80,8 +80,8 @@ void TemplateSettingsWidget::load(const Mernel::std_path& path)
     m_path = path;
 
     if (Mernel::std_fs::exists(m_path)) {
-        std::string buffer       = Mernel::readFileIntoBufferThrow(m_path);
-        auto        settingsJson = Mernel::readJsonFromBufferThrow(buffer);
+        std::string buffer       = Mernel::readFileIntoBuffer(m_path);
+        auto        settingsJson = Mernel::readJsonFromBuffer(buffer);
 
         auto*                            db = m_modelsProvider->database();
         Core::PropertyTreeReaderDatabase reader(db);
@@ -117,8 +117,8 @@ void TemplateSettingsWidget::save()
     Core::PropertyTreeWriterDatabase writer;
     writer.valueToJson(*m_userSettings, jsonData);
 
-    std::string buffer = Mernel::writeJsonToBufferThrow(jsonData, true);
-    Mernel::writeFileFromBufferThrow(m_path, buffer);
+    std::string buffer = Mernel::writeJsonToBuffer(jsonData, true);
+    Mernel::writeFileFromBuffer(m_path, buffer);
 }
 
 }

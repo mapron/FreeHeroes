@@ -21,20 +21,21 @@
 
 namespace Mernel::Reflection {
 using namespace FreeHeroes;
-ENUM_REFLECTION_STRINGIY(FHTemplateProcessor::Stage,
-                         Invalid,
-                         Invalid,
-                         ZoneCenterPlacement,
-                         ZoneTilesInitial,
-                         ZoneTilesExpand,
-                         ZoneTilesRefinement,
-                         TownsPlacement,
-                         BorderRoads,
-                         RoadsPlacement,
-                         Rewards,
-                         Obstacles,
-                         Guards,
-                         PlayerInfo)
+ENUM_REFLECTION_STRINGIFY(
+    FHTemplateProcessor::Stage,
+    Invalid,
+    Invalid,
+    ZoneCenterPlacement,
+    ZoneTilesInitial,
+    ZoneTilesExpand,
+    ZoneTilesRefinement,
+    TownsPlacement,
+    BorderRoads,
+    RoadsPlacement,
+    Rewards,
+    Obstacles,
+    Guards,
+    PlayerInfo)
 
 }
 
