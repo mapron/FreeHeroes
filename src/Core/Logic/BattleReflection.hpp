@@ -63,10 +63,12 @@ STRUCT_REFLECTION_PAIRED(
 )
 
 template<>
-inline constexpr const std::tuple MetaInfo::s_fields<BattlePositionExtended>{
+struct MetaInfo::MetaFields<BattlePositionExtended> {
+static inline constexpr const std::tuple s_fields{
     SetGetNoexcept("main"    , &BattlePositionExtended::setMainPos, &BattlePositionExtended::mainPos       ),
     SetGetNoexcept("sight"   , &BattlePositionExtended::setSight  , &BattlePositionExtended::sightDirection),
     SetGetNoexcept("large"   , &BattlePositionExtended::setLarge  , &BattlePositionExtended::isLarge       ),
+};
 };
 STRUCT_REFLECTION_PAIRED(
     BattleFieldGeometry,

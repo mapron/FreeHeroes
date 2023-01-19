@@ -397,14 +397,14 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_defReplacements)
 
 template<>
-inline constexpr const bool MetaInfo::s_isStringMap<FHRngUserSettings::PlayersMap>{ true };
+inline constexpr const bool s_isStringMap<FHRngUserSettings::PlayersMap>{ true };
 template<>
-inline constexpr const bool MetaInfo::s_isStringMap<FHMap::PlayersMap>{ true };
+inline constexpr const bool s_isStringMap<FHMap::PlayersMap>{ true };
 template<>
-inline constexpr const bool MetaInfo::s_isStringMap<FHMap::RngZoneMap>{ true };
+inline constexpr const bool s_isStringMap<FHMap::RngZoneMap>{ true };
 template<>
-inline constexpr const bool MetaInfo::s_isStringMap<FHMap::RngConnectionMap>{ true };
+inline constexpr const bool s_isStringMap<FHMap::RngConnectionMap>{ true };
 template<>
-inline constexpr const bool MetaInfo::s_isStringMap<FHMap::DefMap>{ true };
+inline constexpr const bool s_isStringMap<FHMap::DefMap>{ true };
 
 }

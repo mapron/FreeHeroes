@@ -15,16 +15,21 @@ using namespace ::FreeHeroes::Gui;
 
 // clang-format off
 template<>
-inline constexpr const std::tuple MetaInfo::s_fields<QPoint>{
+struct MetaInfo::MetaFields<QPoint> {
+static inline constexpr const std::tuple s_fields{
     SetGetLambda<QPoint, int>("x", [](QPoint& obj, int val) { obj.setX(val); }, [](const QPoint& obj) { return obj.x(); }),
     SetGetLambda<QPoint, int>("y", [](QPoint& obj, int val) { obj.setY(val); }, [](const QPoint& obj) { return obj.y(); }),
 };
+};
 
 template<>
-inline constexpr const std::tuple MetaInfo::s_fields<QSize>{
+struct MetaInfo::MetaFields<QSize> {
+static inline constexpr const std::tuple s_fields{
     SetGetLambda<QSize, int>("w", [](QSize& obj, int val) { obj.setWidth(val);  }, [](const QSize& obj) { return obj.width(); }),
     SetGetLambda<QSize, int>("h", [](QSize& obj, int val) { obj.setHeight(val); }, [](const QSize& obj) { return obj.height(); }),
 };
+};
+
 // clang-format on
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(

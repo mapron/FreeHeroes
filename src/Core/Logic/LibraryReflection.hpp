@@ -123,7 +123,7 @@ STRUCT_REFLECTION_PAIRED(
 // ------------------------------------------------------------------------------------------
 
 template<>
-inline constexpr const bool MetaInfo::s_isStringMap<LibraryTerrain::Presentation::BTMap>{ true };
+inline constexpr const bool s_isStringMap<LibraryTerrain::Presentation::BTMap>{ true };
 ENUM_REFLECTION_STRINGIFY(
     LibraryTerrain::TileBase,
     None,
@@ -1014,40 +1014,40 @@ STRUCT_REFLECTION_PAIRED(
 // clang-format on
 
 template<>
-inline constexpr const bool MetaInfo::s_useCustomTransformRead<LibraryUnit::Traits>{ true };
+inline constexpr const bool s_useCustomTransformRead<LibraryUnit::Traits>{ true };
 template<>
 CORELOGIC_EXPORT bool MetaInfo::transformTreeRead<LibraryUnit::Traits>(const PropertyTree& treeIn, PropertyTree& treeOut);
 
 template<>
-inline constexpr const bool MetaInfo::s_useCustomTransformRead<ResourceAmount>{ true };
+inline constexpr const bool s_useCustomTransformRead<ResourceAmount>{ true };
 template<>
 CORELOGIC_EXPORT bool MetaInfo::transformTreeRead<ResourceAmount>(const PropertyTree& treeIn, PropertyTree& treeOut);
 
 template<>
-inline constexpr const bool MetaInfo::s_useCustomTransformRead<UnitWithCount>{ true };
+inline constexpr const bool s_useCustomTransformRead<UnitWithCount>{ true };
 template<>
 CORELOGIC_EXPORT bool MetaInfo::transformTreeRead<UnitWithCount>(const PropertyTree& treeIn, PropertyTree& treeOut);
 
 template<>
-inline constexpr const bool MetaInfo::s_useCustomTransformRead<LibraryHero::StartStack>{ true };
+inline constexpr const bool s_useCustomTransformRead<LibraryHero::StartStack>{ true };
 template<>
 CORELOGIC_EXPORT bool MetaInfo::transformTreeRead<LibraryHero::StartStack>(const PropertyTree& treeIn, PropertyTree& treeOut);
 
 template<>
-inline constexpr const bool MetaInfo::s_useCustomTransformRead<ObjectDefMappings>{ true };
+inline constexpr const bool s_useCustomTransformRead<ObjectDefMappings>{ true };
 template<>
 CORELOGIC_EXPORT bool MetaInfo::transformTreeRead<ObjectDefMappings>(const PropertyTree& treeIn, PropertyTree& treeOut);
 
 template<>
-inline constexpr const bool MetaInfo::s_isStringMap<LibraryFactionHeroClass::SkillWeights>{ true };
+inline constexpr const bool s_isStringMap<LibraryFactionHeroClass::SkillWeights>{ true };
 
 template<>
-inline constexpr const bool MetaInfo::s_isStringMap<LibraryFactionHeroClass::PrimaryWeights>{ true };
+inline constexpr const bool s_isStringMap<LibraryFactionHeroClass::PrimaryWeights>{ true };
 
 template<>
-inline constexpr const bool MetaInfo::s_isStringMap<ObjectDefMappings::Map>{ true };
+inline constexpr const bool s_isStringMap<ObjectDefMappings::Map>{ true };
 
 template<>
-inline constexpr const bool MetaInfo::s_isStringMap<TranslationMap::Data>{ true };
+inline constexpr const bool s_isStringMap<TranslationMap::Data>{ true };
 
 }

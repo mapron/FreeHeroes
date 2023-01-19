@@ -22,16 +22,19 @@ using namespace Mernel;
 namespace Mernel::Reflection {
 
 template<>
-inline constexpr const std::tuple MetaInfo::s_fields<SomeClass>{
-    Field("one", &SomeClass::m_one),
-    Field("bar", &SomeClass::m_bar),
-    Field("baz", &SomeClass::m_baz),
+struct MetaInfo::MetaFields<SomeClass> {
+    static inline constexpr const std::tuple s_fields{
+        Field("one", &SomeClass::m_one),
+        Field("bar", &SomeClass::m_bar),
+        Field("baz", &SomeClass::m_baz),
+    };
 };
 
 template<>
-inline constexpr const std::tuple MetaInfo::s_fields<WrapperClass>{
-
-    Field("f", &WrapperClass::m_f),
+struct MetaInfo::MetaFields<WrapperClass> {
+    static inline constexpr const std::tuple s_fields{
+        Field("f", &WrapperClass::m_f),
+    };
 };
 
 }
