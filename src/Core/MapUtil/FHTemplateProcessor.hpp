@@ -83,12 +83,7 @@ private:
 
     std::vector<Core::LibraryFactionConstPtr> m_playableFactions;
     std::vector<Core::LibraryFactionConstPtr> m_rewardFactions;
-    struct Unit {
-        Core::LibraryUnitConstPtr m_id    = nullptr;
-        int64_t                   m_value = 0;
-    };
-
-    std::vector<Unit> m_guardUnits;
+    std::vector<Core::LibraryUnitConstPtr>    m_guardUnits;
 
     struct Guard {
         int64_t     m_value           = 0;

@@ -196,11 +196,8 @@ FHTemplateProcessor::FHTemplateProcessor(FHMap&                     map,
     for (auto* unit : units) {
         if (unit->faction->alignment == Core::LibraryFaction::Alignment::Special)
             continue;
-        m_guardUnits.push_back({ unit, unit->value });
+        m_guardUnits.push_back(unit);
     }
-    std::sort(m_guardUnits.begin(), m_guardUnits.end(), [](const Unit& l, const Unit& r) {
-        return l.m_value > r.m_value;
-    });
 }
 
 void FHTemplateProcessor::run(const std::string& stopAfterStage)
@@ -815,6 +812,18 @@ void FHTemplateProcessor::runRoadsPlacement()
 
 void FHTemplateProcessor::runRewards()
 {
+    std::vector values{ 3000, 6000, 10000, 15000, 20000, 50000, 100000, 200000, 500000 };
+    for (int x = 1; x <= 17; x += 2) {
+        for (int y = 3; int val : values) {
+            y += 2;
+
+            Guard guard;
+            guard.m_value = val;
+            guard.m_pos   = FHPos{ x, y, 0 };
+            guard.m_zone  = &m_tileZones[0];
+            m_guards.push_back(guard);
+        }
+    }
 }
 
 void FHTemplateProcessor::runObstacles()
@@ -992,42 +1001,67 @@ void FHTemplateProcessor::runObstacles()
 
 void FHTemplateProcessor::runGuards()
 {
-    auto makeCandidates = [this](int64_t value) {
-        std::vector<Unit*> candidates; // unit with at least 3 in the stack
-        std::vector<Unit*> candidates3to9;
-        std::vector<Unit*> candidates10to49;
-        std::vector<Unit*> candidates50to99;
-        std::vector<Unit*> candidates100plus;
-        for (Unit& unit : m_guardUnits) {
-            auto possibleCount = value / unit.m_value;
-            if (possibleCount < 3)
+    auto getPossibleCount = [](Core::LibraryUnitConstPtr unit, int64_t value) {
+        auto possibleCount = value / unit->value;
+        if (possibleCount <= 1)
+            return possibleCount;
+        int64_t unitValue = unit->value;
+        int64_t coef1     = 100;
+        int64_t coef100   = 0;
+        if (possibleCount >= 100) {
+            coef1   = 0;
+            coef100 = 100;
+        } else {
+            coef1   = 100 - possibleCount + 1;
+            coef100 = possibleCount - 1;
+        }
+
+        unitValue = (coef1 * unit->guardMult1 + coef100 * unit->guardMult100) * unitValue / 10000;
+
+        possibleCount = value / unitValue;
+        return possibleCount;
+    };
+
+    auto makeCandidates = [this, &getPossibleCount](int64_t value) {
+        std::map<int, int> unitLevelScore;
+
+        for (Core::LibraryUnitConstPtr unit : m_guardUnits) {
+            auto possibleCount = getPossibleCount(unit, value);
+            if (possibleCount < 5)
                 continue;
-            candidates.push_back(&unit);
+            int score = 0;
             if (possibleCount < 10)
-                candidates3to9.push_back(&unit);
+                score = 1;
+            else if (possibleCount < 25)
+                score = 2;
+            else if (possibleCount < 35)
+                score = 5;
             else if (possibleCount < 50)
-                candidates10to49.push_back(&unit);
+                score = 3;
             else if (possibleCount < 100)
-                candidates50to99.push_back(&unit);
+                score = 2;
             else
-                candidates100plus.push_back(&unit);
+                score = 1;
+            unitLevelScore[unit->level / 10] += score;
+        }
+        auto      it                = std::max_element(unitLevelScore.begin(), unitLevelScore.end(), [](auto l, auto r) { return l.second < r.second; });
+        const int optimalGuardLevel = it->first;
+
+        std::vector<Core::LibraryUnitConstPtr> result;
+        for (Core::LibraryUnitConstPtr unit : m_guardUnits) {
+            auto possibleCount = getPossibleCount(unit, value);
+            if (possibleCount < 5)
+                continue;
+            const int levelDiff = (unit->level / 10) - optimalGuardLevel;
+            if (levelDiff < -1 || levelDiff > 2)
+                continue;
+
+            if (unit->level < 80 && possibleCount >= 100)
+                continue;
+            result.push_back(unit);
         }
 
-        // @todo: that is just a draft!
-        if (candidates10to49.size() > 10) {
-            return candidates10to49;
-        }
-        if (candidates50to99.size() > 10) {
-            return candidates50to99;
-        }
-        if (candidates3to9.size() > 5) {
-            return candidates3to9;
-        }
-        if (candidates100plus.size() > 5) {
-            return candidates100plus;
-        }
-
-        return candidates;
+        return result;
     };
 
     std::map<std::string, size_t> nameIndex;
@@ -1036,19 +1070,19 @@ void FHTemplateProcessor::runGuards()
         if (guard.m_value == 0)
             continue;
 
-        std::vector<Unit*> candidates = makeCandidates(guard.m_value);
+        std::vector<Core::LibraryUnitConstPtr> candidates = makeCandidates(guard.m_value);
 
         if (candidates.empty()) { // value is so low, nobody can guard so low value at least in group of 3
             continue;
         }
-        Unit* unit = candidates.size() == 1 ? candidates[0] : candidates[m_rng->gen(candidates.size() - 1)];
+        Core::LibraryUnitConstPtr unit = candidates[m_rng->gen(candidates.size() - 1)];
 
         auto finalValue = m_rng->genDispersed(guard.m_value, guard.m_valueDispersion);
 
         FHMonster fhMonster;
         fhMonster.m_pos        = guard.m_pos;
-        fhMonster.m_count      = finalValue / unit->m_value;
-        fhMonster.m_id         = unit->m_id;
+        fhMonster.m_count      = getPossibleCount(unit, finalValue);
+        fhMonster.m_id         = unit;
         fhMonster.m_guardValue = finalValue;
 
         if (guard.m_joinable) {

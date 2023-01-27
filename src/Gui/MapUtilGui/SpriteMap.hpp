@@ -68,6 +68,8 @@ struct SpriteMap {
         BlockMask m_blockMask;
 
         std::vector<std::pair<std::string, std::string>> m_info;
+        std::string                                      m_overlayInfo;
+        int                                              m_overlayInfoOffsetX = -1;
 
         Item& addInfo(std::string a, std::string b)
         {

@@ -63,6 +63,8 @@ void SpriteMapPainter::paint(QPainter*        painter,
             auto oldTransform = painter->transform();
             painter->translate(x * tileSize, y * tileSize);
 
+            auto posTransform = painter->transform();
+
             if (item.m_shiftHalfTile) {
                 painter->translate(0, tileSize / 2);
             }
@@ -95,6 +97,17 @@ void SpriteMapPainter::paint(QPainter*        painter,
                 }
                 pix = QPixmap::fromImage(img);
                 painter->drawPixmap(frame.m_paddingLeftTop, pix);
+            }
+            if (!item.m_overlayInfo.empty()) {
+                painter->setPen(Qt::white);
+                QFont font = painter->font();
+                font.setPixelSize(12);
+                painter->setFont(font);
+                painter->setTransform(posTransform);
+                painter->translate((item.m_overlayInfoOffsetX) * tileSize, (0) * tileSize);
+                painter->drawText(QRect(0, tileSize / 2, tileSize, tileSize / 2),
+                                  Qt::AlignCenter | Qt::AlignVCenter,
+                                  QString::fromStdString(item.m_overlayInfo));
             }
 
             // debug diamond

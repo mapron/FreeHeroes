@@ -116,7 +116,7 @@ SettingsWidget::SettingsWidget(QSettings& uiSettings, IAppSettings::AllSettings&
     }
     {
         QStringList wordList;
-        wordList << "sod_res,hota_res,hd_res";
+        wordList << "sod_res,hd_res,hota_res";
         wordList << "hota_res,sod_res,hd_res";
         m_ui->resourcesList->setCompleter(new QCompleter(wordList, this));
     }

@@ -486,6 +486,8 @@ STRUCT_REFLECTION_PAIRED(
     "countWithHeroBase",           countWithHeroBase,
     "cost",                        cost,
     "value",                       value,
+    "guardMult1",                  guardMult1,
+    "guardMult100",                guardMult100,
     "upgrades",                    upgrades,
     "bmArtifact",                  battleMachineArtifact,
     "abilities",                   abilities,

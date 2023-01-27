@@ -40,7 +40,7 @@ public:
         QString     localeId = "";
         QStringList localeItems;
         QString     databaseIdList = QString{ Core::g_database_HOTA };
-        QString     resourcesList  = "sod_res,hota_res,hd_res";
+        QString     resourcesList  = "sod_res,hd_res,hota_res";
 
         void reset()
         {

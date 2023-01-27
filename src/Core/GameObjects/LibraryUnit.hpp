@@ -148,7 +148,9 @@ struct LibraryUnit {
     int                              growth = 0;
     HeroStackSize                    countWithHeroBase;
     ResourceAmount                   cost;
-    int                              value = 0;
+    int                              value        = 0;
+    int                              guardMult1   = 100;
+    int                              guardMult100 = 100;
     std::vector<LibraryUnitConstPtr> upgrades;
 
     LibraryUnitConstPtr prevUpgrade = nullptr;

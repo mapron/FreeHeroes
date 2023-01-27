@@ -257,11 +257,15 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         auto pos = obj.m_pos;
         pos.m_x += 1;
 
+        auto strCount = std::to_string(obj.m_count);
+
         auto* def = obj.m_id->objectDefs.get({});
         result.addItem(makeItemByDef(SpriteMap::Layer::Monster, def, pos)
                            .addInfo("id", obj.m_id->id)
-                           .addInfo("count", std::to_string(obj.m_count))
-                           .addInfo("value", std::to_string(obj.m_guardValue)));
+                           .addInfo("count", strCount)
+                           .addInfo("value", std::to_string(obj.m_guardValue)))
+            ->m_overlayInfo
+            = strCount;
     }
 
     for (auto& obj : fhMap.m_objects.m_dwellings) {
