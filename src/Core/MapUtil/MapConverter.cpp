@@ -224,12 +224,12 @@ void MapConverter::run(Task task, int recurse) noexcept(false)
             } break;
             case Task::FHMapToH3M:
             {
-                run(Task::LoadH3M, recurse + 1);
+                run(Task::LoadFH, recurse + 1);
                 run(Task::SaveH3M, recurse + 1);
             } break;
             case Task::H3MToFHMap:
             {
-                run(Task::LoadFH, recurse + 1);
+                run(Task::LoadH3M, recurse + 1);
                 run(Task::SaveFH, recurse + 1);
             } break;
             case Task::FHTplToFHMap:

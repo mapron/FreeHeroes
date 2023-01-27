@@ -518,13 +518,13 @@ void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
             stream << player;
     }
 
-    auto writeBitsSized = [&stream](const std::vector<uint8_t>& bitArray, bool sized) {
+    auto writeBitsSized = [&stream](const std::vector<uint8_t>& bitArray, bool sized, bool invert) {
         if (sized)
             stream.writeSize(bitArray.size());
-        stream.writeBits(bitArray);
+        stream.writeBits(bitArray, invert);
     };
 
-    writeBitsSized(m_allowedHeroes, m_features->m_mapAllowedHeroesSized);
+    writeBitsSized(m_allowedHeroes, m_features->m_mapAllowedHeroesSized, false);
 
     if (m_features->m_mapPlaceholderHeroes) {
         stream << m_placeholderHeroes;
@@ -548,7 +548,7 @@ void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
     }
 
     if (m_features->m_mapAllowedArtifacts)
-        writeBitsSized(m_allowedArtifacts, m_features->m_mapAllowedArtifactsSized);
+        writeBitsSized(m_allowedArtifacts, m_features->m_mapAllowedArtifactsSized, true);
 
     if (m_features->m_mapAllowedSpells)
         stream.writeBits(m_allowedSpells);

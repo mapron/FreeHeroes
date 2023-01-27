@@ -150,12 +150,30 @@ struct FHMonster : public FHCommonObject {
 
     uint32_t m_questIdentifier = 0;
     int64_t  m_guardValue      = 0;
+
+    enum class UpgradedStack
+    {
+        Invalid,
+        Random,
+        Yes,
+        No
+    };
+
+    UpgradedStack m_upgradedStack = UpgradedStack::Random;
 };
 
 struct FHBank : public FHCommonObject {
     Core::LibraryMapBankConstPtr m_id = nullptr;
+    enum class UpgradedStack
+    {
+        Invalid,
+        Random,
+        Yes,
+        No
+    };
 
-    std::vector<int> m_guardsVariants; // empty = full random
+    UpgradedStack m_upgradedStack = UpgradedStack::Random;
+    int           m_guardsVariant = -1; // -1 = full random
 };
 
 struct FHObstacle : public FHCommonObject {

@@ -840,14 +840,16 @@ STRUCT_REFLECTION_STRINGIFY(
     order,
     name)
 
-STRUCT_REFLECTION_PAIRED(LibraryMapBank,
-    "objectDefs"          ,        objectDefs,
-    "untranslatedName"    ,        untranslatedName,
-    "legacyId"            ,        legacyId,
-    "variants"            ,        variants,
-    "rewards"             ,        rewards,
-    "pres"                ,        presentationParams,
-    "fieldLayout"         ,        fieldLayout
+STRUCT_REFLECTION_STRINGIFY(
+    LibraryMapBank,
+    objectDefs,
+    untranslatedName,
+    legacyId,
+    variants,
+    rewards,
+    upgradedStackIndex,
+    presentationParams,
+    fieldLayout
     )
 
 ENUM_REFLECTION_STRINGIFY(LibraryMapObstacle::Type, Invalid,

@@ -38,6 +38,7 @@ struct LibraryMapBank {
     };
     using Variants = std::vector<Variant>;
     Variants variants;
+    int      upgradedStackIndex = -1;
 
     struct Presentation {
         int            order = 0;

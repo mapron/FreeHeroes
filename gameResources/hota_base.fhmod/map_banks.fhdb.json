@@ -152,12 +152,9 @@
     { "name": "I"    , "rewardIndex": 0, "guards": [ "sod.unit.griffin=10", "sod.unit.griffin=10", "sod.unit.griffin=10"     , "sod.unit.griffin=10", "sod.unit.griffin=10"]},
     { "name": "II"   , "rewardIndex": 1, "guards": [ "sod.unit.griffin=20", "sod.unit.griffin=20", "sod.unit.griffin=20"     , "sod.unit.griffin=20", "sod.unit.griffin=20"]},
     { "name": "III"  , "rewardIndex": 2, "guards": [ "sod.unit.griffin=30", "sod.unit.griffin=30", "sod.unit.griffin=30"     , "sod.unit.griffin=30", "sod.unit.griffin=30"]},
-    { "name": "IV"   , "rewardIndex": 3, "guards": [ "sod.unit.griffin=40", "sod.unit.griffin=40", "sod.unit.griffin=40"     , "sod.unit.griffin=40", "sod.unit.griffin=40"]},
-    { "name": "I+"   , "rewardIndex": 0, "guards": [ "sod.unit.griffin=10", "sod.unit.griffin=10", "sod.unit.royalGriffin=10", "sod.unit.griffin=10", "sod.unit.griffin=10"]},
-    { "name": "II+"  , "rewardIndex": 1, "guards": [ "sod.unit.griffin=20", "sod.unit.griffin=20", "sod.unit.royalGriffin=20", "sod.unit.griffin=20", "sod.unit.griffin=20"]},
-    { "name": "III+" , "rewardIndex": 2, "guards": [ "sod.unit.griffin=30", "sod.unit.griffin=30", "sod.unit.royalGriffin=30", "sod.unit.griffin=30", "sod.unit.griffin=30"]},
-    { "name": "IV+"  , "rewardIndex": 3, "guards": [ "sod.unit.griffin=40", "sod.unit.griffin=40", "sod.unit.royalGriffin=40", "sod.unit.griffin=40", "sod.unit.griffin=40"]}
-    ]
+    { "name": "IV"   , "rewardIndex": 3, "guards": [ "sod.unit.griffin=40", "sod.unit.griffin=40", "sod.unit.griffin=40"     , "sod.unit.griffin=40", "sod.unit.griffin=40"]}
+    ],
+    "updgradedStackPossible": true
 },
 "sod.map.hive"           : {
     "untranslatedName": "Dragonflies hive",
@@ -265,12 +262,9 @@
     { "name": "I"    , "rewardIndex": 0, "guards": [ "sod.unit.imp=20", "sod.unit.imp=20", "sod.unit.imp=20"     , "sod.unit.imp=20", "sod.unit.imp=20"  ]},
     { "name": "II"   , "rewardIndex": 1, "guards": [ "sod.unit.imp=30", "sod.unit.imp=30", "sod.unit.imp=30"     , "sod.unit.imp=30", "sod.unit.imp=30"  ]},
     { "name": "III"  , "rewardIndex": 2, "guards": [ "sod.unit.imp=40", "sod.unit.imp=40", "sod.unit.imp=40"     , "sod.unit.imp=40", "sod.unit.imp=40"  ]},
-    { "name": "IV"   , "rewardIndex": 3, "guards": [ "sod.unit.imp=60", "sod.unit.imp=60", "sod.unit.imp=60"     , "sod.unit.imp=60", "sod.unit.imp=60"  ]},
-    { "name": "I+"   , "rewardIndex": 0, "guards": [ "sod.unit.imp=20", "sod.unit.imp=20", "sod.unit.familiar=20", "sod.unit.imp=20", "sod.unit.imp=20"  ]},
-    { "name": "II+"  , "rewardIndex": 1, "guards": [ "sod.unit.imp=30", "sod.unit.imp=30", "sod.unit.familiar=30", "sod.unit.imp=30", "sod.unit.imp=30"  ]},
-    { "name": "III+" , "rewardIndex": 2, "guards": [ "sod.unit.imp=40", "sod.unit.imp=40", "sod.unit.familiar=40", "sod.unit.imp=40", "sod.unit.imp=40"  ]},
-    { "name": "IV+"  , "rewardIndex": 3, "guards": [ "sod.unit.imp=60", "sod.unit.imp=60", "sod.unit.familiar=60", "sod.unit.imp=60", "sod.unit.imp=60"  ]}
-    ]
+    { "name": "IV"   , "rewardIndex": 3, "guards": [ "sod.unit.imp=60", "sod.unit.imp=60", "sod.unit.imp=60"     , "sod.unit.imp=60", "sod.unit.imp=60"  ]}
+    ],
+    "upgradedStackIndex": 3
 },
 "sod.map.dwarvenTreasury"             : {
     "untranslatedName": "Dwarven Treasury",
@@ -284,12 +278,9 @@
     { "name": "I"    , "rewardIndex": 0, "guards": [ "sod.unit.dwarf=10", "sod.unit.dwarf=10", "sod.unit.dwarf=10"      , "sod.unit.dwarf=10", "sod.unit.dwarf=10"  ]},
     { "name": "II"   , "rewardIndex": 1, "guards": [ "sod.unit.dwarf=15", "sod.unit.dwarf=15", "sod.unit.dwarf=15"      , "sod.unit.dwarf=15", "sod.unit.dwarf=15"  ]},
     { "name": "III"  , "rewardIndex": 2, "guards": [ "sod.unit.dwarf=20", "sod.unit.dwarf=20", "sod.unit.dwarf=20"      , "sod.unit.dwarf=20", "sod.unit.dwarf=20"  ]},
-    { "name": "IV"   , "rewardIndex": 3, "guards": [ "sod.unit.dwarf=30", "sod.unit.dwarf=30", "sod.unit.dwarf=30"      , "sod.unit.dwarf=30", "sod.unit.dwarf=30"  ]},
-    { "name": "I+"   , "rewardIndex": 0, "guards": [ "sod.unit.dwarf=10", "sod.unit.dwarf=10", "sod.unit.battleDwarf=10", "sod.unit.dwarf=10", "sod.unit.dwarf=10"  ]},
-    { "name": "II+"  , "rewardIndex": 1, "guards": [ "sod.unit.dwarf=15", "sod.unit.dwarf=15", "sod.unit.battleDwarf=15", "sod.unit.dwarf=15", "sod.unit.dwarf=15"  ]},
-    { "name": "III+" , "rewardIndex": 2, "guards": [ "sod.unit.dwarf=20", "sod.unit.dwarf=20", "sod.unit.battleDwarf=20", "sod.unit.dwarf=20", "sod.unit.dwarf=20"  ]},
-    { "name": "IV+"  , "rewardIndex": 3, "guards": [ "sod.unit.dwarf=30", "sod.unit.dwarf=30", "sod.unit.battleDwarf=30", "sod.unit.dwarf=30", "sod.unit.dwarf=30"  ]}
-    ]
+    { "name": "IV"   , "rewardIndex": 3, "guards": [ "sod.unit.dwarf=30", "sod.unit.dwarf=30", "sod.unit.dwarf=30"      , "sod.unit.dwarf=30", "sod.unit.dwarf=30"  ]}
+    ],
+    "upgradedStackIndex": 3
 },
 "sod.map.medusaStores"             : {
     "untranslatedName": "Medusa Stores",
@@ -303,12 +294,9 @@
     { "name": "I"    , "rewardIndex": 0, "guards": [ "sod.unit.medusa=4" , "sod.unit.medusa=4" , "sod.unit.medusa=4"      , "sod.unit.medusa=4" , "sod.unit.medusa=4"  ]},
     { "name": "II"   , "rewardIndex": 1, "guards": [ "sod.unit.medusa=6" , "sod.unit.medusa=6" , "sod.unit.medusa=6"      , "sod.unit.medusa=6" , "sod.unit.medusa=6"  ]},
     { "name": "III"  , "rewardIndex": 2, "guards": [ "sod.unit.medusa=8" , "sod.unit.medusa=8" , "sod.unit.medusa=8"      , "sod.unit.medusa=8" , "sod.unit.medusa=8"  ]},
-    { "name": "IV"   , "rewardIndex": 3, "guards": [ "sod.unit.medusa=10", "sod.unit.medusa=10", "sod.unit.medusa=10"     , "sod.unit.medusa=10", "sod.unit.medusa=10" ]},
-    { "name": "I+"   , "rewardIndex": 0, "guards": [ "sod.unit.medusa=4" , "sod.unit.medusa=4" , "sod.unit.medusaQueen=4" , "sod.unit.medusa=4" , "sod.unit.medusa=4"  ]},
-    { "name": "II+"  , "rewardIndex": 1, "guards": [ "sod.unit.medusa=6" , "sod.unit.medusa=6" , "sod.unit.medusaQueen=6" , "sod.unit.medusa=6" , "sod.unit.medusa=6"  ]},
-    { "name": "III+" , "rewardIndex": 2, "guards": [ "sod.unit.medusa=8" , "sod.unit.medusa=8" , "sod.unit.medusaQueen=8" , "sod.unit.medusa=8" , "sod.unit.medusa=8"  ]},
-    { "name": "IV+"  , "rewardIndex": 3, "guards": [ "sod.unit.medusa=10", "sod.unit.medusa=10", "sod.unit.medusaQueen=10", "sod.unit.medusa=10", "sod.unit.medusa=10" ]}
-    ]
+    { "name": "IV"   , "rewardIndex": 3, "guards": [ "sod.unit.medusa=10", "sod.unit.medusa=10", "sod.unit.medusa=10"     , "sod.unit.medusa=10", "sod.unit.medusa=10" ]}
+    ],
+    "upgradedStackIndex": 3
 },
 "sod.map.cyclopsStockpile"             : {
     "untranslatedName": "Cyclops Stockpile",
@@ -322,12 +310,9 @@
     { "name": "I"    , "rewardIndex": 0, "guards": [ "sod.unit.cyclop=4" , "sod.unit.cyclop=4" , "sod.unit.cyclop=4"     , "sod.unit.cyclop=4" , "sod.unit.cyclop=4"  ]},
     { "name": "II"   , "rewardIndex": 1, "guards": [ "sod.unit.cyclop=6" , "sod.unit.cyclop=6" , "sod.unit.cyclop=6"     , "sod.unit.cyclop=6" , "sod.unit.cyclop=6"  ]},
     { "name": "III"  , "rewardIndex": 2, "guards": [ "sod.unit.cyclop=8" , "sod.unit.cyclop=8" , "sod.unit.cyclop=8"     , "sod.unit.cyclop=8" , "sod.unit.cyclop=8"  ]},
-    { "name": "IV"   , "rewardIndex": 3, "guards": [ "sod.unit.cyclop=10", "sod.unit.cyclop=10", "sod.unit.cyclop=10"    , "sod.unit.cyclop=10", "sod.unit.cyclop=10" ]},
-    { "name": "I+"   , "rewardIndex": 0, "guards": [ "sod.unit.cyclop=4" , "sod.unit.cyclop=4" , "sod.unit.cyclopKing=4" , "sod.unit.cyclop=4" , "sod.unit.cyclop=4"  ]},
-    { "name": "II+"  , "rewardIndex": 1, "guards": [ "sod.unit.cyclop=6" , "sod.unit.cyclop=6" , "sod.unit.cyclopKing=6" , "sod.unit.cyclop=6" , "sod.unit.cyclop=6"  ]},
-    { "name": "III+" , "rewardIndex": 2, "guards": [ "sod.unit.cyclop=8" , "sod.unit.cyclop=8" , "sod.unit.cyclopKing=8" , "sod.unit.cyclop=8" , "sod.unit.cyclop=8"  ]},
-    { "name": "IV+"  , "rewardIndex": 3, "guards": [ "sod.unit.cyclop=10", "sod.unit.cyclop=10", "sod.unit.cyclopKing=10", "sod.unit.cyclop=10", "sod.unit.cyclop=10" ]}
-    ]
+    { "name": "IV"   , "rewardIndex": 3, "guards": [ "sod.unit.cyclop=10", "sod.unit.cyclop=10", "sod.unit.cyclop=10"    , "sod.unit.cyclop=10", "sod.unit.cyclop=10" ]}
+    ],
+    "upgradedStackIndex": 3
 },
 "sod.map.nagaBank"             : {
     "untranslatedName": "Naga bank",
@@ -341,12 +326,9 @@
     { "name": "I"    , "rewardIndex": 0, "guards": [ "sod.unit.naga=2", "sod.unit.naga=2", "sod.unit.naga=2"     , "sod.unit.naga=2", "sod.unit.naga=2" ]},
     { "name": "II"   , "rewardIndex": 1, "guards": [ "sod.unit.naga=3", "sod.unit.naga=3", "sod.unit.naga=3"     , "sod.unit.naga=3", "sod.unit.naga=3" ]},
     { "name": "III"  , "rewardIndex": 2, "guards": [ "sod.unit.naga=4", "sod.unit.naga=4", "sod.unit.naga=4"     , "sod.unit.naga=4", "sod.unit.naga=4" ]},
-    { "name": "IV"   , "rewardIndex": 3, "guards": [ "sod.unit.naga=6", "sod.unit.naga=6", "sod.unit.naga=6"     , "sod.unit.naga=6", "sod.unit.naga=6" ]},
-    { "name": "I+"   , "rewardIndex": 0, "guards": [ "sod.unit.naga=2", "sod.unit.naga=2", "sod.unit.nagaQueen=2", "sod.unit.naga=2", "sod.unit.naga=2" ]},
-    { "name": "II+"  , "rewardIndex": 1, "guards": [ "sod.unit.naga=3", "sod.unit.naga=3", "sod.unit.nagaQueen=3", "sod.unit.naga=3", "sod.unit.naga=3" ]},
-    { "name": "III+" , "rewardIndex": 2, "guards": [ "sod.unit.naga=4", "sod.unit.naga=4", "sod.unit.nagaQueen=4", "sod.unit.naga=4", "sod.unit.naga=4" ]},
-    { "name": "IV+"  , "rewardIndex": 3, "guards": [ "sod.unit.naga=6", "sod.unit.naga=6", "sod.unit.nagaQueen=6", "sod.unit.naga=6", "sod.unit.naga=6" ]}
-    ]
+    { "name": "IV"   , "rewardIndex": 3, "guards": [ "sod.unit.naga=6", "sod.unit.naga=6", "sod.unit.naga=6"     , "sod.unit.naga=6", "sod.unit.naga=6" ]}
+    ],
+    "upgradedStackIndex": 3
 },
 "hota.map.spit"             : {
     "untranslatedName": "Basilisk Spit",
@@ -361,12 +343,9 @@
     { "name": "I"    , "rewardIndex": 0, "guards": [ "sod.unit.basilisk=4" , "sod.unit.basilisk=4"        , "sod.unit.basilisk=4" , "sod.unit.basilisk=4"  ]},
     { "name": "II"   , "rewardIndex": 1, "guards": [ "sod.unit.basilisk=6" , "sod.unit.basilisk=6"        , "sod.unit.basilisk=6" , "sod.unit.basilisk=6"  ]},
     { "name": "III"  , "rewardIndex": 2, "guards": [ "sod.unit.basilisk=8" , "sod.unit.basilisk=8"        , "sod.unit.basilisk=8" , "sod.unit.basilisk=8"  ]},
-    { "name": "IV"   , "rewardIndex": 3, "guards": [ "sod.unit.basilisk=12", "sod.unit.basilisk=12"       , "sod.unit.basilisk=12", "sod.unit.basilisk=12" ]},
-    { "name": "I+"   , "rewardIndex": 0, "guards": [ "sod.unit.basilisk=4" , "sod.unit.greaterBasilisk=4" , "sod.unit.basilisk=4" , "sod.unit.basilisk=4"  ]},
-    { "name": "II+"  , "rewardIndex": 1, "guards": [ "sod.unit.basilisk=6" , "sod.unit.greaterBasilisk=6" , "sod.unit.basilisk=6" , "sod.unit.basilisk=6"  ]},
-    { "name": "III+" , "rewardIndex": 2, "guards": [ "sod.unit.basilisk=8" , "sod.unit.greaterBasilisk=8" , "sod.unit.basilisk=8" , "sod.unit.basilisk=8"  ]},
-    { "name": "IV+"  , "rewardIndex": 3, "guards": [ "sod.unit.basilisk=12", "sod.unit.greaterBasilisk=12", "sod.unit.basilisk=12", "sod.unit.basilisk=12" ]}
-    ]
+    { "name": "IV"   , "rewardIndex": 3, "guards": [ "sod.unit.basilisk=12", "sod.unit.basilisk=12"       , "sod.unit.basilisk=12", "sod.unit.basilisk=12" ]}
+    ],
+    "upgradedStackIndex": 2
 },
 "hota.map.ruins"             : {
     "untranslatedName": "Ruins",

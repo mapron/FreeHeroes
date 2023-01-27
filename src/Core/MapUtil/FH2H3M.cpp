@@ -246,7 +246,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
     for (auto& allowed : dest.m_allowedHeroes)
         allowed = 1;
     for (auto& allowed : dest.m_allowedArtifacts)
-        allowed = 0;
+        allowed = 1;
     for (auto& allowed : dest.m_allowedSpells)
         allowed = 1;
     for (auto& allowed : dest.m_allowedSecSkills)
@@ -259,12 +259,12 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
 
     if (src.m_version == Core::GameVersion::HOTA) {
         // these artifact ids are just unexistent. @todo: do I really need this logic?
-        dest.m_allowedArtifacts[145] = 0;
-        dest.m_allowedArtifacts[144] = 0;
+        dest.m_allowedArtifacts[145] = 1;
+        dest.m_allowedArtifacts[144] = 1;
     }
     for (const auto& artId : src.m_disabledArtifacts) {
         const auto legacyId               = (artId)->legacyId;
-        dest.m_allowedArtifacts[legacyId] = 1;
+        dest.m_allowedArtifacts[legacyId] = 0;
     }
 
     for (const auto& spellId : src.m_disabledSpells) {
@@ -378,6 +378,10 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         }
         monster->m_joinOnlyForMoney = fhMon.m_joinOnlyForMoney;
         monster->m_joinPercent      = fhMon.m_joinPercent;
+        if (fhMon.m_upgradedStack == FHMonster::UpgradedStack::No)
+            monster->m_upgradedStack = 0;
+        if (fhMon.m_upgradedStack == FHMonster::UpgradedStack::Yes)
+            monster->m_upgradedStack = 1;
 
         auto* def = fhMon.m_id->objectDefs.get({});
         dest.m_objects.push_back(Object{ .m_order = fhMon.m_order, .m_pos = int3fromPos(fhMon.m_pos, dest.m_features->m_monstersMapXOffset), .m_defnum = tmplCache.add(def), .m_impl = std::move(monster) });
@@ -407,20 +411,13 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
     for (auto& fhBank : src.m_objects.m_banks) {
         auto bank = std::make_unique<MapObjectCreatureBank>(dest.m_features);
 
-        if (!fhBank.m_guardsVariants.empty()) {
-            const int variantsCount = fhBank.m_id->variants.size();
-            if (variantsCount > 4) {
-                bank->m_content = fhBank.m_guardsVariants[0];
-                if (bank->m_content > 4)
-                    bank->m_content -= variantsCount / 2;
-                if (fhBank.m_guardsVariants.size() == 2)
-                    bank->m_upgraded = 0xffu;
-                else if (fhBank.m_guardsVariants[0] < variantsCount / 2)
+        if (fhBank.m_guardsVariant != -1) {
+            bank->m_content = fhBank.m_guardsVariant;
+            if (fhBank.m_id->upgradedStackIndex != -1) {
+                if (fhBank.m_upgradedStack == FHBank::UpgradedStack::No)
                     bank->m_upgraded = 0;
-                else
+                if (fhBank.m_upgradedStack == FHBank::UpgradedStack::Yes)
                     bank->m_upgraded = 1;
-            } else {
-                bank->m_content = fhBank.m_guardsVariants[0];
             }
         }
 

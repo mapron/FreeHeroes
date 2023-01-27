@@ -455,7 +455,7 @@ struct HeroArtSet {
 struct HeroSpellSet {
     MapFormatFeaturesPtr m_features;
     bool                 m_hasCustomSpells = false;
-    std::vector<uint8_t> m_spells;
+    std::vector<uint8_t> m_spells          = std::vector<uint8_t>(70);
 
     HeroSpellSet() = default;
     HeroSpellSet(MapFormatFeaturesPtr features)
@@ -473,7 +473,7 @@ struct HeroSpellSet {
 struct HeroPrimSkillSet {
     MapFormatFeaturesPtr m_features;
     bool                 m_hasCustomPrimSkills = false;
-    std::vector<uint8_t> m_primSkills;
+    std::vector<uint8_t> m_primSkills          = std::vector<uint8_t>(4);
 
     HeroPrimSkillSet() = default;
     HeroPrimSkillSet(MapFormatFeaturesPtr features)
@@ -688,6 +688,8 @@ struct MapMonster : public MapObjectAbstract {
     uint32_t m_agressionExact   = 0xffffffffU;
     uint32_t m_joinPercent      = 100;
     bool     m_joinOnlyForMoney = false;
+    uint32_t m_upgradedStack    = 0xffffffffU;
+    uint32_t m_splitStack       = 0xffffffffU;
 
     using MapObjectAbstract::MapObjectAbstract;
 

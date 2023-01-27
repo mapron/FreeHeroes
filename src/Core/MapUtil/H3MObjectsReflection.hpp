@@ -163,7 +163,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_notGrowingTeam,
     m_joinPercent,
     m_agressionExact,
-    m_joinOnlyForMoney)
+    m_joinOnlyForMoney,
+    m_upgradedStack,
+    m_splitStack)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     MapQuest,

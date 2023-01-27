@@ -143,6 +143,15 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 
     m_reward)
 
+ENUM_REFLECTION_STRINGIFY(
+    FHMonster::UpgradedStack,
+    Invalid,
+
+    Invalid,
+    Random,
+    Yes,
+    No)
+
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHMonster,
     m_pos,
@@ -156,7 +165,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_joinOnlyForMoney,
     m_joinPercent,
     m_questIdentifier,
-    m_guardValue)
+    m_guardValue,
+    m_upgradedStack)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHDwelling,
@@ -177,6 +187,15 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 
     m_id)
 
+ENUM_REFLECTION_STRINGIFY(
+    FHBank::UpgradedStack,
+    Invalid,
+
+    Invalid,
+    Random,
+    Yes,
+    No)
+
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHBank,
     m_pos,
@@ -184,7 +203,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_defIndex,
 
     m_id,
-    m_guardsVariants)
+    m_upgradedStack,
+    m_guardsVariant)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHObstacle,

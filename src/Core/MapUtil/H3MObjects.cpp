@@ -576,11 +576,7 @@ void MapMonster::readBinary(ByteOrderDataStreamReader& stream)
     if (m_features->m_monsterJoinPercent) {
         stream >> m_agressionExact >> m_joinOnlyForMoney;
         stream >> m_joinPercent;
-        uint32_t unknown3 = 0;
-        uint32_t unknown4 = 0;
-        stream >> unknown3 >> unknown4;
-        assert(unknown3 == 0xffffffffU);
-        assert(unknown4 == 0xffffffffU);
+        stream >> m_upgradedStack >> m_splitStack;
     }
 }
 
@@ -608,9 +604,7 @@ void MapMonster::writeBinary(ByteOrderDataStreamWriter& stream) const
     if (m_features->m_monsterJoinPercent) {
         stream << m_agressionExact << m_joinOnlyForMoney;
         stream << m_joinPercent;
-        uint32_t unknown3 = 0xffffffff;
-        uint32_t unknown4 = 0xffffffff;
-        stream << unknown3 << unknown4;
+        stream << m_upgradedStack << m_splitStack;
     }
 }
 

@@ -265,7 +265,7 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
                            .addInfo("count", strCount)
                            .addInfo("value", std::to_string(obj.m_guardValue)))
             ->m_overlayInfo
-            = strCount;
+            = strCount + (obj.m_upgradedStack == FHMonster::UpgradedStack::Yes ? " u" : "");
     }
 
     for (auto& obj : fhMap.m_objects.m_dwellings) {

@@ -432,6 +432,14 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 fhMonster.m_joinOnlyForMoney = monster->m_joinOnlyForMoney;
                 fhMonster.m_joinPercent      = monster->m_joinPercent;
 
+                if (monster->m_upgradedStack == 0xffffffffU) {
+                    fhMonster.m_upgradedStack = FHMonster::UpgradedStack::Random;
+                } else if (monster->m_upgradedStack == 1) {
+                    fhMonster.m_upgradedStack = FHMonster::UpgradedStack::Yes;
+                } else {
+                    fhMonster.m_upgradedStack = FHMonster::UpgradedStack::No;
+                }
+
                 dest.m_objects.m_monsters.push_back(std::move(fhMonster));
             } break;
             case MapObjectType::OCEAN_BOTTLE:
@@ -716,18 +724,16 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 initCommon(fhBank);
                 fhBank.m_id = id;
                 if (bank->m_content != 0xffffffffu) {
-                    const int variant       = bank->m_content;
-                    const int variantsCount = id->variants.size();
-                    if (variantsCount > 4) {
+                    fhBank.m_guardsVariant = bank->m_content;
+
+                    if (id->upgradedStackIndex != -1) {
                         if (bank->m_upgraded == 0xffu) {
-                            fhBank.m_guardsVariants = { variant, variant + variantsCount / 2 };
+                            fhBank.m_upgradedStack = FHBank::UpgradedStack::Random;
                         } else if (bank->m_upgraded == 1) {
-                            fhBank.m_guardsVariants = { variant + variantsCount / 2 };
+                            fhBank.m_upgradedStack = FHBank::UpgradedStack::Yes;
                         } else {
-                            fhBank.m_guardsVariants = { variant };
+                            fhBank.m_upgradedStack = FHBank::UpgradedStack::No;
                         }
-                    } else {
-                        fhBank.m_guardsVariants = { variant };
                     }
                 }
                 dest.m_objects.m_banks.push_back(std::move(fhBank));

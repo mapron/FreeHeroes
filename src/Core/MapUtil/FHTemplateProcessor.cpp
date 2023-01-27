@@ -812,7 +812,8 @@ void FHTemplateProcessor::runRoadsPlacement()
 
 void FHTemplateProcessor::runRewards()
 {
-    std::vector values{ 3000, 6000, 10000, 15000, 20000, 50000, 100000, 200000, 500000 };
+    //std::vector values{ 3000, 6000, 10000, 15000, 20000, 50000, 100000, 200000, 500000 };
+    std::vector values{ 100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000 };
     for (int x = 1; x <= 17; x += 2) {
         for (int y = 3; int val : values) {
             y += 2;
@@ -1077,13 +1078,20 @@ void FHTemplateProcessor::runGuards()
         }
         Core::LibraryUnitConstPtr unit = candidates[m_rng->gen(candidates.size() - 1)];
 
-        auto finalValue = m_rng->genDispersed(guard.m_value, guard.m_valueDispersion);
+        auto       finalValue = m_rng->genDispersed(guard.m_value, guard.m_valueDispersion);
+        const bool upgraded   = unit->upgrades.empty() ? false : m_rng->genSmall(3) == 0;
 
         FHMonster fhMonster;
         fhMonster.m_pos        = guard.m_pos;
         fhMonster.m_count      = getPossibleCount(unit, finalValue);
         fhMonster.m_id         = unit;
         fhMonster.m_guardValue = finalValue;
+
+        if (upgraded) {
+            auto upCount = getPossibleCount(unit->upgrades[0], finalValue);
+            // let's say upgraded stack is 1/4 of stacks. Then recalc count taking an account 1/4 of value is upped.
+            fhMonster.m_count = fhMonster.m_count * 3 / 4 + upCount * 1 / 4;
+        }
 
         if (guard.m_joinable) {
             fhMonster.m_agressionMin = 4;
@@ -1095,6 +1103,7 @@ void FHTemplateProcessor::runGuards()
 
         fhMonster.m_joinOnlyForMoney = true;
         fhMonster.m_joinPercent      = 50;
+        fhMonster.m_upgradedStack    = upgraded ? FHMonster::UpgradedStack::Yes : FHMonster::UpgradedStack::No;
 
         if (!guard.m_id.empty())
             nameIndex[guard.m_id] = m_map.m_objects.m_monsters.size();
