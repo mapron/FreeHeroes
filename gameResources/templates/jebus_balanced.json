@@ -36,62 +36,7 @@
 		"hasRoundLimit":true,
 		"roundLimit": 100
 	},
-	"disabledArtifacts": [
-		"sod.artifact.complex.allStat"         ,
-		"sod.artifact.complex.necro"           ,
-		"sod.artifact.complex.life"            ,
-		"sod.artifact.complex.debuff"          ,
-		"sod.artifact.complex.growth"          ,
-		"sod.artifact.complex.immune"          ,
-		"sod.artifact.complex.freeBolt"        ,
-		"sod.artifact.complex.fastOnboard"     ,
-		"sod.artifact.complex.noBowPenalty"    ,
-		"sod.artifact.complex.manaRegen"       ,
-		"sod.artifact.complex.spellRounds"     ,
-		"sod.artifact.complex.resources"       ,
-		"hota.artifact.complex.diplomacy"      ,
-		"hota.artifact.complex.resist"         ,
-		"hota.artifact.complex.buff"           ,
-		"hota.artifact.complex.gold"           ,
-		
-		"sod.artifact.sword.armag"             ,
-		"hota.artifact.misc.summon"            ,
-		"sod.artifact.misc.dragonStuff"        ,
-		"sod.artifact.helm.boat"               ,
-		"sod.artifact.neck.mp1"                ,
-		
-		"sod.artifact.cape.noMagic3plus"       ,
-		"sod.artifact.misc.noMagic"            ,
-		
-		"sod.artifact.misc.eagle1"             ,
-		"sod.artifact.misc.eagle2"             ,
-		"sod.artifact.misc.eagle3"             ,
-		
-		"sod.artifact.neck.resist1"            ,
-		"sod.artifact.cape.resist1"            ,
-		"sod.artifact.boots.resist1"           
-	],
-	"disabledHeroes":[
-		"sod.hero.rampart.rn020",
-		"sod.hero.castle.kn130",
-
-		"sod.hero.campaign.sh000",
-		"sod.hero.campaign.qc128",
-		"sod.hero.campaign.sh003",
-		"sod.hero.campaign.sh004",
-		"sod.hero.campaign.sh005",
-		"sod.hero.campaign.sh006",
-		"sod.hero.campaign.sh007",
-		"sod.hero.campaign.sh009",
-		"sod.hero.campaign.sh008",
-		"sod.hero.campaign.sh001",
-		"sod.hero.campaign.dm131",
-
-		"hota.hero.campaign.cvc01",
-		"hota.hero.campaign.cvc02"
-	],
-	"disabledSkills":[
-		"sod.skill.eagleEye",
-		"sod.skill.resistance"
-	]
+	"disabledArtifacts":{},
+	"disabledHeroes":{},
+	"disabledSkills":{}
 }

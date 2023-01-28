@@ -283,7 +283,8 @@ struct FHRngUserSettings {
         None,
         RandomAnyFaction,
         RandomStartingFaction,
-        Fixed
+        FixedAny,
+        FixedStarting,
     };
 
     struct UserPlayer {
@@ -317,6 +318,7 @@ struct MAPUTIL_EXPORT FHMap {
     std::string m_name;
     std::string m_descr;
     uint8_t     m_difficulty = 0;
+    bool        m_isWaterMap = false;
 
     PlayersMap               m_players;
     std::vector<FHHero>      m_wanderingHeroes;
@@ -357,10 +359,53 @@ struct MAPUTIL_EXPORT FHMap {
 
     Core::LibraryTerrainConstPtr m_defaultTerrain = nullptr;
 
-    std::vector<Core::LibraryHeroConstPtr>           m_disabledHeroes;
-    std::vector<Core::LibraryArtifactConstPtr>       m_disabledArtifacts;
-    std::vector<Core::LibrarySpellConstPtr>          m_disabledSpells;
-    std::vector<Core::LibrarySecondarySkillConstPtr> m_disabledSkills;
+    template<class Ptr>
+    struct DisableConfig {
+        using Map = std::map<Ptr, bool>;
+        Map m_data;
+
+        bool isDisabled(bool isWater, Ptr obj) const
+        {
+            if (m_data.contains(obj))
+                return m_data.at(obj);
+
+            if (!isWater && obj->isWaterContent)
+                return true;
+            return !obj->isEnabledByDefault;
+        }
+
+        void setDisabled(bool isWater, Ptr obj, bool state)
+        {
+            if (!obj)
+                return;
+
+            if (state) {
+                if (!obj->isEnabledByDefault) // if object is disabled by default = we don't add to the disabled, it's excess.
+                    return;
+
+                if (!isWater && obj->isWaterContent) // if object is for water map, and we have non-water map = we don't add to the disabled, it's excess.
+                    return;
+
+                m_data[obj] = true;
+            } else {
+                if (!isWater && !obj->isWaterContent && obj->isEnabledByDefault) // if object is for regular map, and we have non-water map = we don't add to the enabled, it's excess.
+                    return;
+                m_data[obj] = false;
+            }
+        }
+    };
+
+    using DisableConfigHeroes          = DisableConfig<Core::LibraryHeroConstPtr>;
+    using DisableConfigArtifacts       = DisableConfig<Core::LibraryArtifactConstPtr>;
+    using DisableConfigSpells          = DisableConfig<Core::LibrarySpellConstPtr>;
+    using DisableConfigSecondarySkills = DisableConfig<Core::LibrarySecondarySkillConstPtr>;
+    using DisableConfigBanks           = DisableConfig<Core::LibraryMapBankConstPtr>;
+
+    DisableConfigHeroes          m_disabledHeroes;
+    DisableConfigArtifacts       m_disabledArtifacts;
+    DisableConfigSpells          m_disabledSpells;
+    DisableConfigSecondarySkills m_disabledSkills;
+    DisableConfigBanks           m_disabledBanks;
 
     std::vector<FHHeroData> m_customHeroes;
 

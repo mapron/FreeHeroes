@@ -73,6 +73,9 @@ struct LibraryHero {
 
     StartStacks startStacks;
 
+    bool isWaterContent     = false;
+    bool isEnabledByDefault = true;
+
     Presentation presentationParams;
 
     LibraryFactionHeroClassConstPtr heroClass() const noexcept

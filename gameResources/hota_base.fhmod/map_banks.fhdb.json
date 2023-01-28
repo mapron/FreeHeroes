@@ -344,8 +344,7 @@
     { "name": "II"   , "rewardIndex": 1, "guards": [ "sod.unit.basilisk=6" , "sod.unit.basilisk=6"        , "sod.unit.basilisk=6" , "sod.unit.basilisk=6"  ]},
     { "name": "III"  , "rewardIndex": 2, "guards": [ "sod.unit.basilisk=8" , "sod.unit.basilisk=8"        , "sod.unit.basilisk=8" , "sod.unit.basilisk=8"  ]},
     { "name": "IV"   , "rewardIndex": 3, "guards": [ "sod.unit.basilisk=12", "sod.unit.basilisk=12"       , "sod.unit.basilisk=12", "sod.unit.basilisk=12" ]}
-    ],
-    "upgradedStackIndex": 2
+    ]
 },
 "hota.map.ruins"             : {
     "untranslatedName": "Ruins",
@@ -374,31 +373,67 @@
 
 "records" : {
 
-"sod.map.crypt"                      : { "pres": { "order":1    } },
-"sod.map.utopia"                     : { "pres": { "order":2    } },
-"sod.map.derelictShip"               : { "pres": { "order":1001 } },
-"sod.map.shipwreck"                  : { "pres": { "order":1002 } },
-"hota.map.blackTower"                : { "pres": { "order":3    } },
-"hota.map.mansion"                   : { "pres": { "order":4    } },
-"hota.map.beholderSanctuary"         : { "pres": { "order":5    } },
-"hota.map.templeSea"                 : { "pres": { "order":1003 } },
-"hota.map.churchyard"                : { "pres": { "order":6    } },
-"sod.map.conservatory"               : { "pres": { "order":100  } },
-"sod.map.hive"                       : { "pres": { "order":101  } },
-"hota.map.experimentalShop"          : { "pres": { "order":102  } },
-"hota.map.wolfRaiderPicket"          : { "pres": { "order":103  } },
-"hota.map.vermilionTower"            : { "pres": { "order":104  } },
-"hota.map.pirateCave"                : { "pres": { "order":105  } },
-"hota.map.ivoryTower"                : { "pres": { "order":106  } },
+"sod.map.crypt"                      : { "presentationParams": { "order":1    } },
+"sod.map.utopia"                     : { "presentationParams": { "order":2    } },
+"sod.map.derelictShip"               : { "presentationParams": { "order":1001 } },
+"sod.map.shipwreck"                  : { "presentationParams": { "order":1002 } },
+"hota.map.blackTower"                : { "presentationParams": { "order":3    } },
+"hota.map.mansion"                   : { "presentationParams": { "order":4    } },
+"hota.map.beholderSanctuary"         : { "presentationParams": { "order":5    } },
+"hota.map.templeSea"                 : { "presentationParams": { "order":1003 } },
+"hota.map.churchyard"                : { "presentationParams": { "order":6    } },
+"sod.map.conservatory"               : { "presentationParams": { "order":100  } },
+"sod.map.hive"                       : { "presentationParams": { "order":101  } },
+"hota.map.experimentalShop"          : { "presentationParams": { "order":102  } },
+"hota.map.wolfRaiderPicket"          : { "presentationParams": { "order":103  } },
+"hota.map.vermilionTower"            : { "presentationParams": { "order":104  } },
+"hota.map.pirateCave"                : { "presentationParams": { "order":105  } },
+"hota.map.ivoryTower"                : { "presentationParams": { "order":106  } },
 
-"sod.map.impCache"                   : { "pres": { "order":200  } },
-"sod.map.dwarvenTreasury"            : { "pres": { "order":201  } },
-"sod.map.medusaStores"               : { "pres": { "order":202  } },
-"sod.map.cyclopsStockpile"           : { "pres": { "order":203  } },
-"sod.map.nagaBank"                   : { "pres": { "order":204  } },
-"hota.map.spit"                      : { "pres": { "order":205  } },
-"hota.map.ruins"                     : { "pres": { "order":206  } }
+"sod.map.impCache"                   : { "presentationParams": { "order":200  } },
+"sod.map.dwarvenTreasury"            : { "presentationParams": { "order":201  } },
+"sod.map.medusaStores"               : { "presentationParams": { "order":202  } },
+"sod.map.cyclopsStockpile"           : { "presentationParams": { "order":203  } },
+"sod.map.nagaBank"                   : { "presentationParams": { "order":204  } },
+"hota.map.spit"                      : { "presentationParams": { "order":205  } },
+"hota.map.ruins"                     : { "presentationParams": { "order":206  } }
+
+}
+
+},
+
+{
+"scope": "mapBanks",
+"compactCols":                       [ "isWaterContent",  "isEnabledByDefault"],
+
+"records" : {
+
+"sod.map.crypt"                      : [ false, true ],
+"sod.map.utopia"                     : [ false, true ],
+"sod.map.derelictShip"               : [ true , true ],
+"sod.map.shipwreck"                  : [ true , true ],
+"hota.map.blackTower"                : [ false, true ],
+"hota.map.mansion"                   : [ false, true ],
+"hota.map.beholderSanctuary"         : [ false, true ],
+"hota.map.templeSea"                 : [ true , true ],
+"hota.map.churchyard"                : [ false, true ],
+"sod.map.conservatory"               : [ false, true ],
+"sod.map.hive"                       : [ false, true ],
+"hota.map.experimentalShop"          : [ false, true ],
+"hota.map.wolfRaiderPicket"          : [ false, true ],
+"hota.map.vermilionTower"            : [ false, true ],
+"hota.map.pirateCave"                : [ false, false ],
+"hota.map.ivoryTower"                : [ false, false ],
+"sod.map.impCache"                   : [ false, true ],
+"sod.map.dwarvenTreasury"            : [ false, true ],
+"sod.map.medusaStores"               : [ false, true ],
+"sod.map.cyclopsStockpile"           : [ false, true ],
+"sod.map.nagaBank"                   : [ false, true ],
+"hota.map.spit"                      : [ false, true ],
+"hota.map.ruins"                     : [ false, true ]
+
 
 }
 
 }]
+

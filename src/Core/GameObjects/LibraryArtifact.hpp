@@ -224,6 +224,9 @@ struct LibraryArtifact {
     ArtifactSlotRequirement slotReq;
     LibraryArtifactConstPtr partOfSet = nullptr;
 
+    bool isWaterContent     = false;
+    bool isEnabledByDefault = true;
+
     ObjectDefMappings objectDefs;
     Presentation      presentationParams;
 

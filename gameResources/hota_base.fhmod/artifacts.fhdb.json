@@ -243,4 +243,219 @@
 
 }
 
+},
+
+{
+"scope": "artifacts",
+"compactCols":                               [ "isWaterContent",  "isEnabledByDefault"],
+
+"records" : {
+
+"sod.artifact.special.spellbook"            : [ false, true ],
+"sod.artifact.special.scroll"               : [ false, true ],
+"sod.artifact.special.grail"                : [ false, true ],
+
+"sod.artifact.battleMachine.catapult"       : [ false, true ],
+"sod.artifact.battleMachine.ballista"       : [ false, true ],
+"sod.artifact.battleMachine.ammoCart"       : [ false, true ],
+"sod.artifact.battleMachine.firstAidTent"   : [ false, true ],
+"hota.artifact.battleMachine.cannon"        : [ false, true ],
+
+
+"sod.artifact.sword.att2"                   : [ false, true ],
+"sod.artifact.sword.att3"                   : [ false, true ],
+"sod.artifact.sword.att4"                   : [ false, true ],
+"sod.artifact.sword.att5"                   : [ false, true ],
+"sod.artifact.sword.att6"                   : [ false, true ],
+"hota.artifact.sword.att7"                  : [ false, true ],
+"sod.artifact.sword.att12"                  : [ false, true ],
+
+"sod.artifact.shield.def2"                  : [ false, true ],
+"sod.artifact.shield.def3"                  : [ false, true ],
+"sod.artifact.shield.def4"                  : [ false, true ],
+"sod.artifact.shield.def5"                  : [ false, true ],
+"sod.artifact.shield.def6"                  : [ false, true ],
+"hota.artifact.shield.def7"                 : [ false, true ],
+"sod.artifact.shield.def12"                 : [ false, true ],
+
+
+"sod.artifact.helm.int1"                    : [ false, true ],
+"sod.artifact.helm.int2"                    : [ false, true ],
+"sod.artifact.helm.int3"                    : [ false, true ],
+"sod.artifact.helm.int4"                    : [ false, true ],
+"sod.artifact.helm.int5"                    : [ false, true ],
+"hota.artifact.helm.int6"                   : [ false, true ],
+"sod.artifact.helm.int10"                   : [ false, true ],
+
+"sod.artifact.torso.spl1"                   : [ false, true ],
+"sod.artifact.torso.spl2"                   : [ false, true ],
+"sod.artifact.torso.spl3"                   : [ false, true ],
+"sod.artifact.torso.spl4"                   : [ false, true ],
+"sod.artifact.torso.spl5"                   : [ false, true ],
+"hota.artifact.torso.spl6"                  : [ false, true ],
+"sod.artifact.torso.spl10"                  : [ false, true ],
+
+"sod.artifact.torso.all1"                   : [ false, true ],
+"sod.artifact.boots.all2"                   : [ false, true ],
+"sod.artifact.neck.all3"                    : [ false, true ],
+"sod.artifact.shield.all4"                  : [ false, true ],
+"sod.artifact.sword.all5"                   : [ false, true ],
+"sod.artifact.helm.all6"                    : [ false, true ],
+
+
+"sod.artifact.ring.attDef1"                 : [ false, true ],
+"sod.artifact.sword.attDef2"                : [ false, true ],
+"sod.artifact.shield.attDef3"               : [ false, true ],
+"sod.artifact.torso.attDef4"                : [ false, true ],
+"sod.artifact.boots.intSpl1"                : [ false, true ],
+"sod.artifact.cape.intSpl2"                 : [ false, true ],
+"sod.artifact.neck.intSpl3"                 : [ false, true ],
+"sod.artifact.helm.intSpl4"                 : [ false, true ],
+"sod.artifact.ring.luckMorale1"             : [ false, true ],
+
+
+"sod.artifact.misc.luck1a"                  : [ false, true ],
+"sod.artifact.misc.luck1b"                  : [ false, true ],
+"sod.artifact.misc.luck1c"                  : [ false, true ],
+"sod.artifact.misc.morale1a"                : [ false, true ],
+"sod.artifact.misc.morale1b"                : [ false, true ],
+"sod.artifact.misc.morale1c"                : [ false, true ],
+"sod.artifact.neck.luckMorale3"             : [ false, true ],
+
+
+"hota.artifact.misc.unluck1a"               : [ false, true ],
+"hota.artifact.misc.unluck1b"               : [ false, true ],
+"hota.artifact.misc.unluck2"                : [ false, true ],
+"hota.artifact.misc.unmorale1"              : [ false, true ],
+"hota.artifact.ring.unmorale1"              : [ false, true ],
+"hota.artifact.neck.unmorale2"              : [ false, true ],
+
+"sod.artifact.misc.neutralizeMorale"        : [ false, true ],
+"sod.artifact.misc.neutralizeLuck"          : [ false, true ],
+
+"sod.artifact.ring.mp1"                     : [ false, true ],
+"sod.artifact.boots.mp1"                    : [ false, true ],
+"sod.artifact.neck.mp1"                     : [ true , true ],
+
+"sod.artifact.misc.mana1"                   : [ false, true ],
+"sod.artifact.misc.mana2"                   : [ false, true ],
+"sod.artifact.misc.mana3"                   : [ false, true ],
+
+"sod.artifact.neck.rounds1"                 : [ false, true ],
+"sod.artifact.ring.rounds2"                 : [ false, true ],
+"sod.artifact.cape.rounds3"                 : [ false, true ],
+
+"sod.artifact.ring.life1a"                  : [ false, true ],
+"sod.artifact.ring.life1b"                  : [ false, true ],
+"sod.artifact.misc.life2"                   : [ false, true ],
+
+"sod.artifact.neck.speed1"                  : [ false, true ],
+"sod.artifact.ring.speed1"                  : [ false, true ],
+"sod.artifact.cape.speed2"                  : [ false, true ],
+
+"sod.artifact.misc.scoutRadius1a"           : [ false, true ],
+"sod.artifact.misc.scoutRadius1b"           : [ false, true ],
+
+"sod.artifact.neck.necr1"                   : [ false, true ],
+"sod.artifact.cape.necr1"                   : [ false, true ],
+"sod.artifact.boots.necr1"                  : [ false, true ],
+
+"sod.artifact.neck.resist1"                 : [ false, false ],
+"sod.artifact.cape.resist1"                 : [ false, false ],
+"sod.artifact.boots.resist1"                : [ false, false ],
+
+"sod.artifact.misc.archery1"                : [ false, true ],
+"sod.artifact.misc.archery2"                : [ false, true ],
+"sod.artifact.misc.archery3"                : [ false, true ],
+
+"sod.artifact.misc.eagle1"                  : [ false, false ],
+"sod.artifact.misc.eagle2"                  : [ false, false ],
+"sod.artifact.misc.eagle3"                  : [ false, false ],
+
+"sod.artifact.neck.diplomacy1"              : [ false, true ],
+"sod.artifact.ring.diplomacy2"              : [ false, true ],
+"sod.artifact.cape.diplomacy3"              : [ false, true ],
+
+"hota.artifact.misc.interfere"              : [ false, true ],
+"hota.artifact.ring.interfere"              : [ false, true ],
+"hota.artifact.torso.interfere"             : [ false, true ],
+
+"hota.artifact.boots.pathfind"              : [ false, true ],
+
+"sod.artifact.misc.bookAir"                 : [ false, true ],
+"sod.artifact.misc.bookEarth"               : [ false, true ],
+"sod.artifact.misc.bookFire"                : [ false, true ],
+"sod.artifact.misc.bookWater"               : [ false, true ],
+
+"sod.artifact.helm.spells5"                 : [ false, true ],
+
+"sod.artifact.misc.sphereAir"               : [ false, true ],
+"sod.artifact.misc.sphereEarth"             : [ false, true ],
+"sod.artifact.misc.sphereFire"              : [ false, true ],
+"sod.artifact.misc.sphereWater"             : [ false, true ],
+
+"hota.artifact.cape.noMagic12"              : [ false, true  ],
+"sod.artifact.cape.noMagic3plus"            : [ false, false ],
+"sod.artifact.misc.noMagic"                 : [ false, false ],
+
+"sod.artifact.misc.noDispell"               : [ false, true ],
+"sod.artifact.misc.noImmune"                : [ false, true ],
+"hota.artifact.ring.noResurrect"            : [ false, true ],
+
+"sod.artifact.neck.protectSpellBers"        : [ false, true ],
+"sod.artifact.neck.protectSpellBlind"       : [ false, true ],
+"sod.artifact.neck.protectSpellCurse"       : [ false, true ],
+"sod.artifact.neck.protectSpellDeathWave"   : [ false, true ],
+"sod.artifact.neck.protectSpellKillUndead"  : [ false, true ],
+"sod.artifact.neck.protectSpellHypnosis"    : [ false, true ],
+"sod.artifact.neck.protectSpellLightning"   : [ false, true ],
+"sod.artifact.neck.protectSpellForget"      : [ false, true ],
+
+"sod.artifact.cape.resourceCrystal"         : [ false, true ],
+"sod.artifact.ring.resourceGems"            : [ false, true ],
+"sod.artifact.misc.resourceCrystal"         : [ false, true ],
+"sod.artifact.misc.resourceOre"             : [ false, true ],
+"sod.artifact.ring.resourceSulfur"          : [ false, true ],
+"sod.artifact.misc.resourceWood"            : [ false, true ],
+"sod.artifact.misc.gold1"                   : [ false, true ],
+"sod.artifact.misc.gold2"                   : [ false, true ],
+"sod.artifact.misc.gold3"                   : [ false, true ],
+
+"sod.artifact.misc.growth2"                 : [ false, true ],
+"sod.artifact.misc.growth3"                 : [ false, true ],
+"sod.artifact.misc.growth4"                 : [ false, true ],
+"sod.artifact.misc.growth5"                 : [ false, true ],
+"sod.artifact.misc.growth6"                 : [ false, true ],
+
+"sod.artifact.sword.armag"                  : [ false, false ],
+
+"sod.artifact.cape.spellFly"                : [ false, true  ],
+"hota.artifact.misc.summon"                 : [ false, false ],
+"sod.artifact.boots.spellWalkWater"         : [ true , true  ],
+"sod.artifact.misc.archeryNoDistance"       : [ false, true  ],
+"sod.artifact.misc.dragonStuff"             : [ false, false ],
+"sod.artifact.misc.noSurrender"             : [ false, true  ],
+"sod.artifact.helm.boat"                    : [ true , true  ],
+
+"sod.artifact.complex.allStat"              : [ false, false ],
+"sod.artifact.complex.necro"                : [ false, false ],
+"sod.artifact.complex.life"                 : [ false, false ],
+"sod.artifact.complex.debuff"               : [ false, false ],
+"sod.artifact.complex.growth"               : [ false, false ],
+"sod.artifact.complex.immune"               : [ false, false ],
+"sod.artifact.complex.freeBolt"             : [ false, false ],
+"sod.artifact.complex.fastOnboard"          : [ true , false ],
+"sod.artifact.complex.noBowPenalty"         : [ false, false ],
+"sod.artifact.complex.manaRegen"            : [ false, false ],
+"sod.artifact.complex.spellRounds"          : [ false, false ],
+"sod.artifact.complex.resources"            : [ false, false ],
+
+"hota.artifact.complex.diplomacy"           : [ false, false ],
+"hota.artifact.complex.resist"              : [ false, false ],
+"hota.artifact.complex.buff"                : [ false, false ],
+"hota.artifact.complex.gold"                : [ false, false ]
+
+}
+
 }]
+

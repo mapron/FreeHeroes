@@ -322,6 +322,8 @@ STRUCT_REFLECTION_PAIRED(
     "frequencyMage",               frequencyMage,
     "handler",                     handler,
     "calc",                        calc,
+    "isWaterContent",              isWaterContent,
+    "isEnabledByDefault",          isEnabledByDefault,
     "pres",                        presentationParams
 )
  //  -----------------------------------------------------------------------------
@@ -594,6 +596,8 @@ STRUCT_REFLECTION_PAIRED(
     "parts",                      parts,
     "noPenalty",                  disabledPenalties,
     "bmUnit",                     battleMachineUnit,
+    "isWaterContent",             isWaterContent,
+    "isEnabledByDefault",         isEnabledByDefault,
     "pres",                       presentationParams,
     "objectDefs",                 objectDefs
 )
@@ -688,6 +692,8 @@ STRUCT_REFLECTION_PAIRED(
     "secondarySkills",             secondarySkills, 
     "startSpellId",                startSpell,
     "startStacks",                 startStacks,
+    "isWaterContent",              isWaterContent,
+    "isEnabledByDefault",          isEnabledByDefault,
     "pres",                        presentationParams
 )
 // ------------------------------------------------------------------------------------------
@@ -786,6 +792,8 @@ STRUCT_REFLECTION_PAIRED(
     "endConditions",               endConditions,
     "retaliationWhenCancel",       retaliationWhenCancel,
     "summonUnit",                  summonUnit,
+    "isWaterContent",              isWaterContent,
+    "isEnabledByDefault",          isEnabledByDefault,
     "pres",                        presentationParams
 )
 
@@ -849,7 +857,9 @@ STRUCT_REFLECTION_STRINGIFY(
     rewards,
     upgradedStackIndex,
     presentationParams,
-    fieldLayout
+    fieldLayout,
+    isWaterContent,
+    isEnabledByDefault
     )
 
 ENUM_REFLECTION_STRINGIFY(LibraryMapObstacle::Type, Invalid,

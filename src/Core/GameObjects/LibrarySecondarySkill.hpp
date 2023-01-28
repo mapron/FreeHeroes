@@ -42,6 +42,9 @@ struct LibrarySecondarySkill {
     HandlerType              handler = HandlerType::Special;
     std::vector<std::string> calc;
 
+    bool isWaterContent     = false;
+    bool isEnabledByDefault = true;
+
     Presentation presentationParams;
 };
 

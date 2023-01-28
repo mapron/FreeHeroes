@@ -345,7 +345,8 @@ ENUM_REFLECTION_STRINGIFY(
     None,
     RandomAnyFaction,
     RandomStartingFaction,
-    Fixed)
+    FixedAny,
+    FixedStarting)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngUserSettings::UserPlayer,
@@ -395,6 +396,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_name,
     m_descr,
     m_difficulty,
+    m_isWaterMap,
     m_players,
     m_wanderingHeroes,
     m_towns,
@@ -426,5 +428,42 @@ template<>
 inline constexpr const bool s_isStringMap<FHMap::RngConnectionMap>{ true };
 template<>
 inline constexpr const bool s_isStringMap<FHMap::DefMap>{ true };
+template<>
+inline constexpr const bool s_isStringMap<FHScoreSettings::AttrMap>{ true };
+
+#define FHMAP_DISABLE_CONFIG_SETUP(name) \
+    template<> \
+    inline constexpr const bool s_isStringMap<name::Map>{ true }; \
+    template<> \
+    inline constexpr const bool s_useCustomTransformRead<name>{ true }; \
+    template<> \
+    bool MetaInfo::transformTreeRead<name>(const PropertyTree& treeIn, PropertyTree& treeOut) \
+    { \
+        treeOut.convertToMap(); \
+        treeOut["data"] = treeIn; \
+        return true; \
+    } \
+    template<> \
+    inline constexpr const bool s_useCustomTransformWrite<name>{ true }; \
+    template<> \
+    bool MetaInfo::transformTreeWrite<name>(const PropertyTree& treeIn, PropertyTree& treeOut) \
+    { \
+        PropertyTree m; \
+        m.convertToMap(); \
+        treeOut = treeIn.contains("data") ? treeIn["data"] : m; \
+        return true; \
+    } \
+    template<> \
+    struct MetaInfo::MetaFields<name> { \
+        static inline constexpr const std::tuple s_fields{ \
+            Field("data", &name::m_data), \
+        }; \
+    };
+
+FHMAP_DISABLE_CONFIG_SETUP(FHMap::DisableConfigHeroes)
+FHMAP_DISABLE_CONFIG_SETUP(FHMap::DisableConfigArtifacts)
+FHMAP_DISABLE_CONFIG_SETUP(FHMap::DisableConfigSpells)
+FHMAP_DISABLE_CONFIG_SETUP(FHMap::DisableConfigSecondarySkills)
+FHMAP_DISABLE_CONFIG_SETUP(FHMap::DisableConfigBanks)
 
 }

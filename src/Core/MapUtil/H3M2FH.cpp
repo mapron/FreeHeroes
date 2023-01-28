@@ -766,25 +766,21 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
 
     for (int index = 0; auto& allowedFlag : src.m_allowedHeroes) {
         const auto& heroId = m_heroIds[index++];
-        if (!allowedFlag)
-            dest.m_disabledHeroes.push_back(heroId);
+        dest.m_disabledHeroes.setDisabled(dest.m_isWaterMap, heroId, !allowedFlag);
     }
 
     for (int index = 0; auto& allowedFlag : src.m_allowedArtifacts) {
         const auto& artId = m_artifactIds[index++];
-        if (!allowedFlag && artId)
-            dest.m_disabledArtifacts.push_back(artId);
+        dest.m_disabledArtifacts.setDisabled(dest.m_isWaterMap, artId, !allowedFlag);
     }
 
     for (int index = 0; auto& allowedFlag : src.m_allowedSpells) {
         const auto& spellId = m_spellIds[index++];
-        if (!allowedFlag)
-            dest.m_disabledSpells.push_back(spellId);
+        dest.m_disabledSpells.setDisabled(dest.m_isWaterMap, spellId, !allowedFlag);
     }
     for (int index = 0; auto& allowedFlag : src.m_allowedSecSkills) {
         const auto& secSkillId = m_secSkillIds[index++];
-        if (!allowedFlag)
-            dest.m_disabledSkills.push_back(secSkillId);
+        dest.m_disabledSkills.setDisabled(dest.m_isWaterMap, secSkillId, !allowedFlag);
     }
 
     for (int index = 0; auto& customHero : src.m_customHeroData) {

@@ -110,7 +110,7 @@ private:
     };
     std::map<FHPlayerId, PlayerInfo> m_playerInfo;
 
-    std::set<Core::LibraryHeroConstPtr> m_usedHeroes;
+    std::set<Core::LibraryHeroConstPtr> m_heroPool;
 };
 
 class AstarGenerator {

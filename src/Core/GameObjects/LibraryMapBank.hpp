@@ -46,6 +46,8 @@ struct LibraryMapBank {
     };
     Presentation      presentationParams;
     ObjectDefMappings objectDefs;
+    bool              isWaterContent     = false;
+    bool              isEnabledByDefault = true;
 };
 
 }

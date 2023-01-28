@@ -252,7 +252,11 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
     for (auto& allowed : dest.m_allowedSecSkills)
         allowed = 1;
 
-    for (const auto& heroId : src.m_disabledHeroes) {
+    for (const auto heroId : m_database->heroes()->records()) {
+        if (heroId->legacyId < 0)
+            continue;
+        if (!src.m_disabledHeroes.isDisabled(src.m_isWaterMap, heroId))
+            continue;
         const auto legacyId            = (heroId)->legacyId;
         dest.m_allowedHeroes[legacyId] = 0;
     }
@@ -262,16 +266,28 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         dest.m_allowedArtifacts[145] = 1;
         dest.m_allowedArtifacts[144] = 1;
     }
-    for (const auto& artId : src.m_disabledArtifacts) {
+    for (const auto artId : m_database->artifacts()->records()) {
+        if (artId->legacyId < 0)
+            continue;
+        if (!src.m_disabledArtifacts.isDisabled(src.m_isWaterMap, artId))
+            continue;
         const auto legacyId               = (artId)->legacyId;
         dest.m_allowedArtifacts[legacyId] = 0;
     }
-
-    for (const auto& spellId : src.m_disabledSpells) {
-        const auto legacyId            = (spellId)->legacyId;
-        dest.m_allowedSpells[legacyId] = 0;
+    for (const auto spellId : m_database->spells()->records()) {
+        if (spellId->legacyId < 0)
+            continue;
+        if (!src.m_disabledSpells.isDisabled(src.m_isWaterMap, spellId))
+            continue;
+        const auto legacyId = (spellId)->legacyId;
+        if (legacyId < (int) dest.m_allowedSpells.size())
+            dest.m_allowedSpells[legacyId] = 0;
     }
-    for (const auto& secSkillId : src.m_disabledSkills) {
+    for (const auto secSkillId : m_database->secSkills()->records()) {
+        if (secSkillId->legacyId < 0)
+            continue;
+        if (!src.m_disabledSkills.isDisabled(src.m_isWaterMap, secSkillId))
+            continue;
         const auto legacyId               = (secSkillId)->legacyId;
         dest.m_allowedSecSkills[legacyId] = 0;
     }

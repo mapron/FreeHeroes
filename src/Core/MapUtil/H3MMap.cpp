@@ -387,10 +387,10 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
         readBitsSized(m_allowedArtifacts, m_features->m_mapAllowedArtifactsSized, true);
 
     if (m_features->m_mapAllowedSpells)
-        stream.readBits(m_allowedSpells);
+        stream.readBits(m_allowedSpells, true);
 
     if (m_features->m_mapAllowedSecSkills)
-        stream.readBits(m_allowedSecSkills);
+        stream.readBits(m_allowedSecSkills, true);
 
     stream >> m_rumors;
 
@@ -551,10 +551,10 @@ void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
         writeBitsSized(m_allowedArtifacts, m_features->m_mapAllowedArtifactsSized, true);
 
     if (m_features->m_mapAllowedSpells)
-        stream.writeBits(m_allowedSpells);
+        stream.writeBits(m_allowedSpells, true);
 
     if (m_features->m_mapAllowedSecSkills)
-        stream.writeBits(m_allowedSecSkills);
+        stream.writeBits(m_allowedSecSkills, true);
 
     stream << m_rumors;
 

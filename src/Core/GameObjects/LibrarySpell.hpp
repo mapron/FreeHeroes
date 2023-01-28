@@ -71,6 +71,9 @@ struct LibrarySpell {
 
     bool indistinctive = false;
 
+    bool isWaterContent     = false;
+    bool isEnabledByDefault = true;
+
     std::vector<std::string>  calcScript;
     std::vector<std::string>  filterScript;
     std::vector<Range>        rangeByLevel;

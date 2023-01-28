@@ -190,6 +190,10 @@ FHTemplateProcessor::FHTemplateProcessor(FHMap&                     map,
         if (faction->alignment == Core::LibraryFaction::Alignment::Independent)
             continue;
         m_playableFactions.push_back(faction);
+        for (auto* hero : faction->heroes) {
+            if (!map.m_disabledHeroes.isDisabled(map.m_isWaterMap, hero))
+                m_heroPool.insert(hero);
+        }
     }
     assert(!m_playableFactions.empty());
     auto& units = m_database->units()->records();
@@ -241,8 +245,8 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
     auto heroGen = [this](Core::LibraryHeroConstPtr hero, Core::LibraryFactionConstPtr faction, HeroGeneration policy) -> Core::LibraryHeroConstPtr {
         if (policy == HeroGeneration::None)
             return nullptr;
-        if (policy == HeroGeneration::Fixed) {
-            m_usedHeroes.insert(hero);
+        if (policy == HeroGeneration::FixedAny || policy == HeroGeneration::FixedStarting) {
+            m_heroPool.erase(hero);
             return hero;
         }
         return getRandomHero(policy == HeroGeneration::RandomStartingFaction ? faction : nullptr);
@@ -1219,21 +1223,22 @@ Core::LibraryFactionConstPtr FHTemplateProcessor::getRandomFaction(bool rewardOn
 
 Core::LibraryHeroConstPtr FHTemplateProcessor::getRandomHero(Core::LibraryFactionConstPtr faction)
 {
-    if (!faction)
-        return getRandomHero(getRandomFaction(false));
-
     std::vector<Core::LibraryHeroConstPtr> heroes;
-    std::set<Core::LibraryHeroConstPtr>    disabled(m_map.m_disabledHeroes.cbegin(), m_map.m_disabledHeroes.cend());
-
-    for (auto* hero : faction->heroes)
-        if (!disabled.contains(hero) && !m_usedHeroes.contains(hero))
+    if (faction) {
+        for (auto* hero : faction->heroes) {
+            if (!m_heroPool.contains(hero))
+                continue;
             heroes.push_back(hero);
+        }
+    } else {
+        heroes = std::vector<Core::LibraryHeroConstPtr>(m_heroPool.cbegin(), m_heroPool.cend());
+    }
 
     if (heroes.empty())
         return nullptr;
 
     auto* hero = heroes[m_rng->gen(heroes.size() - 1)];
-    m_usedHeroes.insert(hero);
+    m_heroPool.erase(hero);
     return hero;
 }
 
