@@ -33,6 +33,9 @@ QString translateHelper(const Core::TranslationMap& tsMap,
     if (tsMap.ts.contains("ru_RU")) {
         return QString::fromStdString(tsMap.ts.at("ru_RU"));
     }
+    if (tsMap.ts.contains("de_DE")) {
+        return QString::fromStdString(tsMap.ts.at("de_DE"));
+    }
     if (tsMap.ts.contains("en_US")) {
         return QString::fromStdString(tsMap.ts.at("en_US"));
     }
@@ -346,31 +349,11 @@ GuiMapBank::GuiMapBank(Sound::IMusicBox*, const IGraphicsLibrary* graphicsLibrar
 QList<ResourceAmountHelper::ResourceInfo> ResourceAmountHelper::trasformResourceAmount(const Core::ResourceAmount& resourceAmount) const
 {
     QList<ResourceInfo> result;
-    // clang-format off
-    if (resourceAmount.gold)    result <<  ResourceInfo{"gold"   ,resourceName("gold")   , resourceAmount.gold};
-    if (resourceAmount.wood)    result <<  ResourceInfo{"wood"   ,resourceName("wood")   , resourceAmount.wood};
-    if (resourceAmount.mercury) result <<  ResourceInfo{"mercury",resourceName("mercury"), resourceAmount.mercury};
-    if (resourceAmount.ore)     result <<  ResourceInfo{"ore"    ,resourceName("ore")    , resourceAmount.ore};
-    if (resourceAmount.sulfur)  result <<  ResourceInfo{"sulfur" ,resourceName("sulfur") , resourceAmount.sulfur};
-    if (resourceAmount.crystal) result <<  ResourceInfo{"crystal",resourceName("crystal"), resourceAmount.crystal};
-    if (resourceAmount.gems)    result <<  ResourceInfo{"gems"   ,resourceName("gems")   , resourceAmount.gems};
-    // clang-format on
+    for (const auto& [resId, count] : resourceAmount.data) {
+        QString name = translateHelper(resId);
+        result << ResourceInfo{ resId, name, count };
+    }
     return result;
-}
-
-QString ResourceAmountHelper::resourceName(const std::string& resourceId) const
-{
-    // clang-format off
-    if (resourceId == "gold")    return tr("Gold", "as resource");
-
-    if (resourceId == "wood")    return tr("Wood", "as resource");
-    if (resourceId == "mercury") return tr("Mercury", "as resource");
-    if (resourceId == "ore")     return tr("Ore", "as resource");
-    if (resourceId == "sulfur")  return tr("Sulfur", "as resource");
-    if (resourceId == "crystal") return tr("Crystal", "as resource");
-    if (resourceId == "gems")    return tr("Gems", "as resource");
-    // clang-format on
-    return QString::fromStdString(resourceId);
 }
 
 template class AbstractGuiWrapper<GuiArtifact, Core::LibraryArtifact>;

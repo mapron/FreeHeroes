@@ -3,15 +3,15 @@
 
 "records": {
 
-"wood"     : {"untranslatedName":"Wood" },
-"mercury"  : {"untranslatedName":"Mercury" },
-"ore"      : {"untranslatedName":"Ore" },
+"wood"     : {"untranslatedName":"Wood"   , "value": 200, "rarity": "Common" },
+"mercury"  : {"untranslatedName":"Mercury", "value": 400, "rarity": "Rare" },
+"ore"      : {"untranslatedName":"Ore"    , "value": 200, "rarity": "Common" },
 
-"sulfur"   : {"untranslatedName":"Sulfur"},
-"crystal"  : {"untranslatedName":"Crystal" },
-"gems"     : {"untranslatedName":"Gems" },
+"sulfur"   : {"untranslatedName":"Sulfur" , "value": 400, "rarity": "Rare"  },
+"crystal"  : {"untranslatedName":"Crystal", "value": 400, "rarity": "Rare"  },
+"gems"     : {"untranslatedName":"Gems"   , "value": 400, "rarity": "Rare"  },
 
-"gold"     : {"untranslatedName":"Gold"}
+"gold"     : {"untranslatedName":"Gold", "pileSize": 100, "value": 100 , "rarity": "Gold"}
 }
 
 }]

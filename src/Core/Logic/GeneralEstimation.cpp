@@ -123,16 +123,9 @@ void GeneralEstimation::bindTypes(sol::state& lua)
         "fire"       , &MagicIncrease::fire   ,
         "water"      , &MagicIncrease::water
     );
-
     lua.new_usertype<ResourceAmount>( "ResourceAmount",
-        "gold"     , &ResourceAmount::gold,
-        "wood"     , &ResourceAmount::wood,
-        "ore"      , &ResourceAmount::ore,
-        "mercury"  , &ResourceAmount::mercury,
-        "sulfur"   , &ResourceAmount::sulfur,
-        "crystal"  , &ResourceAmount::crystal,
-        "gems"     , &ResourceAmount::gems
-   );
+         "incById"     , &ResourceAmount::incById
+    );
 
    lua.new_enum("CType",
                 "Living",        UnitType::Living,

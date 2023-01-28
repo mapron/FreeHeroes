@@ -50,6 +50,23 @@ ENUM_REFLECTION_STRINGIFY(
     Major,
     Relic)
 
+ENUM_REFLECTION_STRINGIFY(
+    FHScoreAttr,
+    Invalid,
+
+    Invalid,
+    Army,
+    ArtStat,
+    ArtSupport,
+    Gold,
+    Resource,
+    ResourceGen,
+    Experience,
+    SpellOffensive,
+    SpellCommon,
+    SpellAll,
+    Misc)
+
 // clang-format off
 STRUCT_REFLECTION_PAIRED(
     FHPlayer,
@@ -88,6 +105,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_order,
     m_player,
     m_defIndex,
+    m_guard,
+    m_score,
 
     m_isMain,
     m_factionId,
@@ -109,6 +128,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_pos,
     m_order,
     m_defIndex,
+    m_guard,
+    m_score,
 
     m_amount,
     m_id,
@@ -119,6 +140,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRandomResource,
     m_pos,
     m_order,
+    m_guard,
+    m_score,
 
     m_amount)
 
@@ -126,6 +149,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHArtifact,
     m_pos,
     m_order,
+    m_guard,
+    m_score,
 
     m_id)
 
@@ -133,6 +158,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRandomArtifact,
     m_pos,
     m_order,
+    m_guard,
+    m_score,
 
     m_type)
 
@@ -140,6 +167,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHPandora,
     m_pos,
     m_order,
+    m_guard,
+    m_score,
 
     m_reward)
 
@@ -157,6 +186,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_pos,
     m_order,
     m_defIndex,
+    m_guard,
+    m_score,
 
     m_id,
     m_count,
@@ -173,15 +204,19 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_pos,
     m_order,
     m_player,
+    m_defIndex,
+    m_guard,
+    m_score,
 
-    m_id,
-    m_defIndex)
+    m_id)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHMine,
     m_pos,
     m_order,
     m_defIndex,
+    m_guard,
+    m_score,
 
     m_player,
 
@@ -201,6 +236,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_pos,
     m_order,
     m_defIndex,
+    m_guard,
+    m_score,
 
     m_id,
     m_upgradedStack,
@@ -212,6 +249,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_pos,
     m_order,
     m_defIndex,
+    m_guard,
+    m_score,
 
     m_id)
 
@@ -228,6 +267,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_pos,
     m_order,
     m_defIndex,
+    m_guard,
+    m_score,
 
     m_visitableId,
 
@@ -239,6 +280,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_pos,
     m_order,
     m_defIndex,
+    m_guard,
+    m_score,
 
     m_visitableId,
 
@@ -273,6 +316,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_pos,
     m_order,
     m_defIndex,
+    m_guard,
+    m_score,
 
     m_visitableId,
 
@@ -292,6 +337,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_pos,
     m_order,
     m_defIndex,
+    m_guard,
+    m_score,
 
     m_visitableId,
 
@@ -305,23 +352,6 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_town,
     m_playerControlled,
     m_useZoneFaction)
-
-ENUM_REFLECTION_STRINGIFY(
-    FHScoreSettings::Attr,
-    Invalid,
-
-    Invalid,
-    Army,
-    ArtStat,
-    ArtSupport,
-    Gold,
-    Resource,
-    ResourceGen,
-    Experience,
-    SpellOffensive,
-    SpellCommon,
-    SpellAll,
-    Misc)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHScoreSettings::ScoreScope,
@@ -468,7 +498,7 @@ inline constexpr const bool s_isStringMap<FHScoreSettings::AttrMap>{ true };
     template<> \
     inline constexpr const bool s_useCustomTransformRead<name>{ true }; \
     template<> \
-    bool MetaInfo::transformTreeRead<name>(const PropertyTree& treeIn, PropertyTree& treeOut) \
+    inline bool MetaInfo::transformTreeRead<name>(const PropertyTree& treeIn, PropertyTree& treeOut) \
     { \
         treeOut.convertToMap(); \
         treeOut["data"] = treeIn; \
@@ -477,7 +507,7 @@ inline constexpr const bool s_isStringMap<FHScoreSettings::AttrMap>{ true };
     template<> \
     inline constexpr const bool s_useCustomTransformWrite<name>{ true }; \
     template<> \
-    bool MetaInfo::transformTreeWrite<name>(const PropertyTree& treeIn, PropertyTree& treeOut) \
+    inline bool MetaInfo::transformTreeWrite<name>(const PropertyTree& treeIn, PropertyTree& treeOut) \
     { \
         PropertyTree m; \
         m.convertToMap(); \

@@ -817,35 +817,34 @@ void FHTemplateProcessor::runRoadsPlacement()
 
 void FHTemplateProcessor::runRewards()
 {
-    //std::vector values{ 3000, 6000, 10000, 15000, 20000, 50000, 100000, 200000, 500000 };
-    /*std::vector values{ 100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000 };
-    for (int x = 1; x <= 17; x += 2) {
-        for (int y = 3; int val : values) {
-            y += 2;
-
-            Guard guard;
-            guard.m_value = val;
-            guard.m_pos   = FHPos{ x, y, 0 };
-            guard.m_zone  = &m_tileZones[0];
-            m_guards.push_back(guard);
-        }
-    }*/
     for (auto& tileZone : m_tileZones) {
-        ObjectGenerator gen(m_map, m_database, m_rng);
-        gen.m_score = tileZone.m_rngZoneSettings.m_score;
-        gen.generate();
+        if (tileZone.m_rngZoneSettings.m_score.m_guarded.empty())
+            continue;
+        ObjectGenerator gen(m_map, m_database, m_rng, m_logOutput);
+        gen.generate(tileZone.m_rngZoneSettings.m_score);
 
         std::vector<FHPos> cells;
         for (auto* cell : tileZone.m_innerArea)
-            cells.push_back({ cell->m_pos });
+            if (cell->m_pos.m_x > 2)
+                cells.push_back({ cell->m_pos });
         std::sort(cells.begin(), cells.end());
 
-        std::vector<MapCanvas::Tile*> inner(tileZone.m_innerArea.cbegin(), tileZone.m_innerArea.cend());
         for (auto ptr : gen.m_objects) {
-            FHPos pos = cells[m_rng->gen(inner.size() - 1)];
+            FHPos pos = cells[m_rng->gen(cells.size() - 1)];
             ptr->setPos(pos);
             ptr->place();
+            auto guardValue = ptr->getGuard();
+            {
+                Guard guard;
+                guard.m_value = guardValue;
+                guard.m_pos   = pos;
+                guard.m_pos.m_y++;
+                guard.m_zone = &m_tileZones[0];
+                m_guards.push_back(guard);
+            }
+            //m_logOutput << "place '" << ptr->getId() << "' at " << pos.toPrintableString() << '\n';
         }
+        break; // @todo:
     }
 }
 

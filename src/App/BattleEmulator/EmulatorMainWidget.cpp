@@ -235,7 +235,7 @@ void EmulatorMainWidget::onAttDataChanged(bool forcedUpdate)
 
     m_adventureStatePrev->m_att = m_adventureState->m_att;
 
-    AdventureEstimation(m_gameDatabase->gameRules()).calculateArmy(m_adventureState->m_att, m_adventureState->m_terrain);
+    AdventureEstimation(m_gameDatabase).calculateArmy(m_adventureState->m_att, m_adventureState->m_terrain);
 
     m_adventureKingdom->dayIncome  = m_adventureState->m_att.estimated.dayIncome;
     m_adventureKingdom->weekIncome = m_adventureState->m_att.estimated.weekIncomeMax;
@@ -255,7 +255,7 @@ void EmulatorMainWidget::onDefDataChanged(bool forcedUpdate)
 
     m_adventureStatePrev->m_def = m_adventureState->m_def;
 
-    AdventureEstimation(m_gameDatabase->gameRules()).calculateArmy(m_adventureState->m_def, m_adventureState->m_terrain);
+    AdventureEstimation(m_gameDatabase).calculateArmy(m_adventureState->m_def, m_adventureState->m_terrain);
 
     m_ui->armyConfigDef->refresh();
 }
@@ -263,12 +263,12 @@ void EmulatorMainWidget::onDefDataChanged(bool forcedUpdate)
 void EmulatorMainWidget::makeNewDay()
 {
     if (m_adventureState->m_att.hasHero()) {
-        AdventureEstimation(m_gameDatabase->gameRules()).calculateDayStart(m_adventureState->m_att.hero);
+        AdventureEstimation(m_gameDatabase).calculateDayStart(m_adventureState->m_att.hero);
         m_ui->armyConfigAtt->refresh();
         onAttDataChanged(true);
     }
     if (m_adventureState->m_def.hasHero()) {
-        AdventureEstimation(m_gameDatabase->gameRules()).calculateDayStart(m_adventureState->m_def.hero);
+        AdventureEstimation(m_gameDatabase).calculateDayStart(m_adventureState->m_def.hero);
         m_ui->armyConfigDef->refresh();
         onDefDataChanged(true);
     }
@@ -399,7 +399,7 @@ void EmulatorMainWidget::applyCurrentObjectRewards(QString defenderName)
         const auto resourceRewards = ResourceAmountHelper().trasformResourceAmount(reward.resources);
         for (auto& resReward : resourceRewards) {
             rewardDescriptionTitles << QString("%1 %2").arg(resReward.amount).arg(resReward.name);
-            auto res    = m_gameDatabase->resources()->find(resReward.id.toStdString());
+            auto res    = resReward.id;
             auto iconId = isSingleReward ? res->presentationParams.iconLarge : res->presentationParams.icon;
             auto pix    = m_graphicsLibrary->getPixmap(iconId)->get();
             items << GeneralPopupDialog::Item{ pix, QString("%1").arg(resReward.amount), false };
@@ -445,8 +445,8 @@ int EmulatorMainWidget::execBattle(bool isReplay, bool isQuick)
     if (isReplay) {
         replayRec = m_replayManager->m_records[m_ui->comboBoxReplaySelect->currentIndex()];
         replayData.load(replayRec.battleReplay, m_gameDatabase);
-        AdventureEstimation(m_gameDatabase->gameRules()).calculateArmy(replayData.m_adv.m_att, replayData.m_adv.m_terrain);
-        AdventureEstimation(m_gameDatabase->gameRules()).calculateArmy(replayData.m_adv.m_def, replayData.m_adv.m_terrain);
+        AdventureEstimation(m_gameDatabase).calculateArmy(replayData.m_adv.m_att, replayData.m_adv.m_terrain);
+        AdventureEstimation(m_gameDatabase).calculateArmy(replayData.m_adv.m_def, replayData.m_adv.m_terrain);
     } else {
         replayRec = m_replayManager->makeNewUnique();
     }
@@ -472,7 +472,7 @@ int EmulatorMainWidget::execBattle(bool isReplay, bool isQuick)
         auto& armyAdv = isAttacker ? replayData.m_adv.m_att : replayData.m_adv.m_def;
 
         AdventureStackMutablePtr bm = armyAdv.squad.addHidden(shootArt->battleMachineUnit, 1);
-        AdventureEstimation(m_gameDatabase->gameRules()).calculateArmySummon(armyAdv, replayData.m_adv.m_terrain, bm);
+        AdventureEstimation(m_gameDatabase).calculateArmySummon(armyAdv, replayData.m_adv.m_terrain, bm);
         army->createMachineShoot(bm);
     }
 
@@ -487,7 +487,7 @@ int EmulatorMainWidget::execBattle(bool isReplay, bool isQuick)
                          [&replayData, this](BattleStack::Side side, LibraryUnitConstPtr unit, int count) -> AdventureStackConstPtr {
                              auto&                    army   = side == BattleStack::Side::Attacker ? replayData.m_adv.m_att : replayData.m_adv.m_def;
                              AdventureStackMutablePtr result = army.squad.addHidden(unit, count);
-                             AdventureEstimation(m_gameDatabase->gameRules()).calculateArmySummon(army, replayData.m_adv.m_terrain, result);
+                             AdventureEstimation(m_gameDatabase).calculateArmySummon(army, replayData.m_adv.m_terrain, result);
                              return result;
                          });
     IBattleView*    battleView    = &battle;
@@ -648,7 +648,7 @@ void EmulatorMainWidget::checkForHeroLevelUps(bool fromDebugWidget)
             auto rng              = m_randomGeneratorFactory->create();
             rng->makeGoodSeed();
             HeroLevelupDialog   dlg(m_modelsProvider, this);
-            AdventureEstimation estimation(m_gameDatabase->gameRules());
+            AdventureEstimation estimation(m_gameDatabase);
 
             while ((result = estimation.calculateHeroLevelUp(hero, *rng)).isValid()) {
                 decision.choices.clear();

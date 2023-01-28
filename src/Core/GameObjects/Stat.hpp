@@ -340,32 +340,4 @@ struct MagicIncrease : public internal::MakeAggregate<MagicIncrease> {
     }
 };
 
-struct ResourceAmount : public internal::MakeAggregate<ResourceAmount> {
-    int gold = 0;
-
-    int wood = 0;
-    int ore  = 0;
-
-    int mercury = 0;
-    int sulfur  = 0;
-    int crystal = 0;
-    int gems    = 0;
-
-    constexpr auto asTuple() const noexcept { return std::tie(gold, wood, ore, mercury, sulfur, crystal, gems); }
-    constexpr auto asTuple() noexcept { return std::tie(gold, wood, ore, mercury, sulfur, crystal, gems); }
-
-    void maxWith(const ResourceAmount& another)
-    {
-        gold    = std::max(gold, another.gold);
-        wood    = std::max(wood, another.wood);
-        ore     = std::max(ore, another.ore);
-        mercury = std::max(mercury, another.mercury);
-        sulfur  = std::max(sulfur, another.sulfur);
-        crystal = std::max(crystal, another.crystal);
-        gems    = std::max(gems, another.gems);
-    }
-
-    constexpr size_t nonEmptyAmount() const noexcept { return (gold != 0) + (wood != 0) + (ore != 0) + (mercury != 0) + (sulfur != 0) + (crystal != 0) + (gems != 0); }
-};
-
 }

@@ -518,6 +518,8 @@ GameDatabase::GameDatabase(const Mernel::PropertyTree& recordObjectMaps)
         art.presentationParams.orderCategory = LibraryArtifact::OrderCategory::Scrolls;
         art.treasureClass                    = LibraryArtifact::TreasureClass::Scroll;
         art.objectDefs                       = ObjectDefMappings{ .variants = { { "", m_impl->m_objectDefs.find("ava0001") } } };
+        art.value                            = 0;
+        art.cost                             = 2000;
         m_impl->m_artifacts.insertObject(art.id, std::move(art));
     }
 
@@ -582,6 +584,15 @@ GameDatabase::GameDatabase(const Mernel::PropertyTree& recordObjectMaps)
             assert(obj->mappings.key.empty());
             obj->mappings.key = key;
         }
+        if (artifact->value == -1) {
+            assert(artifact->statBonus.nonEmptyAmount());
+            const int statBouns = artifact->statBonus.ad.attack + artifact->statBonus.ad.defense + artifact->statBonus.magic.intelligence + artifact->statBonus.magic.spellPower;
+            artifact->value     = statBouns * 1000;
+        }
+        if (artifact->cost == -1)
+            artifact->cost = artifact->value;
+        if (artifact->guard == -1)
+            artifact->guard = artifact->value * 2;
 
         m_impl->m_artifacts.m_sorted.push_back(artifact);
     }

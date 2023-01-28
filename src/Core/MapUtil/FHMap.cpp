@@ -20,6 +20,12 @@
 namespace FreeHeroes {
 using namespace Mernel;
 
+std::string FHScoreSettings::attrToString(FHScoreAttr attr)
+{
+    auto str = Mernel::Reflection::EnumTraits::enumToString(attr);
+    return std::string(str.data(), str.size());
+}
+
 void FHMap::toJson(PropertyTree& data) const
 {
     Core::PropertyTreeWriterDatabase writer;
@@ -69,8 +75,12 @@ void FHMap::initTiles(const Core::IGameDatabase* database)
     };
 
     if (m_defaultTerrain) {
-        for (int z = 0; z < m_tileMap.m_depth; ++z)
-            fillZoneTerrain(FHZone{ .m_terrainId = m_defaultTerrain, .m_rect{ FHZone::Rect{ .m_pos{ 0, 0, z }, .m_width = m_tileMap.m_width, .m_height = m_tileMap.m_height } } });
+        for (int z = 0; z < m_tileMap.m_depth; ++z) {
+            FHPos        pos{ 0, 0, z };
+            FHZone::Rect rect{ .m_pos = pos, .m_width = m_tileMap.m_width, .m_height = m_tileMap.m_height };
+            FHZone       zone{ .m_terrainId = m_defaultTerrain, .m_rect = rect };
+            fillZoneTerrain(std::move(zone));
+        }
     }
     for (auto& zone : m_zones)
         fillZoneTerrain(zone);
@@ -118,6 +128,29 @@ void FHMap::rescaleToSize(int mapSize)
         rngZone.m_centerDispersion.m_x = rngZone.m_centerDispersion.m_x * wmult / wdiv;
         rngZone.m_centerDispersion.m_y = rngZone.m_centerDispersion.m_y * hmult / hdiv;
     }
+}
+
+std::ostream& operator<<(std::ostream& stream, const FHScore& score)
+{
+    stream << "{";
+    for (bool start = false; const auto& [key, val] : score) {
+        if (start)
+            stream << ", ";
+        stream << FreeHeroes::FHScoreSettings::attrToString(key) << "=" << val;
+        start = true;
+    }
+    stream << "}";
+    return stream;
+}
+
+FHScore operator+(const FHScore& l, const FHScore& r)
+{
+    FreeHeroes::FHScore result = l;
+
+    for (const auto& [key, val] : r)
+        result[key] += val;
+
+    return result;
 }
 
 }

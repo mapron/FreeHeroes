@@ -104,7 +104,7 @@
     "values = { 250, 500, 1000 } ",
     "bonus = values[skillLevel + 1] ",
     "if isSpec then bonus = bonus + math.ceil(bonus * heroLevel / 20) end ",
-    "h.dayIncome.gold = h.dayIncome.gold + bonus"
+    "h.dayIncome:incById(\"gold\", bonus)"
 ]},
 "sod.skill.scholar"           : { "untranslatedName":"Scholar", "frequencyWarrior": 1 , "frequencyMage": 7, "handler":"stat", "calc":[
     "h.maxTeachingSpell = skillLevel + 2"

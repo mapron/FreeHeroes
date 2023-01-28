@@ -1,70 +1,100 @@
 {
-    "groups": {
-        "0": {
-            "boundarySizeHeight": 32,
-            "boundarySizeWidth": 32,
-            "extra": null,
-            "frames": [
-                {
-                    "dup": false,
-                    "h": 31,
-                    "id": 0,
-                    "padLeft": 0,
-                    "padTop": 1,
-                    "w": 32
-                },
-                {
-                    "dup": false,
-                    "h": 30,
-                    "id": 1,
-                    "padLeft": 0,
-                    "padTop": 2,
-                    "w": 32
-                },
-                {
-                    "dup": false,
-                    "h": 32,
-                    "id": 2,
-                    "padLeft": 0,
-                    "padTop": 0,
-                    "w": 32
-                },
-                {
-                    "dup": false,
-                    "h": 25,
-                    "id": 3,
-                    "padLeft": 0,
-                    "padTop": 5,
-                    "w": 32
-                },
-                {
-                    "dup": false,
-                    "h": 31,
-                    "id": 4,
-                    "padLeft": 0,
-                    "padTop": 1,
-                    "w": 32
-                },
-                {
-                    "dup": false,
-                    "h": 28,
-                    "id": 5,
-                    "padLeft": 0,
-                    "padTop": 4,
-                    "w": 32
-                },
-                {
-                    "dup": false,
-                    "h": 27,
-                    "id": 6,
-                    "padLeft": 0,
-                    "padTop": 4,
-                    "w": 32
-                }
-            ],
-            "pixHeightOffset": 0
-        }
-    },
-    "splitToFolder": false,
-    "version": "1.0"
+    "boundarySize": 
+        {"h": 32, "w": 32}, 
+    "groups": 
+        [
+            {
+                "key": 0, 
+                "value": 
+                    {
+                        "frames": 
+                            [
+                                {
+                                    "bitmapSize": 
+                                        {"h": 31, "w": 32}, 
+                                    "bitmapOffset": 
+                                        {"x": 0, "y": 0}, 
+                                    "boundarySize": 
+                                        {"h": 32, "w": 32},
+                                    "padding": 
+                                        {"x": 0, "y": 1}
+                                },
+                                {
+                                    "bitmapSize": 
+                                        {"h": 30, "w": 32}, 
+                                    "bitmapOffset": 
+                                        {"x": 32, "y": 0}, 
+                                    "boundarySize": 
+                                        {"h": 32, "w": 32},
+                                    "padding": 
+                                        {"x": 0, "y": 2}
+                                },
+                                {
+                                    "bitmapSize": 
+                                        {"h": 32, "w": 32}, 
+                                    "bitmapOffset": 
+                                        {"x": 64, "y": 0}, 
+                                    "boundarySize": 
+                                        {"h": 32, "w": 32},
+                                    "padding": 
+                                        {"x": 0, "y":0}
+                                },
+                                {
+                                    "bitmapSize": 
+                                        {"h": 25, "w": 32}, 
+                                    "bitmapOffset": 
+                                        {"x": 96, "y": 0}, 
+                                    "boundarySize": 
+                                        {"h": 32, "w": 32},
+                                    "padding": 
+                                        {"x": 0, "y": 5}
+                                },
+                                {
+                                    "bitmapSize": 
+                                        {"h": 31, "w": 32}, 
+                                    "bitmapOffset": 
+                                        {"x": 128, "y": 0}, 
+                                    "boundarySize": 
+                                        {"h": 32, "w": 32},
+                                    "padding": 
+                                        {"x": 0, "y": 1}
+                                },
+                                {
+                                    "bitmapSize": 
+                                        {"h": 31, "w": 32}, 
+                                    "bitmapOffset": 
+                                        {"x": 160, "y": 0}, 
+                                    "boundarySize": 
+                                        {"h": 32, "w": 32},
+                                    "padding": 
+                                        {"x": 0, "y": 1}
+                                },
+                                {
+                                    "bitmapSize": 
+                                        {"h": 28, "w": 32}, 
+                                    "bitmapOffset": 
+                                        {"x": 192, "y": 0}, 
+                                    "boundarySize": 
+                                        {"h": 32, "w": 32},
+                                    "padding": 
+                                        {"x": 0, "y": 4}
+                                },
+                                {
+                                    "bitmapSize": 
+                                        {"h": 27, "w": 32}, 
+                                    "bitmapOffset": 
+                                        {"x": 224, "y": 0}, 
+                                    "boundarySize": 
+                                        {"h": 32, "w": 32},
+                                    "padding": 
+                                        {"x": 0, "y": 4}
+                                }
+                            ], 
+                        "params": 
+                            {}
+                    }
+            }
+        ], 
+    "mask": 
+        {}
 }

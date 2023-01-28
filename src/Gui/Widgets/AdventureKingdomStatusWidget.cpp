@@ -16,7 +16,7 @@
 namespace FreeHeroes::Gui {
 
 namespace {
-const int resCount       = 6;
+const int resCount       = 7;
 const int resLabelWidth  = 80;
 const int resLabelSpacer = 6;
 const int goldLabelWidth = 120;
@@ -81,13 +81,12 @@ AdventureKingdomStatusWidget::AdventureKingdomStatusWidget(QWidget* parent)
 
     QHBoxLayout* layout = new QHBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
-    for (int i = 0; i < resCount + 1; i++) {
-        QString          id  = m_impl->m_resIds[i];
+    for (int i = 0; i < resCount; i++) {
         Impl::ResWidget& res = *m_impl->m_resLabels[i];
         res.text             = new DarkFrameLabel(this);
         res.text->setAlignment(Qt::AlignLeft);
         res.text->setIndent(30);
-        res.text->setFixedWidth(i == resCount ? goldLabelWidth : resLabelWidth);
+        res.text->setFixedWidth(i == resCount - 1 ? goldLabelWidth : resLabelWidth);
         layout->addWidget(res.text);
         res.text->setProperty("fill", false);
 
@@ -103,7 +102,7 @@ AdventureKingdomStatusWidget::AdventureKingdomStatusWidget(QWidget* parent)
 
 void AdventureKingdomStatusWidget::setResourceIcons(const QMap<QString, QPixmap>& icons)
 {
-    for (int i = 0; i < resCount + 1; i++) {
+    for (int i = 0; i < resCount; i++) {
         const auto& id    = m_impl->m_resIds[i];
         auto*       label = m_impl->m_resLabels[i];
         label->img->setPixmap(icons.value(id));
@@ -112,17 +111,21 @@ void AdventureKingdomStatusWidget::setResourceIcons(const QMap<QString, QPixmap>
 
 void AdventureKingdomStatusWidget::update(const Core::AdventureKingdom& kingdom)
 {
-    auto& cur = kingdom.currentResources;
-    auto& inc = kingdom.dayIncome;
-    // clang-format off
-    m_impl->gold   .set(cur.gold   , inc.gold);
-    m_impl->wood   .set(cur.wood   , inc.wood);
-    m_impl->mercury.set(cur.mercury, inc.mercury);
-    m_impl->ore    .set(cur.ore    , inc.ore);
-    m_impl->sulfur .set(cur.sulfur , inc.sulfur);
-    m_impl->crystal.set(cur.crystal, inc.crystal);
-    m_impl->gems   .set(cur.gems   , inc.gems);
-    // clang-format on
+    for (int i = 0; i < resCount; i++) {
+        const std::string id     = m_impl->m_resIds[i].toStdString();
+        auto*             widget = m_impl->m_resLabels[i];
+        int               cur    = 0;
+        int               inc    = 0;
+
+        for (const auto& [res, value] : kingdom.currentResources.data)
+            if (res->id == id)
+                cur = value;
+        for (const auto& [res, value] : kingdom.dayIncome.data)
+            if (res->id == id)
+                inc = value;
+
+        widget->set(cur, inc);
+    }
 
     m_impl->dateLabel->setText(tr("Month: %1, Week: %2, Day: %3")
                                    .arg(kingdom.currentDate.month)

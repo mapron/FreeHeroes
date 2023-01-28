@@ -13,14 +13,15 @@ namespace FreeHeroes {
 
 class ObjectGenerator {
 public:
-    using Score = std::map<FHScoreSettings::Attr, int64_t>;
-
     struct IObject {
         virtual ~IObject() = default;
 
-        virtual void  setPos(FHPos pos) = 0;
-        virtual void  place() const     = 0;
-        virtual Score getScore() const  = 0;
+        virtual void        setPos(FHPos pos) = 0;
+        virtual void        place() const     = 0;
+        virtual FHScore     getScore() const  = 0;
+        virtual void        disable()         = 0;
+        virtual std::string getId() const     = 0;
+        virtual int64_t     getGuard() const  = 0;
     };
 
     using IObjectPtr = std::shared_ptr<IObject>;
@@ -28,28 +29,48 @@ public:
     struct IObjectFactory {
         virtual ~IObjectFactory() = default;
 
-        virtual IObjectPtr make() = 0;
+        virtual IObjectPtr make(uint64_t rngFreq)     = 0;
+        virtual uint64_t   totalFreq() const          = 0;
+        virtual size_t     totalActiveRecords() const = 0;
     };
     using IObjectFactoryPtr = std::shared_ptr<IObjectFactory>;
 
 public:
-    ObjectGenerator(FHMap& map, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng)
-        : m_database(database)
+    ObjectGenerator(FHMap&                        map,
+                    const Core::IGameDatabase*    database,
+                    Core::IRandomGenerator* const rng,
+                    std::ostream&                 logOutput)
+        : m_map(map)
+        , m_database(database)
         , m_rng(rng)
-        , m_map(map)
+        , m_logOutput(logOutput)
     {}
 
-    void generate();
+    void generate(const FHScoreSettings& settings);
 
-    FHScoreSettings m_score;
+    FHScoreSettings m_scoreSettings;
+
+    FHScore m_currentScore;
+    FHScore m_targetScore;
 
     std::vector<IObjectFactoryPtr> m_objectFactories;
     std::vector<IObjectPtr>        m_objects;
 
+    template<class T>
+    struct AbstractObject;
+
 private:
+    template<class Record>
+    struct AbstractFactory;
+    struct ObjectFactoryBank;
+    struct ObjectFactoryArtifact;
+    struct ObjectFactoryResourcePile;
+
+private:
+    FHMap&                           m_map;
     const Core::IGameDatabase* const m_database;
     Core::IRandomGenerator* const    m_rng;
-    FHMap&                           m_map;
+    std::ostream&                    m_logOutput;
 };
 
 }

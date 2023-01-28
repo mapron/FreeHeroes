@@ -831,13 +831,12 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
 Core::ResourceAmount H3M2FHConverter::convertResources(const std::vector<uint32_t>& resourceAmount) const
 {
     Core::ResourceAmount resources;
-    resources.wood    = resourceAmount[0];
-    resources.mercury = resourceAmount[1];
-    resources.ore     = resourceAmount[2];
-    resources.sulfur  = resourceAmount[3];
-    resources.crystal = resourceAmount[4];
-    resources.gems    = resourceAmount[5];
-    resources.gold    = resourceAmount[6];
+    for (size_t legacyId = 0; legacyId < m_resourceIds.size(); ++legacyId) {
+        auto       resId = m_resourceIds[legacyId];
+        const auto count = resourceAmount[legacyId];
+        if (count)
+            resources.data[resId] = count * resId->pileSize;
+    }
     return resources;
 }
 

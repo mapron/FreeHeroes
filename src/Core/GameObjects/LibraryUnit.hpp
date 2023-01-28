@@ -10,6 +10,7 @@
 
 #include "LibrarySpell.hpp"
 #include "LibraryObjectDef.hpp"
+#include "LibraryResource.hpp"
 
 #include <string>
 #include <vector>

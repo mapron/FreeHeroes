@@ -1,22 +1,28 @@
 {
-    "groups": {
-        "0": {
-            "boundarySizeHeight": 32,
-            "boundarySizeWidth": 32,
-            "extra": null,
-            "frames": [
-                {
-                    "dup": false,
-                    "h": 8,
-                    "id": 0,
-                    "padLeft": 12,
-                    "padTop": 11,
-                    "w": 8
-                }
-            ],
-            "pixHeightOffset": 0
-        }
-    },
-    "splitToFolder": false,
-    "version": "1.0"
+    "boundarySize": 
+        {"h": 32, "w": 32}, 
+    "groups": 
+        [
+            {
+                "key": 0, 
+                "value": 
+                    {
+                        "frames": 
+                            [
+                                {
+                                    "bitmapSize": 
+                                        {"h": 8, "w": 8}, 
+                                    "boundarySize": 
+                                        {"h": 32, "w": 32},
+                                    "padding": 
+                                        {"x": 12, "y": 11}
+                                }
+                            ], 
+                        "params": 
+                            {}
+                    }
+            }
+        ], 
+    "mask": 
+        {}
 }

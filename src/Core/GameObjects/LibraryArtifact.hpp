@@ -200,6 +200,7 @@ struct LibraryArtifact {
     };
 
     std::string              id;
+    HeroPrimaryParams        statBonus;
     std::vector<std::string> calc;
     ArtifactSlotType         slot;
     TreasureClass            treasureClass = TreasureClass::Special;
@@ -209,7 +210,10 @@ struct LibraryArtifact {
 
     std::vector<Tag> tags;
 
-    int                             value       = 0;
+    int cost  = -1;
+    int value = -1;
+    int guard = -1;
+
     LibrarySpellConstPtr            scrollSpell = nullptr;
     SpellFilter                     provideSpells;
     SpellFilter                     protectSpells;

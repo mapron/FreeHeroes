@@ -12,6 +12,7 @@
 
 #include "LibraryFwd.hpp"
 #include "Stat.hpp"
+#include "LibraryResource.hpp"
 
 #include <QString>
 #include <QPixmap>
@@ -279,13 +280,11 @@ class GUIGAMEWRAPPERS_EXPORT ResourceAmountHelper : public QObject {
     Q_OBJECT
 public:
     struct ResourceInfo {
-        QString id;
-        QString name;
-        int     amount = 0;
+        Core::LibraryResourceConstPtr id = nullptr;
+        QString                       name;
+        int                           amount = 0;
     };
     QList<ResourceInfo> trasformResourceAmount(const Core::ResourceAmount& resourceAmount) const;
-
-    QString resourceName(const std::string& resourceId) const;
 };
 
 }

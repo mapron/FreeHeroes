@@ -208,7 +208,17 @@ STRUCT_REFLECTION_PAIRED(
     "orderCommon",                 orderCommon,
     "icon",                        icon,
     "iconLarge",                   iconLarge,
-    "iconTrade",                   iconTrade
+    "iconTrade",                   iconTrade,
+    "name",                        name
+)
+ENUM_REFLECTION_STRINGIFY(
+    LibraryResource::Rarity,
+    Invalid,
+
+    Invalid,
+    Gold,
+    Common,
+    Rare
 )
 
 STRUCT_REFLECTION_PAIRED(
@@ -216,22 +226,19 @@ STRUCT_REFLECTION_PAIRED(
     
     "untranslatedName",            untranslatedName,
     "legacyId",                    legacyId,
+    "pileSize" ,                   pileSize,
+    "value"    ,                   value,
+    "rarity"   ,                   rarity,
     "objectDefs",                  objectDefs,
     "minesDefs",                   minesDefs,
     "pres",                        presentationParams
 )
 
 
+
 STRUCT_REFLECTION_PAIRED(
     ResourceAmount,
-    
-    "gold"     ,                  gold   ,
-    "wood"     ,                  wood   ,
-    "ore"      ,                  ore    ,
-    "mercury"  ,                  mercury,
-    "sulfur"   ,                  sulfur ,
-    "crystal"  ,                  crystal,
-    "gems"     ,                  gems   
+    "data"     ,                  data
 )
 
 //  -----------------------------------------------------------------------------
@@ -584,11 +591,14 @@ STRUCT_REFLECTION_PAIRED(
     "slot",                       slot,
     "class",                      treasureClass,
     "special",                    special,
+    "statBonus",                  statBonus,
     "calc",                       calc,
     "untranslatedName",           untranslatedName,
     "legacyId",                   legacyId,
     "tags",                       tags,
+    "cost",                       cost,
     "value",                      value,
+    "guard",                      guard,
     "provideSpells",              provideSpells,
     "protectSpells",              protectSpells,
     "forbidSpells",               forbidSpells,
@@ -841,7 +851,8 @@ STRUCT_REFLECTION_STRINGIFY(
     LibraryMapBank::Variant,
     name,
     rewardIndex,
-    guards)
+    guards,
+    frequency)
 
 STRUCT_REFLECTION_STRINGIFY(
     LibraryMapBank::Presentation,
@@ -859,7 +870,8 @@ STRUCT_REFLECTION_STRINGIFY(
     presentationParams,
     fieldLayout,
     isWaterContent,
-    isEnabledByDefault
+    isEnabledByDefault,
+    guardValue
     )
 
 ENUM_REFLECTION_STRINGIFY(LibraryMapObstacle::Type, Invalid,
@@ -1036,6 +1048,9 @@ template<>
 inline constexpr const bool s_useCustomTransformRead<ResourceAmount>{ true };
 template<>
 CORELOGIC_EXPORT bool MetaInfo::transformTreeRead<ResourceAmount>(const PropertyTree& treeIn, PropertyTree& treeOut);
+
+template<>
+inline constexpr const bool s_isStringMap<ResourceAmount::Map>{ true };
 
 template<>
 inline constexpr const bool s_useCustomTransformRead<UnitWithCount>{ true };

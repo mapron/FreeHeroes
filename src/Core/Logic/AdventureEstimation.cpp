@@ -12,6 +12,7 @@
 #include "LibraryTerrain.hpp"
 
 #include "IRandomGenerator.hpp"
+#include "IGameDatabase.hpp"
 
 #include "MernelPlatform/Logger.hpp"
 
@@ -352,6 +353,9 @@ void AdventureEstimation::calculateHeroStats(AdventureHero& hero)
     hero.estimated.experienceStartLevel = GeneralEstimation(m_rules).getExperienceForLevel(hero.level);
     hero.estimated.experienceNextLevel  = GeneralEstimation(m_rules).getExperienceForLevel(hero.level + 1);
 
+    for (auto* resId : m_gameDatabase->resources()->records())
+        hero.estimated.dayIncome.data[resId] = 0;
+
     sol::state lua;
 
     // bindings
@@ -441,6 +445,7 @@ void AdventureEstimation::calculateHeroStats(AdventureHero& hero)
                 spellbook.insert(art->scrollSpell);
             hero.estimated.immunities.makeUnion(art->protectSpells);
             hero.estimated.forbidSpells.makeUnion(art->forbidSpells);
+            hero.estimated.primary += art->statBonus;
             for (auto penalty : art->disabledPenalties)
                 hero.estimated.disabledPenalties.insert(penalty);
             for (auto cast : art->spellCasts) {
@@ -486,6 +491,7 @@ void AdventureEstimation::calculateHeroStats(AdventureHero& hero)
     if (hero.library->spec->type == LibraryHeroSpec::Type::Income) {
         hero.estimated.dayIncome += hero.library->spec->dayIncome;
     }
+    hero.estimated.dayIncome.removeEmpty();
 }
 
 void AdventureEstimation::calculateHeroStatsAfterSquad(AdventureHero& hero, const AdventureSquad& squad)
@@ -767,6 +773,12 @@ void calculateUnitStats(LibraryGameRulesConstPtr rules, AdventureStack& unit, co
 
     cur.primary.ad.attack  = std::clamp(cur.primary.ad.attack, 0, rules->limits.maxUnitAd.attack);
     cur.primary.ad.defense = std::clamp(cur.primary.ad.defense, 0, rules->limits.maxUnitAd.defense);
+}
+
+AdventureEstimation::AdventureEstimation(const IGameDatabase* gameDatabase)
+    : m_gameDatabase(gameDatabase)
+    , m_rules(gameDatabase->gameRules())
+{
 }
 
 void AdventureEstimation::calculateArmy(AdventureArmy& army, LibraryTerrainConstPtr terrain)

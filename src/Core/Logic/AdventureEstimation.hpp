@@ -18,12 +18,12 @@ class state;
 namespace FreeHeroes::Core {
 
 class IRandomGenerator;
+class IGameDatabase;
 
 class CORELOGIC_EXPORT AdventureEstimation {
 public:
-    AdventureEstimation(LibraryGameRulesConstPtr rules)
-        : m_rules(rules)
-    {}
+    AdventureEstimation(const IGameDatabase* gameDatabase);
+
     struct LevelUpResult {
         bool                                       valid    = false;
         int                                        newLevel = 0;
@@ -51,7 +51,8 @@ private:
     void calculateSquadSpeed(AdventureSquad& squad);
 
 private:
-    LibraryGameRulesConstPtr m_rules;
+    const IGameDatabase* const m_gameDatabase;
+    LibraryGameRulesConstPtr   m_rules;
 };
 
 }

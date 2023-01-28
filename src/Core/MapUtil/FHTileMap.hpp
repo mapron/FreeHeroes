@@ -29,6 +29,11 @@ struct FHPos {
     }
 
     constexpr auto operator<=>(const FHPos&) const = default;
+
+    std::string toPrintableString() const noexcept
+    {
+        return "(" + std::to_string(m_x) + ", " + std::to_string(m_y) + ", " + std::to_string(m_z) + ")";
+    }
 };
 
 static inline constexpr const FHPos g_invalidPos{ -1, -1, -1 };

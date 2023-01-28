@@ -35,6 +35,7 @@ struct LibraryMapBank {
         std::string name;
         int         rewardIndex = 0;
         Guards      guards;
+        int         frequency = 300;
     };
     using Variants = std::vector<Variant>;
     Variants variants;
@@ -48,6 +49,8 @@ struct LibraryMapBank {
     ObjectDefMappings objectDefs;
     bool              isWaterContent     = false;
     bool              isEnabledByDefault = true;
+
+    int guardValue = -1;
 };
 
 }

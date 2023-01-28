@@ -82,4 +82,21 @@
 
 }
 
+},
+
+{
+"scope": "resources",
+
+"records": {
+
+"wood"     : { "pres": {"name": {"ts": {"en_US": "Wood"    , "ru_RU": "Древесина"      } } } },
+"mercury"  : { "pres": {"name": {"ts": {"en_US": "Mercury" , "ru_RU": "Ртуть"          } } } },
+"ore"      : { "pres": {"name": {"ts": {"en_US": "Ore"     , "ru_RU": "Руда"           } } } },
+"sulfur"   : { "pres": {"name": {"ts": {"en_US": "Sulfur"  , "ru_RU": "Сера"           } } } },
+"crystal"  : { "pres": {"name": {"ts": {"en_US": "Crystal" , "ru_RU": "Кристаллы"      } } } },
+"gems"     : { "pres": {"name": {"ts": {"en_US": "Gems"    , "ru_RU": "Драг. камни"    } } } },
+"gold"     : { "pres": {"name": {"ts": {"en_US": "Gold"    , "ru_RU": "Золото"         } } } }
+
+}
+
 }]

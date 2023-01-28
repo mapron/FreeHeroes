@@ -6,7 +6,7 @@
 #pragma once
 
 #include "LibraryFwd.hpp"
-#include "Stat.hpp"
+#include "LibraryResource.hpp"
 
 #include <variant>
 #include <string>

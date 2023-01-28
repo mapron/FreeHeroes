@@ -199,6 +199,9 @@ bool MetaInfo::transformTreeRead<ResourceAmount>(const PropertyTree& treeIn, Pro
         return false;
 
     treeOut.convertToMap();
+    PropertyTree& treeOutData = treeOut["data"];
+    treeOutData.convertToMap();
+
     std::string valueStr(treeIn.getScalar().toString());
 
     if (valueStr.empty() || valueStr == "0") {
@@ -210,8 +213,8 @@ bool MetaInfo::transformTreeRead<ResourceAmount>(const PropertyTree& treeIn, Pro
         const auto& str     = parts[i];
         auto        partsEq = splitLine(str, '=', true);
         if (partsEq.size() == 1 && !hasGold) {
-            treeOut["gold"] = PropertyTreeScalar(std::atoi(partsEq[0].c_str()));
-            hasGold         = true;
+            treeOutData["gold"] = PropertyTreeScalar(std::atoi(partsEq[0].c_str()));
+            hasGold             = true;
             continue;
         }
         if (partsEq.size() != 2 || partsEq[0].empty()) {
@@ -221,7 +224,7 @@ bool MetaInfo::transformTreeRead<ResourceAmount>(const PropertyTree& treeIn, Pro
         if (!value)
             return false;
 
-        treeOut[partsEq[0]] = PropertyTreeScalar(value);
+        treeOutData[partsEq[0]] = PropertyTreeScalar(value);
     }
     return true;
 }

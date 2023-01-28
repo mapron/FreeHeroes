@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "Stat.hpp"
+#include "LibraryResource.hpp"
 
 namespace FreeHeroes::Core {
 

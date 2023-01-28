@@ -511,14 +511,8 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
 std::vector<uint32_t> FH2H3MConverter::convertResource(const Core::ResourceAmount& amount) const
 {
     std::vector<uint32_t> res(7);
-
-    res[0] = amount.wood;
-    res[1] = amount.mercury;
-    res[2] = amount.ore;
-    res[3] = amount.sulfur;
-    res[4] = amount.crystal;
-    res[5] = amount.gems;
-    res[6] = amount.gold;
+    for (const auto& [id, count] : amount.data)
+        res[id->legacyId] = count / id->pileSize;
     return res;
 }
 void FH2H3MConverter::convertReward(const Core::Reward& fhReward, MapReward& reward) const
@@ -559,20 +553,10 @@ void FH2H3MConverter::convertRewardHut(const Core::Reward& fhReward, MapSeerHut*
     }
     if (fhReward.resources.nonEmptyAmount()) {
         hut->m_reward = MapSeerHut::RewardType::RESOURCES;
-        auto apply    = [&hut](int id, int res) {
-            if (res == 0)
-                return;
-            hut->m_rVal = static_cast<uint32_t>(res);
-            hut->m_rID  = static_cast<uint32_t>(id);
-        };
-
-        apply(0, fhReward.resources.wood);
-        apply(1, fhReward.resources.mercury);
-        apply(2, fhReward.resources.ore);
-        apply(3, fhReward.resources.sulfur);
-        apply(4, fhReward.resources.crystal);
-        apply(5, fhReward.resources.gems);
-        apply(6, fhReward.resources.gold);
+        for (const auto& [res, count] : fhReward.resources.data) {
+            hut->m_rVal = static_cast<uint32_t>(count / res->pileSize);
+            hut->m_rID  = static_cast<uint32_t>(res->legacyId);
+        }
     }
 
     auto applySkill = [&hut](int id, int val) {

@@ -5,6 +5,8 @@
 
 "sod.map.crypt"             : {
     "untranslatedName": "Crypt",
+    "guardValue": 2000,
+    
     "rewards": [
         {"resources":"1500"},
         {"resources":"2000"},
@@ -12,15 +14,17 @@
         {"resources":"5000","artifacts":[{"classes": ["treasure"]}]}
     ],
     "variants": [
-    { "name": "I"   , "rewardIndex": 0, "guards": [ "sod.unit.skeleton=10", "sod.unit.walkingDead=10", "sod.unit.walkingDead=10", "sod.unit.skeleton=10"   , "sod.unit.skeleton=10"]},
-    { "name": "II"  , "rewardIndex": 1, "guards": [ "sod.unit.skeleton=13", "sod.unit.walkingDead=10", "sod.unit.wight=5"       , "sod.unit.walkingDead=10", "sod.unit.skeleton=12"]},
-    { "name": "III" , "rewardIndex": 2, "guards": [ "sod.unit.skeleton=20", "sod.unit.walkingDead=20", "sod.unit.wight=10"      , "sod.unit.vampire=5"     ]},
-    { "name": "IV"  , "rewardIndex": 3, "guards": [ "sod.unit.skeleton=20", "sod.unit.walkingDead=20", "sod.unit.wight=10"      , "sod.unit.vampire=10"    ]}
+    { "name": "I"   , "frequency": 300, "rewardIndex": 0, "guards": [ "sod.unit.skeleton=10", "sod.unit.walkingDead=10", "sod.unit.walkingDead=10", "sod.unit.skeleton=10"   , "sod.unit.skeleton=10"]},
+    { "name": "II"  , "frequency": 300, "rewardIndex": 1, "guards": [ "sod.unit.skeleton=13", "sod.unit.walkingDead=10", "sod.unit.wight=5"       , "sod.unit.walkingDead=10", "sod.unit.skeleton=12"]},
+    { "name": "III" , "frequency": 300, "rewardIndex": 2, "guards": [ "sod.unit.skeleton=20", "sod.unit.walkingDead=20", "sod.unit.wight=10"      , "sod.unit.vampire=5"     ]},
+    { "name": "IV"  , "frequency": 100, "rewardIndex": 3, "guards": [ "sod.unit.skeleton=20", "sod.unit.walkingDead=20", "sod.unit.wight=10"      , "sod.unit.vampire=10"    ]}
     ]
 
 },
 "sod.map.utopia"           : {
     "untranslatedName": "Utopia",
+    "guardValue": 20000,
+    
     "rewards": [
         {"resources":"20000","artifacts":[{"classes": ["treasure"]},{"classes": ["minor"]},{"classes": ["major"]},{"classes": ["relic"]}]},
         {"resources":"30000","artifacts":[{"classes": ["minor"   ]},{"classes": ["major"]},{"classes": ["relic"]},{"classes": ["relic"]}]},
@@ -28,14 +32,16 @@
         {"resources":"50000","artifacts":[{"classes": ["relic"   ]},{"classes": ["relic"]},{"classes": ["relic"]},{"classes": ["relic"]}]}
     ],
     "variants": [
-    { "name": "I"   , "rewardIndex": 0, "guards": [ "sod.unit.greenDragon=8", "sod.unit.redDragon=5", "sod.unit.goldDragon=2", "sod.unit.blackDragon=1"]},
-    { "name": "II"  , "rewardIndex": 1, "guards": [ "sod.unit.greenDragon=8", "sod.unit.redDragon=6", "sod.unit.goldDragon=3", "sod.unit.blackDragon=2"]},
-    { "name": "III" , "rewardIndex": 2, "guards": [ "sod.unit.greenDragon=8", "sod.unit.redDragon=6", "sod.unit.goldDragon=4", "sod.unit.blackDragon=3"]},
-    { "name": "IV"  , "rewardIndex": 3, "guards": [ "sod.unit.greenDragon=8", "sod.unit.redDragon=7", "sod.unit.goldDragon=6", "sod.unit.blackDragon=5"]}
+    { "name": "I"   , "frequency": 300, "rewardIndex": 0, "guards": [ "sod.unit.greenDragon=8", "sod.unit.redDragon=5", "sod.unit.goldDragon=2", "sod.unit.blackDragon=1"]},
+    { "name": "II"  , "frequency": 300, "rewardIndex": 1, "guards": [ "sod.unit.greenDragon=8", "sod.unit.redDragon=6", "sod.unit.goldDragon=3", "sod.unit.blackDragon=2"]},
+    { "name": "III" , "frequency": 300, "rewardIndex": 2, "guards": [ "sod.unit.greenDragon=8", "sod.unit.redDragon=6", "sod.unit.goldDragon=4", "sod.unit.blackDragon=3"]},
+    { "name": "IV"  , "frequency": 100, "rewardIndex": 3, "guards": [ "sod.unit.greenDragon=8", "sod.unit.redDragon=7", "sod.unit.goldDragon=6", "sod.unit.blackDragon=5"]}
     ]
 },
 "sod.map.derelictShip"             : {
     "untranslatedName": "Derelict Ship",
+    "guardValue": 8000,
+    
     "rewards": [
         {"resources":"3000"},
         {"resources":"3000","artifacts":[{"classes": ["treasure"]}]},
@@ -43,14 +49,16 @@
         {"resources":"6000","artifacts":[{"classes": ["minor"]}]}
     ],
     "variants": [
-    { "name": "I"   , "rewardIndex": 0, "guards": [ "sod.unit.waterElemental=4" ,"sod.unit.waterElemental=4" , "sod.unit.waterElemental=4" , "sod.unit.waterElemental=4" , "sod.unit.waterElemental=4" ]},
-    { "name": "II"  , "rewardIndex": 1, "guards": [ "sod.unit.waterElemental=6" ,"sod.unit.waterElemental=6" , "sod.unit.waterElemental=6" , "sod.unit.waterElemental=6" , "sod.unit.waterElemental=6" ]},
-    { "name": "III" , "rewardIndex": 2, "guards": [ "sod.unit.waterElemental=8" ,"sod.unit.waterElemental=8" , "sod.unit.waterElemental=8" , "sod.unit.waterElemental=8" , "sod.unit.waterElemental=8" ]},
-    { "name": "IV"  , "rewardIndex": 3, "guards": [ "sod.unit.waterElemental=12","sod.unit.waterElemental=12", "sod.unit.waterElemental=12", "sod.unit.waterElemental=12", "sod.unit.waterElemental=12"]}
+    { "name": "I"   , "frequency": 300, "rewardIndex": 0, "guards": [ "sod.unit.waterElemental=4" ,"sod.unit.waterElemental=4" , "sod.unit.waterElemental=4" , "sod.unit.waterElemental=4" , "sod.unit.waterElemental=4" ]},
+    { "name": "II"  , "frequency": 300, "rewardIndex": 1, "guards": [ "sod.unit.waterElemental=6" ,"sod.unit.waterElemental=6" , "sod.unit.waterElemental=6" , "sod.unit.waterElemental=6" , "sod.unit.waterElemental=6" ]},
+    { "name": "III" , "frequency": 300, "rewardIndex": 2, "guards": [ "sod.unit.waterElemental=8" ,"sod.unit.waterElemental=8" , "sod.unit.waterElemental=8" , "sod.unit.waterElemental=8" , "sod.unit.waterElemental=8" ]},
+    { "name": "IV"  , "frequency": 100, "rewardIndex": 3, "guards": [ "sod.unit.waterElemental=12","sod.unit.waterElemental=12", "sod.unit.waterElemental=12", "sod.unit.waterElemental=12", "sod.unit.waterElemental=12"]}
     ]
 },
 "sod.map.shipwreck"             : {
     "untranslatedName": "Shipwreck",
+    "guardValue": 4000,
+    
     "rewards": [
         {"resources":"2000"},
         {"resources":"3000"},
@@ -58,15 +66,17 @@
         {"resources":"5000","artifacts":[{"classes": ["minor"]}]}
     ],
     "variants": [
-    { "name": "I"   , "rewardIndex": 0, "guards": [ "sod.unit.wight=2" , "sod.unit.wight=2" , "sod.unit.wight=2" , "sod.unit.wight=2" , "sod.unit.wight=2" ]},
-    { "name": "II"  , "rewardIndex": 1, "guards": [ "sod.unit.wight=3" , "sod.unit.wight=3" , "sod.unit.wight=3" , "sod.unit.wight=3" , "sod.unit.wight=3" ]},
-    { "name": "III" , "rewardIndex": 2, "guards": [ "sod.unit.wight=5" , "sod.unit.wight=5" , "sod.unit.wight=5" , "sod.unit.wight=5" , "sod.unit.wight=5" ]},
-    { "name": "IV"  , "rewardIndex": 3, "guards": [ "sod.unit.wight=10", "sod.unit.wight=10", "sod.unit.wight=10", "sod.unit.wight=10", "sod.unit.wight=10"]}
+    { "name": "I"   , "frequency": 300, "rewardIndex": 0, "guards": [ "sod.unit.wight=2" , "sod.unit.wight=2" , "sod.unit.wight=2" , "sod.unit.wight=2" , "sod.unit.wight=2" ]},
+    { "name": "II"  , "frequency": 300, "rewardIndex": 1, "guards": [ "sod.unit.wight=3" , "sod.unit.wight=3" , "sod.unit.wight=3" , "sod.unit.wight=3" , "sod.unit.wight=3" ]},
+    { "name": "III" , "frequency": 300, "rewardIndex": 2, "guards": [ "sod.unit.wight=5" , "sod.unit.wight=5" , "sod.unit.wight=5" , "sod.unit.wight=5" , "sod.unit.wight=5" ]},
+    { "name": "IV"  , "frequency": 100, "rewardIndex": 3, "guards": [ "sod.unit.wight=10", "sod.unit.wight=10", "sod.unit.wight=10", "sod.unit.wight=10", "sod.unit.wight=10"]}
     ]
 
 },
 "hota.map.blackTower"             : {
     "untranslatedName": "Black tower",
+    "guardValue": 3000,
+    
     "fieldLayout": "std",
     "rewards": [
         {"resources":"2000","artifacts":[{"classes": ["minor"]}]},
@@ -75,15 +85,17 @@
         {"resources":"3750","artifacts":[{"classes": ["minor"]}]}
     ],
     "variants": [
-    { "name": "I"   , "rewardIndex": 0, "guards": [ "sod.unit.greenDragon=1" ]},
-    { "name": "II"  , "rewardIndex": 1, "guards": [ "sod.unit.redDragon=1"   ]},
-    { "name": "III" , "rewardIndex": 2, "guards": [ "sod.unit.goldDragon=1"  ]},
-    { "name": "IV"  , "rewardIndex": 3, "guards": [ "sod.unit.blackDragon=1" ]}
+    { "name": "I"   , "frequency": 300, "rewardIndex": 0, "guards": [ "sod.unit.greenDragon=1" ]},
+    { "name": "II"  , "frequency": 300, "rewardIndex": 1, "guards": [ "sod.unit.redDragon=1"   ]},
+    { "name": "III" , "frequency": 300, "rewardIndex": 2, "guards": [ "sod.unit.goldDragon=1"  ]},
+    { "name": "IV"  , "frequency": 100, "rewardIndex": 3, "guards": [ "sod.unit.blackDragon=1" ]}
     ]
 
 },
 "hota.map.mansion"             : {
     "untranslatedName": "Mansion",
+    "guardValue": 10000,
+    
     "rewards": [
         {"resources": "2500,mercury=2,sulfur=2,crystal=2,gems=2","artifacts":[{"classes": ["major"]}]},
         {"resources": "5000,mercury=3,sulfur=3,crystal=3,gems=3","artifacts":[{"classes": ["major"]}]},
@@ -91,15 +103,17 @@
         {"resources":"10000,mercury=5,sulfur=5,crystal=5,gems=5","artifacts":[{"classes": ["major"]}]}
     ],
     "variants": [
-    { "name": "I"   , "rewardIndex": 0, "guards": [ "sod.unit.vampireLord=8" , "sod.unit.vampireLord=8" ,"sod.unit.vampireLord=8" ,"sod.unit.vampireLord=8" ,"sod.unit.vampireLord=8" ]},
-    { "name": "II"  , "rewardIndex": 1, "guards": [ "sod.unit.vampireLord=12", "sod.unit.vampireLord=12","sod.unit.vampireLord=12","sod.unit.vampireLord=12","sod.unit.vampireLord=12"]},
-    { "name": "III" , "rewardIndex": 2, "guards": [ "sod.unit.vampireLord=16", "sod.unit.vampireLord=16","sod.unit.vampireLord=16","sod.unit.vampireLord=16","sod.unit.vampireLord=16"]},
-    { "name": "IV"  , "rewardIndex": 3, "guards": [ "sod.unit.vampireLord=20", "sod.unit.vampireLord=20","sod.unit.vampireLord=20","sod.unit.vampireLord=20","sod.unit.vampireLord=20"]}
+    { "name": "I"   , "frequency": 150, "rewardIndex": 0, "guards": [ "sod.unit.vampireLord=8" , "sod.unit.vampireLord=8" ,"sod.unit.vampireLord=8" ,"sod.unit.vampireLord=8" ,"sod.unit.vampireLord=8" ]},
+    { "name": "II"  , "frequency": 150, "rewardIndex": 1, "guards": [ "sod.unit.vampireLord=12", "sod.unit.vampireLord=12","sod.unit.vampireLord=12","sod.unit.vampireLord=12","sod.unit.vampireLord=12"]},
+    { "name": "III" , "frequency": 150, "rewardIndex": 2, "guards": [ "sod.unit.vampireLord=16", "sod.unit.vampireLord=16","sod.unit.vampireLord=16","sod.unit.vampireLord=16","sod.unit.vampireLord=16"]},
+    { "name": "IV"  , "frequency":  50, "rewardIndex": 3, "guards": [ "sod.unit.vampireLord=20", "sod.unit.vampireLord=20","sod.unit.vampireLord=20","sod.unit.vampireLord=20","sod.unit.vampireLord=20"]}
     ]
 
 },
 "hota.map.beholderSanctuary"             : {
     "untranslatedName": "Beholders' Sanctuary",
+    "guardValue": 5000,
+    
     "rewards": [
         {"resources": "3000","artifacts":[{"classes": ["minor"]}]},
         {"resources": "5000","artifacts":[{"classes": ["minor"]}]},
@@ -107,15 +121,17 @@
         {"resources": "9000","artifacts":[{"classes": ["major"]}]}
     ],
     "variants": [
-    { "name": "I"   , "rewardIndex": 0, "guards": [ "sod.unit.beholder=10", "sod.unit.beholder=10", "sod.unit.beholder=10", "sod.unit.beholder=10", "sod.unit.beholder=10"]},
-    { "name": "II"  , "rewardIndex": 1, "guards": [ "sod.unit.beholder=15", "sod.unit.beholder=15", "sod.unit.beholder=15", "sod.unit.beholder=15", "sod.unit.beholder=15"]},
-    { "name": "III" , "rewardIndex": 2, "guards": [ "sod.unit.beholder=20", "sod.unit.beholder=20", "sod.unit.beholder=20", "sod.unit.beholder=20", "sod.unit.beholder=20"]},
-    { "name": "IV"  , "rewardIndex": 3, "guards": [ "sod.unit.beholder=30", "sod.unit.beholder=30", "sod.unit.beholder=30", "sod.unit.beholder=30", "sod.unit.beholder=30"]}
+    { "name": "I"   , "frequency": 300, "rewardIndex": 0, "guards": [ "sod.unit.beholder=10", "sod.unit.beholder=10", "sod.unit.beholder=10", "sod.unit.beholder=10", "sod.unit.beholder=10"]},
+    { "name": "II"  , "frequency": 300, "rewardIndex": 1, "guards": [ "sod.unit.beholder=15", "sod.unit.beholder=15", "sod.unit.beholder=15", "sod.unit.beholder=15", "sod.unit.beholder=15"]},
+    { "name": "III" , "frequency": 300, "rewardIndex": 2, "guards": [ "sod.unit.beholder=20", "sod.unit.beholder=20", "sod.unit.beholder=20", "sod.unit.beholder=20", "sod.unit.beholder=20"]},
+    { "name": "IV"  , "frequency": 100, "rewardIndex": 3, "guards": [ "sod.unit.beholder=30", "sod.unit.beholder=30", "sod.unit.beholder=30", "sod.unit.beholder=30", "sod.unit.beholder=30"]}
     ]
 
 },
 "hota.map.templeSea"           : {
     "untranslatedName": "Temple of the Sea",
+    "guardValue": 20000,
+    
     "rewards": [
         {"resources":"10000","artifacts":[{"classes": ["treasure"]},{"classes": ["treasure"]},{"classes": ["minor"]},{"classes": ["relic"]}]},
         {"resources":"15000","artifacts":[{"classes": ["treasure"]},{"classes": ["minor"   ]},{"classes": ["major"]},{"classes": ["relic"]}]},
@@ -123,24 +139,27 @@
         {"resources":"30000","artifacts":[{"classes": ["major"   ]},{"classes": ["major"   ]},{"classes": ["relic"]},{"classes": ["relic"]}]}
     ],
     "variants": [
-    { "name": "I"   , "rewardIndex": 0, "guards": [ "hota.unit.seaSerpent=6", "sod.unit.chaosHydra=3", "hota.unit.haspid=2", "sod.unit.hydra=8"]},
-    { "name": "II"  , "rewardIndex": 1, "guards": [ "hota.unit.seaSerpent=7", "sod.unit.chaosHydra=4", "hota.unit.haspid=3", "sod.unit.hydra=8"]},
-    { "name": "III" , "rewardIndex": 2, "guards": [ "hota.unit.seaSerpent=7", "sod.unit.chaosHydra=5", "hota.unit.haspid=4", "sod.unit.hydra=8"]},
-    { "name": "IV"  , "rewardIndex": 3, "guards": [ "hota.unit.seaSerpent=9", "sod.unit.chaosHydra=6", "hota.unit.haspid=5", "sod.unit.hydra=10"]}
+    { "name": "I"   , "frequency": 300, "rewardIndex": 0, "guards": [ "hota.unit.seaSerpent=6", "sod.unit.chaosHydra=3", "hota.unit.haspid=2", "sod.unit.hydra=8"]},
+    { "name": "II"  , "frequency": 300, "rewardIndex": 1, "guards": [ "hota.unit.seaSerpent=7", "sod.unit.chaosHydra=4", "hota.unit.haspid=3", "sod.unit.hydra=8"]},
+    { "name": "III" , "frequency": 300, "rewardIndex": 2, "guards": [ "hota.unit.seaSerpent=7", "sod.unit.chaosHydra=5", "hota.unit.haspid=4", "sod.unit.hydra=8"]},
+    { "name": "IV"  , "frequency": 100, "rewardIndex": 3, "guards": [ "hota.unit.seaSerpent=9", "sod.unit.chaosHydra=6", "hota.unit.haspid=5", "sod.unit.hydra=10"]}
     ]
 },
 "hota.map.churchyard"           : {
     "untranslatedName": "Churchyard",
+    "guardValue": 3000,
+    
     "fieldLayout": "churchyard2",
     "rewards": [
         {"resources":"2500","artifacts":[{"classes": ["minor"]}] }
     ],
     "variants": [
-        { "name": "I"   , "rewardIndex": 0, "guards": [ "sod.unit.zombieLord=15", "sod.unit.zombieLord=15", "sod.unit.zombieLord=15", "sod.unit.zombieLord=15", "sod.unit.zombieLord=15", "sod.unit.zombieLord=15"]}
+        { "name": "I"   , "frequency": 1000 , "rewardIndex": 0, "guards": [ "sod.unit.zombieLord=15", "sod.unit.zombieLord=15", "sod.unit.zombieLord=15", "sod.unit.zombieLord=15", "sod.unit.zombieLord=15", "sod.unit.zombieLord=15"]}
     ]
 },
 "sod.map.conservatory"           : {
     "untranslatedName": "Griffins' conservatory",
+    "guardValue": 4000,
 
     "rewards": [
         {"units":["sod.unit.angel=1"]},
@@ -149,31 +168,33 @@
         {"units":["sod.unit.angel=4"]}
     ],
     "variants": [
-    { "name": "I"    , "rewardIndex": 0, "guards": [ "sod.unit.griffin=10", "sod.unit.griffin=10", "sod.unit.griffin=10"     , "sod.unit.griffin=10", "sod.unit.griffin=10"]},
-    { "name": "II"   , "rewardIndex": 1, "guards": [ "sod.unit.griffin=20", "sod.unit.griffin=20", "sod.unit.griffin=20"     , "sod.unit.griffin=20", "sod.unit.griffin=20"]},
-    { "name": "III"  , "rewardIndex": 2, "guards": [ "sod.unit.griffin=30", "sod.unit.griffin=30", "sod.unit.griffin=30"     , "sod.unit.griffin=30", "sod.unit.griffin=30"]},
-    { "name": "IV"   , "rewardIndex": 3, "guards": [ "sod.unit.griffin=40", "sod.unit.griffin=40", "sod.unit.griffin=40"     , "sod.unit.griffin=40", "sod.unit.griffin=40"]}
+    { "name": "I"    , "frequency": 300, "rewardIndex": 0, "guards": [ "sod.unit.griffin=10", "sod.unit.griffin=10", "sod.unit.griffin=10"     , "sod.unit.griffin=10", "sod.unit.griffin=10"]},
+    { "name": "II"   , "frequency": 300, "rewardIndex": 1, "guards": [ "sod.unit.griffin=20", "sod.unit.griffin=20", "sod.unit.griffin=20"     , "sod.unit.griffin=20", "sod.unit.griffin=20"]},
+    { "name": "III"  , "frequency": 300, "rewardIndex": 2, "guards": [ "sod.unit.griffin=30", "sod.unit.griffin=30", "sod.unit.griffin=30"     , "sod.unit.griffin=30", "sod.unit.griffin=30"]},
+    { "name": "IV"   , "frequency": 100, "rewardIndex": 3, "guards": [ "sod.unit.griffin=40", "sod.unit.griffin=40", "sod.unit.griffin=40"     , "sod.unit.griffin=40", "sod.unit.griffin=40"]}
     ],
     "updgradedStackPossible": true
 },
 "sod.map.hive"           : {
     "untranslatedName": "Dragonflies hive",
+    "guardValue": 18000,
 
     "rewards": [
-        {"units":["sod.unit.wyvern=1"]},
-        {"units":["sod.unit.wyvern=2"]},
-        {"units":["sod.unit.wyvern=3"]},
-        {"units":["sod.unit.wyvern=4"]}
+        {"units":["sod.unit.wyvern=4"]},
+        {"units":["sod.unit.wyvern=6"]},
+        {"units":["sod.unit.wyvern=8"]},
+        {"units":["sod.unit.wyvern=12"]}
     ],
     "variants": [
-    { "name": "I"    , "rewardIndex": 0, "guards": [ "sod.unit.dragonFly=6" , "sod.unit.dragonFly=6" , "sod.unit.dragonFly=6" , "sod.unit.dragonFly=6" , "sod.unit.dragonFly=6" ]},
-    { "name": "II"   , "rewardIndex": 1, "guards": [ "sod.unit.dragonFly=9" , "sod.unit.dragonFly=9" , "sod.unit.dragonFly=9" , "sod.unit.dragonFly=9" , "sod.unit.dragonFly=9" ]},
-    { "name": "III"  , "rewardIndex": 2, "guards": [ "sod.unit.dragonFly=12", "sod.unit.dragonFly=12", "sod.unit.dragonFly=12", "sod.unit.dragonFly=12", "sod.unit.dragonFly=12"]},
-    { "name": "IV"   , "rewardIndex": 3, "guards": [ "sod.unit.dragonFly=18", "sod.unit.dragonFly=18", "sod.unit.dragonFly=18", "sod.unit.dragonFly=18", "sod.unit.dragonFly=18"]}
+    { "name": "I"    , "frequency": 300, "rewardIndex": 0, "guards": [ "sod.unit.dragonFly=6" , "sod.unit.dragonFly=6" , "sod.unit.dragonFly=6" , "sod.unit.dragonFly=6" , "sod.unit.dragonFly=6" ]},
+    { "name": "II"   , "frequency": 300, "rewardIndex": 1, "guards": [ "sod.unit.dragonFly=9" , "sod.unit.dragonFly=9" , "sod.unit.dragonFly=9" , "sod.unit.dragonFly=9" , "sod.unit.dragonFly=9" ]},
+    { "name": "III"  , "frequency": 300, "rewardIndex": 2, "guards": [ "sod.unit.dragonFly=12", "sod.unit.dragonFly=12", "sod.unit.dragonFly=12", "sod.unit.dragonFly=12", "sod.unit.dragonFly=12"]},
+    { "name": "IV"   , "frequency": 100, "rewardIndex": 3, "guards": [ "sod.unit.dragonFly=18", "sod.unit.dragonFly=18", "sod.unit.dragonFly=18", "sod.unit.dragonFly=18", "sod.unit.dragonFly=18"]}
     ]
 },
 "hota.map.experimentalShop"           : {
     "untranslatedName": "Experimental Shop",
+    "guardValue": 7000,
 
     "rewards": [
         {"units":["sod.unit.giant=1"]},
@@ -182,14 +203,16 @@
         {"units":["sod.unit.giant=4"]}
     ],
     "variants": [
-    { "name": "I"    , "rewardIndex": 0, "guards": [ "hota.unit.steelGolem=5" , "hota.unit.steelGolem=5" , "hota.unit.steelGolem=5" , "hota.unit.steelGolem=5" , "hota.unit.steelGolem=5" ]},
-    { "name": "II"   , "rewardIndex": 1, "guards": [ "hota.unit.steelGolem=10", "hota.unit.steelGolem=10", "hota.unit.steelGolem=10", "hota.unit.steelGolem=10", "hota.unit.steelGolem=10"]},
-    { "name": "III"  , "rewardIndex": 2, "guards": [ "hota.unit.steelGolem=15", "hota.unit.steelGolem=15", "hota.unit.steelGolem=15", "hota.unit.steelGolem=15", "hota.unit.steelGolem=15"]},
-    { "name": "IV"   , "rewardIndex": 3, "guards": [ "hota.unit.steelGolem=20", "hota.unit.steelGolem=20", "hota.unit.steelGolem=20", "hota.unit.steelGolem=20", "hota.unit.steelGolem=20"]}
+    { "name": "I"    , "frequency": 210, "rewardIndex": 0, "guards": [ "hota.unit.steelGolem=5" , "hota.unit.steelGolem=5" , "hota.unit.steelGolem=5" , "hota.unit.steelGolem=5" , "hota.unit.steelGolem=5" ]},
+    { "name": "II"   , "frequency": 210, "rewardIndex": 1, "guards": [ "hota.unit.steelGolem=10", "hota.unit.steelGolem=10", "hota.unit.steelGolem=10", "hota.unit.steelGolem=10", "hota.unit.steelGolem=10"]},
+    { "name": "III"  , "frequency": 210, "rewardIndex": 2, "guards": [ "hota.unit.steelGolem=15", "hota.unit.steelGolem=15", "hota.unit.steelGolem=15", "hota.unit.steelGolem=15", "hota.unit.steelGolem=15"]},
+    { "name": "IV"   , "frequency":  70, "rewardIndex": 3, "guards": [ "hota.unit.steelGolem=20", "hota.unit.steelGolem=20", "hota.unit.steelGolem=20", "hota.unit.steelGolem=20", "hota.unit.steelGolem=20"]}
     ]
 },
 "hota.map.wolfRaiderPicket"           : {
     "untranslatedName": "Wolf Raider Picket",
+    "guardValue": 19000,
+    
     "rewards": [
         {"units":["sod.unit.cyclop=4"]},
         {"units":["sod.unit.cyclop=6"]},
@@ -197,14 +220,16 @@
         {"units":["sod.unit.cyclop=12"]}
     ],
     "variants": [
-    { "name": "I"    , "rewardIndex": 0, "guards": [ "sod.unit.wolfHoboRider=10", "sod.unit.wolfHoboRider=10", "sod.unit.wolfHoboRider=10", "sod.unit.wolfHoboRider=10", "sod.unit.wolfHoboRider=10"]},
-    { "name": "II"   , "rewardIndex": 1, "guards": [ "sod.unit.wolfHoboRider=15", "sod.unit.wolfHoboRider=15", "sod.unit.wolfHoboRider=15", "sod.unit.wolfHoboRider=15", "sod.unit.wolfHoboRider=15"]},
-    { "name": "III"  , "rewardIndex": 2, "guards": [ "sod.unit.wolfHoboRider=20", "sod.unit.wolfHoboRider=20", "sod.unit.wolfHoboRider=20", "sod.unit.wolfHoboRider=20", "sod.unit.wolfHoboRider=20"]},
-    { "name": "IV"   , "rewardIndex": 3, "guards": [ "sod.unit.wolfHoboRider=30", "sod.unit.wolfHoboRider=30", "sod.unit.wolfHoboRider=30", "sod.unit.wolfHoboRider=30", "sod.unit.wolfHoboRider=30"]}
+    { "name": "I"    , "frequency": 210, "rewardIndex": 0, "guards": [ "sod.unit.wolfHoboRider=10", "sod.unit.wolfHoboRider=10", "sod.unit.wolfHoboRider=10", "sod.unit.wolfHoboRider=10", "sod.unit.wolfHoboRider=10"]},
+    { "name": "II"   , "frequency": 210, "rewardIndex": 1, "guards": [ "sod.unit.wolfHoboRider=15", "sod.unit.wolfHoboRider=15", "sod.unit.wolfHoboRider=15", "sod.unit.wolfHoboRider=15", "sod.unit.wolfHoboRider=15"]},
+    { "name": "III"  , "frequency": 210, "rewardIndex": 2, "guards": [ "sod.unit.wolfHoboRider=20", "sod.unit.wolfHoboRider=20", "sod.unit.wolfHoboRider=20", "sod.unit.wolfHoboRider=20", "sod.unit.wolfHoboRider=20"]},
+    { "name": "IV"   , "frequency":  70, "rewardIndex": 3, "guards": [ "sod.unit.wolfHoboRider=30", "sod.unit.wolfHoboRider=30", "sod.unit.wolfHoboRider=30", "sod.unit.wolfHoboRider=30", "sod.unit.wolfHoboRider=30"]}
     ]
 },
 "hota.map.vermilionTower"             : {
     "untranslatedName": "Vermilion tower",
+    "guardValue": 8000,
+    
     "rewards": [
         {"units":["sod.unit.firebird=1"]},
         {"units":["sod.unit.firebird=2"]},
@@ -212,15 +237,17 @@
         {"units":["sod.unit.firebird=4"]}
     ],
     "variants": [
-    { "name": "I"   , "rewardIndex": 0, "guards": [ "sod.unit.fireElemental=7" , "sod.unit.fireElemental=7" , "sod.unit.fireElemental=7" , "sod.unit.fireElemental=7" , "sod.unit.fireElemental=7"   ]},
-    { "name": "II"  , "rewardIndex": 1, "guards": [ "sod.unit.fireElemental=14", "sod.unit.fireElemental=14", "sod.unit.fireElemental=14", "sod.unit.fireElemental=14", "sod.unit.fireElemental=14"  ]},
-    { "name": "III" , "rewardIndex": 2, "guards": [ "sod.unit.fireElemental=21", "sod.unit.fireElemental=21", "sod.unit.fireElemental=21", "sod.unit.fireElemental=21", "sod.unit.fireElemental=21"  ]},
-    { "name": "IV"  , "rewardIndex": 3, "guards": [ "sod.unit.fireElemental=28", "sod.unit.fireElemental=28", "sod.unit.fireElemental=28", "sod.unit.fireElemental=28", "sod.unit.fireElemental=28"  ]}
+    { "name": "I"   , "frequency": 60, "rewardIndex": 0, "guards": [ "sod.unit.fireElemental=7" , "sod.unit.fireElemental=7" , "sod.unit.fireElemental=7" , "sod.unit.fireElemental=7" , "sod.unit.fireElemental=7"   ]},
+    { "name": "II"  , "frequency": 60, "rewardIndex": 1, "guards": [ "sod.unit.fireElemental=14", "sod.unit.fireElemental=14", "sod.unit.fireElemental=14", "sod.unit.fireElemental=14", "sod.unit.fireElemental=14"  ]},
+    { "name": "III" , "frequency": 60, "rewardIndex": 2, "guards": [ "sod.unit.fireElemental=21", "sod.unit.fireElemental=21", "sod.unit.fireElemental=21", "sod.unit.fireElemental=21", "sod.unit.fireElemental=21"  ]},
+    { "name": "IV"  , "frequency": 20, "rewardIndex": 3, "guards": [ "sod.unit.fireElemental=28", "sod.unit.fireElemental=28", "sod.unit.fireElemental=28", "sod.unit.fireElemental=28", "sod.unit.fireElemental=28"  ]}
     ]
 
 },
 "hota.map.pirateCave"             : {
     "untranslatedName": "Pirate Cave",
+    "guardValue": 7000,
+    
     "rewards": [
         {"units":["hota.unit.seaSerpent=1"]},
         {"units":["hota.unit.seaSerpent=2"]},
@@ -228,15 +255,17 @@
         {"units":["hota.unit.seaSerpent=4"]}
     ],
     "variants": [
-    { "name": "I"   , "rewardIndex": 0, "guards": [ "hota.unit.pirate=10", "hota.unit.corsair=10", "hota.unit.pirate=10", "hota.unit.corsair=10"  ]},
-    { "name": "II"  , "rewardIndex": 1, "guards": [ "hota.unit.pirate=20", "hota.unit.corsair=20", "hota.unit.pirate=20", "hota.unit.corsair=20"  ]},
-    { "name": "III" , "rewardIndex": 2, "guards": [ "hota.unit.pirate=30", "hota.unit.corsair=30", "hota.unit.pirate=30", "hota.unit.corsair=30"  ]},
-    { "name": "IV"  , "rewardIndex": 3, "guards": [ "hota.unit.pirate=40", "hota.unit.corsair=40", "hota.unit.pirate=40", "hota.unit.corsair=40"  ]}
+    { "name": "I"   , "frequency": 300, "rewardIndex": 0, "guards": [ "hota.unit.pirate=10", "hota.unit.corsair=10", "hota.unit.pirate=10", "hota.unit.corsair=10"  ]},
+    { "name": "II"  , "frequency": 300, "rewardIndex": 1, "guards": [ "hota.unit.pirate=20", "hota.unit.corsair=20", "hota.unit.pirate=20", "hota.unit.corsair=20"  ]},
+    { "name": "III" , "frequency": 300, "rewardIndex": 2, "guards": [ "hota.unit.pirate=30", "hota.unit.corsair=30", "hota.unit.pirate=30", "hota.unit.corsair=30"  ]},
+    { "name": "IV"  , "frequency": 100, "rewardIndex": 3, "guards": [ "hota.unit.pirate=40", "hota.unit.corsair=40", "hota.unit.pirate=40", "hota.unit.corsair=40"  ]}
     ]
 
 },
 "hota.map.ivoryTower"             : {
     "untranslatedName": "Ivory tower",
+    "guardValue": 14000,
+    
     "rewards": [
         {"units":["sod.unit.enchanter=3"]},
         {"units":["sod.unit.enchanter=6"]},
@@ -244,14 +273,16 @@
         {"units":["sod.unit.enchanter=12"]}
     ],
     "variants": [
-    { "name": "I"   , "rewardIndex": 0, "guards": [ "sod.unit.archMage=7" , "sod.unit.archMage=7" , "sod.unit.archMage=7" , "sod.unit.archMage=7" , "sod.unit.archMage=7"   ]},
-    { "name": "II"  , "rewardIndex": 1, "guards": [ "sod.unit.archMage=10", "sod.unit.archMage=10", "sod.unit.archMage=10", "sod.unit.archMage=10", "sod.unit.archMage=10"  ]},
-    { "name": "III" , "rewardIndex": 2, "guards": [ "sod.unit.archMage=13", "sod.unit.archMage=13", "sod.unit.archMage=13", "sod.unit.archMage=13", "sod.unit.archMage=13"  ]},
-    { "name": "IV"  , "rewardIndex": 3, "guards": [ "sod.unit.archMage=16", "sod.unit.archMage=16", "sod.unit.archMage=16", "sod.unit.archMage=16", "sod.unit.archMage=16"  ]}
+    { "name": "I"   , "frequency": 300, "rewardIndex": 0, "guards": [ "sod.unit.archMage=7" , "sod.unit.archMage=7" , "sod.unit.archMage=7" , "sod.unit.archMage=7" , "sod.unit.archMage=7"   ]},
+    { "name": "II"  , "frequency": 300, "rewardIndex": 1, "guards": [ "sod.unit.archMage=10", "sod.unit.archMage=10", "sod.unit.archMage=10", "sod.unit.archMage=10", "sod.unit.archMage=10"  ]},
+    { "name": "III" , "frequency": 300, "rewardIndex": 2, "guards": [ "sod.unit.archMage=13", "sod.unit.archMage=13", "sod.unit.archMage=13", "sod.unit.archMage=13", "sod.unit.archMage=13"  ]},
+    { "name": "IV"  , "frequency": 100, "rewardIndex": 3, "guards": [ "sod.unit.archMage=16", "sod.unit.archMage=16", "sod.unit.archMage=16", "sod.unit.archMage=16", "sod.unit.archMage=16"  ]}
     ]
 },
 "sod.map.impCache"             : {
     "untranslatedName": "Imp cache",
+    "guardValue": 10000,
+    
     "rewards": [
         {"resources":"1000,mercury=2"},
         {"resources":"1500,mercury=3"},
@@ -259,15 +290,17 @@
         {"resources":"3000,mercury=6"}
     ],
     "variants": [
-    { "name": "I"    , "rewardIndex": 0, "guards": [ "sod.unit.imp=20", "sod.unit.imp=20", "sod.unit.imp=20"     , "sod.unit.imp=20", "sod.unit.imp=20"  ]},
-    { "name": "II"   , "rewardIndex": 1, "guards": [ "sod.unit.imp=30", "sod.unit.imp=30", "sod.unit.imp=30"     , "sod.unit.imp=30", "sod.unit.imp=30"  ]},
-    { "name": "III"  , "rewardIndex": 2, "guards": [ "sod.unit.imp=40", "sod.unit.imp=40", "sod.unit.imp=40"     , "sod.unit.imp=40", "sod.unit.imp=40"  ]},
-    { "name": "IV"   , "rewardIndex": 3, "guards": [ "sod.unit.imp=60", "sod.unit.imp=60", "sod.unit.imp=60"     , "sod.unit.imp=60", "sod.unit.imp=60"  ]}
+    { "name": "I"    , "frequency": 300, "rewardIndex": 0, "guards": [ "sod.unit.imp=20", "sod.unit.imp=20", "sod.unit.imp=20"     , "sod.unit.imp=20", "sod.unit.imp=20"  ]},
+    { "name": "II"   , "frequency": 300, "rewardIndex": 1, "guards": [ "sod.unit.imp=30", "sod.unit.imp=30", "sod.unit.imp=30"     , "sod.unit.imp=30", "sod.unit.imp=30"  ]},
+    { "name": "III"  , "frequency": 300, "rewardIndex": 2, "guards": [ "sod.unit.imp=40", "sod.unit.imp=40", "sod.unit.imp=40"     , "sod.unit.imp=40", "sod.unit.imp=40"  ]},
+    { "name": "IV"   , "frequency": 100, "rewardIndex": 3, "guards": [ "sod.unit.imp=60", "sod.unit.imp=60", "sod.unit.imp=60"     , "sod.unit.imp=60", "sod.unit.imp=60"  ]}
     ],
     "upgradedStackIndex": 3
 },
 "sod.map.dwarvenTreasury"             : {
     "untranslatedName": "Dwarven Treasury",
+    "guardValue": 4000,
+    
     "rewards": [
         {"resources":"2500,crystal=2"},
         {"resources":"4000,crystal=3"},
@@ -275,15 +308,17 @@
         {"resources":"7500,crystal=10"}
     ],
     "variants": [
-    { "name": "I"    , "rewardIndex": 0, "guards": [ "sod.unit.dwarf=10", "sod.unit.dwarf=10", "sod.unit.dwarf=10"      , "sod.unit.dwarf=10", "sod.unit.dwarf=10"  ]},
-    { "name": "II"   , "rewardIndex": 1, "guards": [ "sod.unit.dwarf=15", "sod.unit.dwarf=15", "sod.unit.dwarf=15"      , "sod.unit.dwarf=15", "sod.unit.dwarf=15"  ]},
-    { "name": "III"  , "rewardIndex": 2, "guards": [ "sod.unit.dwarf=20", "sod.unit.dwarf=20", "sod.unit.dwarf=20"      , "sod.unit.dwarf=20", "sod.unit.dwarf=20"  ]},
-    { "name": "IV"   , "rewardIndex": 3, "guards": [ "sod.unit.dwarf=30", "sod.unit.dwarf=30", "sod.unit.dwarf=30"      , "sod.unit.dwarf=30", "sod.unit.dwarf=30"  ]}
+    { "name": "I"    , "frequency": 300, "rewardIndex": 0, "guards": [ "sod.unit.dwarf=10", "sod.unit.dwarf=10", "sod.unit.dwarf=10"      , "sod.unit.dwarf=10", "sod.unit.dwarf=10"  ]},
+    { "name": "II"   , "frequency": 300, "rewardIndex": 1, "guards": [ "sod.unit.dwarf=15", "sod.unit.dwarf=15", "sod.unit.dwarf=15"      , "sod.unit.dwarf=15", "sod.unit.dwarf=15"  ]},
+    { "name": "III"  , "frequency": 300, "rewardIndex": 2, "guards": [ "sod.unit.dwarf=20", "sod.unit.dwarf=20", "sod.unit.dwarf=20"      , "sod.unit.dwarf=20", "sod.unit.dwarf=20"  ]},
+    { "name": "IV"   , "frequency": 100, "rewardIndex": 3, "guards": [ "sod.unit.dwarf=30", "sod.unit.dwarf=30", "sod.unit.dwarf=30"      , "sod.unit.dwarf=30", "sod.unit.dwarf=30"  ]}
     ],
     "upgradedStackIndex": 3
 },
 "sod.map.medusaStores"             : {
     "untranslatedName": "Medusa Stores",
+    "guardValue": 3000,
+    
     "rewards": [
         {"resources":"2000,sulfur=5"},
         {"resources":"3000,sulfur=6"},
@@ -291,15 +326,17 @@
         {"resources":"5000,sulfur=10"}
     ],
     "variants": [
-    { "name": "I"    , "rewardIndex": 0, "guards": [ "sod.unit.medusa=4" , "sod.unit.medusa=4" , "sod.unit.medusa=4"      , "sod.unit.medusa=4" , "sod.unit.medusa=4"  ]},
-    { "name": "II"   , "rewardIndex": 1, "guards": [ "sod.unit.medusa=6" , "sod.unit.medusa=6" , "sod.unit.medusa=6"      , "sod.unit.medusa=6" , "sod.unit.medusa=6"  ]},
-    { "name": "III"  , "rewardIndex": 2, "guards": [ "sod.unit.medusa=8" , "sod.unit.medusa=8" , "sod.unit.medusa=8"      , "sod.unit.medusa=8" , "sod.unit.medusa=8"  ]},
-    { "name": "IV"   , "rewardIndex": 3, "guards": [ "sod.unit.medusa=10", "sod.unit.medusa=10", "sod.unit.medusa=10"     , "sod.unit.medusa=10", "sod.unit.medusa=10" ]}
+    { "name": "I"    , "frequency": 300, "rewardIndex": 0, "guards": [ "sod.unit.medusa=4" , "sod.unit.medusa=4" , "sod.unit.medusa=4"      , "sod.unit.medusa=4" , "sod.unit.medusa=4"  ]},
+    { "name": "II"   , "frequency": 300, "rewardIndex": 1, "guards": [ "sod.unit.medusa=6" , "sod.unit.medusa=6" , "sod.unit.medusa=6"      , "sod.unit.medusa=6" , "sod.unit.medusa=6"  ]},
+    { "name": "III"  , "frequency": 300, "rewardIndex": 2, "guards": [ "sod.unit.medusa=8" , "sod.unit.medusa=8" , "sod.unit.medusa=8"      , "sod.unit.medusa=8" , "sod.unit.medusa=8"  ]},
+    { "name": "IV"   , "frequency": 100, "rewardIndex": 3, "guards": [ "sod.unit.medusa=10", "sod.unit.medusa=10", "sod.unit.medusa=10"     , "sod.unit.medusa=10", "sod.unit.medusa=10" ]}
     ],
     "upgradedStackIndex": 3
 },
 "sod.map.cyclopsStockpile"             : {
     "untranslatedName": "Cyclops Stockpile",
+    "guardValue": 6000,
+    
     "rewards": [
          {"resources": "mercury=4,sulfur=4,crystal=4,gems=4"},
          {"resources": "mercury=6,sulfur=6,crystal=6,gems=6"},
@@ -307,15 +344,17 @@
          {"resources": "mercury=10,sulfur=10,crystal=10,gems=10"}
     ],
     "variants": [
-    { "name": "I"    , "rewardIndex": 0, "guards": [ "sod.unit.cyclop=4" , "sod.unit.cyclop=4" , "sod.unit.cyclop=4"     , "sod.unit.cyclop=4" , "sod.unit.cyclop=4"  ]},
-    { "name": "II"   , "rewardIndex": 1, "guards": [ "sod.unit.cyclop=6" , "sod.unit.cyclop=6" , "sod.unit.cyclop=6"     , "sod.unit.cyclop=6" , "sod.unit.cyclop=6"  ]},
-    { "name": "III"  , "rewardIndex": 2, "guards": [ "sod.unit.cyclop=8" , "sod.unit.cyclop=8" , "sod.unit.cyclop=8"     , "sod.unit.cyclop=8" , "sod.unit.cyclop=8"  ]},
-    { "name": "IV"   , "rewardIndex": 3, "guards": [ "sod.unit.cyclop=10", "sod.unit.cyclop=10", "sod.unit.cyclop=10"    , "sod.unit.cyclop=10", "sod.unit.cyclop=10" ]}
+    { "name": "I"    , "frequency": 300, "rewardIndex": 0, "guards": [ "sod.unit.cyclop=4" , "sod.unit.cyclop=4" , "sod.unit.cyclop=4"     , "sod.unit.cyclop=4" , "sod.unit.cyclop=4"  ]},
+    { "name": "II"   , "frequency": 300, "rewardIndex": 1, "guards": [ "sod.unit.cyclop=6" , "sod.unit.cyclop=6" , "sod.unit.cyclop=6"     , "sod.unit.cyclop=6" , "sod.unit.cyclop=6"  ]},
+    { "name": "III"  , "frequency": 300, "rewardIndex": 2, "guards": [ "sod.unit.cyclop=8" , "sod.unit.cyclop=8" , "sod.unit.cyclop=8"     , "sod.unit.cyclop=8" , "sod.unit.cyclop=8"  ]},
+    { "name": "IV"   , "frequency": 100, "rewardIndex": 3, "guards": [ "sod.unit.cyclop=10", "sod.unit.cyclop=10", "sod.unit.cyclop=10"    , "sod.unit.cyclop=10", "sod.unit.cyclop=10" ]}
     ],
     "upgradedStackIndex": 3
 },
 "sod.map.nagaBank"             : {
     "untranslatedName": "Naga bank",
+    "guardValue": 6000,
+    
     "rewards": [
         {"resources": "4000,gems=8" },
         {"resources": "6000,gems=12"},
@@ -323,15 +362,17 @@
         {"resources":"12000,gems=24"}
     ],
     "variants": [
-    { "name": "I"    , "rewardIndex": 0, "guards": [ "sod.unit.naga=2", "sod.unit.naga=2", "sod.unit.naga=2"     , "sod.unit.naga=2", "sod.unit.naga=2" ]},
-    { "name": "II"   , "rewardIndex": 1, "guards": [ "sod.unit.naga=3", "sod.unit.naga=3", "sod.unit.naga=3"     , "sod.unit.naga=3", "sod.unit.naga=3" ]},
-    { "name": "III"  , "rewardIndex": 2, "guards": [ "sod.unit.naga=4", "sod.unit.naga=4", "sod.unit.naga=4"     , "sod.unit.naga=4", "sod.unit.naga=4" ]},
-    { "name": "IV"   , "rewardIndex": 3, "guards": [ "sod.unit.naga=6", "sod.unit.naga=6", "sod.unit.naga=6"     , "sod.unit.naga=6", "sod.unit.naga=6" ]}
+    { "name": "I"    , "frequency": 300, "rewardIndex": 0, "guards": [ "sod.unit.naga=2", "sod.unit.naga=2", "sod.unit.naga=2"     , "sod.unit.naga=2", "sod.unit.naga=2" ]},
+    { "name": "II"   , "frequency": 300, "rewardIndex": 1, "guards": [ "sod.unit.naga=3", "sod.unit.naga=3", "sod.unit.naga=3"     , "sod.unit.naga=3", "sod.unit.naga=3" ]},
+    { "name": "III"  , "frequency": 300, "rewardIndex": 2, "guards": [ "sod.unit.naga=4", "sod.unit.naga=4", "sod.unit.naga=4"     , "sod.unit.naga=4", "sod.unit.naga=4" ]},
+    { "name": "IV"   , "frequency": 100, "rewardIndex": 3, "guards": [ "sod.unit.naga=6", "sod.unit.naga=6", "sod.unit.naga=6"     , "sod.unit.naga=6", "sod.unit.naga=6" ]}
     ],
     "upgradedStackIndex": 3
 },
 "hota.map.spit"             : {
     "untranslatedName": "Basilisk Spit",
+    "guardValue": 3000,
+    
     "fieldLayout" : "spit",
     "rewards": [
         {"resources": "3000"},
@@ -340,14 +381,16 @@
         {"resources": "9000"}
     ],
     "variants": [
-    { "name": "I"    , "rewardIndex": 0, "guards": [ "sod.unit.basilisk=4" , "sod.unit.basilisk=4"        , "sod.unit.basilisk=4" , "sod.unit.basilisk=4"  ]},
-    { "name": "II"   , "rewardIndex": 1, "guards": [ "sod.unit.basilisk=6" , "sod.unit.basilisk=6"        , "sod.unit.basilisk=6" , "sod.unit.basilisk=6"  ]},
-    { "name": "III"  , "rewardIndex": 2, "guards": [ "sod.unit.basilisk=8" , "sod.unit.basilisk=8"        , "sod.unit.basilisk=8" , "sod.unit.basilisk=8"  ]},
-    { "name": "IV"   , "rewardIndex": 3, "guards": [ "sod.unit.basilisk=12", "sod.unit.basilisk=12"       , "sod.unit.basilisk=12", "sod.unit.basilisk=12" ]}
+    { "name": "I"    , "frequency": 200, "rewardIndex": 0, "guards": [ "sod.unit.basilisk=4" , "sod.unit.basilisk=4"        , "sod.unit.basilisk=4" , "sod.unit.basilisk=4"  ]},
+    { "name": "II"   , "frequency": 200, "rewardIndex": 1, "guards": [ "sod.unit.basilisk=6" , "sod.unit.basilisk=6"        , "sod.unit.basilisk=6" , "sod.unit.basilisk=6"  ]},
+    { "name": "III"  , "frequency": 200, "rewardIndex": 2, "guards": [ "sod.unit.basilisk=8" , "sod.unit.basilisk=8"        , "sod.unit.basilisk=8" , "sod.unit.basilisk=8"  ]},
+    { "name": "IV"   , "frequency":  70, "rewardIndex": 3, "guards": [ "sod.unit.basilisk=12", "sod.unit.basilisk=12"       , "sod.unit.basilisk=12", "sod.unit.basilisk=12" ]}
     ]
 },
 "hota.map.ruins"             : {
     "untranslatedName": "Ruins",
+    "guardValue": 2000,
+    
     "fieldLayout" : "ruins",
     "rewards": [
         {"resources": "1000"},
@@ -356,10 +399,10 @@
         {"resources": "4000"}
     ],
     "variants": [
-    { "name": "I"    , "rewardIndex": 0, "guards": [ "sod.unit.skeleton=20",  "sod.unit.wight=3" ,   "sod.unit.wraith=3" , "sod.unit.skeletonWarrior=10" , "sod.unit.powerLich=1"      ]},
-    { "name": "II"   , "rewardIndex": 1, "guards": [ "sod.unit.skeleton=30",  "sod.unit.wight=5" ,   "sod.unit.wraith=5" , "sod.unit.skeletonWarrior=10" , "sod.unit.powerLich=1"      ]},
-    { "name": "III"  , "rewardIndex": 2, "guards": [ "sod.unit.skeleton=40",  "sod.unit.wight=7" ,   "sod.unit.wraith=7" , "sod.unit.skeletonWarrior=20" , "sod.unit.powerLich=2"      ]},
-    { "name": "IV"   , "rewardIndex": 3, "guards": [ "sod.unit.skeleton=50",  "sod.unit.wight=9" ,   "sod.unit.wraith=9" , "sod.unit.skeletonWarrior=20" , "sod.unit.powerLich=3"      ]}
+    { "name": "I"    , "frequency": 300, "rewardIndex": 0, "guards": [ "sod.unit.skeleton=20",  "sod.unit.wight=3" ,   "sod.unit.wraith=3" , "sod.unit.skeletonWarrior=10" , "sod.unit.powerLich=1"      ]},
+    { "name": "II"   , "frequency": 300, "rewardIndex": 1, "guards": [ "sod.unit.skeleton=30",  "sod.unit.wight=5" ,   "sod.unit.wraith=5" , "sod.unit.skeletonWarrior=10" , "sod.unit.powerLich=1"      ]},
+    { "name": "III"  , "frequency": 300, "rewardIndex": 2, "guards": [ "sod.unit.skeleton=40",  "sod.unit.wight=7" ,   "sod.unit.wraith=7" , "sod.unit.skeletonWarrior=20" , "sod.unit.powerLich=2"      ]},
+    { "name": "IV"   , "frequency": 100, "rewardIndex": 3, "guards": [ "sod.unit.skeleton=50",  "sod.unit.wight=9" ,   "sod.unit.wraith=9" , "sod.unit.skeletonWarrior=20" , "sod.unit.powerLich=3"      ]}
     ]
 }
 
@@ -379,9 +422,9 @@
 "sod.map.shipwreck"                  : { "presentationParams": { "order":1002 } },
 "hota.map.blackTower"                : { "presentationParams": { "order":3    } },
 "hota.map.mansion"                   : { "presentationParams": { "order":4    } },
-"hota.map.beholderSanctuary"         : { "presentationParams": { "order":5    } },
-"hota.map.templeSea"                 : { "presentationParams": { "order":1003 } },
-"hota.map.churchyard"                : { "presentationParams": { "order":6    } },
+"hota.map.beholderSanctuary"         : { "presentationParams": { "order":1003 } },
+"hota.map.templeSea"                 : { "presentationParams": { "order":1004 } },
+"hota.map.churchyard"                : { "presentationParams": { "order":5    } },
 "sod.map.conservatory"               : { "presentationParams": { "order":100  } },
 "sod.map.hive"                       : { "presentationParams": { "order":101  } },
 "hota.map.experimentalShop"          : { "presentationParams": { "order":102  } },
@@ -414,7 +457,7 @@
 "sod.map.shipwreck"                  : [ true , true ],
 "hota.map.blackTower"                : [ false, true ],
 "hota.map.mansion"                   : [ false, true ],
-"hota.map.beholderSanctuary"         : [ false, true ],
+"hota.map.beholderSanctuary"         : [ true , true ],
 "hota.map.templeSea"                 : [ true , true ],
 "hota.map.churchyard"                : [ false, true ],
 "sod.map.conservatory"               : [ false, true ],
