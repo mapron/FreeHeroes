@@ -736,6 +736,12 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                         }
                     }
                 }
+                for (uint32_t artId : bank->m_artifacts) {
+                    if (artId == uint32_t(-1))
+                        fhBank.m_artifacts.push_back(nullptr);
+                    else
+                        fhBank.m_artifacts.push_back(m_artifactIds[artId]);
+                }
                 dest.m_objects.m_banks.push_back(std::move(fhBank));
             } break;
             default:

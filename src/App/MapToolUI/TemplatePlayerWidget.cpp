@@ -60,6 +60,7 @@ FHRngUserSettings::HeroGeneration getPolicyFromCombo(QComboBox* combo)
 
 class HeroFilterModel : public QSortFilterProxyModel {
     QComboBox* m_factionCombo;
+    bool       m_useFactionFilter{ true };
 
 public:
     HeroFilterModel(QComboBox* factionCombo, QObject* parent)
@@ -67,6 +68,14 @@ public:
     {
         m_factionCombo = factionCombo;
         setDynamicSortFilter(false);
+    }
+
+    void setUseFactionFilter(bool flag)
+    {
+        if (m_useFactionFilter == flag)
+            return;
+        m_useFactionFilter = flag;
+        invalidate();
     }
 
     // QSortFilterProxyModel interface
@@ -78,9 +87,11 @@ protected:
         if (!hero)
             return false;
 
-        Core::LibraryFactionConstPtr filterFaction = getFactionFromCombo(m_factionCombo);
-        if (filterFaction) {
-            return filterFaction == hero->faction;
+        if (m_useFactionFilter) {
+            Core::LibraryFactionConstPtr filterFaction = getFactionFromCombo(m_factionCombo);
+            if (filterFaction) {
+                return filterFaction == hero->faction;
+            }
         }
 
         return true;
@@ -98,14 +109,16 @@ TemplatePlayerWidget::TemplatePlayerWidget(const Gui::LibraryModelsProvider* mod
     m_ui->comboBoxHeroMain->setIconSize({ 32, 24 });
     m_ui->comboBoxHeroExtra->setIconSize({ 32, 24 });
 
-    auto* heroFilter = new HeroFilterModel(m_ui->comboBoxFaction, this);
+    auto* heroFilterModelMain  = new HeroFilterModel(m_ui->comboBoxFaction, this);
+    auto* heroFilterModelExtra = new HeroFilterModel(m_ui->comboBoxFaction, this);
 
     auto* comboModel = new ComboModel("", { 32, 24 }, modelsProvider->heroes(), this);
 
-    heroFilter->setSourceModel(comboModel);
+    heroFilterModelMain->setSourceModel(comboModel);
+    heroFilterModelExtra->setSourceModel(comboModel);
 
-    m_ui->comboBoxHeroMain->setModel(heroFilter);
-    m_ui->comboBoxHeroExtra->setModel(heroFilter);
+    m_ui->comboBoxHeroMain->setModel(heroFilterModelMain);
+    m_ui->comboBoxHeroExtra->setModel(heroFilterModelExtra);
 
     FactionsFilterModel* factionsFilter = new FactionsFilterModel(false, this);
     factionsFilter->setSourceModel(modelsProvider->factions());
@@ -113,34 +126,39 @@ TemplatePlayerWidget::TemplatePlayerWidget(const Gui::LibraryModelsProvider* mod
     FactionsComboModel* factionsCombo = new FactionsComboModel(factionsFilter, this);
     m_ui->comboBoxFaction->setModel(factionsCombo);
 
-    connect(m_ui->comboBoxFaction, qOverload<int>(&QComboBox::currentIndexChanged), this, [heroFilter, this](int) {
-        heroFilter->invalidate();
+    connect(m_ui->comboBoxFaction, qOverload<int>(&QComboBox::currentIndexChanged), this, [heroFilterModelMain, heroFilterModelExtra, this](int) {
+        heroFilterModelMain->invalidate();
+        heroFilterModelExtra->invalidate();
 
-        if (m_ui->comboBoxHeroMainPolicy->currentIndex() == 3 && m_ui->comboBoxHeroMain->currentIndex() == -1)
+        if (m_ui->comboBoxHeroMainPolicy->currentIndex() >= 3 && m_ui->comboBoxHeroMain->currentIndex() == -1)
             m_ui->comboBoxHeroMain->setCurrentIndex(0);
-        if (m_ui->comboBoxHeroExtraPolicy->currentIndex() == 3 && m_ui->comboBoxHeroExtra->currentIndex() == -1)
+        if (m_ui->comboBoxHeroExtraPolicy->currentIndex() >= 3 && m_ui->comboBoxHeroExtra->currentIndex() == -1)
             m_ui->comboBoxHeroExtra->setCurrentIndex(0);
     });
     connect(m_ui->comboBoxHeroMain, qOverload<int>(&QComboBox::currentIndexChanged), this, [this](int index) {
-        if (index >= 0)
+        if (index >= 0 && m_ui->comboBoxHeroMainPolicy->currentIndex() < 3)
             m_ui->comboBoxHeroMainPolicy->setCurrentIndex(3);
     });
     connect(m_ui->comboBoxHeroExtra, qOverload<int>(&QComboBox::currentIndexChanged), this, [this](int index) {
-        if (index >= 0)
+        if (index >= 0 && m_ui->comboBoxHeroExtraPolicy->currentIndex() < 3)
             m_ui->comboBoxHeroExtraPolicy->setCurrentIndex(3);
     });
 
-    connect(m_ui->comboBoxHeroMainPolicy, qOverload<int>(&QComboBox::currentIndexChanged), this, [this](int index) {
-        if (index != 3)
+    connect(m_ui->comboBoxHeroMainPolicy, qOverload<int>(&QComboBox::currentIndexChanged), this, [this, heroFilterModelMain](int index) {
+        if (index < 3)
             m_ui->comboBoxHeroMain->setCurrentIndex(-1);
-        if (index == 3 && m_ui->comboBoxHeroMain->currentIndex() == -1)
+        if (index >= 3 && m_ui->comboBoxHeroMain->currentIndex() == -1)
             m_ui->comboBoxHeroMain->setCurrentIndex(0);
+
+        heroFilterModelMain->setUseFactionFilter(index == 4);
     });
-    connect(m_ui->comboBoxHeroExtraPolicy, qOverload<int>(&QComboBox::currentIndexChanged), this, [this](int index) {
-        if (index != 3)
+    connect(m_ui->comboBoxHeroExtraPolicy, qOverload<int>(&QComboBox::currentIndexChanged), this, [this, heroFilterModelExtra](int index) {
+        if (index < 3)
             m_ui->comboBoxHeroExtra->setCurrentIndex(-1);
-        if (index == 3 && m_ui->comboBoxHeroExtra->currentIndex() == -1)
+        if (index >= 3 && m_ui->comboBoxHeroExtra->currentIndex() == -1)
             m_ui->comboBoxHeroExtra->setCurrentIndex(0);
+
+        heroFilterModelExtra->setUseFactionFilter(index == 4);
     });
 }
 
@@ -170,9 +188,11 @@ FHRngUserSettings::UserPlayer TemplatePlayerWidget::getConfig() const
     result.m_startingHeroGen = getPolicyFromCombo(m_ui->comboBoxHeroMainPolicy);
     result.m_extraHeroGen    = getPolicyFromCombo(m_ui->comboBoxHeroExtraPolicy);
 
-    if (result.m_startingHeroGen != FHRngUserSettings::HeroGeneration::Fixed)
+    if (result.m_startingHeroGen != FHRngUserSettings::HeroGeneration::FixedStarting
+        && result.m_startingHeroGen != FHRngUserSettings::HeroGeneration::FixedAny)
         result.m_startingHero = nullptr;
-    if (result.m_extraHeroGen != FHRngUserSettings::HeroGeneration::Fixed)
+    if (result.m_extraHeroGen != FHRngUserSettings::HeroGeneration::FixedStarting
+        && result.m_extraHeroGen != FHRngUserSettings::HeroGeneration::FixedAny)
         result.m_extraHero = nullptr;
     return result;
 }

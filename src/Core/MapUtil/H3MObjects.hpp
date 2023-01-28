@@ -544,8 +544,9 @@ struct MapObjectWithOwner : public MapObjectAbstract {
 struct MapObjectCreatureBank : public MapObjectAbstract {
     using MapObjectAbstract::MapObjectAbstract;
 
-    uint32_t m_content  = 0xffffffffU;
-    uint8_t  m_upgraded = 0xffU;
+    uint32_t              m_content  = 0xffffffffU;
+    uint8_t               m_upgraded = 0xffU;
+    std::vector<uint32_t> m_artifacts;
 
     void readBinary(ByteOrderDataStreamReader& stream) override;
     void writeBinary(ByteOrderDataStreamWriter& stream) const override;

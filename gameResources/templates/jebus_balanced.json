@@ -10,7 +10,29 @@
 	},
 	"rngZones" : {
 		"Common"  : { "centerDispersion": {"x": 5 , "y": 5 }, "relativeSizeAvg": 100, "relativeSizeDispersion": 10, "cornerRoads": 3,
-			"towns": [{"town":{"isMain":true, "hasFort":true},"playerControlled":true, "useZoneFaction": true}, {}, {}]	},
+			"towns": [{"town":{"isMain":true, "hasFort":true},"playerControlled":true, "useZoneFaction": true}, {}, {}],
+            
+            "score": {
+                "guarded": {
+                    "Army":           { "target": 50000, "maxSingle": 20000},
+                    "ArtStat":        { "target": 50000, "maxSingle": 20000},
+                    "ArtSupport":     { "target": 50000},
+                    "Gold":           { "target": 50000},
+                    "Resource":       { "target": 50000, "maxSingle": 20000},
+                    "ResourceGen":    { "target": 50000},
+                    "Experience":     { "target": 50000},
+                    "SpellOffensive": { "target": 50000},
+                    "SpellCommon":    { "target": 50000},
+                    "SpellAll":       { "target": 50000},
+                    "Misc":           { "target": 50000}
+                },
+                "unguarded": {
+                    "Gold":           { "target": 20000, "maxSingle": 2000},
+                    "Experience":     { "target": 20000, "maxSingle": 2000}
+                },
+                "armyFocusPercent": 80
+            }   
+        },
 		"Treasure": { "centerDispersion": {"x": 15, "y": 15}, "relativeSizeAvg": 130, "relativeSizeDispersion": 20, "terrain": "sod.terrain.sand",
 			"towns": [{"town":{"hasFort":true}, "useZoneFaction": true}, {"town":{"hasFort":true}}, {"town":{"hasFort":true}}, {"town":{"hasFort":true}}, {"town":{"hasFort":true}}]	},
 

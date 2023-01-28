@@ -227,6 +227,12 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_isSpell)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    MapObjectCreatureBank,
+    m_content,
+    m_upgraded,
+    m_artifacts)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     MapResource,
     m_message,
     m_amount)

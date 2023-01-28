@@ -278,8 +278,19 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     }
 
     for (auto& obj : fhMap.m_objects.m_banks) {
-        auto* def = obj.m_id->objectDefs.get(obj.m_defIndex);
-        result.addItem(makeItemByDef(SpriteMap::Layer::Bank, def, obj.m_pos).addInfo("id", obj.m_id->id));
+        auto* def               = obj.m_id->objectDefs.get(obj.m_defIndex);
+        auto  strCount          = obj.m_guardsVariant < 0 ? "R" : std::to_string(obj.m_guardsVariant + 1);
+        auto* item              = result.addItem(makeItemByDef(SpriteMap::Layer::Bank, def, obj.m_pos).addInfo("id", obj.m_id->id).addInfo("size", strCount));
+        item->m_overlayInfo     = strCount + (obj.m_upgradedStack == FHBank::UpgradedStack::Yes ? " u" : "");
+        item->m_overlayInfoFont = 16;
+
+        auto artPos = obj.m_pos;
+        artPos.m_x--;
+        for (auto* art : obj.m_artifacts) {
+            artPos.m_x--;
+            auto* artdef = art->objectDefs.get({});
+            result.addItem(makeItemByDef(SpriteMap::Layer::Artifact, artdef, artPos).setPriority(SpriteMap::s_objectMaxPriority + 2));
+        }
     }
     for (auto& obj : fhMap.m_objects.m_obstacles) {
         auto* def = obj.m_id->objectDefs.get(obj.m_defIndex);

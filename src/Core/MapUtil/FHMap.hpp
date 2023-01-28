@@ -16,6 +16,7 @@
 #include "Reward.hpp"
 
 #include "LibraryObjectDef.hpp"
+#include "LibrarySecondarySkill.hpp"
 
 #include "FHTileMap.hpp"
 
@@ -174,6 +175,8 @@ struct FHBank : public FHCommonObject {
 
     UpgradedStack m_upgradedStack = UpgradedStack::Random;
     int           m_guardsVariant = -1; // -1 = full random
+
+    std::vector<Core::LibraryArtifactConstPtr> m_artifacts; // empty = full random
 };
 
 struct FHObstacle : public FHCommonObject {
@@ -240,6 +243,36 @@ struct FHRngZoneTown {
     bool   m_useZoneFaction   = false;
 };
 
+struct FHScoreSettings {
+    enum class Attr
+    {
+        Invalid,
+
+        Army,
+        ArtStat,
+        ArtSupport,
+        Gold,
+        Resource,
+        ResourceGen,
+        Experience,
+        SpellOffensive,
+        SpellCommon,
+        SpellAll,
+        Misc,
+    };
+    struct ScoreScope {
+        int64_t m_target    = 0;
+        int64_t m_minSingle = -1;
+        int64_t m_maxSingle = -1;
+    };
+
+    using AttrMap = std::map<Attr, ScoreScope>;
+
+    AttrMap m_guarded;
+    AttrMap m_unguarded;
+    int     m_armyFocusPercent = 80;
+};
+
 struct FHRngZone {
     FHPlayerId                   m_player          = FHPlayerId::Invalid;
     Core::LibraryFactionConstPtr m_mainTownFaction = nullptr;
@@ -251,6 +284,8 @@ struct FHRngZone {
     FHPos                      m_centerDispersion;
     int                        m_relativeSizeAvg        = 100;
     int                        m_relativeSizeDispersion = 0;
+
+    FHScoreSettings m_score;
 
     int m_cornerRoads = 0;
 

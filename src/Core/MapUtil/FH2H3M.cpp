@@ -437,6 +437,9 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
             }
         }
 
+        for (auto* art : fhBank.m_artifacts)
+            bank->m_artifacts.push_back(art ? (uint32_t) art->legacyId : uint32_t(-1));
+
         auto* def = fhBank.m_id->objectDefs.get(fhBank.m_defIndex);
         dest.m_objects.push_back(Object{ .m_order = fhBank.m_order, .m_pos = int3fromPos(fhBank.m_pos), .m_defnum = tmplCache.add(def), .m_impl = std::move(bank) });
     }

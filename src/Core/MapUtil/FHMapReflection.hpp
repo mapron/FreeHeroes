@@ -204,7 +204,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 
     m_id,
     m_upgradedStack,
-    m_guardsVariant)
+    m_guardsVariant,
+    m_artifacts)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHObstacle,
@@ -305,6 +306,35 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_playerControlled,
     m_useZoneFaction)
 
+ENUM_REFLECTION_STRINGIFY(
+    FHScoreSettings::Attr,
+    Invalid,
+
+    Invalid,
+    Army,
+    ArtStat,
+    ArtSupport,
+    Gold,
+    Resource,
+    ResourceGen,
+    Experience,
+    SpellOffensive,
+    SpellCommon,
+    SpellAll,
+    Misc)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHScoreSettings::ScoreScope,
+    m_target,
+    m_minSingle,
+    m_maxSingle)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHScoreSettings,
+    m_guarded,
+    m_unguarded,
+    m_armyFocusPercent)
+
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone,
     m_player,
@@ -317,7 +347,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_relativeSizeAvg,
     m_relativeSizeDispersion,
     m_cornerRoads,
-    m_isNormal)
+    m_isNormal,
+    m_score)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngConnection,

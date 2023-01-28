@@ -96,7 +96,12 @@
      </item>
      <item>
       <property name="text">
-       <string>Fixed</string>
+       <string>Fixed - Any</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Fixed - Starting</string>
       </property>
      </item>
     </widget>
@@ -152,7 +157,12 @@
      </item>
      <item>
       <property name="text">
-       <string>Fixed</string>
+       <string>Fixed - Any</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Fixed - Starting</string>
       </property>
      </item>
     </widget>

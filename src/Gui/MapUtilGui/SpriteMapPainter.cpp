@@ -10,6 +10,7 @@
 
 #include <QPainter>
 #include <QDebug>
+#include <QPainterPath>
 
 namespace FreeHeroes {
 
@@ -101,13 +102,37 @@ void SpriteMapPainter::paint(QPainter*        painter,
             if (!item.m_overlayInfo.empty()) {
                 painter->setPen(Qt::white);
                 QFont font = painter->font();
-                font.setPixelSize(12);
+                font.setPixelSize(item.m_overlayInfoFont);
                 painter->setFont(font);
                 painter->setTransform(posTransform);
                 painter->translate((item.m_overlayInfoOffsetX) * tileSize, (0) * tileSize);
-                painter->drawText(QRect(0, tileSize / 2, tileSize, tileSize / 2),
-                                  Qt::AlignCenter | Qt::AlignVCenter,
-                                  QString::fromStdString(item.m_overlayInfo));
+                //                painter->drawText(QRect(0, tileSize / 2, tileSize, tileSize / 2),
+                //                                  Qt::AlignCenter | Qt::AlignVCenter,
+                //                                  QString::fromStdString(item.m_overlayInfo));
+
+                QFontMetrics fm(font);
+
+                const QString txt       = QString::fromStdString(item.m_overlayInfo);
+                int           textWidth = fm.horizontalAdvance(txt);
+                //int textHeight = fm.height();
+
+                const int textX = tileSize / 2 - textWidth / 2 - 2;
+                const int textY = tileSize / 2;
+
+                QPainterPath myPath;
+                myPath.addText(textX, textY, font, txt);
+
+                QPainterPathStroker stroker;
+                stroker.setWidth(3);
+                const QPainterPath stroked = stroker.createStroke(myPath);
+
+                painter->setBrush(Qt::black);
+                painter->setPen(Qt::NoPen);
+                painter->drawPath(stroked);
+
+                painter->setBrush(Qt::white);
+                painter->setPen(Qt::white);
+                painter->drawText(textX, textY, txt);
             }
 
             // debug diamond

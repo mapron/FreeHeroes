@@ -646,29 +646,28 @@ void MapObjectWithOwner::fromJson(const PropertyTree& data)
 void MapObjectCreatureBank::readBinary(ByteOrderDataStreamReader& stream)
 {
     if (m_features->m_creatureBankSize) {
-        stream >> m_content >> m_upgraded;
-        stream.zeroPadding(4);
+        stream >> m_content >> m_upgraded >> m_artifacts;
     }
 }
 
 void MapObjectCreatureBank::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
     if (m_features->m_creatureBankSize) {
-        stream << m_content << m_upgraded;
-        stream.zeroPadding(4);
+        stream << m_content << m_upgraded << m_artifacts;
     }
 }
 
 void MapObjectCreatureBank::toJson(PropertyTree& data) const
 {
-    data["content"]  = PropertyTreeScalar(m_content);
-    data["upgraded"] = PropertyTreeScalar(m_upgraded);
+    Mernel::Reflection::PropertyTreeWriter writer;
+    writer.valueToJson(*this, data);
 }
 
 void MapObjectCreatureBank::fromJson(const PropertyTree& data)
 {
-    data["content"].getScalar().convertTo(m_content);
-    data["upgraded"].getScalar().convertTo(m_upgraded);
+    Mernel::Reflection::PropertyTreeReader reader;
+    *this = { m_features };
+    reader.jsonToValue(data, *this);
 }
 
 void MapResource::readBinary(ByteOrderDataStreamReader& stream)
