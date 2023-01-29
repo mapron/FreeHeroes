@@ -108,7 +108,7 @@ private:
         HeroGeneration            m_startingHeroGen = HeroGeneration::RandomStartingFaction;
         HeroGeneration            m_extraHeroGen    = HeroGeneration::None;
     };
-    std::map<FHPlayerId, PlayerInfo> m_playerInfo;
+    std::map<Core::LibraryPlayerConstPtr, PlayerInfo> m_playerInfo;
 
     std::set<Core::LibraryHeroConstPtr> m_heroPool;
 };

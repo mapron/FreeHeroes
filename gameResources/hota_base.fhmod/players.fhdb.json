@@ -1,18 +1,18 @@
 [{
 "scope": "players",
 
-"compactCols":    ["untranslatedName"  , "legacyId"  , {"pres":["order", "color"]}  ],
+"compactCols":    ["untranslatedName"  , "legacyId"  , "isPlayable", {"pres":["order", "color", "icon"]}  ],
 "records": {
 
-"Red"                 : [ "Red"         , 0         ,   [ 0 , "F71A0E" ] ],
-"Blue"                : [ "Blue"        , 1         ,   [ 1 , "1C18F4" ] ],
-"Tan"                 : [ "Tan"         , 2         ,   [ 2 , "E7BD9C" ] ],
-"Green"               : [ "Green"       , 3         ,   [ 3 , "3F7F3F" ] ],
-"Orange"              : [ "Orange"      , 4         ,   [ 4 , "EA6800" ] ],
-"Purple"              : [ "Purple"      , 5         ,   [ 5 , "7A478E" ] ],
-"Teal"                : [ "Teal"        , 6         ,   [ 6 , "5A9C98" ] ],
-"Pink"                : [ "Pink"        , 7         ,   [ 7 , "AD6373" ] ],
-"None"                : [ "None"        , -1        ,   [ 8 , "888888" ] ]
+"Red"                 : [ "Red"         , 0         ,  true       ,  [ 0 , "F71A0E", "crest58:0" ] ],
+"Blue"                : [ "Blue"        , 1         ,  true       ,  [ 1 , "1C18F4", "crest58:1" ] ],
+"Tan"                 : [ "Tan"         , 2         ,  true       ,  [ 2 , "E7BD9C", "crest58:2" ] ],
+"Green"               : [ "Green"       , 3         ,  true       ,  [ 3 , "3F7F3F", "crest58:3" ] ],
+"Orange"              : [ "Orange"      , 4         ,  true       ,  [ 4 , "EA6800", "crest58:4" ] ],
+"Purple"              : [ "Purple"      , 5         ,  true       ,  [ 5 , "7A478E", "crest58:5" ] ],
+"Teal"                : [ "Teal"        , 6         ,  true       ,  [ 6 , "5A9C98", "crest58:6" ] ],
+"Pink"                : [ "Pink"        , 7         ,  true       ,  [ 7 , "AD6373", "crest58:7" ] ],
+"None"                : [ "None"        , -1        ,  false      ,  [ 8 , "888888", ""          ] ]
 
 }
 

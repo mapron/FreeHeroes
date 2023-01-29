@@ -9,6 +9,8 @@
 
 #include "FHMapReflection.hpp"
 #include "LibraryModels.hpp"
+#include "LibraryPlayer.hpp"
+#include "LibraryWrappersMetatype.hpp"
 
 #include "MernelPlatform/FileIOUtils.hpp"
 #include "MernelPlatform/FileFormatJson.hpp"
@@ -29,41 +31,26 @@ TemplateSettingsWidget::TemplateSettingsWidget(const Gui::LibraryModelsProvider*
 {
     m_ui->setupUi(this, std::tuple{ modelsProvider });
 
-    std::map<FHPlayerId, QString> colorMap{
-
-        { FHPlayerId::Red, tr("Red") },
-        { FHPlayerId::Blue, tr("Blue") },
-        { FHPlayerId::Tan, tr("Tan") },
-        { FHPlayerId::Green, tr("Green") },
-        { FHPlayerId::Orange, tr("Orange") },
-        { FHPlayerId::Purple, tr("Purple") },
-        { FHPlayerId::Teal, tr("Teal") },
-        { FHPlayerId::Pink, tr("Pink") },
+    QList<TemplatePlayerWidget*> widgets{
+        m_ui->playerWidgetRed,
+        m_ui->playerWidgetBlue,
+        m_ui->playerWidgetTan,
+        m_ui->playerWidgetGreen,
+        m_ui->playerWidgetOrange,
+        m_ui->playerWidgetPurple,
+        m_ui->playerWidgetTeal,
+        m_ui->playerWidgetPink,
     };
+    for (int i = 0; i < widgets.size(); i++) {
+        TemplatePlayerWidget* w      = widgets[i];
+        auto                  player = modelsProvider->players()->data(modelsProvider->players()->index(i, 0), Gui::PlayersModel::GuiObject).value<Gui::GuiPlayerConstPtr>();
 
-    m_mapping = {
-
-        { FHPlayerId::Red, m_ui->playerWidgetRed },
-        { FHPlayerId::Blue, m_ui->playerWidgetBlue },
-        { FHPlayerId::Tan, m_ui->playerWidgetTan },
-        { FHPlayerId::Green, m_ui->playerWidgetGreen },
-        { FHPlayerId::Orange, m_ui->playerWidgetOrange },
-        { FHPlayerId::Purple, m_ui->playerWidgetPurple },
-        { FHPlayerId::Teal, m_ui->playerWidgetTeal },
-        { FHPlayerId::Pink, m_ui->playerWidgetPink },
-    };
-
-    for (auto [id, w] : m_mapping) {
-        w->setPlayerColorText(colorMap.at(id));
+        auto pix = player->getIcon();
+        w->setPlayerColorText(player->getName(), pix);
+        m_mapping[player->getSource()] = w;
     }
-
-    m_ui->comboBoxMapSize->setItemData(0, 36);
-    m_ui->comboBoxMapSize->setItemData(1, 72);
-    m_ui->comboBoxMapSize->setItemData(2, 108);
-    m_ui->comboBoxMapSize->setItemData(3, 144);
-    m_ui->comboBoxMapSize->setItemData(4, 180);
-    m_ui->comboBoxMapSize->setItemData(5, 216);
-    m_ui->comboBoxMapSize->setItemData(6, 252);
+    for (int i = 0; i <= 6; i++)
+        m_ui->comboBoxMapSize->setItemData(i, 36 * (i + 1));
 
     connect(m_ui->pushButtonReset, &QAbstractButton::clicked, this, [this] {
         *m_userSettings = {};

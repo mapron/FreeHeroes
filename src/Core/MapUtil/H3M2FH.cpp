@@ -12,6 +12,7 @@
 #include "LibraryMapObstacle.hpp"
 #include "LibraryMapVisitable.hpp"
 #include "LibraryObjectDef.hpp"
+#include "LibraryPlayer.hpp"
 #include "LibraryTerrain.hpp"
 
 #include "MernelPlatform/Logger.hpp"
@@ -147,15 +148,6 @@ FHPos posFromH3M(H3Pos pos, int xoffset = 0)
     return { (pos.m_x + xoffset), pos.m_y, pos.m_z };
 }
 
-FHPlayerId makePlayerId(int h3Id)
-{
-    if (h3Id >= 0 && h3Id <= 7)
-        return static_cast<FHPlayerId>(h3Id);
-    if (h3Id == -1 || h3Id == 255)
-        return FHPlayerId::None;
-    return FHPlayerId::Invalid;
-}
-
 class FloodFiller {
 public:
     void fillAdjucent(const FHPos& current, const std::set<FHPos>& exclude, std::set<FHPos>& result, const std::function<bool(const MapTile&)>& pred)
@@ -229,6 +221,12 @@ H3M2FHConverter::H3M2FHConverter(const Core::IGameDatabase* database)
     m_secSkillIds = database->secSkills()->legacyOrderedRecords();
     m_terrainIds  = database->terrains()->legacyOrderedRecords();
     m_unitIds     = database->units()->legacyOrderedRecords();
+
+    auto players = database->players()->legacyOrderedRecords();
+    for (int i = 0; i < (int) players.size(); i++)
+        m_playerIds[i] = players[i];
+    m_playerIds[-1]  = database->players()->find(std::string(Core::LibraryPlayer::s_none));
+    m_playerIds[255] = database->players()->find(std::string(Core::LibraryPlayer::s_none));
 }
 
 void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
@@ -251,11 +249,11 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
     if (dest.m_config.m_hasRoundLimit)
         dest.m_config.m_roundLimit = src.m_hotaVer.m_roundLimit;
 
-    std::map<FHPlayerId, FHPos>   mainTowns;
-    std::map<FHPlayerId, uint8_t> mainHeroes;
+    std::map<Core::LibraryPlayerConstPtr, FHPos>   mainTowns;
+    std::map<Core::LibraryPlayerConstPtr, uint8_t> mainHeroes;
 
     for (int index = 0; const PlayerInfo& playerInfo : src.m_players) {
-        const auto playerId = makePlayerId(index++);
+        const auto playerId = m_playerIds.at(index++);
         auto&      fhPlayer = dest.m_players[playerId];
 
         fhPlayer.m_aiPossible             = playerInfo.m_canComputerPlay;
@@ -347,7 +345,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             {
                 const auto* hero = static_cast<const MapHero*>(impl);
 
-                const auto playerId = makePlayerId(hero->m_playerOwner);
+                const auto playerId = m_playerIds.at(hero->m_playerOwner);
                 FHHero     fhhero;
                 fhhero.m_player          = playerId;
                 fhhero.m_order           = index;
@@ -591,7 +589,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             case MapObjectType::TOWN:
             {
                 const auto* town     = static_cast<const MapTown*>(impl);
-                const auto  playerId = makePlayerId(town->m_playerOwner);
+                const auto  playerId = m_playerIds.at(town->m_playerOwner);
                 FHTown      fhtown;
                 initCommon(fhtown);
                 fhtown.m_player    = playerId;
@@ -615,7 +613,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 const auto* objOwner = static_cast<const MapObjectWithOwner*>(impl);
                 FHMine      mine;
                 initCommon(mine);
-                mine.m_player = makePlayerId(objOwner->m_owner);
+                mine.m_player = m_playerIds.at(objOwner->m_owner);
                 mine.m_id     = mappings.resourceMine;
                 dest.m_objects.m_mines.push_back(std::move(mine));
             } break;
@@ -629,7 +627,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 initCommon(dwelling);
                 assert(mappings.dwelling);
                 dwelling.m_id     = mappings.dwelling;
-                dwelling.m_player = makePlayerId(objOwner->m_owner);
+                dwelling.m_player = m_playerIds.at(objOwner->m_owner);
                 dest.m_objects.m_dwellings.push_back(std::move(dwelling));
             } break;
             case MapObjectType::WAR_MACHINE_FACTORY:

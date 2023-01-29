@@ -29,20 +29,6 @@ class IGameDatabase;
 class IRandomGenerator;
 }
 
-enum class FHPlayerId
-{
-    Invalid = -2,
-    None    = -1,
-    Red     = 0,
-    Blue,
-    Tan,
-    Green,
-    Orange,
-    Purple,
-    Teal,
-    Pink,
-};
-
 enum class FHScoreAttr
 {
     Invalid,
@@ -83,7 +69,7 @@ struct FHCommonVisitable : public FHCommonObject {
 };
 
 struct FHPlayerControlledObject : public FHCommonObject {
-    FHPlayerId m_player = FHPlayerId::Invalid;
+    Core::LibraryPlayerConstPtr m_player = nullptr;
 };
 
 struct FHHeroData {
@@ -282,7 +268,7 @@ struct FHScoreSettings {
 };
 
 struct FHRngZone {
-    FHPlayerId                   m_player          = FHPlayerId::Invalid;
+    Core::LibraryPlayerConstPtr  m_player          = nullptr;
     Core::LibraryFactionConstPtr m_mainTownFaction = nullptr;
     Core::LibraryFactionConstPtr m_rewardsFaction  = nullptr;
     Core::LibraryTerrainConstPtr m_terrain         = nullptr;
@@ -337,7 +323,7 @@ struct FHRngUserSettings {
         HeroGeneration               m_startingHeroGen = HeroGeneration::RandomStartingFaction;
         HeroGeneration               m_extraHeroGen    = HeroGeneration::None;
     };
-    using PlayersMap = std::map<FHPlayerId, UserPlayer>;
+    using PlayersMap = std::map<Core::LibraryPlayerConstPtr, UserPlayer>;
 
     PlayersMap m_players;
 
@@ -347,7 +333,7 @@ struct FHRngUserSettings {
 };
 
 struct MAPUTIL_EXPORT FHMap {
-    using PlayersMap       = std::map<FHPlayerId, FHPlayer>;
+    using PlayersMap       = std::map<Core::LibraryPlayerConstPtr, FHPlayer>;
     using DefMap           = std::map<Core::LibraryObjectDefConstPtr, Core::LibraryObjectDef>;
     using RngZoneMap       = std::map<std::string, FHRngZone>;
     using RngConnectionMap = std::map<std::string, FHRngConnection>;

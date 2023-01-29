@@ -23,7 +23,7 @@ struct TileZone {
     Core::LibraryTerrainConstPtr m_terrain         = nullptr;
     Core::LibraryFactionConstPtr m_mainTownFaction = nullptr;
     Core::LibraryFactionConstPtr m_rewardsFaction  = nullptr;
-    FHPlayerId                   m_player          = FHPlayerId::None;
+    Core::LibraryPlayerConstPtr  m_player          = nullptr;
 
     using TileRegion = std::unordered_set<MapCanvas::Tile*>;
 

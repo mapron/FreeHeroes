@@ -13,6 +13,7 @@
 #include "LibraryMapObstacle.hpp"
 #include "LibraryMapVisitable.hpp"
 #include "LibraryObjectDef.hpp"
+#include "LibraryPlayer.hpp"
 #include "LibrarySecondarySkill.hpp"
 #include "LibraryTerrain.hpp"
 
@@ -149,7 +150,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
     });
 
     for (auto& [playerId, fhPlayer] : src.m_players) {
-        auto  index    = static_cast<int>(playerId);
+        auto  index    = playerId->legacyId;
         auto& h3player = dest.m_players[index];
 
         h3player.m_canHumanPlay           = fhPlayer.m_humanPossible;
@@ -176,7 +177,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
     tmplCache.addId("avlholg0");
 
     for (auto& fhTown : src.m_towns) {
-        auto playerIndex = static_cast<int>(fhTown.m_player);
+        auto playerIndex = fhTown.m_player->legacyId;
         if (playerIndex >= 0) {
             auto& h3player = dest.m_players[playerIndex];
             if (fhTown.m_isMain) {
@@ -203,7 +204,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
     }
 
     for (auto& fhHero : src.m_wanderingHeroes) {
-        auto  playerIndex = static_cast<int>(fhHero.m_player);
+        auto  playerIndex = fhHero.m_player->legacyId;
         auto* libraryHero = fhHero.m_data.m_army.hero.library;
         assert(libraryHero);
 
@@ -407,7 +408,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         std::unique_ptr<IMapObject> impl;
         if (fhDwelling.m_id->hasPlayer) {
             auto dwell     = std::make_unique<MapObjectWithOwner>(dest.m_features);
-            dwell->m_owner = static_cast<uint8_t>(fhDwelling.m_player);
+            dwell->m_owner = static_cast<uint8_t>(fhDwelling.m_player->legacyId);
             impl           = std::move(dwell);
         } else {
             impl = std::make_unique<MapObjectSimple>(dest.m_features);
@@ -418,7 +419,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
     }
     for (auto& fhMine : src.m_objects.m_mines) {
         auto mine     = std::make_unique<MapObjectWithOwner>(dest.m_features);
-        mine->m_owner = static_cast<uint8_t>(fhMine.m_player);
+        mine->m_owner = static_cast<uint8_t>(fhMine.m_player->legacyId);
 
         auto* def = fhMine.m_id->minesDefs.get(fhMine.m_defIndex);
         dest.m_objects.push_back(Object{ .m_order = fhMine.m_order, .m_pos = int3fromPos(fhMine.m_pos), .m_defnum = tmplCache.add(def), .m_impl = std::move(mine) });

@@ -979,12 +979,14 @@ STRUCT_REFLECTION_PAIRED(
     LibraryPlayer::Presentation,
     "name",                        name,
     "order",                       order,
+    "icon",                        icon,
     "color",                       colorRGB
 )
 
 STRUCT_REFLECTION_PAIRED(
     LibraryPlayer,
     "legacyId",                    legacyId,
+    "isPlayable",                  isPlayable,
     "untranslatedName",            untranslatedName,
     "pres",                        presentationParams
 )

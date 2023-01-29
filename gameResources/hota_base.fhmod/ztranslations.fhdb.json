@@ -99,4 +99,23 @@
 
 }
 
+},
+
+{
+"scope": "players",
+
+"records": {
+
+"Red"     : { "pres": {"name": {"ts": { "ru_RU": "Красный"     } } } },
+"Blue"    : { "pres": {"name": {"ts": { "ru_RU": "Синий"       } } } },
+"Tan"     : { "pres": {"name": {"ts": { "ru_RU": "Коричневый"  } } } },
+"Green"   : { "pres": {"name": {"ts": { "ru_RU": "Зелёный"     } } } },
+"Orange"  : { "pres": {"name": {"ts": { "ru_RU": "Оранжевый"   } } } },
+"Purple"  : { "pres": {"name": {"ts": { "ru_RU": "Фиолетовый"  } } } },
+"Teal"    : { "pres": {"name": {"ts": { "ru_RU": "Чайный"      } } } },
+"Pink"    : { "pres": {"name": {"ts": { "ru_RU": "Розовый"     } } } },
+"None"    : { "pres": {"name": {"ts": { "ru_RU": "Нет"         } } } }
+
+}
+
 }]

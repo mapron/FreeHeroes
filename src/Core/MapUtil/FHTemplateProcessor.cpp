@@ -8,6 +8,8 @@
 #include "MernelReflection/EnumTraitsMacro.hpp"
 #include "MernelPlatform/Profiler.hpp"
 
+#include "LibraryPlayer.hpp"
+
 #include "RmgUtil/TemplateUtils.hpp"
 #include "RmgUtil/ObjectGenerator.hpp"
 #include "RmgUtil/KMeans.hpp"
@@ -124,7 +126,7 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
         m_playerInfo[playerId] = {};
     }
     for (const auto& [key, rngZone] : m_map.m_rngZones) {
-        if (rngZone.m_player <= FHPlayerId::None)
+        if (rngZone.m_player == nullptr || !rngZone.m_player->isPlayable)
             continue;
 
         if (!m_playerInfo.contains(rngZone.m_player))
@@ -450,7 +452,7 @@ void FHTemplateProcessor::runZoneTilesRefinement()
 
 void FHTemplateProcessor::runTownsPlacement()
 {
-    auto placeTown = [this](FHTown town, FHPos pos, FHPlayerId player, Core::LibraryFactionConstPtr faction) {
+    auto placeTown = [this](FHTown town, FHPos pos, Core::LibraryPlayerConstPtr player, Core::LibraryFactionConstPtr faction) {
         if (!faction)
             faction = getRandomFaction(false);
         town.m_factionId = faction;
@@ -478,6 +480,8 @@ void FHTemplateProcessor::runTownsPlacement()
         }
     };
 
+    auto playerNone = m_database->players()->find(std::string(Core::LibraryPlayer::s_none));
+
     for (auto& tileZone : m_tileZones) {
         std::vector<FHPos> townPositions;
         const auto&        towns = tileZone.m_rngZoneSettings.m_towns;
@@ -500,7 +504,7 @@ void FHTemplateProcessor::runTownsPlacement()
         }
 
         for (size_t i = 0; i < towns.size(); ++i) {
-            auto player  = towns[i].m_playerControlled ? tileZone.m_rngZoneSettings.m_player : FHPlayerId::None;
+            auto player  = towns[i].m_playerControlled ? tileZone.m_rngZoneSettings.m_player : playerNone;
             auto faction = towns[i].m_useZoneFaction ? tileZone.m_mainTownFaction : nullptr;
             placeTown(towns[i].m_town, townPositions[i], player, faction);
         }

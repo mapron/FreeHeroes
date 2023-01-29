@@ -6,13 +6,13 @@
 #include "FHMapToSpriteMap.hpp"
 
 #include "FHMap.hpp"
-#include "FHMapReflection.hpp"
 #include "SpriteMap.hpp"
 
 #include "LibraryDwelling.hpp"
 #include "LibraryMapBank.hpp"
 #include "LibraryMapObstacle.hpp"
 #include "LibraryMapVisitable.hpp"
+#include "LibraryPlayer.hpp"
 
 #include "IGraphicsLibrary.hpp"
 
@@ -27,62 +27,18 @@ QColor makeColor(const std::vector<int>& rgb)
     return QColor();
 }
 
-std::string playerToString(FHPlayerId player)
+std::string playerToString(Core::LibraryPlayerConstPtr player)
 {
-    auto str = Mernel::Reflection::EnumTraits::enumToString(player);
-    return std::string(str.begin(), str.end());
+    return player->untranslatedName;
 }
 
-QColor makePlayerColor(FHPlayerId id)
+QColor makePlayerColor(Core::LibraryPlayerConstPtr player)
 {
-    switch (id) {
-        case FHPlayerId::Invalid:
-            return {};
-        case FHPlayerId::None:
-            return QColor("#888888");
-        case FHPlayerId::Red:
-            return QColor("#F71A0E");
-        case FHPlayerId::Blue:
-            return QColor("#1C18F4");
-        case FHPlayerId::Tan:
-            return QColor("#E7BD9C");
-        case FHPlayerId::Green:
-            return QColor("#3F7F3F");
-        case FHPlayerId::Orange:
-            return QColor("#EA6800");
-        case FHPlayerId::Purple:
-            return QColor("#7A478E");
-        case FHPlayerId::Teal:
-            return QColor("#5A9C98");
-        case FHPlayerId::Pink:
-            return QColor("#AD6373");
-    }
-    return {};
+    if (!player)
+        return {};
+    return QColor("#" + QString::fromStdString(player->presentationParams.colorRGB));
 }
 
-/*
-DrawHint directionToHint(HeroDirection direction)
-{
-    switch (direction) {
-        case HeroDirection::T:
-            return { 0, false };
-        case HeroDirection::TR:
-            return { 1, false };
-        case HeroDirection::R:
-            return { 2, false };
-        case HeroDirection::BR:
-            return { 3, false };
-        case HeroDirection::B:
-            return { 4, false };
-        case HeroDirection::BL:
-            return { 3, true };
-        case HeroDirection::L:
-            return { 2, true };
-        case HeroDirection::TL:
-            return { 1, true };
-    }
-    return {};
-}*/
 }
 
 SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* graphicsLibrary) const
@@ -206,14 +162,14 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     }
 
     for (auto& fhHero : fhMap.m_wanderingHeroes) {
-        auto  playerIndex = static_cast<int>(fhHero.m_player);
-        auto* libraryHero = fhHero.m_data.m_army.hero.library;
+        const bool isPlayable  = fhHero.m_player->isPlayable;
+        auto*      libraryHero = fhHero.m_data.m_army.hero.library;
         assert(libraryHero);
 
         auto pos = fhHero.m_pos;
-        if (playerIndex >= 0)
+        if (isPlayable)
             pos.m_x += 1;
-        const std::string id = playerIndex < 0 ? "avxprsn0" : libraryHero->getAdventureSprite() + "e";
+        const std::string id = !isPlayable ? "avxprsn0" : libraryHero->getAdventureSprite() + "e";
         result.addItem(makeItemById(SpriteMap::Layer::Hero, id, pos)
                            .addInfo("id", libraryHero->id)
                            .setPriority(SpriteMap::s_objectMaxPriority + 1));

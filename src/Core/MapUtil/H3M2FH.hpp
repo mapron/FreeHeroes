@@ -45,6 +45,7 @@ private:
     //std::vector<Core::LibraryMapObstacleConstPtr>;
     //std::vector<Core::LibraryMapVisitableConstPtr>;
     //std::vector<Core::LibraryObjectDefConstPtr>;
+    std::map<int, Core::LibraryPlayerConstPtr>       m_playerIds;
     std::vector<Core::LibraryResourceConstPtr>       m_resourceIds;
     std::vector<Core::LibrarySecondarySkillConstPtr> m_secSkillIds;
     std::vector<Core::LibrarySpellConstPtr>          m_spellIds;

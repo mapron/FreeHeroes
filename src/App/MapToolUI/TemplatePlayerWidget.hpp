@@ -28,7 +28,7 @@ public:
 
     FHRngUserSettings::UserPlayer getConfig() const;
 
-    void setPlayerColorText(QString txt);
+    void setPlayerColorText(QString txt, QPixmap icon);
 
 private:
     std::unique_ptr<Ui::TemplatePlayerWidget> m_ui;

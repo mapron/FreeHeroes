@@ -232,6 +232,22 @@ public:
     virtual GuiFactionConstPtr find(Core::LibraryFactionConstPtr source) const = 0;
 };
 
+class GUIGAMEWRAPPERS_EXPORT GuiPlayer : public QObject
+    , public AbstractGuiWrapper<GuiPlayer, Core::LibraryPlayer> {
+    Q_OBJECT
+    using Base = AbstractGuiWrapper<GuiPlayer, Core::LibraryPlayer>;
+
+public:
+    GuiPlayer(Sound::IMusicBox* musicBox, const IGraphicsLibrary* graphicsLibrary, Core::LibraryPlayerConstPtr source);
+    QPixmap getIcon() const { return m_icon->get(); }
+    QColor  getColor() const;
+
+private:
+    IAsyncPixmapPtr         m_icon;
+    const IGraphicsLibrary* m_graphicsLibrary;
+};
+using GuiPlayerConstPtr = const GuiPlayer*;
+
 class GUIGAMEWRAPPERS_EXPORT GuiTerrain : public QObject
     , public AbstractGuiWrapper<GuiTerrain, Core::LibraryTerrain> {
     Q_OBJECT

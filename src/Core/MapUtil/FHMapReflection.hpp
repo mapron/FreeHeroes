@@ -15,20 +15,6 @@
 namespace Mernel::Reflection {
 
 ENUM_REFLECTION_STRINGIFY(
-    FHPlayerId,
-    Invalid,
-    Invalid,
-    None,
-    Red,
-    Blue,
-    Tan,
-    Green,
-    Orange,
-    Purple,
-    Teal,
-    Pink)
-
-ENUM_REFLECTION_STRINGIFY(
     Core::GameVersion,
     Invalid,
     SOD,

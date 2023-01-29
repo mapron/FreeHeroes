@@ -197,9 +197,10 @@ FHRngUserSettings::UserPlayer TemplatePlayerWidget::getConfig() const
     return result;
 }
 
-void TemplatePlayerWidget::setPlayerColorText(QString txt)
+void TemplatePlayerWidget::setPlayerColorText(QString txt, QPixmap icon)
 {
     m_ui->labelColor->setText(txt);
+    m_ui->labelIcon->setPixmap(QPixmap::fromImage(icon.toImage().scaledToHeight(m_ui->labelIcon->maximumHeight())));
 }
 
 }

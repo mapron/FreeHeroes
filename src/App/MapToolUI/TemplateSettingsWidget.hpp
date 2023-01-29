@@ -7,6 +7,8 @@
 
 #include "MernelPlatform/FsUtils.hpp"
 
+#include "LibraryFwd.hpp"
+
 #include <QFrame>
 
 #include <memory>
@@ -19,7 +21,6 @@ namespace FreeHeroes {
 namespace Gui {
 class LibraryModelsProvider;
 }
-enum class FHPlayerId;
 struct FHRngUserSettings;
 class TemplatePlayerWidget;
 class TemplateSettingsWidget : public QFrame {
@@ -33,11 +34,11 @@ public:
     void save();
 
 private:
-    std::unique_ptr<Ui::TemplateSettingsWidget> m_ui;
-    std::unique_ptr<FHRngUserSettings>          m_userSettings;
-    Mernel::std_path                            m_path;
-    const Gui::LibraryModelsProvider*           m_modelsProvider = nullptr;
-    std::map<FHPlayerId, TemplatePlayerWidget*> m_mapping;
+    std::unique_ptr<Ui::TemplateSettingsWidget>                  m_ui;
+    std::unique_ptr<FHRngUserSettings>                           m_userSettings;
+    Mernel::std_path                                             m_path;
+    const Gui::LibraryModelsProvider*                            m_modelsProvider = nullptr;
+    std::map<Core::LibraryPlayerConstPtr, TemplatePlayerWidget*> m_mapping;
 };
 
 }

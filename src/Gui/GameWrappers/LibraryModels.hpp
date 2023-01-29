@@ -184,6 +184,14 @@ private:
     bool m_allowIndependent;
 };
 
+class GUIGAMEWRAPPERS_EXPORT PlayersModel : public AbstractGuiWrapperListModel<GuiPlayer> {
+public:
+    using Base = AbstractGuiWrapperListModel<GuiPlayer>;
+    using AbstractGuiWrapperListModel::AbstractGuiWrapperListModel;
+
+    QVariant data(const QModelIndex& index, int role) const override;
+};
+
 class GUIGAMEWRAPPERS_EXPORT TerrainsModel : public AbstractGuiWrapperListModel<GuiTerrain> {
 public:
     using Base = AbstractGuiWrapperListModel<GuiTerrain>;
@@ -229,28 +237,30 @@ public:
     // that's why all models here are non-const.
     // clang-format off
     ArtifactsModel   * artifacts  () const noexcept { return m_artifacts;}
-    UnitsModel       * units      () const noexcept { return m_units;}
+    FactionsModel    * factions   () const noexcept { return m_factions;}
     HeroesModel      * heroes     () const noexcept { return m_heroes;}
+    MapBanksModel    * mapBanks   () const noexcept { return m_mapBanks;}
+    PlayersModel     * players   () const noexcept  { return m_players;}
     SkillsModel      * skills     () const noexcept { return m_skills;}
     SpellsModel      * spells     () const noexcept { return m_spells;}
-    FactionsModel    * factions   () const noexcept { return m_factions;}
     TerrainsModel    * terrains   () const noexcept { return m_terrains;}
-    MapBanksModel    * mapBanks   () const noexcept { return m_mapBanks;}
     UiCommonModel    * ui         () const noexcept { return m_uiCommon;}
+    UnitsModel       * units      () const noexcept { return m_units;}
     // clang-format on
     const IAppSettings*        appSettings() const noexcept { return m_appSettings; }
     const Core::IGameDatabase* database() const noexcept { return m_database; }
 
 private:
     ArtifactsModel* m_artifacts;
-    UnitsModel*     m_units;
+    FactionsModel*  m_factions;
     HeroesModel*    m_heroes;
+    MapBanksModel*  m_mapBanks;
+    PlayersModel*   m_players;
     SkillsModel*    m_skills;
     SpellsModel*    m_spells;
-    FactionsModel*  m_factions;
     TerrainsModel*  m_terrains;
-    MapBanksModel*  m_mapBanks;
     UiCommonModel*  m_uiCommon;
+    UnitsModel*     m_units;
 
     const IAppSettings* const        m_appSettings;
     const Core::IGameDatabase* const m_database;

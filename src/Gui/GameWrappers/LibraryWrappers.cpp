@@ -12,6 +12,7 @@
 #include "LibraryHeroSpec.hpp"
 #include "LibraryMapBank.hpp"
 #include "LibraryObjectDef.hpp"
+#include "LibraryPlayer.hpp"
 #include "LibrarySecondarySkill.hpp"
 #include "LibraryTerrain.hpp"
 #include "LibraryUnit.hpp"
@@ -318,6 +319,19 @@ GuiFaction::GuiFaction(Sound::IMusicBox*, const IGraphicsLibrary* graphicsLibrar
 {
 }
 
+GuiPlayer::GuiPlayer(Sound::IMusicBox*, const IGraphicsLibrary* graphicsLibrary, Core::LibraryPlayerConstPtr source)
+    : QObject(nullptr)
+    , Base(source)
+    , m_icon(graphicsLibrary->getPixmap(source->presentationParams.icon))
+    , m_graphicsLibrary(graphicsLibrary)
+{
+}
+
+QColor GuiPlayer::getColor() const
+{
+    return QColor("#" + QString::fromStdString(getSource()->presentationParams.colorRGB));
+}
+
 GuiTerrain::GuiTerrain(Sound::IMusicBox*, const IGraphicsLibrary* graphicsLibrary, Core::LibraryTerrainConstPtr source)
     : QObject(nullptr)
     , Base(source)
@@ -357,12 +371,13 @@ QList<ResourceAmountHelper::ResourceInfo> ResourceAmountHelper::trasformResource
 }
 
 template class AbstractGuiWrapper<GuiArtifact, Core::LibraryArtifact>;
-template class AbstractGuiWrapper<GuiUnit, Core::LibraryUnit>;
+template class AbstractGuiWrapper<GuiFaction, Core::LibraryFaction>;
 template class AbstractGuiWrapper<GuiHero, Core::LibraryHero>;
+template class AbstractGuiWrapper<GuiMapBank, Core::LibraryMapBank>;
+template class AbstractGuiWrapper<GuiPlayer, Core::LibraryPlayer>;
 template class AbstractGuiWrapper<GuiSkill, Core::LibrarySecondarySkill>;
 template class AbstractGuiWrapper<GuiSpell, Core::LibrarySpell>;
-template class AbstractGuiWrapper<GuiFaction, Core::LibraryFaction>;
 template class AbstractGuiWrapper<GuiTerrain, Core::LibraryTerrain>;
-template class AbstractGuiWrapper<GuiMapBank, Core::LibraryMapBank>;
+template class AbstractGuiWrapper<GuiUnit, Core::LibraryUnit>;
 
 }
