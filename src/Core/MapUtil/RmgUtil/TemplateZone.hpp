@@ -5,10 +5,10 @@
  */
 #pragma once
 
-#include "FHMap.hpp"
-#include "FHTemplateCanvas.hpp"
+#include "../FHMap.hpp"
+#include "TemplateCanvas.hpp"
 #include "IRandomGenerator.hpp"
-#include "FHTemplateUtils.hpp"
+#include "TemplateUtils.hpp"
 
 #include <unordered_set>
 

@@ -10,8 +10,8 @@
 #include <string>
 #include <cassert>
 
-#include "FHTemplateUtils.hpp"
-#include "FHTileMap.hpp"
+#include "TemplateUtils.hpp"
+#include "../FHTileMap.hpp"
 
 #include "IRandomGenerator.hpp"
 

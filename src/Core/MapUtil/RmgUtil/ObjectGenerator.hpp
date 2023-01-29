@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "FHMap.hpp"
+#include "../FHMap.hpp"
 
 namespace FreeHeroes {
 

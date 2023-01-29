@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "FHTileMap.hpp"
+#include "../FHTileMap.hpp"
 
 #include <stdexcept>
 #include <set>

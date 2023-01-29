@@ -255,6 +255,11 @@ struct FHRoad {
     void placeOnMap(FHTileMap& map) const;
 };
 
+inline FHPos operator+(const FHPos& left_, const FHPos& right_)
+{
+    return { left_.m_x + right_.m_x, left_.m_y + right_.m_y };
+}
+
 }
 
 namespace std {

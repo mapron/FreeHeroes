@@ -4,17 +4,15 @@
  * See LICENSE file for details.
  */
 #include "FHTemplateProcessor.hpp"
-#include "FHTemplateUtils.hpp"
 
 #include "MernelReflection/EnumTraitsMacro.hpp"
 #include "MernelPlatform/Profiler.hpp"
 
-#include "LibraryMapObstacle.hpp"
-#include "LibraryMapVisitable.hpp"
-#include "LibraryObjectDef.hpp"
-
-#include "ObjectGenerator.hpp"
-#include "KMeans.hpp"
+#include "RmgUtil/TemplateUtils.hpp"
+#include "RmgUtil/ObjectGenerator.hpp"
+#include "RmgUtil/KMeans.hpp"
+#include "RmgUtil/AstarGenerator.hpp"
+#include "RmgUtil/ObstacleUtil.hpp"
 
 #include <functional>
 #include <stdexcept>
@@ -69,106 +67,6 @@ struct DistanceRecord {
     {
         const int64_t distanceByRadius = m_distance * 1000 / m_zoneRadius;
         return distanceByRadius;
-    }
-};
-
-struct ObstacleBucket {
-    std::vector<Core::LibraryMapObstacleConstPtr> m_objects;
-    Core::LibraryObjectDef::PlanarMask            m_mask;
-    size_t                                        m_area = 0;
-};
-using ObstacleBucketList = std::vector<ObstacleBucket>;
-
-struct ObstacleIndex {
-    ObstacleBucketList m_bucketLists;
-
-    void add(Core::LibraryMapObstacleConstPtr obj)
-    {
-        auto* def = obj->objectDefs.get({});
-        assert(def);
-        auto mask = def->blockMapPlanar;
-        auto w    = mask.width;
-        auto h    = mask.height;
-        if (!w || !h)
-            return;
-
-        ObstacleBucketList& bucketList = m_bucketLists;
-        auto                it         = std::find_if(bucketList.begin(), bucketList.end(), [&mask](const ObstacleBucket& buck) {
-            return buck.m_mask == mask;
-        });
-        if (it != bucketList.end()) {
-            (*it).m_objects.push_back(obj);
-            return;
-        }
-        ObstacleBucket buck;
-        buck.m_mask = mask;
-        buck.m_area = mask.height * mask.width;
-        buck.m_objects.push_back(obj);
-        bucketList.push_back(std::move(buck));
-    }
-    void doSort()
-    {
-        //assert(m_bucketLists.contains(Type::Small));
-        // for (auto& bucketList : m_bucketLists) {
-        std::sort(m_bucketLists.begin(), m_bucketLists.end(), [](const ObstacleBucket& l, const ObstacleBucket& r) {
-            return l.m_area > r.m_area;
-        });
-        //}
-    }
-
-    bool isEmpty(const Core::LibraryObjectDef::PlanarMask& mask, size_t xOffset, size_t yOffset, size_t w, size_t h)
-    {
-        for (size_t y = 0; y < h && (y + yOffset) < mask.height; ++y) {
-            for (size_t x = 0; x < w && (x + xOffset) < mask.width; ++x) {
-                const uint8_t requiredBlockBit = mask.data[y + yOffset][x + xOffset];
-                if (requiredBlockBit)
-                    return false;
-            }
-        }
-        return true;
-    }
-
-    // mask is 8x6, for example. we will search for an object that fits int top-left corner.
-    std::vector<const ObstacleBucket*> find(const Core::LibraryObjectDef::PlanarMask& mask, size_t xOffset, size_t yOffset)
-    {
-        auto w = mask.width;
-        auto h = mask.height;
-        if (!w || !h)
-            return {};
-
-        auto isMaskFit = [&mask, xOffset, yOffset](const Core::LibraryObjectDef::PlanarMask& maskObj) {
-            const auto w       = mask.width - xOffset;
-            const auto h       = mask.height - yOffset;
-            const auto wmin    = std::min(maskObj.width, w);
-            const auto hmin    = std::min(maskObj.height, h);
-            size_t     overlap = 0;
-            for (size_t y = 0; y < hmin; ++y) {
-                const auto& row = mask.data[y + yOffset];
-                for (size_t x = 0; x < wmin; ++x) {
-                    const bool emptyBlockBit    = row[x + xOffset] == 0;
-                    const bool requiredBlockBit = row[x + xOffset] == 1;
-                    //const bool tentativeBlockBit = row[x + xOffset] == 2;
-                    const bool objBlockBit = maskObj.data[y][x] == 1;
-                    if (objBlockBit) {
-                        overlap++;
-                        if (emptyBlockBit)
-                            return false;
-                    }
-                    if (!objBlockBit) {
-                        if (requiredBlockBit)
-                            return false;
-                    }
-                }
-            }
-            return overlap > 0;
-        };
-
-        std::vector<const ObstacleBucket*> result;
-        for (const ObstacleBucket& bucket : m_bucketLists) {
-            if (isMaskFit(bucket.m_mask))
-                result.push_back(&bucket);
-        }
-        return result;
     }
 };
 
@@ -1281,128 +1179,6 @@ std::vector<FHPos> FHTemplateProcessor::aStarPath(MapCanvas::Tile* start, MapCan
     auto result = generator.findPath({ start->m_pos.m_x, start->m_pos.m_y }, { end->m_pos.m_x, end->m_pos.m_y });
 
     return result;
-}
-
-FHPos operator+(const FHPos& left_, const FHPos& right_)
-{
-    return { left_.m_x + right_.m_x, left_.m_y + right_.m_y };
-}
-
-AstarGenerator::Node::Node(FHPos pos, AstarGenerator::Node* parent)
-{
-    m_parent = parent;
-    m_pos    = pos;
-}
-
-uint64_t AstarGenerator::Node::getScore()
-{
-    return m_G + m_H;
-}
-
-AstarGenerator::AstarGenerator()
-{
-    m_directions = {
-        { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 }, { -1, -1 }, { 1, 1 }, { -1, 1 }, { 1, -1 }
-    };
-}
-
-void AstarGenerator::setWorldSize(FHPos worldSize_)
-{
-    m_worldSize = worldSize_;
-}
-
-void AstarGenerator::addCollision(FHPos coordinates_)
-{
-    m_collisions.push_back(coordinates_);
-}
-
-void AstarGenerator::removeCollision(FHPos coordinates_)
-{
-    auto it = std::find(m_collisions.begin(), m_collisions.end(), coordinates_);
-    if (it != m_collisions.end()) {
-        m_collisions.erase(it);
-    }
-}
-
-void AstarGenerator::clearCollisions()
-{
-    m_collisions.clear();
-}
-
-AstarGenerator::CoordinateList AstarGenerator::findPath(FHPos source, FHPos target)
-{
-    std::shared_ptr<Node> current;
-    NodeSet               openSet, closedSet;
-    openSet.reserve(100);
-    closedSet.reserve(100);
-    openSet.push_back(std::make_shared<Node>(source));
-
-    while (!openSet.empty()) {
-        auto current_it = openSet.begin();
-        current         = *current_it;
-
-        for (auto it = openSet.begin(); it != openSet.end(); it++) {
-            auto node = *it;
-            if (node->getScore() <= current->getScore()) {
-                current    = node;
-                current_it = it;
-            }
-        }
-
-        if (current->m_pos == target) {
-            break;
-        }
-
-        closedSet.push_back(current);
-        openSet.erase(current_it);
-
-        for (uint64_t i = 0; i < m_directions.size(); ++i) {
-            FHPos newCoordinates(current->m_pos + m_directions[i]);
-            if (detectCollision(newCoordinates) || findNodeOnList(closedSet, newCoordinates)) {
-                continue;
-            }
-
-            uint64_t totalCost = current->m_G + ((i < 4) ? 10 : 14);
-
-            Node* successorRaw = findNodeOnList(openSet, newCoordinates);
-            if (successorRaw == nullptr) {
-                auto successor = std::make_shared<Node>(newCoordinates, current.get());
-                successor->m_G = totalCost;
-                successor->m_H = posDistance(successor->m_pos, target) * 10;
-                openSet.push_back(successor);
-            } else if (totalCost < successorRaw->m_G) {
-                successorRaw->m_parent = current.get();
-                successorRaw->m_G      = totalCost;
-            }
-        }
-    }
-
-    CoordinateList path;
-    Node*          currentRaw = current.get();
-    while (currentRaw != nullptr) {
-        path.push_back(currentRaw->m_pos);
-        currentRaw = currentRaw->m_parent;
-    }
-
-    return path;
-}
-
-AstarGenerator::Node* AstarGenerator::findNodeOnList(NodeSet& nodes_, FHPos coordinates_)
-{
-    for (auto&& node : nodes_) {
-        if (node->m_pos == coordinates_) {
-            return node.get();
-        }
-    }
-    return nullptr;
-}
-
-bool AstarGenerator::detectCollision(FHPos coordinates_)
-{
-    if (coordinates_.m_x < 0 || coordinates_.m_x >= m_worldSize.m_x || coordinates_.m_y < 0 || coordinates_.m_y >= m_worldSize.m_y || std::find(m_collisions.begin(), m_collisions.end(), coordinates_) != m_collisions.end()) {
-        return true;
-    }
-    return false;
 }
 
 }
