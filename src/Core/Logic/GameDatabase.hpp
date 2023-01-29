@@ -19,6 +19,7 @@ public:
     ~GameDatabase();
 
     LibraryArtifactContainerPtr       artifacts() const override;
+    LibraryBuildingContainerPtr       buildings() const override;
     LibraryDwellingContainerPtr       dwellings() const override;
     LibraryFactionContainerPtr        factions() const override;
     LibraryHeroContainerPtr           heroes() const override;
@@ -27,6 +28,7 @@ public:
     LibraryMapObstacleContainerPtr    mapObstacles() const override;
     LibraryMapVisitableContainerPtr   mapVisitables() const override;
     LibraryObjectDefContainerPtr      objectDefs() const override;
+    LibraryPlayerContainerPtr         players() const override;
     LibraryResourceContainerPtr       resources() const override;
     LibrarySecondarySkillContainerPtr secSkills() const override;
     LibrarySpellContainerPtr          spells() const override;

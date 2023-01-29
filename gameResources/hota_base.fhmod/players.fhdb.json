@@ -1,0 +1,19 @@
+[{
+"scope": "players",
+
+"compactCols":    ["untranslatedName"  , "legacyId"  , {"pres":["order", "color"]}  ],
+"records": {
+
+"Red"                 : [ "Red"         , 0         ,   [ 0 , "F71A0E" ] ],
+"Blue"                : [ "Blue"        , 1         ,   [ 1 , "1C18F4" ] ],
+"Tan"                 : [ "Tan"         , 2         ,   [ 2 , "E7BD9C" ] ],
+"Green"               : [ "Green"       , 3         ,   [ 3 , "3F7F3F" ] ],
+"Orange"              : [ "Orange"      , 4         ,   [ 4 , "EA6800" ] ],
+"Purple"              : [ "Purple"      , 5         ,   [ 5 , "7A478E" ] ],
+"Teal"                : [ "Teal"        , 6         ,   [ 6 , "5A9C98" ] ],
+"Pink"                : [ "Pink"        , 7         ,   [ 7 , "AD6373" ] ],
+"None"                : [ "None"        , -1        ,   [ 8 , "888888" ] ]
+
+}
+
+}]

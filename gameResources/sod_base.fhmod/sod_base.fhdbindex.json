@@ -3,6 +3,7 @@
 "segments": [
 "artifacts",
 "artifacts_presentation",
+"buildings",
 "dwellings",
 "factions",
 "factions_presentation",
@@ -17,6 +18,7 @@
 "object_defs",
 "object_defs_mapping",
 "object_defs_obstacles",
+"players",
 "resources",
 "resources_presentation",
 "skills",

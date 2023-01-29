@@ -8,6 +8,7 @@
 namespace FreeHeroes::Core {
 
 struct LibraryArtifact;
+struct LibraryBuilding;
 struct LibraryDwelling;
 struct LibraryFaction;
 struct LibraryFactionHeroClass;
@@ -18,6 +19,7 @@ struct LibraryMapBank;
 struct LibraryMapObstacle;
 struct LibraryMapVisitable;
 struct LibraryObjectDef;
+struct LibraryPlayer;
 struct LibraryResource;
 struct LibrarySecondarySkill;
 struct LibrarySpell;
@@ -25,6 +27,7 @@ struct LibraryTerrain;
 struct LibraryUnit;
 
 using LibraryArtifactConstPtr         = const LibraryArtifact*;
+using LibraryBuildingConstPtr         = const LibraryBuilding*;
 using LibraryDwellingConstPtr         = const LibraryDwelling*;
 using LibraryFactionConstPtr          = const LibraryFaction*;
 using LibraryFactionHeroClassConstPtr = const LibraryFactionHeroClass*;
@@ -35,6 +38,7 @@ using LibraryMapBankConstPtr          = const LibraryMapBank*;
 using LibraryMapObstacleConstPtr      = const LibraryMapObstacle*;
 using LibraryMapVisitableConstPtr     = const LibraryMapVisitable*;
 using LibraryObjectDefConstPtr        = const LibraryObjectDef*;
+using LibraryPlayerConstPtr           = const LibraryPlayer*;
 using LibraryResourceConstPtr         = const LibraryResource*;
 using LibrarySecondarySkillConstPtr   = const LibrarySecondarySkill*;
 using LibrarySpellConstPtr            = const LibrarySpell*;

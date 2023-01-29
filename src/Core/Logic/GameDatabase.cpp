@@ -6,6 +6,7 @@
 #include "GameDatabase.hpp"
 
 #include "LibraryArtifact.hpp"
+#include "LibraryBuilding.hpp"
 #include "LibraryDwelling.hpp"
 #include "LibraryFaction.hpp"
 #include "LibraryGameRules.hpp"
@@ -15,6 +16,7 @@
 #include "LibraryMapObstacle.hpp"
 #include "LibraryMapVisitable.hpp"
 #include "LibraryObjectDef.hpp"
+#include "LibraryPlayer.hpp"
 #include "LibraryResource.hpp"
 #include "LibrarySecondarySkill.hpp"
 #include "LibrarySpell.hpp"
@@ -40,6 +42,7 @@ struct LibraryContainerKey {
 
 // clang-format off
 template<> struct LibraryContainerKey<LibraryArtifact      > { static constexpr const char * scopeName = "artifacts" ; };
+template<> struct LibraryContainerKey<LibraryBuilding      > { static constexpr const char * scopeName = "buildings" ; };
 template<> struct LibraryContainerKey<LibraryDwelling      > { static constexpr const char * scopeName = "dwellings" ; };
 template<> struct LibraryContainerKey<LibraryFaction       > { static constexpr const char * scopeName = "factions" ; };
 template<> struct LibraryContainerKey<LibraryHero          > { static constexpr const char * scopeName = "heroes" ; };
@@ -48,6 +51,7 @@ template<> struct LibraryContainerKey<LibraryMapBank       > { static constexpr 
 template<> struct LibraryContainerKey<LibraryMapObstacle   > { static constexpr const char * scopeName = "mapObstacles"; };
 template<> struct LibraryContainerKey<LibraryMapVisitable  > { static constexpr const char * scopeName = "mapVisitables"; };
 template<> struct LibraryContainerKey<LibraryObjectDef     > { static constexpr const char * scopeName = "objectDefs" ; };
+template<> struct LibraryContainerKey<LibraryPlayer        > { static constexpr const char * scopeName = "players" ; };
 template<> struct LibraryContainerKey<LibraryResource      > { static constexpr const char * scopeName = "resources" ; };
 template<> struct LibraryContainerKey<LibrarySecondarySkill> { static constexpr const char * scopeName = "skills" ; };
 template<> struct LibraryContainerKey<LibrarySpell         > { static constexpr const char * scopeName = "spells" ; };
@@ -165,6 +169,7 @@ struct GameDatabase::Impl {
         }
     };
     LibraryContainer<LibraryArtifact>       m_artifacts;
+    LibraryContainer<LibraryBuilding>       m_buildings;
     LibraryContainer<LibraryDwelling>       m_dwellings;
     LibraryContainer<LibraryFaction>        m_factions;
     LibraryContainer<LibraryHero>           m_heroes;
@@ -173,6 +178,7 @@ struct GameDatabase::Impl {
     LibraryContainer<LibraryMapObstacle>    m_mapObstacles;
     LibraryContainer<LibraryMapVisitable>   m_mapVisitables;
     LibraryContainer<LibraryObjectDef>      m_objectDefs;
+    LibraryContainer<LibraryPlayer>         m_players;
     LibraryContainer<LibraryResource>       m_resources;
     LibraryContainer<LibrarySecondarySkill> m_skills;
     LibraryContainer<LibrarySpell>          m_spells;
@@ -197,6 +203,11 @@ template<>
 GameDatabase::Impl::LibraryContainer<LibraryArtifact>& GameDatabase::Impl::getContainer<LibraryArtifact>()
 {
     return m_artifacts;
+}
+template<>
+GameDatabase::Impl::LibraryContainer<LibraryBuilding>& GameDatabase::Impl::getContainer<LibraryBuilding>()
+{
+    return m_buildings;
 }
 template<>
 GameDatabase::Impl::LibraryContainer<LibraryDwelling>& GameDatabase::Impl::getContainer<LibraryDwelling>()
@@ -239,6 +250,11 @@ GameDatabase::Impl::LibraryContainer<LibraryObjectDef>& GameDatabase::Impl::getC
     return m_objectDefs;
 }
 template<>
+GameDatabase::Impl::LibraryContainer<LibraryPlayer>& GameDatabase::Impl::getContainer<LibraryPlayer>()
+{
+    return m_players;
+}
+template<>
 GameDatabase::Impl::LibraryContainer<LibraryResource>& GameDatabase::Impl::getContainer<LibraryResource>()
 {
     return m_resources;
@@ -268,6 +284,10 @@ IGameDatabase::LibraryArtifactContainerPtr GameDatabase::artifacts() const
 {
     return &m_impl->m_artifacts;
 }
+IGameDatabase::LibraryBuildingContainerPtr GameDatabase::buildings() const
+{
+    return &m_impl->m_buildings;
+}
 IGameDatabase::LibraryDwellingContainerPtr GameDatabase::dwellings() const
 {
     return &m_impl->m_dwellings;
@@ -295,6 +315,10 @@ IGameDatabase::LibraryMapObstacleContainerPtr GameDatabase::mapObstacles() const
 IGameDatabase::LibraryMapVisitableContainerPtr GameDatabase::mapVisitables() const
 {
     return &m_impl->m_mapVisitables;
+}
+IGameDatabase::LibraryPlayerContainerPtr GameDatabase::players() const
+{
+    return &m_impl->m_players;
 }
 IGameDatabase::LibraryObjectDefContainerPtr GameDatabase::objectDefs() const
 {
@@ -331,6 +355,7 @@ GameDatabase::GameDatabase(const Mernel::PropertyTree& recordObjectMaps)
 {
     // clang-format off
     m_impl->m_artifacts      .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_buildings      .prepareObjectKeys(recordObjectMaps);
     m_impl->m_dwellings      .prepareObjectKeys(recordObjectMaps);
     m_impl->m_factions       .prepareObjectKeys(recordObjectMaps);
     m_impl->m_heroSpecs      .prepareObjectKeys(recordObjectMaps);
@@ -339,6 +364,7 @@ GameDatabase::GameDatabase(const Mernel::PropertyTree& recordObjectMaps)
     m_impl->m_mapObstacles   .prepareObjectKeys(recordObjectMaps);
     m_impl->m_mapVisitables  .prepareObjectKeys(recordObjectMaps);
     m_impl->m_objectDefs     .prepareObjectKeys(recordObjectMaps);
+    m_impl->m_players        .prepareObjectKeys(recordObjectMaps);
     m_impl->m_resources      .prepareObjectKeys(recordObjectMaps);
     m_impl->m_skills         .prepareObjectKeys(recordObjectMaps);
     m_impl->m_spells         .prepareObjectKeys(recordObjectMaps);
@@ -348,6 +374,7 @@ GameDatabase::GameDatabase(const Mernel::PropertyTree& recordObjectMaps)
 
     // clang-format off
     m_impl->m_artifacts      .loadRecordList(this, recordObjectMaps);
+    m_impl->m_buildings      .loadRecordList(this, recordObjectMaps);
     m_impl->m_dwellings      .loadRecordList(this, recordObjectMaps);
     m_impl->m_factions       .loadRecordList(this, recordObjectMaps);
     m_impl->m_heroSpecs      .loadRecordList(this, recordObjectMaps);
@@ -356,6 +383,7 @@ GameDatabase::GameDatabase(const Mernel::PropertyTree& recordObjectMaps)
     m_impl->m_mapObstacles   .loadRecordList(this, recordObjectMaps);
     m_impl->m_mapVisitables  .loadRecordList(this, recordObjectMaps);
     m_impl->m_objectDefs     .loadRecordList(this, recordObjectMaps);
+    m_impl->m_players        .loadRecordList(this, recordObjectMaps);
     m_impl->m_resources      .loadRecordList(this, recordObjectMaps);
     m_impl->m_skills         .loadRecordList(this, recordObjectMaps);
     m_impl->m_spells         .loadRecordList(this, recordObjectMaps);
@@ -686,6 +714,20 @@ GameDatabase::GameDatabase(const Mernel::PropertyTree& recordObjectMaps)
             objMutable->mappings.key = key;
         }
         m_impl->m_dwellings.m_sorted.push_back(obj);
+    }
+    // players postproc
+    std::sort(m_impl->m_players.m_unsorted.begin(), m_impl->m_players.m_unsorted.end(), [](auto* l, auto* r) {
+        return l->presentationParams.order < r->presentationParams.order;
+    });
+    for (auto* obj : m_impl->m_players.m_unsorted) {
+        m_impl->m_players.m_sorted.push_back(obj);
+    }
+    // players postproc
+    std::sort(m_impl->m_buildings.m_unsorted.begin(), m_impl->m_buildings.m_unsorted.end(), [](auto* l, auto* r) {
+        return l->presentationParams.order < r->presentationParams.order;
+    });
+    for (auto* obj : m_impl->m_buildings.m_unsorted) {
+        m_impl->m_buildings.m_sorted.push_back(obj);
     }
     const size_t terrainsSize   = m_impl->m_terrains.legacyOrderedRecords().size();
     auto         makePlanarMask = [](const std::vector<uint8_t>& data, bool invert) -> LibraryObjectDef::PlanarMask {

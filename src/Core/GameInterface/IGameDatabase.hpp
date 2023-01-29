@@ -25,20 +25,22 @@ concept is_any_of = std::disjunction_v<std::is_same<_Ty, _Types>...>;
 template<class T>
 concept GameDatabaseObject = is_any_of<T,
                                        LibraryArtifact,
+                                       LibraryBuilding,
                                        LibraryDwelling,
-                                       LibraryUnit,
                                        LibraryFaction,
-                                       LibraryHeroSpec,
+                                       LibraryGameRules,
                                        LibraryHero,
-                                       LibrarySecondarySkill,
-                                       LibrarySpell,
-                                       LibraryTerrain,
-                                       LibraryResource,
+                                       LibraryHeroSpec,
                                        LibraryMapBank,
                                        LibraryMapObstacle,
                                        LibraryMapVisitable,
-                                       LibraryGameRules,
-                                       LibraryObjectDef>;
+                                       LibraryObjectDef,
+                                       LibraryPlayer,
+                                       LibraryResource,
+                                       LibrarySecondarySkill,
+                                       LibrarySpell,
+                                       LibraryTerrain,
+                                       LibraryUnit>;
 
 class IGameDatabase {
 public:
@@ -58,6 +60,7 @@ public:
     };
 
     using LibraryArtifactContainerPtr       = const ContainerInterface<LibraryArtifact>*;
+    using LibraryBuildingContainerPtr       = const ContainerInterface<LibraryBuilding>*;
     using LibraryDwellingContainerPtr       = const ContainerInterface<LibraryDwelling>*;
     using LibraryFactionContainerPtr        = const ContainerInterface<LibraryFaction>*;
     using LibraryHeroContainerPtr           = const ContainerInterface<LibraryHero>*;
@@ -66,6 +69,7 @@ public:
     using LibraryMapObstacleContainerPtr    = const ContainerInterface<LibraryMapObstacle>*;
     using LibraryMapVisitableContainerPtr   = const ContainerInterface<LibraryMapVisitable>*;
     using LibraryObjectDefContainerPtr      = const ContainerInterface<LibraryObjectDef>*;
+    using LibraryPlayerContainerPtr         = const ContainerInterface<LibraryPlayer>*;
     using LibraryResourceContainerPtr       = const ContainerInterface<LibraryResource>*;
     using LibrarySecondarySkillContainerPtr = const ContainerInterface<LibrarySecondarySkill>*;
     using LibrarySpellContainerPtr          = const ContainerInterface<LibrarySpell>*;
@@ -73,6 +77,7 @@ public:
     using LibraryUnitContainerPtr           = const ContainerInterface<LibraryUnit>*;
 
     virtual LibraryArtifactContainerPtr       artifacts() const     = 0;
+    virtual LibraryBuildingContainerPtr       buildings() const     = 0;
     virtual LibraryDwellingContainerPtr       dwellings() const     = 0;
     virtual LibraryFactionContainerPtr        factions() const      = 0;
     virtual LibraryHeroContainerPtr           heroes() const        = 0;
@@ -81,6 +86,7 @@ public:
     virtual LibraryMapObstacleContainerPtr    mapObstacles() const  = 0;
     virtual LibraryMapVisitableContainerPtr   mapVisitables() const = 0;
     virtual LibraryObjectDefContainerPtr      objectDefs() const    = 0;
+    virtual LibraryPlayerContainerPtr         players() const       = 0;
     virtual LibraryResourceContainerPtr       resources() const     = 0;
     virtual LibrarySecondarySkillContainerPtr secSkills() const     = 0;
     virtual LibrarySpellContainerPtr          spells() const        = 0;
@@ -98,6 +104,7 @@ public:
 };
 // clang-format off
 template <> inline IGameDatabase::LibraryArtifactContainerPtr       IGameDatabase::container() const { return artifacts();}
+template <> inline IGameDatabase::LibraryBuildingContainerPtr       IGameDatabase::container() const { return buildings();}
 template <> inline IGameDatabase::LibraryDwellingContainerPtr       IGameDatabase::container() const { return dwellings();}
 template <> inline IGameDatabase::LibraryFactionContainerPtr        IGameDatabase::container() const { return factions();}
 template <> inline IGameDatabase::LibraryHeroContainerPtr           IGameDatabase::container() const { return heroes();}
@@ -106,6 +113,7 @@ template <> inline IGameDatabase::LibraryMapBankContainerPtr        IGameDatabas
 template <> inline IGameDatabase::LibraryMapObstacleContainerPtr    IGameDatabase::container() const { return mapObstacles();}
 template <> inline IGameDatabase::LibraryMapVisitableContainerPtr   IGameDatabase::container() const { return mapVisitables();}
 template <> inline IGameDatabase::LibraryObjectDefContainerPtr      IGameDatabase::container() const { return objectDefs();}
+template <> inline IGameDatabase::LibraryPlayerContainerPtr         IGameDatabase::container() const { return players();}
 template <> inline IGameDatabase::LibraryResourceContainerPtr       IGameDatabase::container() const { return resources();}
 template <> inline IGameDatabase::LibrarySecondarySkillContainerPtr IGameDatabase::container() const { return secSkills();}
 template <> inline IGameDatabase::LibrarySpellContainerPtr          IGameDatabase::container() const { return spells();}

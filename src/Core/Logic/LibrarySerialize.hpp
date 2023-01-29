@@ -15,6 +15,7 @@ struct SkillHeroItem;
 class IGameDatabase;
 
 void deserialize(const IGameDatabase* gameDatabase, LibraryArtifact& artifact, const Mernel::PropertyTree& jsonObj);
+void deserialize(const IGameDatabase* gameDatabase, LibraryBuilding& obj, const Mernel::PropertyTree& jsonObj);
 void deserialize(const IGameDatabase* gameDatabase, LibraryDwelling& dwelling, const Mernel::PropertyTree& jsonObj);
 void deserialize(const IGameDatabase* gameDatabase, LibraryFaction& faction, const Mernel::PropertyTree& jsonObj);
 void deserialize(const IGameDatabase* gameDatabase, LibraryHero& hero, const Mernel::PropertyTree& jsonObj);
@@ -23,6 +24,7 @@ void deserialize(const IGameDatabase* gameDatabase, LibraryMapBank& obj, const M
 void deserialize(const IGameDatabase* gameDatabase, LibraryMapObstacle& obj, const Mernel::PropertyTree& jsonObj);
 void deserialize(const IGameDatabase* gameDatabase, LibraryMapVisitable& obj, const Mernel::PropertyTree& jsonObj);
 void deserialize(const IGameDatabase* gameDatabase, LibraryObjectDef& obj, const Mernel::PropertyTree& jsonObj);
+void deserialize(const IGameDatabase* gameDatabase, LibraryPlayer& obj, const Mernel::PropertyTree& jsonObj);
 void deserialize(const IGameDatabase* gameDatabase, LibraryResource& obj, const Mernel::PropertyTree& jsonObj);
 void deserialize(const IGameDatabase* gameDatabase, LibrarySecondarySkill& skill, const Mernel::PropertyTree& jsonObj);
 void deserialize(const IGameDatabase* gameDatabase, LibrarySpell& spell, const Mernel::PropertyTree& jsonObj);

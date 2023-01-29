@@ -25,6 +25,12 @@ void deserialize(const IGameDatabase* gameDatabase, LibraryArtifact& artifact, c
     reader.jsonToValue(jsonObj, artifact);
 }
 
+void deserialize(const IGameDatabase* gameDatabase, LibraryBuilding& obj, const Mernel::PropertyTree& jsonObj)
+{
+    PropertyTreeReaderDatabase reader(gameDatabase);
+    reader.jsonToValue(jsonObj, obj);
+}
+
 void deserialize(const IGameDatabase* gameDatabase, LibraryDwelling& dwelling, const PropertyTree& jsonObj)
 {
     PropertyTreeReaderDatabase reader(gameDatabase);
@@ -66,6 +72,12 @@ void deserialize(const IGameDatabase* gameDatabase, LibraryMapVisitable& obj, co
     reader.jsonToValue(jsonObj, obj);
 }
 void deserialize(const IGameDatabase* gameDatabase, LibraryObjectDef& obj, const PropertyTree& jsonObj)
+{
+    PropertyTreeReaderDatabase reader(gameDatabase);
+    reader.jsonToValue(jsonObj, obj);
+}
+
+void deserialize(const IGameDatabase* gameDatabase, LibraryPlayer& obj, const Mernel::PropertyTree& jsonObj)
 {
     PropertyTreeReaderDatabase reader(gameDatabase);
     reader.jsonToValue(jsonObj, obj);

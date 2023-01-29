@@ -6,6 +6,7 @@
 #pragma once
 
 #include "LibraryArtifact.hpp"
+#include "LibraryBuilding.hpp"
 #include "LibraryDwelling.hpp"
 #include "LibraryFaction.hpp"
 #include "LibraryGameRules.hpp"
@@ -15,6 +16,7 @@
 #include "LibraryMapObstacle.hpp"
 #include "LibraryMapVisitable.hpp"
 #include "LibraryObjectDef.hpp"
+#include "LibraryPlayer.hpp"
 #include "LibraryResource.hpp"
 #include "LibrarySecondarySkill.hpp"
 #include "LibrarySpell.hpp"
@@ -955,6 +957,38 @@ STRUCT_REFLECTION_PAIRED(
     "legacyId",                    legacyId,
     "objectDefs",                  objectDefs
 )
+
+// ------------------------------------------------------------------------------------------
+
+STRUCT_REFLECTION_PAIRED(
+    LibraryBuilding::Presentation,
+    "name",                    name,
+    "order",                   order
+)
+
+STRUCT_REFLECTION_PAIRED(
+    LibraryBuilding,
+    "legacyId",                    legacyId,
+    "untranslatedName",            untranslatedName,
+    "pres",                        presentationParams
+)
+
+// ------------------------------------------------------------------------------------------
+
+STRUCT_REFLECTION_PAIRED(
+    LibraryPlayer::Presentation,
+    "name",                        name,
+    "order",                       order,
+    "color",                       colorRGB
+)
+
+STRUCT_REFLECTION_PAIRED(
+    LibraryPlayer,
+    "legacyId",                    legacyId,
+    "untranslatedName",            untranslatedName,
+    "pres",                        presentationParams
+)
+
 
 // ------------------------------------------------------------------------------------------
 
