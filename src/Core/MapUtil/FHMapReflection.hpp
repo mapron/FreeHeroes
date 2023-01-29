@@ -86,6 +86,11 @@ STRUCT_REFLECTION_PAIRED(
 // clang-format on
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHTown::RmgStack,
+    m_level,
+    m_value)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHTown,
     m_pos,
     m_order,
@@ -98,7 +103,12 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_factionId,
     m_hasFort,
     m_questIdentifier,
-    m_spellResearch)
+    m_spellResearch,
+    m_hasCustomBuildings,
+    m_buildings,
+    m_hasGarison,
+    m_garison,
+    m_garisonRmg)
 
 // clang-format off
 STRUCT_REFLECTION_PAIRED(
@@ -362,9 +372,11 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_centerDispersion,
     m_relativeSizeAvg,
     m_relativeSizeDispersion,
+    m_score,
+    m_guardMin,
+    m_guardMax,
     m_cornerRoads,
-    m_isNormal,
-    m_score)
+    m_isNormal)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngConnection,

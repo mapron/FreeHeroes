@@ -262,6 +262,8 @@ struct SpellFilter {
                 onlySpells.push_back(spell);
         }
     }
+
+    bool operator==(const SpellFilter&) const noexcept = default;
 };
 
 struct ImmunitiesParams {

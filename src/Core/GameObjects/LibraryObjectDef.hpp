@@ -75,6 +75,8 @@ struct LibraryObjectDef {
 struct ObjectDefIndex {
     std::string variant;
     std::string substitution;
+
+    bool operator==(const ObjectDefIndex&) const noexcept = default;
 };
 
 struct ObjectDefMappings {

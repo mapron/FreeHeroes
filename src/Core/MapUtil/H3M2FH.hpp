@@ -37,6 +37,7 @@ private:
     Core::IGameDatabase::LibraryFactionContainerPtr m_factionsContainer;
 
     std::vector<Core::LibraryArtifactConstPtr> m_artifactIds;
+    std::vector<Core::LibraryBuildingConstPtr> m_buildingIds;
     //std::vector<Core::LibraryDwellingConstPtr>;
     std::vector<Core::LibraryFactionConstPtr> m_factionIds;
     std::vector<Core::LibraryHeroConstPtr>    m_heroIds;

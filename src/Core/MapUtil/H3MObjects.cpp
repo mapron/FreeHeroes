@@ -429,6 +429,7 @@ void MapTown::prepareArrays()
 
     m_builtBuildings.resize(48);
     m_forbiddenBuildings.resize(48);
+    m_garison.prepareArrays();
 }
 
 void MapTown::readBinary(ByteOrderDataStreamReader& stream)

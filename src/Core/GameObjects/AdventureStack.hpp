@@ -53,6 +53,11 @@ struct AdventureStack {
         LibraryUnit::Abilities::FixedCast  fixedCast;
     };
     EstimatedParams estimated;
+
+    bool operator==(const AdventureStack& another) const noexcept
+    {
+        return this->isEqualTo(another);
+    }
 };
 
 }

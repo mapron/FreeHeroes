@@ -462,11 +462,30 @@ void FHTemplateProcessor::runTownsPlacement()
         town.m_player = player;
         if (town.m_hasFort)
             town.m_defIndex.variant = "FORT";
-        if (town.m_isMain && m_playerInfo.contains(player)) {
+        const bool isPlayerControlled = m_playerInfo.contains(player);
+        if (town.m_isMain && isPlayerControlled) {
             if (m_playerInfo[player].m_hasMainTown)
                 throw std::runtime_error("Multiple main towns is not allowed");
             m_playerInfo[player].m_hasMainTown      = true;
             m_playerInfo[player].m_mainTownMapIndex = m_map.m_towns.size();
+        }
+        if (!town.m_garisonRmg.empty()) {
+            town.m_hasGarison = true;
+            for (const auto& [level, value] : town.m_garisonRmg) {
+                Core::LibraryUnitConstPtr unit = nullptr;
+                for (auto* funit : faction->units) {
+                    if (funit->level == level)
+                        unit = funit;
+                }
+                assert(unit);
+                int count = 0;
+                if (isPlayerControlled) {
+                    count = value / unit->value;
+                } else {
+                    count = getPossibleCount(unit, value);
+                }
+                town.m_garison.push_back({ unit, count });
+            }
         }
         m_map.m_towns.push_back(town);
         for (int x = 0; x < 5; x++) {
@@ -925,28 +944,7 @@ void FHTemplateProcessor::runObstacles()
 
 void FHTemplateProcessor::runGuards()
 {
-    auto getPossibleCount = [](Core::LibraryUnitConstPtr unit, int64_t value) {
-        auto possibleCount = value / unit->value;
-        if (possibleCount <= 1)
-            return possibleCount;
-        int64_t unitValue = unit->value;
-        int64_t coef1     = 100;
-        int64_t coef100   = 0;
-        if (possibleCount >= 100) {
-            coef1   = 0;
-            coef100 = 100;
-        } else {
-            coef1   = 100 - possibleCount + 1;
-            coef100 = possibleCount - 1;
-        }
-
-        unitValue = (coef1 * unit->guardMult1 + coef100 * unit->guardMult100) * unitValue / 10000;
-
-        possibleCount = value / unitValue;
-        return possibleCount;
-    };
-
-    auto makeCandidates = [this, &getPossibleCount](int64_t value) {
+    auto makeCandidates = [this](int64_t value) {
         std::map<int, int> unitLevelScore;
 
         for (Core::LibraryUnitConstPtr unit : m_guardUnits) {
@@ -1183,6 +1181,28 @@ std::vector<FHPos> FHTemplateProcessor::aStarPath(MapCanvas::Tile* start, MapCan
     auto result = generator.findPath({ start->m_pos.m_x, start->m_pos.m_y }, { end->m_pos.m_x, end->m_pos.m_y });
 
     return result;
+}
+
+int FHTemplateProcessor::getPossibleCount(Core::LibraryUnitConstPtr unit, int64_t value) const
+{
+    auto possibleCount = value / unit->value;
+    if (possibleCount <= 1)
+        return possibleCount;
+    int64_t unitValue = unit->value;
+    int64_t coef1     = 100;
+    int64_t coef100   = 0;
+    if (possibleCount >= 100) {
+        coef1   = 0;
+        coef100 = 100;
+    } else {
+        coef1   = 100 - possibleCount + 1;
+        coef100 = possibleCount - 1;
+    }
+
+    unitValue = (coef1 * unit->guardMult1 + coef100 * unit->guardMult100) * unitValue / 10000;
+
+    possibleCount = value / unitValue;
+    return possibleCount;
 }
 
 }

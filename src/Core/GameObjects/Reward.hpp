@@ -20,6 +20,8 @@ namespace FreeHeroes::Core {
 struct UnitWithCount {
     LibraryUnitConstPtr unit  = nullptr;
     int                 count = 0;
+
+    bool operator==(const UnitWithCount&) const noexcept = default;
 };
 
 struct Reward {
@@ -44,6 +46,8 @@ struct Reward {
                                                 + rngBonus.nonEmptyAmount()
                                                 + statBonus.nonEmptyAmount()
                                                 + secSkills.size(); }
+
+    bool operator==(const Reward&) const noexcept = default;
 };
 using Rewards = std::vector<Reward>;
 

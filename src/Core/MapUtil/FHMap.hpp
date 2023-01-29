@@ -54,6 +54,8 @@ struct FHPlayer {
     bool m_generateHeroAtMainTown{ false };
 
     std::vector<Core::LibraryFactionConstPtr> m_startingFactions;
+
+    bool operator==(const FHPlayer&) const noexcept = default;
 };
 
 struct FHCommonObject {
@@ -62,14 +64,20 @@ struct FHCommonObject {
     Core::ObjectDefIndex m_defIndex;
     int64_t              m_guard = 0;
     FHScore              m_score;
+
+    bool operator==(const FHCommonObject&) const noexcept = default;
 };
 
 struct FHCommonVisitable : public FHCommonObject {
     Core::LibraryMapVisitableConstPtr m_visitableId = nullptr;
+
+    bool operator==(const FHCommonVisitable&) const noexcept = default;
 };
 
 struct FHPlayerControlledObject : public FHCommonObject {
     Core::LibraryPlayerConstPtr m_player = nullptr;
+
+    bool operator==(const FHPlayerControlledObject&) const noexcept = default;
 };
 
 struct FHHeroData {
@@ -80,6 +88,8 @@ struct FHHeroData {
     bool m_hasSpells     = false;
 
     Core::AdventureArmy m_army;
+
+    bool operator==(const FHHeroData&) const noexcept = default;
 };
 
 struct FHHero : public FHPlayerControlledObject {
@@ -87,6 +97,8 @@ struct FHHero : public FHPlayerControlledObject {
     FHHeroData m_data;
 
     uint32_t m_questIdentifier = 0;
+
+    bool operator==(const FHHero&) const noexcept = default;
 };
 
 struct FHTown : public FHPlayerControlledObject {
@@ -95,14 +107,35 @@ struct FHTown : public FHPlayerControlledObject {
     bool                         m_hasFort{ false };
     uint32_t                     m_questIdentifier = 0;
     bool                         m_spellResearch{ false };
+    bool                         m_hasCustomBuildings{ false };
+    bool                         m_hasGarison{ false };
+
+    std::vector<Core::LibraryBuildingConstPtr> m_buildings;
+
+    std::vector<Core::AdventureStack> m_garison;
+
+    struct RmgStack {
+        int m_level = 0;
+        int m_value = 0;
+
+        bool operator==(const RmgStack&) const noexcept = default;
+    };
+
+    std::vector<RmgStack> m_garisonRmg;
+
+    bool operator==(const FHTown&) const noexcept = default;
 };
 
 struct FHDwelling : public FHPlayerControlledObject {
     Core::LibraryDwellingConstPtr m_id = nullptr;
+
+    bool operator==(const FHDwelling&) const noexcept = default;
 };
 
 struct FHMine : public FHPlayerControlledObject {
     Core::LibraryResourceConstPtr m_id = nullptr;
+
+    bool operator==(const FHMine&) const noexcept = default;
 };
 
 struct FHResource : public FHCommonObject {
@@ -117,14 +150,20 @@ struct FHResource : public FHCommonObject {
     Type                          m_type   = Type::Resource;
 
     Core::LibraryMapVisitableConstPtr m_visitableId = nullptr;
+
+    bool operator==(const FHResource&) const noexcept = default;
 };
 
 struct FHRandomResource : public FHCommonObject {
     uint32_t m_amount = 0;
+
+    bool operator==(const FHRandomResource&) const noexcept = default;
 };
 
 struct FHArtifact : public FHCommonObject {
     Core::LibraryArtifactConstPtr m_id = nullptr;
+
+    bool operator==(const FHArtifact&) const noexcept = default;
 };
 
 struct FHRandomArtifact : public FHCommonObject {
@@ -139,10 +178,14 @@ struct FHRandomArtifact : public FHCommonObject {
     };
 
     Type m_type = Type::Invalid;
+
+    bool operator==(const FHRandomArtifact&) const noexcept = default;
 };
 
 struct FHPandora : public FHCommonObject {
     Core::Reward m_reward;
+
+    bool operator==(const FHPandora&) const noexcept = default;
 };
 
 struct FHMonster : public FHCommonObject {
@@ -167,6 +210,8 @@ struct FHMonster : public FHCommonObject {
     };
 
     UpgradedStack m_upgradedStack = UpgradedStack::Random;
+
+    bool operator==(const FHMonster&) const noexcept = default;
 };
 
 struct FHBank : public FHCommonObject {
@@ -183,21 +228,30 @@ struct FHBank : public FHCommonObject {
     int           m_guardsVariant = -1; // -1 = full random
 
     std::vector<Core::LibraryArtifactConstPtr> m_artifacts; // empty = full random
+
+    bool operator==(const FHBank&) const noexcept = default;
 };
 
 struct FHObstacle : public FHCommonObject {
     Core::LibraryMapObstacleConstPtr m_id = nullptr;
+
+    bool operator==(const FHObstacle&) const noexcept = default;
 };
 struct FHVisitable : public FHCommonVisitable {
+    bool operator==(const FHVisitable&) const noexcept = default;
 };
 
 struct FHShrine : public FHCommonVisitable {
     Core::LibrarySpellConstPtr m_spellId     = nullptr;
     int                        m_randomLevel = -1;
+
+    bool operator==(const FHShrine&) const noexcept = default;
 };
 
 struct FHSkillHut : public FHCommonVisitable {
     std::vector<Core::LibrarySecondarySkillConstPtr> m_skillIds;
+
+    bool operator==(const FHSkillHut&) const noexcept = default;
 };
 struct FHQuest {
     enum class Type
@@ -222,6 +276,8 @@ struct FHQuest {
     int                                        m_level = 0;
 
     uint32_t m_targetQuestId = 0;
+
+    bool operator==(const FHQuest&) const noexcept = default;
 };
 
 struct FHQuestHut : public FHCommonVisitable {
@@ -280,6 +336,9 @@ struct FHRngZone {
     int                        m_relativeSizeDispersion = 0;
 
     FHScoreSettings m_score;
+
+    int64_t m_guardMin = 0;
+    int64_t m_guardMax = 0;
 
     int m_cornerRoads = 0;
 

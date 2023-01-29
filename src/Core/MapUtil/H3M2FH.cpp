@@ -214,6 +214,7 @@ H3M2FHConverter::H3M2FHConverter(const Core::IGameDatabase* database)
     m_factionsContainer = database->factions();
 
     m_artifactIds = database->artifacts()->legacyOrderedRecords();
+    m_buildingIds = database->buildings()->legacyOrderedRecords();
     m_factionIds  = m_factionsContainer->legacyOrderedRecords();
     m_heroIds     = database->heroes()->legacyOrderedRecords();
     m_resourceIds = database->resources()->legacyOrderedRecords();
@@ -595,11 +596,25 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 fhtown.m_player    = playerId;
                 fhtown.m_factionId = m_factionIds[objTempl.m_subid];
                 assert(fhtown.m_factionId == mappings.factionTown);
-                fhtown.m_questIdentifier = town->m_questIdentifier;
-                fhtown.m_hasFort         = town->m_hasFort;
-                fhtown.m_spellResearch   = town->m_spellResearch;
+                fhtown.m_questIdentifier    = town->m_questIdentifier;
+                fhtown.m_hasFort            = town->m_hasFort;
+                fhtown.m_spellResearch      = town->m_spellResearch;
+                fhtown.m_hasCustomBuildings = town->m_hasCustomBuildings;
+                fhtown.m_hasGarison         = town->m_hasGarison;
                 if (mainTowns.contains(playerId) && mainTowns.at(playerId) == fhtown.m_pos)
                     fhtown.m_isMain = true;
+                if (fhtown.m_hasCustomBuildings) {
+                    for (size_t i = 0; i < town->m_builtBuildings.size(); ++i) {
+                        if (town->m_builtBuildings[i])
+                            fhtown.m_buildings.push_back(m_buildingIds[i]);
+                    }
+                }
+                if (fhtown.m_hasGarison) {
+                    for (const auto& stack : town->m_garison.m_stacks) {
+                        if (stack.m_count)
+                            fhtown.m_garison.push_back(Core::AdventureStack(m_unitIds[stack.m_id], stack.m_count));
+                    }
+                }
                 dest.m_towns.push_back(std::move(fhtown));
             } break;
             case MapObjectType::ABANDONED_MINE:

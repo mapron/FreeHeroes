@@ -6,6 +6,7 @@
 #include "FH2H3M.hpp"
 
 #include "LibraryArtifact.hpp"
+#include "LibraryBuilding.hpp"
 #include "LibraryDwelling.hpp"
 #include "LibraryFaction.hpp"
 #include "LibraryHero.hpp"
@@ -187,14 +188,28 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
                 h3player.m_generatedHeroTownFaction = static_cast<uint8_t>(fhTown.m_factionId->legacyId);
             }
         }
-        auto cas1               = std::make_unique<MapTown>(dest.m_features);
-        cas1->m_playerOwner     = playerIndex;
-        cas1->m_hasFort         = fhTown.m_hasFort;
-        cas1->m_questIdentifier = fhTown.m_questIdentifier;
-        cas1->m_spellResearch   = fhTown.m_spellResearch;
+        auto cas1                  = std::make_unique<MapTown>(dest.m_features);
+        cas1->m_playerOwner        = playerIndex;
+        cas1->m_hasFort            = fhTown.m_hasFort;
+        cas1->m_questIdentifier    = fhTown.m_questIdentifier;
+        cas1->m_spellResearch      = fhTown.m_spellResearch;
+        cas1->m_hasCustomBuildings = fhTown.m_hasCustomBuildings;
+        cas1->m_hasGarison         = fhTown.m_hasGarison;
 
         //cas1->m_formation       = 0xCC;
         cas1->prepareArrays();
+        if (cas1->m_hasCustomBuildings) {
+            for (auto* building : fhTown.m_buildings)
+                cas1->m_builtBuildings[building->legacyId] = 1;
+        }
+        if (cas1->m_hasGarison) {
+            size_t i = 0;
+            for (i = 0; const auto& stack : fhTown.m_garison)
+                cas1->m_garison.m_stacks[i++] = { (uint16_t) stack.library->legacyId, (uint16_t) stack.count };
+            for (; i < cas1->m_garison.m_stacks.size(); ++i)
+                cas1->m_garison.m_stacks[i] = { (uint16_t) -1, 0 };
+        }
+
         auto* libraryFaction = fhTown.m_factionId;
         assert(libraryFaction);
 

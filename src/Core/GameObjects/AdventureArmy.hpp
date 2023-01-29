@@ -34,6 +34,11 @@ struct AdventureArmy {
         ResourceAmount dayIncome;
     };
     EstimatedParams estimated;
+
+    bool operator==(const AdventureArmy& another) const noexcept
+    {
+        return this->isEqualTo(another);
+    }
 };
 
 }

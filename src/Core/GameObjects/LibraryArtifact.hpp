@@ -380,6 +380,8 @@ struct ArtifactFilter {
                 onlyArtifacts.push_back(art);
         }
     }
+
+    bool operator==(const ArtifactFilter&) const noexcept = default;
 };
 
 using ArtifactReward = std::vector<ArtifactFilter>;
