@@ -17,9 +17,6 @@ SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake ${MERNEL_ROOT}/cmake)
 option( WARNING_AS_ERROR "" ON )
 set(FFMPEG_BINARY "" CACHE FILEPATH "Path to ffmpeg binary")
 
-include(targets)
-include(qt_helpers)
-
 #[[
 ########## Compile flags ##########
 #]]
@@ -96,6 +93,9 @@ else()
     set(${QT_CMAKE_EXPORT_NAMESPACE}::lrelease ${Qt5_LRELEASE_EXECUTABLE})
 endif()
 
+
+include(targets)
+include(qt_helpers)
 
 
 #[[
