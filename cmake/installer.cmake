@@ -56,12 +56,6 @@ endif()
 
 AddInstallArchiveTarget(InstallArchive)
 
-AddTarget(TYPE static NAME 7zip_static
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/7zip
-    EXPORT_INCLUDES
-    SKIP_STATIC_CHECK
-    STATIC_RUNTIME
-)
 
 file(REMOVE ${CMAKE_BINARY_DIR}/installer_resource.rc)
 file(REMOVE ${CMAKE_BINARY_DIR}/InstallData.7z)

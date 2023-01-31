@@ -10,14 +10,15 @@ set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/install CACHE STRING "" FOR
 cmake_minimum_required(VERSION 3.20)
 
 project(freeheroes)
-
-SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+set(MERNEL_ROOT ${CMAKE_CURRENT_LIST_DIR}/ext/mernel)
+SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake ${MERNEL_ROOT}/cmake)
 
 #project options
 option( WARNING_AS_ERROR "" ON )
 set(FFMPEG_BINARY "" CACHE FILEPATH "Path to ffmpeg binary")
 
 include(targets)
+include(qt_helpers)
 
 #[[
 ########## Compile flags ##########
@@ -96,35 +97,13 @@ else()
 endif()
 
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/mocWrapper.cmake.in ${CMAKE_BINARY_DIR}/mocWrapper.cmake @ONLY)
 
-# Zlib
+#[[
+########## Mernel ##########
+#]]
+include(ext/mernel/mernel_thirdparty.cmake)
 
-if (MSVC)
-    AddTarget(TYPE static NAME zlib 
-        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/zlib
-        EXPORT_INCLUDES
-        SKIP_STATIC_CHECK
-        COMPILE_OPTIONS
-            /wd4996 
-            /wd4131 # 'xxxx': uses old-style declarator
-        INTERFACE_COMPILE_DEFINITIONS USE_ZLIB
-    )
-else()
-    AddTarget(TYPE interface NAME zlib 
-        SOURCE_DIR .
-        LINK_LIBRARIES -lz
-        INTERFACE_COMPILE_DEFINITIONS USE_ZLIB
-    )
-endif()
-
-# Json
-AddTarget(TYPE interface NAME rapidjson 
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty)
-
-# frozen 
-AddTarget(TYPE interface NAME frozen 
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/frozen/include)
+include(ext/mernel/mernel.cmake)
 
 # Lua and Sol
 AddTarget(TYPE static NAME lua_static SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/lua/src
@@ -149,18 +128,6 @@ AddTarget(TYPE static NAME lua_static SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rd
 AddTarget(TYPE interface NAME sol SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/sol/include LINK_LIBRARIES lua_static)
 
 
-
-# Google Test
-set(BUILD_GMOCK OFF)
-set(INSTALL_GTEST OFF)
-set(GOOGLETEST_VERSION 1.10.0)
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-add_subdirectory(3rdparty/googletest/googletest)
-#[[
-########## Mernel ##########
-#]]
-
-include(ext/mernel/mernel.cmake)
 
 #[[
 ########## FreeHeroes code targets ##########
