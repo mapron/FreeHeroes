@@ -141,11 +141,41 @@ struct FHRngZone {
         bool operator==(const GeneratorPandora&) const noexcept = default;
     };
 
+    struct GeneratorShrine : public GeneratorCommon {
+        struct Record {
+            Core::SpellFilter m_filter;
+            int               m_visualLevel = 1;
+            int               m_frequency   = 1000;
+            int               m_guard       = -1;
+
+            bool operator==(const Record&) const noexcept = default;
+        };
+        using Map = std::map<std::string, Record>;
+        Map m_records;
+
+        bool operator==(const GeneratorShrine&) const noexcept = default;
+    };
+    struct GeneratorScroll : public GeneratorCommon {
+        struct Record {
+            Core::SpellFilter m_filter;
+            int               m_frequency = 1000;
+            int               m_guard     = -1;
+
+            bool operator==(const Record&) const noexcept = default;
+        };
+        using Map = std::map<std::string, Record>;
+        Map m_records;
+
+        bool operator==(const GeneratorScroll&) const noexcept = default;
+    };
+
     struct Generators {
         GeneratorBank         m_banks;
         GeneratorArtifact     m_artifacts;
         GeneratorResourcePile m_resources;
         GeneratorPandora      m_pandoras;
+        GeneratorShrine       m_shrines;
+        GeneratorScroll       m_scrolls;
 
         bool operator==(const Generators&) const noexcept = default;
     };

@@ -23,7 +23,7 @@ struct LibrarySpell {
     enum class Qualify     { None, Good, Bad };
     enum class TargetClass { Units, Land, Immediate, None };
     enum class Range       { Single, R1, R1NoCenter, R2, R3, Obstacle2, Obstacle3, Chain4, Chain5, All };
-    enum class Tag         { Mind, Vision, Ice, Lightning, AirElem, FireElem };
+    enum class Tag         { Mind, Vision, Ice, Lightning, AirElem, FireElem, Control };
     enum class EndCondition{ Time, GetHit, MakingAttack };
     // clang-format on
 
@@ -68,6 +68,7 @@ struct LibrarySpell {
 
     int level    = 0;
     int manaCost = 0;
+    int value    = 0;
 
     bool indistinctive = false;
 
@@ -107,6 +108,7 @@ struct SpellFilter {
     std::vector<int>                  levels;
     std::vector<MagicSchool>          schools;
     std::vector<LibrarySpell::Tag>    tags;
+    std::vector<LibrarySpell::Tag>    notTags;
     bool                              teachableOnly = false;
     bool                              all           = false;
 
@@ -116,6 +118,7 @@ struct SpellFilter {
                && notSpells.empty()
                && levels.empty()
                && tags.empty()
+               && notTags.empty()
                && schools.empty()
                && !teachableOnly
                && !all;
@@ -154,6 +157,16 @@ struct SpellFilter {
                 }
             }
             result = result && tagsMatch;
+        }
+        if (!notTags.empty()) {
+            bool tagsMatch = false;
+            for (auto tag : notTags) {
+                if (std::find(spell->tags.cbegin(), spell->tags.cend(), tag) != spell->tags.cend()) {
+                    tagsMatch = true;
+                    break;
+                }
+            }
+            result = result && !tagsMatch;
         }
         if (teachableOnly) {
             result = result && spell->isTeachable;
@@ -219,6 +232,19 @@ struct SpellFilter {
         }
         return populatedFilter;
     }
+    std::vector<LibrarySpellConstPtr> filterPossible(const std::vector<const LibrarySpell*>& allPossibleSpells) const
+    {
+        if (isDefault())
+            return {};
+
+        std::vector<LibrarySpellConstPtr> populatedFilter;
+        populatedFilter.reserve(allPossibleSpells.size());
+        for (auto* spell : allPossibleSpells) {
+            if (contains(spell))
+                populatedFilter.push_back(spell);
+        }
+        return populatedFilter;
+    }
 
     void makeUnion(const SpellFilter& another)
     {
@@ -249,6 +275,10 @@ struct SpellFilter {
         for (auto tag : another.tags) {
             if (std::find(tags.cbegin(), tags.cend(), tag) == tags.cend())
                 tags.push_back(tag);
+        }
+        for (auto tag : another.notTags) {
+            if (std::find(notTags.cbegin(), notTags.cend(), tag) == notTags.cend())
+                notTags.push_back(tag);
         }
 
         auto onlySpellsCopy = onlySpells;

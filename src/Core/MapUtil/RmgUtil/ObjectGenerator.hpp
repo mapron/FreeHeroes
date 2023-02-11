@@ -62,6 +62,8 @@ private:
     struct ObjectFactoryArtifact;
     struct ObjectFactoryResourcePile;
     struct ObjectFactoryPandora;
+    struct ObjectFactoryScroll;
+    struct ObjectFactoryShrine;
 
 private:
     FHMap&                           m_map;

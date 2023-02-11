@@ -76,6 +76,8 @@ struct ObjectDefIndex {
     std::string variant;
     std::string substitution;
 
+    bool isEmpty() const noexcept { return variant.empty() && substitution.empty(); }
+
     bool operator==(const ObjectDefIndex&) const noexcept = default;
 };
 

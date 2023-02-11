@@ -616,6 +616,7 @@ GameDatabase::GameDatabase(const Mernel::PropertyTree& recordObjectMaps)
             assert(artifact->statBonus.nonEmptyAmount());
             const int statBouns = artifact->statBonus.ad.attack + artifact->statBonus.ad.defense + artifact->statBonus.magic.intelligence + artifact->statBonus.magic.spellPower;
             artifact->value     = statBouns * 1000;
+            artifact->tags.push_back(LibraryArtifact::Tag::Stats);
         }
         if (artifact->cost == -1)
             artifact->cost = artifact->value;

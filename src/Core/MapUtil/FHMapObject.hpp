@@ -28,6 +28,8 @@ enum class FHScoreAttr
     Resource,
     ResourceGen,
     Experience,
+    Control,
+    Upgrade,
     SpellOffensive,
     SpellCommon,
     SpellAll,

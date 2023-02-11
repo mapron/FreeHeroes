@@ -27,6 +27,8 @@ ENUM_REFLECTION_STRINGIFY(
     Resource,
     ResourceGen,
     Experience,
+    Control,
+    Upgrade,
     SpellOffensive,
     SpellCommon,
     SpellAll,
@@ -88,11 +90,36 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_records)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRngZone::GeneratorScroll::Record,
+    m_filter,
+    m_frequency,
+    m_guard)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRngZone::GeneratorScroll,
+    m_isEnabled,
+    m_records)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRngZone::GeneratorShrine::Record,
+    m_filter,
+    m_visualLevel,
+    m_frequency,
+    m_guard)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRngZone::GeneratorShrine,
+    m_isEnabled,
+    m_records)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone::Generators,
     m_banks,
     m_artifacts,
     m_resources,
-    m_pandoras)
+    m_pandoras,
+    m_shrines,
+    m_scrolls)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone,
@@ -172,6 +199,10 @@ template<>
 inline constexpr const bool s_isStringMap<FHRngZone::GeneratorResourcePile::Map>{ true };
 template<>
 inline constexpr const bool s_isStringMap<FHRngZone::GeneratorPandora::Map>{ true };
+template<>
+inline constexpr const bool s_isStringMap<FHRngZone::GeneratorScroll::Map>{ true };
+template<>
+inline constexpr const bool s_isStringMap<FHRngZone::GeneratorShrine::Map>{ true };
 template<>
 inline constexpr const bool s_isStringMap<FHRngZone::ScoreMap>{ true };
 template<>

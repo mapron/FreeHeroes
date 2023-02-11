@@ -29,7 +29,9 @@
                             
                             "Experience":     { "target": 50000, "minSingle": 12000},
                             "SpellOffensive": { "target": 50000, "minSingle": 12000},
-                            "SpellCommon":    { "target": 50000, "minSingle": 12000}
+                            "SpellCommon":    { "target": 50000, "minSingle": 12000},
+
+                            "Control":        { "target": 100000, "maxSingle": 30000}
                         }
                     },
                     "Mid": {
@@ -41,8 +43,8 @@
                             "Gold":           { "target": 50000, "maxSingle": 15000},
                             "Resource":       { "target": 40000, "maxSingle": 15000},
                             "Experience":     { "target": 50000, "maxSingle": 15000},
-                            "SpellOffensive": { "target": 50000, "maxSingle": 15000, "minSingle": 4000},
-                            "SpellCommon":    { "target": 50000, "maxSingle": 15000, "minSingle": 4000},
+                            "SpellOffensive": { "target": 50000, "maxSingle": 15000, "minSingle": 2000},
+                            "SpellCommon":    { "target": 50000, "maxSingle": 15000, "minSingle": 2000},
                             "Misc":           { "target": 50000}
                         },
                         "guardPercent": 80
@@ -52,6 +54,7 @@
                         "score":{
                             "Gold":           { "target": 20000, "maxSingle": 2000},
                             "Experience":     { "target": 20000, "maxSingle": 2000},
+                            "Upgrade"   :     { "target": 20000, "maxSingle": 5000},
                             "ResourceGen":    { "target": 10000},
                             "SpellAll":       { "target": 50000, "maxSingle": 5000}
                         },
@@ -69,7 +72,8 @@
                             "treasure" : { "frequency": 2000, "filter": {"classes": ["treasure"] } },
                             "minor"    : { "frequency": 1500, "filter": {"classes": ["minor"]    } },
                             "major"    : { "frequency": 1500, "filter": {"classes": ["major"]    } },
-                            "relic"    : { "frequency": 1000, "filter": {"classes": ["relic"]    } }
+                            "relic"    : { "frequency": 1000, "filter": {"classes": ["relic"], "notTags": ["control"]    } },
+                            "control"  : { "frequency": 1000, "filter": {"classes": ["relic"], "tags"   : ["control"]    } }
                         }
                     },
                     "resources": {
@@ -97,6 +101,28 @@
                             "xp12K": { "frequency": 300 , "reward": {"exp": 12000 }  },
                             "xp16K": { "frequency": 300 , "reward": {"exp": 16000 }  },
                             "xp20K": { "frequency": 300 , "reward": {"exp": 20000 }  }
+                        }
+                    },
+                    "shrines": {
+                        "isEnabled": true,
+                        "records": {
+                            "lvl1"     : { "frequency":  500, "visualLevel": 1, "filter": {"levels": [1]    } },
+                            "lvl2"     : { "frequency":  400, "visualLevel": 2, "filter": {"levels": [2]    } },
+                            "lvl3"     : { "frequency":  400, "visualLevel": 3, "filter": {"levels": [3]    } },
+                            "lvl4"     : { "frequency":  300, "visualLevel": 4, "filter": {"levels": [4], "notTags"   : ["control"]    } },
+                            "lvl5"     : { "frequency":  300, "visualLevel": 4, "filter": {"levels": [5], "notTags"   : ["control"]    } },
+                            "control"  : { "frequency":  200, "visualLevel": 4, "filter": {                 "tags"    : ["control"]    } }
+                        }
+                    },
+                    "scrolls": {
+                        "isEnabled": true,
+                        "records": {
+                            "lvl1"     : { "frequency":  500, "filter": {"levels": [1]    } },
+                            "lvl2"     : { "frequency":  400, "filter": {"levels": [2]    } },
+                            "lvl3"     : { "frequency":  400, "filter": {"levels": [3]    } },
+                            "lvl4"     : { "frequency":  300, "filter": {"levels": [4], "notTags"   : ["control"]    } },
+                            "lvl5"     : { "frequency":  300, "filter": {"levels": [5], "notTags"   : ["control"]    } },
+                            "control"  : { "frequency":  200, "filter": {                  "tags"   : ["control"]    } }
                         }
                     }
                 }

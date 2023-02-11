@@ -565,6 +565,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 initCommon(fhres);
                 fhres.m_amount = resource->m_amount;
                 fhres.m_id     = m_resourceIds[objTempl.m_subid];
+                fhres.m_amount *= fhres.m_id->pileSize;
                 assert(fhres.m_id);
                 dest.m_objects.m_resources.push_back(std::move(fhres));
             } break;
@@ -848,7 +849,7 @@ Core::ResourceAmount H3M2FHConverter::convertResources(const std::vector<uint32_
         auto       resId = m_resourceIds[legacyId];
         const auto count = resourceAmount[legacyId];
         if (count)
-            resources.data[resId] = count * resId->pileSize;
+            resources.data[resId] = count;
     }
     return resources;
 }

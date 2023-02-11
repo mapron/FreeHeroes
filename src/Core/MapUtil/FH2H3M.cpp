@@ -349,7 +349,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
     for (auto& fhRes : src.m_objects.m_resources) {
         if (fhRes.m_type == FHResource::Type::Resource) {
             auto res      = std::make_unique<MapResource>(dest.m_features);
-            res->m_amount = fhRes.m_amount;
+            res->m_amount = fhRes.m_amount / fhRes.m_id->pileSize;
 
             dest.m_objects.push_back(Object{ .m_order = fhRes.m_order, .m_pos = int3fromPos(fhRes.m_pos), .m_defnum = tmplCache.add(fhRes.m_id->objectDefs.get({})), .m_impl = std::move(res) });
         } else {
@@ -540,7 +540,7 @@ std::vector<uint32_t> FH2H3MConverter::convertResource(const Core::ResourceAmoun
 {
     std::vector<uint32_t> res(7);
     for (const auto& [id, count] : amount.data)
-        res[id->legacyId] = count / id->pileSize;
+        res[id->legacyId] = count;
     return res;
 }
 void FH2H3MConverter::convertReward(const Core::Reward& fhReward, MapReward& reward) const

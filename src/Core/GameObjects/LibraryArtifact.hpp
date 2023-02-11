@@ -243,6 +243,7 @@ struct ArtifactFilter {
     std::vector<LibraryArtifact::TreasureClass> classes;
 
     std::vector<LibraryArtifact::Tag> tags;
+    std::vector<LibraryArtifact::Tag> notTags;
 
     bool all = false;
 
@@ -251,6 +252,7 @@ struct ArtifactFilter {
         return onlyArtifacts.empty()
                && notArtifacts.empty()
                && tags.empty()
+               && notTags.empty()
                && classes.empty()
                && !all;
     }
@@ -285,6 +287,16 @@ struct ArtifactFilter {
                 }
             }
             result = result && tagsMatch;
+        }
+        if (!notTags.empty()) {
+            bool tagsMatch = false;
+            for (auto tag : notTags) {
+                if (std::find(art->tags.cbegin(), art->tags.cend(), tag) != art->tags.cend()) {
+                    tagsMatch = true;
+                    break;
+                }
+            }
+            result = result && !tagsMatch;
         }
 
         return result;
@@ -367,6 +379,10 @@ struct ArtifactFilter {
         for (auto tag : another.tags) {
             if (std::find(tags.cbegin(), tags.cend(), tag) == tags.cend())
                 tags.push_back(tag);
+        }
+        for (auto tag : another.notTags) {
+            if (std::find(notTags.cbegin(), notTags.cend(), tag) == notTags.cend())
+                notTags.push_back(tag);
         }
 
         auto onlyArtifactsCopy = onlyArtifacts;

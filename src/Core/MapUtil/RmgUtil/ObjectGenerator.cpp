@@ -43,6 +43,28 @@ FHScore estimateReward(const Core::Reward& reward)
     return score;
 }
 
+void estimateArtScore(Core::LibraryArtifactConstPtr art, FHScore& score)
+{
+    auto attr = FHScoreAttr::ArtSupport;
+    if (std::find(art->tags.cbegin(), art->tags.cend(), Core::LibraryArtifact::Tag::Stats) != art->tags.cend())
+        attr = FHScoreAttr::ArtStat;
+    if (std::find(art->tags.cbegin(), art->tags.cend(), Core::LibraryArtifact::Tag::Control) != art->tags.cend())
+        attr = FHScoreAttr::Control;
+
+    score[attr] = art->value;
+}
+
+void estimateSpellScore(Core::LibrarySpellConstPtr spell, FHScore& score)
+{
+    auto attr = FHScoreAttr::SpellCommon;
+    if (std::find(spell->tags.cbegin(), spell->tags.cend(), Core::LibrarySpell::Tag::Control) != spell->tags.cend())
+        attr = FHScoreAttr::Control;
+    if (spell->type == Core::LibrarySpell::Type::Offensive || spell->type == Core::LibrarySpell::Type::Summon)
+        attr = FHScoreAttr::SpellOffensive;
+
+    score[attr] = spell->value;
+}
+
 }
 
 template<class Child>
@@ -110,10 +132,10 @@ public:
         if (!enableFilter)
             return true;
 
-        const bool isStat = art->statBonus.nonEmptyAmount() > 0;
-        auto       attr   = isStat ? FHScoreAttr::ArtStat : FHScoreAttr::ArtSupport;
+        FHScore score;
+        estimateArtScore(art, score);
 
-        bool isValid = scoreSettings.isValidValue(attr, art->value);
+        bool isValid = scoreSettings.isValidScore(score);
         return isValid;
     }
 
@@ -195,6 +217,103 @@ private:
     Core::IRandomGenerator* const  m_rng;
 
     ArtList m_artifacts;
+};
+
+class SpellPool {
+public:
+    using SpellSet  = std::set<Core::LibrarySpellConstPtr>;
+    using SpellList = std::vector<Core::LibrarySpellConstPtr>;
+
+    static bool okFilter(Core::LibrarySpellConstPtr spell, bool enableFilter, const FHScoreSettings& scoreSettings)
+    {
+        if (!enableFilter)
+            return true;
+
+        FHScore score;
+        estimateSpellScore(spell, score);
+
+        bool isValid = scoreSettings.isValidScore(score);
+        return isValid;
+    }
+
+    SpellPool(FHMap& map, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng)
+        : m_rng(rng)
+    {
+        for (auto* spell : database->spells()->records()) {
+            if (map.m_disabledSpells.isDisabled(map.m_isWaterMap, spell))
+                continue;
+
+            m_spells.push_back(spell);
+        }
+    }
+
+    Core::LibrarySpellConstPtr make(const Core::SpellFilter& filter, bool enableFilter, const FHScoreSettings& scoreSettings)
+    {
+        SpellList spellList = filter.filterPossible(m_spells);
+        if (spellList.empty())
+            return nullptr;
+
+        SpellSet artSet(spellList.cbegin(), spellList.cend());
+        m_pools[artSet].m_spellList = spellList;
+        return m_pools[artSet].make(m_rng, enableFilter, scoreSettings);
+    }
+    bool isEmpty(const Core::SpellFilter& filter, bool enableFilter, const FHScoreSettings& scoreSettings) const
+    {
+        SpellList spellList = filter.filterPossible(m_spells);
+        if (spellList.empty())
+            return true;
+
+        SpellList artListFiltered;
+        for (auto art : spellList) {
+            if (okFilter(art, enableFilter, scoreSettings))
+                artListFiltered.push_back(art);
+        }
+
+        return artListFiltered.empty();
+    }
+
+private:
+    struct SubPool {
+        SpellList m_spellList;
+        SpellList m_current;
+
+        Core::LibrarySpellConstPtr make(Core::IRandomGenerator* rng, bool enableFilter, const FHScoreSettings& scoreSettings)
+        {
+            bool hasReset = false;
+            if (m_current.empty()) {
+                m_current = m_spellList;
+                hasReset  = true;
+            }
+            auto art = makeOne(rng, enableFilter, scoreSettings);
+
+            while (!art) {
+                if (m_current.empty()) {
+                    if (hasReset)
+                        return nullptr;
+                    m_current = m_spellList;
+                    hasReset  = true;
+                }
+                art = makeOne(rng, enableFilter, scoreSettings);
+            }
+
+            return art;
+        }
+
+        Core::LibrarySpellConstPtr makeOne(Core::IRandomGenerator* rng, bool enableFilter, const FHScoreSettings& scoreSettings)
+        {
+            auto index = rng->gen(m_current.size() - 1);
+            auto art   = m_current[index];
+            m_current.erase(m_current.begin() + index);
+            if (!okFilter(art, enableFilter, scoreSettings))
+                return nullptr;
+
+            return art;
+        }
+    };
+    std::map<SpellSet, SubPool>   m_pools;
+    Core::IRandomGenerator* const m_rng;
+
+    SpellList m_spells;
 };
 
 template<class T>
@@ -322,15 +441,7 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
         obj.m_map                 = &m_map;
 
         const Core::Reward& reward = record.m_id->rewards[record.m_id->variants[record.m_guardsVariant].rewardIndex];
-        FHScore             score;
-        {
-            for (const auto& [id, count] : reward.resources.data) {
-                const int amount = count / id->pileSize;
-                const int value  = amount * id->value;
-                auto      attr   = (id->rarity == Core::LibraryResource::Rarity::Gold) ? FHScoreAttr::Gold : FHScoreAttr::Resource;
-                score[attr] += value;
-            }
-        }
+        FHScore             score  = estimateReward(reward);
 
         {
             const Core::ArtifactFilter firstFilter = reward.artifacts.empty() ? Core::ArtifactFilter{} : reward.artifacts[0];
@@ -338,16 +449,8 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
                 auto art = m_artifactPool->make(filter, firstFilter == filter, m_scoreSettings);
                 assert(art);
                 obj.m_obj.m_artifacts.push_back(art);
-                const bool isStat = art->statBonus.nonEmptyAmount() > 0;
-                auto       attr   = isStat ? FHScoreAttr::ArtStat : FHScoreAttr::ArtSupport;
-                score[attr] += art->value;
-            }
-        }
-        {
-            for (const auto& stack : reward.units) {
-                auto      attr  = FHScoreAttr::Army;
-                const int value = stack.unit->value * stack.count;
-                score[attr] += value;
+
+                estimateArtScore(art, score);
             }
         }
         obj.m_obj.m_score = score;
@@ -401,15 +504,11 @@ struct ObjectGenerator::ObjectFactoryArtifact : public AbstractFactory<RecordArt
         };
         obj.m_map = &m_map;
 
-        FHScore score;
         obj.m_obj.m_id = m_artifactPool->make(record.m_filter, true, m_scoreSettings);
         assert(obj.m_obj.m_id);
 
-        const bool isStat = obj.m_obj.m_id->statBonus.nonEmptyAmount() > 0;
-        auto       attr   = isStat ? FHScoreAttr::ArtStat : FHScoreAttr::ArtSupport;
-        score[attr]       = obj.m_obj.m_id->value;
+        estimateArtScore(obj.m_obj.m_id, obj.m_obj.m_score);
 
-        obj.m_obj.m_score = score;
         obj.m_obj.m_guard = obj.m_obj.m_id->guard;
 
         return std::make_shared<ObjectArtifact>(std::move(obj));
@@ -522,6 +621,142 @@ struct ObjectGenerator::ObjectFactoryPandora : public AbstractFactory<RecordPand
 
 // ---------------------------------------------------------------------------------------
 
+struct RecordSpellShrine : public CommonRecord<RecordSpellShrine> {
+    Core::SpellFilter                 m_filter;
+    Core::LibraryMapVisitableConstPtr m_visitableId = nullptr;
+};
+
+struct ObjectGenerator::ObjectFactoryShrine : public AbstractFactory<RecordSpellShrine> {
+    struct ObjectShrine : public AbstractObject<FHShrine> {
+        std::string getId() const override { return "shrine " + this->m_obj.m_spellId->id; }
+    };
+
+    ObjectFactoryShrine(FHMap& map, const FHRngZone::GeneratorShrine& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng, SpellPool* spellPool)
+        : AbstractFactory<RecordSpellShrine>(map, database, rng)
+        , m_spellPool(spellPool)
+        , m_scoreSettings(scoreSettings)
+    {
+        if (!genSettings.m_isEnabled)
+            return;
+
+        std::map<int, Core::LibraryMapVisitableConstPtr> visitables;
+        for (int level = 0; const char* id : { "sod.visitable.shrine1", "sod.visitable.shrine2", "sod.visitable.shrine3" }) {
+            level++;
+            auto* visitableId = database->mapVisitables()->find(id);
+            assert(visitableId);
+            visitables[level] = visitableId;
+        }
+
+        {
+            auto* visitableId = database->mapVisitables()->find("hota.visitable.shrine4");
+            if (!visitableId)
+                visitableId = visitables[3];
+            visitables[4] = visitableId;
+        }
+
+        for (const auto& [_, value] : genSettings.m_records) {
+            if (m_spellPool->isEmpty(value.m_filter, true, scoreSettings))
+                continue;
+
+            auto rec = RecordSpellShrine{ .m_filter = value.m_filter, .m_visitableId = visitables[value.m_visualLevel] };
+
+            m_records.m_records.push_back(rec.setFreq(value.m_frequency));
+        }
+
+        m_records.updateFrequency();
+    }
+
+    IObjectPtr make(uint64_t rngFreq) override
+    {
+        const size_t index  = m_records.getFreqIndex(rngFreq);
+        auto&        record = m_records.m_records[index];
+
+        ObjectShrine obj;
+        obj.m_onDisable = [this, &record] {
+            m_records.onDisable(record);
+        };
+        obj.m_map               = &m_map;
+        obj.m_obj.m_visitableId = record.m_visitableId;
+        obj.m_obj.m_spellId     = m_spellPool->make(record.m_filter, true, m_scoreSettings);
+
+        assert(obj.m_obj.m_spellId);
+
+        estimateSpellScore(obj.m_obj.m_spellId, obj.m_obj.m_score);
+
+        obj.m_obj.m_guard = obj.m_obj.m_spellId->value * 2 * 3 / 4; // shrine = 75% of spell value
+
+        return std::make_shared<ObjectShrine>(std::move(obj));
+    }
+
+    SpellPool* const      m_spellPool;
+    const FHScoreSettings m_scoreSettings;
+};
+
+// ---------------------------------------------------------------------------------------
+
+struct RecordSpellScroll : public CommonRecord<RecordSpellScroll> {
+    Core::SpellFilter m_filter;
+};
+
+struct ObjectGenerator::ObjectFactoryScroll : public AbstractFactory<RecordSpellScroll> {
+    struct ObjectScroll : public AbstractObjectWithId<FHArtifact> {
+    };
+
+    ObjectFactoryScroll(FHMap& map, const FHRngZone::GeneratorScroll& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng, SpellPool* spellPool)
+        : AbstractFactory<RecordSpellScroll>(map, database, rng)
+        , m_spellPool(spellPool)
+        , m_scoreSettings(scoreSettings)
+    {
+        if (!genSettings.m_isEnabled)
+            return;
+
+        for (auto* art : database->artifacts()->records()) {
+            if (!art->scrollSpell)
+                continue;
+            m_scrollMapping[art->scrollSpell] = art;
+        }
+
+        for (const auto& [_, value] : genSettings.m_records) {
+            if (m_spellPool->isEmpty(value.m_filter, true, scoreSettings))
+                continue;
+
+            auto rec = RecordSpellScroll{ .m_filter = value.m_filter };
+
+            m_records.m_records.push_back(rec.setFreq(value.m_frequency));
+        }
+
+        m_records.updateFrequency();
+    }
+
+    IObjectPtr make(uint64_t rngFreq) override
+    {
+        const size_t index  = m_records.getFreqIndex(rngFreq);
+        auto&        record = m_records.m_records[index];
+
+        ObjectScroll obj;
+        obj.m_onDisable = [this, &record] {
+            m_records.onDisable(record);
+        };
+        obj.m_map    = &m_map;
+        auto spellId = m_spellPool->make(record.m_filter, true, m_scoreSettings);
+        assert(spellId);
+        obj.m_obj.m_id = m_scrollMapping.at(spellId);
+        assert(obj.m_obj.m_id);
+
+        estimateSpellScore(spellId, obj.m_obj.m_score);
+
+        obj.m_obj.m_guard = spellId->value * 2; // scroll = 100% of spell value
+
+        return std::make_shared<ObjectScroll>(std::move(obj));
+    }
+
+    std::map<Core::LibrarySpellConstPtr, Core::LibraryArtifactConstPtr> m_scrollMapping;
+    SpellPool* const                                                    m_spellPool;
+    const FHScoreSettings                                               m_scoreSettings;
+};
+
+// ---------------------------------------------------------------------------------------
+
 void ObjectGenerator::generate(const FHRngZone& zoneSettings)
 {
     static const std::string indentBase("      ");
@@ -580,7 +815,8 @@ void ObjectGenerator::generate(const FHRngZone& zoneSettings)
         return false;
     };
 
-    ArtifactPool pool(m_map, m_database, m_rng);
+    ArtifactPool artifactPool(m_map, m_database, m_rng);
+    SpellPool    spellPool(m_map, m_database, m_rng);
 
     for (const auto& [scoreId, scoreSettings] : zoneSettings.m_scoreTargets) {
         if (!scoreSettings.m_isEnabled) {
@@ -594,10 +830,12 @@ void ObjectGenerator::generate(const FHRngZone& zoneSettings)
             targetScore[key] = val.m_target;
 
         std::vector<IObjectFactoryPtr> objectFactories;
-        objectFactories.push_back(std::make_shared<ObjectFactoryBank>(m_map, zoneSettings.m_generators.m_banks, scoreSettings, m_database, m_rng, &pool));
-        objectFactories.push_back(std::make_shared<ObjectFactoryArtifact>(m_map, zoneSettings.m_generators.m_artifacts, scoreSettings, m_database, m_rng, &pool));
+        objectFactories.push_back(std::make_shared<ObjectFactoryBank>(m_map, zoneSettings.m_generators.m_banks, scoreSettings, m_database, m_rng, &artifactPool));
+        objectFactories.push_back(std::make_shared<ObjectFactoryArtifact>(m_map, zoneSettings.m_generators.m_artifacts, scoreSettings, m_database, m_rng, &artifactPool));
         objectFactories.push_back(std::make_shared<ObjectFactoryResourcePile>(m_map, zoneSettings.m_generators.m_resources, scoreSettings, m_database, m_rng));
         objectFactories.push_back(std::make_shared<ObjectFactoryPandora>(m_map, zoneSettings.m_generators.m_pandoras, scoreSettings, m_database, m_rng));
+        objectFactories.push_back(std::make_shared<ObjectFactoryShrine>(m_map, zoneSettings.m_generators.m_shrines, scoreSettings, m_database, m_rng, &spellPool));
+        objectFactories.push_back(std::make_shared<ObjectFactoryScroll>(m_map, zoneSettings.m_generators.m_scrolls, scoreSettings, m_database, m_rng, &spellPool));
 
         for (int i = 0; i < 1000000; i++) {
             if (!tryGen(targetScore, currentScore, objectFactories)) {

@@ -621,6 +621,7 @@ STRUCT_REFLECTION_PAIRED(
     "not",                        notArtifacts,
     "classes",                    classes,
     "tags",                       tags,
+    "notTags",                    notTags,
     "all",                        all
 )
 
@@ -757,7 +758,8 @@ ENUM_REFLECTION_PAIRED(LibrarySpell::Tag,
     "ice"         ,               Ice,
     "lightning"   ,               Lightning,
     "airElem"     ,               AirElem,
-    "fireElem"    ,               FireElem
+    "fireElem"    ,               FireElem,
+    "control"     ,               Control
 )
 ENUM_REFLECTION_PAIRED(LibrarySpell::EndCondition,
     Time,
@@ -795,6 +797,7 @@ STRUCT_REFLECTION_PAIRED(
     "tags",                        tags,
     "level",                       level,
     "manaCost",                    manaCost,
+    "value",                       value,
     "indistinctive",               indistinctive,
     "targetClass",                 targetClass,
     "counterSpells",               counterSpells,
@@ -824,6 +827,7 @@ STRUCT_REFLECTION_PAIRED(
     "levels",                      levels,
     "schools",                     schools,
     "tags",                        tags,
+    "notTags",                     notTags,
     "teachableOnly",               teachableOnly,
     "all",                         all
 )

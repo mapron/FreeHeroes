@@ -132,12 +132,12 @@
 
 "hota.artifact.boots.pathfind"        : {"class":"major"   , "value": 5000 , "cost": 5000 , "guard": 20000, "untranslatedName": "Boots PathFind"          ,"slot":"boots"  , "special": "noTerrainPenalty"},
 
-"sod.artifact.misc.bookAir"           : {"class":"relic"   , "value":40000 , "cost":20000 , "guard": 80000, "untranslatedName": "Book of Air"             ,"slot":"misc"  , "provideSpells": {"schools": ["air"]  , "teachableOnly": true }},
-"sod.artifact.misc.bookEarth"         : {"class":"relic"   , "value":40000 , "cost":20000 , "guard": 80000, "untranslatedName": "Book of Earth"           ,"slot":"misc"  , "provideSpells": {"schools": ["earth"], "teachableOnly": true }},
+"sod.artifact.misc.bookAir"           : {"class":"relic"   , "value":40000 , "cost":20000 , "guard": 80000, "untranslatedName": "Book of Air"             ,"slot":"misc"  , "provideSpells": {"schools": ["air"]  , "teachableOnly": true }, "tags": ["control"] },
+"sod.artifact.misc.bookEarth"         : {"class":"relic"   , "value":40000 , "cost":20000 , "guard": 80000, "untranslatedName": "Book of Earth"           ,"slot":"misc"  , "provideSpells": {"schools": ["earth"], "teachableOnly": true }, "tags": ["control"] },
 "sod.artifact.misc.bookFire"          : {"class":"relic"   , "value":20000 , "cost":20000 , "guard": 40000, "untranslatedName": "Book of Fire"            ,"slot":"misc"  , "provideSpells": {"schools": ["fire" ], "teachableOnly": true }},
 "sod.artifact.misc.bookWater"         : {"class":"relic"   , "value":15000 , "cost":20000 , "guard": 30000, "untranslatedName": "Book of Water"           ,"slot":"misc"  , "provideSpells": {"schools": ["water"], "teachableOnly": true }},
 
-"sod.artifact.helm.spells5"           : {"class":"relic"   , "value":40000 , "cost":30000 , "guard": 80000, "untranslatedName": "Helm With Magic 5"       ,"slot":"helm"  ,  "provideSpells": {"levels": [5], "teachableOnly": true }},
+"sod.artifact.helm.spells5"           : {"class":"relic"   , "value":40000 , "cost":30000 , "guard": 80000, "untranslatedName": "Helm With Magic 5"       ,"slot":"helm"  ,  "provideSpells": {"levels": [5], "teachableOnly": true }, "tags": ["control"]},
 
 "sod.artifact.misc.sphereAir"         : {"class":"major"   , "value":10000 , "cost": 6000 , "guard": 25000, "untranslatedName": "Air Sphere"              ,"slot":"misc"  , "calc": ["h.magicIncrease.air:add(50, 100)"  ]},
 "sod.artifact.misc.sphereEarth"       : {"class":"major"   , "value":10000 , "cost": 6000 , "guard": 25000, "untranslatedName": "Earth Sphere"            ,"slot":"misc"  , "calc": ["h.magicIncrease.earth:add(50, 100)"]},
@@ -180,7 +180,7 @@
 "sod.artifact.sword.armag"                  : {"class":"unique"  , "value":50000, "cost":50000, "guard": 100000, "untranslatedName": "Sword With Armag"             ,"slot":"sword" ,
     "calc": ["h.primary:incAll(3)", "h.primary.magic:incInt(3)"],  "provideSpells": {"onlySpells": ["sod.spell.armageddon"] }, "protectSpells": {"onlySpells": ["sod.spell.armageddon"] } },
 
-"sod.artifact.cape.spellFly"                : {"class":"relic"   , "value":40000, "cost":20000, "guard": 80000, "untranslatedName": "Cape of Fly"           ,"slot":"cape"  , "special":"alwaysFly"},
+"sod.artifact.cape.spellFly"                : {"class":"relic"   , "value":40000, "cost":20000, "guard": 80000, "untranslatedName": "Cape of Fly"           ,"slot":"cape"  , "special":"alwaysFly", "tags": ["control"]},
 "hota.artifact.misc.summon"                 : {"class":"unique"  , "value":50000, "cost":50000, "guard": 40000, "untranslatedName": "Fangarm Summon"        ,"slot":"misc"  , "special":"resurrectFangarms"},
 "sod.artifact.boots.spellWalkWater"         : {"class":"relic"   , "value":10000, "cost":10000, "guard": 40000, "untranslatedName": "Boots of Waterwalk"    ,"slot":"boots" , "special":"alwaysWaterWalk"},
 "sod.artifact.misc.archeryNoDistance"       : {"class":"major"   , "value": 8000, "cost": 8000, "guard": 20000, "untranslatedName": "Bow No Distance"       ,"slot":"misc"  , "noPenalty":["distance", "obstacle"] },

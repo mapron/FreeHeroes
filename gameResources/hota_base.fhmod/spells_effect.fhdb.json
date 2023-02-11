@@ -716,16 +716,16 @@
 
     },
     "sod.spell.fly" : {
-
+        "tags": ["control"]
     },
     "sod.spell.waterWalk" : {
-
+        "tags": ["control"]
     },
     "sod.spell.dimensionDoor" : {
-
+        "tags": ["control"]
     },
     "sod.spell.townPortal" : {
-
+        "tags": ["control"]
     }
 
 }
