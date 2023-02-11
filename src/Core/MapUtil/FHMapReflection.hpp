@@ -11,8 +11,10 @@
 #include "MernelReflection/MetaInfoMacro.hpp"
 
 #include "FHTileMapReflection.hpp"
+#include "FHTemplateReflection.hpp"
 
 namespace Mernel::Reflection {
+using namespace FreeHeroes;
 
 ENUM_REFLECTION_STRINGIFY(
     Core::GameVersion,
@@ -35,23 +37,6 @@ ENUM_REFLECTION_STRINGIFY(
     Minor,
     Major,
     Relic)
-
-ENUM_REFLECTION_STRINGIFY(
-    FHScoreAttr,
-    Invalid,
-
-    Invalid,
-    Army,
-    ArtStat,
-    ArtSupport,
-    Gold,
-    Resource,
-    ResourceGen,
-    Experience,
-    SpellOffensive,
-    SpellCommon,
-    SpellAll,
-    Misc)
 
 // clang-format off
 STRUCT_REFLECTION_PAIRED(
@@ -344,83 +329,11 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_spellId)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
-    FHRngZoneTown,
-    m_town,
-    m_playerControlled,
-    m_useZoneFaction)
-
-STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
-    FHScoreSettings::ScoreScope,
-    m_target,
-    m_minSingle,
-    m_maxSingle)
-
-STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
-    FHScoreSettings,
-    m_guarded,
-    m_unguarded,
-    m_armyFocusPercent)
-
-STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
-    FHRngZone,
-    m_player,
-    m_mainTownFaction,
-    m_rewardsFaction,
-    m_terrain,
-    m_towns,
-    m_centerAvg,
-    m_centerDispersion,
-    m_relativeSizeAvg,
-    m_relativeSizeDispersion,
-    m_score,
-    m_guardMin,
-    m_guardMax,
-    m_cornerRoads,
-    m_isNormal)
-
-STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
-    FHRngConnection,
-    m_from,
-    m_to,
-    m_mirrorGuard,
-    m_guard)
-
-STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHDebugTile,
     m_pos,
     m_valueA,
     m_valueB,
     m_valueC)
-
-STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
-    FHRngOptions,
-    m_roughTilePercentage,
-    m_rotationDegreeDispersion,
-    m_allowFlip)
-
-ENUM_REFLECTION_STRINGIFY(
-    FHRngUserSettings::HeroGeneration,
-    RandomStartingFaction,
-    None,
-    RandomAnyFaction,
-    RandomStartingFaction,
-    FixedAny,
-    FixedStarting)
-
-STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
-    FHRngUserSettings::UserPlayer,
-    m_faction,
-    m_startingHero,
-    m_extraHero,
-    m_startingHeroGen,
-    m_extraHeroGen)
-
-STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
-    FHRngUserSettings,
-    m_players,
-    m_difficultyScale,
-    m_defaultRoad,
-    m_mapSize)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHMap::Objects,
@@ -461,9 +374,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_towns,
     m_zones,
     m_debugTiles,
-    m_rngZones,
-    m_rngConnections,
-    m_rngOptions,
+    m_template,
     m_objects,
     m_config,
     m_rivers,
@@ -478,17 +389,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_defReplacements)
 
 template<>
-inline constexpr const bool s_isStringMap<FHRngUserSettings::PlayersMap>{ true };
-template<>
 inline constexpr const bool s_isStringMap<FHMap::PlayersMap>{ true };
 template<>
-inline constexpr const bool s_isStringMap<FHMap::RngZoneMap>{ true };
-template<>
-inline constexpr const bool s_isStringMap<FHMap::RngConnectionMap>{ true };
-template<>
 inline constexpr const bool s_isStringMap<FHMap::DefMap>{ true };
-template<>
-inline constexpr const bool s_isStringMap<FHScoreSettings::AttrMap>{ true };
 
 #define FHMAP_DISABLE_CONFIG_SETUP(name) \
     template<> \

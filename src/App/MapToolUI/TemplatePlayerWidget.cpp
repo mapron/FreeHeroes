@@ -175,6 +175,8 @@ void TemplatePlayerWidget::setConfig(const FHRngUserSettings::UserPlayer& settin
 
     setHeroToCombo(settings.m_startingHero, m_ui->comboBoxHeroMain);
     setHeroToCombo(settings.m_extraHero, m_ui->comboBoxHeroExtra);
+
+    m_ui->checkBoxStdStat->setChecked(settings.m_stdStats);
 }
 
 FHRngUserSettings::UserPlayer TemplatePlayerWidget::getConfig() const
@@ -194,6 +196,8 @@ FHRngUserSettings::UserPlayer TemplatePlayerWidget::getConfig() const
     if (result.m_extraHeroGen != FHRngUserSettings::HeroGeneration::FixedStarting
         && result.m_extraHeroGen != FHRngUserSettings::HeroGeneration::FixedAny)
         result.m_extraHero = nullptr;
+
+    result.m_stdStats = m_ui->checkBoxStdStat->isChecked();
     return result;
 }
 

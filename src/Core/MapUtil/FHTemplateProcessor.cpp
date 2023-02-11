@@ -111,7 +111,7 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
     m_indent                      = baseIndent + "  ";
     m_map.m_tileMapUpdateRequired = false;
 
-    const int regionCount = m_map.m_rngZones.size();
+    const int regionCount = m_map.m_template.m_zones.size();
     if (regionCount <= 1)
         throw std::runtime_error("need at least two zones");
 
@@ -125,7 +125,7 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
     for (const auto& [playerId, info] : m_map.m_players) {
         m_playerInfo[playerId] = {};
     }
-    for (const auto& [key, rngZone] : m_map.m_rngZones) {
+    for (const auto& [key, rngZone] : m_map.m_template.m_zones) {
         if (rngZone.m_player == nullptr || !rngZone.m_player->isPlayable)
             continue;
 
@@ -133,14 +133,15 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
             throw std::runtime_error("You need to define all players used in zones.");
     }
     for (auto& [playerId, info] : m_playerInfo) {
-        if (!m_map.m_rngUserSettings.m_players.contains(playerId))
+        if (!m_map.m_template.m_userSettings.m_players.contains(playerId))
             continue;
-        auto& pl               = m_map.m_rngUserSettings.m_players[playerId];
+        auto& pl               = m_map.m_template.m_userSettings.m_players[playerId];
         info.m_faction         = pl.m_faction;
         info.m_startingHero    = pl.m_startingHero;
         info.m_extraHero       = pl.m_extraHero;
         info.m_startingHeroGen = pl.m_startingHeroGen;
         info.m_extraHeroGen    = pl.m_extraHeroGen;
+        info.m_stdStats        = pl.m_stdStats;
     }
 
     auto heroGen = [this](Core::LibraryHeroConstPtr hero, Core::LibraryFactionConstPtr faction, HeroGeneration policy) -> Core::LibraryHeroConstPtr {
@@ -161,7 +162,7 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
     }
 
     m_tileZones.resize(regionCount);
-    for (int i = 0; const auto& [key, rngZone] : m_map.m_rngZones) {
+    for (int i = 0; const auto& [key, rngZone] : m_map.m_template.m_zones) {
         auto& tileZone             = m_tileZones[i];
         tileZone.m_player          = rngZone.m_player;
         tileZone.m_mainTownFaction = rngZone.m_mainTownFaction;
@@ -264,7 +265,7 @@ void FHTemplateProcessor::runZoneCenterPlacement()
     const int w = m_map.m_tileMap.m_width;
     const int h = m_map.m_tileMap.m_height;
 
-    if (m_map.m_rngOptions.m_allowFlip) {
+    if (m_map.m_template.m_allowFlip) {
         bool vertical   = m_rng->genSmall(1) == 1;
         bool horizontal = m_rng->genSmall(1) == 1;
         for (auto& tileZone : m_tileZones) {
@@ -274,8 +275,8 @@ void FHTemplateProcessor::runZoneCenterPlacement()
                 tileZone.m_startTile.m_y = h - tileZone.m_startTile.m_y - 1;
         }
     }
-    if (m_map.m_rngOptions.m_rotationDegreeDispersion) {
-        const int rotationDegree = m_rng->genDispersed(0, m_map.m_rngOptions.m_rotationDegreeDispersion);
+    if (m_map.m_template.m_rotationDegreeDispersion) {
+        const int rotationDegree = m_rng->genDispersed(0, m_map.m_template.m_rotationDegreeDispersion);
         m_logOutput << m_indent << "starting rotation of zones to " << rotationDegree << " degrees\n";
         for (auto& tileZone : m_tileZones) {
             auto newPos          = rotateChebyshev(tileZone.m_startTile, rotationDegree, w, h);
@@ -568,7 +569,7 @@ void FHTemplateProcessor::runBorderRoads()
 
     TileZone::TileRegion connectionUnblockableCells;
 
-    for (const auto& [connectionId, connections] : m_map.m_rngConnections) {
+    for (const auto& [connectionId, connections] : m_map.m_template.m_connections) {
         auto&                 tileZoneFrom = findZoneById(connections.m_from);
         auto&                 tileZoneTo   = findZoneById(connections.m_to);
         auto                  key          = makeKey(tileZoneFrom, tileZoneTo);
@@ -1043,6 +1044,18 @@ void FHTemplateProcessor::runGuards()
 
 void FHTemplateProcessor::runPlayerInfo()
 {
+    auto addHero = [this](FHHero fhhero, Core::LibraryHeroConstPtr heroId, bool stdStats) {
+        FHHeroData& destHero = fhhero.m_data;
+        destHero.m_army.hero = Core::AdventureHero(heroId);
+        if (stdStats) {
+            destHero.m_hasSecSkills              = true;
+            destHero.m_army.hero.secondarySkills = heroId->isWarrior ? m_map.m_template.m_stdSkillsWarrior : m_map.m_template.m_stdSkillsMage;
+            m_logOutput << "destHero.m_army.hero.secondarySkills=" << destHero.m_army.hero.secondarySkills.size() << "\n";
+        }
+
+        m_map.m_wanderingHeroes.push_back(std::move(fhhero));
+    };
+
     for (const auto& [playerId, info] : m_playerInfo) {
         FHPlayer& player                = m_map.m_players[playerId];
         player.m_startingFactions       = { info.m_faction };
@@ -1058,10 +1071,7 @@ void FHTemplateProcessor::runPlayerInfo()
             fhhero.m_pos    = pos;
             fhhero.m_isMain = true;
 
-            FHHeroData& destHero = fhhero.m_data;
-            destHero.m_army.hero = Core::AdventureHero(info.m_startingHero);
-
-            m_map.m_wanderingHeroes.push_back(std::move(fhhero));
+            addHero(std::move(fhhero), info.m_startingHero, info.m_stdStats);
         }
         if (info.m_hasMainTown && info.m_extraHero) {
             const FHTown& mainTown = m_map.m_towns.at(info.m_mainTownMapIndex);
@@ -1074,10 +1084,7 @@ void FHTemplateProcessor::runPlayerInfo()
             fhhero.m_player = playerId;
             fhhero.m_pos    = pos;
 
-            FHHeroData& destHero = fhhero.m_data;
-            destHero.m_army.hero = Core::AdventureHero(info.m_extraHero);
-
-            m_map.m_wanderingHeroes.push_back(std::move(fhhero));
+            addHero(std::move(fhhero), info.m_extraHero, info.m_stdStats);
         }
     }
 }

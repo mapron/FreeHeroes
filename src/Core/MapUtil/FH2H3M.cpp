@@ -247,9 +247,21 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
             if (hero->m_hasExp)
                 hero->m_exp = static_cast<int32_t>(fhHero.m_data.m_army.hero.experience);
 
-            //assert(!hero->m_hasSecSkills);
-            //assert(!hero->m_spellSet.m_hasCustomSpells);
-            //assert(!hero->m_primSkillSet.m_hasCustomPrimSkills);
+            if (hero->m_primSkillSet.m_hasCustomPrimSkills) {
+                auto& prim = hero->m_primSkillSet.m_primSkills;
+                prim.resize(4);
+                std::tie(prim[0], prim[1]) = fhHero.m_data.m_army.hero.currentBasePrimary.ad.asTuple();
+                std::tie(prim[2], prim[3]) = fhHero.m_data.m_army.hero.currentBasePrimary.magic.asTuple();
+            }
+            if (hero->m_hasSecSkills) {
+                for (auto& sk : fhHero.m_data.m_army.hero.secondarySkills) {
+                    hero->m_secSkills.push_back({ static_cast<uint8_t>(sk.skill->legacyId), static_cast<uint8_t>(sk.level + 1) });
+                }
+            }
+            if (hero->m_spellSet.m_hasCustomSpells) {
+                for (auto* spell : fhHero.m_data.m_army.hero.spellbook)
+                    hero->m_spellSet.m_spells[spell->legacyId] = 1;
+            }
         }
         dest.m_allowedHeroes[heroId] = 0;
         if (playerIndex < 0) {

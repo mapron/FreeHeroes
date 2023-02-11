@@ -15,10 +15,11 @@
 #include "AdventureArmy.hpp"
 #include "Reward.hpp"
 
-#include "LibraryObjectDef.hpp"
 #include "LibrarySecondarySkill.hpp"
 
 #include "FHTileMap.hpp"
+#include "FHMapObject.hpp"
+#include "FHTemplate.hpp"
 
 #include "MapUtilExport.hpp"
 
@@ -29,24 +30,6 @@ class IGameDatabase;
 class IRandomGenerator;
 }
 
-enum class FHScoreAttr
-{
-    Invalid,
-
-    Army,
-    ArtStat,
-    ArtSupport,
-    Gold,
-    Resource,
-    ResourceGen,
-    Experience,
-    SpellOffensive,
-    SpellCommon,
-    SpellAll,
-    Misc,
-};
-using FHScore = std::map<FHScoreAttr, int64_t>;
-
 struct FHPlayer {
     bool m_humanPossible{ false };
     bool m_aiPossible{ false };
@@ -56,28 +39,6 @@ struct FHPlayer {
     std::vector<Core::LibraryFactionConstPtr> m_startingFactions;
 
     bool operator==(const FHPlayer&) const noexcept = default;
-};
-
-struct FHCommonObject {
-    FHPos                m_pos{ g_invalidPos };
-    int                  m_order = 0;
-    Core::ObjectDefIndex m_defIndex;
-    int64_t              m_guard = 0;
-    FHScore              m_score;
-
-    bool operator==(const FHCommonObject&) const noexcept = default;
-};
-
-struct FHCommonVisitable : public FHCommonObject {
-    Core::LibraryMapVisitableConstPtr m_visitableId = nullptr;
-
-    bool operator==(const FHCommonVisitable&) const noexcept = default;
-};
-
-struct FHPlayerControlledObject : public FHCommonObject {
-    Core::LibraryPlayerConstPtr m_player = nullptr;
-
-    bool operator==(const FHPlayerControlledObject&) const noexcept = default;
 };
 
 struct FHHeroData {
@@ -99,31 +60,6 @@ struct FHHero : public FHPlayerControlledObject {
     uint32_t m_questIdentifier = 0;
 
     bool operator==(const FHHero&) const noexcept = default;
-};
-
-struct FHTown : public FHPlayerControlledObject {
-    bool                         m_isMain{ false };
-    Core::LibraryFactionConstPtr m_factionId = nullptr;
-    bool                         m_hasFort{ false };
-    uint32_t                     m_questIdentifier = 0;
-    bool                         m_spellResearch{ false };
-    bool                         m_hasCustomBuildings{ false };
-    bool                         m_hasGarison{ false };
-
-    std::vector<Core::LibraryBuildingConstPtr> m_buildings;
-
-    std::vector<Core::AdventureStack> m_garison;
-
-    struct RmgStack {
-        int m_level = 0;
-        int m_value = 0;
-
-        bool operator==(const RmgStack&) const noexcept = default;
-    };
-
-    std::vector<RmgStack> m_garisonRmg;
-
-    bool operator==(const FHTown&) const noexcept = default;
 };
 
 struct FHDwelling : public FHPlayerControlledObject {
@@ -299,58 +235,6 @@ struct FHScholar : public FHCommonVisitable {
     Core::LibrarySecondarySkillConstPtr m_skillId     = nullptr;
     Core::LibrarySpellConstPtr          m_spellId     = nullptr;
 };
-struct FHRngZoneTown {
-    FHTown m_town;
-    bool   m_playerControlled = false;
-    bool   m_useZoneFaction   = false;
-};
-
-struct FHScoreSettings {
-    struct ScoreScope {
-        int64_t m_target    = 0;
-        int64_t m_minSingle = -1;
-        int64_t m_maxSingle = -1;
-    };
-
-    using AttrMap = std::map<FHScoreAttr, ScoreScope>;
-
-    AttrMap m_guarded;
-    AttrMap m_unguarded;
-    int     m_armyFocusPercent = 80;
-
-    bool empty() const { return m_guarded.empty() && m_unguarded.empty(); }
-
-    MAPUTIL_EXPORT static std::string attrToString(FHScoreAttr attr);
-};
-
-struct FHRngZone {
-    Core::LibraryPlayerConstPtr  m_player          = nullptr;
-    Core::LibraryFactionConstPtr m_mainTownFaction = nullptr;
-    Core::LibraryFactionConstPtr m_rewardsFaction  = nullptr;
-    Core::LibraryTerrainConstPtr m_terrain         = nullptr;
-
-    std::vector<FHRngZoneTown> m_towns;
-    FHPos                      m_centerAvg;
-    FHPos                      m_centerDispersion;
-    int                        m_relativeSizeAvg        = 100;
-    int                        m_relativeSizeDispersion = 0;
-
-    FHScoreSettings m_score;
-
-    int64_t m_guardMin = 0;
-    int64_t m_guardMax = 0;
-
-    int m_cornerRoads = 0;
-
-    bool m_isNormal = false;
-};
-struct FHRngConnection {
-    std::string m_from;
-    std::string m_to;
-
-    std::string m_mirrorGuard;
-    int64_t     m_guard = 0;
-};
 
 struct FHDebugTile {
     FHPos m_pos;
@@ -359,43 +243,9 @@ struct FHDebugTile {
     int   m_valueC = 0;
 };
 
-struct FHRngOptions {
-    int  m_roughTilePercentage      = 12;
-    int  m_rotationDegreeDispersion = 0;
-    bool m_allowFlip                = false;
-};
-
-struct FHRngUserSettings {
-    enum class HeroGeneration
-    {
-        None,
-        RandomAnyFaction,
-        RandomStartingFaction,
-        FixedAny,
-        FixedStarting,
-    };
-
-    struct UserPlayer {
-        Core::LibraryFactionConstPtr m_faction         = nullptr;
-        Core::LibraryHeroConstPtr    m_startingHero    = nullptr;
-        Core::LibraryHeroConstPtr    m_extraHero       = nullptr;
-        HeroGeneration               m_startingHeroGen = HeroGeneration::RandomStartingFaction;
-        HeroGeneration               m_extraHeroGen    = HeroGeneration::None;
-    };
-    using PlayersMap = std::map<Core::LibraryPlayerConstPtr, UserPlayer>;
-
-    PlayersMap m_players;
-
-    FHRoadType m_defaultRoad     = FHRoadType::Invalid;
-    int        m_difficultyScale = 100;
-    int        m_mapSize         = 144;
-};
-
 struct MAPUTIL_EXPORT FHMap {
-    using PlayersMap       = std::map<Core::LibraryPlayerConstPtr, FHPlayer>;
-    using DefMap           = std::map<Core::LibraryObjectDefConstPtr, Core::LibraryObjectDef>;
-    using RngZoneMap       = std::map<std::string, FHRngZone>;
-    using RngConnectionMap = std::map<std::string, FHRngConnection>;
+    using PlayersMap = std::map<Core::LibraryPlayerConstPtr, FHPlayer>;
+    using DefMap     = std::map<Core::LibraryObjectDefConstPtr, Core::LibraryObjectDef>;
 
     Core::GameVersion m_version = Core::GameVersion::Invalid;
     uint64_t          m_seed{ 0 };
@@ -413,10 +263,7 @@ struct MAPUTIL_EXPORT FHMap {
     std::vector<FHTown>      m_towns;
     std::vector<FHZone>      m_zones;
     std::vector<FHDebugTile> m_debugTiles;
-    RngZoneMap               m_rngZones;
-    RngConnectionMap         m_rngConnections;
-    FHRngOptions             m_rngOptions;
-    FHRngUserSettings        m_rngUserSettings;
+    FHTemplate               m_template;
 
     struct Objects {
         std::vector<FHResource>       m_resources;
@@ -520,7 +367,7 @@ struct MAPUTIL_EXPORT FHMap {
 
     void initTiles(const Core::IGameDatabase* database);
 
-    void rescaleToSize(int mapSize);
+    void rescaleToUserSize();
 };
 
 // clang-format off
@@ -556,9 +403,5 @@ template <> inline       std::vector<FHSkillHut>       &       FHMap::Objects::c
 template <> inline       std::vector<FHScholar>        &       FHMap::Objects::container()       noexcept { return m_scholars;}
 template <> inline       std::vector<FHQuestHut>       &       FHMap::Objects::container()       noexcept { return m_questHuts;}
 // clang-format on
-
-MAPUTIL_EXPORT std::ostream& operator<<(std::ostream& stream, const FreeHeroes::FHScore& score);
-
-MAPUTIL_EXPORT FreeHeroes::FHScore operator+(const FreeHeroes::FHScore& l, const FreeHeroes::FHScore& r);
 
 }

@@ -108,6 +108,8 @@ private:
         Core::LibraryHeroConstPtr m_extraHero       = nullptr;
         HeroGeneration            m_startingHeroGen = HeroGeneration::RandomStartingFaction;
         HeroGeneration            m_extraHeroGen    = HeroGeneration::None;
+
+        bool m_stdStats = false;
     };
     std::map<Core::LibraryPlayerConstPtr, PlayerInfo> m_playerInfo;
 

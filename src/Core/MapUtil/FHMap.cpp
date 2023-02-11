@@ -20,12 +20,6 @@
 namespace FreeHeroes {
 using namespace Mernel;
 
-std::string FHScoreSettings::attrToString(FHScoreAttr attr)
-{
-    auto str = Mernel::Reflection::EnumTraits::enumToString(attr);
-    return std::string(str.data(), str.size());
-}
-
 void FHMap::toJson(PropertyTree& data) const
 {
     Core::PropertyTreeWriterDatabase writer;
@@ -36,17 +30,18 @@ void FHMap::fromJson(PropertyTree data, const Core::IGameDatabase* database)
 {
     Core::PropertyTreeReaderDatabase reader(database);
     *this = {};
-    if (data.contains("rngZones")) {
+    if (data.contains("template")) {
+        auto&           zones = data["template"]["zones"];
         PropertyTreeMap baseItems;
-        for (auto& [key, item] : data["rngZones"].getMap()) {
+        for (auto& [key, item] : zones.getMap()) {
             if (item.contains("isNormal"))
                 continue;
             baseItems[key] = item;
         }
         for (auto& [key, item] : baseItems) {
-            data["rngZones"].getMap().erase(key);
+            zones.getMap().erase(key);
         }
-        for (auto& [key, item] : data["rngZones"].getMap()) {
+        for (auto& [key, item] : zones.getMap()) {
             if (!item.contains("base"))
                 continue;
             auto baseKey = item["base"].getScalar().toString();
@@ -59,7 +54,7 @@ void FHMap::fromJson(PropertyTree data, const Core::IGameDatabase* database)
 void FHMap::applyRngUserSettings(const Mernel::PropertyTree& data, const Core::IGameDatabase* database)
 {
     Core::PropertyTreeReaderDatabase reader(database);
-    reader.jsonToValue(data, m_rngUserSettings);
+    reader.jsonToValue(data, m_template.m_userSettings);
 }
 
 void FHMap::initTiles(const Core::IGameDatabase* database)
@@ -110,24 +105,13 @@ void FHMap::initTiles(const Core::IGameDatabase* database)
     }
 }
 
-void FHMap::rescaleToSize(int mapSize)
+void FHMap::rescaleToUserSize()
 {
-    int wmult = mapSize;
-    int wdiv  = m_tileMap.m_width;
-
-    int hmult = mapSize;
-    int hdiv  = m_tileMap.m_height;
+    const int mapSize = m_template.m_userSettings.m_mapSize;
+    m_template.rescaleToSize(mapSize, m_tileMap.m_width, m_tileMap.m_height);
 
     m_tileMap.m_width  = mapSize;
     m_tileMap.m_height = mapSize;
-
-    for (auto& [key, rngZone] : m_rngZones) {
-        rngZone.m_centerAvg.m_x = rngZone.m_centerAvg.m_x * wmult / wdiv;
-        rngZone.m_centerAvg.m_y = rngZone.m_centerAvg.m_y * hmult / hdiv;
-
-        rngZone.m_centerDispersion.m_x = rngZone.m_centerDispersion.m_x * wmult / wdiv;
-        rngZone.m_centerDispersion.m_y = rngZone.m_centerDispersion.m_y * hmult / hdiv;
-    }
 }
 
 std::ostream& operator<<(std::ostream& stream, const FHScore& score)
@@ -141,16 +125,6 @@ std::ostream& operator<<(std::ostream& stream, const FHScore& score)
     }
     stream << "}";
     return stream;
-}
-
-FHScore operator+(const FHScore& l, const FHScore& r)
-{
-    FreeHeroes::FHScore result = l;
-
-    for (const auto& [key, val] : r)
-        result[key] += val;
-
-    return result;
 }
 
 }

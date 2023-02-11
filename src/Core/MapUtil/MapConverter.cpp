@@ -519,7 +519,7 @@ void MapConverter::convertFHtoH3M()
     auto* db = m_databaseContainer->getDatabase(m_mapFH.m_version);
 
     m_mapFH.initTiles(db);
-    m_mapFH.m_tileMap.rngTiles(rng.get(), m_mapFH.m_rngOptions.m_roughTilePercentage);
+    m_mapFH.m_tileMap.rngTiles(rng.get(), m_mapFH.m_template.m_roughTilePercentage);
 
     convertFH2H3M(m_mapFH, m_mapH3M, db);
 }
@@ -548,7 +548,7 @@ void MapConverter::convertFHTPLtoFH()
 
         m_mapFH.applyRngUserSettings(settingsJson, db);
     }
-    m_mapFH.rescaleToSize(m_mapFH.m_rngUserSettings.m_mapSize);
+    m_mapFH.rescaleToUserSize();
 
     rng->setSeed(m_mapFH.m_seed);
 

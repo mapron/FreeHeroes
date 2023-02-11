@@ -8,60 +8,63 @@
 		"Red" : {"human": true},
 		"Blue": {"human": true}
 	},
-	"rngZones" : {
-		"Common"  : { "centerDispersion": {"x": 5 , "y": 5 }, "relativeSizeAvg": 100, "relativeSizeDispersion": 10, "cornerRoads": 3,
-			"towns": [
-                {"town":{"isMain":true, "hasFort":true,"hasCustomBuildings":true,"buildings":["townHall1","fort1","tavern","mageGuild1","t1","t2"],"garisonRmg":[{"level":10,"value":1000}]},"playerControlled":true, "useZoneFaction": true}, 
-                {"town":{"garisonRmg":[{"level":10,"value":2000},{"level":20,"value":1000},{"level":30,"value":1000}]}}, 
-                {"town":{"garisonRmg":[{"level":10,"value":2000},{"level":20,"value":1000},{"level":30,"value":1000}]}}],
-            
-            "score": {
-                "guarded": {
-                    "Army":           { "target": 50000, "maxSingle": 20000},
-                    "ArtStat":        { "target": 50000, "maxSingle": 20000},
-                    "ArtSupport":     { "target": 50000},
-                    "Gold":           { "target": 150000},
-                    "Resource":       { "target": 90000, "maxSingle": 20000},
-                    "ResourceGen":    { "target": 50000},
-                    "Experience":     { "target": 50000},
-                    "SpellOffensive": { "target": 50000},
-                    "SpellCommon":    { "target": 50000},
-                    "SpellAll":       { "target": 50000},
-                    "Misc":           { "target": 50000}
+	"template": {
+        "zones" : {
+            "Common"  : { 
+                "centerDispersion": {"x": 5 , "y": 5 }, "relativeSizeAvg": 100, "relativeSizeDispersion": 10, "cornerRoads": 3,
+                "towns": [
+                    {"town":{"isMain":true, "hasFort":true,"hasCustomBuildings":true,"buildings":["townHall1","fort1","tavern","mageGuild1","t1","t2"],"garisonRmg":[{"level":10,"value":1000}]},"playerControlled":true, "useZoneFaction": true}, 
+                    {"town":{"garisonRmg":[{"level":10,"value":2000},{"level":20,"value":1000},{"level":30,"value":1000}]}}, 
+                    {"town":{"garisonRmg":[{"level":10,"value":2000},{"level":20,"value":1000},{"level":30,"value":1000}]}}],
+                
+                "score": {
+                    "guarded": {
+                        "Army":           { "target": 50000, "maxSingle": 20000},
+                        "ArtStat":        { "target": 50000, "maxSingle": 20000},
+                        "ArtSupport":     { "target": 50000},
+                        "Gold":           { "target": 150000},
+                        "Resource":       { "target": 90000, "maxSingle": 20000},
+                        "ResourceGen":    { "target": 50000},
+                        "Experience":     { "target": 50000},
+                        "SpellOffensive": { "target": 50000},
+                        "SpellCommon":    { "target": 50000},
+                        "SpellAll":       { "target": 50000},
+                        "Misc":           { "target": 50000}
+                    },
+                    "unguarded": {
+                        "Gold":           { "target": 20000, "maxSingle": 2000},
+                        "Experience":     { "target": 20000, "maxSingle": 2000}
+                    },
+                    "armyFocusPercent": 80
                 },
-                "unguarded": {
-                    "Gold":           { "target": 20000, "maxSingle": 2000},
-                    "Experience":     { "target": 20000, "maxSingle": 2000}
-                },
-                "armyFocusPercent": 80
+                "guardMin": 4000,
+                "guardMax": 30000
             },
-            "guardMin": 4000,
-            "guardMax": 30000
+            "Treasure": { "centerDispersion": {"x": 15, "y": 15}, "relativeSizeAvg": 130, "relativeSizeDispersion": 20, "terrain": "sod.terrain.sand",
+                "towns": [
+                {"town":{"hasFort":true, "garisonRmg":[{"level":60,"value":20000}]}, "useZoneFaction": true}, 
+                {"town":{"hasFort":true, "garisonRmg":[{"level":60,"value":20000}]}},   
+                {"town":{"hasFort":true, "garisonRmg":[{"level":60,"value":20000}]}}, 
+                {"town":{"hasFort":true, "garisonRmg":[{"level":60,"value":20000}]}}, 
+                {"town":{"hasFort":true, "garisonRmg":[{"level":60,"value":20000}]}}]	
+            },
+    
+            "P1": { "base": "Common"  , "isNormal": true,  "player": "Red" , "centerAvg": {"x": 10, "y": 10}  },
+            "P2": { "base": "Common"  , "isNormal": true,  "player": "Blue", "centerAvg": {"x": 90, "y": 90}  },
+            "P3": { "base": "Common"  , "isNormal": true,  "player": "None", "centerAvg": {"x": 90, "y": 10}  },
+            "P4": { "base": "Common"  , "isNormal": true,  "player": "None", "centerAvg": {"x": 10, "y": 90}  },
+            "CC": { "base": "Treasure", "isNormal": true,  "player": "None", "centerAvg": {"x": 50, "y": 50}  }
         },
-		"Treasure": { "centerDispersion": {"x": 15, "y": 15}, "relativeSizeAvg": 130, "relativeSizeDispersion": 20, "terrain": "sod.terrain.sand",
-			"towns": [
-            {"town":{"hasFort":true, "garisonRmg":[{"level":60,"value":20000}]}, "useZoneFaction": true}, 
-            {"town":{"hasFort":true, "garisonRmg":[{"level":60,"value":20000}]}},   
-            {"town":{"hasFort":true, "garisonRmg":[{"level":60,"value":20000}]}}, 
-            {"town":{"hasFort":true, "garisonRmg":[{"level":60,"value":20000}]}}, 
-            {"town":{"hasFort":true, "garisonRmg":[{"level":60,"value":20000}]}}]	},
-
-		"P1": { "base": "Common"  , "isNormal": true,  "player": "Red" , "centerAvg": {"x": 10, "y": 10}  },
-		"P2": { "base": "Common"  , "isNormal": true,  "player": "Blue", "centerAvg": {"x": 90, "y": 90}  },
-		"P3": { "base": "Common"  , "isNormal": true,  "player": "None", "centerAvg": {"x": 90, "y": 10} , "rewardsFaction" : "hota.faction.cove", "terrain": "hota.terrain.wasteland" },
-		"P4": { "base": "Common"  , "isNormal": true,  "player": "None", "centerAvg": {"x": 10, "y": 90} , "rewardsFaction" : "sod.faction.neutral" },
-		"CC": { "base": "Treasure", "isNormal": true,  "player": "None", "centerAvg": {"x": 50, "y": 50}  }
-	},
-	
-	"rngConnections": {
-		"CC_P1": { "from": "CC", "to": "P1", "guard": 100000 },
-		"CC_P2": { "from": "CC", "to": "P2", "mirrorGuard": "CC_P1" },
-		"CC_P3": { "from": "CC", "to": "P3", "guard": 100000 },
-		"CC_P4": { "from": "CC", "to": "P4", "guard": 100000 }
-	},
-	"rngOptions": {
+        "connections": {
+            "CC_P1": { "from": "CC", "to": "P1", "guard": 100000 },
+            "CC_P2": { "from": "CC", "to": "P2", "mirrorGuard": "CC_P1" },
+            "CC_P3": { "from": "CC", "to": "P3", "guard": 100000 },
+            "CC_P4": { "from": "CC", "to": "P4", "guard": 100000 }
+        },
 		"rotationDegreeDispersion": 50,
-		"allowFlip": true
+		"allowFlip": true,
+        "stdSkillsWarrior": [{"skillId": "sod.skill.offense" , "level": 0 }, {"skillId": "sod.skill.magicEarth", "level": 0 }],
+        "stdSkillsMage"   : [{"skillId": "sod.skill.wisdom"  , "level": 0 }, {"skillId": "sod.skill.magicEarth", "level": 0 }]
 	},
 	"config":{
 		"allowSpecialWeeks":false,
