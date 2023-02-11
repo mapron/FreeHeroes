@@ -17,7 +17,7 @@
 <context>
     <name>FreeHeroes::Gui::AdventureKingdomStatusWidget</name>
     <message>
-        <location filename="../../src/Gui/Widgets/AdventureKingdomStatusWidget.cpp" line="127"/>
+        <location filename="../../src/Gui/Widgets/AdventureKingdomStatusWidget.cpp" line="130"/>
         <source>Month: %1, Week: %2, Day: %3</source>
         <translation>Месяц: %1, Неделя: %2, День: %3</translation>
     </message>
@@ -427,32 +427,32 @@
 <context>
     <name>FreeHeroes::Gui::GuiArtifact</name>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="111"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="115"/>
         <source>This artifacts is a part of the set: </source>
         <translation>Этот артефакт является частью сборного: </translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="114"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="118"/>
         <source>Parts of set assemblied: {%1} / {%2}</source>
         <translation>Собрано частей: {%1} / {%2}</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="117"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="121"/>
         <source>Last remaining artifact: </source>
         <translation>Недостающий артефакт из набора: </translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="120"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="124"/>
         <source>Congratulations! You found all parts of the set!&lt;br&gt;For assembly, press {Control+Left Click}</source>
         <translation>Поздравляем! Вы нашли все части из набора!&lt;br&gt;Для сборки нажмите {Control+Левый клик}</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="129"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="133"/>
         <source>This artifact can be disassembled into: </source>
         <translation>Этот артефакт может быть разобран на части: </translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="132"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="136"/>
         <source>Press {Control+Left Click} to disassemble</source>
         <translation>Нажмите {Control+Левый клик} для разбора</translation>
     </message>
@@ -460,18 +460,18 @@
 <context>
     <name>FreeHeroes::Gui::GuiHero</name>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="225"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="229"/>
         <source>%1 (+%2/day)</source>
         <translation>%1 (+%2/день)</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="228"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="232"/>
         <source>Dragons</source>
         <comment>speciality</comment>
         <translation>Драконы</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="231"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="235"/>
         <source>Speed</source>
         <comment>speciality</comment>
         <translation>Скорость</translation>
@@ -480,22 +480,22 @@
 <context>
     <name>FreeHeroes::Gui::GuiSkill</name>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="268"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="272"/>
         <source>None</source>
         <translation>Нет</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="268"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="272"/>
         <source>Basic</source>
         <translation>Базовый</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="268"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="272"/>
         <source>Advanced</source>
         <translation>Продвинутый</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="268"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="272"/>
         <source>Expert</source>
         <translation>Экспертный</translation>
     </message>
@@ -503,18 +503,18 @@
 <context>
     <name>FreeHeroes::Gui::GuiSpell</name>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="294"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="298"/>
         <source>Inflicts damage:</source>
         <translation>Наносит урон:</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="304"/>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="306"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="308"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="310"/>
         <source>lvl.</source>
         <translation>ур.</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="306"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="310"/>
         <source>Mana:</source>
         <translation>Мана:</translation>
     </message>
@@ -522,7 +522,7 @@
 <context>
     <name>FreeHeroes::Gui::GuiUnit</name>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="165"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="169"/>
         <source>%1 %2</source>
         <translation>%1 %2</translation>
     </message>
@@ -1102,51 +1102,6 @@
         <location filename="../../src/Gui/Widgets/PrimaryStatsWidget.cpp" line="34"/>
         <source>Show information</source>
         <translation>Показать информацию</translation>
-    </message>
-</context>
-<context>
-    <name>FreeHeroes::Gui::ResourceAmountHelper</name>
-    <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="364"/>
-        <source>Gold</source>
-        <comment>as resource</comment>
-        <translation>Золото</translation>
-    </message>
-    <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="366"/>
-        <source>Wood</source>
-        <comment>as resource</comment>
-        <translation>Древесина</translation>
-    </message>
-    <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="367"/>
-        <source>Mercury</source>
-        <comment>as resource</comment>
-        <translation>Ртуть</translation>
-    </message>
-    <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="368"/>
-        <source>Ore</source>
-        <comment>as resource</comment>
-        <translation>Руда</translation>
-    </message>
-    <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="369"/>
-        <source>Sulfur</source>
-        <comment>as resource</comment>
-        <translation>Сера</translation>
-    </message>
-    <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="370"/>
-        <source>Crystal</source>
-        <comment>as resource</comment>
-        <translation>Кристаллы</translation>
-    </message>
-    <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="371"/>
-        <source>Gems</source>
-        <comment>as resource</comment>
-        <translation>Драг. камни</translation>
     </message>
 </context>
 <context>

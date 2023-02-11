@@ -7,16 +7,10 @@
 
 #include "ui_TemplateSettingsWidget.h"
 
-#include "FHMapReflection.hpp"
+#include "FHTemplateReflection.hpp"
 #include "LibraryModels.hpp"
 #include "LibraryPlayer.hpp"
 #include "LibraryWrappersMetatype.hpp"
-
-#include "MernelPlatform/FileIOUtils.hpp"
-#include "MernelPlatform/FileFormatJson.hpp"
-
-#include "GameDatabasePropertyReader.hpp"
-#include "GameDatabasePropertyWriter.hpp"
 
 #include <QTimer>
 
@@ -26,7 +20,6 @@ TemplateSettingsWidget::TemplateSettingsWidget(const Gui::LibraryModelsProvider*
                                                QWidget*                          parent)
     : QFrame(parent)
     , m_ui(std::make_unique<Ui::TemplateSettingsWidget>())
-    , m_userSettings(std::make_unique<FHRngUserSettings>())
     , m_modelsProvider(modelsProvider)
 {
     m_ui->setupUi(this, std::tuple{ modelsProvider });
@@ -49,46 +42,19 @@ TemplateSettingsWidget::TemplateSettingsWidget(const Gui::LibraryModelsProvider*
         w->setPlayerColorText(player->getName(), pix);
         m_mapping[player->getSource()] = w;
     }
-    for (int i = 0; i <= 6; i++)
-        m_ui->comboBoxMapSize->setItemData(i, 36 * (i + 1));
 
     connect(m_ui->pushButtonReset, &QAbstractButton::clicked, this, [this] {
-        *m_userSettings = {};
+        m_userSettings->m_players.clear();
         updateUI();
     });
 }
 
-TemplateSettingsWidget::~TemplateSettingsWidget()
-{
-}
-
-void TemplateSettingsWidget::load(const Mernel::std_path& path)
-{
-    m_path = path;
-
-    if (Mernel::std_fs::exists(m_path)) {
-        std::string buffer       = Mernel::readFileIntoBuffer(m_path);
-        auto        settingsJson = Mernel::readJsonFromBuffer(buffer);
-
-        auto*                            db = m_modelsProvider->database();
-        Core::PropertyTreeReaderDatabase reader(db);
-        reader.jsonToValue(settingsJson, *m_userSettings);
-    }
-
-    updateUI();
-}
+TemplateSettingsWidget::~TemplateSettingsWidget() = default;
 
 void TemplateSettingsWidget::updateUI()
 {
     for (auto [id, w] : m_mapping) {
         w->setConfig(m_userSettings->m_players[id]);
-    }
-
-    for (int i = 0; i < m_ui->comboBoxMapSize->count(); ++i) {
-        if (m_ui->comboBoxMapSize->itemData(i).value<int>() >= m_userSettings->m_mapSize) {
-            m_ui->comboBoxMapSize->setCurrentIndex(i);
-            break;
-        }
     }
 }
 
@@ -97,15 +63,6 @@ void TemplateSettingsWidget::save()
     for (auto [id, w] : m_mapping) {
         m_userSettings->m_players[id] = w->getConfig();
     }
-
-    m_userSettings->m_mapSize = m_ui->comboBoxMapSize->currentData().toInt();
-
-    Mernel::PropertyTree             jsonData;
-    Core::PropertyTreeWriterDatabase writer;
-    writer.valueToJson(*m_userSettings, jsonData);
-
-    std::string buffer = Mernel::writeJsonToBuffer(jsonData, true);
-    Mernel::writeFileFromBuffer(m_path, buffer);
 }
 
 }

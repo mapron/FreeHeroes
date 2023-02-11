@@ -81,14 +81,31 @@ struct FHRngUserSettings {
         HeroGeneration               m_startingHeroGen = HeroGeneration::RandomStartingFaction;
         HeroGeneration               m_extraHeroGen    = HeroGeneration::None;
         bool                         m_stdStats        = false;
+
+        bool operator==(const UserPlayer&) const noexcept = default;
     };
     using PlayersMap = std::map<Core::LibraryPlayerConstPtr, UserPlayer>;
 
-    PlayersMap m_players;
+    struct DifficultySettings {
+        int m_minGuardsPercent = 100;
+        int m_maxGuardsPercent = 100;
 
-    FHRoadType m_defaultRoad     = FHRoadType::Invalid;
+        int m_minArmyPercent = 100;
+        int m_maxArmyPercent = 100;
+
+        int m_minGoldPercent = 100;
+        int m_maxGoldPercent = 100;
+
+        bool operator==(const DifficultySettings&) const noexcept = default;
+    };
+
+    PlayersMap         m_players;
+    DifficultySettings m_difficulty;
+
+    FHRoadType m_defaultRoad     = FHRoadType::Cobblestone;
     int        m_difficultyScale = 100;
     int        m_mapSize         = 144;
+    bool       m_hasUnderground  = false;
 };
 
 struct FHTemplate {

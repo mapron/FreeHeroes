@@ -91,11 +91,22 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_stdStats)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRngUserSettings::DifficultySettings,
+    m_minGuardsPercent,
+    m_maxGuardsPercent,
+    m_minArmyPercent,
+    m_maxArmyPercent,
+    m_minGoldPercent,
+    m_maxGoldPercent)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngUserSettings,
     m_players,
+    m_difficulty,
     m_difficultyScale,
     m_defaultRoad,
-    m_mapSize)
+    m_mapSize,
+    m_hasUnderground)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHTemplate,

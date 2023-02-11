@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>459</width>
-    <height>342</height>
+    <width>723</width>
+    <height>440</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,7 +25,7 @@
       </attribute>
       <layout class="QVBoxLayout" name="tabMainLayout">
        <property name="spacing">
-        <number>20</number>
+        <number>10</number>
        </property>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
@@ -55,18 +55,189 @@
         </layout>
        </item>
        <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_31d">
+         <item>
+          <widget class="QLabel" name="label_3d">
+           <property name="minimumSize">
+            <size>
+             <width>150</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Heroes III Game installation:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="heroes3Path"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButtonEditH3">
+           <property name="text">
+            <string>Browse...</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <property name="spacing">
+          <number>10</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Map size</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="comboBoxMapSize">
+           <item>
+            <property name="text">
+             <string>36x36 (S)</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>72x72 (M)</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>108x108 (L)</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>144x144 (XL)</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>180x180 (H)</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>216x216 (XH)</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>252x252 (G)</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="checkBoxUnderground">
+           <property name="text">
+            <string>Has underground (not implemented)</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Roads</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="comboBoxRoads">
+           <item>
+            <property name="text">
+             <string>No</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Dirt 75%</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Gravel 65%</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Cobblestone 50%</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
         <widget class="QGroupBox" name="groupBox2">
          <property name="title">
           <string>Generator destination:</string>
          </property>
          <layout class="QVBoxLayout" name="groupBoxLayout3">
           <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_31e">
+            <item>
+             <widget class="QLabel" name="label_3e">
+              <property name="minimumSize">
+               <size>
+                <width>250</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Map file name</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="mapFilename"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_31f">
+            <item>
+             <widget class="QLabel" name="label_3f">
+              <property name="minimumSize">
+               <size>
+                <width>250</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Map in-game name</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="mapGamename"/>
+            </item>
+           </layout>
+          </item>
+          <item>
            <layout class="QHBoxLayout" name="horizontalLayout_31">
             <item>
              <widget class="QLabel" name="label_3">
               <property name="minimumSize">
                <size>
-                <width>150</width>
+                <width>250</width>
                 <height>0</height>
                </size>
               </property>
@@ -76,7 +247,11 @@
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="fhMapPath"/>
+             <widget class="QLineEdit" name="fhMapPath">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
             </item>
             <item>
              <widget class="QPushButton" name="pushButtonEditMap">
@@ -93,7 +268,7 @@
              <widget class="QLabel" name="label_4">
               <property name="minimumSize">
                <size>
-                <width>150</width>
+                <width>250</width>
                 <height>0</height>
                </size>
               </property>
@@ -103,7 +278,11 @@
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="h3mMapPath"/>
+             <widget class="QLineEdit" name="h3mMapPath">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -253,11 +432,21 @@
      </widget>
      <widget class="QWidget" name="tabTemplateSettings">
       <attribute name="title">
-       <string>Template settings</string>
+       <string>Player settings</string>
       </attribute>
       <layout class="QVBoxLayout" name="tabTemplateSettingsLayout">
        <item>
         <widget class="FreeHeroes::TemplateSettingsWidget" name="templateSettingsWidget"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabDifficultySettings">
+      <attribute name="title">
+       <string>Difficulty settings</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="tabDifficultySettingsLayout">
+       <item>
+        <widget class="FreeHeroes::TemplateDifficultyWidget" name="tabDifficultySettingsWidget"/>
        </item>
       </layout>
      </widget>
@@ -308,50 +497,27 @@
          <property name="bottomMargin">
           <number>5</number>
          </property>
-         <item>
-          <spacer name="horizontalSpacer1">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButtonConvertToH3M">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="font">
-            <font>
-             <pointsize>10</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Convert FH to H3M</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButtonConvertToFH">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="font">
-            <font>
-             <pointsize>10</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Convert H3M to FH</string>
-           </property>
-          </widget>
-         </item>
         </layout>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_7">
+         <property name="text">
+          <string>Diagnostic info for developer</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTextEdit" name="textEditDiagInfo">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>80</height>
+          </size>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -389,6 +555,12 @@
    <class>FreeHeroes::TemplateSettingsWidget</class>
    <extends>QFrame</extends>
    <header>TemplateSettingsWidget.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>FreeHeroes::TemplateDifficultyWidget</class>
+   <extends>QFrame</extends>
+   <header>TemplateDifficultyWidget.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

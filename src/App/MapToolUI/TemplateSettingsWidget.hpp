@@ -5,16 +5,19 @@
  */
 #pragma once
 
-#include "MernelPlatform/FsUtils.hpp"
-
 #include "LibraryFwd.hpp"
 
 #include <QFrame>
 
 #include <memory>
+#include <map>
 
 namespace Ui {
 class TemplateSettingsWidget;
+}
+
+namespace Mernel {
+class PropertyTree;
 }
 
 namespace FreeHeroes {
@@ -23,20 +26,22 @@ class LibraryModelsProvider;
 }
 struct FHRngUserSettings;
 class TemplatePlayerWidget;
+
 class TemplateSettingsWidget : public QFrame {
     Q_OBJECT
 public:
     TemplateSettingsWidget(const Gui::LibraryModelsProvider* modelsProvider, QWidget* parent);
     ~TemplateSettingsWidget();
 
-    void load(const Mernel::std_path& path);
     void updateUI();
     void save();
 
+    void setUserSettings(FHRngUserSettings* userSettings) { m_userSettings = userSettings; }
+
 private:
-    std::unique_ptr<Ui::TemplateSettingsWidget>                  m_ui;
-    std::unique_ptr<FHRngUserSettings>                           m_userSettings;
-    Mernel::std_path                                             m_path;
+    std::unique_ptr<Ui::TemplateSettingsWidget> m_ui;
+
+    FHRngUserSettings*                                           m_userSettings   = nullptr;
     const Gui::LibraryModelsProvider*                            m_modelsProvider = nullptr;
     std::map<Core::LibraryPlayerConstPtr, TemplatePlayerWidget*> m_mapping;
 };

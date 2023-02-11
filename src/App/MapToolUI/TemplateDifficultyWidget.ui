@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TemplateDifficultyWidget</class>
+ <widget class="QFrame" name="TemplateDifficultyWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>829</width>
+    <height>238</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string/>
+  </property>
+  <layout class="QVBoxLayout" name="mainLayout">
+   <property name="spacing">
+    <number>8</number>
+   </property>
+   <item>
+    <widget class="QLabel" name="label_1">
+     <property name="text">
+      <string>Generator will roll random value between min and max percent and adjust all zones on the map.
+If min = max, then result will be same every generation.
+If min &gt; max, value will be adjusted.</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="FreeHeroes::SliderSpinWidget" name="sliderMinGuard" native="true"/>
+   </item>
+   <item>
+    <widget class="FreeHeroes::SliderSpinWidget" name="sliderMaxGuard" native="true"/>
+   </item>
+   <item>
+    <widget class="FreeHeroes::SliderSpinWidget" name="sliderMinArmy" native="true"/>
+   </item>
+   <item>
+    <widget class="FreeHeroes::SliderSpinWidget" name="sliderMaxArmy" native="true"/>
+   </item>
+   <item>
+    <widget class="FreeHeroes::SliderSpinWidget" name="sliderMinGold" native="true"/>
+   </item>
+   <item>
+    <widget class="FreeHeroes::SliderSpinWidget" name="sliderMaxGold" native="true"/>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_31">
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <spacer name="horizontalSpacer2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButtonReset">
+       <property name="text">
+        <string>Clear all</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>FreeHeroes::SliderSpinWidget</class>
+   <extends>QWidget</extends>
+   <header>SliderSpinWidget.hpp</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

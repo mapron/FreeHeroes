@@ -24,8 +24,10 @@ class IGraphicsLibrary;
 class LibraryModelsProvider;
 }
 
+struct FHRngUserSettings;
 class MapEditorWidget;
 class MapToolWindow : public QFrame {
+    Q_OBJECT
 public:
     MapToolWindow(
         const Core::IGameDatabaseContainer*  gameDatabaseContainer,
@@ -35,8 +37,13 @@ public:
 
         QWidget* parent = nullptr);
 
-    void generateMap();
     ~MapToolWindow();
+
+    void generateMap();
+    void updatePaths();
+
+    void loadUserSettings();
+    bool saveUserSettings();
 
 private:
     std::unique_ptr<Ui::MapToolWindow> m_ui;
@@ -46,6 +53,9 @@ private:
 
     const Gui::IGraphicsLibrary* const      m_graphicsLibrary;
     const Gui::LibraryModelsProvider* const m_modelsProvider;
+
+    std::unique_ptr<FHRngUserSettings> m_userSettings;
+    std::string                        m_userSettingsData;
 
     MapEditorWidget* m_editor = nullptr;
 };

@@ -1,8 +1,8 @@
 {
 	"version": "HOTA",
 	"seed": 0,
-	"name": "FreeHeroes generated - JC",
-	"descr": "FreeHeroes generated - JC",
+	"name": "JC",
+	"descr": "Jebus Cross Balanced",
 	"tileMap":{"depth":1,"height":100,"width":100},
 	"players": {
 		"Red" : {"human": true},

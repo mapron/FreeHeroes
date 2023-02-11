@@ -17,7 +17,7 @@
 <context>
     <name>FreeHeroes::Gui::AdventureKingdomStatusWidget</name>
     <message>
-        <location filename="../../src/Gui/Widgets/AdventureKingdomStatusWidget.cpp" line="127"/>
+        <location filename="../../src/Gui/Widgets/AdventureKingdomStatusWidget.cpp" line="130"/>
         <source>Month: %1, Week: %2, Day: %3</source>
         <translation>Monat: %1, Woche: %2, Tag: %3</translation>
     </message>
@@ -421,32 +421,32 @@
 <context>
     <name>FreeHeroes::Gui::GuiArtifact</name>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="111"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="115"/>
         <source>This artifacts is a part of the set: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="114"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="118"/>
         <source>Parts of set assemblied: {%1} / {%2}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="117"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="121"/>
         <source>Last remaining artifact: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="120"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="124"/>
         <source>Congratulations! You found all parts of the set!&lt;br&gt;For assembly, press {Control+Left Click}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="129"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="133"/>
         <source>This artifact can be disassembled into: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="132"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="136"/>
         <source>Press {Control+Left Click} to disassemble</source>
         <translation type="unfinished"></translation>
     </message>
@@ -454,18 +454,18 @@
 <context>
     <name>FreeHeroes::Gui::GuiHero</name>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="225"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="229"/>
         <source>%1 (+%2/day)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="228"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="232"/>
         <source>Dragons</source>
         <comment>speciality</comment>
         <translation>Drachen</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="231"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="235"/>
         <source>Speed</source>
         <comment>speciality</comment>
         <translation>Geschwindigkeit</translation>
@@ -474,22 +474,22 @@
 <context>
     <name>FreeHeroes::Gui::GuiSkill</name>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="268"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="272"/>
         <source>None</source>
         <translation>Kein</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="268"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="272"/>
         <source>Basic</source>
         <translation>Basis</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="268"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="272"/>
         <source>Advanced</source>
         <translation>Fortgeschritten</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="268"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="272"/>
         <source>Expert</source>
         <translation>Experte</translation>
     </message>
@@ -497,18 +497,18 @@
 <context>
     <name>FreeHeroes::Gui::GuiSpell</name>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="294"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="298"/>
         <source>Inflicts damage:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="304"/>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="306"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="308"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="310"/>
         <source>lvl.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="306"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="310"/>
         <source>Mana:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -516,7 +516,7 @@
 <context>
     <name>FreeHeroes::Gui::GuiUnit</name>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="165"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="169"/>
         <source>%1 %2</source>
         <translation>%1 %2</translation>
     </message>
@@ -1094,51 +1094,6 @@
         <location filename="../../src/Gui/Widgets/PrimaryStatsWidget.cpp" line="34"/>
         <source>Show information</source>
         <translation>Zeige Information</translation>
-    </message>
-</context>
-<context>
-    <name>FreeHeroes::Gui::ResourceAmountHelper</name>
-    <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="364"/>
-        <source>Gold</source>
-        <comment>as resource</comment>
-        <translation>Gold</translation>
-    </message>
-    <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="366"/>
-        <source>Wood</source>
-        <comment>as resource</comment>
-        <translation>Holz</translation>
-    </message>
-    <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="367"/>
-        <source>Mercury</source>
-        <comment>as resource</comment>
-        <translation>Quecksilber</translation>
-    </message>
-    <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="368"/>
-        <source>Ore</source>
-        <comment>as resource</comment>
-        <translation>Erz</translation>
-    </message>
-    <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="369"/>
-        <source>Sulfur</source>
-        <comment>as resource</comment>
-        <translation>Schwefel</translation>
-    </message>
-    <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="370"/>
-        <source>Crystal</source>
-        <comment>as resource</comment>
-        <translation>Kirstall</translation>
-    </message>
-    <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="371"/>
-        <source>Gems</source>
-        <comment>as resource</comment>
-        <translation>Edelsteine</translation>
     </message>
 </context>
 <context>
