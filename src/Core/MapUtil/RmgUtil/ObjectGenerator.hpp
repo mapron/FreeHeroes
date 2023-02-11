@@ -52,6 +52,8 @@ public:
 
     template<class T>
     struct AbstractObject;
+    template<class T>
+    struct AbstractObjectWithId;
 
 private:
     template<class Record>
@@ -59,6 +61,7 @@ private:
     struct ObjectFactoryBank;
     struct ObjectFactoryArtifact;
     struct ObjectFactoryResourcePile;
+    struct ObjectFactoryPandora;
 
 private:
     FHMap&                           m_map;

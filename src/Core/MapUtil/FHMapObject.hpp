@@ -9,6 +9,7 @@
 
 #include "LibraryObjectDef.hpp"
 #include "AdventureStack.hpp"
+#include "Reward.hpp"
 
 #include <map>
 
@@ -69,21 +70,17 @@ struct FHTown : public FHPlayerControlledObject {
 
     std::vector<Core::AdventureStack> m_garison;
 
-    struct RmgStack {
-        int m_level = 0;
-        int m_value = 0;
-
-        bool operator==(const RmgStack&) const noexcept = default;
-    };
-
-    std::vector<RmgStack> m_garisonRmg;
+    Core::UnitByValueList m_garisonRmg;
 
     bool operator==(const FHTown&) const noexcept = default;
 };
 
 MAPUTIL_EXPORT std::ostream& operator<<(std::ostream& stream, const FreeHeroes::FHScore& score);
 
-MAPUTIL_EXPORT FreeHeroes::FHScore operator+(const FreeHeroes::FHScore& l, const FreeHeroes::FHScore& r);
-MAPUTIL_EXPORT FreeHeroes::FHScore operator-(const FreeHeroes::FHScore& l, const FreeHeroes::FHScore& r);
+MAPUTIL_EXPORT FHScore operator+(const FHScore& l, const FHScore& r);
+MAPUTIL_EXPORT FHScore operator-(const FHScore& l, const FHScore& r);
+
+MAPUTIL_EXPORT int64_t maxScoreValue(const FHScore& score);
+MAPUTIL_EXPORT int64_t totalScoreValue(const FHScore& score);
 
 }

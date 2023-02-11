@@ -472,10 +472,10 @@ void FHTemplateProcessor::runTownsPlacement()
         }
         if (!town.m_garisonRmg.empty()) {
             town.m_hasGarison = true;
-            for (const auto& [level, value] : town.m_garisonRmg) {
+            for (const auto& [levels, value] : town.m_garisonRmg) {
                 Core::LibraryUnitConstPtr unit = nullptr;
                 for (auto* funit : faction->units) {
-                    if (funit->level == level)
+                    if (levels.contains(funit->level))
                         unit = funit;
                 }
                 assert(unit);

@@ -11,6 +11,8 @@
 #include "LibraryArtifact.hpp"
 #include "LibrarySpell.hpp"
 
+#include "Reward.hpp"
+
 namespace FreeHeroes {
 
 struct FHRngZoneTown {
@@ -52,6 +54,22 @@ struct FHScoreSettings {
             return false;
 
         return true;
+    }
+
+    bool isValidScore(const FHScore& score) const noexcept
+    {
+        if (score.empty())
+            return true;
+
+        for (const auto& [attr, value] : score) {
+            if (!value)
+                continue;
+            const bool isValid = isValidValue(attr, value);
+            if (isValid)
+                return true;
+        }
+
+        return false;
     }
 
     bool operator==(const FHScoreSettings&) const noexcept = default;
@@ -109,11 +127,25 @@ struct FHRngZone {
 
         bool operator==(const GeneratorResourcePile&) const noexcept = default;
     };
+    struct GeneratorPandora : public GeneratorCommon {
+        struct Record {
+            Core::Reward m_reward;
+            int          m_frequency = 1000;
+            int          m_guard     = -1;
+
+            bool operator==(const Record&) const noexcept = default;
+        };
+        using Map = std::map<std::string, Record>;
+        Map m_records;
+
+        bool operator==(const GeneratorPandora&) const noexcept = default;
+    };
 
     struct Generators {
         GeneratorBank         m_banks;
         GeneratorArtifact     m_artifacts;
         GeneratorResourcePile m_resources;
+        GeneratorPandora      m_pandoras;
 
         bool operator==(const Generators&) const noexcept = default;
     };

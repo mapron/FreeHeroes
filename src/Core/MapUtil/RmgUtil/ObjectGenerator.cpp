@@ -15,6 +15,36 @@
 
 namespace FreeHeroes {
 
+namespace {
+
+FHScore estimateReward(const Core::Reward& reward)
+{
+    FHScore score;
+    for (const auto& [id, count] : reward.resources.data) {
+        const int amount = count / id->pileSize;
+        const int value  = amount * id->value;
+        auto      attr   = (id->rarity == Core::LibraryResource::Rarity::Gold) ? FHScoreAttr::Gold : FHScoreAttr::Resource;
+        score[attr] += value;
+    }
+
+    int64_t armyValue = 0;
+    for (const auto& unit : reward.units) {
+        armyValue += unit.count * unit.unit->value;
+    }
+    for (const auto& unit : reward.randomUnits) {
+        armyValue += unit.m_value;
+    }
+    if (armyValue)
+        score[FHScoreAttr::Army] = armyValue;
+
+    if (reward.gainedExp)
+        score[FHScoreAttr::Experience] = reward.gainedExp * 5 / 4;
+
+    return score;
+}
+
+}
+
 template<class Child>
 struct CommonRecord {
     bool     m_enabled   = true;
@@ -169,16 +199,20 @@ private:
 
 template<class T>
 struct ObjectGenerator::AbstractObject : public IObject {
-    void        setPos(FHPos pos) override { m_obj.m_pos = pos; }
-    void        place() const override { m_map->m_objects.container<T>().push_back(m_obj); }
-    FHScore     getScore() const override { return m_obj.m_score; }
-    void        disable() override { m_onDisable(); }
-    std::string getId() const override { return m_obj.m_id->id; }
-    int64_t     getGuard() const override { return m_obj.m_guard; }
+    void    setPos(FHPos pos) override { m_obj.m_pos = pos; }
+    void    place() const override { m_map->m_objects.container<T>().push_back(m_obj); }
+    FHScore getScore() const override { return m_obj.m_score; }
+    void    disable() override { m_onDisable(); }
+    int64_t getGuard() const override { return m_obj.m_guard; }
 
     T                     m_obj;
     FHMap*                m_map = nullptr;
     std::function<void()> m_onDisable;
+};
+
+template<class T>
+struct ObjectGenerator::AbstractObjectWithId : public ObjectGenerator::AbstractObject<T> {
+    std::string getId() const override { return this->m_obj.m_id->id; }
 };
 
 template<class Record>
@@ -249,28 +283,10 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
                     }
 
                     {
-                        FHScore score;
-                        {
-                            for (const auto& [id, count] : reward.resources.data) {
-                                const int amount = count / id->pileSize;
-                                const int value  = amount * id->value;
-                                auto      attr   = (id->rarity == Core::LibraryResource::Rarity::Gold) ? FHScoreAttr::Gold : FHScoreAttr::Resource;
-                                score[attr] += value;
-                            }
-                        }
-                        std::list<bool> validChecks;
-                        for (FHScoreAttr attr : { FHScoreAttr::Gold, FHScoreAttr::Resource }) {
-                            if (score[attr]) {
-                                bool isValid = scoreSettings.isValidValue(attr, score[attr]);
-                                validChecks.push_back(isValid);
-                            }
-                        }
-                        bool resourceRewardIsValid = validChecks.empty();
-                        for (bool isValid : validChecks)
-                            resourceRewardIsValid = resourceRewardIsValid || isValid;
+                        const FHScore score = estimateReward(reward);
 
-                        if (!resourceRewardIsValid) {
-                            std::cerr << "---- res - skipping " << bank->id << " [" << i << "]\n";
+                        if (!scoreSettings.isValidScore(score)) {
+                            std::cerr << "---- res/army - skipping " << bank->id << " [" << i << "]\n";
                             continue;
                         }
                     }
@@ -351,7 +367,7 @@ struct RecordArtifact : public CommonRecord<RecordArtifact> {
 };
 
 struct ObjectGenerator::ObjectFactoryArtifact : public AbstractFactory<RecordArtifact> {
-    struct ObjectArtifact : public AbstractObject<FHArtifact> {
+    struct ObjectArtifact : public AbstractObjectWithId<FHArtifact> {
     };
 
     ObjectFactoryArtifact(FHMap& map, const FHRngZone::GeneratorArtifact& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng, ArtifactPool* artifactPool)
@@ -362,13 +378,14 @@ struct ObjectGenerator::ObjectFactoryArtifact : public AbstractFactory<RecordArt
         if (!genSettings.m_isEnabled)
             return;
 
-        for (const auto& [_, value] : genSettings.m_records)
-            m_records.m_records.push_back(RecordArtifact{
-                .m_filter = value.m_filter }
-                                              .setFreq(value.m_frequency));
+        for (const auto& [_, value] : genSettings.m_records) {
+            if (m_artifactPool->isEmpty(value.m_filter, true, scoreSettings))
+                continue;
 
-        for (auto& record : m_records.m_records)
-            record.m_enabled = !m_artifactPool->isEmpty(record.m_filter, true, scoreSettings);
+            auto rec = RecordArtifact{ .m_filter = value.m_filter };
+
+            m_records.m_records.push_back(rec.setFreq(value.m_frequency));
+        }
 
         m_records.updateFrequency();
     }
@@ -404,7 +421,7 @@ struct ObjectGenerator::ObjectFactoryArtifact : public AbstractFactory<RecordArt
 
 // ---------------------------------------------------------------------------------------
 
-struct ObjectResourcePile : public ObjectGenerator::AbstractObject<FHResource> {
+struct ObjectResourcePile : public ObjectGenerator::AbstractObjectWithId<FHResource> {
 };
 
 struct RecordResourcePile : public CommonRecord<RecordResourcePile> {
@@ -446,6 +463,60 @@ struct ObjectGenerator::ObjectFactoryResourcePile : public AbstractFactory<Recor
         obj.m_map = &m_map;
 
         return std::make_shared<ObjectResourcePile>(std::move(obj));
+    }
+};
+
+// ---------------------------------------------------------------------------------------
+
+struct ObjectPandora : public ObjectGenerator::AbstractObject<FHPandora> {
+    std::string getId() const override { return m_obj.m_generationId; }
+};
+
+struct RecordPandora : public CommonRecord<RecordPandora> {
+    ObjectPandora m_obj;
+};
+
+struct ObjectGenerator::ObjectFactoryPandora : public AbstractFactory<RecordPandora> {
+    ObjectFactoryPandora(FHMap& map, const FHRngZone::GeneratorPandora& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng)
+        : AbstractFactory<RecordPandora>(map, database, rng)
+    {
+        if (!genSettings.m_isEnabled)
+            return;
+
+        for (const auto& [id, value] : genSettings.m_records) {
+            ObjectPandora obj;
+            obj.m_obj.m_generationId = id;
+            obj.m_obj.m_guard        = value.m_guard;
+            obj.m_obj.m_reward       = value.m_reward;
+            obj.m_obj.m_score        = estimateReward(value.m_reward);
+            auto maxValue            = maxScoreValue(obj.m_obj.m_score);
+            if (!maxValue)
+                throw std::runtime_error("Pandora '" + id + "' has no valid reward!");
+
+            if (obj.m_obj.m_guard == -1)
+                obj.m_obj.m_guard = maxValue * 2;
+
+            if (scoreSettings.isValidScore(obj.m_obj.m_score))
+                m_records.m_records.push_back(RecordPandora{ .m_obj = std::move(obj) }.setFreq(value.m_frequency));
+            else
+                std::cerr << " --- skip pandora " << id << " = " << obj.m_obj.m_score << "\n";
+        }
+
+        m_records.updateFrequency();
+    }
+
+    IObjectPtr make(uint64_t rngFreq) override
+    {
+        const size_t index  = m_records.getFreqIndex(rngFreq);
+        auto&        record = m_records.m_records[index];
+
+        ObjectPandora obj = record.m_obj;
+        obj.m_onDisable   = [this, &record] {
+            m_records.onDisable(record);
+        };
+        obj.m_map = &m_map;
+
+        return std::make_shared<ObjectPandora>(std::move(obj));
     }
 };
 
@@ -526,6 +597,7 @@ void ObjectGenerator::generate(const FHRngZone& zoneSettings)
         objectFactories.push_back(std::make_shared<ObjectFactoryBank>(m_map, zoneSettings.m_generators.m_banks, scoreSettings, m_database, m_rng, &pool));
         objectFactories.push_back(std::make_shared<ObjectFactoryArtifact>(m_map, zoneSettings.m_generators.m_artifacts, scoreSettings, m_database, m_rng, &pool));
         objectFactories.push_back(std::make_shared<ObjectFactoryResourcePile>(m_map, zoneSettings.m_generators.m_resources, scoreSettings, m_database, m_rng));
+        objectFactories.push_back(std::make_shared<ObjectFactoryPandora>(m_map, zoneSettings.m_generators.m_pandoras, scoreSettings, m_database, m_rng));
 
         for (int i = 0; i < 1000000; i++) {
             if (!tryGen(targetScore, currentScore, objectFactories)) {

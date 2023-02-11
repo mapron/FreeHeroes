@@ -258,12 +258,15 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         item->m_overlayInfoFont = 16;
         addValueInfo(item, obj);
 
-        auto artPos = obj.m_pos;
-        artPos.m_x--;
-        for (auto* art : obj.m_artifacts) {
-            artPos.m_x--;
-            auto* artdef = art->objectDefs.get({});
-            result.addItem(makeItemByDef(SpriteMap::Layer::Artifact, artdef, artPos).setPriority(SpriteMap::s_objectMaxPriority + 2));
+        for (size_t index = 0; auto* art : obj.m_artifacts) {
+            auto artPos = obj.m_pos;
+            artPos.m_x -= 2;
+            artPos.m_x -= index % 2;
+            artPos.m_y -= index / 2;
+            index++;
+            auto* artdef       = art->objectDefs.get({});
+            auto* artItem      = result.addItem(makeItemByDef(SpriteMap::Layer::Artifact, artdef, artPos).setPriority(SpriteMap::s_objectMaxPriority + 2));
+            artItem->m_opacity = 0.8;
         }
     }
     for (auto& obj : fhMap.m_objects.m_obstacles) {
@@ -293,8 +296,11 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     }
 
     for (auto& obj : fhMap.m_objects.m_pandoras) {
-        std::string id = "ava0128";
-        addValueInfo(result.addItem(makeItemById(SpriteMap::Layer::Pandora, id, obj.m_pos)), obj);
+        std::string id             = "ava0128";
+        auto*       item           = result.addItem(makeItemById(SpriteMap::Layer::Pandora, id, obj.m_pos));
+        item->m_overlayInfo        = obj.m_generationId;
+        item->m_overlayInfoOffsetX = 0;
+        addValueInfo(item, obj);
     }
 
     result.m_width  = fhMap.m_tileMap.m_width;

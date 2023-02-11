@@ -56,4 +56,33 @@ FHScore operator-(const FHScore& l, const FHScore& r)
     return result;
 }
 
+std::ostream& operator<<(std::ostream& stream, const FHScore& score)
+{
+    stream << "{";
+    for (bool start = false; const auto& [key, val] : score) {
+        if (start)
+            stream << ", ";
+        stream << FreeHeroes::FHScoreSettings::attrToString(key) << "=" << val;
+        start = true;
+    }
+    stream << "} (sum=" << totalScoreValue(score) << ")";
+    return stream;
+}
+
+int64_t maxScoreValue(const FHScore& score)
+{
+    int64_t result = 0;
+    for (const auto& [attr, value] : score)
+        result = std::max(result, value);
+    return result;
+}
+
+int64_t totalScoreValue(const FHScore& score)
+{
+    int64_t result = 0;
+    for (const auto& [attr, value] : score)
+        result += value;
+    return result;
+}
+
 }

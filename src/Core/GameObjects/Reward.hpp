@@ -23,11 +23,21 @@ struct UnitWithCount {
 
     bool operator==(const UnitWithCount&) const noexcept = default;
 };
+using UnitWithCountList = std::vector<UnitWithCount>;
+
+struct UnitByValue {
+    std::set<int> m_levels;
+    int           m_value = 0;
+
+    bool operator==(const UnitByValue&) const noexcept = default;
+};
+using UnitByValueList = std::vector<UnitByValue>;
 
 struct Reward {
-    ResourceAmount             resources;
-    std::vector<UnitWithCount> units;
-    ArtifactReward             artifacts;
+    ResourceAmount    resources;
+    UnitWithCountList units;
+    UnitByValueList   randomUnits;
+    ArtifactReward    artifacts;
 
     int64_t gainedExp = 0;
     int     manaDiff  = 0;

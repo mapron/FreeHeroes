@@ -83,7 +83,9 @@ void SpriteMapPainter::paint(QPainter*        painter,
             if (boundingSize.width() > tileSize || boundingSize.height() > tileSize) {
                 painter->translate(-boundingSize.width() + tileSize, -boundingSize.height() + tileSize);
             }
+            painter->setOpacity(item.m_opacity);
             painter->drawPixmap(frame.m_paddingLeftTop, frame.m_frame);
+            painter->setOpacity(1.0);
             if (item.m_keyColor.isValid()) {
                 QPixmap pix     = frame.m_frame;
                 QImage  imgOrig = pix.toImage();

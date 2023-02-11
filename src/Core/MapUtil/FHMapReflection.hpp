@@ -71,11 +71,6 @@ STRUCT_REFLECTION_PAIRED(
 // clang-format on
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
-    FHTown::RmgStack,
-    m_level,
-    m_value)
-
-STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHTown,
     m_pos,
     m_order,
@@ -151,7 +146,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_guard,
     m_score,
 
-    m_reward)
+    m_reward,
+    m_generationId)
 
 ENUM_REFLECTION_STRINGIFY(
     FHMonster::UpgradedStack,

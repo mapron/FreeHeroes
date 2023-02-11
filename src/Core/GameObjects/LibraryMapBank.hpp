@@ -29,7 +29,7 @@ struct LibraryMapBank {
 
     Rewards rewards;
 
-    using Guards = std::vector<UnitWithCount>;
+    using Guards = UnitWithCountList;
 
     struct Variant {
         std::string name;

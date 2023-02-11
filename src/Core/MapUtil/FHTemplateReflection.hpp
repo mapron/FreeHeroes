@@ -77,10 +77,22 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_records)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRngZone::GeneratorPandora::Record,
+    m_reward,
+    m_frequency,
+    m_guard)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRngZone::GeneratorPandora,
+    m_isEnabled,
+    m_records)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone::Generators,
     m_banks,
     m_artifacts,
-    m_resources)
+    m_resources,
+    m_pandoras)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone,
@@ -158,6 +170,8 @@ template<>
 inline constexpr const bool s_isStringMap<FHRngZone::GeneratorArtifact::Map>{ true };
 template<>
 inline constexpr const bool s_isStringMap<FHRngZone::GeneratorResourcePile::Map>{ true };
+template<>
+inline constexpr const bool s_isStringMap<FHRngZone::GeneratorPandora::Map>{ true };
 template<>
 inline constexpr const bool s_isStringMap<FHRngZone::ScoreMap>{ true };
 template<>

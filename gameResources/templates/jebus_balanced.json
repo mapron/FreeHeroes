@@ -13,9 +13,9 @@
             "Common"  : { 
                 "centerDispersion": {"x": 5 , "y": 5 }, "relativeSizeAvg": 100, "relativeSizeDispersion": 10, "cornerRoads": 3,
                 "towns": [
-                    {"town":{"isMain":true, "hasFort":true,"hasCustomBuildings":true,"buildings":["townHall1","fort1","tavern","mageGuild1","t1","t2"],"garisonRmg":[{"level":10,"value":1000}]},"playerControlled":true, "useZoneFaction": true}, 
-                    {"town":{"garisonRmg":[{"level":10,"value":2000},{"level":20,"value":1000},{"level":30,"value":1000}]}}, 
-                    {"town":{"garisonRmg":[{"level":10,"value":2000},{"level":20,"value":1000},{"level":30,"value":1000}]}}],
+                    {"town":{"isMain":true, "hasFort":true,"hasCustomBuildings":true,"buildings":["townHall1","fort1","tavern","mageGuild1","t1","t2"],"garisonRmg":[{"levels":[10],"value":1000}]},"playerControlled":true, "useZoneFaction": true}, 
+                    {"town":{"garisonRmg":[{"levels":[10],"value":2000},{"levels":[20],"value":1000},{"levels":[30],"value":1000}]}}, 
+                    {"town":{"garisonRmg":[{"levels":[10],"value":2000},{"levels":[20],"value":1000},{"levels":[30],"value":1000}]}}],
                 
                 "scoreTargets": {
                     "High": {
@@ -83,16 +83,31 @@
                             "crystal" : { "amounts": [3, 4, 5, 6]                   , "guard": 2000, "resource": "crystal" , "frequency": 2000 },
                             "gems"    : { "amounts": [3, 4, 5, 6]                   , "guard": 2000, "resource": "gems"    , "frequency": 2000 }
                         }
+                    },
+                    "pandoras": {
+                        "isEnabled": true,
+                        "records": {
+                            "gold5K" : { "frequency": 500 , "reward": {"resources": "5000"}  },
+                            "gold10K": { "frequency": 500 , "reward": {"resources":"10000"}  },
+                            "gold15K": { "frequency": 300 , "reward": {"resources":"15000"}  },
+                            "gold20K": { "frequency": 300 , "reward": {"resources":"20000"}  },
+                            
+                            "xp4K" : { "frequency": 500 , "reward": {"exp":  4000 }  },
+                            "xp8K" : { "frequency": 500 , "reward": {"exp":  8000 }  },
+                            "xp12K": { "frequency": 300 , "reward": {"exp": 12000 }  },
+                            "xp16K": { "frequency": 300 , "reward": {"exp": 16000 }  },
+                            "xp20K": { "frequency": 300 , "reward": {"exp": 20000 }  }
+                        }
                     }
                 }
             },
             "Treasure": { "centerDispersion": {"x": 15, "y": 15}, "relativeSizeAvg": 130, "relativeSizeDispersion": 20, "terrain": "sod.terrain.sand",
                 "towns": [
-                {"town":{"hasFort":true, "garisonRmg":[{"level":60,"value":20000}]}, "useZoneFaction": true}, 
-                {"town":{"hasFort":true, "garisonRmg":[{"level":60,"value":20000}]}},   
-                {"town":{"hasFort":true, "garisonRmg":[{"level":60,"value":20000}]}}, 
-                {"town":{"hasFort":true, "garisonRmg":[{"level":60,"value":20000}]}}, 
-                {"town":{"hasFort":true, "garisonRmg":[{"level":60,"value":20000}]}}]	
+                {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}, "useZoneFaction": true}, 
+                {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}},
+                {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}},
+                {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}},
+                {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}}]	
             },
     
             "P1": { "base": "Common"  , "isNormal": true,  "player": "Red" , "centerAvg": {"x": 10, "y": 10}  },

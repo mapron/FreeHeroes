@@ -65,6 +65,8 @@ struct SpriteMap {
         int m_z        = 0;
         int m_priority = 0;
 
+        double m_opacity = 1.0;
+
         BlockMask m_blockMask;
 
         std::vector<std::pair<std::string, std::string>> m_info;

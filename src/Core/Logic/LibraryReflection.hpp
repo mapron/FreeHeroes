@@ -832,6 +832,7 @@ STRUCT_REFLECTION_PAIRED(
     Reward,
     "resources"   ,                resources,
     "units"       ,                units,
+    "randomUnits" ,                randomUnits,
     "artifacts"   ,                artifacts,
     "exp"         ,                gainedExp,
     "mana"        ,                manaDiff,
@@ -847,6 +848,12 @@ STRUCT_REFLECTION_PAIRED(
     UnitWithCount,
     "id"        ,                  unit,
     "n"         ,                  count
+)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    UnitByValue,
+    m_levels,
+    m_value
 )
 
 STRUCT_REFLECTION_STRINGIFY(

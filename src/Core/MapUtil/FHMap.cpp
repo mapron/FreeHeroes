@@ -116,17 +116,4 @@ void FHMap::rescaleToUserSize()
     m_tileMap.m_height = mapSize;
 }
 
-std::ostream& operator<<(std::ostream& stream, const FHScore& score)
-{
-    stream << "{";
-    for (bool start = false; const auto& [key, val] : score) {
-        if (start)
-            stream << ", ";
-        stream << FreeHeroes::FHScoreSettings::attrToString(key) << "=" << val;
-        start = true;
-    }
-    stream << "}";
-    return stream;
-}
-
 }
