@@ -168,6 +168,21 @@ struct FHRngZone {
 
         bool operator==(const GeneratorScroll&) const noexcept = default;
     };
+    struct GeneratorDwelling : public GeneratorCommon {
+        struct Record {
+            int m_level     = 0;
+            int m_weeks     = 1;
+            int m_castles   = 0;
+            int m_frequency = 1000;
+            int m_guard     = -1;
+
+            bool operator==(const Record&) const noexcept = default;
+        };
+        using Map = std::map<std::string, Record>;
+        Map m_records;
+
+        bool operator==(const GeneratorDwelling&) const noexcept = default;
+    };
 
     struct Generators {
         GeneratorBank         m_banks;
@@ -176,6 +191,7 @@ struct FHRngZone {
         GeneratorPandora      m_pandoras;
         GeneratorShrine       m_shrines;
         GeneratorScroll       m_scrolls;
+        GeneratorDwelling     m_dwellings;
 
         bool operator==(const Generators&) const noexcept = default;
     };

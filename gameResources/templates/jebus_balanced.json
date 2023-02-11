@@ -124,6 +124,20 @@
                             "lvl5"     : { "frequency":  300, "filter": {"levels": [5], "notTags"   : ["control"]    } },
                             "control"  : { "frequency":  200, "filter": {                  "tags"   : ["control"]    } }
                         }
+                    },
+                    "dwellings": {
+                        "isEnabled": true,
+                        "records": {
+                            "T1"          : { "frequency":  500, "level": 10, "weeks": 2, "castles": 1, "guard": 2000  },
+                            "T2"          : { "frequency":  400, "level": 20, "weeks": 2, "castles": 1, "guard": 2000  },
+                            "T3"          : { "frequency":  400, "level": 30, "weeks": 2, "castles": 0, "guard": 3000  },
+                            "T4"          : { "frequency":  400, "level": 40, "weeks": 2, "castles": 0, "guard": 4000  },
+                            "T5"          : { "frequency":  400, "level": 50, "weeks": 2, "castles": 0, "guard": 5000  },
+                            "T6"          : { "frequency":  400, "level": 60, "weeks": 2, "castles": 0, "guard": 8000  },
+                            "T7"          : { "frequency":  400, "level": 70, "weeks": 2, "castles": 0, "guard": 12000 },
+                            "T8"          : { "frequency":  200, "level": 80, "weeks": 2, "castles": 0, "guard": 20000 },
+                            "warMachine"  : { "frequency":  200, "level": 90, "weeks": 1, "castles": 0, "guard": 4000  }
+                        }
                     }
                 }
             },

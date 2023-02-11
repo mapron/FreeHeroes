@@ -182,7 +182,7 @@
 
 "sod.artifact.cape.spellFly"                : {"class":"relic"   , "value":40000, "cost":20000, "guard": 80000, "untranslatedName": "Cape of Fly"           ,"slot":"cape"  , "special":"alwaysFly", "tags": ["control"]},
 "hota.artifact.misc.summon"                 : {"class":"unique"  , "value":50000, "cost":50000, "guard": 40000, "untranslatedName": "Fangarm Summon"        ,"slot":"misc"  , "special":"resurrectFangarms"},
-"sod.artifact.boots.spellWalkWater"         : {"class":"relic"   , "value":10000, "cost":10000, "guard": 40000, "untranslatedName": "Boots of Waterwalk"    ,"slot":"boots" , "special":"alwaysWaterWalk"},
+"sod.artifact.boots.spellWalkWater"         : {"class":"relic"   , "value":10000, "cost":10000, "guard": 40000, "untranslatedName": "Boots of Waterwalk"    ,"slot":"boots" , "special":"alwaysWaterWalk", "tags": ["control"]},
 "sod.artifact.misc.archeryNoDistance"       : {"class":"major"   , "value": 8000, "cost": 8000, "guard": 20000, "untranslatedName": "Bow No Distance"       ,"slot":"misc"  , "noPenalty":["distance", "obstacle"] },
 "sod.artifact.misc.dragonStuff"             : {"class":"unique"  , "value":20000, "cost":20000, "guard": 40000, "untranslatedName": "Charm Dragon Buff"     ,"slot":"misc"  , "special":"dragonsBuffs" },
 "sod.artifact.misc.noSurrender"             : {"class":"major"   , "value": 5000, "cost": 5000, "guard": 30000, "untranslatedName": "Charm No Surrender"    ,"slot":"misc"  , "special":"disableSurrender"  },

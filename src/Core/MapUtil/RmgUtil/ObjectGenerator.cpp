@@ -7,6 +7,8 @@
 #include "IRandomGenerator.hpp"
 
 #include "LibraryMapBank.hpp"
+#include "LibraryDwelling.hpp"
+#include "LibraryPlayer.hpp"
 
 #include "ObjectGenerator.hpp"
 
@@ -624,6 +626,7 @@ struct ObjectGenerator::ObjectFactoryPandora : public AbstractFactory<RecordPand
 struct RecordSpellShrine : public CommonRecord<RecordSpellShrine> {
     Core::SpellFilter                 m_filter;
     Core::LibraryMapVisitableConstPtr m_visitableId = nullptr;
+    int                               m_guard       = -1;
 };
 
 struct ObjectGenerator::ObjectFactoryShrine : public AbstractFactory<RecordSpellShrine> {
@@ -658,7 +661,7 @@ struct ObjectGenerator::ObjectFactoryShrine : public AbstractFactory<RecordSpell
             if (m_spellPool->isEmpty(value.m_filter, true, scoreSettings))
                 continue;
 
-            auto rec = RecordSpellShrine{ .m_filter = value.m_filter, .m_visitableId = visitables[value.m_visualLevel] };
+            auto rec = RecordSpellShrine{ .m_filter = value.m_filter, .m_visitableId = visitables[value.m_visualLevel], .m_guard = value.m_guard };
 
             m_records.m_records.push_back(rec.setFreq(value.m_frequency));
         }
@@ -683,7 +686,9 @@ struct ObjectGenerator::ObjectFactoryShrine : public AbstractFactory<RecordSpell
 
         estimateSpellScore(obj.m_obj.m_spellId, obj.m_obj.m_score);
 
-        obj.m_obj.m_guard = obj.m_obj.m_spellId->value * 2 * 3 / 4; // shrine = 75% of spell value
+        obj.m_obj.m_guard = record.m_guard;
+        if (obj.m_obj.m_guard == -1)
+            obj.m_obj.m_guard = obj.m_obj.m_spellId->value * 2 * 3 / 4; // shrine = 75% of spell value
 
         return std::make_shared<ObjectShrine>(std::move(obj));
     }
@@ -696,6 +701,7 @@ struct ObjectGenerator::ObjectFactoryShrine : public AbstractFactory<RecordSpell
 
 struct RecordSpellScroll : public CommonRecord<RecordSpellScroll> {
     Core::SpellFilter m_filter;
+    int               m_guard = -1;
 };
 
 struct ObjectGenerator::ObjectFactoryScroll : public AbstractFactory<RecordSpellScroll> {
@@ -720,7 +726,7 @@ struct ObjectGenerator::ObjectFactoryScroll : public AbstractFactory<RecordSpell
             if (m_spellPool->isEmpty(value.m_filter, true, scoreSettings))
                 continue;
 
-            auto rec = RecordSpellScroll{ .m_filter = value.m_filter };
+            auto rec = RecordSpellScroll{ .m_filter = value.m_filter, .m_guard = value.m_guard };
 
             m_records.m_records.push_back(rec.setFreq(value.m_frequency));
         }
@@ -745,7 +751,9 @@ struct ObjectGenerator::ObjectFactoryScroll : public AbstractFactory<RecordSpell
 
         estimateSpellScore(spellId, obj.m_obj.m_score);
 
-        obj.m_obj.m_guard = spellId->value * 2; // scroll = 100% of spell value
+        obj.m_obj.m_guard = record.m_guard;
+        if (obj.m_obj.m_guard == -1)
+            obj.m_obj.m_guard = spellId->value * 2; // scroll = 100% of spell value
 
         return std::make_shared<ObjectScroll>(std::move(obj));
     }
@@ -757,7 +765,99 @@ struct ObjectGenerator::ObjectFactoryScroll : public AbstractFactory<RecordSpell
 
 // ---------------------------------------------------------------------------------------
 
-void ObjectGenerator::generate(const FHRngZone& zoneSettings)
+struct RecordDwelling : public CommonRecord<RecordDwelling> {
+    Core::LibraryDwellingConstPtr m_id    = nullptr;
+    int                           m_value = -1;
+    int                           m_guard = -1;
+};
+
+struct ObjectGenerator::ObjectFactoryDwelling : public AbstractFactory<RecordDwelling> {
+    struct ObjectDwelling : public AbstractObjectWithId<FHDwelling> {
+    };
+
+    ObjectFactoryDwelling(FHMap&                              map,
+                          const FHRngZone::GeneratorDwelling& genSettings,
+                          const FHScoreSettings&              scoreSettings,
+                          const Core::IGameDatabase*          database,
+                          Core::IRandomGenerator* const       rng,
+                          Core::LibraryFactionConstPtr        mainFaction)
+        : AbstractFactory<RecordDwelling>(map, database, rng)
+    {
+        if (!genSettings.m_isEnabled)
+            return;
+
+        std::map<int, std::vector<Core::LibraryDwellingConstPtr>> dwellByLevel;
+        m_none = database->players()->find(std::string(Core::LibraryPlayer::s_none));
+
+        for (auto* dwelling : database->dwellings()->records()) {
+            if (dwelling->creatureIds.empty())
+                continue;
+            Core::LibraryFactionConstPtr f = dwelling->creatureIds[0]->faction;
+            if (f != mainFaction)
+                continue;
+
+            int level = 0;
+            for (auto* unit : dwelling->creatureIds) {
+                level = std::max(level, unit->level);
+            }
+            dwellByLevel[level].push_back(dwelling);
+        }
+
+        for (const auto& [_, value] : genSettings.m_records) {
+            if (!dwellByLevel.contains(value.m_level))
+                continue;
+            std::vector<Core::LibraryDwellingConstPtr> dwells = dwellByLevel[value.m_level];
+
+            for (auto* dwell : dwells) {
+                int scoreValue = 0;
+                for (auto* unit : dwell->creatureIds) {
+                    const int v          = unit->value;
+                    const int baseGrowth = unit->growth;
+                    const int growth     = baseGrowth * value.m_weeks + value.m_castles;
+                    scoreValue += growth * v;
+                }
+
+                auto rec = RecordDwelling{ .m_id = dwell, .m_value = scoreValue, .m_guard = value.m_guard };
+                if (rec.m_guard == -1) {
+                    rec.m_guard = scoreValue * 2;
+                }
+                rec.m_frequency = value.m_frequency;
+                m_records.m_records.push_back(rec);
+            }
+        }
+
+        m_records.updateFrequency();
+    }
+
+    IObjectPtr make(uint64_t rngFreq) override
+    {
+        const size_t index  = m_records.getFreqIndex(rngFreq);
+        auto&        record = m_records.m_records[index];
+
+        ObjectDwelling obj;
+        obj.m_onDisable = [this, &record] {
+            m_records.onDisable(record);
+        };
+        obj.m_map          = &m_map;
+        obj.m_obj.m_id     = record.m_id;
+        obj.m_obj.m_player = m_none;
+
+        obj.m_obj.m_score[FHScoreAttr::Army] = record.m_value;
+
+        obj.m_obj.m_guard = record.m_guard;
+
+        return std::make_shared<ObjectDwelling>(std::move(obj));
+    }
+
+    Core::LibraryPlayerConstPtr m_none;
+};
+
+// ---------------------------------------------------------------------------------------
+
+void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
+                               Core::LibraryFactionConstPtr mainFaction,
+                               Core::LibraryFactionConstPtr rewardsFaction,
+                               Core::LibraryTerrainConstPtr terrain)
 {
     static const std::string indentBase("      ");
 
@@ -836,6 +936,7 @@ void ObjectGenerator::generate(const FHRngZone& zoneSettings)
         objectFactories.push_back(std::make_shared<ObjectFactoryPandora>(m_map, zoneSettings.m_generators.m_pandoras, scoreSettings, m_database, m_rng));
         objectFactories.push_back(std::make_shared<ObjectFactoryShrine>(m_map, zoneSettings.m_generators.m_shrines, scoreSettings, m_database, m_rng, &spellPool));
         objectFactories.push_back(std::make_shared<ObjectFactoryScroll>(m_map, zoneSettings.m_generators.m_scrolls, scoreSettings, m_database, m_rng, &spellPool));
+        objectFactories.push_back(std::make_shared<ObjectFactoryDwelling>(m_map, zoneSettings.m_generators.m_dwellings, scoreSettings, m_database, m_rng, mainFaction));
 
         for (int i = 0; i < 1000000; i++) {
             if (!tryGen(targetScore, currentScore, objectFactories)) {

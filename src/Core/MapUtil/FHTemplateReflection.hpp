@@ -101,6 +101,19 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_records)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRngZone::GeneratorDwelling::Record,
+    m_level,
+    m_weeks,
+    m_castles,
+    m_frequency,
+    m_guard)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRngZone::GeneratorDwelling,
+    m_isEnabled,
+    m_records)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone::GeneratorShrine::Record,
     m_filter,
     m_visualLevel,
@@ -119,7 +132,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_resources,
     m_pandoras,
     m_shrines,
-    m_scrolls)
+    m_scrolls,
+    m_dwellings)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone,
@@ -203,6 +217,8 @@ template<>
 inline constexpr const bool s_isStringMap<FHRngZone::GeneratorScroll::Map>{ true };
 template<>
 inline constexpr const bool s_isStringMap<FHRngZone::GeneratorShrine::Map>{ true };
+template<>
+inline constexpr const bool s_isStringMap<FHRngZone::GeneratorDwelling::Map>{ true };
 template<>
 inline constexpr const bool s_isStringMap<FHRngZone::ScoreMap>{ true };
 template<>

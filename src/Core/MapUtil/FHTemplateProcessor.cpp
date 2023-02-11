@@ -743,7 +743,10 @@ void FHTemplateProcessor::runRewards()
         if (tileZone.m_rngZoneSettings.m_scoreTargets.empty())
             continue;
         ObjectGenerator gen(m_map, m_database, m_rng, m_logOutput);
-        gen.generate(tileZone.m_rngZoneSettings);
+        gen.generate(tileZone.m_rngZoneSettings,
+                     tileZone.m_mainTownFaction,
+                     tileZone.m_rewardsFaction,
+                     tileZone.m_terrain);
 
         std::vector<FHPos> cells;
         for (auto* cell : tileZone.m_innerArea)

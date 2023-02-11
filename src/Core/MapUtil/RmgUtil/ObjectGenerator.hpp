@@ -46,7 +46,10 @@ public:
         , m_logOutput(logOutput)
     {}
 
-    void generate(const FHRngZone& zoneSettings);
+    void generate(const FHRngZone&             zoneSettings,
+                  Core::LibraryFactionConstPtr mainFaction,
+                  Core::LibraryFactionConstPtr rewardsFaction,
+                  Core::LibraryTerrainConstPtr terrain);
 
     std::vector<IObjectPtr> m_objects;
 
@@ -64,6 +67,7 @@ private:
     struct ObjectFactoryPandora;
     struct ObjectFactoryScroll;
     struct ObjectFactoryShrine;
+    struct ObjectFactoryDwelling;
 
 private:
     FHMap&                           m_map;
