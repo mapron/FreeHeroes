@@ -374,7 +374,6 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_towns,
     m_zones,
     m_debugTiles,
-    m_template,
     m_objects,
     m_config,
     m_rivers,

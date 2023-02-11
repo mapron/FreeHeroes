@@ -75,29 +75,30 @@ public:
     using ArtifactSet = std::set<Core::LibraryArtifactConstPtr>;
     using ArtList     = std::vector<Core::LibraryArtifactConstPtr>;
 
-    ArtifactPool(FHMap& map, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng, const FHScoreSettings::AttrMap& attrMap)
+    static bool okFilter(Core::LibraryArtifactConstPtr art, bool enableFilter, const FHScoreSettings& scoreSettings)
+    {
+        if (!enableFilter)
+            return true;
+
+        const bool isStat = art->statBonus.nonEmptyAmount() > 0;
+        auto       attr   = isStat ? FHScoreAttr::ArtStat : FHScoreAttr::ArtSupport;
+
+        bool isValid = scoreSettings.isValidValue(attr, art->value);
+        return isValid;
+    }
+
+    ArtifactPool(FHMap& map, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng)
         : m_rng(rng)
     {
         for (auto* art : database->artifacts()->records()) {
             if (map.m_disabledArtifacts.isDisabled(map.m_isWaterMap, art))
                 continue;
 
-            const bool isStat = art->statBonus.nonEmptyAmount() > 0;
-            auto       attr   = isStat ? FHScoreAttr::ArtStat : FHScoreAttr::ArtSupport;
-            if (!attrMap.contains(attr))
-                continue;
-            const int singleMinValue = attrMap.at(attr).m_minSingle;
-            const int singleMaxValue = attrMap.at(attr).m_maxSingle;
-            if (singleMinValue != -1 && art->value < singleMinValue)
-                continue;
-            if (singleMaxValue != -1 && art->value > singleMaxValue)
-                continue;
-
             m_artifacts.push_back(art);
         }
     }
 
-    Core::LibraryArtifactConstPtr make(const Core::ArtifactFilter& filter)
+    Core::LibraryArtifactConstPtr make(const Core::ArtifactFilter& filter, bool enableFilter, const FHScoreSettings& scoreSettings)
     {
         ArtList artList = filter.filterPossible(m_artifacts);
         if (artList.empty())
@@ -105,11 +106,21 @@ public:
 
         ArtifactSet artSet(artList.cbegin(), artList.cend());
         m_pools[artSet].m_artList = artList;
-        return m_pools[artSet].make(m_rng);
+        return m_pools[artSet].make(m_rng, enableFilter, scoreSettings);
     }
-    bool isEmpty(const Core::ArtifactFilter& filter) const
+    bool isEmpty(const Core::ArtifactFilter& filter, bool enableFilter, const FHScoreSettings& scoreSettings) const
     {
-        return filter.filterPossible(m_artifacts).empty();
+        ArtList artList = filter.filterPossible(m_artifacts);
+        if (artList.empty())
+            return true;
+
+        ArtList artListFiltered;
+        for (auto art : artList) {
+            if (okFilter(art, enableFilter, scoreSettings))
+                artListFiltered.push_back(art);
+        }
+
+        return artListFiltered.empty();
     }
 
 private:
@@ -117,14 +128,37 @@ private:
         ArtList m_artList;
         ArtList m_current;
 
-        Core::LibraryArtifactConstPtr make(Core::IRandomGenerator* rng)
+        Core::LibraryArtifactConstPtr make(Core::IRandomGenerator* rng, bool enableFilter, const FHScoreSettings& scoreSettings)
         {
-            if (m_current.empty())
+            bool hasReset = false;
+            if (m_current.empty()) {
                 m_current = m_artList;
-            auto index  = rng->gen(m_current.size() - 1);
-            auto result = m_current[index];
+                hasReset  = true;
+            }
+            auto art = makeOne(rng, enableFilter, scoreSettings);
+
+            while (!art) {
+                if (m_current.empty()) {
+                    if (hasReset)
+                        return nullptr;
+                    m_current = m_artList;
+                    hasReset  = true;
+                }
+                art = makeOne(rng, enableFilter, scoreSettings);
+            }
+
+            return art;
+        }
+
+        Core::LibraryArtifactConstPtr makeOne(Core::IRandomGenerator* rng, bool enableFilter, const FHScoreSettings& scoreSettings)
+        {
+            auto index = rng->gen(m_current.size() - 1);
+            auto art   = m_current[index];
             m_current.erase(m_current.begin() + index);
-            return result;
+            if (!okFilter(art, enableFilter, scoreSettings))
+                return nullptr;
+
+            return art;
         }
     };
     std::map<ArtifactSet, SubPool> m_pools;
@@ -171,6 +205,8 @@ struct ObjectGenerator::AbstractFactory : public IObjectFactory {
     FHMap&                        m_map;
 };
 
+// ---------------------------------------------------------------------------------------
+
 struct RecordBank : public CommonRecord<RecordBank> {
     Core::LibraryMapBankConstPtr m_id            = nullptr;
     int                          m_guardsVariant = 0;
@@ -181,10 +217,14 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
         std::string getId() const override { return m_obj.m_id->id + " [" + std::to_string(m_obj.m_guardsVariant + 1) + "]"; }
     };
 
-    ObjectFactoryBank(FHMap& map, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng, ArtifactPool* artifactPool)
+    ObjectFactoryBank(FHMap& map, const FHRngZone::GeneratorBank& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng, ArtifactPool* artifactPool)
         : AbstractFactory<RecordBank>(map, database, rng)
         , m_artifactPool(artifactPool)
+        , m_scoreSettings(scoreSettings)
     {
+        if (!genSettings.m_isEnabled)
+            return;
+
         for (auto* bank : database->mapBanks()->records()) {
             if (m_map.m_disabledBanks.isDisabled(m_map.m_isWaterMap, bank))
                 continue;
@@ -196,14 +236,44 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
                 record.m_frequency     = bank->variants[i].frequency;
 
                 {
-                    const Core::Reward& reward                = record.m_id->rewards[record.m_id->variants[record.m_guardsVariant].rewardIndex];
-                    bool                artifactRewardIsValid = true;
+                    const Core::Reward&        reward                = record.m_id->rewards[record.m_id->variants[record.m_guardsVariant].rewardIndex];
+                    bool                       artifactRewardIsValid = true;
+                    const Core::ArtifactFilter firstFilter           = reward.artifacts.empty() ? Core::ArtifactFilter{} : reward.artifacts[0];
                     for (const auto& filter : reward.artifacts) {
-                        if (m_artifactPool->isEmpty(filter))
+                        if (m_artifactPool->isEmpty(filter, firstFilter == filter, scoreSettings))
                             artifactRewardIsValid = false;
                     }
-                    if (!artifactRewardIsValid)
+                    if (!artifactRewardIsValid) {
+                        std::cerr << "---- art - skipping " << bank->id << " [" << i << "]\n";
                         continue;
+                    }
+
+                    {
+                        FHScore score;
+                        {
+                            for (const auto& [id, count] : reward.resources.data) {
+                                const int amount = count / id->pileSize;
+                                const int value  = amount * id->value;
+                                auto      attr   = (id->rarity == Core::LibraryResource::Rarity::Gold) ? FHScoreAttr::Gold : FHScoreAttr::Resource;
+                                score[attr] += value;
+                            }
+                        }
+                        std::list<bool> validChecks;
+                        for (FHScoreAttr attr : { FHScoreAttr::Gold, FHScoreAttr::Resource }) {
+                            if (score[attr]) {
+                                bool isValid = scoreSettings.isValidValue(attr, score[attr]);
+                                validChecks.push_back(isValid);
+                            }
+                        }
+                        bool resourceRewardIsValid = validChecks.empty();
+                        for (bool isValid : validChecks)
+                            resourceRewardIsValid = resourceRewardIsValid || isValid;
+
+                        if (!resourceRewardIsValid) {
+                            std::cerr << "---- res - skipping " << bank->id << " [" << i << "]\n";
+                            continue;
+                        }
+                    }
 
                     const size_t artRewards = reward.artifacts.size();
                     if (artRewards == 0)
@@ -247,8 +317,9 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
         }
 
         {
+            const Core::ArtifactFilter firstFilter = reward.artifacts.empty() ? Core::ArtifactFilter{} : reward.artifacts[0];
             for (const auto& filter : reward.artifacts) {
-                auto art = m_artifactPool->make(filter);
+                auto art = m_artifactPool->make(filter, firstFilter == filter, m_scoreSettings);
                 assert(art);
                 obj.m_obj.m_artifacts.push_back(art);
                 const bool isStat = art->statBonus.nonEmptyAmount() > 0;
@@ -269,8 +340,11 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
         return std::make_shared<ObjectBank>(std::move(obj));
     }
 
-    ArtifactPool* const m_artifactPool;
+    ArtifactPool* const   m_artifactPool;
+    const FHScoreSettings m_scoreSettings;
 };
+
+// ---------------------------------------------------------------------------------------
 
 struct RecordArtifact : public CommonRecord<RecordArtifact> {
     Core::ArtifactFilter m_filter;
@@ -280,33 +354,21 @@ struct ObjectGenerator::ObjectFactoryArtifact : public AbstractFactory<RecordArt
     struct ObjectArtifact : public AbstractObject<FHArtifact> {
     };
 
-    ObjectFactoryArtifact(FHMap& map, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng, ArtifactPool* artifactPool)
+    ObjectFactoryArtifact(FHMap& map, const FHRngZone::GeneratorArtifact& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng, ArtifactPool* artifactPool)
         : AbstractFactory<RecordArtifact>(map, database, rng)
         , m_artifactPool(artifactPool)
+        , m_scoreSettings(scoreSettings)
     {
-        using TC = Core::LibraryArtifact::TreasureClass;
-        m_records.m_records.push_back(RecordArtifact{
-            .m_filter = Core::ArtifactFilter{
-                .classes = { TC::Treasure },
-            } }.setFreq(2000));
+        if (!genSettings.m_isEnabled)
+            return;
 
-        m_records.m_records.push_back(RecordArtifact{
-            .m_filter = Core::ArtifactFilter{
-                .classes = { TC::Minor },
-            } }.setFreq(1500));
-
-        m_records.m_records.push_back(RecordArtifact{
-            .m_filter = Core::ArtifactFilter{
-                .classes = { TC::Major },
-            } }.setFreq(1500));
-
-        m_records.m_records.push_back(RecordArtifact{
-            .m_filter = Core::ArtifactFilter{
-                .classes = { TC::Relic },
-            } }.setFreq(1000));
+        for (const auto& [_, value] : genSettings.m_records)
+            m_records.m_records.push_back(RecordArtifact{
+                .m_filter = value.m_filter }
+                                              .setFreq(value.m_frequency));
 
         for (auto& record : m_records.m_records)
-            record.m_enabled = !m_artifactPool->isEmpty(record.m_filter);
+            record.m_enabled = !m_artifactPool->isEmpty(record.m_filter, true, scoreSettings);
 
         m_records.updateFrequency();
     }
@@ -323,7 +385,7 @@ struct ObjectGenerator::ObjectFactoryArtifact : public AbstractFactory<RecordArt
         obj.m_map = &m_map;
 
         FHScore score;
-        obj.m_obj.m_id = m_artifactPool->make(record.m_filter);
+        obj.m_obj.m_id = m_artifactPool->make(record.m_filter, true, m_scoreSettings);
         assert(obj.m_obj.m_id);
 
         const bool isStat = obj.m_obj.m_id->statBonus.nonEmptyAmount() > 0;
@@ -336,8 +398,11 @@ struct ObjectGenerator::ObjectFactoryArtifact : public AbstractFactory<RecordArt
         return std::make_shared<ObjectArtifact>(std::move(obj));
     }
 
-    ArtifactPool* const m_artifactPool;
+    ArtifactPool* const   m_artifactPool;
+    const FHScoreSettings m_scoreSettings;
 };
+
+// ---------------------------------------------------------------------------------------
 
 struct ObjectResourcePile : public ObjectGenerator::AbstractObject<FHResource> {
 };
@@ -347,27 +412,22 @@ struct RecordResourcePile : public CommonRecord<RecordResourcePile> {
 };
 
 struct ObjectGenerator::ObjectFactoryResourcePile : public AbstractFactory<RecordResourcePile> {
-    ObjectFactoryResourcePile(FHMap& map, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng)
+    ObjectFactoryResourcePile(FHMap& map, const FHRngZone::GeneratorResourcePile& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng)
         : AbstractFactory<RecordResourcePile>(map, database, rng)
     {
-        const std::vector<int> amountRare{ 3, 4, 5, 6 };
-        const std::vector<int> amountCommon{ 5, 6, 7, 8, 9, 10 };
-        for (auto* resId : database->resources()->records()) {
-            const int          freqTotal = 15000;
-            ObjectResourcePile obj;
-            obj.m_obj.m_id = resId;
+        if (!genSettings.m_isEnabled)
+            return;
 
-            const auto attr       = resId->rarity == Core::LibraryResource::Rarity::Gold ? FHScoreAttr::Gold : FHScoreAttr::Resource;
-            const auto amounts    = resId->rarity == Core::LibraryResource::Rarity::Rare ? amountRare : amountCommon;
-            const auto avgAmount  = amounts[amounts.size() / 2];
-            const auto avgValue   = resId->value * avgAmount;
-            const auto guardValue = avgValue * 2;
-            const int  freq       = freqTotal / amounts.size();
-            for (int amount : amounts) {
-                obj.m_obj.m_amount      = amount * resId->pileSize;
-                obj.m_obj.m_guard       = guardValue;
-                obj.m_obj.m_score[attr] = resId->value * amount;
-                m_records.m_records.push_back(RecordResourcePile{ .m_obj = std::move(obj) }.setFreq(freq));
+        for (const auto& [_, value] : genSettings.m_records) {
+            const auto attr = value.m_resource->rarity == Core::LibraryResource::Rarity::Gold ? FHScoreAttr::Gold : FHScoreAttr::Resource;
+            for (int amount : value.m_amounts) {
+                ObjectResourcePile obj;
+                obj.m_obj.m_id          = value.m_resource;
+                obj.m_obj.m_amount      = amount;
+                obj.m_obj.m_guard       = value.m_guard;
+                obj.m_obj.m_score[attr] = value.m_resource->value * (amount / value.m_resource->pileSize);
+                if (scoreSettings.isValidValue(attr, obj.m_obj.m_score[attr]))
+                    m_records.m_records.push_back(RecordResourcePile{ .m_obj = std::move(obj) }.setFreq(value.m_frequency));
             }
         }
 
@@ -389,22 +449,16 @@ struct ObjectGenerator::ObjectFactoryResourcePile : public AbstractFactory<Recor
     }
 };
 
-void ObjectGenerator::generate(const FHScoreSettings& settings)
+// ---------------------------------------------------------------------------------------
+
+void ObjectGenerator::generate(const FHRngZone& zoneSettings)
 {
-    ArtifactPool pool(m_map, m_database, m_rng, settings.m_guarded);
+    static const std::string indentBase("      ");
 
-    for (const auto& [key, val] : settings.m_guarded) {
-        m_targetScore[key] = val.m_target;
-    }
-
-    m_objectFactories.push_back(std::make_shared<ObjectFactoryBank>(m_map, m_database, m_rng, &pool));
-    m_objectFactories.push_back(std::make_shared<ObjectFactoryArtifact>(m_map, m_database, m_rng, &pool));
-    m_objectFactories.push_back(std::make_shared<ObjectFactoryResourcePile>(m_map, m_database, m_rng));
-
-    auto tryGen = [this]() -> bool {
+    auto tryGen = [this](const FHScore& targetScore, FHScore& currentScore, std::vector<IObjectFactoryPtr>& objectFactories) -> bool {
         static const std::string indent("        ");
         uint64_t                 totalWeight = 0;
-        for (IObjectFactoryPtr& fac : m_objectFactories) {
+        for (IObjectFactoryPtr& fac : objectFactories) {
             totalWeight += fac->totalFreq();
         }
         if (!totalWeight)
@@ -412,11 +466,11 @@ void ObjectGenerator::generate(const FHScoreSettings& settings)
 
         const uint64_t rngFreq = m_rng->gen(totalWeight - 1);
 
-        auto isScoreOverflow = [this](const FHScore& current) {
+        auto isScoreOverflow = [&targetScore](const FHScore& current) {
             for (const auto& [key, val] : current) {
-                if (!m_targetScore.contains(key))
+                if (!targetScore.contains(key))
                     return true;
-                const auto targetVal = m_targetScore.at(key);
+                const auto targetVal = targetScore.at(key);
                 if (val > targetVal)
                     return true;
             }
@@ -424,7 +478,7 @@ void ObjectGenerator::generate(const FHScoreSettings& settings)
         };
 
         uint64_t indexWeight = 0, baseWeight = 0;
-        for (IObjectFactoryPtr& fac : m_objectFactories) {
+        for (IObjectFactoryPtr& fac : objectFactories) {
             indexWeight += fac->totalFreq();
             if (indexWeight > rngFreq && fac->totalFreq()) {
                 const uint64_t rngFreqForFactory = rngFreq - baseWeight;
@@ -434,13 +488,13 @@ void ObjectGenerator::generate(const FHScoreSettings& settings)
                 if (obj->getScore().empty())
                     throw std::runtime_error("Object '" + obj->getId() + "' has no score!");
 
-                FHScore currentScore = m_currentScore + obj->getScore();
-                if (isScoreOverflow(currentScore)) {
+                FHScore currentScoreTmp = currentScore + obj->getScore();
+                if (isScoreOverflow(currentScoreTmp)) {
                     obj->disable();
                     // m_logOutput << "try disable '" << obj->getId() << "'\n";
                     return true;
                 }
-                m_currentScore = currentScore;
+                currentScore = currentScoreTmp;
 
                 m_logOutput << indent << "add '" << obj->getId() << "' score=" << obj->getScore() << " guard=" << obj->getGuard() << "; current factory freq=" << fac->totalFreq() << ", active=" << fac->totalActiveRecords() << "\n";
                 //m_logOutput << "Updated score=" << m_currentScore << "\n";
@@ -455,15 +509,35 @@ void ObjectGenerator::generate(const FHScoreSettings& settings)
         return false;
     };
 
-    for (int i = 0; i < 1000000; i++) {
-        if (!tryGen()) {
-            m_logOutput << "Finished on [" << i << "] iteration\n";
-            break;
-        }
-    }
+    ArtifactPool pool(m_map, m_database, m_rng);
 
-    m_logOutput << "target score:" << m_targetScore << "\n";
-    m_logOutput << "end score:" << m_currentScore << "\n";
+    for (const auto& [scoreId, scoreSettings] : zoneSettings.m_scoreTargets) {
+        if (!scoreSettings.m_isEnabled) {
+            m_logOutput << indentBase << scoreId << " is disabled;\n";
+            continue;
+        }
+        FHScore currentScore;
+        FHScore targetScore;
+
+        for (const auto& [key, val] : scoreSettings.m_score)
+            targetScore[key] = val.m_target;
+
+        std::vector<IObjectFactoryPtr> objectFactories;
+        objectFactories.push_back(std::make_shared<ObjectFactoryBank>(m_map, zoneSettings.m_generators.m_banks, scoreSettings, m_database, m_rng, &pool));
+        objectFactories.push_back(std::make_shared<ObjectFactoryArtifact>(m_map, zoneSettings.m_generators.m_artifacts, scoreSettings, m_database, m_rng, &pool));
+        objectFactories.push_back(std::make_shared<ObjectFactoryResourcePile>(m_map, zoneSettings.m_generators.m_resources, scoreSettings, m_database, m_rng));
+
+        for (int i = 0; i < 1000000; i++) {
+            if (!tryGen(targetScore, currentScore, objectFactories)) {
+                m_logOutput << indentBase << scoreId << " finished on [" << i << "] iteration\n";
+                break;
+            }
+        }
+
+        m_logOutput << indentBase << scoreId << " target score:" << targetScore << "\n";
+        m_logOutput << indentBase << scoreId << " end score:" << currentScore << "\n";
+        m_logOutput << indentBase << scoreId << " deficit score:" << (targetScore - currentScore) << "\n";
+    }
 }
 
 }

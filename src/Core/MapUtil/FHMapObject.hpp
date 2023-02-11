@@ -84,5 +84,6 @@ struct FHTown : public FHPlayerControlledObject {
 MAPUTIL_EXPORT std::ostream& operator<<(std::ostream& stream, const FreeHeroes::FHScore& score);
 
 MAPUTIL_EXPORT FreeHeroes::FHScore operator+(const FreeHeroes::FHScore& l, const FreeHeroes::FHScore& r);
+MAPUTIL_EXPORT FreeHeroes::FHScore operator-(const FreeHeroes::FHScore& l, const FreeHeroes::FHScore& r);
 
 }

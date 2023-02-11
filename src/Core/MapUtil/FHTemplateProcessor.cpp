@@ -740,10 +740,10 @@ void FHTemplateProcessor::runRoadsPlacement()
 void FHTemplateProcessor::runRewards()
 {
     for (auto& tileZone : m_tileZones) {
-        if (tileZone.m_rngZoneSettings.m_score.m_guarded.empty())
+        if (tileZone.m_rngZoneSettings.m_scoreTargets.empty())
             continue;
         ObjectGenerator gen(m_map, m_database, m_rng, m_logOutput);
-        gen.generate(tileZone.m_rngZoneSettings.m_score);
+        gen.generate(tileZone.m_rngZoneSettings);
 
         std::vector<FHPos> cells;
         for (auto* cell : tileZone.m_innerArea)

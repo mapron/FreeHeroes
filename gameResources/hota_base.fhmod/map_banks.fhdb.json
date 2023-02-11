@@ -26,10 +26,10 @@
     "guardValue": 20000,
     
     "rewards": [
-        {"resources":"20000","artifacts":[{"classes": ["treasure"]},{"classes": ["minor"]},{"classes": ["major"]},{"classes": ["relic"]}]},
-        {"resources":"30000","artifacts":[{"classes": ["minor"   ]},{"classes": ["major"]},{"classes": ["relic"]},{"classes": ["relic"]}]},
-        {"resources":"40000","artifacts":[{"classes": ["major"   ]},{"classes": ["relic"]},{"classes": ["relic"]},{"classes": ["relic"]}]},
-        {"resources":"50000","artifacts":[{"classes": ["relic"   ]},{"classes": ["relic"]},{"classes": ["relic"]},{"classes": ["relic"]}]}
+        {"resources":"20000","artifacts":[{"classes": ["relic"]},{"classes": ["major"]},{"classes": ["minor"]},{"classes": ["treasure"]}]},
+        {"resources":"30000","artifacts":[{"classes": ["relic"]},{"classes": ["relic"]},{"classes": ["major"]},{"classes": ["minor"   ]}]},
+        {"resources":"40000","artifacts":[{"classes": ["relic"]},{"classes": ["relic"]},{"classes": ["relic"]},{"classes": ["major"   ]}]},
+        {"resources":"50000","artifacts":[{"classes": ["relic"]},{"classes": ["relic"]},{"classes": ["relic"]},{"classes": ["relic"   ]}]}
     ],
     "variants": [
     { "name": "I"   , "frequency": 300, "rewardIndex": 0, "guards": [ "sod.unit.greenDragon=8", "sod.unit.redDragon=5", "sod.unit.goldDragon=2", "sod.unit.blackDragon=1"]},
@@ -133,10 +133,10 @@
     "guardValue": 20000,
     
     "rewards": [
-        {"resources":"10000","artifacts":[{"classes": ["treasure"]},{"classes": ["treasure"]},{"classes": ["minor"]},{"classes": ["relic"]}]},
-        {"resources":"15000","artifacts":[{"classes": ["treasure"]},{"classes": ["minor"   ]},{"classes": ["major"]},{"classes": ["relic"]}]},
-        {"resources":"20000","artifacts":[{"classes": ["minor"   ]},{"classes": ["major"   ]},{"classes": ["major"]},{"classes": ["relic"]}]},
-        {"resources":"30000","artifacts":[{"classes": ["major"   ]},{"classes": ["major"   ]},{"classes": ["relic"]},{"classes": ["relic"]}]}
+        {"resources":"10000","artifacts":[{"classes": ["relic"]}, {"classes": ["minor"]}, {"classes": ["treasure"]}, {"classes": ["treasure"]}]},
+        {"resources":"15000","artifacts":[{"classes": ["relic"]}, {"classes": ["major"]}, {"classes": ["minor"   ]}, {"classes": ["treasure"]}]},
+        {"resources":"20000","artifacts":[{"classes": ["relic"]}, {"classes": ["major"]}, {"classes": ["major"   ]}, {"classes": ["minor"   ]}]},
+        {"resources":"30000","artifacts":[{"classes": ["relic"]}, {"classes": ["relic"]}, {"classes": ["major"   ]}, {"classes": ["major"   ]}]}
     ],
     "variants": [
     { "name": "I"   , "frequency": 300, "rewardIndex": 0, "guards": [ "hota.unit.seaSerpent=6", "sod.unit.chaosHydra=3", "hota.unit.haspid=2", "sod.unit.hydra=8"]},

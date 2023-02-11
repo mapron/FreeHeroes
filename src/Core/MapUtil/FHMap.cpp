@@ -30,6 +30,8 @@ void FHMap::fromJson(PropertyTree data, const Core::IGameDatabase* database)
 {
     Core::PropertyTreeReaderDatabase reader(database);
     *this = {};
+    reader.jsonToValue(data, *this);
+
     if (data.contains("template")) {
         auto&           zones = data["template"]["zones"];
         PropertyTreeMap baseItems;
@@ -47,8 +49,8 @@ void FHMap::fromJson(PropertyTree data, const Core::IGameDatabase* database)
             auto baseKey = item["base"].getScalar().toString();
             PropertyTree::mergePatch(item, baseItems.at(baseKey));
         }
+        reader.jsonToValue(data["template"], m_template);
     }
-    reader.jsonToValue(data, *this);
 }
 
 void FHMap::applyRngUserSettings(const Mernel::PropertyTree& data, const Core::IGameDatabase* database)

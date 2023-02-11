@@ -17,28 +17,74 @@
                     {"town":{"garisonRmg":[{"level":10,"value":2000},{"level":20,"value":1000},{"level":30,"value":1000}]}}, 
                     {"town":{"garisonRmg":[{"level":10,"value":2000},{"level":20,"value":1000},{"level":30,"value":1000}]}}],
                 
-                "score": {
-                    "guarded": {
-                        "Army":           { "target": 50000, "maxSingle": 20000},
-                        "ArtStat":        { "target": 50000, "maxSingle": 20000},
-                        "ArtSupport":     { "target": 50000},
-                        "Gold":           { "target": 150000},
-                        "Resource":       { "target": 90000, "maxSingle": 20000},
-                        "ResourceGen":    { "target": 50000},
-                        "Experience":     { "target": 50000},
-                        "SpellOffensive": { "target": 50000},
-                        "SpellCommon":    { "target": 50000},
-                        "SpellAll":       { "target": 50000},
-                        "Misc":           { "target": 50000}
+                "scoreTargets": {
+                    "High": {
+                        "isEnabled": true,
+                        "score": {
+                            "Army":           { "target": 50000 , "maxSingle": 20000, "minSingle": 8000},
+                            "ArtStat":        { "target": 50000 , "maxSingle": 20000, "minSingle": 8000},
+                            "ArtSupport":     { "target": 50000 , "maxSingle": 30000, "minSingle": 8000},
+                            "Gold":           { "target": 150000, "maxSingle": 50000, "minSingle": 8000},
+                            "Resource":       { "target": 90000 , "maxSingle": 50000, "minSingle": 8000},
+                            
+                            "Experience":     { "target": 50000, "minSingle": 12000},
+                            "SpellOffensive": { "target": 50000, "minSingle": 12000},
+                            "SpellCommon":    { "target": 50000, "minSingle": 12000}
+                        }
                     },
-                    "unguarded": {
-                        "Gold":           { "target": 20000, "maxSingle": 2000},
-                        "Experience":     { "target": 20000, "maxSingle": 2000}
+                    "Mid": {
+                        "isEnabled": true,
+                        "score": {
+                            "Army":           { "target": 30000, "maxSingle": 10000},
+                            "ArtStat":        { "target": 30000, "maxSingle": 10000},
+                            "ArtSupport":     { "target": 30000, "maxSingle": 10000},
+                            "Gold":           { "target": 50000, "maxSingle": 15000},
+                            "Resource":       { "target": 40000, "maxSingle": 15000},
+                            "Experience":     { "target": 50000, "maxSingle": 15000},
+                            "SpellOffensive": { "target": 50000, "maxSingle": 15000, "minSingle": 4000},
+                            "SpellCommon":    { "target": 50000, "maxSingle": 15000, "minSingle": 4000},
+                            "Misc":           { "target": 50000}
+                        },
+                        "guardPercent": 80
                     },
-                    "armyFocusPercent": 80
+                    "Low": {
+                        "isEnabled": true,
+                        "score":{
+                            "Gold":           { "target": 20000, "maxSingle": 2000},
+                            "Experience":     { "target": 20000, "maxSingle": 2000},
+                            "ResourceGen":    { "target": 10000},
+                            "SpellAll":       { "target": 50000, "maxSingle": 5000}
+                        },
+                        "guardPercent": 0
+                    }
                 },
                 "guardMin": 4000,
-                "guardMax": 30000
+                "guardMax": 30000,
+
+                "generators": {
+                    "banks": {"isEnabled": true},
+                    "artifacts": {
+                        "isEnabled": true,
+                        "records": {
+                            "treasure" : { "frequency": 2000, "filter": {"classes": ["treasure"] } },
+                            "minor"    : { "frequency": 1500, "filter": {"classes": ["minor"]    } },
+                            "major"    : { "frequency": 1500, "filter": {"classes": ["major"]    } },
+                            "relic"    : { "frequency": 1000, "filter": {"classes": ["relic"]    } }
+                        }
+                    },
+                    "resources": {
+                        "isEnabled": true,
+                        "records": {
+                            "gold"    : { "amounts": [500, 600, 700, 800, 900, 1000], "guard": 1500, "resource": "gold"    , "frequency": 3000 },
+                            "wood"    : { "amounts": [5, 6, 7, 8, 9, 10]            , "guard": 1500, "resource": "wood"    , "frequency": 2000 },
+                            "ore"     : { "amounts": [5, 6, 7, 8, 9, 10]            , "guard": 1500, "resource": "ore"     , "frequency": 2000 },
+                            "mercury" : { "amounts": [3, 4, 5, 6]                   , "guard": 2000, "resource": "mercury" , "frequency": 2000 },
+                            "sulfur"  : { "amounts": [3, 4, 5, 6]                   , "guard": 2000, "resource": "sulfur"  , "frequency": 2000 },
+                            "crystal" : { "amounts": [3, 4, 5, 6]                   , "guard": 2000, "resource": "crystal" , "frequency": 2000 },
+                            "gems"    : { "amounts": [3, 4, 5, 6]                   , "guard": 2000, "resource": "gems"    , "frequency": 2000 }
+                        }
+                    }
+                }
             },
             "Treasure": { "centerDispersion": {"x": 15, "y": 15}, "relativeSizeAvg": 130, "relativeSizeDispersion": 20, "terrain": "sod.terrain.sand",
                 "towns": [
@@ -63,8 +109,8 @@
         },
 		"rotationDegreeDispersion": 50,
 		"allowFlip": true,
-        "stdSkillsWarrior": [{"skillId": "sod.skill.offense" , "level": 0 }, {"skillId": "sod.skill.magicEarth", "level": 0 }],
-        "stdSkillsMage"   : [{"skillId": "sod.skill.wisdom"  , "level": 0 }, {"skillId": "sod.skill.magicEarth", "level": 0 }]
+        "stdSkillsWarrior": [{"skillId": "sod.skill.offense" , "level": 0 }, {"skillId": "sod.skill.archery"   , "level": 0 }, {"skillId": "sod.skill.magicEarth", "level": 0 }],
+        "stdSkillsMage"   : [{"skillId": "sod.skill.wisdom"  , "level": 0 }, {"skillId": "sod.skill.magicAir"  , "level": 0 }, {"skillId": "sod.skill.magicEarth", "level": 0 }]
 	},
 	"config":{
 		"allowSpecialWeeks":false,

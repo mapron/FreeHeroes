@@ -43,4 +43,17 @@ FHScore operator+(const FHScore& l, const FHScore& r)
     return result;
 }
 
+FHScore operator-(const FHScore& l, const FHScore& r)
+{
+    FreeHeroes::FHScore result = l;
+
+    for (const auto& [key, val] : r) {
+        result[key] -= val;
+        if (!result[key])
+            result.erase(key);
+    }
+
+    return result;
+}
+
 }

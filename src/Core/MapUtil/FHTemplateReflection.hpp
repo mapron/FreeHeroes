@@ -10,6 +10,8 @@
 #include "MernelReflection/EnumTraitsMacro.hpp"
 #include "MernelReflection/MetaInfoMacro.hpp"
 
+#include "LibraryReflection.hpp"
+
 namespace Mernel::Reflection {
 using namespace FreeHeroes;
 
@@ -44,9 +46,41 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHScoreSettings,
-    m_guarded,
-    m_unguarded,
-    m_armyFocusPercent)
+    m_score,
+    m_isEnabled,
+    m_guardPercent)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRngZone::GeneratorBank,
+    m_isEnabled)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRngZone::GeneratorArtifact::Record,
+    m_frequency,
+    m_filter)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRngZone::GeneratorArtifact,
+    m_isEnabled,
+    m_records)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRngZone::GeneratorResourcePile::Record,
+    m_amounts,
+    m_frequency,
+    m_resource,
+    m_guard)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRngZone::GeneratorResourcePile,
+    m_isEnabled,
+    m_records)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRngZone::Generators,
+    m_banks,
+    m_artifacts,
+    m_resources)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone,
@@ -59,7 +93,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_centerDispersion,
     m_relativeSizeAvg,
     m_relativeSizeDispersion,
-    m_score,
+    m_scoreTargets,
+    m_generators,
     m_guardMin,
     m_guardMax,
     m_cornerRoads,
@@ -119,6 +154,12 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_stdSkillsWarrior,
     m_stdSkillsMage)
 
+template<>
+inline constexpr const bool s_isStringMap<FHRngZone::GeneratorArtifact::Map>{ true };
+template<>
+inline constexpr const bool s_isStringMap<FHRngZone::GeneratorResourcePile::Map>{ true };
+template<>
+inline constexpr const bool s_isStringMap<FHRngZone::ScoreMap>{ true };
 template<>
 inline constexpr const bool s_isStringMap<FHScoreSettings::AttrMap>{ true };
 template<>

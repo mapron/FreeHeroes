@@ -8,6 +8,8 @@
 #include "FHMapObject.hpp"
 
 #include "LibraryHero.hpp"
+#include "LibraryArtifact.hpp"
+#include "LibrarySpell.hpp"
 
 namespace FreeHeroes {
 
@@ -15,6 +17,8 @@ struct FHRngZoneTown {
     FHTown m_town;
     bool   m_playerControlled = false;
     bool   m_useZoneFaction   = false;
+
+    bool operator==(const FHRngZoneTown&) const noexcept = default;
 };
 
 struct FHScoreSettings {
@@ -22,15 +26,35 @@ struct FHScoreSettings {
         int64_t m_target    = 0;
         int64_t m_minSingle = -1;
         int64_t m_maxSingle = -1;
+
+        bool operator==(const ScoreScope&) const noexcept = default;
     };
 
     using AttrMap = std::map<FHScoreAttr, ScoreScope>;
 
-    AttrMap m_guarded;
-    AttrMap m_unguarded;
-    int     m_armyFocusPercent = 80;
+    AttrMap m_score;
+    int     m_guardPercent = 100;
+    bool    m_isEnabled{ false };
 
-    bool empty() const { return m_guarded.empty() && m_unguarded.empty(); }
+    bool isValidValue(FHScoreAttr attr, int64_t value) const noexcept
+    {
+        auto it = m_score.find(attr);
+        if (it == m_score.cend())
+            return false;
+
+        const ScoreScope& scope = it->second;
+
+        auto minVal = scope.m_minSingle;
+        auto maxVal = scope.m_maxSingle;
+        if (minVal != -1 && value < minVal)
+            return false;
+        if (maxVal != -1 && value > maxVal)
+            return false;
+
+        return true;
+    }
+
+    bool operator==(const FHScoreSettings&) const noexcept = default;
 
     MAPUTIL_EXPORT static std::string attrToString(FHScoreAttr attr);
 };
@@ -47,7 +71,54 @@ struct FHRngZone {
     int                        m_relativeSizeAvg        = 100;
     int                        m_relativeSizeDispersion = 0;
 
-    FHScoreSettings m_score;
+    using ScoreMap = std::map<std::string, FHScoreSettings>;
+
+    ScoreMap m_scoreTargets;
+
+    struct GeneratorCommon {
+        bool m_isEnabled = false;
+
+        bool operator==(const GeneratorCommon&) const noexcept = default;
+    };
+    struct GeneratorBank : public GeneratorCommon {
+        bool operator==(const GeneratorBank&) const noexcept = default;
+    };
+    struct GeneratorArtifact : public GeneratorCommon {
+        struct Record {
+            Core::ArtifactFilter m_filter;
+            int                  m_frequency = 1000;
+
+            bool operator==(const Record&) const noexcept = default;
+        };
+        using Map = std::map<std::string, Record>;
+        Map m_records;
+
+        bool operator==(const GeneratorArtifact&) const noexcept = default;
+    };
+    struct GeneratorResourcePile : public GeneratorCommon {
+        struct Record {
+            std::vector<int>              m_amounts;
+            Core::LibraryResourceConstPtr m_resource  = nullptr;
+            int                           m_frequency = 1000;
+            int                           m_guard     = 0;
+
+            bool operator==(const Record&) const noexcept = default;
+        };
+        using Map = std::map<std::string, Record>;
+        Map m_records;
+
+        bool operator==(const GeneratorResourcePile&) const noexcept = default;
+    };
+
+    struct Generators {
+        GeneratorBank         m_banks;
+        GeneratorArtifact     m_artifacts;
+        GeneratorResourcePile m_resources;
+
+        bool operator==(const Generators&) const noexcept = default;
+    };
+
+    Generators m_generators;
 
     int64_t m_guardMin = 0;
     int64_t m_guardMax = 0;
@@ -55,6 +126,8 @@ struct FHRngZone {
     int m_cornerRoads = 0;
 
     bool m_isNormal = false;
+
+    bool operator==(const FHRngZone&) const noexcept = default;
 };
 struct FHRngConnection {
     std::string m_from;

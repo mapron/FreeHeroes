@@ -46,15 +46,9 @@ public:
         , m_logOutput(logOutput)
     {}
 
-    void generate(const FHScoreSettings& settings);
+    void generate(const FHRngZone& zoneSettings);
 
-    FHScoreSettings m_scoreSettings;
-
-    FHScore m_currentScore;
-    FHScore m_targetScore;
-
-    std::vector<IObjectFactoryPtr> m_objectFactories;
-    std::vector<IObjectPtr>        m_objects;
+    std::vector<IObjectPtr> m_objects;
 
     template<class T>
     struct AbstractObject;
