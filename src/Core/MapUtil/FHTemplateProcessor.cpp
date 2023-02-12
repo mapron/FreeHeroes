@@ -17,6 +17,7 @@
 #include "RmgUtil/KMeans.hpp"
 #include "RmgUtil/AstarGenerator.hpp"
 #include "RmgUtil/ObstacleUtil.hpp"
+#include "RmgUtil/ObjectBundle.hpp"
 
 #include <functional>
 #include <stdexcept>
@@ -749,35 +750,30 @@ void FHTemplateProcessor::runRewards()
         if (tileZone.m_rngZoneSettings.m_scoreTargets.empty())
             continue;
 
-        if (!(tileZone.m_id == "CC" || tileZone.m_id == "P1")) // @todo:
-            continue;
-
         ObjectGenerator gen(m_map, m_database, m_rng, m_logOutput);
         gen.generate(tileZone.m_rngZoneSettings,
                      tileZone.m_mainTownFaction,
                      tileZone.m_rewardsFaction,
                      tileZone.m_terrain);
 
-        std::vector<FHPos> cells;
-        for (auto* cell : tileZone.m_innerArea)
-            if (cell->m_pos.m_x > 2)
-                cells.push_back({ cell->m_pos });
-        std::sort(cells.begin(), cells.end());
+        ObjectBundleSet bundleSet;
+        bundleSet.consume(gen, tileZone, m_rng);
 
-        for (auto ptr : gen.m_objects) {
-            FHPos pos = cells[m_rng->gen(cells.size() - 1)];
-            ptr->setPos(pos);
-            ptr->place();
-            auto guardValue = ptr->getGuard();
-            {
+        for (auto& bundle : bundleSet.m_bundles) {
+            //bundle.placeOnMap();
+            //auto guardValue = bundle.m_guard;
+            for (auto& pos : bundle.m_estimatedOccupied) {
+                //m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = tileZone.m_index, .m_valueB = 3 });
+            }
+
+            if (bundle.m_guard) {
                 Guard guard;
-                guard.m_value = guardValue;
-                guard.m_pos   = pos;
-                guard.m_pos.m_y++;
+                guard.m_value = bundle.m_guard;
+                guard.m_pos   = bundle.m_guardAbsPos;
+                //guard.m_pos.m_y++;
                 guard.m_zone = &m_tileZones[0];
                 m_guards.push_back(guard);
             }
-            //m_logOutput << "place '" << ptr->getId() << "' at " << pos.toPrintableString() << '\n';
         }
     }
 

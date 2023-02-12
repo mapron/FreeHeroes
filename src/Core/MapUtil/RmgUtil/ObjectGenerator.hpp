@@ -16,12 +16,23 @@ public:
     struct IObject {
         virtual ~IObject() = default;
 
+        enum class Type
+        {
+            Visitable,
+            Pickable,
+            Joinable,  // monster join
+            Removable, // Prison
+        };
+
         virtual void        setPos(FHPos pos) = 0;
         virtual void        place() const     = 0;
         virtual FHScore     getScore() const  = 0;
         virtual void        disable()         = 0;
         virtual std::string getId() const     = 0;
         virtual int64_t     getGuard() const  = 0;
+        virtual Type        getType() const   = 0;
+
+        virtual Core::LibraryObjectDefConstPtr getDef() const { return nullptr; }
     };
 
     using IObjectPtr = std::shared_ptr<IObject>;
@@ -34,6 +45,15 @@ public:
         virtual size_t     totalActiveRecords() const = 0;
     };
     using IObjectFactoryPtr = std::shared_ptr<IObjectFactory>;
+
+    struct ObjectGroup {
+        std::vector<IObjectPtr> m_objects;
+        int                     m_guardPercent = 100;
+        std::string             m_id;
+        FHScore                 m_targetScore;
+        int64_t                 m_targetScoreTotal = 0;
+        const FHScoreSettings*  m_scoreSettings    = nullptr;
+    };
 
 public:
     ObjectGenerator(FHMap&                        map,
@@ -51,10 +71,12 @@ public:
                   Core::LibraryFactionConstPtr rewardsFaction,
                   Core::LibraryTerrainConstPtr terrain);
 
+    bool generateOneObject(const FHScore& targetScore, FHScore& currentScore, std::vector<IObjectFactoryPtr>& objectFactories, ObjectGroup& group);
+
     static bool correctObjIndex(Core::ObjectDefIndex& defIndex, const Core::ObjectDefMappings& defMapping, Core::LibraryTerrainConstPtr requiredTerrain);
     static bool terrainViable(const Core::ObjectDefMappings& defMapping, Core::LibraryTerrainConstPtr requiredTerrain);
 
-    std::vector<IObjectPtr> m_objects;
+    std::vector<ObjectGroup> m_groups;
 
     template<class T>
     struct AbstractObject;

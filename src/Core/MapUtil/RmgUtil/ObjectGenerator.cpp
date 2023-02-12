@@ -387,7 +387,9 @@ struct RecordBank : public CommonRecord<RecordBank> {
 
 struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
     struct ObjectBank : public AbstractObject<FHBank> {
-        std::string getId() const override { return m_obj.m_id->id + " [" + std::to_string(m_obj.m_guardsVariant + 1) + "]"; }
+        std::string                    getId() const override { return m_obj.m_id->id + " [" + std::to_string(m_obj.m_guardsVariant + 1) + "]"; }
+        Type                           getType() const override { return Type::Visitable; }
+        Core::LibraryObjectDefConstPtr getDef() const override { return m_obj.m_id->objectDefs.get({}); }
     };
 
     ObjectFactoryBank(FHMap&                          map,
@@ -500,6 +502,7 @@ struct RecordArtifact : public CommonRecord<RecordArtifact> {
 
 struct ObjectGenerator::ObjectFactoryArtifact : public AbstractFactory<RecordArtifact> {
     struct ObjectArtifact : public AbstractObjectWithId<FHArtifact> {
+        Type getType() const override { return Type::Pickable; }
     };
 
     ObjectFactoryArtifact(FHMap& map, const FHRngZone::GeneratorArtifact& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng, ArtifactPool* artifactPool)
@@ -552,6 +555,7 @@ struct ObjectGenerator::ObjectFactoryArtifact : public AbstractFactory<RecordArt
 // ---------------------------------------------------------------------------------------
 
 struct ObjectResourcePile : public ObjectGenerator::AbstractObjectWithId<FHResource> {
+    Type getType() const override { return Type::Pickable; }
 };
 
 struct RecordResourcePile : public CommonRecord<RecordResourcePile> {
@@ -600,6 +604,7 @@ struct ObjectGenerator::ObjectFactoryResourcePile : public AbstractFactory<Recor
 
 struct ObjectPandora : public ObjectGenerator::AbstractObject<FHPandora> {
     std::string getId() const override { return m_obj.m_generationId; }
+    Type        getType() const override { return Type::Pickable; }
 };
 
 struct RecordPandora : public CommonRecord<RecordPandora> {
@@ -740,6 +745,9 @@ struct RecordSpellShrine : public CommonRecord<RecordSpellShrine> {
 struct ObjectGenerator::ObjectFactoryShrine : public AbstractFactory<RecordSpellShrine> {
     struct ObjectShrine : public AbstractObject<FHShrine> {
         std::string getId() const override { return "shrine " + this->m_obj.m_spellId->id; }
+
+        Type                           getType() const override { return Type::Visitable; }
+        Core::LibraryObjectDefConstPtr getDef() const override { return m_obj.m_visitableId->objectDefs.get({}); }
     };
 
     ObjectFactoryShrine(FHMap& map, const FHRngZone::GeneratorShrine& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng, SpellPool* spellPool)
@@ -824,6 +832,7 @@ struct RecordSpellScroll : public CommonRecord<RecordSpellScroll> {
 
 struct ObjectGenerator::ObjectFactoryScroll : public AbstractFactory<RecordSpellScroll> {
     struct ObjectScroll : public AbstractObjectWithId<FHArtifact> {
+        Type getType() const override { return Type::Pickable; }
     };
 
     ObjectFactoryScroll(FHMap& map, const FHRngZone::GeneratorScroll& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng, SpellPool* spellPool)
@@ -895,6 +904,8 @@ struct RecordDwelling : public CommonRecord<RecordDwelling> {
 
 struct ObjectGenerator::ObjectFactoryDwelling : public AbstractFactory<RecordDwelling> {
     struct ObjectDwelling : public AbstractObjectWithId<FHDwelling> {
+        Type                           getType() const override { return Type::Visitable; }
+        Core::LibraryObjectDefConstPtr getDef() const override { return m_obj.m_id->objectDefs.get({}); }
     };
 
     ObjectFactoryDwelling(FHMap&                              map,
@@ -983,7 +994,9 @@ struct RecordVisitable : public CommonRecord<RecordVisitable> {
 
 struct ObjectGenerator::ObjectFactoryVisitable : public AbstractFactory<RecordVisitable> {
     struct ObjectVisitable : public AbstractObject<FHVisitable> {
-        std::string getId() const override { return this->m_obj.m_visitableId->id; }
+        std::string                    getId() const override { return this->m_obj.m_visitableId->id; }
+        Type                           getType() const override { return Type::Visitable; }
+        Core::LibraryObjectDefConstPtr getDef() const override { return m_obj.m_visitableId->objectDefs.get({}); }
     };
 
     ObjectFactoryVisitable(FHMap&                               map,
@@ -1059,6 +1072,7 @@ struct RecordSpecialResource : public CommonRecord<RecordSpecialResource> {
 struct ObjectGenerator::ObjectFactorySpecialResource : public AbstractFactory<RecordSpecialResource> {
     struct ObjectSpecialResource : public AbstractObject<FHResource> {
         std::string getId() const override { return this->m_id; }
+        Type        getType() const override { return Type::Pickable; }
         std::string m_id;
     };
 
@@ -1119,7 +1133,9 @@ struct RecordMine : public CommonRecord<RecordMine> {
 
 struct ObjectGenerator::ObjectFactoryMine : public AbstractFactory<RecordMine> {
     struct ObjectMine : public AbstractObject<FHMine> {
-        std::string getId() const override { return "mine." + this->m_obj.m_id->id; }
+        std::string                    getId() const override { return "mine." + this->m_obj.m_id->id; }
+        Type                           getType() const override { return Type::Visitable; }
+        Core::LibraryObjectDefConstPtr getDef() const override { return m_obj.m_id->minesDefs.get({}); }
     };
 
     ObjectFactoryMine(FHMap&                          map,
@@ -1176,60 +1192,6 @@ void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
 {
     static const std::string indentBase("      ");
 
-    auto tryGen = [this](const FHScore& targetScore, FHScore& currentScore, std::vector<IObjectFactoryPtr>& objectFactories) -> bool {
-        static const std::string indent("        ");
-        uint64_t                 totalWeight = 0;
-        for (IObjectFactoryPtr& fac : objectFactories) {
-            totalWeight += fac->totalFreq();
-        }
-        if (!totalWeight)
-            return false;
-
-        const uint64_t rngFreq = m_rng->gen(totalWeight - 1);
-
-        auto isScoreOverflow = [&targetScore](const FHScore& current) {
-            for (const auto& [key, val] : current) {
-                if (!targetScore.contains(key))
-                    return true;
-                const auto targetVal = targetScore.at(key);
-                if (val > targetVal)
-                    return true;
-            }
-            return false;
-        };
-
-        uint64_t indexWeight = 0, baseWeight = 0;
-        for (IObjectFactoryPtr& fac : objectFactories) {
-            indexWeight += fac->totalFreq();
-            if (indexWeight > rngFreq && fac->totalFreq()) {
-                const uint64_t rngFreqForFactory = rngFreq - baseWeight;
-                auto           obj               = fac->make(rngFreqForFactory);
-                if (!obj)
-                    throw std::runtime_error("Object factory failed to make an object!");
-                if (obj->getScore().empty())
-                    throw std::runtime_error("Object '" + obj->getId() + "' has no score!");
-
-                FHScore currentScoreTmp = currentScore + obj->getScore();
-                if (isScoreOverflow(currentScoreTmp)) {
-                    obj->disable();
-                    // m_logOutput << "try disable '" << obj->getId() << "'\n";
-                    return true;
-                }
-                currentScore = currentScoreTmp;
-
-                m_logOutput << indent << "add '" << obj->getId() << "' score=" << obj->getScore() << " guard=" << obj->getGuard() << "; current factory freq=" << fac->totalFreq() << ", active=" << fac->totalActiveRecords() << "\n";
-                //m_logOutput << "Updated score=" << m_currentScore << "\n";
-
-                m_objects.push_back(obj);
-                return true;
-            }
-            baseWeight = indexWeight;
-        }
-
-        assert(false);
-        return false;
-    };
-
     ArtifactPool artifactPool(m_map, m_database, m_rng);
     SpellPool    spellPool(m_map, m_database, m_rng);
 
@@ -1238,12 +1200,29 @@ void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
             m_logOutput << indentBase << scoreId << " is disabled;\n";
             continue;
         }
-        m_logOutput << indentBase << scoreId << " start\n";
-        FHScore currentScore;
         FHScore targetScore;
 
         for (const auto& [key, val] : scoreSettings.m_score)
             targetScore[key] = val.m_target;
+
+        ObjectGroup group;
+        group.m_id               = scoreId;
+        group.m_guardPercent     = scoreSettings.m_guardPercent;
+        group.m_targetScore      = targetScore;
+        group.m_targetScoreTotal = totalScoreValue(targetScore);
+        group.m_scoreSettings    = &scoreSettings;
+        m_groups.push_back(group);
+    }
+
+    std::sort(m_groups.begin(), m_groups.end(), [](const ObjectGroup& l, const ObjectGroup& r) {
+        return l.m_targetScoreTotal > r.m_targetScoreTotal;
+    });
+
+    for (ObjectGroup& group : m_groups) {
+        const auto& scoreSettings = *group.m_scoreSettings;
+
+        m_logOutput << indentBase << group.m_id << " start\n";
+        FHScore currentScore;
 
         std::vector<IObjectFactoryPtr> objectFactories;
         objectFactories.push_back(std::make_shared<ObjectFactoryBank>(m_map, zoneSettings.m_generators.m_banks, scoreSettings, m_database, m_rng, &artifactPool, terrain));
@@ -1257,24 +1236,84 @@ void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
         objectFactories.push_back(std::make_shared<ObjectFactorySpecialResource>(m_map, zoneSettings.m_generators.m_resourcesSpecial, scoreSettings, m_database, m_rng));
         objectFactories.push_back(std::make_shared<ObjectFactoryMine>(m_map, zoneSettings.m_generators.m_mines, scoreSettings, m_database, m_rng));
 
-        for (int i = 0; i < 1000000; i++) {
-            if (!tryGen(targetScore, currentScore, objectFactories)) {
-                m_logOutput << indentBase << scoreId << " finished on [" << i << "] iteration\n";
+        const int iterLimit = 100000;
+        int       i         = 0;
+        for (; i < iterLimit; i++) {
+            if (!generateOneObject(group.m_targetScore, currentScore, objectFactories, group)) {
+                m_logOutput << indentBase << group.m_id << " finished on [" << i << "] iteration\n";
                 break;
             }
         }
-        auto deficitScore   = (targetScore - currentScore);
-        auto targetSum      = totalScoreValue(targetScore);
+        if (i >= iterLimit - 1)
+            throw std::runtime_error("Iteration limit reached.");
+
+        auto deficitScore   = (group.m_targetScore - currentScore);
+        auto targetSum      = group.m_targetScoreTotal;
         auto deficitSum     = totalScoreValue(deficitScore);
         auto allowedDeficit = targetSum * scoreSettings.m_tolerancePercent / 100;
 
-        m_logOutput << indentBase << scoreId << " target score:" << targetScore << "\n";
-        m_logOutput << indentBase << scoreId << " end score:" << currentScore << "\n";
-        m_logOutput << indentBase << scoreId << " deficit score:" << deficitScore << "\n";
-        m_logOutput << indentBase << scoreId << " checking deficit tolerance: " << deficitSum << " <= " << allowedDeficit << "...\n";
+        m_logOutput << indentBase << group.m_id << " target score:" << group.m_targetScore << "\n";
+        m_logOutput << indentBase << group.m_id << " end score:" << currentScore << "\n";
+        m_logOutput << indentBase << group.m_id << " deficit score:" << deficitScore << "\n";
+        m_logOutput << indentBase << group.m_id << " checking deficit tolerance: " << deficitSum << " <= " << allowedDeficit << "...\n";
         if (deficitSum > allowedDeficit)
-            throw std::runtime_error("Deficit score for '" + scoreId + "' exceed tolerance!");
+            throw std::runtime_error("Deficit score for '" + group.m_id + "' exceed tolerance!");
     }
+}
+
+bool ObjectGenerator::generateOneObject(const FHScore& targetScore, FHScore& currentScore, std::vector<IObjectFactoryPtr>& objectFactories, ObjectGroup& group)
+{
+    static const std::string indent("        ");
+    uint64_t                 totalWeight = 0;
+    for (IObjectFactoryPtr& fac : objectFactories) {
+        totalWeight += fac->totalFreq();
+    }
+    if (!totalWeight)
+        return false;
+
+    const uint64_t rngFreq = m_rng->gen(totalWeight - 1);
+
+    auto isScoreOverflow = [&targetScore](const FHScore& current) {
+        for (const auto& [key, val] : current) {
+            if (!targetScore.contains(key))
+                return true;
+            const auto targetVal = targetScore.at(key);
+            if (val > targetVal)
+                return true;
+        }
+        return false;
+    };
+
+    uint64_t indexWeight = 0, baseWeight = 0;
+    for (IObjectFactoryPtr& fac : objectFactories) {
+        indexWeight += fac->totalFreq();
+        if (indexWeight > rngFreq && fac->totalFreq()) {
+            const uint64_t rngFreqForFactory = rngFreq - baseWeight;
+            auto           obj               = fac->make(rngFreqForFactory);
+            if (!obj)
+                throw std::runtime_error("Object factory failed to make an object!");
+            if (obj->getScore().empty())
+                throw std::runtime_error("Object '" + obj->getId() + "' has no score!");
+
+            FHScore currentScoreTmp = currentScore + obj->getScore();
+            if (isScoreOverflow(currentScoreTmp)) {
+                obj->disable();
+                // m_logOutput << "try disable '" << obj->getId() << "'\n";
+                return true;
+            }
+            currentScore = currentScoreTmp;
+
+            m_logOutput << indent << "add '" << obj->getId() << "' score=" << obj->getScore() << " guard=" << obj->getGuard() << "; current factory freq=" << fac->totalFreq() << ", active=" << fac->totalActiveRecords() << "\n";
+            //m_logOutput << "Updated score=" << m_currentScore << "\n";
+
+            group.m_objects.push_back(obj);
+            return true;
+        }
+        baseWeight = indexWeight;
+    }
+
+    assert(false);
+    return false;
 }
 
 bool ObjectGenerator::correctObjIndex(Core::ObjectDefIndex& defIndex, const Core::ObjectDefMappings& defMapping, Core::LibraryTerrainConstPtr requiredTerrain)
