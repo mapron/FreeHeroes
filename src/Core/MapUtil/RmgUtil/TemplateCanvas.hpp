@@ -18,7 +18,8 @@ struct MapCanvas {
     struct Tile {
         FHPos m_pos;
 
-        TileZone* m_zone = nullptr;
+        TileZone* m_zone         = nullptr;
+        size_t    m_segmentIndex = 0;
 
         bool m_exFix = false;
 

@@ -11,7 +11,7 @@
 	"template": {
         "zones" : {
             "Common"  : { 
-                "centerDispersion": {"x": 5 , "y": 5 }, "relativeSizeAvg": 100, "relativeSizeDispersion": 10, "cornerRoads": 3,
+                "centerDispersion": {"x": 5 , "y": 5 }, "relativeSizeAvg": 100, "relativeSizeDispersion": 10, "segmentAreaSize": 250,
                 "towns": [
                     {"town":{"isMain":true, "hasFort":true,"hasCustomBuildings":true,"buildings":["townHall1","fort1","tavern","mageGuild1","t1","t2"],"garisonRmg":[{"levels":[10],"value":1000}]},"playerControlled":true, "useZoneFaction": true}, 
                     {"town":{"garisonRmg":[{"levels":[10],"value":2000},{"levels":[20],"value":1000},{"levels":[30],"value":1000}]}}, 

@@ -8,8 +8,9 @@
 #include <cstdint>
 #include <vector>
 #include <memory>
+#include <set>
 
-#include "../FHTileMap.hpp"
+#include "../FHPos.hpp"
 
 namespace FreeHeroes {
 
@@ -27,20 +28,28 @@ public:
 
     using NodeSet = std::vector<std::shared_ptr<Node>>;
 
-    bool  detectCollision(FHPos coordinates_);
     Node* findNodeOnList(NodeSet& nodes_, FHPos coordinates_);
 
 public:
     AstarGenerator();
-    void           setWorldSize(FHPos worldSize_);
-    CoordinateList findPath(FHPos source_, FHPos target_);
-    void           addCollision(FHPos coordinates_);
-    void           removeCollision(FHPos coordinates_);
-    void           clearCollisions();
+    void setPoints(FHPos source, FHPos target)
+    {
+        m_source = source;
+        m_target = target;
+    }
+    CoordinateList findPath();
+
+    bool isSuccess() const { return m_success; }
+
+    void setNonCollision(std::set<FHPos> nonCollision) { m_nonCollision = std::move(nonCollision); }
 
 private:
-    CoordinateList m_directions, m_collisions;
-    FHPos          m_worldSize;
+    CoordinateList  m_directions;
+    std::set<FHPos> m_nonCollision;
+
+    FHPos m_source;
+    FHPos m_target;
+    bool  m_success{ false };
 };
 
 }

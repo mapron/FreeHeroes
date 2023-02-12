@@ -182,7 +182,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_generators,
     m_guardMin,
     m_guardMax,
-    m_cornerRoads,
+    m_segmentAreaSize,
     m_isNormal)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(

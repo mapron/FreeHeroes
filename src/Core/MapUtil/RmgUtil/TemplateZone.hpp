@@ -27,12 +27,82 @@ struct TileZone {
 
     using TileRegion = std::unordered_set<MapCanvas::Tile*>;
 
+    static void addIf(TileRegion& reg, MapCanvas::Tile* cell, auto&& predicate)
+    {
+        if (!cell)
+            return;
+        if (!predicate(cell))
+            return;
+        reg.insert(cell);
+    }
+
     FHPos m_startTile;
     FHPos m_centroid;
 
-    TileRegion m_innerArea;
-    TileRegion m_innerEdge;   // subset of innerArea;
-    TileRegion m_outsideEdge; // is not subset of inner area.
+    struct Area {
+        TileRegion m_innerArea;
+        TileRegion m_innerEdge;   // subset of innerArea;
+        TileRegion m_outsideEdge; // is not subset of inner area.
+
+        void makeEdgeFromInnerArea()
+        {
+            m_innerEdge = m_innerArea;
+            removeNonInnerFromInnerEdge();
+        }
+        void removeNonInnerFromInnerEdge()
+        {
+            auto edge = m_innerEdge;
+            m_innerEdge.clear();
+            for (MapCanvas::Tile* cell : edge) {
+                if (m_innerArea.contains(cell->m_neighborB)
+                    && m_innerArea.contains(cell->m_neighborT)
+                    && m_innerArea.contains(cell->m_neighborR)
+                    && m_innerArea.contains(cell->m_neighborL))
+                    continue;
+                m_innerEdge.insert(cell);
+            }
+
+            makeOutsideEdge();
+        }
+
+        void makeOutsideEdge()
+        {
+            m_outsideEdge.clear();
+            auto predicate = [this](MapCanvas::Tile* cell) {
+                return cell && !m_innerArea.contains(cell);
+            };
+            for (auto* cell : m_innerEdge) {
+                addIf(m_outsideEdge, cell->m_neighborB, predicate);
+                addIf(m_outsideEdge, cell->m_neighborT, predicate);
+                addIf(m_outsideEdge, cell->m_neighborR, predicate);
+                addIf(m_outsideEdge, cell->m_neighborL, predicate);
+            }
+        }
+
+        void removeEdgeFromInnerArea()
+        {
+            auto inner = m_innerArea;
+            m_innerArea.clear();
+            for (MapCanvas::Tile* cell : inner) {
+                if (m_innerEdge.contains(cell))
+                    continue;
+                m_innerArea.insert(cell);
+            }
+        }
+
+        bool contains(MapCanvas::Tile* cell) const
+        {
+            return m_innerArea.contains(cell) || m_innerEdge.contains(cell);
+        }
+    };
+    Area m_area;
+
+    Area m_innerAreaUsable;
+
+    std::vector<Area> m_innerAreaSegments;
+
+    TileRegion m_innerAreaSegmentsRoads;
+    TileRegion m_placedRoads;
 
     TileRegion m_lastGrowed;
 
@@ -45,7 +115,7 @@ struct TileZone {
 
     int64_t getPlacedArea() const
     {
-        return m_innerArea.size();
+        return m_area.m_innerArea.size();
     }
     int64_t getAreaDeficit() const
     {
@@ -73,15 +143,15 @@ struct TileZone {
 
     void estimateCentroid()
     {
-        m_centroid = makeCentroid(m_innerArea);
+        m_centroid = makeCentroid(m_area.m_innerArea);
     }
 
     void readFromMap()
     {
-        m_innerArea.clear();
-        m_innerArea.insert(m_mapCanvas->m_tileIndex.at(m_centroid));
+        m_area.m_innerArea.clear();
+        m_area.m_innerArea.insert(m_mapCanvas->m_tileIndex.at(m_centroid));
 
-        makeEdgeFromInnerArea();
+        m_area.makeEdgeFromInnerArea();
 
         while (true) {
             const bool growResult = tryGrowOnce([this](MapCanvas::Tile* cell) {
@@ -91,18 +161,18 @@ struct TileZone {
                 break;
 
             for (MapCanvas::Tile* cell : m_lastGrowed) {
-                m_innerEdge.insert(cell);
-                m_innerArea.insert(cell);
+                m_area.m_innerEdge.insert(cell);
+                m_area.m_innerArea.insert(cell);
             }
-            removeNonInnerFromInnerEdge();
+            m_area.removeNonInnerFromInnerEdge();
         }
 
         for (auto& cell : m_mapCanvas->m_tiles) {
-            if (cell.m_zone == this && !m_innerArea.contains(&cell))
+            if (cell.m_zone == this && !m_area.m_innerArea.contains(&cell))
                 cell.m_zone = nullptr;
         }
 
-        for (auto* cell : m_innerArea)
+        for (auto* cell : m_area.m_innerArea)
             cell->m_zone = this;
     }
     void readFromMapIfDirty()
@@ -113,55 +183,11 @@ struct TileZone {
         readFromMap();
     }
 
-    void makeEdgeFromInnerArea()
-    {
-        m_innerEdge = m_innerArea;
-        removeNonInnerFromInnerEdge();
-    }
-    void removeNonInnerFromInnerEdge()
-    {
-        auto edge = m_innerEdge;
-        m_innerEdge.clear();
-        for (MapCanvas::Tile* cell : edge) {
-            if (m_innerArea.contains(cell->m_neighborB)
-                && m_innerArea.contains(cell->m_neighborT)
-                && m_innerArea.contains(cell->m_neighborR)
-                && m_innerArea.contains(cell->m_neighborL))
-                continue;
-            m_innerEdge.insert(cell);
-        }
-
-        makeOutsideEdge();
-    }
-
-    void makeOutsideEdge()
-    {
-        m_outsideEdge.clear();
-        auto predicate = [this](MapCanvas::Tile* cell) {
-            return cell && !m_innerArea.contains(cell);
-        };
-        for (auto* cell : m_innerEdge) {
-            addIf(m_outsideEdge, cell->m_neighborB, predicate);
-            addIf(m_outsideEdge, cell->m_neighborT, predicate);
-            addIf(m_outsideEdge, cell->m_neighborR, predicate);
-            addIf(m_outsideEdge, cell->m_neighborL, predicate);
-        }
-    }
-
-    void addIf(TileRegion& reg, MapCanvas::Tile* cell, auto&& predicate)
-    {
-        if (!cell)
-            return;
-        if (!predicate(cell))
-            return;
-        reg.insert(cell);
-    }
-
     bool tryGrowOnce(auto&& predicate)
     {
         bool result = false;
         m_lastGrowed.clear();
-        for (auto* pos : m_outsideEdge) {
+        for (auto* pos : m_area.m_outsideEdge) {
             if (predicate(pos)) {
                 result = true;
                 m_lastGrowed.insert(pos);
@@ -202,10 +228,10 @@ struct TileZone {
             }
             cell->m_zone = this;
 
-            m_innerEdge.insert(cell);
-            m_innerArea.insert(cell);
+            m_area.m_innerEdge.insert(cell);
+            m_area.m_innerArea.insert(cell);
         }
-        removeNonInnerFromInnerEdge();
+        m_area.removeNonInnerFromInnerEdge();
         return true;
     }
 
@@ -220,10 +246,10 @@ struct TileZone {
         for (MapCanvas::Tile* cell : m_lastGrowed) {
             cell->m_zone = this;
 
-            m_innerEdge.insert(cell);
-            m_innerArea.insert(cell);
+            m_area.m_innerEdge.insert(cell);
+            m_area.m_innerArea.insert(cell);
         }
-        removeNonInnerFromInnerEdge();
+        m_area.removeNonInnerFromInnerEdge();
         return true;
     }
 

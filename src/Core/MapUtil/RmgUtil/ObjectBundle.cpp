@@ -16,13 +16,11 @@ void ObjectBundleSet::consume(const ObjectGenerator&        generated,
                               Core::IRandomGenerator* const rng)
 {
     std::set<FHPos> cells;
-    for (auto* cell : tileZone.m_innerArea)
-        if (cell->m_pos.m_x > 2)
-            cells.insert({ cell->m_pos });
 
-    auto       totalSize      = cells.size();
-    const int  microCellSize  = 100;
-    const auto microCellCount = totalSize / microCellSize;
+    for (auto& seg : tileZone.m_innerAreaSegments) {
+        for (auto* cell : seg.m_innerArea)
+            cells.insert({ cell->m_pos });
+    }
 
     for (const auto& group : generated.m_groups) {
         for (const auto& obj : group.m_objects) {
@@ -39,15 +37,6 @@ void ObjectBundleSet::consume(const ObjectGenerator&        generated,
         i++;
         bundle.placeOnMap(cells, rng);
     }
-
-    /*
-    for (auto ptr : gen.m_objects) {
-        FHPos pos = cells[m_rng->gen(cells.size() - 1)];
-        ptr->setPos(pos);
-        ptr->place();
-        
-        //m_logOutput << "place '" << ptr->getId() << "' at " << pos.toPrintableString() << '\n';
-    }*/
 }
 
 void ObjectBundle::makeGuard(int percent)
@@ -84,17 +73,16 @@ void ObjectBundle::estimateOccupied()
         if (type == ObjectGenerator::IObject::Type::Visitable) {
             auto* def = item.m_obj->getDef();
 
-            FHPos maskSizePos{ (int) def->blockMapPlanar.width - 1, (int) def->blockMapPlanar.height - 1, 0 };
+            const FHPos blockMaskSizePos{ (int) def->blockMapPlanar.width - 1, (int) def->blockMapPlanar.height - 1, 0 };
+            const FHPos visitMaskSizePos{ (int) def->visitMapPlanar.width - 1, (int) def->visitMapPlanar.height - 1, 0 };
 
             for (size_t my = 0; my < def->blockMapPlanar.height; ++my) {
                 for (size_t mx = 0; mx < def->blockMapPlanar.width; ++mx) {
                     if (def->blockMapPlanar.data[my][mx] == 0)
                         continue;
-                    //size_t px = x + mx;
-                    //size_t py = y + my;
                     FHPos maskBitPos{ (int) mx, (int) my, 0 };
 
-                    m_estimatedOccupied.insert(m_absPos - maskSizePos + maskBitPos);
+                    m_estimatedOccupied.insert(m_absPos - blockMaskSizePos + maskBitPos);
                 }
             }
             FHPos mainPos = m_absPos;
@@ -103,7 +91,7 @@ void ObjectBundle::estimateOccupied()
                     if (def->visitMapPlanar.data[my][mx] == 0)
                         continue;
                     FHPos maskBitPos{ (int) mx, (int) my, 0 };
-                    mainPos = m_absPos - maskSizePos + maskBitPos;
+                    mainPos = m_absPos - visitMaskSizePos + maskBitPos;
                 }
             }
             if (m_guard) {

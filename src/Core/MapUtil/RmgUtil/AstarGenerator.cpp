@@ -27,36 +27,15 @@ AstarGenerator::AstarGenerator()
     };
 }
 
-void AstarGenerator::setWorldSize(FHPos worldSize_)
+AstarGenerator::CoordinateList AstarGenerator::findPath()
 {
-    m_worldSize = worldSize_;
-}
+    m_success = false;
 
-void AstarGenerator::addCollision(FHPos coordinates_)
-{
-    m_collisions.push_back(coordinates_);
-}
-
-void AstarGenerator::removeCollision(FHPos coordinates_)
-{
-    auto it = std::find(m_collisions.begin(), m_collisions.end(), coordinates_);
-    if (it != m_collisions.end()) {
-        m_collisions.erase(it);
-    }
-}
-
-void AstarGenerator::clearCollisions()
-{
-    m_collisions.clear();
-}
-
-AstarGenerator::CoordinateList AstarGenerator::findPath(FHPos source, FHPos target)
-{
     std::shared_ptr<Node> current;
     NodeSet               openSet, closedSet;
     openSet.reserve(100);
     closedSet.reserve(100);
-    openSet.push_back(std::make_shared<Node>(source));
+    openSet.push_back(std::make_shared<Node>(m_source));
 
     while (!openSet.empty()) {
         auto current_it = openSet.begin();
@@ -70,7 +49,8 @@ AstarGenerator::CoordinateList AstarGenerator::findPath(FHPos source, FHPos targ
             }
         }
 
-        if (current->m_pos == target) {
+        if (current->m_pos == m_target) {
+            m_success = true;
             break;
         }
 
@@ -79,7 +59,7 @@ AstarGenerator::CoordinateList AstarGenerator::findPath(FHPos source, FHPos targ
 
         for (uint64_t i = 0; i < m_directions.size(); ++i) {
             FHPos newCoordinates(current->m_pos + m_directions[i]);
-            if (detectCollision(newCoordinates) || findNodeOnList(closedSet, newCoordinates)) {
+            if (!m_nonCollision.contains(newCoordinates) || findNodeOnList(closedSet, newCoordinates)) {
                 continue;
             }
 
@@ -89,7 +69,7 @@ AstarGenerator::CoordinateList AstarGenerator::findPath(FHPos source, FHPos targ
             if (successorRaw == nullptr) {
                 auto successor = std::make_shared<Node>(newCoordinates, current.get());
                 successor->m_G = totalCost;
-                successor->m_H = posDistance(successor->m_pos, target) * 10;
+                successor->m_H = posDistance(successor->m_pos, m_target) * 10;
                 openSet.push_back(successor);
             } else if (totalCost < successorRaw->m_G) {
                 successorRaw->m_parent = current.get();
@@ -116,14 +96,6 @@ AstarGenerator::Node* AstarGenerator::findNodeOnList(NodeSet& nodes_, FHPos coor
         }
     }
     return nullptr;
-}
-
-bool AstarGenerator::detectCollision(FHPos coordinates_)
-{
-    if (coordinates_.m_x < 0 || coordinates_.m_x >= m_worldSize.m_x || coordinates_.m_y < 0 || coordinates_.m_y >= m_worldSize.m_y || std::find(m_collisions.begin(), m_collisions.end(), coordinates_) != m_collisions.end()) {
-        return true;
-    }
-    return false;
 }
 
 }

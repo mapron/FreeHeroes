@@ -63,7 +63,7 @@ private:
     Core::LibraryFactionConstPtr getRandomFaction(bool rewardOnly);
     Core::LibraryHeroConstPtr    getRandomHero(Core::LibraryFactionConstPtr faction);
     TileZone&                    findZoneById(const std::string& id);
-    std::vector<FHPos>           aStarPath(MapCanvas::Tile* start, MapCanvas::Tile* end);
+    std::vector<FHPos>           aStarPath(TileZone& zone, MapCanvas::Tile* start, MapCanvas::Tile* end);
     int                          getPossibleCount(Core::LibraryUnitConstPtr unit, int64_t value) const;
 
 private:
