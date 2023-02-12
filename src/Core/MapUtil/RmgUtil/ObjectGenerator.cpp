@@ -67,6 +67,21 @@ void estimateSpellScore(Core::LibrarySpellConstPtr spell, FHScore& score)
     score[attr] = spell->value;
 }
 
+void estimateSpellListScore(const std::vector<Core::LibrarySpellConstPtr>& spells, FHScore& score)
+{
+    for (Core::LibrarySpellConstPtr spell : spells) {
+        FHScore one;
+        estimateSpellScore(spell, one);
+        for (const auto& [attr, value] : one) {
+            score[attr] = std::max(score[attr], value);
+        }
+    }
+    // make sure spell list is worth 150% of maximum value
+    for (auto& [attr, value] : score) {
+        value = value * 3 / 2;
+    }
+}
+
 }
 
 template<class Child>
@@ -243,6 +258,8 @@ public:
     {
         for (auto* spell : database->spells()->records()) {
             if (map.m_disabledSpells.isDisabled(map.m_isWaterMap, spell))
+                continue;
+            if (!spell->isTeachable)
                 continue;
 
             m_spells.push_back(spell);
@@ -575,14 +592,42 @@ struct ObjectPandora : public ObjectGenerator::AbstractObject<FHPandora> {
 
 struct RecordPandora : public CommonRecord<RecordPandora> {
     ObjectPandora m_obj;
+    struct RandomUnit {
+        std::vector<Core::LibraryUnitConstPtr> m_options;
+        int                                    m_value = 0;
+    };
+    using RandomUnitList = std::vector<RandomUnit>;
+
+    RandomUnitList m_unitRewards;
 };
 
 struct ObjectGenerator::ObjectFactoryPandora : public AbstractFactory<RecordPandora> {
-    ObjectFactoryPandora(FHMap& map, const FHRngZone::GeneratorPandora& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng)
+    ObjectFactoryPandora(FHMap&                             map,
+                         const FHRngZone::GeneratorPandora& genSettings,
+                         const FHScoreSettings&             scoreSettings,
+                         const Core::IGameDatabase*         database,
+                         Core::IRandomGenerator* const      rng,
+                         Core::LibraryFactionConstPtr       rewardsFaction)
         : AbstractFactory<RecordPandora>(map, database, rng)
+        , m_rng(rng)
     {
         if (!genSettings.m_isEnabled)
             return;
+
+        std::vector<Core::LibrarySpellConstPtr>  allSpells;
+        std::map<int, Core::LibraryUnitConstPtr> factionUnits;
+
+        for (auto* unit : rewardsFaction->units)
+            factionUnits[unit->level] = unit;
+
+        for (auto* spell : database->spells()->records()) {
+            if (map.m_disabledSpells.isDisabled(map.m_isWaterMap, spell))
+                continue;
+            if (!spell->isTeachable)
+                continue;
+
+            allSpells.push_back(spell);
+        }
 
         for (const auto& [id, value] : genSettings.m_records) {
             ObjectPandora obj;
@@ -590,15 +635,44 @@ struct ObjectGenerator::ObjectFactoryPandora : public AbstractFactory<RecordPand
             obj.m_obj.m_guard        = value.m_guard;
             obj.m_obj.m_reward       = value.m_reward;
             obj.m_obj.m_score        = estimateReward(value.m_reward);
-            auto maxValue            = maxScoreValue(obj.m_obj.m_score);
+            if (!obj.m_obj.m_reward.spells.isDefault()) {
+                auto filteredSpells = obj.m_obj.m_reward.spells.filterPossible(allSpells);
+                if (filteredSpells.empty())
+                    throw std::runtime_error("Pandora '" + id + "' has invalid spell filter!");
+
+                obj.m_obj.m_reward.spells            = {};
+                obj.m_obj.m_reward.spells.onlySpells = filteredSpells;
+
+                estimateSpellListScore(filteredSpells, obj.m_obj.m_score);
+            }
+            auto maxValue = maxScoreValue(obj.m_obj.m_score);
             if (!maxValue)
                 throw std::runtime_error("Pandora '" + id + "' has no valid reward!");
 
             if (obj.m_obj.m_guard == -1)
                 obj.m_obj.m_guard = maxValue * 2;
 
+            bool                          validRandomUnits = true;
+            RecordPandora::RandomUnitList unitRewards;
+            for (auto&& randomUnit : obj.m_obj.m_reward.randomUnits) {
+                std::vector<Core::LibraryUnitConstPtr> options;
+                for (int level : randomUnit.m_levels) {
+                    if (factionUnits.contains(level)) {
+                        options.push_back(factionUnits[level]);
+                    }
+                }
+                if (options.empty()) {
+                    validRandomUnits = false;
+                }
+                unitRewards.push_back(RecordPandora::RandomUnit{ .m_options = std::move(options), .m_value = randomUnit.m_value });
+            }
+            if (!validRandomUnits)
+                continue;
+
+            obj.m_obj.m_reward.randomUnits.clear();
+
             if (scoreSettings.isValidScore(obj.m_obj.m_score))
-                m_records.m_records.push_back(RecordPandora{ .m_obj = std::move(obj) }.setFreq(value.m_frequency));
+                m_records.m_records.push_back(RecordPandora{ .m_obj = std::move(obj), .m_unitRewards = std::move(unitRewards) }.setFreq(value.m_frequency));
             else
                 std::cerr << " --- skip pandora " << id << " = " << obj.m_obj.m_score << "\n";
         }
@@ -615,10 +689,31 @@ struct ObjectGenerator::ObjectFactoryPandora : public AbstractFactory<RecordPand
         obj.m_onDisable   = [this, &record] {
             m_records.onDisable(record);
         };
-        obj.m_map = &m_map;
+        obj.m_map      = &m_map;
+        bool idChanged = false;
+        for (const auto& unitOptions : record.m_unitRewards) {
+            auto  rindex = m_rng->gen(unitOptions.m_options.size() - 1);
+            auto* unit   = unitOptions.m_options[rindex];
+            int   count  = unitOptions.m_value / unit->value;
+            count        = std::max(count, 1);
+            if (!idChanged) {
+                idChanged          = true;
+                auto        up     = unit->level % 10;
+                std::string suffix = "";
+                if (up == 1)
+                    suffix = "u";
+                else if (up > 1)
+                    suffix = "uu";
+                suffix += "-" + std::to_string(count);
+                obj.m_obj.m_generationId += suffix;
+            }
+            obj.m_obj.m_reward.units.push_back({ unit, count });
+        }
 
         return std::make_shared<ObjectPandora>(std::move(obj));
     }
+
+    Core::IRandomGenerator* const m_rng;
 };
 
 // ---------------------------------------------------------------------------------------
@@ -933,7 +1028,7 @@ void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
         objectFactories.push_back(std::make_shared<ObjectFactoryBank>(m_map, zoneSettings.m_generators.m_banks, scoreSettings, m_database, m_rng, &artifactPool));
         objectFactories.push_back(std::make_shared<ObjectFactoryArtifact>(m_map, zoneSettings.m_generators.m_artifacts, scoreSettings, m_database, m_rng, &artifactPool));
         objectFactories.push_back(std::make_shared<ObjectFactoryResourcePile>(m_map, zoneSettings.m_generators.m_resources, scoreSettings, m_database, m_rng));
-        objectFactories.push_back(std::make_shared<ObjectFactoryPandora>(m_map, zoneSettings.m_generators.m_pandoras, scoreSettings, m_database, m_rng));
+        objectFactories.push_back(std::make_shared<ObjectFactoryPandora>(m_map, zoneSettings.m_generators.m_pandoras, scoreSettings, m_database, m_rng, rewardsFaction));
         objectFactories.push_back(std::make_shared<ObjectFactoryShrine>(m_map, zoneSettings.m_generators.m_shrines, scoreSettings, m_database, m_rng, &spellPool));
         objectFactories.push_back(std::make_shared<ObjectFactoryScroll>(m_map, zoneSettings.m_generators.m_scrolls, scoreSettings, m_database, m_rng, &spellPool));
         objectFactories.push_back(std::make_shared<ObjectFactoryDwelling>(m_map, zoneSettings.m_generators.m_dwellings, scoreSettings, m_database, m_rng, mainFaction));

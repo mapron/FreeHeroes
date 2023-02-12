@@ -301,6 +301,7 @@ void FHTemplateProcessor::runZoneTilesInitial()
 
         m_logOutput << m_indent << "zone [" << tileZone.m_id << "] area=" << tileZone.m_absoluteArea
                     << ", radius=" << tileZone.m_absoluteRadius
+                    << ", startTile=" << tileZone.m_startTile.toPrintableString()
                     << ", townFaction=" << tileZone.m_mainTownFaction->id
                     << ", rewardFaction=" << tileZone.m_rewardsFaction->id
                     << ", terrain=" << tileZone.m_terrain->id
@@ -739,9 +740,11 @@ void FHTemplateProcessor::runRoadsPlacement()
 
 void FHTemplateProcessor::runRewards()
 {
+    m_logOutput << m_indent << "RNG TEST:" << m_rng->gen(1000000) << "\n";
     for (auto& tileZone : m_tileZones) {
         if (tileZone.m_rngZoneSettings.m_scoreTargets.empty())
             continue;
+
         ObjectGenerator gen(m_map, m_database, m_rng, m_logOutput);
         gen.generate(tileZone.m_rngZoneSettings,
                      tileZone.m_mainTownFaction,
@@ -1163,6 +1166,10 @@ Core::LibraryHeroConstPtr FHTemplateProcessor::getRandomHero(Core::LibraryFactio
 
     if (heroes.empty())
         return nullptr;
+
+    std::sort(heroes.begin(), heroes.end(), [](Core::LibraryHeroConstPtr l, Core::LibraryHeroConstPtr r) {
+        return l->sortLess(*r);
+    });
 
     auto* hero = heroes[m_rng->gen(heroes.size() - 1)];
     m_heroPool.erase(hero);

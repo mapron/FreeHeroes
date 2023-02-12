@@ -91,16 +91,49 @@
                     "pandoras": {
                         "isEnabled": true,
                         "records": {
-                            "gold5K" : { "frequency": 500 , "reward": {"resources": "5000"}  },
-                            "gold10K": { "frequency": 500 , "reward": {"resources":"10000"}  },
-                            "gold15K": { "frequency": 300 , "reward": {"resources":"15000"}  },
-                            "gold20K": { "frequency": 300 , "reward": {"resources":"20000"}  },
+                            "gold5K"   : { "frequency": 500 , "reward": {"resources": "5000"}  },
+                            "gold7K"   : { "frequency": 500 , "reward": {"resources": "7500"}  },
+                            "gold10K"  : { "frequency": 500 , "reward": {"resources":"10000"}  },
+                            "gold12K"  : { "frequency": 500 , "reward": {"resources":"12500"}  },
+                            "gold15K"  : { "frequency": 300 , "reward": {"resources":"15000"}  },
+                            "gold20K"  : { "frequency": 300 , "reward": {"resources":"20000"}  },
+                            "gold25K"  : { "frequency": 300 , "reward": {"resources":"25000"}  },
                             
-                            "xp4K" : { "frequency": 500 , "reward": {"exp":  4000 }  },
-                            "xp8K" : { "frequency": 500 , "reward": {"exp":  8000 }  },
-                            "xp12K": { "frequency": 300 , "reward": {"exp": 12000 }  },
-                            "xp16K": { "frequency": 300 , "reward": {"exp": 16000 }  },
-                            "xp20K": { "frequency": 300 , "reward": {"exp": 20000 }  }
+                            "xp4K"     : { "frequency": 500 , "reward": {"exp":  4000 }  },
+                            "xp6K"     : { "frequency": 500 , "reward": {"exp":  6000 }  },
+                            "xp8K"     : { "frequency": 500 , "reward": {"exp":  8000 }  },
+                            "xp10K"    : { "frequency": 500 , "reward": {"exp": 10000 }  },
+                            "xp12K"    : { "frequency": 300 , "reward": {"exp": 12000 }  },
+                            "xp16K"    : { "frequency": 300 , "reward": {"exp": 16000 }  },
+                            "xp20K"    : { "frequency": 300 , "reward": {"exp": 20000 }  },
+                            
+                            "sp1"      : { "frequency": 500 , "guard": 10000, "reward": {"spells":  {"levels": [1]    } } },
+                            "sp2"      : { "frequency": 500 , "guard": 15000, "reward": {"spells":  {"levels": [2]    } } },
+                            "sp3"      : { "frequency": 300 , "guard": 20000, "reward": {"spells":  {"levels": [3]    } } },
+                            "sp4"      : { "frequency": 300 , "guard": 30000, "reward": {"spells":  {"levels": [4], "notTags"   : ["control"]    } } },
+                            "sp5"      : { "frequency": 300 , "guard": 40000, "reward": {"spells":  {"levels": [5], "notTags"   : ["control"]    } } },
+                            "spControl": { "frequency": 300 , "guard": 50000, "reward": {"spells":  {                 "tags"    : ["control"]    } } },
+                            "spAir"    : { "frequency": 300 , "guard": 30000, "reward": {"spells":  {"schools": ["air"]   , "notTags"   : ["control"]   } } },
+                            "spEarth"  : { "frequency": 300 , "guard": 30000, "reward": {"spells":  {"schools": ["earth"] , "notTags"   : ["control"]   } } },
+                            "spFire"   : { "frequency": 300 , "guard": 25000, "reward": {"spells":  {"schools": ["fire" ] , "notTags"   : ["control"]   } } },
+                            "spWater"  : { "frequency": 300 , "guard": 20000, "reward": {"spells":  {"schools": ["water"] , "notTags"   : ["control"]   } } },
+                            "spAll"    : { "frequency": 200 , "guard": 70000, "reward": {"spells":  {"all": true   } } },
+                            
+                            "T1"       : { "frequency": 500 , "guard": 10000, "reward": {"randomUnits":  [{"levels":[10, 11, 12],"value":  5000}] }  },
+                            "T2A"      : { "frequency": 300 , "guard": 10000, "reward": {"randomUnits":  [{"levels":[20, 21, 22],"value":  5000}] }  },
+                            "T2B"      : { "frequency": 300 , "guard": 15000, "reward": {"randomUnits":  [{"levels":[20, 21, 22],"value":  7500}] }  },
+                            "T3A"      : { "frequency": 200 , "guard": 15000, "reward": {"randomUnits":  [{"levels":[30, 31, 32],"value":  7500}] }  },
+                            "T3B"      : { "frequency": 200 , "guard": 20000, "reward": {"randomUnits":  [{"levels":[30, 31, 32],"value": 10000}] }  },
+                            "T4A"      : { "frequency": 200 , "guard": 20000, "reward": {"randomUnits":  [{"levels":[40, 41, 42],"value": 10000}] }  },
+                            "T4B"      : { "frequency": 200 , "guard": 25000, "reward": {"randomUnits":  [{"levels":[40, 41, 42],"value": 12500}] }  },
+                            "T5A"      : { "frequency": 200 , "guard": 25000, "reward": {"randomUnits":  [{"levels":[50, 51, 52],"value": 12500}] }  },
+                            "T5B"      : { "frequency": 200 , "guard": 30000, "reward": {"randomUnits":  [{"levels":[50, 51, 52],"value": 15000}] }  },
+                            "T6A"      : { "frequency": 100 , "guard": 40000, "reward": {"randomUnits":  [{"levels":[60, 61    ],"value": 20000}] }  },
+                            "T6B"      : { "frequency": 100 , "guard": 50000, "reward": {"randomUnits":  [{"levels":[60, 61    ],"value": 25000}] }  },
+                            "T7A"      : { "frequency": 100 , "guard":    -1, "reward": {"randomUnits":  [{"levels":[70, 71    ],"value": 30000}] }  },
+                            "T7B"      : { "frequency": 100 , "guard":    -1, "reward": {"randomUnits":  [{"levels":[70, 71    ],"value": 50000}] }  },
+                            "T8"       : { "frequency": 100 , "guard":    -1, "reward": {"randomUnits":  [{"levels":[80        ],"value":200000}] }  }
+
                         }
                     },
                     "shrines": {

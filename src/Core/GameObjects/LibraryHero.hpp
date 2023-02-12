@@ -87,6 +87,16 @@ struct LibraryHero {
     {
         return presentationParams.gender == Presentation::Gender::Male ? heroClass()->presentationParams.adventureSpriteMale : heroClass()->presentationParams.adventureSpriteFemale;
     }
+
+    bool sortLess(const LibraryHero& other) const noexcept
+    {
+        if (faction != other.faction)
+            return faction->generatedOrder < other.faction->generatedOrder;
+
+        if (isWarrior != other.isWarrior)
+            return isWarrior > other.isWarrior;
+        return presentationParams.order < other.presentationParams.order;
+    }
 };
 
 }

@@ -9,6 +9,7 @@
 #include <set>
 #include <string>
 #include <cassert>
+#include <tuple>
 
 #include "TemplateUtils.hpp"
 #include "../FHTileMap.hpp"
@@ -65,11 +66,14 @@ public:
             return intSqrt(diffX * diffX + diffY * diffY);
         }
 
+        constexpr auto asTuple() const noexcept
+        {
+            return std::tie(m_x, m_y);
+        }
+
         constexpr bool operator<(const Point& another) const noexcept
         {
-            if (m_x != another.m_x)
-                return m_x < another.m_x;
-            return m_y < another.m_y;
+            return asTuple() < another.asTuple();
         }
     };
 

@@ -627,12 +627,7 @@ GameDatabase::GameDatabase(const Mernel::PropertyTree& recordObjectMaps)
     }
     // heroes postproc
     std::sort(m_impl->m_heroes.m_unsorted.begin(), m_impl->m_heroes.m_unsorted.end(), [](auto* l, auto* r) {
-        if (l->faction != r->faction)
-            return l->faction->generatedOrder < r->faction->generatedOrder;
-
-        if (l->isWarrior != r->isWarrior)
-            return l->isWarrior > r->isWarrior;
-        return l->presentationParams.order < r->presentationParams.order;
+        return l->sortLess(*r);
     });
     for (auto* hero : m_impl->m_heroes.m_unsorted) {
         m_impl->m_heroes.m_sorted.push_back(hero);
