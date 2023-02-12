@@ -11,13 +11,13 @@
 
 namespace FreeHeroes {
 
-KMeansSegmentation::Cluster* KMeansSegmentation::getNearestClusterId(Point* point)
+KMeansSegmentation::Cluster* KMeansSegmentation::getNearestClusterId(Point& point)
 {
-    int64_t  minDist          = m_clusters[0].getCentroid().getDistance(*point) * 1000 / m_clusters[0].m_radius;
+    int64_t  minDist          = m_clusters[0].getCentroid().getDistance(point) * 1000 / m_clusters[0].m_radius;
     Cluster* nearestClusterId = &m_clusters[0];
 
     for (size_t i = 1; i < m_clusters.size(); i++) {
-        const int64_t dist = m_clusters[i].getCentroid().getDistance(*point) * 1000 / m_clusters[i].m_radius;
+        const int64_t dist = m_clusters[i].getCentroid().getDistance(point) * 1000 / m_clusters[i].m_radius;
         if (dist < minDist) {
             minDist          = dist;
             nearestClusterId = &m_clusters[i];
@@ -36,7 +36,7 @@ void KMeansSegmentation::runIter()
                                    : done)
     for (size_t i = 0, cnt = m_points.size(); i < cnt; i++) {
         Cluster* currentClusterId = m_points[i].getCluster();
-        Cluster* nearestClusterId = getNearestClusterId(&m_points[i]);
+        Cluster* nearestClusterId = getNearestClusterId(m_points[i]);
 
         if (currentClusterId != nearestClusterId) {
             m_points[i].setCluster(nearestClusterId);

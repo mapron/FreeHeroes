@@ -1298,14 +1298,12 @@ bool ObjectGenerator::generateOneObject(const FHScore& targetScore, FHScore& cur
             FHScore currentScoreTmp = currentScore + obj->getScore();
             if (isScoreOverflow(currentScoreTmp)) {
                 obj->disable();
-                // m_logOutput << "try disable '" << obj->getId() << "'\n";
                 return true;
             }
             currentScore = currentScoreTmp;
 
-            m_logOutput << indent << "add '" << obj->getId() << "' score=" << obj->getScore() << " guard=" << obj->getGuard() << "; current factory freq=" << fac->totalFreq() << ", active=" << fac->totalActiveRecords() << "\n";
-            //m_logOutput << "Updated score=" << m_currentScore << "\n";
-
+            //m_logOutput << indent << "add '" << obj->getId() << "' score=" << obj->getScore() << " guard=" << obj->getGuard() << "; current factory freq=" << fac->totalFreq() << ", active=" << fac->totalActiveRecords() << "\n";
+           
             group.m_objects.push_back(obj);
             return true;
         }

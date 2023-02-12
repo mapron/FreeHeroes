@@ -13,22 +13,35 @@ struct TileZone;
 struct ObjectBundle {
     struct Item {
         ObjectGenerator::IObjectPtr m_obj;
-        //FHPos                       m_relativePos;
+        int64_t                     m_guard = 0;
+        FHPos                       m_absPos;
     };
     std::vector<Item> m_items;
-    //FHPos             m_guardRelativePos;
 
     FHPos   m_absPos;
     FHPos   m_guardAbsPos;
     int64_t m_guard = 0;
 
-    std::set<FHPos> m_estimatedOccupied;
+    ObjectGenerator::IObject::Type m_type = ObjectGenerator::IObject::Type::Visitable;
 
-    void makeGuard(int percent);
+    std::set<FHPos> m_estimatedOccupied;
+    std::set<FHPos> m_protectionBorder;
+    std::set<FHPos> m_blurForPassable;
+    std::set<FHPos> m_guardRegion;
+    std::set<FHPos> m_allArea;
+
+    size_t getEstimatedArea() const { return m_allArea.size(); }
+
+    bool m_canPushMore = false;
+
+    void sumGuard();
+    void checkIfCanPushMore();
 
     void estimateOccupied();
 
-    void placeOnMap(std::set<FHPos>& availableCells, Core::IRandomGenerator* const rng);
+    bool placeOnMap(std::set<FHPos>& availableCells, Core::IRandomGenerator* const rng);
+
+    std::string toPrintableString() const;
 };
 
 class ObjectBundleSet {
@@ -37,7 +50,22 @@ public:
                  TileZone&                     tileZone,
                  Core::IRandomGenerator* const rng);
 
-    std::vector<ObjectBundle> m_bundles;
+    std::vector<ObjectBundle> m_bundlesGuarded;
+    std::vector<ObjectBundle> m_bundlesNonGuarded;
+
+    struct BucketItem {
+        ObjectGenerator::IObjectPtr m_obj;
+        int64_t                     m_guard = 0;
+    };
+
+    struct Bucket {
+        std::vector<BucketItem> m_guarded;
+        std::vector<BucketItem> m_nonGuarded;
+    };
+
+    std::map<ObjectGenerator::IObject::Type, Bucket> m_buckets;
+
+    std::set<FHPos> m_cells;
 };
 
 }

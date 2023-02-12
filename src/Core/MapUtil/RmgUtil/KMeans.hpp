@@ -139,7 +139,7 @@ public:
             cluster.removeAllPoints();
     }
 
-    Cluster* getNearestClusterId(Point* point);
+    Cluster* getNearestClusterId(Point& point);
 
     void initClustersByCentroids(const std::vector<size_t>& centroidPointIndexList)
     {

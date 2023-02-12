@@ -206,7 +206,7 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
     }
 
     m_stopAfter = stringToStage(stopAfterStage);
-    //m_stopAfter = Stage::RoadsPlacement;
+    //m_stopAfter = Stage::Rewards;
 
     for (Stage stage : { Stage::ZoneCenterPlacement,
                          Stage::ZoneTilesInitial,
@@ -583,9 +583,13 @@ void FHTemplateProcessor::runBorderRoads()
         if (border.empty()) {
             throw std::runtime_error("No border between '" + connections.m_from + "' and '" + connections.m_to + "'");
         }
+        std::vector<MapCanvas::Tile*> borderVec(border.cbegin(), border.cend());
+        std::sort(borderVec.begin(), borderVec.end(), [](MapCanvas::Tile* l, MapCanvas::Tile* r) {
+            return l->m_pos < r->m_pos;
+        });
         FHPos borderCentroid = TileZone::makeCentroid(border); // switch to k-means when we need more than one connection.
 
-        auto             it   = std::min_element(border.cbegin(), border.cend(), [&borderCentroid](MapCanvas::Tile* l, MapCanvas::Tile* r) {
+        auto             it   = std::min_element(borderVec.cbegin(), borderVec.cend(), [&borderCentroid](MapCanvas::Tile* l, MapCanvas::Tile* r) {
             return posDistance(borderCentroid, l->m_pos) < posDistance(borderCentroid, r->m_pos);
         });
         MapCanvas::Tile* cell = (*it);
@@ -685,7 +689,10 @@ void FHTemplateProcessor::runRoadsPlacement()
             area.makeEdgeFromInnerArea();
             area.removeEdgeFromInnerArea();
 
-            for (auto* cell : area.m_innerEdge) {
+            std::vector<MapCanvas::Tile*> sortedTiles(area.m_innerEdge.cbegin(), area.m_innerEdge.cend());
+            std::sort(sortedTiles.begin(), sortedTiles.end(), [](MapCanvas::Tile* l, MapCanvas::Tile* r) { return l->m_pos < r->m_pos; });
+
+            for (auto* cell : sortedTiles) {
                 cell->m_segmentIndex     = i;
                 bool hasNeighbourInRoads = false;
                 for (MapCanvas::Tile* cellAdj : cell->m_allNeighbours) {
@@ -703,8 +710,13 @@ void FHTemplateProcessor::runRoadsPlacement()
             }
         }
 
+        //m_logOutput << m_indent << "tileZone.m_roadNodes 1=" << tileZone.m_roadNodes.size() << "\n";
+
         for (TileZone::Area& area : tileZone.m_innerAreaSegments) {
-            for (MapCanvas::Tile* cell : area.m_innerEdge) {
+            std::vector<MapCanvas::Tile*> innerEdge(area.m_innerEdge.cbegin(), area.m_innerEdge.cend());
+            std::sort(innerEdge.begin(), innerEdge.end(), [](MapCanvas::Tile* l, MapCanvas::Tile* r) { return l->m_pos < r->m_pos; });
+
+            for (MapCanvas::Tile* cell : innerEdge) {
                 std::set<std::pair<TileZone*, size_t>> neighAreaBorders;
                 if (!cell->m_neighborB || !cell->m_neighborT || !cell->m_neighborL || !cell->m_neighborR)
                     neighAreaBorders.insert(std::pair<TileZone*, size_t>{ nullptr, 0 });
@@ -735,6 +747,8 @@ void FHTemplateProcessor::runRoadsPlacement()
             }
         }
 
+        //m_logOutput << m_indent << "tileZone.m_roadNodes 2=" << tileZone.m_roadNodes.size() << "\n";
+
         //        for (auto* cell : tileZone.m_innerAreaSegmentsRoads) {
         //            m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 3 });
         //        }
@@ -756,7 +770,7 @@ void FHTemplateProcessor::runRoadsPlacement()
             return l->m_pos < r->m_pos;
         });
 
-        std::list<MapCanvas::Tile*> connected;
+        std::vector<MapCanvas::Tile*> connected;
         {
             MapCanvas::Tile* cell = unconnectedRoadNodes.back();
             unconnectedRoadNodes.pop_back();
@@ -767,11 +781,17 @@ void FHTemplateProcessor::runRoadsPlacement()
             MapCanvas::Tile* cell = unconnectedRoadNodes.back();
             unconnectedRoadNodes.pop_back();
 
+            std::sort(connected.begin(), connected.end(), [](MapCanvas::Tile* l, MapCanvas::Tile* r) {
+                return l->m_pos < r->m_pos;
+            });
+
             auto             it      = std::min_element(connected.cbegin(), connected.cend(), [cell](MapCanvas::Tile* l, MapCanvas::Tile* r) {
                 return posDistance(cell->m_pos, l->m_pos) < posDistance(cell->m_pos, r->m_pos);
             });
             MapCanvas::Tile* closest = *it;
             auto             path    = aStarPath(tileZone, cell, closest);
+
+            //m_logOutput << m_indent << "aStarPath=" << tileZone.m_innerAreaSegmentsRoads.size() << ", con=" << connected.size() << ", unc=" << unconnectedRoadNodes.size() << "\n";
 
             connected.push_back(cell);
 
@@ -791,7 +811,7 @@ void FHTemplateProcessor::runRoadsPlacement()
 
 void FHTemplateProcessor::runRewards()
 {
-    m_logOutput << m_indent << "RNG TEST:" << m_rng->gen(1000000) << "\n";
+    m_logOutput << m_indent << "RNG TEST A:" << m_rng->gen(1000000) << "\n";
 
     for (auto& tileZone : m_tileZones) {
         if (tileZone.m_rngZoneSettings.m_scoreTargets.empty())
@@ -806,10 +826,21 @@ void FHTemplateProcessor::runRewards()
         ObjectBundleSet bundleSet;
         bundleSet.consume(gen, tileZone, m_rng);
 
-        for (auto& bundle : bundleSet.m_bundles) {
-            //bundle.placeOnMap();
-            //auto guardValue = bundle.m_guard;
-            //for (auto& pos : bundle.m_estimatedOccupied) {
+        for (size_t i = 0; auto& bundle : bundleSet.m_bundlesGuarded) {
+            i++;
+            if (!bundle.placeOnMap(bundleSet.m_cells, m_rng)) {
+                m_logOutput << m_indent << "g placement failure [" << i << "]: size=" << bundle.getEstimatedArea() << "; " << bundle.toPrintableString() << "\n";
+
+                continue;
+            }
+
+            for (auto pos : bundle.m_protectionBorder) {
+                if (m_mapCanvas.m_tileIndex.contains(pos))
+                    m_mapCanvas.m_needBeBlocked.insert(m_mapCanvas.m_tileIndex.at(pos));
+
+                //m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = tileZone.m_index, .m_valueB = 1 });
+            }
+            //for (auto pos : bundle.m_blurForPassable) {
             //    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = tileZone.m_index, .m_valueB = 3 });
             //}
 
@@ -817,12 +848,22 @@ void FHTemplateProcessor::runRewards()
                 Guard guard;
                 guard.m_value = bundle.m_guard;
                 guard.m_pos   = bundle.m_guardAbsPos;
-                //guard.m_pos.m_y++;
-                guard.m_zone = &m_tileZones[0];
+                guard.m_zone  = &m_tileZones[0];
                 m_guards.push_back(guard);
             }
         }
+
+        for (size_t i = 0; auto& bundle : bundleSet.m_bundlesNonGuarded) {
+            i++;
+            if (!bundle.placeOnMap(bundleSet.m_cells, m_rng)) {
+                m_logOutput << m_indent << "u placement failure [" << i << "]: size=" << bundle.getEstimatedArea() << "; " << bundle.toPrintableString() << "\n";
+
+                continue;
+            }
+        }
     }
+
+    m_logOutput << m_indent << "RNG TEST B:" << m_rng->gen(1000000) << "\n";
 
     auto correctObjIndexPos = [this](const std::string& id, Core::ObjectDefIndex& defIndex, const Core::ObjectDefMappings& defMapping, FHPos pos) {
         Core::LibraryTerrainConstPtr requiredTerrain = m_mapCanvas.m_tileIndex.at(pos)->m_zone->m_terrain;
