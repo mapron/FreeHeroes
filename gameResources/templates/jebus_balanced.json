@@ -199,13 +199,41 @@
 
                 }
             },
-            "Treasure": { "centerDispersion": {"x": 15, "y": 15}, "relativeSizeAvg": 130, "relativeSizeDispersion": 20, "terrain": "sod.terrain.sand",
+            "Treasure": {
+                "base": "Common",
+                "centerDispersion": {"x": 15, "y": 15}, "relativeSizeAvg": 130, "relativeSizeDispersion": 20, "terrain": "sod.terrain.sand",
                 "towns": [
                 {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}, "useZoneFaction": true}, 
                 {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}},
                 {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}},
                 {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}},
-                {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}}]	
+                {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}}],
+                
+                "scoreTargets": {
+                    "High": {
+                        "isEnabled": true,
+                        "tolerancePercent": 15,
+                        "score": {
+                            "Army":           { "target": 150000  , "minSingle": 8000},
+                            "ArtStat":        { "target": 350000  , "minSingle": 5000},
+                            "ArtSupport":     { "target": 400000  , "minSingle": 8000},
+                            "Gold":           { "target": 1000000 , "minSingle": 8000},
+                            "Resource":       { "target": 90000   , "minSingle": 8000},
+                            
+                            "Experience":     { "target": 50000   , "minSingle":  8000},
+                            "SpellOffensive": { "target": 120000  , "minSingle":  5000},
+                            "SpellCommon":    { "target":  80000  , "minSingle":  5000},
+                
+                            "Control":        { "target": 150000  , "minSingle": 25000}
+                        }
+                    },
+                    "Mid": {
+                        "isEnabled": false
+                    },
+                    "Low": {
+                        "isEnabled": false
+                    }
+                }
             },
     
             "P1": { "base": "Common"  , "isNormal": true,  "player": "Red" , "centerAvg": {"x": 10, "y": 10}  },

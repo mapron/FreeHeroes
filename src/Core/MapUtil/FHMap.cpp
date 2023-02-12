@@ -43,11 +43,24 @@ void FHMap::fromJson(PropertyTree data, const Core::IGameDatabase* database)
         for (auto& [key, item] : baseItems) {
             zones.getMap().erase(key);
         }
+        for (auto& [key, item] : baseItems) {
+            if (!item.contains("base"))
+                continue;
+
+            auto baseKey  = item["base"].getScalar().toString();
+            auto baseItem = baseItems.at(baseKey);
+            PropertyTree::mergePatch(baseItem, item);
+
+            item = baseItem;
+        }
+
         for (auto& [key, item] : zones.getMap()) {
             if (!item.contains("base"))
                 continue;
-            auto baseKey = item["base"].getScalar().toString();
-            PropertyTree::mergePatch(item, baseItems.at(baseKey));
+            auto baseKey  = item["base"].getScalar().toString();
+            auto baseItem = baseItems.at(baseKey);
+            PropertyTree::mergePatch(baseItem, item);
+            item = baseItem;
         }
         reader.jsonToValue(data["template"], m_template);
     }

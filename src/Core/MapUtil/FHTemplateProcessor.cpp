@@ -9,6 +9,8 @@
 #include "MernelPlatform/Profiler.hpp"
 
 #include "LibraryPlayer.hpp"
+#include "LibraryMapBank.hpp"
+#include "LibraryDwelling.hpp"
 
 #include "RmgUtil/TemplateUtils.hpp"
 #include "RmgUtil/ObjectGenerator.hpp"
@@ -450,6 +452,7 @@ void FHTemplateProcessor::runZoneTilesRefinement()
     }
 
     m_map.m_tileMapUpdateRequired = true;
+    placeTerrainZones();
 }
 
 void FHTemplateProcessor::runTownsPlacement()
@@ -741,8 +744,12 @@ void FHTemplateProcessor::runRoadsPlacement()
 void FHTemplateProcessor::runRewards()
 {
     m_logOutput << m_indent << "RNG TEST:" << m_rng->gen(1000000) << "\n";
+
     for (auto& tileZone : m_tileZones) {
         if (tileZone.m_rngZoneSettings.m_scoreTargets.empty())
+            continue;
+
+        if (!(tileZone.m_id == "CC" || tileZone.m_id == "P1")) // @todo:
             continue;
 
         ObjectGenerator gen(m_map, m_database, m_rng, m_logOutput);
@@ -772,8 +779,32 @@ void FHTemplateProcessor::runRewards()
             }
             //m_logOutput << "place '" << ptr->getId() << "' at " << pos.toPrintableString() << '\n';
         }
-        break; // @todo:
     }
+
+    auto correctObjIndexPos = [this](const std::string& id, Core::ObjectDefIndex& defIndex, const Core::ObjectDefMappings& defMapping, FHPos pos) {
+        Core::LibraryTerrainConstPtr requiredTerrain = m_mapCanvas.m_tileIndex.at(pos)->m_zone->m_terrain;
+        auto                         old             = defIndex;
+        defIndex.substitution                        = "!!";
+        defIndex.variant                             = "!!";
+        auto result                                  = ObjectGenerator::correctObjIndex(defIndex, defMapping, requiredTerrain);
+        if (defIndex.substitution == "!!" || defIndex.variant == "!!")
+            throw std::runtime_error("Failed to replace '" + id + "' def ('" + old.variant + "','" + old.substitution + "') for '" + requiredTerrain->id + "'");
+
+        //m_logOutput << id << "  ('" << old.variant << "','" << old.substitution << "') "
+        //            << " -> ('" << defIndex.variant << "','" << defIndex.substitution << "') \n";
+        return result;
+    };
+
+    for (auto& obj : m_map.m_objects.m_banks)
+        correctObjIndexPos(obj.m_id->id, obj.m_defIndex, obj.m_id->objectDefs, obj.m_pos);
+    for (auto& obj : m_map.m_objects.m_dwellings)
+        correctObjIndexPos(obj.m_id->id, obj.m_defIndex, obj.m_id->objectDefs, obj.m_pos);
+    for (auto& obj : m_map.m_objects.m_visitables)
+        correctObjIndexPos(obj.m_visitableId->id, obj.m_defIndex, obj.m_visitableId->objectDefs, obj.m_pos);
+    for (auto& obj : m_map.m_objects.m_mines)
+        correctObjIndexPos(obj.m_id->id, obj.m_defIndex, obj.m_id->minesDefs, obj.m_pos);
+    for (auto& obj : m_map.m_objects.m_shrines)
+        correctObjIndexPos(obj.m_visitableId->id, obj.m_defIndex, obj.m_visitableId->objectDefs, obj.m_pos);
 }
 
 void FHTemplateProcessor::runObstacles()
@@ -1097,6 +1128,10 @@ void FHTemplateProcessor::runPlayerInfo()
 
 void FHTemplateProcessor::placeTerrainZones()
 {
+    if (m_terrainPlaced)
+        return;
+    m_terrainPlaced = true;
+
     for (auto& tileZone : m_tileZones) {
         FHZone fhZone;
         fhZone.m_tiles.reserve(tileZone.m_innerArea.size());
@@ -1148,7 +1183,8 @@ void FHTemplateProcessor::placeRoad(std::vector<FHPos> path)
 Core::LibraryFactionConstPtr FHTemplateProcessor::getRandomFaction(bool rewardOnly)
 {
     auto& factions = rewardOnly ? m_rewardFactions : m_playableFactions;
-    return factions[m_rng->genSmall(factions.size() - 1)];
+    auto  result   = factions[m_rng->genSmall(factions.size() - 1)];
+    return result;
 }
 
 Core::LibraryHeroConstPtr FHTemplateProcessor::getRandomHero(Core::LibraryFactionConstPtr faction)
@@ -1220,6 +1256,11 @@ int FHTemplateProcessor::getPossibleCount(Core::LibraryUnitConstPtr unit, int64_
 
     possibleCount = value / unitValue;
     return possibleCount;
+}
+
+bool FHTemplateProcessor::CmpPlayers::operator()(Core::LibraryPlayerConstPtr a, Core::LibraryPlayerConstPtr b) const
+{
+    return a->id < b->id;
 }
 
 }

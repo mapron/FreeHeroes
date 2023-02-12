@@ -390,7 +390,13 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
         std::string getId() const override { return m_obj.m_id->id + " [" + std::to_string(m_obj.m_guardsVariant + 1) + "]"; }
     };
 
-    ObjectFactoryBank(FHMap& map, const FHRngZone::GeneratorBank& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng, ArtifactPool* artifactPool)
+    ObjectFactoryBank(FHMap&                          map,
+                      const FHRngZone::GeneratorBank& genSettings,
+                      const FHScoreSettings&          scoreSettings,
+                      const Core::IGameDatabase*      database,
+                      Core::IRandomGenerator* const   rng,
+                      ArtifactPool*                   artifactPool,
+                      Core::LibraryTerrainConstPtr    terrain)
         : AbstractFactory<RecordBank>(map, database, rng)
         , m_artifactPool(artifactPool)
         , m_scoreSettings(scoreSettings)
@@ -400,6 +406,9 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
 
         for (auto* bank : database->mapBanks()->records()) {
             if (m_map.m_disabledBanks.isDisabled(m_map.m_isWaterMap, bank))
+                continue;
+
+            if (!ObjectGenerator::terrainViable(bank->objectDefs, terrain))
                 continue;
 
             for (int i = 0, sz = (int) bank->variants.size(); i < sz; i++) {
@@ -981,7 +990,8 @@ struct ObjectGenerator::ObjectFactoryVisitable : public AbstractFactory<RecordVi
                            const FHRngZone::GeneratorVisitable& genSettings,
                            const FHScoreSettings&               scoreSettings,
                            const Core::IGameDatabase*           database,
-                           Core::IRandomGenerator* const        rng)
+                           Core::IRandomGenerator* const        rng,
+                           Core::LibraryTerrainConstPtr         terrain)
         : AbstractFactory<RecordVisitable>(map, database, rng)
     {
         if (!genSettings.m_isEnabled)
@@ -989,6 +999,9 @@ struct ObjectGenerator::ObjectFactoryVisitable : public AbstractFactory<RecordVi
 
         for (auto* visitable : database->mapVisitables()->records()) {
             if (visitable->type == Core::LibraryMapVisitable::Type::Invalid)
+                continue;
+
+            if (!ObjectGenerator::terrainViable(visitable->objectDefs, terrain))
                 continue;
 
             RecordVisitable record;
@@ -1119,6 +1132,8 @@ struct ObjectGenerator::ObjectFactoryMine : public AbstractFactory<RecordMine> {
         if (!genSettings.m_isEnabled)
             return;
 
+        auto none = database->players()->find(std::string(Core::LibraryPlayer::s_none));
+
         for (const auto& [_, value] : genSettings.m_records) {
             RecordMine record;
             record.m_obj.m_id = value.m_resourceId;
@@ -1127,6 +1142,7 @@ struct ObjectGenerator::ObjectFactoryMine : public AbstractFactory<RecordMine> {
             auto scoreValue            = value.m_value;
             record.m_frequency         = value.m_frequency;
             record.m_obj.m_guard       = value.m_guard;
+            record.m_obj.m_player      = none;
             record.m_obj.m_score[attr] = scoreValue;
             if (scoreSettings.isValidValue(attr, scoreValue))
                 m_records.m_records.push_back(record);
@@ -1230,14 +1246,14 @@ void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
             targetScore[key] = val.m_target;
 
         std::vector<IObjectFactoryPtr> objectFactories;
-        objectFactories.push_back(std::make_shared<ObjectFactoryBank>(m_map, zoneSettings.m_generators.m_banks, scoreSettings, m_database, m_rng, &artifactPool));
+        objectFactories.push_back(std::make_shared<ObjectFactoryBank>(m_map, zoneSettings.m_generators.m_banks, scoreSettings, m_database, m_rng, &artifactPool, terrain));
         objectFactories.push_back(std::make_shared<ObjectFactoryArtifact>(m_map, zoneSettings.m_generators.m_artifacts, scoreSettings, m_database, m_rng, &artifactPool));
         objectFactories.push_back(std::make_shared<ObjectFactoryResourcePile>(m_map, zoneSettings.m_generators.m_resources, scoreSettings, m_database, m_rng));
         objectFactories.push_back(std::make_shared<ObjectFactoryPandora>(m_map, zoneSettings.m_generators.m_pandoras, scoreSettings, m_database, m_rng, rewardsFaction));
         objectFactories.push_back(std::make_shared<ObjectFactoryShrine>(m_map, zoneSettings.m_generators.m_shrines, scoreSettings, m_database, m_rng, &spellPool));
         objectFactories.push_back(std::make_shared<ObjectFactoryScroll>(m_map, zoneSettings.m_generators.m_scrolls, scoreSettings, m_database, m_rng, &spellPool));
         objectFactories.push_back(std::make_shared<ObjectFactoryDwelling>(m_map, zoneSettings.m_generators.m_dwellings, scoreSettings, m_database, m_rng, mainFaction));
-        objectFactories.push_back(std::make_shared<ObjectFactoryVisitable>(m_map, zoneSettings.m_generators.m_visitables, scoreSettings, m_database, m_rng));
+        objectFactories.push_back(std::make_shared<ObjectFactoryVisitable>(m_map, zoneSettings.m_generators.m_visitables, scoreSettings, m_database, m_rng, terrain));
         objectFactories.push_back(std::make_shared<ObjectFactorySpecialResource>(m_map, zoneSettings.m_generators.m_resourcesSpecial, scoreSettings, m_database, m_rng));
         objectFactories.push_back(std::make_shared<ObjectFactoryMine>(m_map, zoneSettings.m_generators.m_mines, scoreSettings, m_database, m_rng));
 
@@ -1259,6 +1275,32 @@ void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
         if (deficitSum > allowedDeficit)
             throw std::runtime_error("Deficit score for '" + scoreId + "' exceed tolerance!");
     }
+}
+
+bool ObjectGenerator::correctObjIndex(Core::ObjectDefIndex& defIndex, const Core::ObjectDefMappings& defMapping, Core::LibraryTerrainConstPtr requiredTerrain)
+{
+    for (const auto& [variant, defSource] : defMapping.variants) {
+        if (defSource->terrainsSoftCache.contains(requiredTerrain)) {
+            defIndex.variant      = variant;
+            defIndex.substitution = "";
+            return true;
+        }
+
+        for (const auto& [subsitutionId, def] : defSource->substitutions) {
+            if (def->terrainsSoftCache.contains(requiredTerrain)) {
+                defIndex.variant      = variant;
+                defIndex.substitution = subsitutionId;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool ObjectGenerator::terrainViable(const Core::ObjectDefMappings& defMapping, Core::LibraryTerrainConstPtr requiredTerrain)
+{
+    Core::ObjectDefIndex index;
+    return correctObjIndex(index, defMapping, requiredTerrain);
 }
 
 }

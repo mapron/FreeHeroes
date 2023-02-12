@@ -73,8 +73,9 @@ private:
 
     int64_t m_totalRelativeArea = 0;
 
-    Stage m_currentStage = Stage::Invalid;
-    Stage m_stopAfter    = Stage::Invalid;
+    Stage m_currentStage  = Stage::Invalid;
+    Stage m_stopAfter     = Stage::Invalid;
+    bool  m_terrainPlaced = false;
 
     FHMap&                           m_map;
     const Core::IGameDatabase* const m_database;
@@ -111,7 +112,10 @@ private:
 
         bool m_stdStats = false;
     };
-    std::map<Core::LibraryPlayerConstPtr, PlayerInfo> m_playerInfo;
+    struct CmpPlayers {
+        bool operator()(Core::LibraryPlayerConstPtr a, Core::LibraryPlayerConstPtr b) const;
+    };
+    std::map<Core::LibraryPlayerConstPtr, PlayerInfo, CmpPlayers> m_playerInfo;
 
     std::set<Core::LibraryHeroConstPtr> m_heroPool;
 };

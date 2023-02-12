@@ -51,6 +51,9 @@ public:
                   Core::LibraryFactionConstPtr rewardsFaction,
                   Core::LibraryTerrainConstPtr terrain);
 
+    static bool correctObjIndex(Core::ObjectDefIndex& defIndex, const Core::ObjectDefMappings& defMapping, Core::LibraryTerrainConstPtr requiredTerrain);
+    static bool terrainViable(const Core::ObjectDefMappings& defMapping, Core::LibraryTerrainConstPtr requiredTerrain);
+
     std::vector<IObjectPtr> m_objects;
 
     template<class T>
