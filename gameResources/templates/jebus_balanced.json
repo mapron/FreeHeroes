@@ -45,7 +45,7 @@
                             "Experience":     { "target": 50000, "maxSingle": 15000},
                             "SpellOffensive": { "target": 50000, "maxSingle": 15000, "minSingle": 2000},
                             "SpellCommon":    { "target": 50000, "maxSingle": 15000, "minSingle": 2000},
-                            "Misc":           { "target": 50000}
+                            "Misc":           { "target": 30000}
                         },
                         "guardPercent": 80
                     },
@@ -55,8 +55,8 @@
                             "Gold":           { "target": 20000, "maxSingle": 2000},
                             "Experience":     { "target": 20000, "maxSingle": 2000},
                             "Upgrade"   :     { "target": 20000, "maxSingle": 5000},
-                            "ResourceGen":    { "target": 10000},
-                            "SpellAll":       { "target": 50000, "maxSingle": 5000}
+                            "ResourceGen":    { "target": 30000},
+                            "SpellAny":       { "target": 50000, "maxSingle": 5000}
                         },
                         "guardPercent": 0
                     }
@@ -171,6 +171,9 @@
                             "T8"          : { "frequency":  200, "level": 80, "weeks": 2, "castles": 0, "guard": 20000 },
                             "warMachine"  : { "frequency":  200, "level": 90, "weeks": 1, "castles": 0, "guard": 4000  }
                         }
+                    },
+                    "visitables": {
+                        "isEnabled": true
                     }
                 }
             },

@@ -68,6 +68,7 @@ private:
     struct ObjectFactoryScroll;
     struct ObjectFactoryShrine;
     struct ObjectFactoryDwelling;
+    struct ObjectFactoryVisitable;
 
 private:
     FHMap&                           m_map;

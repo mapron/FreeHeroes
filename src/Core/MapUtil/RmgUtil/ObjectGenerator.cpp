@@ -9,6 +9,7 @@
 #include "LibraryMapBank.hpp"
 #include "LibraryDwelling.hpp"
 #include "LibraryPlayer.hpp"
+#include "LibraryMapVisitable.hpp"
 
 #include "ObjectGenerator.hpp"
 
@@ -56,7 +57,7 @@ void estimateArtScore(Core::LibraryArtifactConstPtr art, FHScore& score)
     score[attr] = art->value;
 }
 
-void estimateSpellScore(Core::LibrarySpellConstPtr spell, FHScore& score)
+void estimateSpellScore(Core::LibrarySpellConstPtr spell, FHScore& score, bool asAnySpell)
 {
     auto attr = FHScoreAttr::SpellCommon;
     if (std::find(spell->tags.cbegin(), spell->tags.cend(), Core::LibrarySpell::Tag::Control) != spell->tags.cend())
@@ -64,14 +65,17 @@ void estimateSpellScore(Core::LibrarySpellConstPtr spell, FHScore& score)
     if (spell->type == Core::LibrarySpell::Type::Offensive || spell->type == Core::LibrarySpell::Type::Summon)
         attr = FHScoreAttr::SpellOffensive;
 
-    score[attr] = spell->value;
+    if (asAnySpell)
+        score[FHScoreAttr::SpellAny] = spell->value;
+    else
+        score[attr] = spell->value;
 }
 
-void estimateSpellListScore(const std::vector<Core::LibrarySpellConstPtr>& spells, FHScore& score)
+void estimateSpellListScore(const std::vector<Core::LibrarySpellConstPtr>& spells, FHScore& score, bool asAnySpell)
 {
     for (Core::LibrarySpellConstPtr spell : spells) {
         FHScore one;
-        estimateSpellScore(spell, one);
+        estimateSpellScore(spell, one, asAnySpell);
         for (const auto& [attr, value] : one) {
             score[attr] = std::max(score[attr], value);
         }
@@ -241,13 +245,10 @@ public:
     using SpellSet  = std::set<Core::LibrarySpellConstPtr>;
     using SpellList = std::vector<Core::LibrarySpellConstPtr>;
 
-    static bool okFilter(Core::LibrarySpellConstPtr spell, bool enableFilter, const FHScoreSettings& scoreSettings)
+    static bool okFilter(Core::LibrarySpellConstPtr spell, bool asAnySpell, const FHScoreSettings& scoreSettings)
     {
-        if (!enableFilter)
-            return true;
-
         FHScore score;
-        estimateSpellScore(spell, score);
+        estimateSpellScore(spell, score, asAnySpell);
 
         bool isValid = scoreSettings.isValidScore(score);
         return isValid;
@@ -266,7 +267,7 @@ public:
         }
     }
 
-    Core::LibrarySpellConstPtr make(const Core::SpellFilter& filter, bool enableFilter, const FHScoreSettings& scoreSettings)
+    Core::LibrarySpellConstPtr make(const Core::SpellFilter& filter, bool asAnySpell, const FHScoreSettings& scoreSettings)
     {
         SpellList spellList = filter.filterPossible(m_spells);
         if (spellList.empty())
@@ -274,21 +275,21 @@ public:
 
         SpellSet artSet(spellList.cbegin(), spellList.cend());
         m_pools[artSet].m_spellList = spellList;
-        return m_pools[artSet].make(m_rng, enableFilter, scoreSettings);
+        return m_pools[artSet].make(m_rng, asAnySpell, scoreSettings);
     }
-    bool isEmpty(const Core::SpellFilter& filter, bool enableFilter, const FHScoreSettings& scoreSettings) const
+    bool isEmpty(const Core::SpellFilter& filter, bool asAnySpell, const FHScoreSettings& scoreSettings) const
     {
         SpellList spellList = filter.filterPossible(m_spells);
         if (spellList.empty())
             return true;
 
-        SpellList artListFiltered;
-        for (auto art : spellList) {
-            if (okFilter(art, enableFilter, scoreSettings))
-                artListFiltered.push_back(art);
+        SpellList spellListFiltered;
+        for (auto spell : spellList) {
+            if (okFilter(spell, asAnySpell, scoreSettings))
+                spellListFiltered.push_back(spell);
         }
 
-        return artListFiltered.empty();
+        return spellListFiltered.empty();
     }
 
 private:
@@ -296,14 +297,14 @@ private:
         SpellList m_spellList;
         SpellList m_current;
 
-        Core::LibrarySpellConstPtr make(Core::IRandomGenerator* rng, bool enableFilter, const FHScoreSettings& scoreSettings)
+        Core::LibrarySpellConstPtr make(Core::IRandomGenerator* rng, bool asAnySpell, const FHScoreSettings& scoreSettings)
         {
             bool hasReset = false;
             if (m_current.empty()) {
                 m_current = m_spellList;
                 hasReset  = true;
             }
-            auto art = makeOne(rng, enableFilter, scoreSettings);
+            auto art = makeOne(rng, asAnySpell, scoreSettings);
 
             while (!art) {
                 if (m_current.empty()) {
@@ -312,18 +313,18 @@ private:
                     m_current = m_spellList;
                     hasReset  = true;
                 }
-                art = makeOne(rng, enableFilter, scoreSettings);
+                art = makeOne(rng, asAnySpell, scoreSettings);
             }
 
             return art;
         }
 
-        Core::LibrarySpellConstPtr makeOne(Core::IRandomGenerator* rng, bool enableFilter, const FHScoreSettings& scoreSettings)
+        Core::LibrarySpellConstPtr makeOne(Core::IRandomGenerator* rng, bool asAnySpell, const FHScoreSettings& scoreSettings)
         {
             auto index = rng->gen(m_current.size() - 1);
             auto art   = m_current[index];
             m_current.erase(m_current.begin() + index);
-            if (!okFilter(art, enableFilter, scoreSettings))
+            if (!okFilter(art, asAnySpell, scoreSettings))
                 return nullptr;
 
             return art;
@@ -416,7 +417,7 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
                             artifactRewardIsValid = false;
                     }
                     if (!artifactRewardIsValid) {
-                        std::cerr << "---- art - skipping " << bank->id << " [" << i << "]\n";
+                        //std::cerr << "---- art - skipping " << bank->id << " [" << i << "]\n";
                         continue;
                     }
 
@@ -424,7 +425,7 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
                         const FHScore score = estimateReward(reward);
 
                         if (!scoreSettings.isValidScore(score)) {
-                            std::cerr << "---- res/army - skipping " << bank->id << " [" << i << "]\n";
+                            //std::cerr << "---- res/army - skipping " << bank->id << " [" << i << "]\n";
                             continue;
                         }
                     }
@@ -643,7 +644,7 @@ struct ObjectGenerator::ObjectFactoryPandora : public AbstractFactory<RecordPand
                 obj.m_obj.m_reward.spells            = {};
                 obj.m_obj.m_reward.spells.onlySpells = filteredSpells;
 
-                estimateSpellListScore(filteredSpells, obj.m_obj.m_score);
+                estimateSpellListScore(filteredSpells, obj.m_obj.m_score, false); // @todo: SpellAny variant for magic pandoras.
             }
             auto maxValue = maxScoreValue(obj.m_obj.m_score);
             if (!maxValue)
@@ -673,8 +674,8 @@ struct ObjectGenerator::ObjectFactoryPandora : public AbstractFactory<RecordPand
 
             if (scoreSettings.isValidScore(obj.m_obj.m_score))
                 m_records.m_records.push_back(RecordPandora{ .m_obj = std::move(obj), .m_unitRewards = std::move(unitRewards) }.setFreq(value.m_frequency));
-            else
-                std::cerr << " --- skip pandora " << id << " = " << obj.m_obj.m_score << "\n";
+            //else
+            //    std::cerr << " --- skip pandora " << id << " = " << obj.m_obj.m_score << "\n";
         }
 
         m_records.updateFrequency();
@@ -722,6 +723,7 @@ struct RecordSpellShrine : public CommonRecord<RecordSpellShrine> {
     Core::SpellFilter                 m_filter;
     Core::LibraryMapVisitableConstPtr m_visitableId = nullptr;
     int                               m_guard       = -1;
+    bool                              m_asAnySpell  = false;
 };
 
 struct ObjectGenerator::ObjectFactoryShrine : public AbstractFactory<RecordSpellShrine> {
@@ -753,12 +755,21 @@ struct ObjectGenerator::ObjectFactoryShrine : public AbstractFactory<RecordSpell
         }
 
         for (const auto& [_, value] : genSettings.m_records) {
-            if (m_spellPool->isEmpty(value.m_filter, true, scoreSettings))
-                continue;
+            for (bool asAnySpell : { false, true }) {
+                if (m_spellPool->isEmpty(value.m_filter, asAnySpell, scoreSettings)) {
+                    // std::cerr << "  === skip: " << _ << ", asAny: " << asAnySpell << "\n";
+                    continue;
+                }
 
-            auto rec = RecordSpellShrine{ .m_filter = value.m_filter, .m_visitableId = visitables[value.m_visualLevel], .m_guard = value.m_guard };
+                auto rec = RecordSpellShrine{
+                    .m_filter      = value.m_filter,
+                    .m_visitableId = visitables[value.m_visualLevel],
+                    .m_guard       = value.m_guard,
+                    .m_asAnySpell  = asAnySpell,
+                };
 
-            m_records.m_records.push_back(rec.setFreq(value.m_frequency));
+                m_records.m_records.push_back(rec.setFreq(value.m_frequency));
+            }
         }
 
         m_records.updateFrequency();
@@ -775,11 +786,11 @@ struct ObjectGenerator::ObjectFactoryShrine : public AbstractFactory<RecordSpell
         };
         obj.m_map               = &m_map;
         obj.m_obj.m_visitableId = record.m_visitableId;
-        obj.m_obj.m_spellId     = m_spellPool->make(record.m_filter, true, m_scoreSettings);
+        obj.m_obj.m_spellId     = m_spellPool->make(record.m_filter, record.m_asAnySpell, m_scoreSettings);
 
         assert(obj.m_obj.m_spellId);
 
-        estimateSpellScore(obj.m_obj.m_spellId, obj.m_obj.m_score);
+        estimateSpellScore(obj.m_obj.m_spellId, obj.m_obj.m_score, record.m_asAnySpell);
 
         obj.m_obj.m_guard = record.m_guard;
         if (obj.m_obj.m_guard == -1)
@@ -796,7 +807,8 @@ struct ObjectGenerator::ObjectFactoryShrine : public AbstractFactory<RecordSpell
 
 struct RecordSpellScroll : public CommonRecord<RecordSpellScroll> {
     Core::SpellFilter m_filter;
-    int               m_guard = -1;
+    int               m_guard      = -1;
+    bool              m_asAnySpell = false;
 };
 
 struct ObjectGenerator::ObjectFactoryScroll : public AbstractFactory<RecordSpellScroll> {
@@ -818,12 +830,16 @@ struct ObjectGenerator::ObjectFactoryScroll : public AbstractFactory<RecordSpell
         }
 
         for (const auto& [_, value] : genSettings.m_records) {
-            if (m_spellPool->isEmpty(value.m_filter, true, scoreSettings))
-                continue;
+            for (bool asAnySpell : { false, true }) {
+                if (m_spellPool->isEmpty(value.m_filter, asAnySpell, scoreSettings)) {
+                    // std::cerr << "  === skip: " << _ << ", asAny: " << asAnySpell << "\n";
+                    continue;
+                }
 
-            auto rec = RecordSpellScroll{ .m_filter = value.m_filter, .m_guard = value.m_guard };
+                auto rec = RecordSpellScroll{ .m_filter = value.m_filter, .m_guard = value.m_guard, .m_asAnySpell = asAnySpell };
 
-            m_records.m_records.push_back(rec.setFreq(value.m_frequency));
+                m_records.m_records.push_back(rec.setFreq(value.m_frequency));
+            }
         }
 
         m_records.updateFrequency();
@@ -839,12 +855,12 @@ struct ObjectGenerator::ObjectFactoryScroll : public AbstractFactory<RecordSpell
             m_records.onDisable(record);
         };
         obj.m_map    = &m_map;
-        auto spellId = m_spellPool->make(record.m_filter, true, m_scoreSettings);
+        auto spellId = m_spellPool->make(record.m_filter, record.m_asAnySpell, m_scoreSettings);
         assert(spellId);
         obj.m_obj.m_id = m_scrollMapping.at(spellId);
         assert(obj.m_obj.m_id);
 
-        estimateSpellScore(spellId, obj.m_obj.m_score);
+        estimateSpellScore(spellId, obj.m_obj.m_score, record.m_asAnySpell);
 
         obj.m_obj.m_guard = record.m_guard;
         if (obj.m_obj.m_guard == -1)
@@ -917,7 +933,8 @@ struct ObjectGenerator::ObjectFactoryDwelling : public AbstractFactory<RecordDwe
                     rec.m_guard = scoreValue * 2;
                 }
                 rec.m_frequency = value.m_frequency;
-                m_records.m_records.push_back(rec);
+                if (scoreSettings.isValidValue(FHScoreAttr::Army, scoreValue))
+                    m_records.m_records.push_back(rec);
             }
         }
 
@@ -945,6 +962,74 @@ struct ObjectGenerator::ObjectFactoryDwelling : public AbstractFactory<RecordDwe
     }
 
     Core::LibraryPlayerConstPtr m_none;
+};
+
+// ---------------------------------------------------------------------------------------
+
+struct RecordVisitable : public CommonRecord<RecordVisitable> {
+    FHVisitable m_obj;
+};
+
+struct ObjectGenerator::ObjectFactoryVisitable : public AbstractFactory<RecordVisitable> {
+    struct ObjectVisitable : public AbstractObject<FHVisitable> {
+        std::string getId() const override { return this->m_obj.m_visitableId->id; }
+    };
+
+    ObjectFactoryVisitable(FHMap&                               map,
+                           const FHRngZone::GeneratorVisitable& genSettings,
+                           const FHScoreSettings&               scoreSettings,
+                           const Core::IGameDatabase*           database,
+                           Core::IRandomGenerator* const        rng)
+        : AbstractFactory<RecordVisitable>(map, database, rng)
+    {
+        if (!genSettings.m_isEnabled)
+            return;
+
+        for (auto* visitable : database->mapVisitables()->records()) {
+            if (visitable->type == Core::LibraryMapVisitable::Type::Invalid)
+                continue;
+
+            RecordVisitable record;
+            record.m_obj.m_visitableId = visitable;
+            record.m_frequency         = visitable->frequency;
+            FHScore   score;
+            const int scoreValue = visitable->value;
+            if (!scoreValue)
+                throw std::runtime_error("'" + visitable->id + "' has no valid score!");
+
+            FHScoreAttr attr = FHScoreAttr::Misc;
+            if (visitable->type == Core::LibraryMapVisitable::Type::Upgrade)
+                attr = FHScoreAttr::Upgrade;
+            if (visitable->type == Core::LibraryMapVisitable::Type::Generator)
+                attr = FHScoreAttr::ResourceGen;
+
+            record.m_obj.m_score[attr] = scoreValue;
+
+            record.m_obj.m_guard = scoreValue * 2;
+
+            if (scoreSettings.isValidValue(attr, scoreValue)) {
+                std::cerr << " *** add visitable :" << visitable->id << " = " << record.m_obj.m_score << "\n";
+                m_records.m_records.push_back(record);
+            }
+        }
+
+        m_records.updateFrequency();
+    }
+
+    IObjectPtr make(uint64_t rngFreq) override
+    {
+        const size_t index  = m_records.getFreqIndex(rngFreq);
+        auto&        record = m_records.m_records[index];
+
+        ObjectVisitable obj;
+        obj.m_onDisable = [this, &record] {
+            m_records.onDisable(record);
+        };
+        obj.m_map = &m_map;
+        obj.m_obj = record.m_obj;
+
+        return std::make_shared<ObjectVisitable>(std::move(obj));
+    }
 };
 
 // ---------------------------------------------------------------------------------------
@@ -1032,6 +1117,7 @@ void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
         objectFactories.push_back(std::make_shared<ObjectFactoryShrine>(m_map, zoneSettings.m_generators.m_shrines, scoreSettings, m_database, m_rng, &spellPool));
         objectFactories.push_back(std::make_shared<ObjectFactoryScroll>(m_map, zoneSettings.m_generators.m_scrolls, scoreSettings, m_database, m_rng, &spellPool));
         objectFactories.push_back(std::make_shared<ObjectFactoryDwelling>(m_map, zoneSettings.m_generators.m_dwellings, scoreSettings, m_database, m_rng, mainFaction));
+        objectFactories.push_back(std::make_shared<ObjectFactoryVisitable>(m_map, zoneSettings.m_generators.m_visitables, scoreSettings, m_database, m_rng));
 
         for (int i = 0; i < 1000000; i++) {
             if (!tryGen(targetScore, currentScore, objectFactories)) {

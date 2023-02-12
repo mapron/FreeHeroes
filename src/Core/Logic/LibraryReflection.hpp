@@ -963,10 +963,25 @@ STRUCT_REFLECTION_PAIRED(
 )
 // ------------------------------------------------------------------------------------------
 
-STRUCT_REFLECTION_PAIRED(
+ENUM_REFLECTION_STRINGIFY(
+    LibraryMapVisitable::Type,
+    Invalid,
+
+    Invalid,
+    Upgrade,
+    Exp,
+    ExpGold,
+    Support,
+    Generator
+    )
+
+STRUCT_REFLECTION_STRINGIFY(
     LibraryMapVisitable,
-    "legacyId",                    legacyId,
-    "objectDefs",                  objectDefs
+    legacyId,
+    type,
+    value,
+    frequency,
+    objectDefs
 )
 
 // ------------------------------------------------------------------------------------------

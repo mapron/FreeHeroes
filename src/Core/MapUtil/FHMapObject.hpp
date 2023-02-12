@@ -32,7 +32,7 @@ enum class FHScoreAttr
     Upgrade,
     SpellOffensive,
     SpellCommon,
-    SpellAll,
+    SpellAny,
     Misc,
 };
 using FHScore = std::map<FHScoreAttr, int64_t>;

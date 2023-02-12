@@ -31,7 +31,7 @@ ENUM_REFLECTION_STRINGIFY(
     Upgrade,
     SpellOffensive,
     SpellCommon,
-    SpellAll,
+    SpellAny,
     Misc)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
@@ -126,6 +126,10 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_records)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRngZone::GeneratorVisitable,
+    m_isEnabled)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone::Generators,
     m_banks,
     m_artifacts,
@@ -133,7 +137,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_pandoras,
     m_shrines,
     m_scrolls,
-    m_dwellings)
+    m_dwellings,
+    m_visitables)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone,

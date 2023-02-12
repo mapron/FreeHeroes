@@ -14,8 +14,22 @@
 namespace FreeHeroes::Core {
 
 struct LibraryMapVisitable {
+    enum class Type
+    {
+        Invalid,
+        Upgrade,
+        Exp,
+        ExpGold,
+        Support,
+        Generator,
+    };
+
     int         legacyId = -1;
     std::string id;
+
+    Type type      = Type::Invalid;
+    int  value     = 0;
+    int  frequency = 0;
 
     ObjectDefMappings objectDefs;
 };
