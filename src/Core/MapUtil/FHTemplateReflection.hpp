@@ -50,7 +50,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHScoreSettings,
     m_score,
     m_isEnabled,
-    m_guardPercent)
+    m_guardPercent,
+    m_tolerancePercent)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone::GeneratorBank,
@@ -130,6 +131,30 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_isEnabled)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRngZone::GeneratorSpecialResource::Record,
+    m_specialType,
+    m_frequency,
+    m_guard,
+    m_value)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRngZone::GeneratorSpecialResource,
+    m_isEnabled,
+    m_records)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRngZone::GeneratorMine::Record,
+    m_resourceId,
+    m_frequency,
+    m_guard,
+    m_value)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRngZone::GeneratorMine,
+    m_isEnabled,
+    m_records)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone::Generators,
     m_banks,
     m_artifacts,
@@ -138,7 +163,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_shrines,
     m_scrolls,
     m_dwellings,
-    m_visitables)
+    m_visitables,
+    m_resourcesSpecial,
+    m_mines)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone,
@@ -224,6 +251,10 @@ template<>
 inline constexpr const bool s_isStringMap<FHRngZone::GeneratorShrine::Map>{ true };
 template<>
 inline constexpr const bool s_isStringMap<FHRngZone::GeneratorDwelling::Map>{ true };
+template<>
+inline constexpr const bool s_isStringMap<FHRngZone::GeneratorSpecialResource::Map>{ true };
+template<>
+inline constexpr const bool s_isStringMap<FHRngZone::GeneratorMine::Map>{ true };
 template<>
 inline constexpr const bool s_isStringMap<FHRngZone::ScoreMap>{ true };
 template<>

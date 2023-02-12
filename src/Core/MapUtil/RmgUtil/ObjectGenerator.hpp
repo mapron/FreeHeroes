@@ -69,6 +69,8 @@ private:
     struct ObjectFactoryShrine;
     struct ObjectFactoryDwelling;
     struct ObjectFactoryVisitable;
+    struct ObjectFactorySpecialResource;
+    struct ObjectFactoryMine;
 
 private:
     FHMap&                           m_map;

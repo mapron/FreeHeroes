@@ -20,31 +20,33 @@
                 "scoreTargets": {
                     "High": {
                         "isEnabled": true,
+                        "tolerancePercent": 15,
                         "score": {
                             "Army":           { "target": 50000 , "maxSingle": 20000, "minSingle": 8000},
-                            "ArtStat":        { "target": 50000 , "maxSingle": 20000, "minSingle": 8000},
+                            "ArtStat":        { "target": 50000 , "maxSingle": 20000, "minSingle": 5000},
                             "ArtSupport":     { "target": 50000 , "maxSingle": 30000, "minSingle": 8000},
                             "Gold":           { "target": 150000, "maxSingle": 50000, "minSingle": 8000},
                             "Resource":       { "target": 90000 , "maxSingle": 50000, "minSingle": 8000},
                             
-                            "Experience":     { "target": 50000, "minSingle": 12000},
-                            "SpellOffensive": { "target": 50000, "minSingle": 12000},
-                            "SpellCommon":    { "target": 50000, "minSingle": 12000},
+                            "Experience":     { "target": 50000 , "minSingle":  8000},
+                            "SpellOffensive": { "target": 60000 , "minSingle":  5000},
+                            "SpellCommon":    { "target": 40000 , "minSingle":  5000},
 
                             "Control":        { "target": 100000, "maxSingle": 30000}
                         }
                     },
                     "Mid": {
                         "isEnabled": true,
+                        "tolerancePercent": 8,
                         "score": {
                             "Army":           { "target": 30000, "maxSingle": 10000},
                             "ArtStat":        { "target": 30000, "maxSingle": 10000},
                             "ArtSupport":     { "target": 30000, "maxSingle": 10000},
                             "Gold":           { "target": 50000, "maxSingle": 15000},
                             "Resource":       { "target": 40000, "maxSingle": 15000},
-                            "Experience":     { "target": 50000, "maxSingle": 15000},
-                            "SpellOffensive": { "target": 50000, "maxSingle": 15000, "minSingle": 2000},
-                            "SpellCommon":    { "target": 50000, "maxSingle": 15000, "minSingle": 2000},
+                            "Experience":     { "target": 50000, "maxSingle": 12000},
+                            "SpellOffensive": { "target": 30000, "maxSingle": 6000, "minSingle": 2000},
+                            "SpellCommon":    { "target": 40000, "maxSingle": 6000, "minSingle": 2000},
                             "Misc":           { "target": 30000}
                         },
                         "guardPercent": 80
@@ -174,7 +176,27 @@
                     },
                     "visitables": {
                         "isEnabled": true
+                    },
+                    "resourcesSpecial": {
+                        "isEnabled": true,
+                         "records": {
+                            "treasureChest": { "frequency":  500,  "value": 2000, "guard": 3000, "specialType": "TreasureChest" },
+                            "campfire"     : { "frequency":  500,  "value": 1000, "guard": 1000, "specialType": "CampFire" }
+                         }
+                    },
+                    "mines": {
+                        "isEnabled": true,
+                        "records": {
+                            "gold"    : { "value": 3000, "guard": 6000, "resourceId": "gold"    , "frequency": 1000 },
+                            "wood"    : { "value": 2000, "guard": 1000, "resourceId": "wood"    , "frequency": 1200 },
+                            "ore"     : { "value": 2000, "guard": 1000, "resourceId": "ore"     , "frequency": 1200 },
+                            "mercury" : { "value": 2000, "guard": 3000, "resourceId": "mercury" , "frequency":  500 },
+                            "sulfur"  : { "value": 2000, "guard": 3000, "resourceId": "sulfur"  , "frequency":  500 },
+                            "crystal" : { "value": 2000, "guard": 3000, "resourceId": "crystal" , "frequency":  500 },
+                            "gems"    : { "value": 2000, "guard": 3000, "resourceId": "gems"    , "frequency":  500 }
+                        }
                     }
+
                 }
             },
             "Treasure": { "centerDispersion": {"x": 15, "y": 15}, "relativeSizeAvg": 130, "relativeSizeDispersion": 20, "terrain": "sod.terrain.sand",

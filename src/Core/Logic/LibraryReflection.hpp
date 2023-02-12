@@ -222,6 +222,14 @@ ENUM_REFLECTION_STRINGIFY(
     Common,
     Rare
 )
+ENUM_REFLECTION_STRINGIFY(
+    LibraryResource::SpecialResource,
+    Invalid,
+
+    Invalid,
+    TreasureChest,
+    CampFire
+)
 
 STRUCT_REFLECTION_PAIRED(
     LibraryResource,

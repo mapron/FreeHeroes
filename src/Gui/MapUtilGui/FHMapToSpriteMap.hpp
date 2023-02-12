@@ -10,6 +10,9 @@
 namespace FreeHeroes {
 
 struct FHMap;
+namespace Core {
+class IGameDatabase;
+}
 namespace Gui {
 class IGraphicsLibrary;
 }
@@ -20,7 +23,7 @@ public:
         : m_settings(renderSettings)
     {}
 
-    SpriteMap render(const FHMap& fhMap, const Gui::IGraphicsLibrary* graphicsLibrary) const;
+    SpriteMap render(const FHMap& fhMap, const Gui::IGraphicsLibrary* graphicsLibrary, const Core::IGameDatabase* database) const;
 
 private:
     const SpriteRenderSettings m_settings;

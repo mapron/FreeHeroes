@@ -507,6 +507,8 @@ struct ObjectGenerator::ObjectFactoryArtifact : public AbstractFactory<RecordArt
 
             auto rec = RecordArtifact{ .m_filter = value.m_filter };
 
+            rec.m_attempts = 3;
+
             m_records.m_records.push_back(rec.setFreq(value.m_frequency));
         }
 
@@ -1002,13 +1004,15 @@ struct ObjectGenerator::ObjectFactoryVisitable : public AbstractFactory<RecordVi
                 attr = FHScoreAttr::Upgrade;
             if (visitable->type == Core::LibraryMapVisitable::Type::Generator)
                 attr = FHScoreAttr::ResourceGen;
+            if (visitable->type == Core::LibraryMapVisitable::Type::Exp)
+                attr = FHScoreAttr::Experience;
 
             record.m_obj.m_score[attr] = scoreValue;
 
             record.m_obj.m_guard = scoreValue * 2;
 
             if (scoreSettings.isValidValue(attr, scoreValue)) {
-                std::cerr << " *** add visitable :" << visitable->id << " = " << record.m_obj.m_score << "\n";
+                //std::cerr << " *** add visitable :" << visitable->id << " = " << record.m_obj.m_score << "\n";
                 m_records.m_records.push_back(record);
             }
         }
@@ -1029,6 +1033,121 @@ struct ObjectGenerator::ObjectFactoryVisitable : public AbstractFactory<RecordVi
         obj.m_obj = record.m_obj;
 
         return std::make_shared<ObjectVisitable>(std::move(obj));
+    }
+};
+
+// ---------------------------------------------------------------------------------------
+
+struct RecordSpecialResource : public CommonRecord<RecordSpecialResource> {
+    FHResource  m_obj;
+    std::string m_id;
+};
+
+struct ObjectGenerator::ObjectFactorySpecialResource : public AbstractFactory<RecordSpecialResource> {
+    struct ObjectSpecialResource : public AbstractObject<FHResource> {
+        std::string getId() const override { return this->m_id; }
+        std::string m_id;
+    };
+
+    ObjectFactorySpecialResource(FHMap&                                     map,
+                                 const FHRngZone::GeneratorSpecialResource& genSettings,
+                                 const FHScoreSettings&                     scoreSettings,
+                                 const Core::IGameDatabase*                 database,
+                                 Core::IRandomGenerator* const              rng)
+        : AbstractFactory<RecordSpecialResource>(map, database, rng)
+    {
+        if (!genSettings.m_isEnabled)
+            return;
+
+        for (const auto& [id, value] : genSettings.m_records) {
+            RecordSpecialResource record;
+            record.m_obj.m_specialType = value.m_specialType;
+            FHScoreAttr attr           = FHScoreAttr::Misc;
+            assert(value.m_specialType != Core::LibraryResource::SpecialResource::Invalid);
+            if (value.m_specialType == Core::LibraryResource::SpecialResource::CampFire)
+                attr = FHScoreAttr::Gold;
+            if (value.m_specialType == Core::LibraryResource::SpecialResource::TreasureChest)
+                attr = FHScoreAttr::Experience;
+
+            auto scoreValue            = value.m_value;
+            record.m_id                = id;
+            record.m_frequency         = value.m_frequency;
+            record.m_obj.m_guard       = value.m_guard;
+            record.m_obj.m_score[attr] = scoreValue;
+            if (scoreSettings.isValidValue(attr, scoreValue))
+                m_records.m_records.push_back(record);
+        }
+
+        m_records.updateFrequency();
+    }
+
+    IObjectPtr make(uint64_t rngFreq) override
+    {
+        const size_t index  = m_records.getFreqIndex(rngFreq);
+        auto&        record = m_records.m_records[index];
+
+        ObjectSpecialResource obj;
+        obj.m_onDisable = [this, &record] {
+            m_records.onDisable(record);
+        };
+        obj.m_map = &m_map;
+        obj.m_obj = record.m_obj;
+        obj.m_id  = record.m_id;
+
+        return std::make_shared<ObjectSpecialResource>(std::move(obj));
+    }
+};
+
+// ---------------------------------------------------------------------------------------
+
+struct RecordMine : public CommonRecord<RecordMine> {
+    FHMine m_obj;
+};
+
+struct ObjectGenerator::ObjectFactoryMine : public AbstractFactory<RecordMine> {
+    struct ObjectMine : public AbstractObject<FHMine> {
+        std::string getId() const override { return "mine." + this->m_obj.m_id->id; }
+    };
+
+    ObjectFactoryMine(FHMap&                          map,
+                      const FHRngZone::GeneratorMine& genSettings,
+                      const FHScoreSettings&          scoreSettings,
+                      const Core::IGameDatabase*      database,
+                      Core::IRandomGenerator* const   rng)
+        : AbstractFactory<RecordMine>(map, database, rng)
+    {
+        if (!genSettings.m_isEnabled)
+            return;
+
+        for (const auto& [_, value] : genSettings.m_records) {
+            RecordMine record;
+            record.m_obj.m_id = value.m_resourceId;
+            FHScoreAttr attr  = FHScoreAttr::ResourceGen;
+
+            auto scoreValue            = value.m_value;
+            record.m_frequency         = value.m_frequency;
+            record.m_obj.m_guard       = value.m_guard;
+            record.m_obj.m_score[attr] = scoreValue;
+            if (scoreSettings.isValidValue(attr, scoreValue))
+                m_records.m_records.push_back(record);
+        }
+
+        m_records.updateFrequency();
+    }
+
+    IObjectPtr make(uint64_t rngFreq) override
+    {
+        const size_t index  = m_records.getFreqIndex(rngFreq);
+        auto&        record = m_records.m_records[index];
+
+        ObjectMine obj;
+        obj.m_onDisable = [this, &record] {
+            m_records.onDisable(record);
+        };
+        obj.m_map = &m_map;
+        obj.m_obj = record.m_obj;
+
+        return std::make_shared<ObjectMine>(std::move(obj));
     }
 };
 
@@ -1103,6 +1222,7 @@ void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
             m_logOutput << indentBase << scoreId << " is disabled;\n";
             continue;
         }
+        m_logOutput << indentBase << scoreId << " start\n";
         FHScore currentScore;
         FHScore targetScore;
 
@@ -1118,6 +1238,8 @@ void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
         objectFactories.push_back(std::make_shared<ObjectFactoryScroll>(m_map, zoneSettings.m_generators.m_scrolls, scoreSettings, m_database, m_rng, &spellPool));
         objectFactories.push_back(std::make_shared<ObjectFactoryDwelling>(m_map, zoneSettings.m_generators.m_dwellings, scoreSettings, m_database, m_rng, mainFaction));
         objectFactories.push_back(std::make_shared<ObjectFactoryVisitable>(m_map, zoneSettings.m_generators.m_visitables, scoreSettings, m_database, m_rng));
+        objectFactories.push_back(std::make_shared<ObjectFactorySpecialResource>(m_map, zoneSettings.m_generators.m_resourcesSpecial, scoreSettings, m_database, m_rng));
+        objectFactories.push_back(std::make_shared<ObjectFactoryMine>(m_map, zoneSettings.m_generators.m_mines, scoreSettings, m_database, m_rng));
 
         for (int i = 0; i < 1000000; i++) {
             if (!tryGen(targetScore, currentScore, objectFactories)) {
@@ -1125,10 +1247,17 @@ void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
                 break;
             }
         }
+        auto deficitScore   = (targetScore - currentScore);
+        auto targetSum      = totalScoreValue(targetScore);
+        auto deficitSum     = totalScoreValue(deficitScore);
+        auto allowedDeficit = targetSum * scoreSettings.m_tolerancePercent / 100;
 
         m_logOutput << indentBase << scoreId << " target score:" << targetScore << "\n";
         m_logOutput << indentBase << scoreId << " end score:" << currentScore << "\n";
-        m_logOutput << indentBase << scoreId << " deficit score:" << (targetScore - currentScore) << "\n";
+        m_logOutput << indentBase << scoreId << " deficit score:" << deficitScore << "\n";
+        m_logOutput << indentBase << scoreId << " checking deficit tolerance: " << deficitSum << " <= " << allowedDeficit << "...\n";
+        if (deficitSum > allowedDeficit)
+            throw std::runtime_error("Deficit score for '" + scoreId + "' exceed tolerance!");
     }
 }
 

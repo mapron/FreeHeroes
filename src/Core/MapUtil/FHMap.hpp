@@ -75,17 +75,9 @@ struct FHMine : public FHPlayerControlledObject {
 };
 
 struct FHResource : public FHCommonObject {
-    enum class Type
-    {
-        Resource,
-        TreasureChest,
-        CampFire,
-    };
-    uint32_t                      m_amount = 0;
-    Core::LibraryResourceConstPtr m_id     = nullptr;
-    Type                          m_type   = Type::Resource;
-
-    Core::LibraryMapVisitableConstPtr m_visitableId = nullptr;
+    uint32_t                               m_amount      = 0;
+    Core::LibraryResourceConstPtr          m_id          = nullptr;
+    Core::LibraryResource::SpecialResource m_specialType = Core::LibraryResource::SpecialResource::Invalid;
 
     bool operator==(const FHResource&) const noexcept = default;
 };

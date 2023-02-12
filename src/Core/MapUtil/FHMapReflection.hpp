@@ -23,13 +23,6 @@ ENUM_REFLECTION_STRINGIFY(
     HOTA)
 
 ENUM_REFLECTION_STRINGIFY(
-    FHResource::Type,
-    Resource,
-    Resource,
-    TreasureChest,
-    CampFire)
-
-ENUM_REFLECTION_STRINGIFY(
     FHRandomArtifact::Type,
     Invalid,
     Any,
@@ -109,8 +102,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 
     m_amount,
     m_id,
-    m_type,
-    m_visitableId)
+    m_specialType)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRandomResource,

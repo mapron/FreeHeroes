@@ -23,6 +23,7 @@
 #include "InspectorWidget.hpp"
 #include "MiniMapWidget.hpp"
 #include "MapScene.hpp"
+#include "LibraryModels.hpp"
 
 #include "ViewSettings.hpp"
 
@@ -211,7 +212,7 @@ void MapEditorWidget::load(const std::string& filename)
 void MapEditorWidget::updateMap()
 {
     MapRenderer renderer(m_impl->m_viewSettings.m_renderSettings);
-    m_impl->m_spriteMap = renderer.render(m_impl->m_map, m_graphicsLibrary);
+    m_impl->m_spriteMap = renderer.render(m_impl->m_map, m_graphicsLibrary, m_modelsProvider->database());
 
     m_impl->m_scene->clear();
     m_impl->m_mapSprites.clear();
