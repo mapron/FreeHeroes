@@ -228,8 +228,10 @@ void SpriteMapPainter::paint(QPainter*        painter,
                 font.setPixelSize(8);
                 painter->setFont(font);
                 //
-                if (debugPiece.m_b == 1)
+                if (debugPiece.m_b == 1) {
                     painter->setBrush(Qt::red);
+                    cellRect.adjust(tileSize / 3, tileSize / 3, -tileSize / 3, -tileSize / 3);
+                }
                 if (debugPiece.m_b == 2) {
                     painter->setBrush(QColor(0, 240, 0, 200));
                     cellRect.adjust(tileSize / 6, tileSize / 6, -tileSize / 6, -tileSize / 6);

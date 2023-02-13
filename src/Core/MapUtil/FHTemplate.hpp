@@ -87,8 +87,11 @@ struct FHRngZone {
     std::vector<FHRngZoneTown> m_towns;
     FHPos                      m_centerAvg;
     FHPos                      m_centerDispersion;
-    int                        m_relativeSizeAvg        = 100;
-    int                        m_relativeSizeDispersion = 0;
+
+    int m_relativeSizeAvg        = 100;
+    int m_relativeSizeDispersion = 0;
+    int m_zoneGuardPercent       = 100;
+    int m_zoneGuardDispersion    = 5;
 
     using ScoreMap = std::map<std::string, FHScoreSettings>;
 
@@ -100,6 +103,17 @@ struct FHRngZone {
         bool operator==(const GeneratorCommon&) const noexcept = default;
     };
     struct GeneratorBank : public GeneratorCommon {
+        struct Record {
+            Core::LibraryMapBankConstPtr m_bank      = nullptr;
+            int                          m_frequency = -1;
+            int                          m_guard     = -1;
+            bool                         m_enabled   = true;
+
+            bool operator==(const Record&) const noexcept = default;
+        };
+        using Map = std::map<std::string, Record>;
+        Map m_records;
+
         bool operator==(const GeneratorBank&) const noexcept = default;
     };
     struct GeneratorArtifact : public GeneratorCommon {
@@ -238,8 +252,9 @@ struct FHRngZone {
 
     Generators m_generators;
 
-    int64_t m_guardMin = 0;
-    int64_t m_guardMax = 0;
+    int64_t m_guardMin   = 0;
+    int64_t m_guardMax   = 0;
+    int64_t m_guardBlock = 0;
 
     int m_segmentAreaSize = 250;
 

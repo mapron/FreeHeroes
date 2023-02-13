@@ -767,7 +767,8 @@ ENUM_REFLECTION_PAIRED(LibrarySpell::Tag,
     "lightning"   ,               Lightning,
     "airElem"     ,               AirElem,
     "fireElem"    ,               FireElem,
-    "control"     ,               Control
+    "control"     ,               Control,
+    "offensive"   ,               OffensiveSummon
 )
 ENUM_REFLECTION_PAIRED(LibrarySpell::EndCondition,
     Time,
@@ -873,7 +874,7 @@ STRUCT_REFLECTION_STRINGIFY(
     name,
     rewardIndex,
     guards,
-    frequency)
+    frequencyRel)
 
 STRUCT_REFLECTION_STRINGIFY(
     LibraryMapBank::Presentation,
@@ -892,7 +893,8 @@ STRUCT_REFLECTION_STRINGIFY(
     fieldLayout,
     isWaterContent,
     isEnabledByDefault,
-    guardValue
+    guardValue,
+    frequency
     )
 
 ENUM_REFLECTION_STRINGIFY(LibraryMapObstacle::Type, Invalid,

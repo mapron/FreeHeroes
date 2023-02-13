@@ -35,7 +35,7 @@ struct LibraryMapBank {
         std::string name;
         int         rewardIndex = 0;
         Guards      guards;
-        int         frequency = 300;
+        int         frequencyRel = 300;
     };
     using Variants = std::vector<Variant>;
     Variants variants;
@@ -51,6 +51,7 @@ struct LibraryMapBank {
     bool              isEnabledByDefault = true;
 
     int guardValue = -1;
+    int frequency  = 1000;
 };
 
 }

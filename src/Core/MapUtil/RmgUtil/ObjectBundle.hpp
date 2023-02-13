@@ -18,24 +18,41 @@ struct ObjectBundle {
     };
     std::vector<Item> m_items;
 
+    enum class GuardPosition
+    {
+        TL,
+        T,
+        TR,
+        L,
+        R,
+        BL,
+        B,
+        BR
+    };
+
     FHPos   m_absPos;
     FHPos   m_guardAbsPos;
-    int64_t m_guard = 0;
+    int64_t m_guard         = 0;
+    bool    m_considerBlock = false;
 
-    ObjectGenerator::IObject::Type m_type = ObjectGenerator::IObject::Type::Visitable;
+    ObjectGenerator::IObject::Type m_type          = ObjectGenerator::IObject::Type::Visitable;
+    GuardPosition                  m_guardPosition = GuardPosition::B;
 
     std::set<FHPos> m_estimatedOccupied;
     std::set<FHPos> m_protectionBorder;
+    std::set<FHPos> m_protectionBorder2;
     std::set<FHPos> m_blurForPassable;
     std::set<FHPos> m_guardRegion;
     std::set<FHPos> m_allArea;
+    std::set<FHPos> m_fitArea;
 
-    size_t getEstimatedArea() const { return m_allArea.size(); }
+    size_t getEstimatedArea() const { return m_fitArea.size(); }
 
-    bool m_canPushMore = false;
+    size_t  m_itemLimit   = 0;
+    bool    m_canPushMore = false;
+    int64_t m_targetGuard = 0;
 
     void sumGuard();
-    void checkIfCanPushMore();
 
     void estimateOccupied();
 

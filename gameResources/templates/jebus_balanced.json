@@ -22,9 +22,10 @@
                         "isEnabled": true,
                         "tolerancePercent": 15,
                         "score": {
-                            "Army":           { "target": 50000 , "maxSingle": 20000, "minSingle": 8000},
-                            "ArtStat":        { "target": 50000 , "maxSingle": 20000, "minSingle": 5000},
-                            "ArtSupport":     { "target": 50000 , "maxSingle": 30000, "minSingle": 8000},
+                            "Army":           { "target": 60000 , "maxSingle": 20000, "minSingle": 8000},
+                            "ArmyDwelling":   { "target": 10000 , "maxSingle": 20000, "minSingle": 2000},
+                            "ArtStat":        { "target": 30000 , "maxSingle": 15000, "minSingle": 4000},
+                            "ArtSupport":     { "target": 20000 , "maxSingle": 10000, "minSingle": 4000},
                             "Gold":           { "target": 150000, "maxSingle": 50000, "minSingle": 8000},
                             "Resource":       { "target": 90000 , "maxSingle": 50000, "minSingle": 8000},
                             
@@ -39,21 +40,24 @@
                         "isEnabled": true,
                         "tolerancePercent": 8,
                         "score": {
-                            "Army":           { "target": 30000, "maxSingle": 10000},
-                            "ArtStat":        { "target": 30000, "maxSingle": 10000},
-                            "ArtSupport":     { "target": 30000, "maxSingle": 10000},
-                            "Gold":           { "target": 50000, "maxSingle": 15000},
-                            "Resource":       { "target": 40000, "maxSingle": 15000},
-                            "Experience":     { "target": 50000, "maxSingle": 12000},
+                            "Army":           { "target": 50000, "maxSingle": 12000},
+                            "ArtStat":        { "target": 15000, "maxSingle": 7000, "minSingle": 2500},
+                            "ArtSupport":     { "target": 10000, "maxSingle": 7000, "minSingle": 2500},
+                            "Gold":           { "target1": 50000, "maxSingle": 15000},
+                            "Resource":       { "target1": 40000, "maxSingle": 15000},
+                            "Experience":     { "target1": 50000, "maxSingle": 12000},
                             "SpellOffensive": { "target": 30000, "maxSingle": 6000, "minSingle": 2000},
                             "SpellCommon":    { "target": 40000, "maxSingle": 6000, "minSingle": 2000},
-                            "Misc":           { "target": 30000}
+                            "Support":        { "target": 5000 , "minSingle": 1000}
                         },
                         "guardPercent": 80
                     },
                     "Low": {
                         "isEnabled": true,
                         "score":{
+                            "ArmyDwelling":   { "target": 10000 ,"maxSingle": 2200},
+                            "ArtStat":        { "target": 6000 , "maxSingle": 2400},
+                            "ArtSupport":     { "target": 8000 , "maxSingle": 2400},
                             "Gold":           { "target": 20000, "maxSingle": 2000},
                             "Experience":     { "target": 20000, "maxSingle": 2000},
                             "Upgrade"   :     { "target": 20000, "maxSingle": 5000},
@@ -65,17 +69,22 @@
                 },
                 "guardMin": 4000,
                 "guardMax": 30000,
+                "guardBlock": 20000,
 
                 "generators": {
                     "banks": {"isEnabled": true},
                     "artifacts": {
                         "isEnabled": true,
                         "records": {
-                            "treasure" : { "frequency": 2000, "filter": {"classes": ["treasure"] } },
-                            "minor"    : { "frequency": 1500, "filter": {"classes": ["minor"]    } },
-                            "major"    : { "frequency": 1500, "filter": {"classes": ["major"]    } },
-                            "relic"    : { "frequency": 1000, "filter": {"classes": ["relic"], "notTags": ["control"]    } },
-                            "control"  : { "frequency": 1000, "filter": {"classes": ["relic"], "tags"   : ["control"]    } }
+                            "treasure"     : { "frequency": 2000, "filter": {"classes": ["treasure"], "notTags": ["stats"]               } },
+                            "minor"        : { "frequency": 1500, "filter": {"classes": ["minor"   ], "notTags": ["stats"]               } },
+                            "major"        : { "frequency": 1500, "filter": {"classes": ["major"   ], "notTags": ["stats"]               } },
+                            "relic"        : { "frequency": 1000, "filter": {"classes": ["relic"   ], "notTags": ["stats", "control"]    } },
+                            "treasureStat" : { "frequency": 2000, "filter": {"classes": ["treasure"], "tags"   : ["stats"]               } },
+                            "minorStat"    : { "frequency": 1500, "filter": {"classes": ["minor"   ], "tags"   : ["stats"]               } },
+                            "majorStat"    : { "frequency": 1500, "filter": {"classes": ["major"   ], "tags"   : ["stats"]               } },
+                            "relicStat"    : { "frequency": 1000, "filter": {"classes": ["relic"   ], "tags"   : ["stats"], "notTags": ["control"]    } },
+                            "control"      : { "frequency": 1000, "filter": {"classes": ["relic"   ], "tags"   : ["control"]             } }
                         }
                     },
                     "resources": {
@@ -141,36 +150,46 @@
                     "shrines": {
                         "isEnabled": true,
                         "records": {
-                            "lvl1"     : { "frequency":  500, "visualLevel": 1, "filter": {"levels": [1]    } },
-                            "lvl2"     : { "frequency":  400, "visualLevel": 2, "filter": {"levels": [2]    } },
-                            "lvl3"     : { "frequency":  400, "visualLevel": 3, "filter": {"levels": [3]    } },
-                            "lvl4"     : { "frequency":  300, "visualLevel": 4, "filter": {"levels": [4], "notTags"   : ["control"]    } },
-                            "lvl5"     : { "frequency":  300, "visualLevel": 4, "filter": {"levels": [5], "notTags"   : ["control"]    } },
+                            "lvl1"     : { "frequency":  500, "visualLevel": 1, "filter": {"levels": [1], "notTags"   : ["offensive", "control"]             } },
+                            "lvl2"     : { "frequency":  400, "visualLevel": 2, "filter": {"levels": [2], "notTags"   : ["offensive", "control"]             } },
+                            "lvl3"     : { "frequency":  400, "visualLevel": 3, "filter": {"levels": [3], "notTags"   : ["offensive", "control"]             } },
+                            "lvl4"     : { "frequency":  300, "visualLevel": 4, "filter": {"levels": [4], "notTags"   : ["offensive", "control"]             } },
+                            "lvl5"     : { "frequency":  300, "visualLevel": 4, "filter": {"levels": [5], "notTags"   : ["offensive", "control"]             } },
+                            "lvl1off"  : { "frequency":  500, "visualLevel": 1, "filter": {"levels": [1], "notTags"   : ["control"], "tags": ["offensive"]   } },
+                            "lvl2off"  : { "frequency":  400, "visualLevel": 2, "filter": {"levels": [2], "notTags"   : ["control"], "tags": ["offensive"]   } },
+                            "lvl3off"  : { "frequency":  400, "visualLevel": 3, "filter": {"levels": [3], "notTags"   : ["control"], "tags": ["offensive"]   } },
+                            "lvl4off"  : { "frequency":  300, "visualLevel": 4, "filter": {"levels": [4], "notTags"   : ["control"], "tags": ["offensive"]   } },
+                            "lvl5off"  : { "frequency":  300, "visualLevel": 4, "filter": {"levels": [5], "notTags"   : ["control"], "tags": ["offensive"]   } },
                             "control"  : { "frequency":  200, "visualLevel": 4, "filter": {                 "tags"    : ["control"]    } }
                         }
                     },
                     "scrolls": {
                         "isEnabled": true,
                         "records": {
-                            "lvl1"     : { "frequency":  500, "filter": {"levels": [1]    } },
-                            "lvl2"     : { "frequency":  400, "filter": {"levels": [2]    } },
-                            "lvl3"     : { "frequency":  400, "filter": {"levels": [3]    } },
-                            "lvl4"     : { "frequency":  300, "filter": {"levels": [4], "notTags"   : ["control"]    } },
-                            "lvl5"     : { "frequency":  300, "filter": {"levels": [5], "notTags"   : ["control"]    } },
-                            "control"  : { "frequency":  200, "filter": {                  "tags"   : ["control"]    } }
+                            "lvl1"     : { "frequency":  500,                   "filter": {"levels": [1], "notTags"   : ["offensive", "control"]             } },
+                            "lvl2"     : { "frequency":  400,                   "filter": {"levels": [2], "notTags"   : ["offensive", "control"]             } },
+                            "lvl3"     : { "frequency":  400,                   "filter": {"levels": [3], "notTags"   : ["offensive", "control"]             } },
+                            "lvl4"     : { "frequency":  300,                   "filter": {"levels": [4], "notTags"   : ["offensive", "control"]             } },
+                            "lvl5"     : { "frequency":  300,                   "filter": {"levels": [5], "notTags"   : ["offensive", "control"]             } },
+                            "lvl1off"  : { "frequency":  500,                   "filter": {"levels": [1], "notTags"   : ["control"], "tags": ["offensive"]   } },
+                            "lvl2off"  : { "frequency":  400,                   "filter": {"levels": [2], "notTags"   : ["control"], "tags": ["offensive"]   } },
+                            "lvl3off"  : { "frequency":  400,                   "filter": {"levels": [3], "notTags"   : ["control"], "tags": ["offensive"]   } },
+                            "lvl4off"  : { "frequency":  300,                   "filter": {"levels": [4], "notTags"   : ["control"], "tags": ["offensive"]   } },
+                            "lvl5off"  : { "frequency":  300,                   "filter": {"levels": [5], "notTags"   : ["control"], "tags": ["offensive"]   } },
+                            "control"  : { "frequency":  200,                   "filter": {                 "tags"    : ["control"]    } }
                         }
                     },
                     "dwellings": {
                         "isEnabled": true,
                         "records": {
-                            "T1"          : { "frequency":  500, "level": 10, "weeks": 2, "castles": 1, "guard": 2000  },
-                            "T2"          : { "frequency":  400, "level": 20, "weeks": 2, "castles": 1, "guard": 2000  },
-                            "T3"          : { "frequency":  400, "level": 30, "weeks": 2, "castles": 0, "guard": 3000  },
-                            "T4"          : { "frequency":  400, "level": 40, "weeks": 2, "castles": 0, "guard": 4000  },
-                            "T5"          : { "frequency":  400, "level": 50, "weeks": 2, "castles": 0, "guard": 5000  },
-                            "T6"          : { "frequency":  400, "level": 60, "weeks": 2, "castles": 0, "guard": 8000  },
-                            "T7"          : { "frequency":  400, "level": 70, "weeks": 2, "castles": 0, "guard": 12000 },
-                            "T8"          : { "frequency":  200, "level": 80, "weeks": 2, "castles": 0, "guard": 20000 },
+                            "T1"          : { "frequency":  500, "level": 10, "weeks": 1, "castles": 1, "guard": 2000  },
+                            "T2"          : { "frequency":  400, "level": 20, "weeks": 1, "castles": 1, "guard": 2000  },
+                            "T3"          : { "frequency":  400, "level": 30, "weeks": 1, "castles": 0, "guard": 3000  },
+                            "T4"          : { "frequency":  400, "level": 40, "weeks": 1, "castles": 0, "guard": 4000  },
+                            "T5"          : { "frequency":  400, "level": 50, "weeks": 1, "castles": 0, "guard": 5000  },
+                            "T6"          : { "frequency":  400, "level": 60, "weeks": 1, "castles": 0, "guard": 8000  },
+                            "T7"          : { "frequency":  400, "level": 70, "weeks": 1, "castles": 0, "guard": 12000 },
+                            "T8"          : { "frequency":  200, "level": 80, "weeks": 1, "castles": 0, "guard": 20000 },
                             "warMachine"  : { "frequency":  200, "level": 90, "weeks": 1, "castles": 0, "guard": 4000  }
                         }
                     },
@@ -202,22 +221,37 @@
             "Treasure": {
                 "base": "Common",
                 "centerDispersion": {"x": 15, "y": 15}, "relativeSizeAvg": 130, "relativeSizeDispersion": 20, "terrain": "sod.terrain.sand",
+                "zoneGuardPercent": 150,
                 "towns": [
-                {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}, "useZoneFaction": true}, 
-                {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}},
-                {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}},
-                {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}},
-                {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}}],
+                    {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}, "useZoneFaction": true}, 
+                    {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}},
+                    {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}},
+                    {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}},
+                    {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}}],
+
+                "guardMin": 20000,
+                "guardMax": 150000,
+                "guardBlock": 70000,
+
+                "generators": {
+                    "banks": {
+                        "isEnabled": true,
+                        "records": {
+                            "utopia": {"bank": "sod.map.utopia", "frequency": 2000, "guard": 30000 }
+                        }
+                    }
+                },
                 
                 "scoreTargets": {
                     "High": {
                         "isEnabled": true,
                         "tolerancePercent": 15,
                         "score": {
-                            "Army":           { "target": 150000  , "minSingle": 8000},
-                            "ArtStat":        { "target": 350000  , "minSingle": 5000},
-                            "ArtSupport":     { "target": 400000  , "minSingle": 8000},
-                            "Gold":           { "target": 1000000 , "minSingle": 8000},
+                            "Army":           { "target": 200000  , "minSingle": 3000},
+                            "ArmyDwelling":   { "target": 20000   , "minSingle": 2500},
+                            "ArtStat":        { "target": 250000  , "minSingle": 5000},
+                            "ArtSupport":     { "target": 200000  , "minSingle": 8000},
+                            "Gold":           { "target": 300000  , "minSingle": 8000},
                             "Resource":       { "target": 90000   , "minSingle": 8000},
                             
                             "Experience":     { "target": 50000   , "minSingle":  8000},

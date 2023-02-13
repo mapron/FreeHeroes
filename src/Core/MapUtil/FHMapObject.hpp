@@ -22,6 +22,7 @@ enum class FHScoreAttr
     Invalid,
 
     Army,
+    ArmyDwelling,
     ArtStat,
     ArtSupport,
     Gold,
@@ -33,7 +34,7 @@ enum class FHScoreAttr
     SpellOffensive,
     SpellCommon,
     SpellAny,
-    Misc,
+    Support,
 };
 using FHScore = std::map<FHScoreAttr, int64_t>;
 

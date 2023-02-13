@@ -21,6 +21,7 @@ ENUM_REFLECTION_STRINGIFY(
 
     Invalid,
     Army,
+    ArmyDwelling,
     ArtStat,
     ArtSupport,
     Gold,
@@ -32,7 +33,7 @@ ENUM_REFLECTION_STRINGIFY(
     SpellOffensive,
     SpellCommon,
     SpellAny,
-    Misc)
+    Support)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZoneTown,
@@ -54,8 +55,16 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_tolerancePercent)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRngZone::GeneratorBank::Record,
+    m_frequency,
+    m_guard,
+    m_enabled,
+    m_bank)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone::GeneratorBank,
-    m_isEnabled)
+    m_isEnabled,
+    m_records)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone::GeneratorArtifact::Record,
@@ -178,10 +187,13 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_centerDispersion,
     m_relativeSizeAvg,
     m_relativeSizeDispersion,
+    m_zoneGuardPercent,
+    m_zoneGuardDispersion,
     m_scoreTargets,
     m_generators,
     m_guardMin,
     m_guardMax,
+    m_guardBlock,
     m_segmentAreaSize,
     m_isNormal)
 
@@ -239,6 +251,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_stdSkillsWarrior,
     m_stdSkillsMage)
 
+template<>
+inline constexpr const bool s_isStringMap<FHRngZone::GeneratorBank::Map>{ true };
 template<>
 inline constexpr const bool s_isStringMap<FHRngZone::GeneratorArtifact::Map>{ true };
 template<>

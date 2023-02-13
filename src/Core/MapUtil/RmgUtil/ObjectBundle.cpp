@@ -14,6 +14,17 @@ namespace FreeHeroes {
 
 namespace {
 
+const std::vector<ObjectBundle::GuardPosition> g_allPositions{
+    ObjectBundle::GuardPosition::TL,
+    ObjectBundle::GuardPosition::T,
+    ObjectBundle::GuardPosition::TR,
+    ObjectBundle::GuardPosition::L,
+    ObjectBundle::GuardPosition::R,
+    ObjectBundle::GuardPosition::BL,
+    ObjectBundle::GuardPosition::B,
+    ObjectBundle::GuardPosition::BR
+};
+
 // clang-format off
 const std::vector<FHPos> g_deltasToTry{ 
     FHPos{}, 
@@ -28,6 +39,7 @@ std::set<FHPos> blurSet(const std::set<FHPos>& source, bool diag, bool excludeOr
 {
     std::set<FHPos> result;
     for (auto pos : source) {
+        result.insert(pos);
         result.insert(pos + FHPos{ -1, 0 });
         result.insert(pos + FHPos{ +1, 0 });
         result.insert(pos + FHPos{ 0, -1 });
@@ -76,11 +88,18 @@ void ObjectBundleSet::consume(const ObjectGenerator&        generated,
         }
     }
 
-    auto makeNewTargetGuard = [rng, &tileZone]() {
-        int64_t min         = tileZone.m_rngZoneSettings.m_guardMin;
-        int64_t max         = tileZone.m_rngZoneSettings.m_guardMax;
-        int64_t targetGuard = min + rng->gen(max - min);
-        return targetGuard;
+    auto makeNewObjectBundle = [rng, &tileZone](ObjectGenerator::IObject::Type type) -> ObjectBundle {
+        ObjectBundle obj;
+        int64_t      min  = tileZone.m_rngZoneSettings.m_guardMin;
+        int64_t      max  = tileZone.m_rngZoneSettings.m_guardMax;
+        obj.m_targetGuard = min + rng->gen(max - min);
+        if (type == ObjectGenerator::IObject::Type::Pickable)
+            obj.m_itemLimit = 1 + rng->genSmall(3);
+
+        obj.m_type          = type;
+        obj.m_guardPosition = g_allPositions[rng->genSmall(g_allPositions.size() - 1)];
+
+        return obj;
     };
 
     for (const auto& [type, bucket] : m_buckets) {
@@ -88,29 +107,30 @@ void ObjectBundleSet::consume(const ObjectGenerator&        generated,
             ObjectBundle bundleNonGuarded;
             bundleNonGuarded.m_items.push_back(ObjectBundle::Item{ .m_obj = item.m_obj });
             bundleNonGuarded.m_type = type;
-
+            bundleNonGuarded.estimateOccupied();
             m_bundlesNonGuarded.push_back(std::move(bundleNonGuarded));
         }
 
-        ObjectBundle bundleGuarded;
-        bundleGuarded.m_type = type;
-        int64_t targetGuard  = makeNewTargetGuard();
+        ObjectBundle bundleGuarded = makeNewObjectBundle(type);
 
-        auto pushIfNeeded = [this, &bundleGuarded, &targetGuard, &makeNewTargetGuard](bool force) {
+        auto pushIfNeeded = [this, &tileZone, &bundleGuarded, &makeNewObjectBundle](bool force) {
             bundleGuarded.sumGuard();
-            if (!force && bundleGuarded.m_guard < targetGuard) {
-                if (bundleGuarded.m_canPushMore)
+            bundleGuarded.m_considerBlock = bundleGuarded.m_guard > tileZone.m_rngZoneSettings.m_guardBlock;
+
+            if (!force && bundleGuarded.m_guard < bundleGuarded.m_targetGuard) {
+                if (bundleGuarded.m_items.size() < bundleGuarded.m_itemLimit)
                     return;
             }
+            if (!bundleGuarded.m_items.size())
+                return;
 
+            bundleGuarded.estimateOccupied();
             m_bundlesGuarded.push_back(bundleGuarded);
-            bundleGuarded.m_items.clear();
-            targetGuard = makeNewTargetGuard();
+            bundleGuarded = makeNewObjectBundle(bundleGuarded.m_type);
         };
 
         for (const auto& item : bucket.m_guarded) {
             bundleGuarded.m_items.push_back(ObjectBundle::Item{ .m_obj = item.m_obj, .m_guard = item.m_guard });
-            bundleGuarded.checkIfCanPushMore();
             pushIfNeeded(false);
         }
         pushIfNeeded(true);
@@ -131,36 +151,62 @@ void ObjectBundle::sumGuard()
         m_guard += item.m_guard;
 }
 
-void ObjectBundle::checkIfCanPushMore()
-{
-    m_canPushMore = false;
-    if (m_type == ObjectGenerator::IObject::Type::Pickable) {
-        m_canPushMore = m_items.size() < 4;
-    }
-}
-
 void ObjectBundle::estimateOccupied()
 {
     m_estimatedOccupied.clear();
     m_protectionBorder.clear();
     m_blurForPassable.clear();
     m_allArea.clear();
+    m_fitArea.clear();
     m_guardRegion.clear();
 
     if (m_type == ObjectGenerator::IObject::Type::Pickable) {
+        size_t       itemCount      = m_items.size();
+        const size_t maxRowSize     = 2;
+        const size_t itemRectHeight = (itemCount + maxRowSize - 1) / maxRowSize;
+        const size_t itemRectWidth  = std::min(maxRowSize, itemCount);
         for (size_t index = 0; auto& item : m_items) {
             auto pos = m_absPos;
-            pos.m_y -= index / 2;
-            pos.m_x -= index % 2;
+            pos.m_y -= index / itemRectWidth;
+            pos.m_x -= index % itemRectWidth;
             m_estimatedOccupied.insert(pos);
             item.m_absPos = pos;
             index++;
         }
-        auto protection = blurSet(m_estimatedOccupied, true);
 
         if (m_guard) {
-            m_guardAbsPos = m_absPos;
-            m_guardAbsPos.m_y++;
+            auto protection     = blurSet(m_estimatedOccupied, true);
+            m_protectionBorder2 = protection;
+            m_guardAbsPos       = m_absPos;
+
+            if (m_guardPosition == GuardPosition::B) {
+                m_guardAbsPos.m_y++;
+            }
+            if (m_guardPosition == GuardPosition::BR) {
+                m_guardAbsPos.m_y++;
+                m_guardAbsPos.m_x++;
+            }
+            if (m_guardPosition == GuardPosition::BL) {
+                m_guardAbsPos.m_y++;
+                m_guardAbsPos.m_x -= itemRectWidth;
+            }
+            if (m_guardPosition == GuardPosition::R) {
+                m_guardAbsPos.m_x++;
+            }
+            if (m_guardPosition == GuardPosition::TR) {
+                m_guardAbsPos.m_x++;
+                m_guardAbsPos.m_y -= itemRectHeight;
+            }
+            if (m_guardPosition == GuardPosition::T) {
+                m_guardAbsPos.m_y -= itemRectHeight;
+            }
+            if (m_guardPosition == GuardPosition::TL) {
+                m_guardAbsPos.m_y -= itemRectHeight;
+                m_guardAbsPos.m_x -= itemRectWidth;
+            }
+            if (m_guardPosition == GuardPosition::L) {
+                m_guardAbsPos.m_x -= itemRectWidth;
+            }
 
             m_guardRegion = blurSet({ m_guardAbsPos }, true, false);
 
@@ -175,6 +221,7 @@ void ObjectBundle::estimateOccupied()
         for (size_t index = 0; auto& item : m_items) {
             item.m_absPos = m_absPos;
             auto* def     = item.m_obj->getDef();
+            assert(def);
 
             const FHPos blockMaskSizePos{ (int) def->blockMapPlanar.width - 1, (int) def->blockMapPlanar.height - 1, 0 };
             const FHPos visitMaskSizePos{ (int) def->visitMapPlanar.width - 1, (int) def->visitMapPlanar.height - 1, 0 };
@@ -204,12 +251,19 @@ void ObjectBundle::estimateOccupied()
         if (m_guard) {
             m_guardAbsPos = mainPos;
             m_guardAbsPos.m_y++;
+            if (m_guardPosition == GuardPosition::TL || m_guardPosition == GuardPosition::L || m_guardPosition == GuardPosition::BL)
+                m_guardAbsPos.m_x--;
+            if (m_guardPosition == GuardPosition::TR || m_guardPosition == GuardPosition::R || m_guardPosition == GuardPosition::BR)
+                m_guardAbsPos.m_x++;
 
             m_guardRegion = blurSet({ m_guardAbsPos }, true, false);
         }
     }
 
     if (m_guard) {
+        if (!m_considerBlock)
+            m_guardRegion = { m_guardAbsPos };
+
         m_estimatedOccupied.insert(m_guardRegion.cbegin(), m_guardRegion.cend());
     }
 
@@ -222,6 +276,9 @@ void ObjectBundle::estimateOccupied()
     m_allArea.insert(m_protectionBorder.cbegin(), m_protectionBorder.cend());
     m_allArea.insert(m_blurForPassable.cbegin(), m_blurForPassable.cend());
     m_allArea.insert(m_estimatedOccupied.cbegin(), m_estimatedOccupied.cend());
+
+    m_fitArea.insert(m_protectionBorder.cbegin(), m_protectionBorder.cend());
+    m_fitArea.insert(m_estimatedOccupied.cbegin(), m_estimatedOccupied.cend());
 }
 
 bool ObjectBundle::placeOnMap(std::set<FHPos>& availableCells, Core::IRandomGenerator* const rng)
@@ -238,14 +295,32 @@ bool ObjectBundle::placeOnMap(std::set<FHPos>& availableCells, Core::IRandomGene
         auto tryPlaceInner = [pos, &availableCells, this](FHPos delta) -> bool {
             this->m_absPos = pos + delta;
             this->estimateOccupied();
-
-            for (FHPos posOcc : m_allArea) {
+            for (FHPos posOcc : m_fitArea) {
                 if (!availableCells.contains(posOcc)) {
                     return false;
                 }
             }
             return true;
         };
+
+        // if first attempt is succeed, we'll try to find near place where we don't fit, and then backup to more close fit.
+        if (tryPlaceInner(g_deltasToTry[0])) {
+            bool  start     = true;
+            FHPos deltaPrev = g_deltasToTry[0];
+            for (FHPos delta : g_deltasToTry) {
+                if (start) {
+                    start = false;
+                    continue;
+                }
+                if (!tryPlaceInner(delta)) {
+                    tryPlaceInner(deltaPrev);
+                    return true;
+                }
+                deltaPrev = delta;
+            }
+            tryPlaceInner(deltaPrev);
+            return true;
+        }
 
         for (FHPos delta : g_deltasToTry) {
             if (tryPlaceInner(delta)) {
@@ -255,7 +330,7 @@ bool ObjectBundle::placeOnMap(std::set<FHPos>& availableCells, Core::IRandomGene
         return false;
     };
 
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < 10; ++i) {
         if (tryPlace()) {
             for (auto& item : m_items) {
                 item.m_obj->setPos(item.m_absPos);

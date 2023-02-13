@@ -35,6 +35,7 @@ public:
         BorderRoads,
         RoadsPlacement,
         Rewards,
+        CorrectObjectTerrains,
         Obstacles,
         Guards,
         PlayerInfo,
@@ -52,6 +53,7 @@ private:
     void runBorderRoads();
     void runRoadsPlacement();
     void runRewards();
+    void runCorrectObjectTerrains();
     void runObstacles();
     void runGuards();
     void runPlayerInfo();
@@ -88,8 +90,7 @@ private:
     std::vector<Core::LibraryUnitConstPtr>    m_guardUnits;
 
     struct Guard {
-        int64_t     m_value           = 0;
-        int64_t     m_valueDispersion = 0;
+        int64_t     m_value = 0;
         std::string m_id;
         std::string m_mirrorFromId;
         FHPos       m_pos;
@@ -97,6 +98,7 @@ private:
         bool        m_joinable = false;
     };
     std::vector<Guard> m_guards;
+    int64_t            m_userMultiplyGuard = 100;
 
     using HeroGeneration = FHRngUserSettings::HeroGeneration;
     struct PlayerInfo {

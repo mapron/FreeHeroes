@@ -62,7 +62,7 @@ void estimateSpellScore(Core::LibrarySpellConstPtr spell, FHScore& score, bool a
     auto attr = FHScoreAttr::SpellCommon;
     if (std::find(spell->tags.cbegin(), spell->tags.cend(), Core::LibrarySpell::Tag::Control) != spell->tags.cend())
         attr = FHScoreAttr::Control;
-    if (spell->type == Core::LibrarySpell::Type::Offensive || spell->type == Core::LibrarySpell::Type::Summon)
+    if (std::find(spell->tags.cbegin(), spell->tags.cend(), Core::LibrarySpell::Tag::OffensiveSummon) != spell->tags.cend())
         attr = FHScoreAttr::SpellOffensive;
 
     if (asAnySpell)
@@ -383,6 +383,7 @@ struct ObjectGenerator::AbstractFactory : public IObjectFactory {
 struct RecordBank : public CommonRecord<RecordBank> {
     Core::LibraryMapBankConstPtr m_id            = nullptr;
     int                          m_guardsVariant = 0;
+    int                          m_guardValue    = 0;
 };
 
 struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
@@ -406,6 +407,10 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
         if (!genSettings.m_isEnabled)
             return;
 
+        std::map<Core::LibraryMapBankConstPtr, const FHRngZone::GeneratorBank::Record*> recordMap;
+        for (auto&& [_, rec] : genSettings.m_records)
+            recordMap[rec.m_bank] = &rec;
+
         for (auto* bank : database->mapBanks()->records()) {
             if (m_map.m_disabledBanks.isDisabled(m_map.m_isWaterMap, bank))
                 continue;
@@ -413,11 +418,32 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
             if (!ObjectGenerator::terrainViable(bank->objectDefs, terrain))
                 continue;
 
+            int totalFreq = 0;
+            for (auto& var : bank->variants)
+                totalFreq += var.frequencyRel;
+
+            int baseFrequency = bank->frequency;
+            int guardValue    = bank->guardValue;
+
+            {
+                auto it = recordMap.find(bank);
+                if (it != recordMap.cend()) {
+                    const FHRngZone::GeneratorBank::Record& rec = *(it->second);
+                    if (rec.m_frequency != -1)
+                        baseFrequency = rec.m_frequency;
+                    if (rec.m_guard != -1)
+                        guardValue = rec.m_guard;
+                    if (!rec.m_enabled)
+                        continue;
+                }
+            }
+
             for (int i = 0, sz = (int) bank->variants.size(); i < sz; i++) {
                 RecordBank record;
                 record.m_guardsVariant = i;
                 record.m_id            = bank;
-                record.m_frequency     = bank->variants[i].frequency;
+                record.m_guardValue    = guardValue;
+                record.m_frequency     = baseFrequency * bank->variants[i].frequencyRel / totalFreq;
 
                 {
                     const Core::Reward&        reward                = record.m_id->rewards[record.m_id->variants[record.m_guardsVariant].rewardIndex];
@@ -428,7 +454,6 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
                             artifactRewardIsValid = false;
                     }
                     if (!artifactRewardIsValid) {
-                        //std::cerr << "---- art - skipping " << bank->id << " [" << i << "]\n";
                         continue;
                     }
 
@@ -436,7 +461,6 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
                         const FHScore score = estimateReward(reward);
 
                         if (!scoreSettings.isValidScore(score)) {
-                            //std::cerr << "---- res/army - skipping " << bank->id << " [" << i << "]\n";
                             continue;
                         }
                     }
@@ -485,7 +509,7 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
             }
         }
         obj.m_obj.m_score = score;
-        obj.m_obj.m_guard = obj.m_obj.m_id->guardValue;
+        obj.m_obj.m_guard = record.m_guardValue;
 
         return std::make_shared<ObjectBank>(std::move(obj));
     }
@@ -690,8 +714,6 @@ struct ObjectGenerator::ObjectFactoryPandora : public AbstractFactory<RecordPand
 
             if (scoreSettings.isValidScore(obj.m_obj.m_score))
                 m_records.m_records.push_back(RecordPandora{ .m_obj = std::move(obj), .m_unitRewards = std::move(unitRewards) }.setFreq(value.m_frequency));
-            //else
-            //    std::cerr << " --- skip pandora " << id << " = " << obj.m_obj.m_score << "\n";
         }
 
         m_records.updateFrequency();
@@ -776,7 +798,6 @@ struct ObjectGenerator::ObjectFactoryShrine : public AbstractFactory<RecordSpell
         for (const auto& [_, value] : genSettings.m_records) {
             for (bool asAnySpell : { false, true }) {
                 if (m_spellPool->isEmpty(value.m_filter, asAnySpell, scoreSettings)) {
-                    // std::cerr << "  === skip: " << _ << ", asAny: " << asAnySpell << "\n";
                     continue;
                 }
 
@@ -852,7 +873,6 @@ struct ObjectGenerator::ObjectFactoryScroll : public AbstractFactory<RecordSpell
         for (const auto& [_, value] : genSettings.m_records) {
             for (bool asAnySpell : { false, true }) {
                 if (m_spellPool->isEmpty(value.m_filter, asAnySpell, scoreSettings)) {
-                    // std::cerr << "  === skip: " << _ << ", asAny: " << asAnySpell << "\n";
                     continue;
                 }
 
@@ -955,7 +975,7 @@ struct ObjectGenerator::ObjectFactoryDwelling : public AbstractFactory<RecordDwe
                     rec.m_guard = scoreValue * 2;
                 }
                 rec.m_frequency = value.m_frequency;
-                if (scoreSettings.isValidValue(FHScoreAttr::Army, scoreValue))
+                if (scoreSettings.isValidValue(FHScoreAttr::ArmyDwelling, scoreValue))
                     m_records.m_records.push_back(rec);
             }
         }
@@ -976,7 +996,7 @@ struct ObjectGenerator::ObjectFactoryDwelling : public AbstractFactory<RecordDwe
         obj.m_obj.m_id     = record.m_id;
         obj.m_obj.m_player = m_none;
 
-        obj.m_obj.m_score[FHScoreAttr::Army] = record.m_value;
+        obj.m_obj.m_score[FHScoreAttr::ArmyDwelling] = record.m_value;
 
         obj.m_obj.m_guard = record.m_guard;
 
@@ -1025,7 +1045,7 @@ struct ObjectGenerator::ObjectFactoryVisitable : public AbstractFactory<RecordVi
             if (!scoreValue)
                 throw std::runtime_error("'" + visitable->id + "' has no valid score!");
 
-            FHScoreAttr attr = FHScoreAttr::Misc;
+            FHScoreAttr attr = FHScoreAttr::Support;
             if (visitable->type == Core::LibraryMapVisitable::Type::Upgrade)
                 attr = FHScoreAttr::Upgrade;
             if (visitable->type == Core::LibraryMapVisitable::Type::Generator)
@@ -1038,7 +1058,6 @@ struct ObjectGenerator::ObjectFactoryVisitable : public AbstractFactory<RecordVi
             record.m_obj.m_guard = scoreValue * 2;
 
             if (scoreSettings.isValidValue(attr, scoreValue)) {
-                //std::cerr << " *** add visitable :" << visitable->id << " = " << record.m_obj.m_score << "\n";
                 m_records.m_records.push_back(record);
             }
         }
@@ -1089,7 +1108,7 @@ struct ObjectGenerator::ObjectFactorySpecialResource : public AbstractFactory<Re
         for (const auto& [id, value] : genSettings.m_records) {
             RecordSpecialResource record;
             record.m_obj.m_specialType = value.m_specialType;
-            FHScoreAttr attr           = FHScoreAttr::Misc;
+            FHScoreAttr attr           = FHScoreAttr::Support;
             assert(value.m_specialType != Core::LibraryResource::SpecialResource::Invalid);
             if (value.m_specialType == Core::LibraryResource::SpecialResource::CampFire)
                 attr = FHScoreAttr::Gold;
@@ -1206,8 +1225,9 @@ void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
             targetScore[key] = val.m_target;
 
         ObjectGroup group;
-        group.m_id               = scoreId;
-        group.m_guardPercent     = scoreSettings.m_guardPercent;
+        group.m_id           = scoreId;
+        group.m_guardPercent = scoreSettings.m_guardPercent;
+
         group.m_targetScore      = targetScore;
         group.m_targetScoreTotal = totalScoreValue(targetScore);
         group.m_scoreSettings    = &scoreSettings;
@@ -1302,8 +1322,8 @@ bool ObjectGenerator::generateOneObject(const FHScore& targetScore, FHScore& cur
             }
             currentScore = currentScoreTmp;
 
-            //m_logOutput << indent << "add '" << obj->getId() << "' score=" << obj->getScore() << " guard=" << obj->getGuard() << "; current factory freq=" << fac->totalFreq() << ", active=" << fac->totalActiveRecords() << "\n";
-           
+            // m_logOutput << indent << "add '" << obj->getId() << "' score=" << obj->getScore() << " guard=" << obj->getGuard() << "; current factory freq=" << fac->totalFreq() << ", active=" << fac->totalActiveRecords() << "\n";
+
             group.m_objects.push_back(obj);
             return true;
         }

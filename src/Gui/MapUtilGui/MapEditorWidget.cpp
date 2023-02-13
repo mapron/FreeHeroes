@@ -178,7 +178,7 @@ void MapEditorWidget::load(const std::string& filename)
     std::ostringstream os;
 
     MapConverter::Settings sett{
-        .m_inputs                  = { .m_fhMap = filename },
+        .m_inputs                  = { .m_fhMap = Mernel::string2path(filename) },
         .m_outputs                 = {},
         .m_dumpUncompressedBuffers = false,
         .m_dumpBinaryDataJson      = false,

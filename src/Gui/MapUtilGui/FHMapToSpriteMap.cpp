@@ -237,13 +237,13 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
 
         auto strCount = std::to_string(obj.m_count);
 
-        auto* def = obj.m_id->objectDefs.get({});
-        result.addItem(makeItemByDef(SpriteMap::Layer::Monster, def, pos)
-                           .addInfo("id", obj.m_id->id)
-                           .addInfo("count", strCount)
-                           .addInfo("value", std::to_string(obj.m_guardValue)))
-            ->m_overlayInfo
-            = strCount + (obj.m_upgradedStack == FHMonster::UpgradedStack::Yes ? " u" : "");
+        auto* def  = obj.m_id->objectDefs.get({});
+        auto* item = result.addItem(makeItemByDef(SpriteMap::Layer::Monster, def, pos)
+                                        .addInfo("id", obj.m_id->id)
+                                        .addInfo("count", strCount)
+                                        .addInfo("value", std::to_string(obj.m_guardValue)));
+        addValueInfo(item, obj);
+        item->m_overlayInfo = strCount + (obj.m_upgradedStack == FHMonster::UpgradedStack::Yes ? " u" : "");
     }
 
     for (auto& obj : fhMap.m_objects.m_dwellings) {

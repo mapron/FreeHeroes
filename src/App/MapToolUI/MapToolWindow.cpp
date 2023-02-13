@@ -238,9 +238,9 @@ void MapToolWindow::generateMap()
 void MapToolWindow::updatePaths()
 {
     const QString mapFileName = m_ui->mapFilename->text();
-    const auto    jsonPath    = (Mernel::AppLocations("FreeHeroes").getAppdataDir() / (mapFileName.toStdString() + ".json"));
 
-    QString root = m_ui->heroes3Path->text();
+    QString    root     = m_ui->heroes3Path->text();
+    const auto jsonPath = (Mernel::string2path(root.toStdString()) / "Maps" / (mapFileName.toStdString() + ".json"));
     if (!root.isEmpty())
         m_ui->h3mMapPath->setText(root + "/Maps/" + mapFileName + ".h3m");
     m_ui->fhMapPath->setText(QString::fromStdString(Mernel::path2string(jsonPath)));

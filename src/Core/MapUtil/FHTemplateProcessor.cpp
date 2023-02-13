@@ -37,6 +37,7 @@ ENUM_REFLECTION_STRINGIFY(
     BorderRoads,
     RoadsPlacement,
     Rewards,
+    CorrectObjectTerrains,
     Obstacles,
     Guards,
     PlayerInfo)
@@ -216,6 +217,7 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
                          Stage::BorderRoads,
                          Stage::RoadsPlacement,
                          Stage::Rewards,
+                         Stage::CorrectObjectTerrains,
                          Stage::Obstacles,
                          Stage::Guards,
                          Stage::PlayerInfo }) {
@@ -255,6 +257,8 @@ void FHTemplateProcessor::runCurrentStage()
             return runRoadsPlacement();
         case Stage::Rewards:
             return runRewards();
+        case Stage::CorrectObjectTerrains:
+            return runCorrectObjectTerrains();
         case Stage::Obstacles:
             return runObstacles();
         case Stage::Guards:
@@ -309,6 +313,7 @@ void FHTemplateProcessor::runZoneTilesInitial()
                     << ", townFaction=" << tileZone.m_mainTownFaction->id
                     << ", rewardFaction=" << tileZone.m_rewardsFaction->id
                     << ", terrain=" << tileZone.m_terrain->id
+                    << ", zoneGuardPercent=" << tileZone.m_rngZoneSettings.m_zoneGuardPercent
                     << "\n";
     }
 
@@ -601,7 +606,7 @@ void FHTemplateProcessor::runBorderRoads()
             guard.m_value        = connections.m_guard;
             guard.m_mirrorFromId = connections.m_mirrorGuard;
             guard.m_pos          = cell->m_pos;
-            guard.m_zone         = &tileZoneFrom;
+            guard.m_zone         = nullptr;
             m_guards.push_back(guard);
         }
         MapCanvas::Tile* ncellFound = nullptr;
@@ -817,6 +822,8 @@ void FHTemplateProcessor::runRewards()
         if (tileZone.m_rngZoneSettings.m_scoreTargets.empty())
             continue;
 
+        m_logOutput << m_indent << " --- generate : " << tileZone.m_id << " --- \n";
+
         ObjectGenerator gen(m_map, m_database, m_rng, m_logOutput);
         gen.generate(tileZone.m_rngZoneSettings,
                      tileZone.m_mainTownFaction,
@@ -830,8 +837,15 @@ void FHTemplateProcessor::runRewards()
             i++;
             if (!bundle.placeOnMap(bundleSet.m_cells, m_rng)) {
                 m_logOutput << m_indent << "g placement failure [" << i << "]: size=" << bundle.getEstimatedArea() << "; " << bundle.toPrintableString() << "\n";
-
                 continue;
+            } else {
+                //                for (auto pos : bundle.m_protectionBorder) {
+                //                    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = tileZone.m_index, .m_valueB = 3 });
+                //                }
+                //                for (auto pos : bundle.m_guardRegion) {
+                //                    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = tileZone.m_index, .m_valueB = 1 });
+                //                }
+                //m_logOutput << m_indent << "g placement success [" << i << "]: size=" << bundle.getEstimatedArea() << "; " << bundle.toPrintableString() << "\n";
             }
 
             for (auto pos : bundle.m_protectionBorder) {
@@ -848,7 +862,7 @@ void FHTemplateProcessor::runRewards()
                 Guard guard;
                 guard.m_value = bundle.m_guard;
                 guard.m_pos   = bundle.m_guardAbsPos;
-                guard.m_zone  = &m_tileZones[0];
+                guard.m_zone  = &tileZone;
                 m_guards.push_back(guard);
             }
         }
@@ -860,11 +874,17 @@ void FHTemplateProcessor::runRewards()
 
                 continue;
             }
+            //for (auto pos : bundle.m_blurForPassable) {
+            //    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = tileZone.m_index, .m_valueB = 3 });
+            //}
         }
     }
 
     m_logOutput << m_indent << "RNG TEST B:" << m_rng->gen(1000000) << "\n";
+}
 
+void FHTemplateProcessor::runCorrectObjectTerrains()
+{
     auto correctObjIndexPos = [this](const std::string& id, Core::ObjectDefIndex& defIndex, const Core::ObjectDefMappings& defMapping, FHPos pos) {
         Core::LibraryTerrainConstPtr requiredTerrain = m_mapCanvas.m_tileIndex.at(pos)->m_zone->m_terrain;
         auto                         old             = defIndex;
@@ -1066,6 +1086,12 @@ void FHTemplateProcessor::runObstacles()
 
 void FHTemplateProcessor::runGuards()
 {
+    const auto& diffSett = m_map.m_template.m_userSettings.m_difficulty;
+    const auto  maxGuard = diffSett.m_maxGuardsPercent;
+    const auto  minGuard = std::min(maxGuard, diffSett.m_minGuardsPercent);
+
+    m_userMultiplyGuard = minGuard + m_rng->gen(maxGuard - minGuard);
+
     auto makeCandidates = [this](int64_t value) {
         std::map<int, int> unitLevelScore;
 
@@ -1111,27 +1137,38 @@ void FHTemplateProcessor::runGuards()
     std::map<std::string, size_t> nameIndex;
 
     for (auto& guard : m_guards) {
-        if (guard.m_value == 0)
+        int64_t value = guard.m_value;
+        if (value == 0)
             continue;
 
-        std::vector<Core::LibraryUnitConstPtr> candidates = makeCandidates(guard.m_value);
+        value = value * m_userMultiplyGuard / 100;
 
-        if (candidates.empty()) { // value is so low, nobody can guard so low value at least in group of 3
+        if (guard.m_zone) {
+            const int64_t dispersionPercent = m_rng->genDispersed(0, guard.m_zone->m_rngZoneSettings.m_zoneGuardDispersion);
+
+            value = value * guard.m_zone->m_rngZoneSettings.m_zoneGuardPercent / 100;
+            value += value * dispersionPercent / 100;
+        }
+
+        std::vector<Core::LibraryUnitConstPtr> candidates = makeCandidates(value);
+
+        if (candidates.empty()) { // value is so low, nobody can guard so low value at least in group of 5
             continue;
         }
         Core::LibraryUnitConstPtr unit = candidates[m_rng->gen(candidates.size() - 1)];
 
-        auto       finalValue = m_rng->genDispersed(guard.m_value, guard.m_valueDispersion);
-        const bool upgraded   = unit->upgrades.empty() ? false : m_rng->genSmall(3) == 0;
+        const bool upgraded = unit->upgrades.empty() ? false : m_rng->genSmall(3) == 0;
 
         FHMonster fhMonster;
         fhMonster.m_pos        = guard.m_pos;
-        fhMonster.m_count      = getPossibleCount(unit, finalValue);
+        fhMonster.m_count      = getPossibleCount(unit, value);
         fhMonster.m_id         = unit;
-        fhMonster.m_guardValue = finalValue;
+        fhMonster.m_guardValue = value;
+
+        //fhMonster.m_score[FHScoreAttr::Support] = guard.m_zone ? guard.m_zone->m_rngZoneSettings.m_zoneGuardPercent : 666;
 
         if (upgraded) {
-            auto upCount = getPossibleCount(unit->upgrades[0], finalValue);
+            auto upCount = getPossibleCount(unit->upgrades[0], value);
             // let's say upgraded stack is 1/4 of stacks. Then recalc count taking an account 1/4 of value is upped.
             fhMonster.m_count = fhMonster.m_count * 3 / 4 + upCount * 1 / 4;
         }
@@ -1171,7 +1208,6 @@ void FHTemplateProcessor::runPlayerInfo()
         if (stdStats) {
             destHero.m_hasSecSkills              = true;
             destHero.m_army.hero.secondarySkills = heroId->isWarrior ? m_map.m_template.m_stdSkillsWarrior : m_map.m_template.m_stdSkillsMage;
-            m_logOutput << "destHero.m_army.hero.secondarySkills=" << destHero.m_army.hero.secondarySkills.size() << "\n";
         }
 
         m_map.m_wanderingHeroes.push_back(std::move(fhhero));

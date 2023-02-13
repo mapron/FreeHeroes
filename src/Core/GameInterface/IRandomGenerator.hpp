@@ -36,6 +36,8 @@ public:
 
     virtual int64_t genDispersed(int64_t avg, uint64_t dispersion)
     {
+        if (!dispersion)
+            return avg;
         return avg - dispersion + gen(dispersion * 2);
     }
 };
