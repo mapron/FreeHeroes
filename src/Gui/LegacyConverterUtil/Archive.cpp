@@ -278,18 +278,21 @@ void Archive::saveToFolder(const std_path& path, bool skipExisting) const
         const auto out = path / string2path(rec.fullname());
         if (skipExisting && std_fs::exists(out))
             continue;
+        rec.m_bufferWithFile.readFromFile();
 
-        writeFileFromHolder(out, rec.m_buffer);
+        rec.m_bufferWithFile.m_path = out;
+        rec.m_bufferWithFile.writeToFile();
     }
 
     for (const HdatRecord& rec : m_hdatRecords) {
-        if (!rec.m_blob.empty()) {
+        if (rec.m_hasBlob) {
             const auto out = path / string2path(rec.m_basename + ".bin");
             if (skipExisting && std_fs::exists(out))
                 continue;
-            ByteArrayHolder buf;
-            buf.ref() = rec.m_blob;
-            writeFileFromHolder(out, buf);
+            rec.m_bufferWithFile.readFromFile();
+
+            rec.m_bufferWithFile.m_path = out;
+            rec.m_bufferWithFile.writeToFile();
         }
 
         {
@@ -317,15 +320,14 @@ void Archive::loadFromFolder(const std_path& path)
     reader.jsonToValue(data, *this);
 
     for (Record& rec : m_records) {
-        const auto out = path / string2path(rec.fullname());
-        rec.m_buffer   = readFileIntoHolder(out);
+        const auto out              = path / string2path(rec.fullname());
+        rec.m_bufferWithFile.m_path = out;
     }
 
     for (HdatRecord& rec : m_hdatRecords) {
         if (rec.m_hasBlob) {
-            const auto      in  = path / string2path(rec.m_basename + ".bin");
-            ByteArrayHolder buf = readFileIntoHolder(in);
-            rec.m_blob          = buf.ref();
+            const auto in               = path / string2path(rec.m_basename + ".bin");
+            rec.m_bufferWithFile.m_path = in;
         }
 
         {
@@ -359,7 +361,8 @@ void Archive::createFromFolder(const Mernel::std_path& path, const std::vector<s
         rec.m_basename         = rec.m_originalBasename;
         std::transform(rec.m_basename.begin(), rec.m_basename.end(), rec.m_basename.begin(), [](unsigned char c) { return std::tolower(c); });
 
-        rec.m_buffer = readFileIntoHolder(it.path());
+        rec.m_bufferWithFile.m_buffer   = readFileIntoHolder(it.path());
+        rec.m_bufferWithFile.m_inMemory = true;
         m_records.push_back(std::move(rec));
     }
 }
@@ -386,8 +389,8 @@ void Archive::convertToBinary()
             brec.m_extNoDot.erase(0, 1);
         brec.m_filenameGarbage = rec.m_filenameGarbage;
         brec.m_unknown1        = rec.m_unknown1;
-        brec.m_buffer          = rec.m_buffer;
-        brec.m_size            = rec.m_buffer.size();
+        brec.m_buffer          = rec.m_bufferWithFile.getBuffer();
+        brec.m_size            = brec.m_buffer.size();
         brec.m_fullSize        = brec.m_size;
         if (rec.m_compressInArchive) {
             brec.m_fullSize       = rec.m_uncompressedSizeCache;
@@ -397,9 +400,9 @@ void Archive::convertToBinary()
         brec.m_headerOrder     = order++;
 
         if (!rec.m_compressOnDisk && rec.m_compressInArchive) {
-            brec.m_fullSize = rec.m_buffer.size();
+            brec.m_fullSize = brec.m_buffer.size();
             ByteArrayHolder comp;
-            compressDataBuffer(rec.m_buffer, comp, { .m_type = CompressionType::Zlib, .m_skipCRC = false });
+            compressDataBuffer(brec.m_buffer, comp, { .m_type = CompressionType::Zlib, .m_skipCRC = false });
             brec.m_buffer         = comp;
             brec.m_compressedSize = brec.m_size = comp.size();
         }
@@ -461,8 +464,9 @@ void Archive::convertFromBinary(bool uncompress)
     m_records.reserve(m_binaryRecords.size());
     for (BinaryRecord& brec : m_binaryRecords) {
         Record rec;
-        rec.m_isPadding = false;
-        rec.m_buffer    = brec.m_buffer;
+        rec.m_isPadding                 = false;
+        rec.m_bufferWithFile.m_buffer   = brec.m_buffer;
+        rec.m_bufferWithFile.m_inMemory = true;
 
         rec.m_originalBasename   = brec.m_basename;
         rec.m_basename           = rec.m_originalBasename;
@@ -483,8 +487,8 @@ void Archive::convertFromBinary(bool uncompress)
 
         if (!rec.m_compressOnDisk && rec.m_compressInArchive) {
             ByteArrayHolder uncomp;
-            uncompressDataBuffer(rec.m_buffer, uncomp, { .m_type = CompressionType::Zlib, .m_skipCRC = false });
-            rec.m_buffer                           = uncomp;
+            uncompressDataBuffer(rec.m_bufferWithFile.m_buffer, uncomp, { .m_type = CompressionType::Zlib, .m_skipCRC = false });
+            rec.m_bufferWithFile.m_buffer          = uncomp;
             [[maybe_unused]] const size_t unpacked = uncomp.size();
             assert(rec.m_uncompressedSizeCache == unpacked);
         }
@@ -501,7 +505,8 @@ void Archive::convertFromBinary(bool uncompress)
         rec.m_isPadding = true;
         rec.m_basename = rec.m_originalBasename = brec.m_basename;
         rec.m_binaryOrder                       = brec.m_binaryDataOrder;
-        rec.m_buffer                            = brec.m_buffer;
+        rec.m_bufferWithFile.m_buffer           = brec.m_buffer;
+        rec.m_bufferWithFile.m_inMemory         = true;
         m_records.push_back(std::move(rec));
     }
 }
@@ -525,7 +530,8 @@ void Archive::readBinaryHDAT(ByteOrderDataStreamReader& stream)
 
         stream >> rec.m_hasBlob;
         if (rec.m_hasBlob) {
-            stream >> rec.m_blob;
+            stream >> rec.m_bufferWithFile.m_buffer.ref();
+            rec.m_bufferWithFile.m_inMemory = true;
         }
         stream >> rec.m_params;
     }
@@ -546,7 +552,7 @@ void Archive::writeBinaryHDAT(ByteOrderDataStreamWriter& stream) const
 
         stream << rec.m_hasBlob;
         if (rec.m_hasBlob) {
-            stream << rec.m_blob;
+            stream << rec.m_bufferWithFile.m_buffer.ref();
         }
         stream << rec.m_params;
     }
@@ -616,6 +622,28 @@ void Archive::BinaryRecord::writeBinaryVID(ByteOrderDataStreamWriter& stream) co
         filename += '.' + m_extNoDot;
     stream.writeStringWithGarbagePadding<g_strVidSize>(filename, m_filenameGarbage);
     stream << m_offset;
+}
+
+Mernel::ByteArrayHolder Archive::BufferWithFile::getBuffer()
+{
+    readFromFile();
+    return m_buffer;
+}
+
+void Archive::BufferWithFile::readFromFile()
+{
+    if (m_inMemory)
+        return;
+
+    ByteArrayHolder buf = readFileIntoHolder(m_path);
+    m_buffer            = buf;
+    m_inMemory          = true;
+}
+
+void Archive::BufferWithFile::writeToFile()
+{
+    assert(m_inMemory);
+    writeFileFromHolder(m_path, m_buffer);
 }
 
 }

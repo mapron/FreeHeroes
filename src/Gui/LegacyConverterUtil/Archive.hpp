@@ -26,6 +26,16 @@ public:
 public:
     BinaryFormat m_format = BinaryFormat::Invalid;
 
+    struct BufferWithFile {
+        Mernel::ByteArrayHolder m_buffer;
+        Mernel::std_path        m_path;
+        bool                    m_inMemory = false;
+
+        Mernel::ByteArrayHolder getBuffer();
+        void                    readFromFile();
+        void                    writeToFile();
+    };
+
     struct Record {
         std::string m_basename;
         std::string m_originalBasename;
@@ -41,7 +51,7 @@ public:
         size_t               m_binaryOrder = 0;
         bool                 m_isPadding   = false;
 
-        Mernel::ByteArrayHolder m_buffer;
+        mutable BufferWithFile m_bufferWithFile;
 
         std::string fullname() const { return m_basename + m_extWithDot; }
     };
@@ -52,8 +62,9 @@ public:
         std::string              m_filenameAlt;
         std::vector<std::string> m_txtChapters;
 
-        bool                  m_hasBlob = false;
-        std::vector<uint8_t>  m_blob;
+        bool                   m_hasBlob = false;
+        mutable BufferWithFile m_bufferWithFile;
+
         std::vector<uint32_t> m_params;
     };
     std::vector<HdatRecord> m_hdatRecords;
