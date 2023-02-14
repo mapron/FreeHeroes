@@ -240,6 +240,14 @@ void SpriteMapPainter::paint(QPainter*        painter,
                     painter->setBrush(Qt::darkMagenta);
                     cellRect.adjust(tileSize / 3, tileSize / 3, -tileSize / 3, -tileSize / 3);
                 }
+                if (debugPiece.m_b == 4) {
+                    painter->setBrush(Qt::darkYellow);
+                    cellRect.adjust(tileSize / 3, tileSize / 3, -tileSize / 3, -tileSize / 3);
+                }
+                if (debugPiece.m_b == 5) {
+                    painter->setBrush(Qt::lightGray);
+                    cellRect.adjust(tileSize / 3, tileSize / 3, -tileSize / 3, -tileSize / 3);
+                }
 
                 if (debugPiece.m_b)
                     painter->drawEllipse(cellRect);

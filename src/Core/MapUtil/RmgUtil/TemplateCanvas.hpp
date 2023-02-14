@@ -28,7 +28,15 @@ struct MapCanvas {
         Tile* m_neighborR = nullptr;
         Tile* m_neighborB = nullptr;
 
+        Tile* m_neighborTL = nullptr;
+        Tile* m_neighborTR = nullptr;
+        Tile* m_neighborBL = nullptr;
+        Tile* m_neighborBR = nullptr;
+
         std::vector<Tile*> m_allNeighbours;
+        std::vector<Tile*> m_allNeighboursWithDiag;
+
+        const std::vector<Tile*>& neighboursList(bool useDiag) const { return useDiag ? m_allNeighboursWithDiag : m_allNeighbours; }
 
         std::string posStr() const
         {
@@ -84,6 +92,32 @@ struct MapCanvas {
                         tile->m_neighborB = m_tileIndex.at({ x, y + 1, z });
                         tile->m_allNeighbours.push_back(tile->m_neighborB);
                     }
+                    tile->m_allNeighboursWithDiag = tile->m_allNeighbours;
+                }
+            }
+        }
+        index = 0;
+        for (int z = 0; z < depth; ++z) {
+            for (int y = 0; y < height; ++y) {
+                for (int x = 0; x < width; ++x) {
+                    Tile* tile = &m_tiles[index++];
+                    if (tile->m_neighborT)
+                        tile->m_neighborTL = tile->m_neighborT->m_neighborL;
+                    if (tile->m_neighborT)
+                        tile->m_neighborTR = tile->m_neighborT->m_neighborR;
+                    if (tile->m_neighborB)
+                        tile->m_neighborBL = tile->m_neighborB->m_neighborL;
+                    if (tile->m_neighborB)
+                        tile->m_neighborBR = tile->m_neighborB->m_neighborR;
+
+                    if (tile->m_neighborTL)
+                        tile->m_allNeighboursWithDiag.push_back(tile->m_neighborTL);
+                    if (tile->m_neighborTR)
+                        tile->m_allNeighboursWithDiag.push_back(tile->m_neighborTR);
+                    if (tile->m_neighborBL)
+                        tile->m_allNeighboursWithDiag.push_back(tile->m_neighborBL);
+                    if (tile->m_neighborBR)
+                        tile->m_allNeighboursWithDiag.push_back(tile->m_neighborBR);
                 }
             }
         }

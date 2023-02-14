@@ -15,9 +15,9 @@
 #include "RmgUtil/TemplateUtils.hpp"
 #include "RmgUtil/ObjectGenerator.hpp"
 #include "RmgUtil/KMeans.hpp"
-#include "RmgUtil/AstarGenerator.hpp"
 #include "RmgUtil/ObstacleUtil.hpp"
 #include "RmgUtil/ObjectBundle.hpp"
+#include "RmgUtil/RoadHelper.hpp"
 
 #include <functional>
 #include <stdexcept>
@@ -207,7 +207,7 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
     }
 
     m_stopAfter = stringToStage(stopAfterStage);
-    //m_stopAfter = Stage::Rewards;
+    //m_stopAfter = Stage::PlayerInfo;
 
     for (Stage stage : { Stage::ZoneCenterPlacement,
                          Stage::ZoneTilesInitial,
@@ -513,6 +513,8 @@ void FHTemplateProcessor::runTownsPlacement()
 
     auto playerNone = m_database->players()->find(std::string(Core::LibraryPlayer::s_none));
 
+    RoadHelper roadHelper(m_map, m_mapCanvas, m_rng, m_logOutput);
+
     for (auto& tileZone : m_tileZones) {
         std::vector<FHPos> townPositions;
         const auto&        towns = tileZone.m_rngZoneSettings.m_towns;
@@ -543,9 +545,8 @@ void FHTemplateProcessor::runTownsPlacement()
         for (auto&& pos : townPositions) {
             auto pos2 = pos;
             pos2.m_y++;
-            tileZone.m_roadNodes.insert(m_mapCanvas.m_tileIndex.at(pos2));
-            tileZone.m_roadNodesTowns.insert(m_mapCanvas.m_tileIndex.at(pos2));
-            placeRoad({ pos, pos2 });
+            tileZone.m_roadNodesHighPriority.insert(m_mapCanvas.m_tileIndex.at(pos2));
+            roadHelper.placeRoad({ pos, pos2 });
         }
     }
 }
@@ -598,7 +599,7 @@ void FHTemplateProcessor::runBorderRoads()
             return posDistance(borderCentroid, l->m_pos) < posDistance(borderCentroid, r->m_pos);
         });
         MapCanvas::Tile* cell = (*it);
-        cell->m_zone->m_roadNodes.insert(cell);
+        cell->m_zone->m_roadNodesHighPriority.insert(cell);
 
         if (connections.m_guard || !connections.m_mirrorGuard.empty()) {
             Guard guard;
@@ -613,7 +614,7 @@ void FHTemplateProcessor::runBorderRoads()
 
         for (MapCanvas::Tile* ncell : cell->m_allNeighbours) {
             if (!ncellFound && ncell && ncell->m_zone != cell->m_zone) {
-                ncell->m_zone->m_roadNodes.insert(ncell);
+                ncell->m_zone->m_roadNodesHighPriority.insert(ncell);
                 ncellFound = ncell;
             }
         }
@@ -658,159 +659,20 @@ void FHTemplateProcessor::runBorderRoads()
             tileZone.m_innerAreaUsable.m_innerArea.insert(cell);
         }
         tileZone.m_innerAreaUsable.makeEdgeFromInnerArea();
+
+        auto bottomEdge = tileZone.m_innerAreaUsable.getBottomEdge();
+        for (auto* cell : bottomEdge)
+            tileZone.m_innerAreaUsable.m_innerArea.erase(cell);
+        tileZone.m_innerAreaUsable.makeEdgeFromInnerArea();
     }
 }
 
 void FHTemplateProcessor::runRoadsPlacement()
 {
+    RoadHelper roadHelper(m_map, m_mapCanvas, m_rng, m_logOutput);
+
     for (auto& tileZone : m_tileZones) {
-        size_t zoneArea = tileZone.m_innerAreaUsable.m_innerArea.size();
-        if (zoneArea < (size_t) tileZone.m_rngZoneSettings.m_segmentAreaSize * 2) {
-            tileZone.m_innerAreaSegments.push_back(tileZone.m_innerAreaUsable);
-        } else {
-            const int k = zoneArea / tileZone.m_rngZoneSettings.m_segmentAreaSize;
-
-            KMeansSegmentation seg;
-            seg.m_points.reserve(zoneArea);
-            for (auto* cell : tileZone.m_innerAreaUsable.m_innerArea) {
-                seg.m_points.push_back({ cell->m_pos });
-            }
-
-            seg.initRandomClusterCentoids(k, m_rng);
-            seg.run(m_logOutput);
-
-            for (KMeansSegmentation::Cluster& cluster : seg.m_clusters) {
-                TileZone::TileRegion zoneSeg;
-                for (auto& point : cluster.m_points) {
-                    auto* cell = m_mapCanvas.m_tileIndex.at(point->toPos());
-                    zoneSeg.insert(cell);
-                }
-                tileZone.m_innerAreaSegments.push_back(TileZone::Area{ .m_innerArea = std::move(zoneSeg) });
-            }
-        }
-
-        for (size_t i = 0; auto& area : tileZone.m_innerAreaSegments) {
-            i++;
-            area.makeEdgeFromInnerArea();
-            area.removeEdgeFromInnerArea();
-
-            std::vector<MapCanvas::Tile*> sortedTiles(area.m_innerEdge.cbegin(), area.m_innerEdge.cend());
-            std::sort(sortedTiles.begin(), sortedTiles.end(), [](MapCanvas::Tile* l, MapCanvas::Tile* r) { return l->m_pos < r->m_pos; });
-
-            for (auto* cell : sortedTiles) {
-                cell->m_segmentIndex     = i;
-                bool hasNeighbourInRoads = false;
-                for (MapCanvas::Tile* cellAdj : cell->m_allNeighbours) {
-                    const bool same = cellAdj->m_segmentIndex == cell->m_segmentIndex && cellAdj->m_zone == cell->m_zone;
-                    if (same)
-                        continue;
-                    if (tileZone.m_innerAreaSegmentsRoads.contains(cellAdj))
-                        hasNeighbourInRoads = true;
-                }
-                if (!hasNeighbourInRoads)
-                    tileZone.m_innerAreaSegmentsRoads.insert(cell);
-            }
-            for (auto* cell : area.m_innerArea) {
-                cell->m_segmentIndex = i;
-            }
-        }
-
-        //m_logOutput << m_indent << "tileZone.m_roadNodes 1=" << tileZone.m_roadNodes.size() << "\n";
-
-        for (TileZone::Area& area : tileZone.m_innerAreaSegments) {
-            std::vector<MapCanvas::Tile*> innerEdge(area.m_innerEdge.cbegin(), area.m_innerEdge.cend());
-            std::sort(innerEdge.begin(), innerEdge.end(), [](MapCanvas::Tile* l, MapCanvas::Tile* r) { return l->m_pos < r->m_pos; });
-
-            for (MapCanvas::Tile* cell : innerEdge) {
-                std::set<std::pair<TileZone*, size_t>> neighAreaBorders;
-                if (!cell->m_neighborB || !cell->m_neighborT || !cell->m_neighborL || !cell->m_neighborR)
-                    neighAreaBorders.insert(std::pair<TileZone*, size_t>{ nullptr, 0 });
-
-                for (MapCanvas::Tile* cellAdj : cell->m_allNeighbours) {
-                    if (area.contains(cellAdj))
-                        continue;
-                    size_t    neighbourSegIndex = cellAdj->m_segmentIndex;
-                    TileZone* neightZone        = cellAdj->m_zone;
-                    if (neightZone != &tileZone)
-                        neighbourSegIndex = 0;
-                    neighAreaBorders.insert({ neightZone, neighbourSegIndex });
-                }
-                if (neighAreaBorders.size() > 1) {
-                    int64_t minDistance = 1000;
-                    for (auto* roadCell : tileZone.m_roadNodes) {
-                        minDistance = std::min(minDistance, posDistance(cell->m_pos, roadCell->m_pos));
-                    }
-                    if (minDistance > 2)
-                        tileZone.m_roadNodes.insert(cell);
-                }
-            }
-        }
-        for (auto* cell : tileZone.m_roadNodes) {
-            tileZone.m_innerAreaSegmentsRoads.insert(cell);
-            for (MapCanvas::Tile* cellAdj : cell->m_allNeighbours) {
-                tileZone.m_innerAreaSegmentsRoads.insert(cellAdj);
-            }
-        }
-
-        //m_logOutput << m_indent << "tileZone.m_roadNodes 2=" << tileZone.m_roadNodes.size() << "\n";
-
-        //        for (auto* cell : tileZone.m_innerAreaSegmentsRoads) {
-        //            m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 3 });
-        //        }
-
-        std::vector<MapCanvas::Tile*> unconnectedRoadNodes(tileZone.m_roadNodes.cbegin(), tileZone.m_roadNodes.cend());
-        if (unconnectedRoadNodes.size() <= 1)
-            continue;
-
-        std::sort(unconnectedRoadNodes.begin(), unconnectedRoadNodes.end(), [&tileZone](MapCanvas::Tile* l, MapCanvas::Tile* r) {
-            const bool ltown = tileZone.m_roadNodesTowns.contains(l);
-            const bool rtown = tileZone.m_roadNodesTowns.contains(r);
-            if (ltown != rtown) {
-                if (ltown && !rtown)
-                    return false;
-                if (!ltown && rtown)
-                    return true;
-            }
-
-            return l->m_pos < r->m_pos;
-        });
-
-        std::vector<MapCanvas::Tile*> connected;
-        {
-            MapCanvas::Tile* cell = unconnectedRoadNodes.back();
-            unconnectedRoadNodes.pop_back();
-            connected.push_back(cell);
-        }
-
-        while (!unconnectedRoadNodes.empty()) {
-            MapCanvas::Tile* cell = unconnectedRoadNodes.back();
-            unconnectedRoadNodes.pop_back();
-
-            std::sort(connected.begin(), connected.end(), [](MapCanvas::Tile* l, MapCanvas::Tile* r) {
-                return l->m_pos < r->m_pos;
-            });
-
-            auto             it      = std::min_element(connected.cbegin(), connected.cend(), [cell](MapCanvas::Tile* l, MapCanvas::Tile* r) {
-                return posDistance(cell->m_pos, l->m_pos) < posDistance(cell->m_pos, r->m_pos);
-            });
-            MapCanvas::Tile* closest = *it;
-            auto             path    = aStarPath(tileZone, cell, closest);
-
-            //m_logOutput << m_indent << "aStarPath=" << tileZone.m_innerAreaSegmentsRoads.size() << ", con=" << connected.size() << ", unc=" << unconnectedRoadNodes.size() << "\n";
-
-            connected.push_back(cell);
-
-            for (auto& pos : path) {
-                auto* pathTile = m_mapCanvas.m_tileIndex.at(pos);
-                tileZone.m_placedRoads.insert(pathTile);
-                tileZone.m_innerAreaSegmentsRoads.insert(pathTile);
-
-                for (TileZone::Area& area : tileZone.m_innerAreaSegments)
-                    area.m_innerArea.erase(pathTile);
-            }
-
-            placeRoad(std::move(path));
-        }
+        roadHelper.placeRoads(tileZone);
     }
 }
 
@@ -838,14 +700,6 @@ void FHTemplateProcessor::runRewards()
             if (!bundle.placeOnMap(bundleSet.m_cells, m_rng)) {
                 m_logOutput << m_indent << "g placement failure [" << i << "]: size=" << bundle.getEstimatedArea() << "; " << bundle.toPrintableString() << "\n";
                 continue;
-            } else {
-                //                for (auto pos : bundle.m_protectionBorder) {
-                //                    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = tileZone.m_index, .m_valueB = 3 });
-                //                }
-                //                for (auto pos : bundle.m_guardRegion) {
-                //                    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = tileZone.m_index, .m_valueB = 1 });
-                //                }
-                //m_logOutput << m_indent << "g placement success [" << i << "]: size=" << bundle.getEstimatedArea() << "; " << bundle.toPrintableString() << "\n";
             }
 
             for (auto pos : bundle.m_protectionBorder) {
@@ -854,9 +708,6 @@ void FHTemplateProcessor::runRewards()
 
                 //m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = tileZone.m_index, .m_valueB = 1 });
             }
-            //for (auto pos : bundle.m_blurForPassable) {
-            //    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = tileZone.m_index, .m_valueB = 3 });
-            //}
 
             if (bundle.m_guard) {
                 Guard guard;
@@ -871,12 +722,8 @@ void FHTemplateProcessor::runRewards()
             i++;
             if (!bundle.placeOnMap(bundleSet.m_cells, m_rng)) {
                 m_logOutput << m_indent << "u placement failure [" << i << "]: size=" << bundle.getEstimatedArea() << "; " << bundle.toPrintableString() << "\n";
-
                 continue;
             }
-            //for (auto pos : bundle.m_blurForPassable) {
-            //    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = tileZone.m_index, .m_valueB = 3 });
-            //}
         }
     }
 
@@ -894,8 +741,6 @@ void FHTemplateProcessor::runCorrectObjectTerrains()
         if (defIndex.substitution == "!!" || defIndex.variant == "!!")
             throw std::runtime_error("Failed to replace '" + id + "' def ('" + old.variant + "','" + old.substitution + "') for '" + requiredTerrain->id + "'");
 
-        //m_logOutput << id << "  ('" << old.variant << "','" << old.substitution << "') "
-        //            << " -> ('" << defIndex.variant << "','" << defIndex.substitution << "') \n";
         return result;
     };
 
@@ -1282,22 +1127,34 @@ void FHTemplateProcessor::placeDebugInfo()
             }
         }
 
+        /*
+        for (auto* cell : tileZone.m_innerAreaUsable.m_innerEdge) {
+            m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 1 });
+        }
+        for (auto* cell : tileZone.m_innerAreaSegmentsRoads) {
+            if (!tileZone.m_innerAreaUsable.m_innerEdge.contains(cell))
+                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 3 });
+            else
+                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 4 });
+        }
+        for (auto* cell : tileZone.m_roadNodes) {
+            m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 2 });
+        }*/
+
         if (m_stopAfter <= Stage::RoadsPlacement) {
             for (auto* cell : tileZone.m_roadNodes) {
-                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 1 });
+                // if (tileZone.m_innerAreaUsable.m_innerEdge.contains(cell))
+                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 2 });
+            }
+            //for (auto* cell : tileZone.m_roadNodesTowns) {
+            //    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 1 });
+            //}
+            for (auto* cell : tileZone.m_innerAreaSegmentsRoads) {
+                if (!tileZone.m_roadNodes.contains(cell))
+                    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 3 });
             }
         }
     }
-}
-
-void FHTemplateProcessor::placeRoad(std::vector<FHPos> path)
-{
-    if (path.empty())
-        return;
-    FHRoad road;
-    road.m_type  = FHRoadType::Cobblestone;
-    road.m_tiles = std::move(path);
-    m_map.m_roads.push_back(std::move(road));
 }
 
 Core::LibraryFactionConstPtr FHTemplateProcessor::getRandomFaction(bool rewardOnly)
@@ -1338,99 +1195,6 @@ TileZone& FHTemplateProcessor::findZoneById(const std::string& id)
     if (it == m_tileZones.end())
         throw std::runtime_error("Invalid zone id:" + id);
     return *it;
-}
-
-std::vector<FHPos> FHTemplateProcessor::aStarPath(TileZone& zone, MapCanvas::Tile* start, MapCanvas::Tile* end)
-{
-    AstarGenerator generator;
-    generator.setPoints({ start->m_pos.m_x, start->m_pos.m_y }, { end->m_pos.m_x, end->m_pos.m_y });
-
-    {
-        std::set<FHPos> nonCollideSet;
-        for (MapCanvas::Tile* tile : zone.m_innerAreaSegmentsRoads) {
-            // prevent circular border roads:
-            if (zone.m_innerAreaUsable.m_innerEdge.contains(tile)) {
-                if (!zone.m_roadNodes.contains(tile))
-                    continue;
-            }
-            nonCollideSet.insert(tile->m_pos);
-
-            //m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = tile->m_pos, .m_valueA = 1, .m_valueB = 3 });
-        }
-
-        generator.setNonCollision(std::move(nonCollideSet));
-    }
-
-    auto path = generator.findPath();
-
-    if (!generator.isSuccess()) {
-        std::set<FHPos> nonCollideSet;
-
-        for (MapCanvas::Tile* tile : zone.m_innerAreaSegmentsRoads)
-            nonCollideSet.insert(tile->m_pos);
-
-        for (auto& areaSeg : zone.m_innerAreaSegments) {
-            if (areaSeg.contains(start) || areaSeg.contains(end)) {
-                for (MapCanvas::Tile* tile : areaSeg.m_innerArea)
-                    nonCollideSet.insert(tile->m_pos);
-            }
-        }
-
-        generator.setNonCollision(std::move(nonCollideSet));
-        path = generator.findPath();
-    }
-
-    if (!generator.isSuccess()) {
-        std::set<FHPos> nonCollideSet;
-        for (MapCanvas::Tile* tile : zone.m_innerAreaUsable.m_innerArea)
-            nonCollideSet.insert(tile->m_pos);
-        generator.setNonCollision(std::move(nonCollideSet));
-        path = generator.findPath();
-    }
-
-    const auto pathCopy = path;
-    for (size_t i = 1; i < pathCopy.size(); i++) {
-        FHPos prev = pathCopy[i - 1];
-        FHPos cur  = pathCopy[i];
-        if (prev.m_x != cur.m_x && prev.m_y != cur.m_y) // diagonal
-        {
-            FHPos extra1 = prev;
-            FHPos extra2 = prev;
-
-            // from TL to BR
-            if (prev.m_x < cur.m_x && prev.m_y < cur.m_y) {
-                extra1.m_y = cur.m_y;
-                extra2.m_x = cur.m_x;
-            }
-
-            // from BL to TR
-            if (prev.m_x < cur.m_x && prev.m_y > cur.m_y) {
-                extra1.m_x = cur.m_x;
-                extra2.m_y = cur.m_y;
-            }
-
-            // from TR to BL
-            if (prev.m_x > cur.m_x && prev.m_y < cur.m_y) {
-                extra1.m_y = cur.m_y;
-                extra2.m_x = cur.m_x;
-            }
-
-            // from BR to TL
-            if (prev.m_x > cur.m_x && prev.m_y > cur.m_y) {
-                extra1.m_x = cur.m_x;
-                extra2.m_y = cur.m_y;
-            }
-
-            if (zone.m_placedRoads.contains(m_mapCanvas.m_tileIndex.at(extra1)))
-                path.push_back(extra1);
-            else if (zone.m_placedRoads.contains(m_mapCanvas.m_tileIndex.at(extra2)))
-                path.push_back(extra2);
-            else
-                path.push_back(extra1);
-        }
-    }
-
-    return path;
 }
 
 int FHTemplateProcessor::getPossibleCount(Core::LibraryUnitConstPtr unit, int64_t value) const

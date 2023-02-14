@@ -225,8 +225,6 @@
                 "towns": [
                     {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}, "useZoneFaction": true}, 
                     {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}},
-                    {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}},
-                    {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}},
                     {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}}],
 
                 "guardMin": 20000,
