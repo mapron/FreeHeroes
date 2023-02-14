@@ -8,15 +8,17 @@
 #include "MernelReflection/EnumTraitsMacro.hpp"
 #include "MernelPlatform/Profiler.hpp"
 
-#include "LibraryPlayer.hpp"
-#include "LibraryMapBank.hpp"
 #include "LibraryDwelling.hpp"
+#include "LibraryMapBank.hpp"
+#include "LibraryMapVisitable.hpp"
+#include "LibraryObjectDef.hpp"
+#include "LibraryPlayer.hpp"
 
-#include "RmgUtil/TemplateUtils.hpp"
-#include "RmgUtil/ObjectGenerator.hpp"
 #include "RmgUtil/KMeans.hpp"
-#include "RmgUtil/ObstacleUtil.hpp"
 #include "RmgUtil/ObjectBundle.hpp"
+#include "RmgUtil/ObjectGenerator.hpp"
+#include "RmgUtil/ObstacleHelper.hpp"
+#include "RmgUtil/TemplateUtils.hpp"
 #include "RmgUtil/RoadHelper.hpp"
 
 #include <functional>
@@ -553,117 +555,18 @@ void FHTemplateProcessor::runTownsPlacement()
 
 void FHTemplateProcessor::runBorderRoads()
 {
-    std::map<std::pair<TileZone*, TileZone*>, TileZone::TileRegion> borderTiles;
-    auto                                                            makeKey = [](TileZone& f, TileZone& s) {
-        std::pair key{ &f, &s };
-        if (f.m_index > s.m_index)
-            key = std::pair{ &s, &f };
-        return key;
-    };
+    RoadHelper roadHelper(m_map, m_mapCanvas, m_rng, m_logOutput);
+    roadHelper.makeBorders(m_tileZones);
 
-    for (auto& tileZoneFirst : m_tileZones) {
-        for (auto& tileZoneSecond : m_tileZones) {
-            auto key = makeKey(tileZoneFirst, tileZoneSecond);
-            if (borderTiles.contains(key))
-                continue;
-            TileZone::TileRegion twoSideBorder;
-            for (auto* cell : tileZoneFirst.m_area.m_outsideEdge) {
-                if (cell->m_zone == &tileZoneSecond)
-                    twoSideBorder.insert(cell);
-            }
-            for (auto* cell : tileZoneSecond.m_area.m_outsideEdge) {
-                if (cell->m_zone == &tileZoneFirst)
-                    twoSideBorder.insert(cell);
-            }
-            borderTiles[key] = twoSideBorder;
-        }
-    }
-
-    TileZone::TileRegion connectionUnblockableCells;
-
-    for (const auto& [connectionId, connections] : m_map.m_template.m_connections) {
-        auto&                 tileZoneFrom = findZoneById(connections.m_from);
-        auto&                 tileZoneTo   = findZoneById(connections.m_to);
-        auto                  key          = makeKey(tileZoneFrom, tileZoneTo);
-        TileZone::TileRegion& border       = borderTiles[key];
-        if (border.empty()) {
-            throw std::runtime_error("No border between '" + connections.m_from + "' and '" + connections.m_to + "'");
-        }
-        std::vector<MapCanvas::Tile*> borderVec(border.cbegin(), border.cend());
-        std::sort(borderVec.begin(), borderVec.end(), [](MapCanvas::Tile* l, MapCanvas::Tile* r) {
-            return l->m_pos < r->m_pos;
+    for (auto& guard : roadHelper.m_guards) {
+        m_guards.push_back(Guard{
+            .m_value        = guard.m_value,
+            .m_id           = guard.m_id,
+            .m_mirrorFromId = guard.m_mirrorFromId,
+            .m_pos          = guard.m_pos,
+            .m_zone         = guard.m_zone,
+            .m_joinable     = guard.m_joinable,
         });
-        FHPos borderCentroid = TileZone::makeCentroid(border); // switch to k-means when we need more than one connection.
-
-        auto             it   = std::min_element(borderVec.cbegin(), borderVec.cend(), [&borderCentroid](MapCanvas::Tile* l, MapCanvas::Tile* r) {
-            return posDistance(borderCentroid, l->m_pos) < posDistance(borderCentroid, r->m_pos);
-        });
-        MapCanvas::Tile* cell = (*it);
-        cell->m_zone->m_roadNodesHighPriority.insert(cell);
-
-        if (connections.m_guard || !connections.m_mirrorGuard.empty()) {
-            Guard guard;
-            guard.m_id           = connectionId;
-            guard.m_value        = connections.m_guard;
-            guard.m_mirrorFromId = connections.m_mirrorGuard;
-            guard.m_pos          = cell->m_pos;
-            guard.m_zone         = nullptr;
-            m_guards.push_back(guard);
-        }
-        MapCanvas::Tile* ncellFound = nullptr;
-
-        for (MapCanvas::Tile* ncell : cell->m_allNeighbours) {
-            if (!ncellFound && ncell && ncell->m_zone != cell->m_zone) {
-                ncell->m_zone->m_roadNodesHighPriority.insert(ncell);
-                ncellFound = ncell;
-            }
-        }
-        assert(ncellFound);
-        border.erase(cell);
-        border.erase(ncellFound);
-        border.erase(cell->m_neighborT);
-        border.erase(ncellFound->m_neighborT);
-        border.erase(cell->m_neighborL);
-        border.erase(ncellFound->m_neighborL);
-        connectionUnblockableCells.insert(cell);
-    }
-    TileZone::TileRegion noExpandTiles;
-    for (MapCanvas::Tile& tile : m_mapCanvas.m_tiles) {
-        for (auto* cell : connectionUnblockableCells) {
-            if (posDistance(tile.m_pos, cell->m_pos) < 4)
-                noExpandTiles.insert(&tile);
-        }
-    }
-    for (const auto& [key, border] : borderTiles) {
-        m_mapCanvas.m_needBeBlocked.insert(border.cbegin(), border.cend());
-    }
-    for (const auto& [key, border] : borderTiles) {
-        for (auto* cell : border) {
-            for (MapCanvas::Tile* ncell : cell->m_allNeighbours) {
-                if (m_mapCanvas.m_needBeBlocked.contains(ncell))
-                    continue;
-                if (noExpandTiles.contains(ncell))
-                    continue;
-                m_mapCanvas.m_tentativeBlocked.insert(ncell);
-            }
-        }
-    }
-
-    for (auto& tileZone : m_tileZones) {
-        tileZone.m_innerAreaUsable = {};
-        for (auto* cell : tileZone.m_area.m_innerArea) {
-            if (m_mapCanvas.m_blocked.contains(cell)
-                || m_mapCanvas.m_needBeBlocked.contains(cell)
-                || m_mapCanvas.m_tentativeBlocked.contains(cell))
-                continue;
-            tileZone.m_innerAreaUsable.m_innerArea.insert(cell);
-        }
-        tileZone.m_innerAreaUsable.makeEdgeFromInnerArea();
-
-        auto bottomEdge = tileZone.m_innerAreaUsable.getBottomEdge();
-        for (auto* cell : bottomEdge)
-            tileZone.m_innerAreaUsable.m_innerArea.erase(cell);
-        tileZone.m_innerAreaUsable.makeEdgeFromInnerArea();
     }
 }
 
@@ -711,9 +614,10 @@ void FHTemplateProcessor::runRewards()
 
             if (bundle.m_guard) {
                 Guard guard;
-                guard.m_value = bundle.m_guard;
-                guard.m_pos   = bundle.m_guardAbsPos;
-                guard.m_zone  = &tileZone;
+                guard.m_value    = bundle.m_guard;
+                guard.m_pos      = bundle.m_guardAbsPos;
+                guard.m_zone     = &tileZone;
+                guard.m_joinable = true;
                 m_guards.push_back(guard);
             }
         }
@@ -758,167 +662,8 @@ void FHTemplateProcessor::runCorrectObjectTerrains()
 
 void FHTemplateProcessor::runObstacles()
 {
-    ObstacleIndex obstacleIndex;
-    using Type = Core::LibraryMapObstacle::Type;
-    const std::set<Type> suitableObjTypes{
-        Type::BRUSH,
-        Type::BUSH,
-        Type::CACTUS,
-        Type::CANYON,
-        Type::CRATER,
-        Type::HILL,
-
-        Type::LAKE,
-        Type::LAVA_FLOW,
-        Type::LAVA_LAKE,
-        Type::MANDRAKE,
-        Type::MOUNTAIN,
-        Type::OAK_TREES,
-        Type::PINE_TREES,
-
-        Type::ROCK,
-        Type::SAND_DUNE,
-        Type::SAND_PIT,
-        Type::SHRUB,
-        Type::STALAGMITE,
-        Type::STUMP,
-        Type::TAR_PIT,
-        Type::TREES,
-        Type::VOLCANIC_VENT,
-        Type::VOLCANO,
-        Type::WILLOW_TREES,
-        Type::YUCCA_TREES,
-
-        Type::DESERT_HILLS,
-        Type::DIRT_HILLS,
-        Type::GRASS_HILLS,
-        Type::ROUGH_HILLS,
-
-        Type::SUBTERRANEAN_ROCKS,
-        Type::SWAMP_FOLIAGE,
-    };
-
-    for (auto* record : m_database->mapObstacles()->records()) {
-        if (!suitableObjTypes.contains(record->type))
-            continue;
-        obstacleIndex.add(record);
-    }
-    obstacleIndex.doSort();
-
-    Core::LibraryObjectDef::PlanarMask mapMask;
-    mapMask.width  = m_map.m_tileMap.m_width;
-    mapMask.height = m_map.m_tileMap.m_height;
-    mapMask.data.resize(mapMask.height);
-    for (auto& row : mapMask.data)
-        row.resize(mapMask.width);
-
-    for (MapCanvas::Tile* cell : m_mapCanvas.m_needBeBlocked)
-        mapMask.data[cell->m_pos.m_y][cell->m_pos.m_x] = 1;
-    for (MapCanvas::Tile* cell : m_mapCanvas.m_tentativeBlocked) {
-        mapMask.data[cell->m_pos.m_y][cell->m_pos.m_x] = 2;
-
-        //m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = 0, .m_valueB = 2 });
-    }
-
-    const size_t maxMaskLookupWidth  = 8;
-    const size_t maxMaskLookupHeight = 6;
-
-    /*
-    for (size_t y = 0; y < mapMask.height; ++y) {
-        for (size_t x = 0; x < mapMask.width; ++x) {
-            if (mapMask.data[y][x] == 0)
-                continue;
-            FHPos pos{ (int) x, (int) y, 0 };
-            m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = 0, .m_valueB = 0 });
-        }
-    }*/
-
-    for (size_t y = 0; y < mapMask.height; ++y) {
-        Core::LibraryMapObstacleConstPtr prev = nullptr;
-        for (size_t x = 0; x < mapMask.width; ++x) {
-            //if (mapMask.data[y][x] == 0)
-            //    continue;
-            if (obstacleIndex.isEmpty(mapMask, x, y, maxMaskLookupWidth, maxMaskLookupHeight))
-                continue;
-            std::vector<const ObstacleBucket*> buckets = obstacleIndex.find(mapMask, x, y);
-            if (buckets.empty())
-                continue;
-            assert(!buckets.empty());
-            int         z = 0;
-            const FHPos mapPos{ (int) x, (int) y, z };
-            //buckets = obstacleIndex.find(mapMask, x, y);
-
-            //const ObstacleBucket* firstBucket = buckets.front();
-
-            std::vector<Core::LibraryMapObstacleConstPtr> suitable;
-            for (const ObstacleBucket* bucket : buckets) {
-                for (auto* obst : bucket->m_objects) {
-                    if (obst == prev)
-                        continue;
-                    auto* def = obst->objectDefs.get({}); // @todo: substitutions?
-
-                    FHPos objPos = mapPos;
-                    objPos.m_x += def->blockMapPlanar.width - 1;
-                    objPos.m_y += def->blockMapPlanar.height - 1;
-                    if (!m_mapCanvas.m_tileIndex.contains(objPos))
-                        continue;
-
-                    Core::LibraryTerrainConstPtr requiredTerrain = m_mapCanvas.m_tileIndex.at(objPos)->m_zone->m_terrain;
-
-                    if (def->terrainsSoftCache.contains(requiredTerrain))
-                        suitable.push_back(obst);
-                }
-            }
-            //{
-            //    FHPos pos{ (int) x, (int) y, 0 };
-            //    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = 0, .m_valueB = 2 });
-            //}
-            if (suitable.empty())
-                continue;
-
-            //const auto                       bucketSize = firstBucket->m_objects.size();
-            Core::LibraryMapObstacleConstPtr obst = suitable[m_rng->gen(suitable.size() - 1)];
-            assert(obst);
-
-            prev = obst;
-
-            auto* def = obst->objectDefs.get({});
-            assert(def);
-
-            for (size_t my = 0; my < def->blockMapPlanar.height; ++my) {
-                for (size_t mx = 0; mx < def->blockMapPlanar.width; ++mx) {
-                    if (def->blockMapPlanar.data[my][mx] == 0)
-                        continue;
-                    size_t px = x + mx;
-                    size_t py = y + my;
-                    FHPos  maskBitPos{ (int) px, (int) py, 0 };
-                    if (py < mapMask.height && px < mapMask.width) {
-                        if (mapMask.data[py][px] == 1)
-                            mapMask.data[py][px] = 2;
-                        auto* cell = m_mapCanvas.m_tileIndex.at(maskBitPos);
-                        m_mapCanvas.m_needBeBlocked.erase(cell);
-                        m_mapCanvas.m_tentativeBlocked.erase(cell);
-                        m_mapCanvas.m_blocked.insert(cell);
-                    }
-                    //m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = 0, .m_valueB = 3 });
-                }
-            }
-
-            FHPos objPos = mapPos;
-            objPos.m_x += def->blockMapPlanar.width - 1;
-            objPos.m_y += def->blockMapPlanar.height - 1;
-
-            FHObstacle fhOb;
-            fhOb.m_id  = obst;
-            fhOb.m_pos = objPos;
-            m_map.m_objects.m_obstacles.push_back(std::move(fhOb));
-
-            //m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = 0, .m_valueB = 1 }); // red
-
-            //if (cnt-- <= 0)
-            //    return;
-        }
-    }
+    ObstacleHelper obstacleHelper(m_map, m_mapCanvas, m_rng, m_database, m_logOutput);
+    obstacleHelper.placeObstacles();
 
     for (auto* tile : m_mapCanvas.m_needBeBlocked) {
         m_logOutput << m_indent << "still require to be blocked: " << tile->posStr() << "\n";
@@ -1187,14 +932,6 @@ Core::LibraryHeroConstPtr FHTemplateProcessor::getRandomHero(Core::LibraryFactio
     auto* hero = heroes[m_rng->gen(heroes.size() - 1)];
     m_heroPool.erase(hero);
     return hero;
-}
-
-TileZone& FHTemplateProcessor::findZoneById(const std::string& id)
-{
-    auto it = std::find_if(m_tileZones.begin(), m_tileZones.end(), [&id](const TileZone& zone) { return zone.m_id == id; });
-    if (it == m_tileZones.end())
-        throw std::runtime_error("Invalid zone id:" + id);
-    return *it;
 }
 
 int FHTemplateProcessor::getPossibleCount(Core::LibraryUnitConstPtr unit, int64_t value) const

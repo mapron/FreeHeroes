@@ -63,7 +63,6 @@ private:
 
     Core::LibraryFactionConstPtr getRandomFaction(bool rewardOnly);
     Core::LibraryHeroConstPtr    getRandomHero(Core::LibraryFactionConstPtr faction);
-    TileZone&                    findZoneById(const std::string& id);
     int                          getPossibleCount(Core::LibraryUnitConstPtr unit, int64_t value) const;
 
 private:
