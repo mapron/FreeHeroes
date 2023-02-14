@@ -10,7 +10,7 @@
 namespace FreeHeroes {
 using namespace Mernel;
 
-std::string FHScoreSettings::attrToString(FHScoreAttr attr)
+std::string FHScoreSettings::attrToString(Core::ScoreAttr attr)
 {
     auto str = Mernel::Reflection::EnumTraits::enumToString(attr);
     return std::string(str.data(), str.size());
@@ -33,9 +33,9 @@ void FHTemplate::rescaleToSize(int newMapSize, int oldWidth, int oldHeight)
     }
 }
 
-FHScore operator+(const FHScore& l, const FHScore& r)
+Core::MapScore operator+(const Core::MapScore& l, const Core::MapScore& r)
 {
-    FreeHeroes::FHScore result = l;
+    FreeHeroes::Core::MapScore result = l;
 
     for (const auto& [key, val] : r)
         result[key] += val;
@@ -43,9 +43,9 @@ FHScore operator+(const FHScore& l, const FHScore& r)
     return result;
 }
 
-FHScore operator-(const FHScore& l, const FHScore& r)
+Core::MapScore operator-(const Core::MapScore& l, const Core::MapScore& r)
 {
-    FreeHeroes::FHScore result = l;
+    FreeHeroes::Core::MapScore result = l;
 
     for (const auto& [key, val] : r) {
         result[key] -= val;
@@ -56,7 +56,7 @@ FHScore operator-(const FHScore& l, const FHScore& r)
     return result;
 }
 
-std::ostream& operator<<(std::ostream& stream, const FHScore& score)
+std::ostream& operator<<(std::ostream& stream, const Core::MapScore& score)
 {
     stream << "{";
     for (bool start = false; const auto& [key, val] : score) {
@@ -69,7 +69,7 @@ std::ostream& operator<<(std::ostream& stream, const FHScore& score)
     return stream;
 }
 
-int64_t maxScoreValue(const FHScore& score)
+int64_t maxScoreValue(const Core::MapScore& score)
 {
     int64_t result = 0;
     for (const auto& [attr, value] : score)
@@ -77,7 +77,7 @@ int64_t maxScoreValue(const FHScore& score)
     return result;
 }
 
-int64_t totalScoreValue(const FHScore& score)
+int64_t totalScoreValue(const Core::MapScore& score)
 {
     int64_t result = 0;
     for (const auto& [attr, value] : score)

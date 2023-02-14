@@ -24,13 +24,14 @@ public:
             Removable, // Prison
         };
 
-        virtual void        setPos(FHPos pos) = 0;
-        virtual void        place() const     = 0;
-        virtual FHScore     getScore() const  = 0;
-        virtual void        disable()         = 0;
-        virtual std::string getId() const     = 0;
-        virtual int64_t     getGuard() const  = 0;
-        virtual Type        getType() const   = 0;
+        virtual void           setPos(FHPos pos) = 0;
+        virtual void           place() const     = 0;
+        virtual Core::MapScore getScore() const  = 0;
+        virtual void           disable()         = 0;
+        virtual std::string    getId() const     = 0;
+        virtual int64_t        getGuard() const  = 0;
+        virtual Type           getType() const   = 0;
+        virtual FHPos          getOffset() const { return FHPos{}; }
 
         virtual Core::LibraryObjectDefConstPtr getDef() const { return nullptr; }
     };
@@ -50,7 +51,7 @@ public:
         std::vector<IObjectPtr> m_objects;
         int                     m_guardPercent = 100;
         std::string             m_id;
-        FHScore                 m_targetScore;
+        Core::MapScore          m_targetScore;
         int64_t                 m_targetScoreTotal = 0;
         const FHScoreSettings*  m_scoreSettings    = nullptr;
     };
@@ -71,7 +72,7 @@ public:
                   Core::LibraryFactionConstPtr rewardsFaction,
                   Core::LibraryTerrainConstPtr terrain);
 
-    bool generateOneObject(const FHScore& targetScore, FHScore& currentScore, std::vector<IObjectFactoryPtr>& objectFactories, ObjectGroup& group);
+    bool generateOneObject(const Core::MapScore& targetScore, Core::MapScore& currentScore, std::vector<IObjectFactoryPtr>& objectFactories, ObjectGroup& group);
 
     static bool correctObjIndex(Core::ObjectDefIndex& defIndex, const Core::ObjectDefMappings& defMapping, Core::LibraryTerrainConstPtr requiredTerrain);
     static bool terrainViable(const Core::ObjectDefMappings& defMapping, Core::LibraryTerrainConstPtr requiredTerrain);
@@ -94,7 +95,6 @@ private:
     struct ObjectFactoryShrine;
     struct ObjectFactoryDwelling;
     struct ObjectFactoryVisitable;
-    struct ObjectFactorySpecialResource;
     struct ObjectFactoryMine;
 
 private:

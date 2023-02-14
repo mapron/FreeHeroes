@@ -178,17 +178,11 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     }
     for (auto& obj : fhMap.m_objects.m_resources) {
         Core::LibraryObjectDefConstPtr def;
-        const bool                     isCommonRes = obj.m_specialType == Core::LibraryResource::SpecialResource::Invalid;
-        if (isCommonRes) {
-            def = obj.m_id->objectDefs.get({});
-        } else {
-            auto* visitableId = database->mapVisitables()->find(Core::LibraryResource::getSpecialId(obj.m_specialType));
-            assert(visitableId);
-            def = visitableId->objectDefs.get(obj.m_defIndex);
-        }
+        def = obj.m_id->objectDefs.get({});
+
         auto* item = result.addItem(makeItemByDef(SpriteMap::Layer::Resource, def, obj.m_pos));
         addValueInfo(item, obj);
-        if (isCommonRes) {
+        {
             auto strCount = std::to_string(obj.m_amount);
             item->addInfo("amount", strCount);
             if (obj.m_amount >= 5000)

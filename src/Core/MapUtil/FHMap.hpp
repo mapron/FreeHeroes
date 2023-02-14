@@ -75,9 +75,8 @@ struct FHMine : public FHPlayerControlledObject {
 };
 
 struct FHResource : public FHCommonObject {
-    uint32_t                               m_amount      = 0;
-    Core::LibraryResourceConstPtr          m_id          = nullptr;
-    Core::LibraryResource::SpecialResource m_specialType = Core::LibraryResource::SpecialResource::Invalid;
+    uint32_t                      m_amount = 0;
+    Core::LibraryResourceConstPtr m_id     = nullptr;
 
     bool operator==(const FHResource&) const noexcept = default;
 };

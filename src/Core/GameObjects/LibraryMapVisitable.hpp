@@ -6,6 +6,7 @@
 #pragma once
 
 #include "LibraryObjectDef.hpp"
+#include "MapScore.hpp"
 
 #include <string>
 #include <vector>
@@ -14,22 +15,20 @@
 namespace FreeHeroes::Core {
 
 struct LibraryMapVisitable {
-    enum class Type
+    enum class VisitKind
     {
         Invalid,
-        Upgrade,
-        Exp,
-        ExpGold,
-        Support,
-        Generator,
+        Normal,
+        Pick,
     };
 
     int         legacyId = -1;
     std::string id;
 
-    Type type      = Type::Invalid;
-    int  value     = 0;
-    int  frequency = 0;
+    ScoreAttr attr      = ScoreAttr::Invalid;
+    int       value     = 0;
+    int       frequency = 0;
+    VisitKind visitKind = VisitKind::Normal;
 
     ObjectDefMappings objectDefs;
 };

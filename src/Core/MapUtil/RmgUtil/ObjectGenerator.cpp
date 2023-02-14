@@ -20,13 +20,13 @@ namespace FreeHeroes {
 
 namespace {
 
-FHScore estimateReward(const Core::Reward& reward)
+Core::MapScore estimateReward(const Core::Reward& reward)
 {
-    FHScore score;
+    Core::MapScore score;
     for (const auto& [id, count] : reward.resources.data) {
         const int amount = count / id->pileSize;
         const int value  = amount * id->value;
-        auto      attr   = (id->rarity == Core::LibraryResource::Rarity::Gold) ? FHScoreAttr::Gold : FHScoreAttr::Resource;
+        auto      attr   = (id->rarity == Core::LibraryResource::Rarity::Gold) ? Core::ScoreAttr::Gold : Core::ScoreAttr::Resource;
         score[attr] += value;
     }
 
@@ -38,43 +38,43 @@ FHScore estimateReward(const Core::Reward& reward)
         armyValue += unit.m_value;
     }
     if (armyValue)
-        score[FHScoreAttr::Army] = armyValue;
+        score[Core::ScoreAttr::Army] = armyValue;
 
     if (reward.gainedExp)
-        score[FHScoreAttr::Experience] = reward.gainedExp * 5 / 4;
+        score[Core::ScoreAttr::Experience] = reward.gainedExp * 5 / 4;
 
     return score;
 }
 
-void estimateArtScore(Core::LibraryArtifactConstPtr art, FHScore& score)
+void estimateArtScore(Core::LibraryArtifactConstPtr art, Core::MapScore& score)
 {
-    auto attr = FHScoreAttr::ArtSupport;
+    auto attr = Core::ScoreAttr::ArtSupport;
     if (std::find(art->tags.cbegin(), art->tags.cend(), Core::LibraryArtifact::Tag::Stats) != art->tags.cend())
-        attr = FHScoreAttr::ArtStat;
+        attr = Core::ScoreAttr::ArtStat;
     if (std::find(art->tags.cbegin(), art->tags.cend(), Core::LibraryArtifact::Tag::Control) != art->tags.cend())
-        attr = FHScoreAttr::Control;
+        attr = Core::ScoreAttr::Control;
 
     score[attr] = art->value;
 }
 
-void estimateSpellScore(Core::LibrarySpellConstPtr spell, FHScore& score, bool asAnySpell)
+void estimateSpellScore(Core::LibrarySpellConstPtr spell, Core::MapScore& score, bool asAnySpell)
 {
-    auto attr = FHScoreAttr::SpellCommon;
+    auto attr = Core::ScoreAttr::SpellCommon;
     if (std::find(spell->tags.cbegin(), spell->tags.cend(), Core::LibrarySpell::Tag::Control) != spell->tags.cend())
-        attr = FHScoreAttr::Control;
+        attr = Core::ScoreAttr::Control;
     if (std::find(spell->tags.cbegin(), spell->tags.cend(), Core::LibrarySpell::Tag::OffensiveSummon) != spell->tags.cend())
-        attr = FHScoreAttr::SpellOffensive;
+        attr = Core::ScoreAttr::SpellOffensive;
 
     if (asAnySpell)
-        score[FHScoreAttr::SpellAny] = spell->value;
+        score[Core::ScoreAttr::SpellAny] = spell->value;
     else
         score[attr] = spell->value;
 }
 
-void estimateSpellListScore(const std::vector<Core::LibrarySpellConstPtr>& spells, FHScore& score, bool asAnySpell)
+void estimateSpellListScore(const std::vector<Core::LibrarySpellConstPtr>& spells, Core::MapScore& score, bool asAnySpell)
 {
     for (Core::LibrarySpellConstPtr spell : spells) {
-        FHScore one;
+        Core::MapScore one;
         estimateSpellScore(spell, one, asAnySpell);
         for (const auto& [attr, value] : one) {
             score[attr] = std::max(score[attr], value);
@@ -153,7 +153,7 @@ public:
         if (!enableFilter)
             return true;
 
-        FHScore score;
+        Core::MapScore score;
         estimateArtScore(art, score);
 
         bool isValid = scoreSettings.isValidScore(score);
@@ -247,7 +247,7 @@ public:
 
     static bool okFilter(Core::LibrarySpellConstPtr spell, bool asAnySpell, const FHScoreSettings& scoreSettings)
     {
-        FHScore score;
+        Core::MapScore score;
         estimateSpellScore(spell, score, asAnySpell);
 
         bool isValid = scoreSettings.isValidScore(score);
@@ -338,11 +338,11 @@ private:
 
 template<class T>
 struct ObjectGenerator::AbstractObject : public IObject {
-    void    setPos(FHPos pos) override { m_obj.m_pos = pos; }
-    void    place() const override { m_map->m_objects.container<T>().push_back(m_obj); }
-    FHScore getScore() const override { return m_obj.m_score; }
-    void    disable() override { m_onDisable(); }
-    int64_t getGuard() const override { return m_obj.m_guard; }
+    void           setPos(FHPos pos) override { m_obj.m_pos = pos; }
+    void           place() const override { m_map->m_objects.container<T>().push_back(m_obj); }
+    Core::MapScore getScore() const override { return m_obj.m_score; }
+    void           disable() override { m_onDisable(); }
+    int64_t        getGuard() const override { return m_obj.m_guard; }
 
     T                     m_obj;
     FHMap*                m_map = nullptr;
@@ -458,7 +458,7 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
                     }
 
                     {
-                        const FHScore score = estimateReward(reward);
+                        const Core::MapScore score = estimateReward(reward);
 
                         if (!scoreSettings.isValidScore(score)) {
                             continue;
@@ -496,7 +496,7 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
         obj.m_map                 = &m_map;
 
         const Core::Reward& reward = record.m_id->rewards[record.m_id->variants[record.m_guardsVariant].rewardIndex];
-        FHScore             score  = estimateReward(reward);
+        Core::MapScore      score  = estimateReward(reward);
 
         {
             const Core::ArtifactFilter firstFilter = reward.artifacts.empty() ? Core::ArtifactFilter{} : reward.artifacts[0];
@@ -594,7 +594,7 @@ struct ObjectGenerator::ObjectFactoryResourcePile : public AbstractFactory<Recor
             return;
 
         for (const auto& [_, value] : genSettings.m_records) {
-            const auto attr = value.m_resource->rarity == Core::LibraryResource::Rarity::Gold ? FHScoreAttr::Gold : FHScoreAttr::Resource;
+            const auto attr = value.m_resource->rarity == Core::LibraryResource::Rarity::Gold ? Core::ScoreAttr::Gold : Core::ScoreAttr::Resource;
             for (int amount : value.m_amounts) {
                 ObjectResourcePile obj;
                 obj.m_obj.m_id          = value.m_resource;
@@ -975,7 +975,7 @@ struct ObjectGenerator::ObjectFactoryDwelling : public AbstractFactory<RecordDwe
                     rec.m_guard = scoreValue * 2;
                 }
                 rec.m_frequency = value.m_frequency;
-                if (scoreSettings.isValidValue(FHScoreAttr::ArmyDwelling, scoreValue))
+                if (scoreSettings.isValidValue(Core::ScoreAttr::ArmyDwelling, scoreValue))
                     m_records.m_records.push_back(rec);
             }
         }
@@ -996,7 +996,7 @@ struct ObjectGenerator::ObjectFactoryDwelling : public AbstractFactory<RecordDwe
         obj.m_obj.m_id     = record.m_id;
         obj.m_obj.m_player = m_none;
 
-        obj.m_obj.m_score[FHScoreAttr::ArmyDwelling] = record.m_value;
+        obj.m_obj.m_score[Core::ScoreAttr::ArmyDwelling] = record.m_value;
 
         obj.m_obj.m_guard = record.m_guard;
 
@@ -1015,8 +1015,16 @@ struct RecordVisitable : public CommonRecord<RecordVisitable> {
 struct ObjectGenerator::ObjectFactoryVisitable : public AbstractFactory<RecordVisitable> {
     struct ObjectVisitable : public AbstractObject<FHVisitable> {
         std::string                    getId() const override { return this->m_obj.m_visitableId->id; }
-        Type                           getType() const override { return Type::Visitable; }
+        Type                           getType() const override { return m_obj.m_visitableId->visitKind == Core::LibraryMapVisitable::VisitKind::Normal ? Type::Visitable : Type::Pickable; }
         Core::LibraryObjectDefConstPtr getDef() const override { return m_obj.m_visitableId->objectDefs.get({}); }
+        FHPos                          getOffset() const override
+        {
+            if (this->m_obj.m_visitableId->id == "hota.visitable.ancientLamp") {
+                // @todo: scan for visitable mask;
+                return FHPos{ +1, 0 };
+            }
+            return FHPos{};
+        }
     };
 
     ObjectFactoryVisitable(FHMap&                               map,
@@ -1031,7 +1039,7 @@ struct ObjectGenerator::ObjectFactoryVisitable : public AbstractFactory<RecordVi
             return;
 
         for (auto* visitable : database->mapVisitables()->records()) {
-            if (visitable->type == Core::LibraryMapVisitable::Type::Invalid)
+            if (visitable->attr == Core::ScoreAttr::Invalid)
                 continue;
 
             if (!ObjectGenerator::terrainViable(visitable->objectDefs, terrain))
@@ -1040,18 +1048,12 @@ struct ObjectGenerator::ObjectFactoryVisitable : public AbstractFactory<RecordVi
             RecordVisitable record;
             record.m_obj.m_visitableId = visitable;
             record.m_frequency         = visitable->frequency;
-            FHScore   score;
-            const int scoreValue = visitable->value;
+            Core::MapScore score;
+            const int      scoreValue = visitable->value;
             if (!scoreValue)
                 throw std::runtime_error("'" + visitable->id + "' has no valid score!");
 
-            FHScoreAttr attr = FHScoreAttr::Support;
-            if (visitable->type == Core::LibraryMapVisitable::Type::Upgrade)
-                attr = FHScoreAttr::Upgrade;
-            if (visitable->type == Core::LibraryMapVisitable::Type::Generator)
-                attr = FHScoreAttr::ResourceGen;
-            if (visitable->type == Core::LibraryMapVisitable::Type::Exp)
-                attr = FHScoreAttr::Experience;
+            Core::ScoreAttr attr = visitable->attr;
 
             record.m_obj.m_score[attr] = scoreValue;
 
@@ -1083,69 +1085,6 @@ struct ObjectGenerator::ObjectFactoryVisitable : public AbstractFactory<RecordVi
 
 // ---------------------------------------------------------------------------------------
 
-struct RecordSpecialResource : public CommonRecord<RecordSpecialResource> {
-    FHResource  m_obj;
-    std::string m_id;
-};
-
-struct ObjectGenerator::ObjectFactorySpecialResource : public AbstractFactory<RecordSpecialResource> {
-    struct ObjectSpecialResource : public AbstractObject<FHResource> {
-        std::string getId() const override { return this->m_id; }
-        Type        getType() const override { return Type::Pickable; }
-        std::string m_id;
-    };
-
-    ObjectFactorySpecialResource(FHMap&                                     map,
-                                 const FHRngZone::GeneratorSpecialResource& genSettings,
-                                 const FHScoreSettings&                     scoreSettings,
-                                 const Core::IGameDatabase*                 database,
-                                 Core::IRandomGenerator* const              rng)
-        : AbstractFactory<RecordSpecialResource>(map, database, rng)
-    {
-        if (!genSettings.m_isEnabled)
-            return;
-
-        for (const auto& [id, value] : genSettings.m_records) {
-            RecordSpecialResource record;
-            record.m_obj.m_specialType = value.m_specialType;
-            FHScoreAttr attr           = FHScoreAttr::Support;
-            assert(value.m_specialType != Core::LibraryResource::SpecialResource::Invalid);
-            if (value.m_specialType == Core::LibraryResource::SpecialResource::CampFire)
-                attr = FHScoreAttr::Gold;
-            if (value.m_specialType == Core::LibraryResource::SpecialResource::TreasureChest)
-                attr = FHScoreAttr::Experience;
-
-            auto scoreValue            = value.m_value;
-            record.m_id                = id;
-            record.m_frequency         = value.m_frequency;
-            record.m_obj.m_guard       = value.m_guard;
-            record.m_obj.m_score[attr] = scoreValue;
-            if (scoreSettings.isValidValue(attr, scoreValue))
-                m_records.m_records.push_back(record);
-        }
-
-        m_records.updateFrequency();
-    }
-
-    IObjectPtr make(uint64_t rngFreq) override
-    {
-        const size_t index  = m_records.getFreqIndex(rngFreq);
-        auto&        record = m_records.m_records[index];
-
-        ObjectSpecialResource obj;
-        obj.m_onDisable = [this, &record] {
-            m_records.onDisable(record);
-        };
-        obj.m_map = &m_map;
-        obj.m_obj = record.m_obj;
-        obj.m_id  = record.m_id;
-
-        return std::make_shared<ObjectSpecialResource>(std::move(obj));
-    }
-};
-
-// ---------------------------------------------------------------------------------------
-
 struct RecordMine : public CommonRecord<RecordMine> {
     FHMine m_obj;
 };
@@ -1171,8 +1110,8 @@ struct ObjectGenerator::ObjectFactoryMine : public AbstractFactory<RecordMine> {
 
         for (const auto& [_, value] : genSettings.m_records) {
             RecordMine record;
-            record.m_obj.m_id = value.m_resourceId;
-            FHScoreAttr attr  = FHScoreAttr::ResourceGen;
+            record.m_obj.m_id    = value.m_resourceId;
+            Core::ScoreAttr attr = Core::ScoreAttr::ResourceGen;
 
             auto scoreValue            = value.m_value;
             record.m_frequency         = value.m_frequency;
@@ -1219,7 +1158,7 @@ void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
             m_logOutput << indentBase << scoreId << " is disabled;\n";
             continue;
         }
-        FHScore targetScore;
+        Core::MapScore targetScore;
 
         for (const auto& [key, val] : scoreSettings.m_score)
             targetScore[key] = val.m_target;
@@ -1242,7 +1181,7 @@ void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
         const auto& scoreSettings = *group.m_scoreSettings;
 
         m_logOutput << indentBase << group.m_id << " start\n";
-        FHScore currentScore;
+        Core::MapScore currentScore;
 
         std::vector<IObjectFactoryPtr> objectFactories;
         objectFactories.push_back(std::make_shared<ObjectFactoryBank>(m_map, zoneSettings.m_generators.m_banks, scoreSettings, m_database, m_rng, &artifactPool, terrain));
@@ -1253,7 +1192,6 @@ void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
         objectFactories.push_back(std::make_shared<ObjectFactoryScroll>(m_map, zoneSettings.m_generators.m_scrolls, scoreSettings, m_database, m_rng, &spellPool));
         objectFactories.push_back(std::make_shared<ObjectFactoryDwelling>(m_map, zoneSettings.m_generators.m_dwellings, scoreSettings, m_database, m_rng, mainFaction));
         objectFactories.push_back(std::make_shared<ObjectFactoryVisitable>(m_map, zoneSettings.m_generators.m_visitables, scoreSettings, m_database, m_rng, terrain));
-        objectFactories.push_back(std::make_shared<ObjectFactorySpecialResource>(m_map, zoneSettings.m_generators.m_resourcesSpecial, scoreSettings, m_database, m_rng));
         objectFactories.push_back(std::make_shared<ObjectFactoryMine>(m_map, zoneSettings.m_generators.m_mines, scoreSettings, m_database, m_rng));
 
         const int iterLimit = 100000;
@@ -1281,7 +1219,7 @@ void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
     }
 }
 
-bool ObjectGenerator::generateOneObject(const FHScore& targetScore, FHScore& currentScore, std::vector<IObjectFactoryPtr>& objectFactories, ObjectGroup& group)
+bool ObjectGenerator::generateOneObject(const Core::MapScore& targetScore, Core::MapScore& currentScore, std::vector<IObjectFactoryPtr>& objectFactories, ObjectGroup& group)
 {
     static const std::string indent("        ");
     uint64_t                 totalWeight = 0;
@@ -1293,7 +1231,7 @@ bool ObjectGenerator::generateOneObject(const FHScore& targetScore, FHScore& cur
 
     const uint64_t rngFreq = m_rng->gen(totalWeight - 1);
 
-    auto isScoreOverflow = [&targetScore](const FHScore& current) {
+    auto isScoreOverflow = [&targetScore](const Core::MapScore& current) {
         for (const auto& [key, val] : current) {
             if (!targetScore.contains(key))
                 return true;
@@ -1315,7 +1253,7 @@ bool ObjectGenerator::generateOneObject(const FHScore& targetScore, FHScore& cur
             if (obj->getScore().empty())
                 throw std::runtime_error("Object '" + obj->getId() + "' has no score!");
 
-            FHScore currentScoreTmp = currentScore + obj->getScore();
+            Core::MapScore currentScoreTmp = currentScore + obj->getScore();
             if (isScoreOverflow(currentScoreTmp)) {
                 obj->disable();
                 return true;

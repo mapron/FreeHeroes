@@ -569,20 +569,6 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 assert(fhres.m_id);
                 dest.m_objects.m_resources.push_back(std::move(fhres));
             } break;
-            case MapObjectType::TREASURE_CHEST:
-            case MapObjectType::CAMPFIRE:
-            {
-                FHResource fhres;
-                initCommon(fhres);
-                fhres.m_amount = 0;
-                fhres.m_id     = nullptr;
-                if (type == MapObjectType::TREASURE_CHEST)
-                    fhres.m_specialType = Core::LibraryResource::SpecialResource::TreasureChest;
-                else if (type == MapObjectType::CAMPFIRE)
-                    fhres.m_specialType = Core::LibraryResource::SpecialResource::CampFire;
-
-                dest.m_objects.m_resources.push_back(std::move(fhres));
-            } break;
             case MapObjectType::RANDOM_TOWN:
             case MapObjectType::TOWN:
             {

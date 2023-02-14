@@ -15,26 +15,6 @@
 namespace Mernel::Reflection {
 using namespace FreeHeroes;
 
-ENUM_REFLECTION_STRINGIFY(
-    FHScoreAttr,
-    Invalid,
-
-    Invalid,
-    Army,
-    ArmyDwelling,
-    ArtStat,
-    ArtSupport,
-    Gold,
-    Resource,
-    ResourceGen,
-    Experience,
-    Control,
-    Upgrade,
-    SpellOffensive,
-    SpellCommon,
-    SpellAny,
-    Support)
-
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZoneTown,
     m_town,
@@ -140,18 +120,6 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_isEnabled)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
-    FHRngZone::GeneratorSpecialResource::Record,
-    m_specialType,
-    m_frequency,
-    m_guard,
-    m_value)
-
-STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
-    FHRngZone::GeneratorSpecialResource,
-    m_isEnabled,
-    m_records)
-
-STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone::GeneratorMine::Record,
     m_resourceId,
     m_frequency,
@@ -173,7 +141,6 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_scrolls,
     m_dwellings,
     m_visitables,
-    m_resourcesSpecial,
     m_mines)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
@@ -265,8 +232,6 @@ template<>
 inline constexpr const bool s_isStringMap<FHRngZone::GeneratorShrine::Map>{ true };
 template<>
 inline constexpr const bool s_isStringMap<FHRngZone::GeneratorDwelling::Map>{ true };
-template<>
-inline constexpr const bool s_isStringMap<FHRngZone::GeneratorSpecialResource::Map>{ true };
 template<>
 inline constexpr const bool s_isStringMap<FHRngZone::GeneratorMine::Map>{ true };
 template<>

@@ -23,6 +23,7 @@
 #include "LibraryTerrain.hpp"
 #include "LibraryUnit.hpp"
 #include "TranslationMap.hpp"
+#include "MapScore.hpp"
 
 #include "MernelReflection/EnumTraitsMacro.hpp"
 #include "MernelReflection/MetaInfoMacro.hpp"
@@ -121,6 +122,30 @@ STRUCT_REFLECTION_PAIRED(
     "luckNegative",                luckNegative,
     "moraleNegative",              moraleNegative
 )
+
+
+ENUM_REFLECTION_STRINGIFY(
+    ScoreAttr,
+    Invalid,
+
+    Invalid,
+    Army,
+    ArmyDwelling,
+    ArtStat,
+    ArtSupport,
+    Gold,
+    Resource,
+    ResourceGen,
+    Experience,
+    Control,
+    Upgrade,
+    SpellOffensive,
+    SpellCommon,
+    SpellAny,
+    Support)
+
+template<>
+inline constexpr const bool s_isStringMap<MapScore>{ true };
 
 // ------------------------------------------------------------------------------------------
 
@@ -221,14 +246,6 @@ ENUM_REFLECTION_STRINGIFY(
     Gold,
     Common,
     Rare
-)
-ENUM_REFLECTION_STRINGIFY(
-    LibraryResource::SpecialResource,
-    Invalid,
-
-    Invalid,
-    TreasureChest,
-    CampFire
 )
 
 STRUCT_REFLECTION_PAIRED(
@@ -974,23 +991,21 @@ STRUCT_REFLECTION_PAIRED(
 // ------------------------------------------------------------------------------------------
 
 ENUM_REFLECTION_STRINGIFY(
-    LibraryMapVisitable::Type,
+    LibraryMapVisitable::VisitKind,
     Invalid,
 
     Invalid,
-    Upgrade,
-    Exp,
-    ExpGold,
-    Support,
-    Generator
+    Normal,
+    Pick
     )
 
 STRUCT_REFLECTION_STRINGIFY(
     LibraryMapVisitable,
     legacyId,
-    type,
+    attr,
     value,
     frequency,
+    visitKind,
     objectDefs
 )
 

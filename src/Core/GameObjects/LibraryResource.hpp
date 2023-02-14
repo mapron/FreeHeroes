@@ -14,9 +14,6 @@
 namespace FreeHeroes::Core {
 
 struct LibraryResource {
-    [[maybe_unused]] static inline constexpr const std::string_view s_treasureChest = "sod.resource.treasureChest";
-    [[maybe_unused]] static inline constexpr const std::string_view s_campfire      = "sod.resource.campfire";
-
     struct Presentation {
         int            orderKingdom = 0;
         int            orderCommon  = 0;
@@ -33,13 +30,6 @@ struct LibraryResource {
         Rare,
     };
 
-    enum class SpecialResource
-    {
-        Invalid,
-        TreasureChest,
-        CampFire,
-    };
-
     std::string id;
     std::string untranslatedName;
     int         legacyId = -1;
@@ -51,15 +41,6 @@ struct LibraryResource {
     ObjectDefMappings objectDefs;
     ObjectDefMappings minesDefs;
     Presentation      presentationParams;
-
-    static inline std::string getSpecialId(SpecialResource type)
-    {
-        if (type == SpecialResource::TreasureChest)
-            return std::string(s_treasureChest);
-        if (type == SpecialResource::CampFire)
-            return std::string(s_campfire);
-        return {};
-    }
 };
 
 struct ResourceAmount {

@@ -101,8 +101,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_score,
 
     m_amount,
-    m_id,
-    m_specialType)
+    m_id)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRandomResource,

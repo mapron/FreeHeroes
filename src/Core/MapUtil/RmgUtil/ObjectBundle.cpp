@@ -170,7 +170,8 @@ void ObjectBundle::estimateOccupied()
             pos.m_y -= index / itemRectWidth;
             pos.m_x -= index % itemRectWidth;
             m_estimatedOccupied.insert(pos);
-            item.m_absPos = pos;
+            item.m_absPos = pos + item.m_obj->getOffset();
+
             index++;
         }
 

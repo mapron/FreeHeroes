@@ -32,14 +32,14 @@ struct FHScoreSettings {
         bool operator==(const ScoreScope&) const noexcept = default;
     };
 
-    using AttrMap = std::map<FHScoreAttr, ScoreScope>;
+    using AttrMap = std::map<Core::ScoreAttr, ScoreScope>;
 
     AttrMap m_score;
     bool    m_isEnabled{ false };
     int     m_guardPercent     = 100;
     int     m_tolerancePercent = 5;
 
-    bool isValidValue(FHScoreAttr attr, int64_t value) const noexcept
+    bool isValidValue(Core::ScoreAttr attr, int64_t value) const noexcept
     {
         auto it = m_score.find(attr);
         if (it == m_score.cend())
@@ -57,7 +57,7 @@ struct FHScoreSettings {
         return true;
     }
 
-    bool isValidScore(const FHScore& score) const noexcept
+    bool isValidScore(const Core::MapScore& score) const noexcept
     {
         if (score.empty())
             return true;
@@ -75,7 +75,7 @@ struct FHScoreSettings {
 
     bool operator==(const FHScoreSettings&) const noexcept = default;
 
-    MAPUTIL_EXPORT static std::string attrToString(FHScoreAttr attr);
+    MAPUTIL_EXPORT static std::string attrToString(Core::ScoreAttr attr);
 };
 
 struct FHRngZone {
@@ -203,22 +203,6 @@ struct FHRngZone {
         bool operator==(const GeneratorVisitable&) const noexcept = default;
     };
 
-    struct GeneratorSpecialResource : public GeneratorCommon {
-        struct Record {
-            Core::LibraryResource::SpecialResource m_specialType = Core::LibraryResource::SpecialResource::Invalid;
-
-            int m_frequency = 1000;
-            int m_guard     = 1000;
-            int m_value     = 500;
-
-            bool operator==(const Record&) const noexcept = default;
-        };
-        using Map = std::map<std::string, Record>;
-        Map m_records;
-
-        bool operator==(const GeneratorSpecialResource&) const noexcept = default;
-    };
-
     struct GeneratorMine : public GeneratorCommon {
         struct Record {
             Core::LibraryResourceConstPtr m_resourceId = nullptr;
@@ -236,16 +220,15 @@ struct FHRngZone {
     };
 
     struct Generators {
-        GeneratorBank            m_banks;
-        GeneratorArtifact        m_artifacts;
-        GeneratorResourcePile    m_resources;
-        GeneratorPandora         m_pandoras;
-        GeneratorShrine          m_shrines;
-        GeneratorScroll          m_scrolls;
-        GeneratorDwelling        m_dwellings;
-        GeneratorVisitable       m_visitables;
-        GeneratorSpecialResource m_resourcesSpecial;
-        GeneratorMine            m_mines;
+        GeneratorBank         m_banks;
+        GeneratorArtifact     m_artifacts;
+        GeneratorResourcePile m_resources;
+        GeneratorPandora      m_pandoras;
+        GeneratorShrine       m_shrines;
+        GeneratorScroll       m_scrolls;
+        GeneratorDwelling     m_dwellings;
+        GeneratorVisitable    m_visitables;
+        GeneratorMine         m_mines;
 
         bool operator==(const Generators&) const noexcept = default;
     };

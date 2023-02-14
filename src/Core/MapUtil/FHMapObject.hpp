@@ -10,6 +10,7 @@
 #include "LibraryObjectDef.hpp"
 #include "AdventureStack.hpp"
 #include "Reward.hpp"
+#include "MapScore.hpp"
 
 #include <map>
 
@@ -17,33 +18,12 @@
 
 namespace FreeHeroes {
 
-enum class FHScoreAttr
-{
-    Invalid,
-
-    Army,
-    ArmyDwelling,
-    ArtStat,
-    ArtSupport,
-    Gold,
-    Resource,
-    ResourceGen,
-    Experience,
-    Control,
-    Upgrade,
-    SpellOffensive,
-    SpellCommon,
-    SpellAny,
-    Support,
-};
-using FHScore = std::map<FHScoreAttr, int64_t>;
-
 struct FHCommonObject {
     FHPos                m_pos{ g_invalidPos };
     int                  m_order = 0;
     Core::ObjectDefIndex m_defIndex;
     int64_t              m_guard = 0;
-    FHScore              m_score;
+    Core::MapScore       m_score;
 
     bool operator==(const FHCommonObject&) const noexcept = default;
 };
@@ -78,12 +58,12 @@ struct FHTown : public FHPlayerControlledObject {
     bool operator==(const FHTown&) const noexcept = default;
 };
 
-MAPUTIL_EXPORT std::ostream& operator<<(std::ostream& stream, const FreeHeroes::FHScore& score);
+MAPUTIL_EXPORT std::ostream& operator<<(std::ostream& stream, const Core::MapScore& score);
 
-MAPUTIL_EXPORT FHScore operator+(const FHScore& l, const FHScore& r);
-MAPUTIL_EXPORT FHScore operator-(const FHScore& l, const FHScore& r);
+MAPUTIL_EXPORT Core::MapScore operator+(const Core::MapScore& l, const Core::MapScore& r);
+MAPUTIL_EXPORT Core::MapScore operator-(const Core::MapScore& l, const Core::MapScore& r);
 
-MAPUTIL_EXPORT int64_t maxScoreValue(const FHScore& score);
-MAPUTIL_EXPORT int64_t totalScoreValue(const FHScore& score);
+MAPUTIL_EXPORT int64_t maxScoreValue(const Core::MapScore& score);
+MAPUTIL_EXPORT int64_t totalScoreValue(const Core::MapScore& score);
 
 }
