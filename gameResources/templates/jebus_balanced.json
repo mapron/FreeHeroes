@@ -78,8 +78,8 @@
                     }
                 },
                 "guardMin": 4000,
-                "guardMax": 30000,
-                "guardBlock": 20000,
+                "guardMax": 20000,
+                "guardBlock": 12000,
 
                 "generators": {
                     "banks": {"isEnabled": true},
@@ -94,7 +94,7 @@
                             "minorStat"    : { "frequency": 1500, "filter": {"classes": ["minor"   ], "tags"   : ["stats"]               } },
                             "majorStat"    : { "frequency": 1500, "filter": {"classes": ["major"   ], "tags"   : ["stats"]               } },
                             "relicStat"    : { "frequency": 1000, "filter": {"classes": ["relic"   ], "tags"   : ["stats"], "notTags": ["control"]    } },
-                            "control"      : { "frequency": 1000, "filter": {"classes": ["relic"   ], "tags"   : ["control"]             } }
+                            "control"      : { "frequency": 4000, "filter": {"classes": ["relic"   ], "tags"   : ["control"]             } }
                         }
                     },
                     "resources": {
@@ -248,22 +248,25 @@
                         "isEnabled": true,
                         "tolerancePercent": 15,
                         "score": {
-                            "Army":           { "target": 200000  , "minSingle": 3000},
-                            "ArmyDwelling":   { "target": 20000   , "minSingle": 2500},
-                            "ArtStat":        { "target": 250000  , "minSingle": 5000},
-                            "ArtSupport":     { "target": 200000  , "minSingle": 8000},
-                            "Gold":           { "target": 300000  , "minSingle": 8000},
-                            "Resource":       { "target": 90000   , "minSingle": 8000},
+                            "Army":           { "target": 200000  , "minSingle": 3000, "maxSingle" : -1},
+                            "ArmyDwelling":   { "target": 20000   , "minSingle": 2500, "maxSingle" : -1},
+                            "ArtStat":        { "target": 250000  , "minSingle": 5000, "maxSingle" : -1},
+                            "ArtSupport":     { "target": 200000  , "minSingle": 8000, "maxSingle" : -1},
+                            "Gold":           { "target": 300000  , "minSingle": 8000, "maxSingle" : -1},
+                            "Resource":       { "target": 90000   , "minSingle": 8000, "maxSingle" : -1},
                             
-                            "Experience":     { "target": 50000   , "minSingle":  8000},
-                            "SpellOffensive": { "target": 120000  , "minSingle":  5000},
-                            "SpellCommon":    { "target":  80000  , "minSingle":  5000},
-                            "Upgrade"   :     { "target": 25000   , "minSingle": 3000},
+                            "Experience":     { "target": 50000   , "minSingle":  8000, "maxSingle" : -1},
+                            "SpellOffensive": { "target": 120000  , "minSingle":  5000, "maxSingle" : -1},
+                            "SpellCommon":    { "target":  80000  , "minSingle":  5000, "maxSingle" : -1},
+                            "Upgrade"   :     { "target": 25000   , "minSingle": 3000, "maxSingle" : -1},
                 
-                            "Control":        { "target": 150000  , "minSingle": 25000}
+                            "Control":        { "target": 250000  , "minSingle": 35000, "maxSingle" : -1}
                         }
                     },
                     "Mid": {
+                        "isEnabled": false
+                    },
+                    "LowGuarded": {
                         "isEnabled": false
                     },
                     "Low": {

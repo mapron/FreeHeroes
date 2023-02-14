@@ -271,7 +271,8 @@ void MapToolWindow::loadUserSettings()
     }
 
     Core::PropertyTreeReaderDatabase reader(m_modelsProvider->database());
-    reader.jsonToValue(jsonData, *m_userSettings);
+    if (jsonData.isMap())
+        reader.jsonToValue(jsonData, *m_userSettings);
 
     m_ui->templateSettingsWidget->setUserSettings(m_userSettings.get());
     m_ui->templateSettingsWidget->updateUI();
