@@ -17,6 +17,18 @@ SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake ${MERNEL_ROOT}/cmake)
 option( WARNING_AS_ERROR "" ON )
 set(FFMPEG_BINARY "" CACHE FILEPATH "Path to ffmpeg binary")
 
+find_package(Git REQUIRED)
+
+execute_process(
+    COMMAND ${GIT_EXECUTABLE} log -1 --format=%h
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_COMMIT
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+configure_file(${CMAKE_CURRENT_LIST_DIR}/cmake/GitCommit.hpp.in ${CMAKE_CURRENT_BINARY_DIR}/export/GitCommit.hpp)
+
+
 #[[
 ########## Compile flags ##########
 #]]

@@ -4,43 +4,43 @@
 <context>
     <name>FreeHeroes::MapToolWindow</name>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="125"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="140"/>
         <source>Open HotA installation root</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="146"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="161"/>
         <source>Random map generator</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="169"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="184"/>
         <source>Failed to save user settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="173"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="188"/>
         <source>Generation...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="214"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="229"/>
         <source>Error occured</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="214"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="229"/>
         <source>Error occured during template generation. 
 Check text area with log at &apos;extra&apos; tab and contact developers.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="233"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="248"/>
         <source>Success</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="233"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="248"/>
         <source>Error!</source>
         <translation type="unfinished"></translation>
     </message>
@@ -48,32 +48,32 @@ Check text area with log at &apos;extra&apos; tab and contact developers.</sourc
 <context>
     <name>FreeHeroes::TemplateDifficultyWidget</name>
     <message>
-        <location filename="../../src/App/MapToolUI/TemplateDifficultyWidget.cpp" line="23"/>
+        <location filename="../../src/App/MapToolUI/TemplateDifficultyWidget.cpp" line="41"/>
         <source>Min guard multiply %</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/TemplateDifficultyWidget.cpp" line="24"/>
+        <location filename="../../src/App/MapToolUI/TemplateDifficultyWidget.cpp" line="42"/>
         <source>Max guard multiply %</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/TemplateDifficultyWidget.cpp" line="29"/>
+        <location filename="../../src/App/MapToolUI/TemplateDifficultyWidget.cpp" line="48"/>
         <source>Min army value multiply %</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/TemplateDifficultyWidget.cpp" line="30"/>
+        <location filename="../../src/App/MapToolUI/TemplateDifficultyWidget.cpp" line="49"/>
         <source>Max army value multiply %</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/TemplateDifficultyWidget.cpp" line="35"/>
+        <location filename="../../src/App/MapToolUI/TemplateDifficultyWidget.cpp" line="55"/>
         <source>Min gold value multiply %</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/TemplateDifficultyWidget.cpp" line="36"/>
+        <location filename="../../src/App/MapToolUI/TemplateDifficultyWidget.cpp" line="56"/>
         <source>Max gold value multiply %</source>
         <translation type="unfinished"></translation>
     </message>
@@ -191,72 +191,82 @@ Check text area with log at &apos;extra&apos; tab and contact developers.</sourc
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="259"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="445"/>
+        <source>Version: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="457"/>
+        <source>Build id: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="569"/>
         <source>Show in Editor...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="276"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="269"/>
         <source>H3M map output</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="308"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="301"/>
         <source>Generate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="334"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="327"/>
         <source>Seed:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="344"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="337"/>
         <source>NewSeed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="389"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="529"/>
         <source>Generate map from template</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="409"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="549"/>
         <source>Status:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="435"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="370"/>
         <source>Player settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="445"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="380"/>
         <source>Difficulty settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="505"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="464"/>
         <source>Diagnostic info for developer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="455"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="390"/>
         <source>Extra</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="466"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="401"/>
         <source>Create fresh seed before every Generate press</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="473"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="408"/>
         <source>Increment seed values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="530"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="489"/>
         <source>Generation log</source>
         <translation type="unfinished"></translation>
     </message>
@@ -266,12 +276,11 @@ Check text area with log at &apos;extra&apos; tab and contact developers.</sourc
     <message>
         <location filename="../../src/App/MapToolUI/TemplateDifficultyWidget.ui" line="23"/>
         <source>Generator will roll random value between min and max percent and adjust all zones on the map.
-If min = max, then result will be same every generation.
-If min &gt; max, value will be adjusted.</source>
+If min = max, then result will be same every generation.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/TemplateDifficultyWidget.ui" line="81"/>
+        <location filename="../../src/App/MapToolUI/TemplateDifficultyWidget.ui" line="80"/>
         <source>Clear all</source>
         <translation type="unfinished"></translation>
     </message>

@@ -23,6 +23,8 @@
 #include "MernelPlatform/FileIOUtils.hpp"
 #include "MernelPlatform/FileFormatJson.hpp"
 
+#include "GitCommit.hpp"
+
 #include <QSettings>
 #include <QMessageBox>
 #include <QDateTime>
@@ -56,8 +58,21 @@ MapToolWindow::MapToolWindow(
     , m_modelsProvider(modelsProvider)
     , m_userSettings(std::make_unique<FHRngUserSettings>())
 {
+    m_version = "1.0.0";
+
+    {
+        auto buildDate = QLocale("en_US").toDate(QString(__DATE__).simplified(), "MMM d yyyy");
+        auto buildTime = QLocale("en_US").toTime(QString(__TIME__).simplified(), "HH:mm:ss");
+        m_buildId      = buildDate.toString("yyyyddMM") + ".";
+        m_buildId += buildTime.toString("HHmmss") + ".";
+        m_buildId += g_gitCommit;
+    }
+
     m_ui->setupUi(this, std::tuple{ modelsProvider });
     m_ui->tabWidget->setCurrentIndex(0);
+
+    m_ui->labelVersion->setText(m_ui->labelVersion->text() + m_version);
+    m_ui->labelBuildId->setText(m_ui->labelBuildId->text() + m_buildId);
 
     m_editor = new MapEditorWidget(
         m_gameDatabaseContainer,
@@ -143,7 +158,7 @@ MapToolWindow::MapToolWindow(
 
     updatePaths();
 
-    setWindowTitle(tr("Random map generator"));
+    setWindowTitle(tr("Random map generator") + " - v. " + m_version);
 }
 
 MapToolWindow::~MapToolWindow()
@@ -218,11 +233,11 @@ void MapToolWindow::generateMap()
 
     {
         std::ostringstream osDiag;
-        osDiag << "SEED:\n";
-        osDiag << seed << "\n";
-        osDiag << "TEMPLATE:\n";
-        osDiag << fhTpl << "\n";
-        osDiag << "SETTINGS:\n";
+        osDiag << "version: " << m_version.toStdString() << "\n";
+        osDiag << "buildId: " << m_buildId.toStdString() << "\n";
+        osDiag << "seed: " << seed << "\n";
+        osDiag << "template: " << fhTpl << "\n";
+        osDiag << "userSettings:\n";
         osDiag << m_userSettingsData << "\n";
 
         m_ui->textEditDiagInfo->setPlainText(QString::fromStdString(osDiag.str()));

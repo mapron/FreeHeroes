@@ -21,8 +21,7 @@
     <widget class="QLabel" name="label_1">
      <property name="text">
       <string>Generator will roll random value between min and max percent and adjust all zones on the map.
-If min = max, then result will be same every generation.
-If min &gt; max, value will be adjusted.</string>
+If min = max, then result will be same every generation.</string>
      </property>
     </widget>
    </item>

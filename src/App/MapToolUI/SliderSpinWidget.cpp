@@ -25,6 +25,7 @@ SliderSpinWidget::SliderSpinWidget(QWidget* parent)
     layout->setContentsMargins(0, 0, 0, 0);
 
     connect(m_slider, &QSlider::valueChanged, m_spin, &QSpinBox::setValue);
+    connect(m_slider, &QSlider::valueChanged, this, &SliderSpinWidget::dataChanged);
     connect(m_spin, qOverload<int>(&QSpinBox::valueChanged), m_slider, &QSlider::setValue);
 }
 

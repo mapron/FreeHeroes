@@ -27,6 +27,9 @@ public:
 
     void setText(const QString& text, int minimumWidth);
 
+signals:
+    void dataChanged();
+
 private:
     QLabel*   m_label;
     QSpinBox* m_spin;

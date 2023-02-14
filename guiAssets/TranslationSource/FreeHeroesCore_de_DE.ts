@@ -1799,27 +1799,27 @@
 <context>
     <name>FreeHeroes::MapEditorWidget</name>
     <message>
-        <location filename="../../src/Gui/MapUtilGui/MapEditorWidget.cpp" line="90"/>
+        <location filename="../../src/Gui/MapUtilGui/MapEditorWidget.cpp" line="91"/>
         <source>Underground</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/MapUtilGui/MapEditorWidget.cpp" line="91"/>
+        <location filename="../../src/Gui/MapUtilGui/MapEditorWidget.cpp" line="92"/>
         <source>Minimap</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/MapUtilGui/MapEditorWidget.cpp" line="92"/>
+        <location filename="../../src/Gui/MapUtilGui/MapEditorWidget.cpp" line="93"/>
         <source>Display settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/MapUtilGui/MapEditorWidget.cpp" line="93"/>
+        <location filename="../../src/Gui/MapUtilGui/MapEditorWidget.cpp" line="94"/>
         <source>Inspector</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Gui/MapUtilGui/MapEditorWidget.cpp" line="207"/>
+        <location filename="../../src/Gui/MapUtilGui/MapEditorWidget.cpp" line="208"/>
         <source>Error occured</source>
         <translation type="unfinished"></translation>
     </message>

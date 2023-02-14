@@ -58,6 +58,9 @@ private:
     std::string                        m_userSettingsData;
 
     MapEditorWidget* m_editor = nullptr;
+
+    QString m_version;
+    QString m_buildId;
 };
 
 }
