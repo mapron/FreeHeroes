@@ -13,10 +13,8 @@ namespace FreeHeroes {
 
 class SpriteMapPainter {
 public:
-    SpriteMapPainter(const SpritePaintSettings* settings, int depth)
-        : m_settings(settings)
-        , m_depth(depth)
-    {}
+    SpriteMapPainter(const SpritePaintSettings* settings, int depth);
+    ~SpriteMapPainter();
 
     void paint(QPainter*        painter,
                const SpriteMap* spriteMap,
@@ -30,6 +28,9 @@ public:
 private:
     const SpritePaintSettings* m_settings;
     const int                  m_depth;
+
+    struct Impl;
+    std::unique_ptr<Impl> m_impl;
 };
 
 }

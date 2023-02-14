@@ -43,6 +43,7 @@ struct LibrarySpell {
         bool        tile                    = false;
 
         TranslationMap name;
+        TranslationMap shortName;
 
         int configOrder = 0;
         int order       = 0;

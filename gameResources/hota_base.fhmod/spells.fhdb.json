@@ -43,7 +43,7 @@
 "sod.spell.chainLightning"            : [     true    ,      false      ,        true         , "offensive" , ""     , "units"        ,  "air"    ,  4     ,     10      ,    10000   , "Chain Lightning"            ],
 "sod.spell.frostRing"                 : [     true    ,      false      ,        true         , "offensive" , ""     , "units"        ,  "water"  ,  3     ,     12      ,     4000   , "Frost Ring"                 ],
 "sod.spell.fireball"                  : [     true    ,      false      ,        true         , "offensive" , ""     , "units"        ,  "fire"   ,  3     ,     15      ,     4000   , "Fireball"                   ],
-"sod.spell.inferno"                   : [     true    ,      false      ,        true         , "offensive" , ""     , "units"        ,  "fire"   ,  5     ,     16      ,     6000   , "Inferno"                    ],
+"sod.spell.inferno"                   : [     true    ,      false      ,        true         , "offensive" , ""     , "units"        ,  "fire"   ,  4     ,     16      ,     6000   , "Inferno"                    ],
 "sod.spell.meteorShower"              : [     true    ,      false      ,        true         , "offensive" , ""     , "units"        ,  "earth"  ,  4     ,     16      ,    10000   , "Meteor Shower"              ],
 "sod.spell.deathRipple"               : [     true    ,      false      ,        true         , "offensive" , ""     , "units"        ,  "earth"  ,  2     ,     10      ,     2000   , "Death Ripple"               ],
 "sod.spell.destroyUndead"             : [     true    ,      false      ,        true         , "offensive" , ""     , "units"        ,  "air"    ,  3     ,     15      ,     4000   , "Destroy Undead"             ],

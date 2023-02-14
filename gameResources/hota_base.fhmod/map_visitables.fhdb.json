@@ -4,7 +4,7 @@
 
 "records": {
 
-"sod.visitable.arena"                      : [ "Upgrade"       ,     3000 ,     500  , "avsarna0" ],
+"sod.visitable.arena"                      : [ "Upgrade"       ,     3500 ,     500  , "avsarna0" ],
 "sod.visitable.marlettoTower"              : [ "Upgrade"       ,     1500 ,    1000  , "avsmarl"  ],
 "sod.visitable.gardenOfRevelation"         : [ "Upgrade"       ,     1500 ,    1000  , "avsgrdn0" ],
 "sod.visitable.libraryOfEnlightenment"     : [ "Upgrade"       ,    10000 ,    1000  ,  { "m": { "":"avslibr0", "A": "avslibs0"  }} ],
@@ -13,12 +13,12 @@
 "sod.visitable.mercenaryCamp"              : [ "Upgrade"       ,     1500 ,    1000  , "avsmerc0" ],
 "sod.visitable.university"                 : [ "Upgrade"       ,     3000 ,     200  , "avsuniv0"  ],
 "sod.visitable.schoolOfWar"                : [ "Upgrade"       ,     1000 ,     500  , "avswar20"  ],
-"hota.visitable.colosseumOfMagi"           : [ "Upgrade"       ,     3000 ,     500  , "avsmgarn"  ],
+"hota.visitable.colosseumOfMagi"           : [ "Upgrade"       ,     3500 ,     500  , "avsmgarn"  ],
 "hota.visitable.hermitHut"                 : [ "Upgrade"       ,     2000 ,     800  , "avshrmit"  ],
 
 "sod.visitable.mysticalGarden"             : [ "ResourceGen"   ,      500 ,     300  , { "m": { "": "avtmyst0", "A": "avtmystd" }}  ],
 "sod.visitable.waterWheel"                 : [ "ResourceGen"   ,     1000 ,     300  , { "m": { "":"avmwwhl0", "S": "avmwwsn0"}}  ],
-"sod.visitable.wagon"                      : [ "ResourceGen"   ,      500 ,     500  , { "m": { "": "avtwagn0", "A": "hatel" }}  ],
+"sod.visitable.wagon"                      : [ "ResourceGen"   ,      500 ,    1500  , { "m": { "": "avtwagn0", "A": "hatel" }}  ],
 "sod.visitable.windmill"                   : [ "ResourceGen"   ,     2500 ,     900  , { "m": { "":"avmwndd0", "A": "avmwmsn0" }} ],
 "hota.visitable.hotaStorage.wood"          : [ "ResourceGen"   ,     2500 ,      250 , "avwrhswd"  ],
 "hota.visitable.hotaStorage.mercury"       : [ "ResourceGen"   ,     2500 ,      250 , "avwrhsmc"  ],

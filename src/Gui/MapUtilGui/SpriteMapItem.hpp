@@ -15,18 +15,14 @@ class LibraryModelsProvider;
 
 struct SpriteMap;
 struct SpritePaintSettings;
+class SpriteMapPainter;
 class SpriteMapItem : public QGraphicsItem {
 public:
     SpriteMapItem(const SpriteMap*           spriteMap,
                   const SpritePaintSettings* spritePaintSettings,
                   int                        depth,
-                  uint32_t                   animationFrameDurationMs)
-        : m_spriteMap(spriteMap)
-        , m_spritePaintSettings(spritePaintSettings)
-        , m_currentDepth(depth)
-        , m_animationFrameDurationMs(animationFrameDurationMs)
-    {
-    }
+                  uint32_t                   animationFrameDurationMs);
+    ~SpriteMapItem();
 
     void tick(uint32_t msecElapsed);
 
@@ -45,6 +41,8 @@ private:
 
     uint32_t m_animationFrameOffsetTerrain = 0;
     uint32_t m_animationFrameOffsetObjects = 0;
+
+    std::unique_ptr<SpriteMapPainter> m_painter;
 };
 
 }

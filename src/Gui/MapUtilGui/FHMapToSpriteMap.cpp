@@ -199,7 +199,13 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
 
     for (auto& obj : fhMap.m_objects.m_artifacts) {
         auto* def = obj.m_id->objectDefs.get({});
-        addValueInfo(result.addItem(makeItemByDef(SpriteMap::Layer::Artifact, def, obj.m_pos).addInfo("id", obj.m_id->id)), obj);
+
+        auto* item = result.addItem(makeItemByDef(SpriteMap::Layer::Artifact, def, obj.m_pos).addInfo("id", obj.m_id->id));
+        addValueInfo(item, obj);
+        if (obj.m_id->scrollSpell) {
+            item->m_overlayInfo        = obj.m_id->scrollSpell->presentationParams.shortName.ts.at("en_US");
+            item->m_overlayInfoOffsetX = 0;
+        }
     }
     for (auto& obj : fhMap.m_objects.m_artifactsRandom) {
         std::string id = "";
@@ -277,8 +283,11 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         addValueInfo(result.addItem(makeItemByDef(SpriteMap::Layer::GeneralVisitable, def, obj.m_pos).addInfo("id", obj.m_visitableId->id)), obj);
     }
     for (auto& obj : fhMap.m_objects.m_shrines) {
-        auto* def = obj.m_visitableId->objectDefs.get(obj.m_defIndex);
-        addValueInfo(result.addItem(makeItemByDef(SpriteMap::Layer::Shrine, def, obj.m_pos).addInfo("id", obj.m_visitableId->id)), obj);
+        auto* def  = obj.m_visitableId->objectDefs.get(obj.m_defIndex);
+        auto* item = result.addItem(makeItemByDef(SpriteMap::Layer::Shrine, def, obj.m_pos).addInfo("id", obj.m_visitableId->id));
+        addValueInfo(item, obj);
+        item->m_overlayInfo        = obj.m_spellId->presentationParams.shortName.ts.at("en_US");
+        item->m_overlayInfoOffsetX = 0;
     }
     for (auto& obj : fhMap.m_objects.m_skillHuts) {
         auto* def = obj.m_visitableId->objectDefs.get(obj.m_defIndex);

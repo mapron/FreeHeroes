@@ -600,7 +600,8 @@ void FHTemplateProcessor::runRewards()
 
         for (size_t i = 0; auto& bundle : bundleSet.m_bundlesGuarded) {
             i++;
-            if (!bundle.placeOnMap(bundleSet.m_cells, m_rng)) {
+
+            if (!bundleSet.placeOnMap(bundle)) {
                 m_logOutput << m_indent << "g placement failure [" << i << "]: size=" << bundle.getEstimatedArea() << "; " << bundle.toPrintableString() << "\n";
                 continue;
             }
@@ -624,7 +625,7 @@ void FHTemplateProcessor::runRewards()
 
         for (size_t i = 0; auto& bundle : bundleSet.m_bundlesNonGuarded) {
             i++;
-            if (!bundle.placeOnMap(bundleSet.m_cells, m_rng)) {
+            if (!bundleSet.placeOnMap(bundle)) {
                 m_logOutput << m_indent << "u placement failure [" << i << "]: size=" << bundle.getEstimatedArea() << "; " << bundle.toPrintableString() << "\n";
                 continue;
             }

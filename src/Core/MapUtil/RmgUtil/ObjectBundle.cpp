@@ -65,85 +65,6 @@ std::set<FHPos> blurSet(const std::set<FHPos>& source, bool diag, bool excludeOr
 
 }
 
-void ObjectBundleSet::consume(const ObjectGenerator&        generated,
-                              TileZone&                     tileZone,
-                              Core::IRandomGenerator* const rng)
-{
-    for (auto& seg : tileZone.m_innerAreaSegments) {
-        for (auto* cell : seg.m_innerArea)
-            m_cells.insert({ cell->m_pos });
-    }
-
-    for (const auto& group : generated.m_groups) {
-        for (const auto& obj : group.m_objects) {
-            BucketItem item;
-            item.m_guard = obj->getGuard() * group.m_guardPercent / 100;
-            item.m_obj   = obj;
-
-            auto& buck = m_buckets[obj->getType()];
-            if (item.m_guard)
-                buck.m_guarded.push_back(item);
-            else
-                buck.m_nonGuarded.push_back(item);
-        }
-    }
-
-    auto makeNewObjectBundle = [rng, &tileZone](ObjectGenerator::IObject::Type type) -> ObjectBundle {
-        ObjectBundle obj;
-        int64_t      min  = tileZone.m_rngZoneSettings.m_guardMin;
-        int64_t      max  = tileZone.m_rngZoneSettings.m_guardMax;
-        obj.m_targetGuard = min + rng->gen(max - min);
-        if (type == ObjectGenerator::IObject::Type::Pickable)
-            obj.m_itemLimit = 1 + rng->genSmall(3);
-
-        obj.m_type          = type;
-        obj.m_guardPosition = g_allPositions[rng->genSmall(g_allPositions.size() - 1)];
-
-        return obj;
-    };
-
-    for (const auto& [type, bucket] : m_buckets) {
-        for (const auto& item : bucket.m_nonGuarded) {
-            ObjectBundle bundleNonGuarded;
-            bundleNonGuarded.m_items.push_back(ObjectBundle::Item{ .m_obj = item.m_obj });
-            bundleNonGuarded.m_type = type;
-            bundleNonGuarded.estimateOccupied();
-            m_bundlesNonGuarded.push_back(std::move(bundleNonGuarded));
-        }
-
-        ObjectBundle bundleGuarded = makeNewObjectBundle(type);
-
-        auto pushIfNeeded = [this, &tileZone, &bundleGuarded, &makeNewObjectBundle](bool force) {
-            bundleGuarded.sumGuard();
-            bundleGuarded.m_considerBlock = bundleGuarded.m_guard > tileZone.m_rngZoneSettings.m_guardBlock;
-
-            if (!force && bundleGuarded.m_guard < bundleGuarded.m_targetGuard) {
-                if (bundleGuarded.m_items.size() < bundleGuarded.m_itemLimit)
-                    return;
-            }
-            if (!bundleGuarded.m_items.size())
-                return;
-
-            bundleGuarded.estimateOccupied();
-            m_bundlesGuarded.push_back(bundleGuarded);
-            bundleGuarded = makeNewObjectBundle(bundleGuarded.m_type);
-        };
-
-        for (const auto& item : bucket.m_guarded) {
-            bundleGuarded.m_items.push_back(ObjectBundle::Item{ .m_obj = item.m_obj, .m_guard = item.m_guard });
-            pushIfNeeded(false);
-        }
-        pushIfNeeded(true);
-    }
-
-    std::sort(m_bundlesGuarded.begin(), m_bundlesGuarded.end(), [](const ObjectBundle& l, const ObjectBundle& r) {
-        return l.getEstimatedArea() > r.getEstimatedArea();
-    });
-    std::sort(m_bundlesNonGuarded.begin(), m_bundlesNonGuarded.end(), [](const ObjectBundle& l, const ObjectBundle& r) {
-        return l.getEstimatedArea() > r.getEstimatedArea();
-    });
-}
-
 void ObjectBundle::sumGuard()
 {
     m_guard = 0;
@@ -224,6 +145,8 @@ void ObjectBundle::estimateOccupied()
             auto* def     = item.m_obj->getDef();
             assert(def);
 
+            // std::cerr << item.m_obj->getId() << "-> " << def->blockMapPlanar.width << "x" << def->blockMapPlanar.height << "\n";
+
             const FHPos blockMaskSizePos{ (int) def->blockMapPlanar.width - 1, (int) def->blockMapPlanar.height - 1, 0 };
             const FHPos visitMaskSizePos{ (int) def->visitMapPlanar.width - 1, (int) def->visitMapPlanar.height - 1, 0 };
 
@@ -282,22 +205,127 @@ void ObjectBundle::estimateOccupied()
     m_fitArea.insert(m_estimatedOccupied.cbegin(), m_estimatedOccupied.cend());
 }
 
-bool ObjectBundle::placeOnMap(std::set<FHPos>& availableCells, Core::IRandomGenerator* const rng)
+std::string ObjectBundle::toPrintableString() const
 {
-    std::vector<FHPos> allCells(availableCells.begin(), availableCells.end());
+    std::ostringstream os;
+    os << "[";
+    for (auto& item : m_items)
+        os << item.m_obj->getId() << ", ";
+    os << "]";
+    return os.str();
+}
+
+void ObjectBundleSet::consume(const ObjectGenerator&        generated,
+                              TileZone&                     tileZone,
+                              Core::IRandomGenerator* const rng)
+{
+    m_rng = rng;
+    for (auto& seg : tileZone.m_innerAreaSegments) {
+        for (auto* cell : seg.m_innerArea)
+            m_cells.insert({ cell->m_pos });
+    }
+
+    m_cellsForUnguardedInner = m_cells;
+    for (auto* cell : tileZone.m_innerAreaUsable.m_innerArea) {
+        if (!m_cells.contains(cell->m_pos))
+            m_cellsForUnguardedRoads.insert(cell->m_pos);
+    }
+
+    for (const auto& group : generated.m_groups) {
+        for (const auto& obj : group.m_objects) {
+            BucketItem item;
+            item.m_guard = obj->getGuard() * group.m_guardPercent / 100;
+            item.m_obj   = obj;
+
+            auto& buck = m_buckets[obj->getType()];
+            if (item.m_guard)
+                buck.m_guarded.push_back(item);
+            else
+                buck.m_nonGuarded.push_back(item);
+        }
+    }
+
+    auto makeNewObjectBundle = [rng, &tileZone](ObjectGenerator::IObject::Type type) -> ObjectBundle {
+        ObjectBundle obj;
+        int64_t      min  = tileZone.m_rngZoneSettings.m_guardMin;
+        int64_t      max  = tileZone.m_rngZoneSettings.m_guardMax;
+        obj.m_targetGuard = min + rng->gen(max - min);
+        if (type == ObjectGenerator::IObject::Type::Pickable)
+            obj.m_itemLimit = 1 + rng->genSmall(3);
+
+        obj.m_type          = type;
+        obj.m_guardPosition = g_allPositions[rng->genSmall(g_allPositions.size() - 1)];
+
+        return obj;
+    };
+
+    for (const auto& [type, bucket] : m_buckets) {
+        for (const auto& item : bucket.m_nonGuarded) {
+            ObjectBundle bundleNonGuarded;
+            bundleNonGuarded.m_items.push_back(ObjectBundle::Item{ .m_obj = item.m_obj });
+            bundleNonGuarded.m_type = type;
+            bundleNonGuarded.estimateOccupied();
+            m_bundlesNonGuarded.push_back(std::move(bundleNonGuarded));
+        }
+
+        ObjectBundle bundleGuarded = makeNewObjectBundle(type);
+
+        auto pushIfNeeded = [this, &tileZone, &bundleGuarded, &makeNewObjectBundle](bool force) {
+            bundleGuarded.sumGuard();
+            bundleGuarded.m_considerBlock = bundleGuarded.m_guard > tileZone.m_rngZoneSettings.m_guardBlock;
+
+            if (!force && bundleGuarded.m_guard < bundleGuarded.m_targetGuard) {
+                if (bundleGuarded.m_items.size() < bundleGuarded.m_itemLimit)
+                    return;
+            }
+            if (!bundleGuarded.m_items.size())
+                return;
+
+            bundleGuarded.estimateOccupied();
+            m_bundlesGuarded.push_back(bundleGuarded);
+            bundleGuarded = makeNewObjectBundle(bundleGuarded.m_type);
+        };
+
+        for (const auto& item : bucket.m_guarded) {
+            bundleGuarded.m_items.push_back(ObjectBundle::Item{ .m_obj = item.m_obj, .m_guard = item.m_guard });
+            pushIfNeeded(false);
+        }
+        pushIfNeeded(true);
+    }
+
+    std::sort(m_bundlesGuarded.begin(), m_bundlesGuarded.end(), [](const ObjectBundle& l, const ObjectBundle& r) {
+        return l.getEstimatedArea() > r.getEstimatedArea();
+    });
+    std::sort(m_bundlesNonGuarded.begin(), m_bundlesNonGuarded.end(), [](const ObjectBundle& l, const ObjectBundle& r) {
+        return l.getEstimatedArea() > r.getEstimatedArea();
+    });
+}
+
+bool ObjectBundleSet::placeOnMap(ObjectBundle& bundle)
+{
+    std::set<FHPos>* cellSource = &m_cells;
+    if (!bundle.m_guard && bundle.m_type == ObjectGenerator::IObject::Type::Pickable) {
+        auto useRoad = m_rng->genSmall(2) > 0;
+        if (useRoad && !m_cellsForUnguardedRoads.empty())
+            cellSource = &m_cellsForUnguardedRoads;
+        else if (!m_cellsForUnguardedInner.empty())
+            cellSource = &m_cellsForUnguardedInner;
+    }
+
+    std::vector<FHPos> allCells(cellSource->begin(), cellSource->end());
 
     if (allCells.empty()) {
         return false;
     }
 
-    auto tryPlace = [&allCells, &availableCells, rng, this]() -> bool {
-        FHPos pos = allCells[rng->gen(allCells.size() - 1)];
+    auto tryPlace = [&allCells, this, &bundle, cellSource]() -> bool {
+        FHPos pos = allCells[m_rng->gen(allCells.size() - 1)];
 
-        auto tryPlaceInner = [pos, &availableCells, this](FHPos delta) -> bool {
-            this->m_absPos = pos + delta;
-            this->estimateOccupied();
-            for (FHPos posOcc : m_fitArea) {
-                if (!availableCells.contains(posOcc)) {
+        auto tryPlaceInner = [pos, &bundle, cellSource](FHPos delta) -> bool {
+            bundle.m_absPos = pos + delta;
+            bundle.estimateOccupied();
+            for (FHPos posOcc : bundle.m_fitArea) {
+                if (!cellSource->contains(posOcc)) {
                     return false;
                 }
             }
@@ -333,29 +361,24 @@ bool ObjectBundle::placeOnMap(std::set<FHPos>& availableCells, Core::IRandomGene
 
     for (int i = 0; i < 10; ++i) {
         if (tryPlace()) {
-            for (auto& item : m_items) {
+            for (auto& item : bundle.m_items) {
                 item.m_obj->setPos(item.m_absPos);
                 item.m_obj->place();
             }
 
-            for (FHPos posOcc : m_allArea)
-                availableCells.erase(posOcc);
+            for (FHPos posOcc : bundle.m_allArea)
+                m_cells.erase(posOcc);
+
+            for (FHPos posOcc : bundle.m_fitArea) {
+                m_cellsForUnguardedInner.erase(posOcc);
+                m_cellsForUnguardedRoads.erase(posOcc);
+            }
 
             return true;
         }
     }
 
     return false;
-}
-
-std::string ObjectBundle::toPrintableString() const
-{
-    std::ostringstream os;
-    os << "[";
-    for (auto& item : m_items)
-        os << item.m_obj->getId() << ", ";
-    os << "]";
-    return os.str();
 }
 
 }

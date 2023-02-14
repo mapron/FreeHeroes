@@ -69,10 +69,10 @@
 "dw.behemoth"                : [ [ "sod.unit.behemoth"           ], "avgbhmt0" ],
 
 "dw.pixie"                   : [ [ "sod.unit.pixie"              ], "avgpixie" ],
-"dw.airElemental"            : [ [ "sod.unit.airElemental"       ], {"m":{"": "avgair0" , "A": "avg2ela"}} ],
-"dw.waterElemental"          : [ [ "sod.unit.waterElemental"     ], {"m":{"": "avgwatr0", "A": "avg2elw"}} ],
-"dw.fireElemental"           : [ [ "sod.unit.fireElemental"      ], {"m":{"": "avgfire0", "A": "avg2elf"}} ],
-"dw.earthElemental"          : [ [ "sod.unit.earthElemental"     ], {"m":{"": "avgerth0", "A": "avg2ele"}} ],
+"dw.airElemental"            : [ [ "sod.unit.airElemental"       ], {"m":{"WIDE": "avgair0" , "": "avg2ela"}} ],
+"dw.waterElemental"          : [ [ "sod.unit.waterElemental"     ], {"m":{"WIDE": "avgwatr0", "": "avg2elw"}} ],
+"dw.fireElemental"           : [ [ "sod.unit.fireElemental"      ], {"m":{"WIDE": "avgfire0", "": "avg2elf"}} ],
+"dw.earthElemental"          : [ [ "sod.unit.earthElemental"     ], {"m":{"WIDE": "avgerth0", "": "avg2ele"}} ],
 "dw.psychicElemental"        : [ [ "sod.unit.psychicElemental"   ], "avgelp"   ],
 "dw.firebird"                : [ [ "sod.unit.firebird"           ], "avgfbrd"  ],
 
@@ -83,7 +83,7 @@
 "hota.dw.stormbird"          : [ [ "hota.unit.stormbird"         ], "nestas" ],
 "hota.dw.seaWitch"           : [ [ "hota.unit.seaWitch"          ], "towerza" ],
 "hota.dw.nix"                : [ [ "hota.unit.nix"               ], {"m":{"": "fortnix" , "A": "fortnixr"}} ],
-"hota.dw.seaSerpent"         : [ [ "hota.unit.seaSerpent"        ], {"m":{"": "hasphtpl", "A": "haspwtpl"}} ],
+"hota.dw.seaSerpent"         : [ [ "hota.unit.seaSerpent"        ], {"m":{"": "hasphtpl", "WIDE": "haspwtpl"}} ],
 
 "dw.peasant"                 : [ [ "sod.unit.peasant"            ], "avgpeas" ],
 "dw.halfling"                : [ [ "sod.unit.halfling"           ], "avghalf" ],

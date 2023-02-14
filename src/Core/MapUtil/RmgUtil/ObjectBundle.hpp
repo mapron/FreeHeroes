@@ -56,17 +56,13 @@ struct ObjectBundle {
 
     void estimateOccupied();
 
-    bool placeOnMap(std::set<FHPos>& availableCells, Core::IRandomGenerator* const rng);
+    //bool placeOnMap(std::set<FHPos>& availableCells, Core::IRandomGenerator* const rng);
 
     std::string toPrintableString() const;
 };
 
 class ObjectBundleSet {
 public:
-    void consume(const ObjectGenerator&        generated,
-                 TileZone&                     tileZone,
-                 Core::IRandomGenerator* const rng);
-
     std::vector<ObjectBundle> m_bundlesGuarded;
     std::vector<ObjectBundle> m_bundlesNonGuarded;
 
@@ -83,6 +79,16 @@ public:
     std::map<ObjectGenerator::IObject::Type, Bucket> m_buckets;
 
     std::set<FHPos> m_cells;
+    std::set<FHPos> m_cellsForUnguardedInner;
+    std::set<FHPos> m_cellsForUnguardedRoads;
+
+    Core::IRandomGenerator* m_rng = nullptr;
+
+    void consume(const ObjectGenerator&        generated,
+                 TileZone&                     tileZone,
+                 Core::IRandomGenerator* const rng);
+
+    bool placeOnMap(ObjectBundle& bundle);
 };
 
 }

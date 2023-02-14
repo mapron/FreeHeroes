@@ -399,7 +399,7 @@
 "avls10s0"     : [ "avls10s0"     ,   "SHRUB"                       ],
 "avls11s0"     : [ "avls11s0"     ,   "SHRUB"                       ],
 "avls1sn0"     : [ "avls1sn0"     ,   "SHRUB"                       ],
-"avls2sn0"     : [ "avls2sn0"     ,   "SHRUB"                       ],
+"avls2sn0"     : [ "avls2sn0"     ,   "EXCLUDED"                    ],
 "avls3sn0"     : [ "avls3sn0"     ,   "SHRUB"                       ],
 "avlsnh01"     : [ "avlsnh01"     ,   "MOUND"                       ],
 "avlsnh02"     : [ "avlsnh02"     ,   "MOUND"                       ],

@@ -37,6 +37,38 @@ const std::vector<QColor> g_neatLightColors{
 };
 }
 
+struct SpriteMapPainter::Impl {
+    struct CachePath {
+        QPainterPath m_path;
+        QFontMetrics m_metrics;
+    };
+
+    mutable std::map<QString, std::vector<CachePath>> m_cache;
+
+    QPainterPath findCache(const QString& text, const QFontMetrics& fm)
+    {
+        auto it = m_cache.find(text);
+        if (it == m_cache.cend())
+            return {};
+        auto& records = it->second;
+        for (auto& rec : records) {
+            if (1 || rec.m_metrics == fm)
+                return rec.m_path;
+        }
+        return {};
+    }
+};
+
+SpriteMapPainter::SpriteMapPainter(const SpritePaintSettings* settings, int depth)
+    : m_settings(settings)
+    , m_depth(depth)
+    , m_impl(std::make_unique<Impl>())
+{}
+
+SpriteMapPainter::~SpriteMapPainter()
+{
+}
+
 void SpriteMapPainter::paint(QPainter*        painter,
                              const SpriteMap* spriteMap,
                              uint32_t         animationFrameOffsetTerrain,
@@ -45,7 +77,7 @@ void SpriteMapPainter::paint(QPainter*        painter,
     painter->setRenderHint(QPainter::SmoothPixmapTransform, m_settings->getEffectiveScale() < 100);
     const int tileSize = m_settings->m_tileSize;
 
-    auto drawCell = [painter, tileSize, animationFrameOffsetTerrain, animationFrameOffsetObjects](const SpriteMap::Cell& cell, int x, int y) {
+    auto drawCell = [painter, tileSize, animationFrameOffsetTerrain, animationFrameOffsetObjects, this](const SpriteMap::Cell& cell, int x, int y, bool isOverlayPass) {
         for (const auto& item : cell.m_items) {
             auto sprite = item.m_sprite->get();
             if (!sprite)
@@ -84,9 +116,10 @@ void SpriteMapPainter::paint(QPainter*        painter,
                 painter->translate(-boundingSize.width() + tileSize, -boundingSize.height() + tileSize);
             }
             painter->setOpacity(item.m_opacity);
-            painter->drawPixmap(frame.m_paddingLeftTop, frame.m_frame);
+            if (!isOverlayPass)
+                painter->drawPixmap(frame.m_paddingLeftTop, frame.m_frame);
             painter->setOpacity(1.0);
-            if (item.m_keyColor.isValid()) {
+            if (!isOverlayPass && item.m_keyColor.isValid()) {
                 QPixmap pix     = frame.m_frame;
                 QImage  imgOrig = pix.toImage();
                 pix.fill(Qt::transparent);
@@ -101,16 +134,13 @@ void SpriteMapPainter::paint(QPainter*        painter,
                 pix = QPixmap::fromImage(img);
                 painter->drawPixmap(frame.m_paddingLeftTop, pix);
             }
-            if (!item.m_overlayInfo.empty()) {
+            if (isOverlayPass && !item.m_overlayInfo.empty()) {
                 painter->setPen(Qt::white);
                 QFont font = painter->font();
                 font.setPixelSize(item.m_overlayInfoFont);
                 painter->setFont(font);
                 painter->setTransform(posTransform);
                 painter->translate((item.m_overlayInfoOffsetX) * tileSize, (0) * tileSize);
-                //                painter->drawText(QRect(0, tileSize / 2, tileSize, tileSize / 2),
-                //                                  Qt::AlignCenter | Qt::AlignVCenter,
-                //                                  QString::fromStdString(item.m_overlayInfo));
 
                 QFontMetrics fm(font);
 
@@ -119,14 +149,23 @@ void SpriteMapPainter::paint(QPainter*        painter,
                 //int textHeight = fm.height();
 
                 const int textX = tileSize / 2 - textWidth / 2 - 2;
-                const int textY = tileSize / 2;
+                const int textY = tileSize / 2 - (tileSize / 4) * ((x + item.m_overlayInfoOffsetX) % 2);
 
-                QPainterPath myPath;
-                myPath.addText(textX, textY, font, txt);
+                painter->translate(textX, textY);
 
-                QPainterPathStroker stroker;
-                stroker.setWidth(3);
-                const QPainterPath stroked = stroker.createStroke(myPath);
+                QPainterPath stroked = m_impl->findCache(txt, fm);
+
+                if (stroked.isEmpty()) {
+                    QPainterPath myPath;
+                    myPath.addText(0, 0, font, txt);
+
+                    QPainterPathStroker stroker;
+                    stroker.setWidth(3);
+                    stroked = stroker.createStroke(myPath);
+                    m_impl->m_cache[txt].push_back({ stroked, fm });
+
+                    //qWarning() << "cache " << txt;
+                }
 
                 painter->setBrush(Qt::black);
                 painter->setPen(Qt::NoPen);
@@ -134,26 +173,7 @@ void SpriteMapPainter::paint(QPainter*        painter,
 
                 painter->setBrush(Qt::white);
                 painter->setPen(Qt::white);
-                painter->drawText(textX, textY, txt);
-            }
-
-            // debug diamond
-            {
-                //                        QVector<QPointF> points;
-                //                        points << drawOrigin + QPointF{ tileWidth / 2, 0 };
-                //                        points << drawOrigin + QPointF{ tileWidth, tileWidth / 2 };
-                //                        points << drawOrigin + QPointF{ tileWidth / 2, tileWidth };
-                //                        points << drawOrigin + QPointF{ 0, tileWidth / 2 };
-                //                        points << drawOrigin + QPointF{ tileWidth / 2, 0 };
-                //                        painter->setPen(QPen(QBrush{ QColor(192, 0, 0, 255) }, 2.));
-                //                        painter->setBrush(QColor(Qt::green));
-                //                        painter->drawPolyline(QPolygonF(points));
-                //   debug cross
-                //    {
-                //        painter->setPen(Qt::SolidLine);
-                //        painter->drawLine(m_boundingOrigin, QPointF(m_boundingSize.width(), m_boundingSize.height()) + m_boundingOrigin);
-                //        painter->drawLine(QPointF(m_boundingSize.width(), 0) + m_boundingOrigin, QPointF(0, m_boundingSize.height()) + m_boundingOrigin);
-                //    }
+                painter->drawText(0, 0, txt);
             }
 
             painter->setTransform(oldTransform);
@@ -181,7 +201,7 @@ void SpriteMapPainter::paint(QPainter*        painter,
             break;
         for (const auto& [rowIndex, row] : grid.m_rows) {
             for (const auto& [colIndex, cell] : row.m_cells) {
-                drawCell(cell, colIndex, rowIndex);
+                drawCell(cell, colIndex, rowIndex, false);
             }
         }
     }
@@ -197,7 +217,18 @@ void SpriteMapPainter::paint(QPainter*        painter,
             continue;
         for (const auto& [rowIndex, row] : grid.m_rows) {
             for (const auto& [colIndex, cell] : row.m_cells) {
-                drawCell(cell, colIndex, rowIndex);
+                drawCell(cell, colIndex, rowIndex, false);
+            }
+        }
+    }
+
+    // item text overlay
+    for (const auto& [priority, grid] : spriteMap->m_planes[m_depth].m_grids) {
+        if (priority < 0)
+            continue;
+        for (const auto& [rowIndex, row] : grid.m_rows) {
+            for (const auto& [colIndex, cell] : row.m_cells) {
+                drawCell(cell, colIndex, rowIndex, true);
             }
         }
     }

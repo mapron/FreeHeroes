@@ -808,7 +808,8 @@ STRUCT_REFLECTION_PAIRED(
     "configOrder",                 configOrder,
     "animation",                   animation,
     "sound",                       sound,
-    "name",                        name
+    "name",                        name,
+    "shortName",                   shortName
 )
 
 
@@ -978,7 +979,8 @@ ENUM_REFLECTION_STRINGIFY(LibraryMapObstacle::Type, Invalid,
     LUCID_POOLS,
     MAGIC_CLOUDS,
     MAGIC_PLAINS,
-    ROCKLANDS
+    ROCKLANDS,
+    EXCLUDED
 )
 
 

@@ -1093,14 +1093,15 @@ struct ObjectGenerator::ObjectFactoryMine : public AbstractFactory<RecordMine> {
     struct ObjectMine : public AbstractObject<FHMine> {
         std::string                    getId() const override { return "mine." + this->m_obj.m_id->id; }
         Type                           getType() const override { return Type::Visitable; }
-        Core::LibraryObjectDefConstPtr getDef() const override { return m_obj.m_id->minesDefs.get({}); }
+        Core::LibraryObjectDefConstPtr getDef() const override { return m_obj.m_id->minesDefs.get(m_obj.m_defIndex); }
     };
 
     ObjectFactoryMine(FHMap&                          map,
                       const FHRngZone::GeneratorMine& genSettings,
                       const FHScoreSettings&          scoreSettings,
                       const Core::IGameDatabase*      database,
-                      Core::IRandomGenerator* const   rng)
+                      Core::IRandomGenerator* const   rng,
+                      Core::LibraryTerrainConstPtr    terrain)
         : AbstractFactory<RecordMine>(map, database, rng)
     {
         if (!genSettings.m_isEnabled)
@@ -1113,8 +1114,9 @@ struct ObjectGenerator::ObjectFactoryMine : public AbstractFactory<RecordMine> {
             record.m_obj.m_id    = value.m_resourceId;
             Core::ScoreAttr attr = Core::ScoreAttr::ResourceGen;
 
-            auto scoreValue            = value.m_value;
-            record.m_frequency         = value.m_frequency;
+            auto scoreValue    = value.m_value;
+            record.m_frequency = value.m_frequency;
+            ObjectGenerator::correctObjIndex(record.m_obj.m_defIndex, record.m_obj.m_id->minesDefs, terrain);
             record.m_obj.m_guard       = value.m_guard;
             record.m_obj.m_player      = none;
             record.m_obj.m_score[attr] = scoreValue;
@@ -1192,7 +1194,7 @@ void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
         objectFactories.push_back(std::make_shared<ObjectFactoryScroll>(m_map, zoneSettings.m_generators.m_scrolls, scoreSettings, m_database, m_rng, &spellPool));
         objectFactories.push_back(std::make_shared<ObjectFactoryDwelling>(m_map, zoneSettings.m_generators.m_dwellings, scoreSettings, m_database, m_rng, mainFaction));
         objectFactories.push_back(std::make_shared<ObjectFactoryVisitable>(m_map, zoneSettings.m_generators.m_visitables, scoreSettings, m_database, m_rng, terrain));
-        objectFactories.push_back(std::make_shared<ObjectFactoryMine>(m_map, zoneSettings.m_generators.m_mines, scoreSettings, m_database, m_rng));
+        objectFactories.push_back(std::make_shared<ObjectFactoryMine>(m_map, zoneSettings.m_generators.m_mines, scoreSettings, m_database, m_rng, terrain));
 
         const int iterLimit = 100000;
         int       i         = 0;

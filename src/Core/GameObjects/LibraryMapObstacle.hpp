@@ -85,6 +85,8 @@ struct LibraryMapObstacle {
         MAGIC_CLOUDS,    //  229
         MAGIC_PLAINS,    // 46 230
         ROCKLANDS,       //  231
+
+        EXCLUDED,
     };
 
     Type type = Type::Invalid;

@@ -43,12 +43,21 @@
                             "Army":           { "target": 50000, "maxSingle": 12000},
                             "ArtStat":        { "target": 15000, "maxSingle": 7000, "minSingle": 2500},
                             "ArtSupport":     { "target": 10000, "maxSingle": 7000, "minSingle": 2500},
-                            "Gold":           { "target": 50000, "maxSingle": 15000},
-                            "Resource":       { "target": 40000, "maxSingle": 15000},
-                            "Experience":     { "target": 50000, "maxSingle": 12000},
+                            "Gold":           { "target": 50000, "maxSingle": 15000, "minSingle": 2500},
+                            "Resource":       { "target": 40000, "maxSingle": 15000, "minSingle": 2500},
+                            "Experience":     { "target": 50000, "maxSingle": 12000, "minSingle": 2500},
                             "SpellOffensive": { "target": 30000, "maxSingle": 6000, "minSingle": 2000},
                             "SpellCommon":    { "target": 40000, "maxSingle": 6000, "minSingle": 2000},
-                            "Support":        { "target": 5000 , "minSingle": 1000}
+                            "Support":        { "target": 5000 , "minSingle": 1000},
+                            "Upgrade"   :     { "target": 20000, "maxSingle": 9000, "minSingle": 2000}
+                        },
+                        "guardPercent": 80
+                    },
+                    "LowGuarded": {
+                        "isEnabled": true,
+                        "score":{
+                            "Experience":     { "target": 30000, "maxSingle": 2000},
+                            "Resource":       { "target": 30000, "maxSingle": 3000}
                         },
                         "guardPercent": 80
                     },
@@ -58,12 +67,12 @@
                             "ArmyDwelling":   { "target": 10000 ,"maxSingle": 2200},
                             "ArtStat":        { "target": 6000 , "maxSingle": 2400},
                             "ArtSupport":     { "target": 8000 , "maxSingle": 2400},
-                            "Gold":           { "target": 20000, "maxSingle": 2000},
+                            "Gold":           { "target": 50000, "maxSingle": 2000},
                             "Resource":       { "target": 100000, "maxSingle": 2500},
-                            "Experience":     { "target": 40000, "maxSingle": 2000},
-                            "Upgrade"   :     { "target": 20000, "maxSingle": 5000},
+                            "Experience":     { "target": 20000, "maxSingle": 2000},
+                            "Upgrade"   :     { "target": 20000, "maxSingle": 3000},
                             "ResourceGen":    { "target": 30000},
-                            "SpellAny":       { "target": 50000, "maxSingle": 5000}
+                            "SpellAny":       { "target": 20000, "maxSingle": 1800}
                         },
                         "guardPercent": 0
                     }
@@ -151,17 +160,17 @@
                     "shrines": {
                         "isEnabled": true,
                         "records": {
-                            "lvl1"     : { "frequency":  500, "visualLevel": 1, "filter": {"levels": [1], "notTags"   : ["offensive", "control"]             } },
-                            "lvl2"     : { "frequency":  400, "visualLevel": 2, "filter": {"levels": [2], "notTags"   : ["offensive", "control"]             } },
-                            "lvl3"     : { "frequency":  400, "visualLevel": 3, "filter": {"levels": [3], "notTags"   : ["offensive", "control"]             } },
-                            "lvl4"     : { "frequency":  300, "visualLevel": 4, "filter": {"levels": [4], "notTags"   : ["offensive", "control"]             } },
-                            "lvl5"     : { "frequency":  300, "visualLevel": 4, "filter": {"levels": [5], "notTags"   : ["offensive", "control"]             } },
-                            "lvl1off"  : { "frequency":  500, "visualLevel": 1, "filter": {"levels": [1], "notTags"   : ["control"], "tags": ["offensive"]   } },
-                            "lvl2off"  : { "frequency":  400, "visualLevel": 2, "filter": {"levels": [2], "notTags"   : ["control"], "tags": ["offensive"]   } },
-                            "lvl3off"  : { "frequency":  400, "visualLevel": 3, "filter": {"levels": [3], "notTags"   : ["control"], "tags": ["offensive"]   } },
-                            "lvl4off"  : { "frequency":  300, "visualLevel": 4, "filter": {"levels": [4], "notTags"   : ["control"], "tags": ["offensive"]   } },
-                            "lvl5off"  : { "frequency":  300, "visualLevel": 4, "filter": {"levels": [5], "notTags"   : ["control"], "tags": ["offensive"]   } },
-                            "control"  : { "frequency":  200, "visualLevel": 4, "filter": {                 "tags"    : ["control"]    } }
+                            "lvl1"     : { "frequency":  200, "visualLevel": 1, "filter": {"levels": [1], "notTags"   : ["offensive", "control"]             } },
+                            "lvl2"     : { "frequency":  200, "visualLevel": 2, "filter": {"levels": [2], "notTags"   : ["offensive", "control"]             } },
+                            "lvl3"     : { "frequency":  200, "visualLevel": 3, "filter": {"levels": [3], "notTags"   : ["offensive", "control"]             } },
+                            "lvl4"     : { "frequency":  150, "visualLevel": 4, "filter": {"levels": [4], "notTags"   : ["offensive", "control"]             } },
+                            "lvl5"     : { "frequency":  100, "visualLevel": 4, "filter": {"levels": [5], "notTags"   : ["offensive", "control"]             } },
+                            "lvl1off"  : { "frequency":  300, "visualLevel": 1, "filter": {"levels": [1], "notTags"   : ["control"], "tags": ["offensive"]   } },
+                            "lvl2off"  : { "frequency":  200, "visualLevel": 2, "filter": {"levels": [2], "notTags"   : ["control"], "tags": ["offensive"]   } },
+                            "lvl3off"  : { "frequency":  200, "visualLevel": 3, "filter": {"levels": [3], "notTags"   : ["control"], "tags": ["offensive"]   } },
+                            "lvl4off"  : { "frequency":  100, "visualLevel": 4, "filter": {"levels": [4], "notTags"   : ["control"], "tags": ["offensive"]   } },
+                            "lvl5off"  : { "frequency":  100, "visualLevel": 4, "filter": {"levels": [5], "notTags"   : ["control"], "tags": ["offensive"]   } },
+                            "control"  : { "frequency":  100, "visualLevel": 4, "filter": {                 "tags"    : ["control"]    } }
                         }
                     },
                     "scrolls": {
@@ -200,13 +209,13 @@
                     "mines": {
                         "isEnabled": true,
                         "records": {
-                            "gold"    : { "value": 3000, "guard": 6000, "resourceId": "gold"    , "frequency": 1000 },
-                            "wood"    : { "value": 2000, "guard": 1000, "resourceId": "wood"    , "frequency": 1200 },
-                            "ore"     : { "value": 2000, "guard": 1000, "resourceId": "ore"     , "frequency": 1200 },
-                            "mercury" : { "value": 2000, "guard": 3000, "resourceId": "mercury" , "frequency":  500 },
-                            "sulfur"  : { "value": 2000, "guard": 3000, "resourceId": "sulfur"  , "frequency":  500 },
-                            "crystal" : { "value": 2000, "guard": 3000, "resourceId": "crystal" , "frequency":  500 },
-                            "gems"    : { "value": 2000, "guard": 3000, "resourceId": "gems"    , "frequency":  500 }
+                            "gold"    : { "value": 3000, "guard": 6000, "resourceId": "gold"    , "frequency": 2500 },
+                            "wood"    : { "value": 2000, "guard": 1000, "resourceId": "wood"    , "frequency": 2000 },
+                            "ore"     : { "value": 2000, "guard": 1000, "resourceId": "ore"     , "frequency": 2000 },
+                            "mercury" : { "value": 2000, "guard": 3000, "resourceId": "mercury" , "frequency": 1200 },
+                            "sulfur"  : { "value": 2000, "guard": 3000, "resourceId": "sulfur"  , "frequency": 1200 },
+                            "crystal" : { "value": 2000, "guard": 3000, "resourceId": "crystal" , "frequency": 1200 },
+                            "gems"    : { "value": 2000, "guard": 3000, "resourceId": "gems"    , "frequency": 1200 }
                         }
                     }
 
@@ -249,6 +258,7 @@
                             "Experience":     { "target": 50000   , "minSingle":  8000},
                             "SpellOffensive": { "target": 120000  , "minSingle":  5000},
                             "SpellCommon":    { "target":  80000  , "minSingle":  5000},
+                            "Upgrade"   :     { "target": 25000   , "minSingle": 3000},
                 
                             "Control":        { "target": 150000  , "minSingle": 25000}
                         }

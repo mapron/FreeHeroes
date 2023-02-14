@@ -13,6 +13,19 @@
 
 namespace FreeHeroes {
 
+SpriteMapItem::SpriteMapItem(const SpriteMap* spriteMap, const SpritePaintSettings* spritePaintSettings, int depth, uint32_t animationFrameDurationMs)
+    : m_spriteMap(spriteMap)
+    , m_spritePaintSettings(spritePaintSettings)
+    , m_currentDepth(depth)
+    , m_animationFrameDurationMs(animationFrameDurationMs)
+    , m_painter(std::make_unique<SpriteMapPainter>(m_spritePaintSettings, m_currentDepth))
+{
+}
+
+SpriteMapItem::~SpriteMapItem()
+{
+}
+
 void SpriteMapItem::tick(uint32_t msecElapsed)
 {
     m_animationTick += msecElapsed;
@@ -40,8 +53,7 @@ QRectF SpriteMapItem::boundingRect() const
 
 void SpriteMapItem::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
-    SpriteMapPainter p(m_spritePaintSettings, m_currentDepth);
-    p.paint(painter, m_spriteMap, m_animationFrameOffsetTerrain, m_animationFrameOffsetObjects);
+    m_painter->paint(painter, m_spriteMap, m_animationFrameOffsetTerrain, m_animationFrameOffsetObjects);
 }
 
 }
