@@ -45,4 +45,7 @@ using LibrarySpellConstPtr            = const LibrarySpell*;
 using LibraryTerrainConstPtr          = const LibraryTerrain*;
 using LibraryUnitConstPtr             = const LibraryUnit*;
 
+struct ObjectDefIndex;
+struct ObjectDefMappings;
+
 }

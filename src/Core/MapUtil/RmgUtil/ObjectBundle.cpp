@@ -5,7 +5,10 @@
  */
 
 #include "ObjectBundle.hpp"
-#include "TemplateZone.hpp"
+#include "TileZone.hpp"
+#include "KMeans.hpp"
+
+#include "MernelPlatform/Profiler.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -35,32 +38,24 @@ const std::vector<FHPos> g_deltasToTry{
 };
 // clang-format on
 
-std::set<FHPos> blurSet(const std::set<FHPos>& source, bool diag, bool excludeOriginal = true)
+MapTileRegion blurSet(const MapTileRegion& source, bool diag, bool excludeOriginal = true)
 {
-    std::set<FHPos> result;
+    MapTileRegion result;
     for (auto pos : source) {
         result.insert(pos);
-        result.insert(pos + FHPos{ -1, 0 });
-        result.insert(pos + FHPos{ +1, 0 });
-        result.insert(pos + FHPos{ 0, -1 });
-        result.insert(pos + FHPos{ 0, +1 });
-        if (diag) {
-            result.insert(pos + FHPos{ -1, -1 });
-            result.insert(pos + FHPos{ +1, -1 });
-            result.insert(pos + FHPos{ -1, +1 });
-            result.insert(pos + FHPos{ +1, +1 });
-        }
+        result.insert(pos->neighboursList(diag));
     }
+    result.doSort();
     if (excludeOriginal) {
-        for (auto it = result.begin(); it != result.end();) {
-            if (source.contains(*it)) {
-                it = result.erase(it);
-            } else {
-                ++it;
-            }
-        }
+        result.erase(source);
+        result.doSort();
     }
     return result;
+}
+MapTileRegion blurSet(MapTileRegion&& source, bool diag, bool excludeOriginal = true)
+{
+    source.doSort();
+    return blurSet(source, diag, excludeOriginal);
 }
 
 }
@@ -74,12 +69,16 @@ void ObjectBundle::sumGuard()
 
 void ObjectBundle::estimateOccupied()
 {
+    Mernel::ProfilerScope scope("estimateOccupied");
     m_estimatedOccupied.clear();
     m_protectionBorder.clear();
     m_blurForPassable.clear();
     m_allArea.clear();
     m_fitArea.clear();
     m_guardRegion.clear();
+    m_absPosIsValid = false;
+    if (!m_absPos)
+        return;
 
     if (m_type == ObjectGenerator::IObject::Type::Pickable) {
         size_t       itemCount      = m_items.size();
@@ -87,59 +86,68 @@ void ObjectBundle::estimateOccupied()
         const size_t itemRectHeight = (itemCount + maxRowSize - 1) / maxRowSize;
         const size_t itemRectWidth  = std::min(maxRowSize, itemCount);
         for (size_t index = 0; auto& item : m_items) {
-            auto pos = m_absPos;
-            pos.m_y -= index / itemRectWidth;
-            pos.m_x -= index % itemRectWidth;
-            m_estimatedOccupied.insert(pos);
-            item.m_absPos = pos + item.m_obj->getOffset();
+            FHPos itemOffset;
+
+            itemOffset.m_y -= index / itemRectWidth;
+            itemOffset.m_x -= index % itemRectWidth;
+            auto visualPos = m_absPos->neighbourByOffset(itemOffset);
+            if (!visualPos)
+                return;
+
+            m_estimatedOccupied.insert(visualPos);
+            item.m_absPos = visualPos->neighbourByOffset(item.m_obj->getOffset());
+            if (!item.m_absPos)
+                return;
 
             index++;
         }
 
         if (m_guard) {
-            auto protection     = blurSet(m_estimatedOccupied, true);
-            m_protectionBorder2 = protection;
-            m_guardAbsPos       = m_absPos;
+            FHPos guardOffset;
 
             if (m_guardPosition == GuardPosition::B) {
-                m_guardAbsPos.m_y++;
+                guardOffset.m_y++;
             }
             if (m_guardPosition == GuardPosition::BR) {
-                m_guardAbsPos.m_y++;
-                m_guardAbsPos.m_x++;
+                guardOffset.m_y++;
+                guardOffset.m_x++;
             }
             if (m_guardPosition == GuardPosition::BL) {
-                m_guardAbsPos.m_y++;
-                m_guardAbsPos.m_x -= itemRectWidth;
+                guardOffset.m_y++;
+                guardOffset.m_x -= itemRectWidth;
             }
             if (m_guardPosition == GuardPosition::R) {
-                m_guardAbsPos.m_x++;
+                guardOffset.m_x++;
             }
             if (m_guardPosition == GuardPosition::TR) {
-                m_guardAbsPos.m_x++;
-                m_guardAbsPos.m_y -= itemRectHeight;
+                guardOffset.m_x++;
+                guardOffset.m_y -= itemRectHeight;
             }
             if (m_guardPosition == GuardPosition::T) {
-                m_guardAbsPos.m_y -= itemRectHeight;
+                guardOffset.m_y -= itemRectHeight;
             }
             if (m_guardPosition == GuardPosition::TL) {
-                m_guardAbsPos.m_y -= itemRectHeight;
-                m_guardAbsPos.m_x -= itemRectWidth;
+                guardOffset.m_y -= itemRectHeight;
+                guardOffset.m_x -= itemRectWidth;
             }
             if (m_guardPosition == GuardPosition::L) {
-                m_guardAbsPos.m_x -= itemRectWidth;
+                guardOffset.m_x -= itemRectWidth;
             }
 
-            m_guardRegion = blurSet({ m_guardAbsPos }, true, false);
+            m_guardAbsPos = m_absPos->neighbourByOffset(guardOffset);
+            if (!m_guardAbsPos)
+                return;
 
-            for (auto pos : protection) {
-                if (!m_guardRegion.contains(pos))
-                    m_protectionBorder.insert(pos);
-            }
+            m_guardRegion = blurSet(MapTileRegion({ m_guardAbsPos }), true, false);
+
+            m_estimatedOccupied.doSort();
+            m_protectionBorder = blurSet(m_estimatedOccupied, true);
+            m_protectionBorder.erase(m_guardRegion);
+            m_protectionBorder.doSort();
         }
     }
     if (m_type == ObjectGenerator::IObject::Type::Visitable) {
-        FHPos mainPos = m_absPos;
+        MapTilePtr mainPos = m_absPos;
         for (size_t index = 0; auto& item : m_items) {
             item.m_absPos = m_absPos;
             auto* def     = item.m_obj->getDef();
@@ -155,8 +163,10 @@ void ObjectBundle::estimateOccupied()
                     if (def->blockMapPlanar.data[my][mx] == 0)
                         continue;
                     FHPos maskBitPos{ (int) mx, (int) my, 0 };
-
-                    m_estimatedOccupied.insert(m_absPos - blockMaskSizePos + maskBitPos);
+                    auto  occPos = m_absPos->neighbourByOffset(FHPos{} - blockMaskSizePos + maskBitPos);
+                    if (!occPos)
+                        return;
+                    m_estimatedOccupied.insert(occPos);
                 }
             }
 
@@ -165,7 +175,9 @@ void ObjectBundle::estimateOccupied()
                     if (def->visitMapPlanar.data[my][mx] == 0)
                         continue;
                     FHPos maskBitPos{ (int) mx, (int) my, 0 };
-                    mainPos = m_absPos - visitMaskSizePos + maskBitPos;
+                    mainPos = m_absPos->neighbourByOffset(FHPos{} - visitMaskSizePos + maskBitPos);
+                    if (!mainPos)
+                        return;
                 }
             }
 
@@ -173,36 +185,45 @@ void ObjectBundle::estimateOccupied()
         }
 
         if (m_guard) {
-            m_guardAbsPos = mainPos;
-            m_guardAbsPos.m_y++;
+            FHPos guardOffset;
+            guardOffset.m_y++;
             if (m_guardPosition == GuardPosition::TL || m_guardPosition == GuardPosition::L || m_guardPosition == GuardPosition::BL)
-                m_guardAbsPos.m_x--;
+                guardOffset.m_x--;
             if (m_guardPosition == GuardPosition::TR || m_guardPosition == GuardPosition::R || m_guardPosition == GuardPosition::BR)
-                m_guardAbsPos.m_x++;
-
-            m_guardRegion = blurSet({ m_guardAbsPos }, true, false);
+                guardOffset.m_x++;
+            m_guardAbsPos = mainPos->neighbourByOffset(guardOffset);
+            if (!m_guardAbsPos)
+                return;
+            m_guardRegion = blurSet(MapTileRegion({ m_guardAbsPos }), true, false);
         }
     }
 
     if (m_guard) {
         if (!m_considerBlock)
-            m_guardRegion = { m_guardAbsPos };
-
-        m_estimatedOccupied.insert(m_guardRegion.cbegin(), m_guardRegion.cend());
+            m_estimatedOccupied.insert(m_guardAbsPos);
+        else
+            m_estimatedOccupied.insert(m_guardRegion);
     }
 
+    m_estimatedOccupied.doSort();
+
     if (m_guard || m_type == ObjectGenerator::IObject::Type::Visitable) {
-        std::set<FHPos> current = m_estimatedOccupied;
-        current.insert(m_protectionBorder.cbegin(), m_protectionBorder.cend());
+        auto current = m_estimatedOccupied;
+        current.insert(m_protectionBorder);
+        current.doSort();
 
         m_blurForPassable = blurSet(current, false);
     }
-    m_allArea.insert(m_protectionBorder.cbegin(), m_protectionBorder.cend());
-    m_allArea.insert(m_blurForPassable.cbegin(), m_blurForPassable.cend());
-    m_allArea.insert(m_estimatedOccupied.cbegin(), m_estimatedOccupied.cend());
+    m_allArea.insert(m_protectionBorder);
+    m_allArea.insert(m_blurForPassable);
+    m_allArea.insert(m_estimatedOccupied);
+    m_allArea.doSort();
 
-    m_fitArea.insert(m_protectionBorder.cbegin(), m_protectionBorder.cend());
-    m_fitArea.insert(m_estimatedOccupied.cbegin(), m_estimatedOccupied.cend());
+    m_fitArea.insert(m_protectionBorder);
+    m_fitArea.insert(m_estimatedOccupied);
+    m_fitArea.doSort();
+
+    m_absPosIsValid = true;
 }
 
 std::string ObjectBundle::toPrintableString() const
@@ -215,21 +236,24 @@ std::string ObjectBundle::toPrintableString() const
     return os.str();
 }
 
-void ObjectBundleSet::consume(const ObjectGenerator&        generated,
-                              TileZone&                     tileZone,
-                              Core::IRandomGenerator* const rng)
+bool ObjectBundleSet::consume(const ObjectGenerator& generated,
+                              TileZone&              tileZone)
 {
-    m_rng = rng;
-    for (auto& seg : tileZone.m_innerAreaSegments) {
-        for (auto* cell : seg.m_innerArea)
-            m_cells.insert({ cell->m_pos });
-    }
+    Mernel::ProfilerScope scope("consume");
 
-    m_cellsForUnguardedInner = m_cells;
-    for (auto* cell : tileZone.m_innerAreaUsable.m_innerArea) {
-        if (!m_cells.contains(cell->m_pos))
-            m_cellsForUnguardedRoads.insert(cell->m_pos);
+    m_consumeResult = {};
+
+    for (auto& seg : tileZone.m_innerAreaSegments) {
+        m_consumeResult.m_cells.insert(seg.m_innerArea);
     }
+    m_consumeResult.m_cells.doSort();
+
+    m_consumeResult.m_cellsForUnguardedInner = m_consumeResult.m_cells;
+    for (auto* cell : tileZone.m_innerAreaUsable.m_innerArea) {
+        if (!m_consumeResult.m_cells.contains(cell))
+            m_consumeResult.m_cellsForUnguardedRoads.insert(cell);
+    }
+    m_consumeResult.m_cellsForUnguardedRoads.doSort();
 
     for (const auto& group : generated.m_groups) {
         for (const auto& obj : group.m_objects) {
@@ -237,7 +261,7 @@ void ObjectBundleSet::consume(const ObjectGenerator&        generated,
             item.m_guard = obj->getGuard() * group.m_guardPercent / 100;
             item.m_obj   = obj;
 
-            auto& buck = m_buckets[obj->getType()];
+            auto& buck = m_consumeResult.m_buckets[obj->getType()];
             if (item.m_guard)
                 buck.m_guarded.push_back(item);
             else
@@ -245,27 +269,33 @@ void ObjectBundleSet::consume(const ObjectGenerator&        generated,
         }
     }
 
-    auto makeNewObjectBundle = [rng, &tileZone](ObjectGenerator::IObject::Type type) -> ObjectBundle {
+    auto makeNewObjectBundle = [this, &tileZone](ObjectGenerator::IObject::Type type) -> ObjectBundle {
         ObjectBundle obj;
         int64_t      min  = tileZone.m_rngZoneSettings.m_guardMin;
         int64_t      max  = tileZone.m_rngZoneSettings.m_guardMax;
-        obj.m_targetGuard = min + rng->gen(max - min);
+        obj.m_targetGuard = min + m_rng->gen(max - min);
         if (type == ObjectGenerator::IObject::Type::Pickable)
-            obj.m_itemLimit = 1 + rng->genSmall(3);
+            obj.m_itemLimit = 1 + m_rng->genSmall(3);
 
         obj.m_type          = type;
-        obj.m_guardPosition = g_allPositions[rng->genSmall(g_allPositions.size() - 1)];
+        obj.m_guardPosition = g_allPositions[m_rng->genSmall(g_allPositions.size() - 1)];
 
         return obj;
     };
 
-    for (const auto& [type, bucket] : m_buckets) {
+    for (const auto& [type, bucket] : m_consumeResult.m_buckets) {
         for (const auto& item : bucket.m_nonGuarded) {
             ObjectBundle bundleNonGuarded;
             bundleNonGuarded.m_items.push_back(ObjectBundle::Item{ .m_obj = item.m_obj });
-            bundleNonGuarded.m_type = type;
+            bundleNonGuarded.m_type   = type;
+            bundleNonGuarded.m_absPos = m_tileContainer.m_centerTile;
             bundleNonGuarded.estimateOccupied();
-            m_bundlesNonGuarded.push_back(std::move(bundleNonGuarded));
+            assert(bundleNonGuarded.m_absPosIsValid);
+
+            if (type == ObjectGenerator::IObject::Type::Pickable)
+                m_consumeResult.m_bundlesNonGuardedPickable.push_back(std::move(bundleNonGuarded));
+            else
+                m_consumeResult.m_bundlesNonGuarded.push_back(std::move(bundleNonGuarded));
         }
 
         ObjectBundle bundleGuarded = makeNewObjectBundle(type);
@@ -281,8 +311,11 @@ void ObjectBundleSet::consume(const ObjectGenerator&        generated,
             if (!bundleGuarded.m_items.size())
                 return;
 
+            bundleGuarded.m_absPos = m_tileContainer.m_centerTile;
             bundleGuarded.estimateOccupied();
-            m_bundlesGuarded.push_back(bundleGuarded);
+            assert(bundleGuarded.m_absPosIsValid);
+
+            m_consumeResult.m_bundlesGuarded.push_back(bundleGuarded);
             bundleGuarded = makeNewObjectBundle(bundleGuarded.m_type);
         };
 
@@ -293,38 +326,115 @@ void ObjectBundleSet::consume(const ObjectGenerator&        generated,
         pushIfNeeded(true);
     }
 
-    std::sort(m_bundlesGuarded.begin(), m_bundlesGuarded.end(), [](const ObjectBundle& l, const ObjectBundle& r) {
+    std::sort(m_consumeResult.m_bundlesGuarded.begin(), m_consumeResult.m_bundlesGuarded.end(), [](const ObjectBundle& l, const ObjectBundle& r) {
         return l.getEstimatedArea() > r.getEstimatedArea();
     });
-    std::sort(m_bundlesNonGuarded.begin(), m_bundlesNonGuarded.end(), [](const ObjectBundle& l, const ObjectBundle& r) {
+    std::sort(m_consumeResult.m_bundlesNonGuarded.begin(), m_consumeResult.m_bundlesNonGuarded.end(), [](const ObjectBundle& l, const ObjectBundle& r) {
         return l.getEstimatedArea() > r.getEstimatedArea();
     });
+
+    std::string m_indent = "        ";
+    bool        success  = true;
+
+    for (size_t i = 0; auto& bundle : m_consumeResult.m_bundlesGuarded) {
+        i++;
+
+        if (!placeOnMap(bundle)) {
+            success = false;
+            m_logOutput << m_indent << "g placement failure [" << i << "]: size=" << bundle.getEstimatedArea() << "; " << bundle.toPrintableString() << "\n";
+            continue;
+        }
+
+        for (auto* pos : bundle.m_protectionBorder) {
+            m_tileContainer.m_needBeBlocked.insert(pos);
+
+            //m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = tileZone.m_index, .m_valueB = 1 });
+        }
+
+        if (bundle.m_guard) {
+            Guard guard;
+            guard.m_value = bundle.m_guard;
+            guard.m_pos   = bundle.m_guardAbsPos;
+            guard.m_zone  = &tileZone;
+            m_guards.push_back(guard);
+        }
+    }
+
+    for (size_t i = 0; auto& bundle : m_consumeResult.m_bundlesNonGuarded) {
+        i++;
+        if (!this->placeOnMap(bundle)) {
+            success = false;
+            m_logOutput << m_indent << "u placement failure [" << i << "]: size=" << bundle.getEstimatedArea() << "; " << bundle.toPrintableString() << "\n";
+            continue;
+        }
+    }
+
+    {
+        MapTileRegion blocked;
+        for (auto* tile : m_consumeResult.m_cells) {
+            bool everyNTileIsFree = true;
+            for (auto* ntile : tile->m_allNeighbours) {
+                if (m_consumeResult.m_cells.contains(ntile))
+                    continue;
+                everyNTileIsFree = false;
+                break;
+            }
+            if (everyNTileIsFree)
+                blocked.insert(tile);
+        }
+
+        m_tileContainer.m_needBeBlocked.insert(blocked);
+        m_consumeResult.m_cells.erase(blocked);
+        m_consumeResult.m_cellsForUnguardedInner.erase(blocked);
+        m_consumeResult.m_cellsForUnguardedRoads.erase(blocked);
+
+        m_tileContainer.m_needBeBlocked.doSort();
+        m_consumeResult.m_cells.doSort();
+        m_consumeResult.m_cellsForUnguardedInner.doSort();
+        m_consumeResult.m_cellsForUnguardedRoads.doSort();
+
+        // @todo: max 6x6 blocks
+    }
+
+    for (size_t i = 0; auto& bundle : m_consumeResult.m_bundlesNonGuardedPickable) {
+        i++;
+        if (!this->placeOnMap(bundle)) {
+            success = false;
+            m_logOutput << m_indent << "p placement failure [" << i << "]: size=" << bundle.getEstimatedArea() << "; " << bundle.toPrintableString() << "\n";
+            continue;
+        }
+    }
+
+    return success;
 }
 
 bool ObjectBundleSet::placeOnMap(ObjectBundle& bundle)
 {
-    std::set<FHPos>* cellSource = &m_cells;
+    Mernel::ProfilerScope scope("placeOnMap");
+
+    MapTileRegion* cellSource = &m_consumeResult.m_cells;
     if (!bundle.m_guard && bundle.m_type == ObjectGenerator::IObject::Type::Pickable) {
         auto useRoad = m_rng->genSmall(2) > 0;
-        if (useRoad && !m_cellsForUnguardedRoads.empty())
-            cellSource = &m_cellsForUnguardedRoads;
-        else if (!m_cellsForUnguardedInner.empty())
-            cellSource = &m_cellsForUnguardedInner;
+        if (useRoad && !m_consumeResult.m_cellsForUnguardedRoads.empty())
+            cellSource = &m_consumeResult.m_cellsForUnguardedRoads;
+        else if (!m_consumeResult.m_cellsForUnguardedInner.empty())
+            cellSource = &m_consumeResult.m_cellsForUnguardedInner;
     }
 
-    std::vector<FHPos> allCells(cellSource->begin(), cellSource->end());
-
-    if (allCells.empty()) {
+    if (cellSource->empty()) {
         return false;
     }
 
-    auto tryPlace = [&allCells, this, &bundle, cellSource]() -> bool {
-        FHPos pos = allCells[m_rng->gen(allCells.size() - 1)];
+    auto tryPlace = [this, &bundle, cellSource]() -> bool {
+        auto* pos = (*cellSource)[m_rng->gen(cellSource->size() - 1)];
 
         auto tryPlaceInner = [pos, &bundle, cellSource](FHPos delta) -> bool {
-            bundle.m_absPos = pos + delta;
+            bundle.m_absPos = pos->neighbourByOffset(delta);
             bundle.estimateOccupied();
-            for (FHPos posOcc : bundle.m_fitArea) {
+            if (!bundle.m_absPosIsValid)
+                return false;
+
+            for (auto* posOcc : bundle.m_fitArea) {
                 if (!cellSource->contains(posOcc)) {
                     return false;
                 }
@@ -362,17 +472,21 @@ bool ObjectBundleSet::placeOnMap(ObjectBundle& bundle)
     for (int i = 0; i < 10; ++i) {
         if (tryPlace()) {
             for (auto& item : bundle.m_items) {
-                item.m_obj->setPos(item.m_absPos);
+                item.m_obj->setPos(item.m_absPos->m_pos);
                 item.m_obj->place();
             }
 
-            for (FHPos posOcc : bundle.m_allArea)
-                m_cells.erase(posOcc);
+            m_consumeResult.m_cells.erase(bundle.m_allArea);
 
-            for (FHPos posOcc : bundle.m_fitArea) {
-                m_cellsForUnguardedInner.erase(posOcc);
-                m_cellsForUnguardedRoads.erase(posOcc);
-            }
+            m_consumeResult.m_cellsForUnguardedInner.erase(bundle.m_fitArea);
+            m_consumeResult.m_cellsForUnguardedRoads.erase(bundle.m_fitArea);
+
+            m_consumeResult.m_cellsForUnguardedInner.erase(bundle.m_guardRegion);
+            m_consumeResult.m_cellsForUnguardedRoads.erase(bundle.m_guardRegion);
+
+            m_consumeResult.m_cells.doSort();
+            m_consumeResult.m_cellsForUnguardedInner.doSort();
+            m_consumeResult.m_cellsForUnguardedRoads.doSort();
 
             return true;
         }

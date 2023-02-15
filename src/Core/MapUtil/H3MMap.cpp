@@ -678,12 +678,12 @@ void DisposedHero::writeBinary(ByteOrderDataStreamWriter& stream) const
     stream << m_players;
 }
 
-void MapTile::readBinary(ByteOrderDataStreamReader& stream)
+void MapTileH3M::readBinary(ByteOrderDataStreamReader& stream)
 {
     stream >> m_terType >> m_terView >> m_riverType >> m_riverDir >> m_roadType >> m_roadDir >> m_extTileFlags;
 }
 
-void MapTile::writeBinary(ByteOrderDataStreamWriter& stream) const
+void MapTileH3M::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
     stream << m_terType << m_terView << m_riverType << m_riverDir << m_roadType << m_roadDir << m_extTileFlags;
 }

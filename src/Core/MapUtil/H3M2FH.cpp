@@ -150,7 +150,7 @@ FHPos posFromH3M(H3Pos pos, int xoffset = 0)
 
 class FloodFiller {
 public:
-    void fillAdjucent(const FHPos& current, const std::set<FHPos>& exclude, std::set<FHPos>& result, const std::function<bool(const MapTile&)>& pred)
+    void fillAdjucent(const FHPos& current, const std::set<FHPos>& exclude, std::set<FHPos>& result, const std::function<bool(const MapTileH3M&)>& pred)
     {
         auto addToResult = [this, &result, &exclude, &current, &pred](int dx, int dy) {
             const FHPos neighbour{ current.m_x + dx, current.m_y + dy, current.m_z };
@@ -173,7 +173,7 @@ public:
             addToResult(0, -1);
     };
 
-    std::vector<FHPos> makeNewZone(const FHPos& tilePos, const std::function<bool(const MapTile&)>& pred)
+    std::vector<FHPos> makeNewZone(const FHPos& tilePos, const std::function<bool(const MapTileH3M&)>& pred)
     {
         // now we create new zone using flood-fill;
         std::set<FHPos> newZone;
@@ -1002,11 +1002,11 @@ void H3M2FHConverter::convertTileMap(const H3Map& src, FHMap& dest) const
 
     FloodFiller terrainFiller(&tileSet, &destTileMap);
 
-    auto visitTerrain = [this, &terrainFiller, &tileSet, &dest](const MapTile& tile, const FHPos& tilePos) {
+    auto visitTerrain = [this, &terrainFiller, &tileSet, &dest](const MapTileH3M& tile, const FHPos& tilePos) {
         if (terrainFiller.m_zoned.contains(tilePos))
             return;
 
-        auto tiles = terrainFiller.makeNewZone(tilePos, [&tile](const MapTile& neighbourTile) -> bool {
+        auto tiles = terrainFiller.makeNewZone(tilePos, [&tile](const MapTileH3M& neighbourTile) -> bool {
             if (neighbourTile.m_terType != tile.m_terType)
                 return true;
             return false;
@@ -1025,14 +1025,14 @@ void H3M2FHConverter::convertTileMap(const H3Map& src, FHMap& dest) const
 
     FloodFiller roadFiller(&tileSet, &destTileMap);
 
-    auto visitRoad = [&roadFiller, &tileSet, &dest](const MapTile& tile, const FHPos& tilePos) {
+    auto visitRoad = [&roadFiller, &tileSet, &dest](const MapTileH3M& tile, const FHPos& tilePos) {
         if (tile.m_roadType == 0)
             return;
 
         if (roadFiller.m_zoned.contains(tilePos))
             return;
 
-        auto tiles = roadFiller.makeNewZone(tilePos, [&tile](const MapTile& neighbourTile) -> bool {
+        auto tiles = roadFiller.makeNewZone(tilePos, [&tile](const MapTileH3M& neighbourTile) -> bool {
             return (neighbourTile.m_roadType != tile.m_roadType);
         });
 
@@ -1048,14 +1048,14 @@ void H3M2FHConverter::convertTileMap(const H3Map& src, FHMap& dest) const
 
     FloodFiller riverFiller(&tileSet, &destTileMap);
 
-    auto visitRiver = [&riverFiller, &tileSet, &dest](const MapTile& tile, const FHPos& tilePos) {
+    auto visitRiver = [&riverFiller, &tileSet, &dest](const MapTileH3M& tile, const FHPos& tilePos) {
         if (tile.m_riverType == 0)
             return;
 
         if (riverFiller.m_zoned.contains(tilePos))
             return;
 
-        auto tiles = riverFiller.makeNewZone(tilePos, [&tile](const MapTile& neighbourTile) -> bool {
+        auto tiles = riverFiller.makeNewZone(tilePos, [&tile](const MapTileH3M& neighbourTile) -> bool {
             return (neighbourTile.m_riverType != tile.m_riverType);
         });
 

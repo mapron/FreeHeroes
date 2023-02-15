@@ -398,6 +398,27 @@ struct ArtifactFilter {
     }
 
     bool operator==(const ArtifactFilter&) const noexcept = default;
+
+    std::string toPrintable() const
+    {
+        std::string result;
+        if (!classes.empty()) {
+            result += "TC=";
+            for (auto tag : classes)
+                result += std::to_string((int) tag) + ", ";
+        }
+        if (!tags.empty()) {
+            result += "; tags=";
+            for (auto tag : tags)
+                result += std::to_string((int) tag) + ", ";
+        }
+        if (!notTags.empty()) {
+            result += "; notTags=";
+            for (auto tag : notTags)
+                result += std::to_string((int) tag) + ", ";
+        }
+        return result;
+    }
 };
 
 using ArtifactReward = std::vector<ArtifactFilter>;

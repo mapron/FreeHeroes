@@ -7,14 +7,17 @@
 
 #include "ObjectGenerator.hpp"
 
+#include "MapTileArea.hpp"
+
 namespace FreeHeroes {
 
 struct TileZone;
+struct MapTileContainer;
 struct ObjectBundle {
     struct Item {
         ObjectGenerator::IObjectPtr m_obj;
-        int64_t                     m_guard = 0;
-        FHPos                       m_absPos;
+        int64_t                     m_guard  = 0;
+        MapTilePtr                  m_absPos = nullptr;
     };
     std::vector<Item> m_items;
 
@@ -30,21 +33,22 @@ struct ObjectBundle {
         BR
     };
 
-    FHPos   m_absPos;
-    FHPos   m_guardAbsPos;
-    int64_t m_guard         = 0;
-    bool    m_considerBlock = false;
+    MapTilePtr m_absPos        = nullptr;
+    MapTilePtr m_guardAbsPos   = nullptr;
+    int64_t    m_guard         = 0;
+    bool       m_considerBlock = false;
 
     ObjectGenerator::IObject::Type m_type          = ObjectGenerator::IObject::Type::Visitable;
     GuardPosition                  m_guardPosition = GuardPosition::B;
 
-    std::set<FHPos> m_estimatedOccupied;
-    std::set<FHPos> m_protectionBorder;
-    std::set<FHPos> m_protectionBorder2;
-    std::set<FHPos> m_blurForPassable;
-    std::set<FHPos> m_guardRegion;
-    std::set<FHPos> m_allArea;
-    std::set<FHPos> m_fitArea;
+    MapTileRegion m_estimatedOccupied;
+    MapTileRegion m_protectionBorder;
+    MapTileRegion m_blurForPassable;
+    MapTileRegion m_guardRegion;
+    MapTileRegion m_allArea;
+    MapTileRegion m_fitArea;
+
+    bool m_absPosIsValid = false;
 
     size_t getEstimatedArea() const { return m_fitArea.size(); }
 
@@ -63,9 +67,6 @@ struct ObjectBundle {
 
 class ObjectBundleSet {
 public:
-    std::vector<ObjectBundle> m_bundlesGuarded;
-    std::vector<ObjectBundle> m_bundlesNonGuarded;
-
     struct BucketItem {
         ObjectGenerator::IObjectPtr m_obj;
         int64_t                     m_guard = 0;
@@ -76,18 +77,41 @@ public:
         std::vector<BucketItem> m_nonGuarded;
     };
 
-    std::map<ObjectGenerator::IObject::Type, Bucket> m_buckets;
+    struct ConsumeResult {
+        std::vector<ObjectBundle> m_bundlesGuarded;
+        std::vector<ObjectBundle> m_bundlesNonGuarded;
+        std::vector<ObjectBundle> m_bundlesNonGuardedPickable;
 
-    std::set<FHPos> m_cells;
-    std::set<FHPos> m_cellsForUnguardedInner;
-    std::set<FHPos> m_cellsForUnguardedRoads;
+        std::map<ObjectGenerator::IObject::Type, Bucket> m_buckets;
+
+        MapTileRegion m_cells;
+        MapTileRegion m_cellsForUnguardedInner;
+        MapTileRegion m_cellsForUnguardedRoads;
+    };
+    ConsumeResult m_consumeResult;
+
+    struct Guard {
+        int64_t    m_value = 0;
+        MapTilePtr m_pos   = nullptr;
+        TileZone*  m_zone  = nullptr;
+    };
+    std::vector<Guard> m_guards;
 
     Core::IRandomGenerator* m_rng = nullptr;
+    MapTileContainer&       m_tileContainer;
+    std::ostream&           m_logOutput;
 
-    void consume(const ObjectGenerator&        generated,
-                 TileZone&                     tileZone,
-                 Core::IRandomGenerator* const rng);
+    ObjectBundleSet(Core::IRandomGenerator* const rng, MapTileContainer& tileContainer, std::ostream& logOutput)
+        : m_rng(rng)
+        , m_tileContainer(tileContainer)
+        , m_logOutput(logOutput)
+    {
+    }
 
+    bool consume(const ObjectGenerator& generated,
+                 TileZone&              tileZone);
+
+private:
     bool placeOnMap(ObjectBundle& bundle);
 };
 

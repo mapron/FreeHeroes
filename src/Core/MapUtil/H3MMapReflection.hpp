@@ -110,7 +110,7 @@ ENUM_REFLECTION_STRINGIFY(
     RESOURCE)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
-    MapTile,
+    MapTileH3M,
     m_extTileFlags,
     m_roadDir,
     m_roadType,

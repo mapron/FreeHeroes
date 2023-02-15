@@ -135,19 +135,19 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         destTile.m_roadDir      = tile.m_roadView;
         destTile.m_extTileFlags = 0;
         if (tile.m_flipHor)
-            destTile.m_extTileFlags |= MapTile::TerrainFlipHor;
+            destTile.m_extTileFlags |= MapTileH3M::TerrainFlipHor;
         if (tile.m_flipVert)
-            destTile.m_extTileFlags |= MapTile::TerrainFlipVert;
+            destTile.m_extTileFlags |= MapTileH3M::TerrainFlipVert;
         if (tile.m_roadFlipHor)
-            destTile.m_extTileFlags |= MapTile::RoadFlipHor;
+            destTile.m_extTileFlags |= MapTileH3M::RoadFlipHor;
         if (tile.m_roadFlipVert)
-            destTile.m_extTileFlags |= MapTile::RoadFlipVert;
+            destTile.m_extTileFlags |= MapTileH3M::RoadFlipVert;
         if (tile.m_riverFlipHor)
-            destTile.m_extTileFlags |= MapTile::RiverFlipHor;
+            destTile.m_extTileFlags |= MapTileH3M::RiverFlipHor;
         if (tile.m_riverFlipVert)
-            destTile.m_extTileFlags |= MapTile::RiverFlipVert;
+            destTile.m_extTileFlags |= MapTileH3M::RiverFlipVert;
         if (tile.m_coastal)
-            destTile.m_extTileFlags |= MapTile::Coastal;
+            destTile.m_extTileFlags |= MapTileH3M::Coastal;
     });
 
     for (auto& [playerId, fhPlayer] : src.m_players) {

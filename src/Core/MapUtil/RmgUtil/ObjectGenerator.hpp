@@ -5,11 +5,24 @@
  */
 #pragma once
 
-#include <memory>
+#include "../FHPos.hpp"
 
-#include "../FHMap.hpp"
+#include "LibraryFwd.hpp"
+#include "MapScore.hpp"
+
+#include <memory>
+#include <vector>
 
 namespace FreeHeroes {
+
+namespace Core {
+class IGameDatabase;
+class IRandomGenerator;
+}
+
+struct FHMap;
+struct FHRngZone;
+struct FHScoreSettings;
 
 class ObjectGenerator {
 public:

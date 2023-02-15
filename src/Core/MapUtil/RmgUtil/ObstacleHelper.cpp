@@ -6,10 +6,12 @@
 #include "ObstacleHelper.hpp"
 
 #include "IGameDatabase.hpp"
+#include "IRandomGenerator.hpp"
 
 #include "LibraryMapObstacle.hpp"
-#include "LibraryMapVisitable.hpp"
 #include "LibraryObjectDef.hpp"
+
+#include "../FHMap.hpp"
 
 namespace FreeHeroes {
 
@@ -103,12 +105,12 @@ std::vector<const ObstacleBucket*> ObstacleIndex::find(const Core::LibraryObject
 }
 
 ObstacleHelper::ObstacleHelper(FHMap&                        map,
-                               MapCanvas&                    mapCanvas,
+                               MapTileContainer&             tileContainer,
                                Core::IRandomGenerator* const rng,
                                const Core::IGameDatabase*    database,
                                std::ostream&                 logOutput)
     : m_map(map)
-    , m_mapCanvas(mapCanvas)
+    , m_tileContainer(tileContainer)
     , m_rng(rng)
     , m_database(database)
     , m_logOutput(logOutput)
@@ -171,9 +173,12 @@ void ObstacleHelper::placeObstacles()
     for (auto& row : mapMask.data)
         row.resize(mapMask.width);
 
-    for (MapCanvas::Tile* cell : m_mapCanvas.m_needBeBlocked)
+    m_tileContainer.m_needBeBlocked.doSort();
+    m_tileContainer.m_tentativeBlocked.doSort();
+
+    for (MapTilePtr cell : m_tileContainer.m_needBeBlocked)
         mapMask.data[cell->m_pos.m_y][cell->m_pos.m_x] = 1;
-    for (MapCanvas::Tile* cell : m_mapCanvas.m_tentativeBlocked) {
+    for (MapTilePtr cell : m_tileContainer.m_tentativeBlocked) {
         mapMask.data[cell->m_pos.m_y][cell->m_pos.m_x] = 2;
 
         //m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = 0, .m_valueB = 2 });
@@ -219,10 +224,10 @@ void ObstacleHelper::placeObstacles()
                     FHPos objPos = mapPos;
                     objPos.m_x += def->blockMapPlanar.width - 1;
                     objPos.m_y += def->blockMapPlanar.height - 1;
-                    if (!m_mapCanvas.m_tileIndex.contains(objPos))
+                    if (!m_tileContainer.m_tileIndex.contains(objPos))
                         continue;
 
-                    Core::LibraryTerrainConstPtr requiredTerrain = m_mapCanvas.m_tileIndex.at(objPos)->m_zone->m_terrain;
+                    Core::LibraryTerrainConstPtr requiredTerrain = m_tileContainer.m_tileIndex.at(objPos)->m_zone->m_terrain;
 
                     if (def->terrainsSoftCache.contains(requiredTerrain))
                         suitable.push_back(obst);
@@ -254,10 +259,8 @@ void ObstacleHelper::placeObstacles()
                     if (py < mapMask.height && px < mapMask.width) {
                         if (mapMask.data[py][px] == 1)
                             mapMask.data[py][px] = 2;
-                        auto* cell = m_mapCanvas.m_tileIndex.at(maskBitPos);
-                        m_mapCanvas.m_needBeBlocked.erase(cell);
-                        m_mapCanvas.m_tentativeBlocked.erase(cell);
-                        m_mapCanvas.m_blocked.insert(cell);
+                        auto* cell = m_tileContainer.m_tileIndex.at(maskBitPos);
+                        m_tileContainer.m_blocked.insert(cell);
                     }
                     //m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = 0, .m_valueB = 3 });
                 }
@@ -278,6 +281,12 @@ void ObstacleHelper::placeObstacles()
             //    return;
         }
     }
+    m_tileContainer.m_blocked.doSort();
+
+    m_tileContainer.m_needBeBlocked.erase(m_tileContainer.m_blocked);
+    m_tileContainer.m_tentativeBlocked.erase(m_tileContainer.m_blocked);
+    m_tileContainer.m_needBeBlocked.doSort();
+    m_tileContainer.m_tentativeBlocked.doSort();
 }
 
 }

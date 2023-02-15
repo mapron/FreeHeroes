@@ -79,7 +79,7 @@ struct PlayerInfo {
     std::vector<SHeroName> m_heroesNames; /// list of placed heroes on the map
 };
 
-struct MapTile {
+struct MapTileH3M {
     uint8_t m_terType      = 0xff;
     uint8_t m_terView      = 0;
     uint8_t m_riverType    = 0;
@@ -111,15 +111,15 @@ struct MapTileSet {
     int32_t m_size           = 0;
     bool    m_hasUnderground = false;
 
-    std::vector<MapTile> m_tiles;
+    std::vector<MapTileH3M> m_tiles;
 
-    MapTile& get(int x, int y, int isU)
+    MapTileH3M& get(int x, int y, int isU)
     {
         const int uOffset = m_size * m_size * isU;
         const int yOffset = m_size * y;
         return m_tiles[uOffset + yOffset + x];
     }
-    const MapTile& get(int x, int y, int isU) const
+    const MapTileH3M& get(int x, int y, int isU) const
     {
         const int uOffset = m_size * m_size * isU;
         const int yOffset = m_size * y;

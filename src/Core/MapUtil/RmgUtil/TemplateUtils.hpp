@@ -5,7 +5,9 @@
  */
 #pragma once
 
-#include "../FHTileMap.hpp"
+#include "../FHPos.hpp"
+
+#include <cmath>
 
 namespace FreeHeroes {
 

@@ -124,7 +124,7 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
     m_logOutput << baseIndent << "Start generating map (seed=" << m_map.m_seed << ") " << m_map.m_tileMap.m_width << "x" << m_map.m_tileMap.m_height
                 << " " << (m_map.m_tileMap.m_depth == 2 ? "+U" : "no U") << "\n";
 
-    m_mapCanvas.init(m_map.m_tileMap.m_width, m_map.m_tileMap.m_height, m_map.m_tileMap.m_depth);
+    m_tileContainer.init(m_map.m_tileMap.m_width, m_map.m_tileMap.m_height, m_map.m_tileMap.m_depth);
 
     m_totalRelativeArea = 0;
 
@@ -197,7 +197,7 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
         tileZone.m_id              = key;
         tileZone.m_index           = i;
         tileZone.m_rng             = m_rng;
-        tileZone.m_mapCanvas       = &m_mapCanvas;
+        tileZone.m_tileContainer   = &m_tileContainer;
         tileZone.m_startTile.m_x   = m_rng->genDispersed(rngZone.m_centerAvg.m_x, rngZone.m_centerDispersion.m_x);
         tileZone.m_startTile.m_y   = m_rng->genDispersed(rngZone.m_centerAvg.m_y, rngZone.m_centerDispersion.m_y);
         tileZone.m_relativeArea    = m_rng->genDispersed(rngZone.m_relativeSizeAvg, rngZone.m_relativeSizeDispersion);
@@ -209,7 +209,10 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
     }
 
     m_stopAfter = stringToStage(stopAfterStage);
-    //m_stopAfter = Stage::PlayerInfo;
+    //m_stopAfter = Stage::RoadsPlacement;
+
+    Mernel::ProfilerContext                profileContext;
+    Mernel::ProfilerDefaultContextSwitcher switcher(profileContext);
 
     for (Stage stage : { Stage::ZoneCenterPlacement,
                          Stage::ZoneTilesInitial,
@@ -229,11 +232,19 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
         m_logOutput << baseIndent << "Start stage: " << stageToString(m_currentStage) << "\n";
         runCurrentStage();
         m_logOutput << baseIndent << "End stage: " << stageToString(m_currentStage) << " (" << timer.elapsed() << " us.)\n";
+        {
+            auto profilerStr = profileContext.printToStr();
+            profileContext.clearAll();
+            if (!profilerStr.empty())
+                m_logOutput << baseIndent << "Profiler data:\n"
+                            << profilerStr;
+        }
         if (m_currentStage == m_stopAfter) {
             m_logOutput << baseIndent << "stopping further generation, as 'stopAfter' was provided.\n";
             break;
         }
     }
+
     placeTerrainZones();
     placeDebugInfo();
 }
@@ -356,8 +367,8 @@ void FHTemplateProcessor::runZoneTilesInitial()
         auto   centroid     = FHPos{ .m_x = cluster.getCentroid().m_x, .m_y = cluster.getCentroid().m_y };
         tileZone.m_centroid = centroid;
         for (KMeansSegmentation::Point* point : cluster.m_points) {
-            auto p                                = point->toPos();
-            m_mapCanvas.m_tileIndex.at(p)->m_zone = &m_tileZones[idx];
+            auto p                                    = point->toPos();
+            m_tileContainer.m_tileIndex.at(p)->m_zone = &m_tileZones[idx];
         }
     }
     for (auto& tileZone : m_tileZones) {
@@ -418,16 +429,16 @@ void FHTemplateProcessor::runZoneTilesRefinement()
         for (auto& tileZone : m_tileZones) {
             for (auto* cell : tileZone.m_area.m_innerArea) {
                 if (cell->m_zone != &tileZone) {
-                    auto zoneStr = cell->m_zone ? std::to_string(tileZone.m_index) : std::string("NULL");
-                    m_logOutput << m_indent << "Invalid zone cell:" << cell->posStr()
+                    auto zoneStr = cell->m_zone ? std::to_string(cell->m_zone->m_index) : std::string("NULL");
+                    m_logOutput << m_indent << "Invalid zone cell:" << cell->toPrintableString()
                                 << ", it placed in [" << tileZone.m_index << "] zone, but cell has [" << zoneStr << "] zone\n";
                     result = false;
                 }
             }
         }
-        for (auto& cell : m_mapCanvas.m_tiles) {
+        for (auto& cell : m_tileContainer.m_tiles) {
             if (!cell.m_zone) {
-                m_logOutput << m_indent << "Unzoned cell:" << cell.posStr() << "\n";
+                m_logOutput << m_indent << "Unzoned cell:" << cell.toPrintableString() << "\n";
                 result = false;
             }
         }
@@ -437,7 +448,7 @@ void FHTemplateProcessor::runZoneTilesRefinement()
     };
 
     for (int i = 0, limit = 10; i <= limit; ++i) {
-        if (m_mapCanvas.fixExclaves()) {
+        if (m_tileContainer.fixExclaves()) {
             m_logOutput << m_indent << "exclaves fixed on [" << i << "] iteration\n";
             break;
         }
@@ -450,12 +461,13 @@ void FHTemplateProcessor::runZoneTilesRefinement()
     }
     checkUnzoned();
 
-    std::set<MapCanvas::Tile*> placed;
+    MapTileRegion placed;
     for (auto& tileZone : m_tileZones) {
-        placed.insert(tileZone.m_area.m_innerArea.cbegin(), tileZone.m_area.m_innerArea.cend());
+        placed.insert(tileZone.m_area.m_innerArea);
     }
+    placed.doSort();
 
-    m_mapCanvas.checkAllTerrains(placed);
+    m_tileContainer.checkAllTerrains(placed);
     for (auto& tileZone : m_tileZones) {
         tileZone.estimateCentroid();
     }
@@ -507,15 +519,15 @@ void FHTemplateProcessor::runTownsPlacement()
                 auto townTilePos = pos;
                 townTilePos.m_x -= x;
                 townTilePos.m_y -= y;
-                if (m_mapCanvas.m_tileIndex.contains(townTilePos))
-                    m_mapCanvas.m_blocked.insert(m_mapCanvas.m_tileIndex[townTilePos]);
+                if (m_tileContainer.m_tileIndex.contains(townTilePos))
+                    m_tileContainer.m_blocked.insert(m_tileContainer.m_tileIndex[townTilePos]);
             }
         }
     };
 
     auto playerNone = m_database->players()->find(std::string(Core::LibraryPlayer::s_none));
 
-    RoadHelper roadHelper(m_map, m_mapCanvas, m_rng, m_logOutput);
+    RoadHelper roadHelper(m_map, m_tileContainer, m_rng, m_logOutput);
 
     for (auto& tileZone : m_tileZones) {
         std::vector<FHPos> townPositions;
@@ -547,7 +559,7 @@ void FHTemplateProcessor::runTownsPlacement()
         for (auto&& pos : townPositions) {
             auto pos2 = pos;
             pos2.m_y++;
-            tileZone.m_roadNodesHighPriority.insert(m_mapCanvas.m_tileIndex.at(pos2));
+            tileZone.m_roadNodesHighPriority.insert(m_tileContainer.m_tileIndex.at(pos2));
             roadHelper.placeRoad({ pos, pos2 });
         }
     }
@@ -555,7 +567,7 @@ void FHTemplateProcessor::runTownsPlacement()
 
 void FHTemplateProcessor::runBorderRoads()
 {
-    RoadHelper roadHelper(m_map, m_mapCanvas, m_rng, m_logOutput);
+    RoadHelper roadHelper(m_map, m_tileContainer, m_rng, m_logOutput);
     roadHelper.makeBorders(m_tileZones);
 
     for (auto& guard : roadHelper.m_guards) {
@@ -572,7 +584,7 @@ void FHTemplateProcessor::runBorderRoads()
 
 void FHTemplateProcessor::runRoadsPlacement()
 {
-    RoadHelper roadHelper(m_map, m_mapCanvas, m_rng, m_logOutput);
+    RoadHelper roadHelper(m_map, m_tileContainer, m_rng, m_logOutput);
 
     for (auto& tileZone : m_tileZones) {
         roadHelper.placeRoads(tileZone);
@@ -582,7 +594,7 @@ void FHTemplateProcessor::runRoadsPlacement()
 void FHTemplateProcessor::runRewards()
 {
     m_logOutput << m_indent << "RNG TEST A:" << m_rng->gen(1000000) << "\n";
-
+    ObjectBundleSet bundleSet(m_rng, m_tileContainer, m_logOutput);
     for (auto& tileZone : m_tileZones) {
         if (tileZone.m_rngZoneSettings.m_scoreTargets.empty())
             continue;
@@ -595,41 +607,18 @@ void FHTemplateProcessor::runRewards()
                      tileZone.m_rewardsFaction,
                      tileZone.m_terrain);
 
-        ObjectBundleSet bundleSet;
-        bundleSet.consume(gen, tileZone, m_rng);
-
-        for (size_t i = 0; auto& bundle : bundleSet.m_bundlesGuarded) {
-            i++;
-
-            if (!bundleSet.placeOnMap(bundle)) {
-                m_logOutput << m_indent << "g placement failure [" << i << "]: size=" << bundle.getEstimatedArea() << "; " << bundle.toPrintableString() << "\n";
-                continue;
-            }
-
-            for (auto pos : bundle.m_protectionBorder) {
-                if (m_mapCanvas.m_tileIndex.contains(pos))
-                    m_mapCanvas.m_needBeBlocked.insert(m_mapCanvas.m_tileIndex.at(pos));
-
-                //m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = tileZone.m_index, .m_valueB = 1 });
-            }
-
-            if (bundle.m_guard) {
-                Guard guard;
-                guard.m_value    = bundle.m_guard;
-                guard.m_pos      = bundle.m_guardAbsPos;
-                guard.m_zone     = &tileZone;
-                guard.m_joinable = true;
-                m_guards.push_back(guard);
-            }
+        if (!bundleSet.consume(gen, tileZone)) {
+            // throw std::runtime_error("Failed to fit some objects into zone '" + tileZone.m_id + "'");
         }
+    }
 
-        for (size_t i = 0; auto& bundle : bundleSet.m_bundlesNonGuarded) {
-            i++;
-            if (!bundleSet.placeOnMap(bundle)) {
-                m_logOutput << m_indent << "u placement failure [" << i << "]: size=" << bundle.getEstimatedArea() << "; " << bundle.toPrintableString() << "\n";
-                continue;
-            }
-        }
+    for (auto& guardBundle : bundleSet.m_guards) {
+        Guard guard;
+        guard.m_value    = guardBundle.m_value;
+        guard.m_pos      = guardBundle.m_pos;
+        guard.m_zone     = guardBundle.m_zone;
+        guard.m_joinable = true;
+        m_guards.push_back(guard);
     }
 
     m_logOutput << m_indent << "RNG TEST B:" << m_rng->gen(1000000) << "\n";
@@ -638,7 +627,7 @@ void FHTemplateProcessor::runRewards()
 void FHTemplateProcessor::runCorrectObjectTerrains()
 {
     auto correctObjIndexPos = [this](const std::string& id, Core::ObjectDefIndex& defIndex, const Core::ObjectDefMappings& defMapping, FHPos pos) {
-        Core::LibraryTerrainConstPtr requiredTerrain = m_mapCanvas.m_tileIndex.at(pos)->m_zone->m_terrain;
+        Core::LibraryTerrainConstPtr requiredTerrain = m_tileContainer.m_tileIndex.at(pos)->m_zone->m_terrain;
         auto                         old             = defIndex;
         defIndex.substitution                        = "!!";
         defIndex.variant                             = "!!";
@@ -663,14 +652,14 @@ void FHTemplateProcessor::runCorrectObjectTerrains()
 
 void FHTemplateProcessor::runObstacles()
 {
-    ObstacleHelper obstacleHelper(m_map, m_mapCanvas, m_rng, m_database, m_logOutput);
+    ObstacleHelper obstacleHelper(m_map, m_tileContainer, m_rng, m_database, m_logOutput);
     obstacleHelper.placeObstacles();
 
-    for (auto* tile : m_mapCanvas.m_needBeBlocked) {
-        m_logOutput << m_indent << "still require to be blocked: " << tile->posStr() << "\n";
+    for (auto* tile : m_tileContainer.m_needBeBlocked) {
+        m_logOutput << m_indent << "still require to be blocked: " << tile->toPrintableString() << "\n";
     }
-    m_mapCanvas.m_tentativeBlocked.clear();
-    if (!m_mapCanvas.m_needBeBlocked.empty()) {
+    m_tileContainer.m_tentativeBlocked.clear();
+    if (!m_tileContainer.m_needBeBlocked.empty()) {
         throw std::runtime_error("Some block tiles are not set.");
     }
 }
@@ -751,7 +740,7 @@ void FHTemplateProcessor::runGuards()
         const bool upgraded = unit->upgrades.empty() ? false : m_rng->genSmall(3) == 0;
 
         FHMonster fhMonster;
-        fhMonster.m_pos        = guard.m_pos;
+        fhMonster.m_pos        = guard.m_pos->m_pos;
         fhMonster.m_count      = getPossibleCount(unit, value);
         fhMonster.m_id         = unit;
         fhMonster.m_guardValue = value;
@@ -785,7 +774,7 @@ void FHTemplateProcessor::runGuards()
         if (guard.m_value == 0 && !guard.m_mirrorFromId.empty()) {
             size_t    mirrorFrom = nameIndex.at(guard.m_mirrorFromId);
             FHMonster fhMonster  = m_map.m_objects.m_monsters[mirrorFrom];
-            fhMonster.m_pos      = guard.m_pos;
+            fhMonster.m_pos      = guard.m_pos->m_pos;
             m_map.m_objects.m_monsters.push_back(std::move(fhMonster));
         }
     }

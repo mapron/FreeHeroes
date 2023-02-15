@@ -10,7 +10,7 @@
 
 #include "FHMap.hpp"
 
-#include "RmgUtil/TemplateZone.hpp"
+#include "RmgUtil/TileZone.hpp"
 
 #include <stdexcept>
 #include <functional>
@@ -66,7 +66,7 @@ private:
     int                          getPossibleCount(Core::LibraryUnitConstPtr unit, int64_t value) const;
 
 private:
-    MapCanvas              m_mapCanvas;
+    MapTileContainer       m_tileContainer;
     std::vector<TileZone>  m_tileZones;
     std::vector<TileZone*> m_tileZonesPtrs;
 
@@ -90,7 +90,7 @@ private:
         int64_t     m_value = 0;
         std::string m_id;
         std::string m_mirrorFromId;
-        FHPos       m_pos;
+        MapTilePtr  m_pos      = nullptr;
         TileZone*   m_zone     = nullptr;
         bool        m_joinable = false;
     };

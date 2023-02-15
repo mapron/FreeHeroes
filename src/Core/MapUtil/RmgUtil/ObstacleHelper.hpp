@@ -5,11 +5,15 @@
  */
 #pragma once
 
-#include "TemplateZone.hpp"
+#include "TileZone.hpp"
 
 #include <algorithm>
 
 namespace FreeHeroes {
+
+namespace Core {
+class IGameDatabase;
+}
 
 struct ObstacleBucket {
     std::vector<Core::LibraryMapObstacleConstPtr> m_objects;
@@ -30,10 +34,11 @@ struct ObstacleIndex {
     std::vector<const ObstacleBucket*> find(const Core::LibraryObjectDef::PlanarMask& mask, size_t xOffset, size_t yOffset);
 };
 
+struct FHMap;
 class ObstacleHelper {
 public:
     ObstacleHelper(FHMap&                        map,
-                   MapCanvas&                    mapCanvas,
+                   MapTileContainer&             tileContainer,
                    Core::IRandomGenerator* const rng,
                    const Core::IGameDatabase*    database,
                    std::ostream&                 logOutput);
@@ -42,7 +47,7 @@ public:
 
 private:
     FHMap&                           m_map;
-    MapCanvas&                       m_mapCanvas;
+    MapTileContainer&                m_tileContainer;
     Core::IRandomGenerator* const    m_rng;
     const Core::IGameDatabase* const m_database;
     std::ostream&                    m_logOutput;

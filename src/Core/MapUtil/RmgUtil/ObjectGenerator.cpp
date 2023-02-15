@@ -13,6 +13,10 @@
 
 #include "ObjectGenerator.hpp"
 
+#include "../FHMap.hpp"
+
+#include "MernelPlatform/Profiler.hpp"
+
 #include <iostream>
 #include <functional>
 
@@ -1151,6 +1155,7 @@ void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
                                Core::LibraryTerrainConstPtr terrain)
 {
     static const std::string indentBase("      ");
+    Mernel::ProfilerScope    scope("generate");
 
     ArtifactPool artifactPool(m_map, m_database, m_rng);
     SpellPool    spellPool(m_map, m_database, m_rng);
@@ -1223,6 +1228,7 @@ void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
 
 bool ObjectGenerator::generateOneObject(const Core::MapScore& targetScore, Core::MapScore& currentScore, std::vector<IObjectFactoryPtr>& objectFactories, ObjectGroup& group)
 {
+    Mernel::ProfilerScope    scope("oneObject");
     static const std::string indent("        ");
     uint64_t                 totalWeight = 0;
     for (IObjectFactoryPtr& fac : objectFactories) {

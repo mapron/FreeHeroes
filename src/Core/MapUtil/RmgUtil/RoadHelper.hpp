@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "TemplateZone.hpp"
+#include "TileZone.hpp"
 
 namespace FreeHeroes {
 
@@ -14,10 +14,11 @@ class IGameDatabase;
 class IRandomGenerator;
 }
 
+struct FHMap;
 class RoadHelper {
 public:
     RoadHelper(FHMap&                        map,
-               MapCanvas&                    mapCanvas,
+               MapTileContainer&             tileContainer,
                Core::IRandomGenerator* const rng,
                std::ostream&                 logOutput);
 
@@ -33,7 +34,7 @@ public:
         int64_t     m_value = 0;
         std::string m_id;
         std::string m_mirrorFromId;
-        FHPos       m_pos;
+        MapTilePtr  m_pos      = nullptr;
         TileZone*   m_zone     = nullptr;
         bool        m_joinable = false;
     };
@@ -41,11 +42,11 @@ public:
     std::vector<Guard> m_guards;
 
 private:
-    std::vector<FHPos> aStarPath(TileZone& zone, MapCanvas::Tile* start, MapCanvas::Tile* end, bool allTiles);
+    std::vector<FHPos> aStarPath(TileZone& zone, MapTilePtr start, MapTilePtr end, bool allTiles);
 
 private:
     FHMap&                        m_map;
-    MapCanvas&                    m_mapCanvas;
+    MapTileContainer&             m_tileContainer;
     Core::IRandomGenerator* const m_rng;
     std::ostream&                 m_logOutput;
 };
