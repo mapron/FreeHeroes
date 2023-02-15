@@ -9,47 +9,62 @@
 #include <vector>
 #include <memory>
 #include <set>
+#include <unordered_set>
 
-#include "../FHPos.hpp"
+#include "MapTileArea.hpp"
 
 namespace FreeHeroes {
 
 class AstarGenerator {
 public:
-    using CoordinateList = std::vector<FHPos>;
     struct Node {
-        uint64_t m_G = 0, m_H = 0;
-        FHPos    m_pos;
-        Node*    m_parent = nullptr;
+        uint64_t   m_G = 0, m_H = 0;
+        MapTilePtr m_pos    = nullptr;
+        Node*      m_parent = nullptr;
 
-        Node(FHPos pos, Node* parent = nullptr);
+        Node(MapTilePtr pos, Node* parent = nullptr);
         uint64_t getScore();
     };
 
-    using NodeSet = std::vector<std::shared_ptr<Node>>;
+    struct NodeSet {
+        using Vec = std::vector<std::shared_ptr<Node>>;
+        Vec                            m_data;
+        std::unordered_set<MapTilePtr> m_used;
 
-    Node* findNodeOnList(NodeSet& nodes_, FHPos coordinates_);
+        void add(std::shared_ptr<Node> node)
+        {
+            m_data.push_back(node);
+            m_used.insert(node->m_pos);
+        }
+        void erase(const Vec::iterator& it)
+        {
+            m_used.erase(it->get()->m_pos);
+            m_data.erase(it);
+        }
+    };
+
+    Node* findNodeOnList(NodeSet& nodes, MapTilePtr coordinates);
 
 public:
     AstarGenerator();
-    void setPoints(FHPos source, FHPos target)
+    void setPoints(MapTilePtr source, MapTilePtr target)
     {
         m_source = source;
         m_target = target;
     }
-    CoordinateList findPath();
+    MapTilePtrList findPath();
 
     bool isSuccess() const { return m_success; }
 
-    void setNonCollision(std::set<FHPos> nonCollision) { m_nonCollision = std::move(nonCollision); }
+    void setNonCollision(MapTileRegion nonCollision) { m_nonCollision = std::move(nonCollision); }
 
 private:
-    CoordinateList  m_directions;
-    std::set<FHPos> m_nonCollision;
+    std::vector<FHPos> m_directions;
+    MapTileRegion      m_nonCollision;
 
-    FHPos m_source;
-    FHPos m_target;
-    bool  m_success{ false };
+    MapTilePtr m_source = nullptr;
+    MapTilePtr m_target = nullptr;
+    bool       m_success{ false };
 };
 
 }

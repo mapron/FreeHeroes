@@ -26,7 +26,7 @@ public:
 
     void placeRoads(TileZone& tileZone);
 
-    void placeRoad(TileZone& tileZone, std::vector<FHPos> path);
+    void placeRoad(TileZone& tileZone, const MapTilePtrList & tileList);
     void placeRoad(std::vector<FHPos> path);
 
 public:
@@ -42,7 +42,7 @@ public:
     std::vector<Guard> m_guards;
 
 private:
-    std::vector<FHPos> aStarPath(TileZone& zone, MapTilePtr start, MapTilePtr end, bool allTiles);
+    MapTilePtrList aStarPath(TileZone& zone, MapTilePtr start, MapTilePtr end, bool allTiles);
 
 private:
     FHMap&                        m_map;

@@ -9,7 +9,7 @@
 
 namespace FreeHeroes {
 
-AstarGenerator::Node::Node(FHPos pos, AstarGenerator::Node* parent)
+AstarGenerator::Node::Node(MapTilePtr pos, AstarGenerator::Node* parent)
 {
     m_parent = parent;
     m_pos    = pos;
@@ -27,21 +27,21 @@ AstarGenerator::AstarGenerator()
     };
 }
 
-AstarGenerator::CoordinateList AstarGenerator::findPath()
+MapTilePtrList AstarGenerator::findPath()
 {
     m_success = false;
 
     std::shared_ptr<Node> current;
     NodeSet               openSet, closedSet;
-    openSet.reserve(100);
-    closedSet.reserve(100);
-    openSet.push_back(std::make_shared<Node>(m_source));
+    openSet.m_data.reserve(100);
+    closedSet.m_data.reserve(100);
+    openSet.add(std::make_shared<Node>(m_source));
 
-    while (!openSet.empty()) {
-        auto current_it = openSet.begin();
+    while (!openSet.m_data.empty()) {
+        auto current_it = openSet.m_data.begin();
         current         = *current_it;
 
-        for (auto it = openSet.begin(); it != openSet.end(); it++) {
+        for (auto it = openSet.m_data.begin(); it != openSet.m_data.end(); it++) {
             auto node = *it;
             if (node->getScore() <= current->getScore()) {
                 current    = node;
@@ -54,12 +54,12 @@ AstarGenerator::CoordinateList AstarGenerator::findPath()
             break;
         }
 
-        closedSet.push_back(current);
+        closedSet.add(current);
         openSet.erase(current_it);
 
         for (uint64_t i = 0; i < m_directions.size(); ++i) {
-            FHPos newCoordinates(current->m_pos + m_directions[i]);
-            if (!m_nonCollision.contains(newCoordinates) || findNodeOnList(closedSet, newCoordinates)) {
+            MapTilePtr newCoordinates(current->m_pos->neighbourByOffset(m_directions[i]));
+            if (!newCoordinates || !m_nonCollision.contains(newCoordinates) || findNodeOnList(closedSet, newCoordinates)) {
                 continue;
             }
 
@@ -69,8 +69,8 @@ AstarGenerator::CoordinateList AstarGenerator::findPath()
             if (successorRaw == nullptr) {
                 auto successor = std::make_shared<Node>(newCoordinates, current.get());
                 successor->m_G = totalCost;
-                successor->m_H = posDistance(successor->m_pos, m_target) * 10;
-                openSet.push_back(successor);
+                successor->m_H = posDistance(successor->m_pos->m_pos, m_target->m_pos) * 10;
+                openSet.add(successor);
             } else if (totalCost < successorRaw->m_G) {
                 successorRaw->m_parent = current.get();
                 successorRaw->m_G      = totalCost;
@@ -78,7 +78,7 @@ AstarGenerator::CoordinateList AstarGenerator::findPath()
         }
     }
 
-    CoordinateList path;
+    MapTilePtrList path;
     Node*          currentRaw = current.get();
     while (currentRaw != nullptr) {
         path.push_back(currentRaw->m_pos);
@@ -88,12 +88,14 @@ AstarGenerator::CoordinateList AstarGenerator::findPath()
     return path;
 }
 
-AstarGenerator::Node* AstarGenerator::findNodeOnList(NodeSet& nodes_, FHPos coordinates_)
+AstarGenerator::Node* AstarGenerator::findNodeOnList(NodeSet& nodes, MapTilePtr coordinates)
 {
-    for (auto&& node : nodes_) {
-        if (node->m_pos == coordinates_) {
+    if (!nodes.m_used.contains(coordinates))
+        return nullptr;
+
+    for (auto&& node : nodes.m_data) {
+        if (node->m_pos == coordinates)
             return node.get();
-        }
     }
     return nullptr;
 }

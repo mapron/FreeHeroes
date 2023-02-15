@@ -317,8 +317,7 @@ void RoadHelper::placeRoads(TileZone& tileZone)
 
             MapTilePtr closest = *it;
             auto       path    = aStarPath(tileZone, townCell, closest, true);
-            for (auto&& pos : path)
-                tileZone.m_innerAreaSegmentsRoads.insert(m_tileContainer.m_tileIndex.at(pos));
+            tileZone.m_innerAreaSegmentsRoads.insert(path);
             tileZone.m_innerAreaSegmentsRoads.doSort();
         }
     }
@@ -357,11 +356,7 @@ void RoadHelper::placeRoads(TileZone& tileZone)
             auto       path    = aStarPath(tileZone, cell, closest, false);
 
             connected.push_back(cell);
-
-            for (auto& pos : path) {
-                auto* pathTile = m_tileContainer.m_tileIndex.at(pos);
-                pathAsRegion.insert(pathTile);
-            }
+            pathAsRegion.insert(path);
 
             placeRoad(tileZone, std::move(path));
         }
@@ -373,20 +368,18 @@ void RoadHelper::placeRoads(TileZone& tileZone)
     }
 }
 
-void RoadHelper::placeRoad(TileZone& tileZone, std::vector<FHPos> path)
+void RoadHelper::placeRoad(TileZone& tileZone, const MapTilePtrList& tileList)
 {
-    if (path.empty())
+    if (tileList.empty())
         return;
 
-    MapTileRegion pathAsRegion;
-    for (auto& pos : path) {
-        auto* pathTile = m_tileContainer.m_tileIndex.at(pos);
-        pathAsRegion.insert(pathTile);
-    }
-    pathAsRegion.doSort();
-
-    tileZone.m_placedRoads.insert(pathAsRegion);
+    tileZone.m_placedRoads.insert(tileList);
     tileZone.m_placedRoads.doSort();
+
+    std::vector<FHPos> path;
+    path.reserve(tileList.size());
+    for (auto* cell : tileList)
+        path.push_back(cell->m_pos);
 
     placeRoad(std::move(path));
 }
@@ -404,24 +397,21 @@ void RoadHelper::placeRoad(std::vector<FHPos> path)
     m_map.m_roads.push_back(std::move(road));
 }
 
-std::vector<FHPos> RoadHelper::aStarPath(TileZone& zone, MapTilePtr start, MapTilePtr end, bool allTiles)
+MapTilePtrList RoadHelper::aStarPath(TileZone& zone, MapTilePtr start, MapTilePtr end, bool allTiles)
 {
     Mernel::ProfilerScope scope("aStarPath");
 
     AstarGenerator generator;
-    generator.setPoints({ start->m_pos.m_x, start->m_pos.m_y }, { end->m_pos.m_x, end->m_pos.m_y });
+    generator.setPoints(start, end);
 
-    std::set<FHPos> nonCollideSet;
+    MapTileRegion nonCollideSet;
     if (allTiles) {
-        for (MapTilePtr tile : zone.m_innerAreaUsable.m_innerArea)
-            nonCollideSet.insert(tile->m_pos);
-        for (MapTilePtr tile : zone.m_innerAreaBottomLine)
-            nonCollideSet.insert(tile->m_pos);
+        nonCollideSet = zone.m_innerAreaUsable.m_innerArea;
+        nonCollideSet.insert(zone.m_innerAreaBottomLine);
     } else {
-        for (MapTilePtr tile : zone.m_innerAreaSegmentsRoads) {
-            nonCollideSet.insert(tile->m_pos);
-        }
+        nonCollideSet = zone.m_innerAreaSegmentsRoads;
     }
+    nonCollideSet.doSort();
     generator.setNonCollision(std::move(nonCollideSet));
 
     auto path = generator.findPath();
@@ -431,40 +421,44 @@ std::vector<FHPos> RoadHelper::aStarPath(TileZone& zone, MapTilePtr start, MapTi
 
     const auto pathCopy = path;
     for (size_t i = 1; i < pathCopy.size(); i++) {
-        FHPos prev = pathCopy[i - 1];
-        FHPos cur  = pathCopy[i];
-        if (prev.m_x != cur.m_x && prev.m_y != cur.m_y) // diagonal
+        MapTilePtr prev  = pathCopy[i - 1];
+        MapTilePtr cur   = pathCopy[i];
+        const int  prevX = prev->m_pos.m_x;
+        const int  prevY = prev->m_pos.m_y;
+        const int  curX  = cur->m_pos.m_x;
+        const int  curY  = cur->m_pos.m_y;
+        if (prevX != curX && prevY != curY) // diagonal
         {
-            FHPos extra1 = prev;
-            FHPos extra2 = prev;
+            MapTilePtr extra1 = prev;
+            MapTilePtr extra2 = prev;
 
             // from TL to BR
-            if (prev.m_x < cur.m_x && prev.m_y < cur.m_y) {
-                extra1.m_y = cur.m_y;
-                extra2.m_x = cur.m_x;
+            if (prevX < curX && prevY < curY) {
+                extra1 = prev->m_neighborB;
+                extra2 = prev->m_neighborR;
             }
 
             // from BL to TR
-            if (prev.m_x < cur.m_x && prev.m_y > cur.m_y) {
-                extra1.m_x = cur.m_x;
-                extra2.m_y = cur.m_y;
+            if (prevX < curX && prevY > curY) {
+                extra1 = prev->m_neighborT;
+                extra2 = prev->m_neighborR;
             }
 
             // from TR to BL
-            if (prev.m_x > cur.m_x && prev.m_y < cur.m_y) {
-                extra1.m_y = cur.m_y;
-                extra2.m_x = cur.m_x;
+            if (prevX > curX && prevY < curY) {
+                extra1 = prev->m_neighborB;
+                extra2 = prev->m_neighborL;
             }
 
             // from BR to TL
-            if (prev.m_x > cur.m_x && prev.m_y > cur.m_y) {
-                extra1.m_x = cur.m_x;
-                extra2.m_y = cur.m_y;
+            if (prevX > curX && prevY > curY) {
+                extra1 = prev->m_neighborT;
+                extra2 = prev->m_neighborL;
             }
 
-            if (zone.m_placedRoads.contains(m_tileContainer.m_tileIndex.at(extra1)))
+            if (zone.m_placedRoads.contains(extra1))
                 path.push_back(extra1);
-            else if (zone.m_placedRoads.contains(m_tileContainer.m_tileIndex.at(extra2)))
+            else if (zone.m_placedRoads.contains(extra2))
                 path.push_back(extra2);
             else
                 path.push_back(extra1);
