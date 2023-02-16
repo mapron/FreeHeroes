@@ -163,7 +163,7 @@ std::vector<MapTileArea> MapTileArea::splitByFloodFill(bool useDiag, MapTilePtr 
     return result;
 }
 
-std::vector<MapTileArea> MapTileArea::splitByMaxArea(size_t maxArea) const
+std::vector<MapTileArea> MapTileArea::splitByMaxArea(std::ostream& os, size_t maxArea) const
 {
     std::vector<MapTileArea> result;
     size_t                   zoneArea = m_innerArea.size();
@@ -171,6 +171,16 @@ std::vector<MapTileArea> MapTileArea::splitByMaxArea(size_t maxArea) const
         return result;
 
     const size_t k = (zoneArea + maxArea + 1) / maxArea;
+
+    return splitByK(os, k);
+}
+
+std::vector<MapTileArea> MapTileArea::splitByK(std::ostream& os, size_t k) const
+{
+    std::vector<MapTileArea> result;
+    size_t                   zoneArea = m_innerArea.size();
+    if (!zoneArea)
+        return result;
 
     if (k == 1) {
         result.push_back(*this);
@@ -182,9 +192,8 @@ std::vector<MapTileArea> MapTileArea::splitByMaxArea(size_t maxArea) const
         for (auto* cell : m_innerArea) {
             seg.m_points.push_back({ cell });
         }
-
+        seg.m_iters = 30;
         seg.initEqualCentoids(k);
-        std::ostringstream os;
         seg.run(os);
 
         for (KMeansSegmentation::Cluster& cluster : seg.m_clusters) {
@@ -192,6 +201,7 @@ std::vector<MapTileArea> MapTileArea::splitByMaxArea(size_t maxArea) const
             for (auto& point : cluster.m_points)
                 zoneSeg.insert(point->m_pos);
 
+            assert(zoneSeg.size() > 0);
             zoneSeg.doSort();
             result.push_back(MapTileArea{ .m_innerArea = std::move(zoneSeg) });
         }

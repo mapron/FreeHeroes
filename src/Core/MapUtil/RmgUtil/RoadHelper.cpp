@@ -162,7 +162,7 @@ void RoadHelper::placeRoads(TileZone& tileZone)
 {
     //Mernel::ProfilerScope topScope("placeRoads");
 
-    tileZone.m_innerAreaSegments = tileZone.m_innerAreaUsable.splitByMaxArea(tileZone.m_rngZoneSettings.m_segmentAreaSize);
+    tileZone.m_innerAreaSegments = tileZone.m_innerAreaUsable.splitByMaxArea(m_logOutput, tileZone.m_rngZoneSettings.m_segmentAreaSize);
     auto borderNet               = MapTileArea::getInnerBorderNet(tileZone.m_innerAreaSegments);
 
     tileZone.m_roadNodes.insert(tileZone.m_roadNodesHighPriority);

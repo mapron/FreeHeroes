@@ -245,15 +245,14 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
     m_consumeResult = {};
 
     for (auto& seg : tileZone.m_innerAreaSegments) {
-        m_consumeResult.m_cells.insert(seg.m_innerArea);
+        ZoneSegment zs;
+        zs.m_cells = seg.m_innerArea;
+        zs.m_cells.doSort();
+        zs.m_cellsForUnguardedInner = zs.m_cells;
+        m_consumeResult.m_segments.push_back(std::move(zs));
     }
-    m_consumeResult.m_cells.doSort();
 
-    m_consumeResult.m_cellsForUnguardedInner = m_consumeResult.m_cells;
-    for (auto* cell : tileZone.m_innerAreaUsable.m_innerArea) {
-        if (!m_consumeResult.m_cells.contains(cell))
-            m_consumeResult.m_cellsForUnguardedRoads.insert(cell);
-    }
+    m_consumeResult.m_cellsForUnguardedRoads = tileZone.m_placedRoads;
     m_consumeResult.m_cellsForUnguardedRoads.doSort();
 
     for (const auto& group : generated.m_groups) {
@@ -335,16 +334,61 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
     });
 
     std::string m_indent = "        ";
-    bool        success  = true;
+
+    auto setSegToBundle = [this](ObjectBundle& bundle, size_t incCount) {
+        bundle.m_segmentIndex = m_consumeResult.m_currentSegment;
+        m_consumeResult.m_segments[m_consumeResult.m_currentSegment].m_objectCount += incCount;
+        m_consumeResult.m_currentSegment++;
+        m_consumeResult.m_currentSegment %= m_consumeResult.m_segments.size();
+    };
+
+    for (auto& bundle : m_consumeResult.m_bundlesGuarded) {
+        setSegToBundle(bundle, 1);
+    }
+    for (auto& bundle : m_consumeResult.m_bundlesNonGuarded) {
+        setSegToBundle(bundle, 1);
+    }
+    for (auto& bundle : m_consumeResult.m_bundlesNonGuardedPickable) {
+        setSegToBundle(bundle, 0);
+    }
+
+    for (auto& zs : m_consumeResult.m_segments) {
+        if (!zs.m_objectCount)
+            continue;
+        MapTileArea area;
+        area.m_innerArea = zs.m_cells;
+        auto parts       = area.splitByK(m_logOutput, zs.m_objectCount);
+        for (auto& part : parts) {
+            FHPos centroid = TileZone::makeCentroid(part.m_innerArea);
+            auto* cell     = m_tileContainer.m_tileIndex.at(centroid);
+            zs.m_centroids.push_back(cell);
+            m_consumeResult.m_centroidsALL.push_back(cell);
+        }
+    }
+    bool successPlacement = true;
+    auto placeOnMapWrap   = [this, &m_indent, &successPlacement](ObjectBundle& bundle, size_t i, const std::string& prefix) {
+        if (placeOnMap(bundle, m_consumeResult.m_segments[bundle.m_segmentIndex], true))
+            return true;
+        if (placeOnMap(bundle, m_consumeResult.m_segments[bundle.m_segmentIndex], false))
+            return true;
+
+        for (int att = 0; att <= 5; ++att) {
+            m_consumeResult.m_currentSegment++;
+            m_consumeResult.m_currentSegment %= m_consumeResult.m_segments.size();
+            if (placeOnMap(bundle, m_consumeResult.m_segments[m_consumeResult.m_currentSegment], true))
+                return true;
+            if (placeOnMap(bundle, m_consumeResult.m_segments[m_consumeResult.m_currentSegment], false))
+                return true;
+        }
+        m_logOutput << m_indent << prefix << " placement failure [" << i << "]: size=" << bundle.getEstimatedArea() << "; " << bundle.toPrintableString() << "\n";
+
+        successPlacement = false;
+        return false;
+    };
 
     for (size_t i = 0; auto& bundle : m_consumeResult.m_bundlesGuarded) {
-        i++;
-
-        if (!placeOnMap(bundle)) {
-            success = false;
-            m_logOutput << m_indent << "g placement failure [" << i << "]: size=" << bundle.getEstimatedArea() << "; " << bundle.toPrintableString() << "\n";
+        if (!placeOnMapWrap(bundle, i++, "g"))
             continue;
-        }
 
         for (auto* pos : bundle.m_protectionBorder) {
             tileZone.m_needBeBlocked.insert(pos);
@@ -362,92 +406,95 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
     }
 
     for (size_t i = 0; auto& bundle : m_consumeResult.m_bundlesNonGuarded) {
-        i++;
-        if (!this->placeOnMap(bundle)) {
-            success = false;
-            m_logOutput << m_indent << "u placement failure [" << i << "]: size=" << bundle.getEstimatedArea() << "; " << bundle.toPrintableString() << "\n";
-            continue;
-        }
+        placeOnMapWrap(bundle, i++, "u");
+    }
+    size_t remainArea = 0;
+    for (auto& zs : m_consumeResult.m_segments) {
+        remainArea += zs.m_cells.size();
     }
     const size_t segTotal      = tileZone.m_innerAreaUsable.m_innerArea.size() - tileZone.m_innerAreaSegmentsRoads.size();
-    const size_t remainArea    = m_consumeResult.m_cells.size();
     const size_t remainPercent = (remainArea * 100 / segTotal);
     m_logOutput << m_indent << "remaining size=" << remainArea << " / " << segTotal << "\n";
     if (remainPercent < 10)
         m_logOutput << m_indent << "Warning: only " << remainPercent << "% left\n";
 
-    {
-        MapTileArea blockedEst;
-        blockedEst.m_innerArea = m_consumeResult.m_cells;
-        auto          parts    = blockedEst.splitByFloodFill(false);
-        MapTileRegion needBlock;
-        for (auto& part : parts) {
-            if (part.m_innerArea.size() < 3)
-                continue;
-            const size_t maxArea = 12;
+    if (1) {
+        for (auto& zoneSegment : m_consumeResult.m_segments) {
+            MapTileArea blockedEst;
+            blockedEst.m_innerArea = zoneSegment.m_cells;
+            auto          parts    = blockedEst.splitByFloodFill(false);
+            MapTileRegion needBlock;
+            for (auto& part : parts) {
+                if (part.m_innerArea.size() < 3)
+                    continue;
+                const size_t maxArea = 12;
 
-            auto segments  = part.splitByMaxArea(maxArea);
-            auto borderNet = MapTileArea::getInnerBorderNet(segments);
+                auto segments  = part.splitByMaxArea(m_logOutput, maxArea);
+                auto borderNet = MapTileArea::getInnerBorderNet(segments);
 
-            for (const auto& seg : segments) {
-                for (auto* tile : seg.m_innerArea) {
-                    if (borderNet.contains(tile))
-                        continue;
+                for (const auto& seg : segments) {
+                    for (auto* tile : seg.m_innerArea) {
+                        if (borderNet.contains(tile))
+                            continue;
 
-                    needBlock.insert(tile);
+                        needBlock.insert(tile);
+                    }
                 }
             }
-        }
-        needBlock.doSort();
+            needBlock.doSort();
 
-        tileZone.m_needBeBlocked.insert(needBlock);
-        m_consumeResult.m_cells.erase(needBlock);
-        m_consumeResult.m_cellsForUnguardedInner.erase(needBlock);
-        m_consumeResult.m_cellsForUnguardedRoads.erase(needBlock);
+            tileZone.m_needBeBlocked.insert(needBlock);
+            zoneSegment.m_cells.erase(needBlock);
+            zoneSegment.m_cellsForUnguardedInner.erase(needBlock);
+
+            zoneSegment.m_cells.doSort();
+            zoneSegment.m_cellsForUnguardedInner.doSort();
+        }
 
         tileZone.m_needBeBlocked.doSort();
-        m_consumeResult.m_cells.doSort();
-        m_consumeResult.m_cellsForUnguardedInner.doSort();
-        m_consumeResult.m_cellsForUnguardedRoads.doSort();
-
-        // @todo: max 6x6 blocks
     }
 
     for (size_t i = 0; auto& bundle : m_consumeResult.m_bundlesNonGuardedPickable) {
-        i++;
-        if (!this->placeOnMap(bundle)) {
-            success = false;
-            m_logOutput << m_indent << "p placement failure [" << i << "]: size=" << bundle.getEstimatedArea() << "; " << bundle.toPrintableString() << "\n";
-            continue;
-        }
+        placeOnMapWrap(bundle, i++, "p");
     }
 
-    return success;
+    return successPlacement;
 }
 
-bool ObjectBundleSet::placeOnMap(ObjectBundle& bundle)
+bool ObjectBundleSet::placeOnMap(ObjectBundle& bundle,
+                                 ZoneSegment&  currentSegment,
+                                 bool          useCentroids)
 {
     Mernel::ProfilerScope scope("placeOnMap");
 
-    MapTileRegion* cellSource = &m_consumeResult.m_cells;
-    if (!bundle.m_guard && bundle.m_type == ObjectGenerator::IObject::Type::Pickable) {
-        auto useRoad = m_rng->genSmall(2) > 0;
-        if (useRoad && !m_consumeResult.m_cellsForUnguardedRoads.empty())
+    const bool     unguardedPick = !bundle.m_guard && bundle.m_type == ObjectGenerator::IObject::Type::Pickable;
+    bool           useRoad       = false;
+    MapTileRegion* cellSource    = &currentSegment.m_cells;
+    if (unguardedPick) {
+        useRoad = m_rng->genSmall(2) == 0 && !m_consumeResult.m_cellsForUnguardedRoads.empty();
+        if (useRoad)
             cellSource = &m_consumeResult.m_cellsForUnguardedRoads;
-        else if (!m_consumeResult.m_cellsForUnguardedInner.empty())
-            cellSource = &m_consumeResult.m_cellsForUnguardedInner;
+        else if (!currentSegment.m_cellsForUnguardedInner.empty())
+            cellSource = &currentSegment.m_cellsForUnguardedInner;
     }
 
-    if (cellSource->empty()) {
+    if (cellSource->empty())
         return false;
-    }
 
-    auto tryPlace = [this, &bundle, cellSource]() -> bool {
-        auto* pos = (*cellSource)[m_rng->gen(cellSource->size() - 1)];
+    size_t rngCentroidIndex = size_t(-1);
 
-        auto tryPlaceInner = [pos, &bundle, cellSource](FHPos delta) -> bool {
+    auto tryPlace = [this, &bundle, &currentSegment, useCentroids, useRoad, &rngCentroidIndex, &cellSource]() -> bool {
+        MapTilePtr pos;
+        if (useCentroids && !useRoad && !currentSegment.m_centroids.empty()) {
+            rngCentroidIndex = m_rng->gen(currentSegment.m_centroids.size() - 1);
+            pos              = currentSegment.m_centroids[rngCentroidIndex];
+        } else {
+            pos = (*cellSource)[m_rng->gen(cellSource->size() - 1)];
+        }
+
+        auto tryPlaceInner = [pos, &bundle, &cellSource](FHPos delta) -> bool {
             Mernel::ProfilerScope scope("tryPlaceInner");
-            bundle.m_absPos = pos->neighbourByOffset(delta);
+            bundle.m_absPos = pos->neighbourByOffset(delta + FHPos{ 1, 1 });
             bundle.estimateOccupied();
             if (!bundle.m_absPosIsValid)
                 return false;
@@ -493,22 +540,23 @@ bool ObjectBundleSet::placeOnMap(ObjectBundle& bundle)
                 item.m_obj->setPos(item.m_absPos->m_pos);
                 item.m_obj->place();
             }
-
+            if (rngCentroidIndex != size_t(-1))
+                currentSegment.m_centroids.erase(currentSegment.m_centroids.begin() + rngCentroidIndex);
             {
                 Mernel::ProfilerScope scope1("erase");
-                m_consumeResult.m_cells.erase(bundle.m_allArea);
+                currentSegment.m_cells.erase(bundle.m_allArea);
 
-                m_consumeResult.m_cellsForUnguardedInner.erase(bundle.m_fitArea);
+                currentSegment.m_cellsForUnguardedInner.erase(bundle.m_fitArea);
                 m_consumeResult.m_cellsForUnguardedRoads.erase(bundle.m_fitArea);
 
-                m_consumeResult.m_cellsForUnguardedInner.erase(bundle.m_guardRegion);
+                currentSegment.m_cellsForUnguardedInner.erase(bundle.m_guardRegion);
                 m_consumeResult.m_cellsForUnguardedRoads.erase(bundle.m_guardRegion);
             }
 
             {
                 Mernel::ProfilerScope scope2("doSort");
-                m_consumeResult.m_cells.doSort();
-                m_consumeResult.m_cellsForUnguardedInner.doSort();
+                currentSegment.m_cells.doSort();
+                currentSegment.m_cellsForUnguardedInner.doSort();
                 m_consumeResult.m_cellsForUnguardedRoads.doSort();
             }
 

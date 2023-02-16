@@ -87,6 +87,12 @@ void KMeansSegmentation::run(std::ostream& os)
 
     //for (size_t i = 0; i < m_clusters.size(); i++)
     //    os << "Cluster " << m_clusters[i].m_index << " centroid: " << m_clusters[i].getCentroidStr() << std::endl;
+
+    for (int i = (int) m_clusters.size() - 1; i >= 0; i--) {
+        if (m_clusters[i].m_points.size() == 0) {
+            m_clusters.erase(m_clusters.begin() + i);
+        }
+    }
 }
 
 }

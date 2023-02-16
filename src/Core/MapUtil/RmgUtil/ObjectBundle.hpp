@@ -52,9 +52,10 @@ struct ObjectBundle {
 
     size_t getEstimatedArea() const { return m_fitArea.size(); }
 
-    size_t  m_itemLimit   = 0;
-    bool    m_canPushMore = false;
-    int64_t m_targetGuard = 0;
+    size_t  m_itemLimit    = 0;
+    bool    m_canPushMore  = false;
+    int64_t m_targetGuard  = 0;
+    size_t  m_segmentIndex = 0;
 
     void sumGuard();
 
@@ -77,6 +78,14 @@ public:
         std::vector<BucketItem> m_nonGuarded;
     };
 
+    struct ZoneSegment {
+        MapTileRegion m_cells;
+        MapTileRegion m_cellsForUnguardedInner;
+
+        size_t         m_objectCount = 0;
+        MapTilePtrList m_centroids;
+    };
+
     struct ConsumeResult {
         std::vector<ObjectBundle> m_bundlesGuarded;
         std::vector<ObjectBundle> m_bundlesNonGuarded;
@@ -84,9 +93,13 @@ public:
 
         std::map<ObjectGenerator::IObject::Type, Bucket> m_buckets;
 
-        MapTileRegion m_cells;
-        MapTileRegion m_cellsForUnguardedInner;
+        std::vector<ZoneSegment> m_segments;
+
         MapTileRegion m_cellsForUnguardedRoads;
+
+        size_t m_currentSegment = 0;
+
+        MapTilePtrList m_centroidsALL;
     };
     ConsumeResult m_consumeResult;
 
@@ -112,7 +125,9 @@ public:
                  TileZone&              tileZone);
 
 private:
-    bool placeOnMap(ObjectBundle& bundle);
+    bool placeOnMap(ObjectBundle& bundle,
+                    ZoneSegment&  currentSegment,
+                    bool          useCentroids);
 };
 
 }

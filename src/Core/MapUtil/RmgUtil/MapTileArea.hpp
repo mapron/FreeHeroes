@@ -60,7 +60,8 @@ struct MapTileArea {
     MapTileArea floodFillDiagonalByInnerEdge(MapTilePtr cellStart) const;
 
     std::vector<MapTileArea> splitByFloodFill(bool useDiag, MapTilePtr hint = nullptr) const;
-    std::vector<MapTileArea> splitByMaxArea(size_t maxArea) const;
+    std::vector<MapTileArea> splitByMaxArea(std::ostream& os, size_t maxArea) const;
+    std::vector<MapTileArea> splitByK(std::ostream& os, size_t k) const;
 
     static MapTileArea getInnerBorderNet(const std::vector<MapTileArea>& areas);
 };

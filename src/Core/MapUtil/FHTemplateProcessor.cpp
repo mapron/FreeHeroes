@@ -618,6 +618,9 @@ void FHTemplateProcessor::runRewards()
         if (!bundleSet.consume(gen, tileZone)) {
             // throw std::runtime_error("Failed to fit some objects into zone '" + tileZone.m_id + "'");
         }
+        //for (auto* cell : bundleSet.m_consumeResult.m_centroidsALL) {
+        //    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 1 }); // red
+        //}
     }
 
     for (auto& guardBundle : bundleSet.m_guards) {
