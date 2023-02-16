@@ -113,28 +113,40 @@ void RoadHelper::makeBorders(std::vector<TileZone>& tileZones)
         }
     }
     noExpandTiles.doSort();
+    MapTileRegion needBeBlocked;
+    MapTileRegion tentativeBlocked;
     for (const auto& [key, border] : borderTiles) {
-        m_tileContainer.m_needBeBlocked.insert(border);
+        needBeBlocked.insert(border);
     }
-    m_tileContainer.m_needBeBlocked.doSort();
+    needBeBlocked.doSort();
     for (const auto& [key, border] : borderTiles) {
         for (auto* cell : border) {
             for (MapTilePtr ncell : cell->m_allNeighbours) {
-                if (m_tileContainer.m_needBeBlocked.contains(ncell))
+                if (needBeBlocked.contains(ncell))
                     continue;
                 if (noExpandTiles.contains(ncell))
                     continue;
-                m_tileContainer.m_tentativeBlocked.insert(ncell);
+                tentativeBlocked.insert(ncell);
             }
         }
     }
 
+    tentativeBlocked.doSort();
+
     for (auto& tileZone : tileZones) {
         tileZone.m_innerAreaUsable = {};
         for (auto* cell : tileZone.m_area.m_innerArea) {
-            if (m_tileContainer.m_blocked.contains(cell)
-                || m_tileContainer.m_needBeBlocked.contains(cell)
-                || m_tileContainer.m_tentativeBlocked.contains(cell))
+            if (needBeBlocked.contains(cell))
+                tileZone.m_needBeBlocked.insert(cell);
+            if (tentativeBlocked.contains(cell))
+                tileZone.m_tentativeBlocked.insert(cell);
+        }
+        tileZone.m_needBeBlocked.doSort();
+        tileZone.m_tentativeBlocked.doSort();
+        for (auto* cell : tileZone.m_area.m_innerArea) {
+            if (tileZone.m_blocked.contains(cell)
+                || tileZone.m_needBeBlocked.contains(cell)
+                || tileZone.m_tentativeBlocked.contains(cell))
                 continue;
             tileZone.m_innerAreaUsable.m_innerArea.insert(cell);
         }
@@ -150,31 +162,9 @@ void RoadHelper::placeRoads(TileZone& tileZone)
 {
     //Mernel::ProfilerScope topScope("placeRoads");
 
-    size_t zoneArea = tileZone.m_innerAreaUsable.m_innerArea.size();
-    if (zoneArea < (size_t) tileZone.m_rngZoneSettings.m_segmentAreaSize * 2) {
-        tileZone.m_innerAreaSegments.push_back(tileZone.m_innerAreaUsable);
-    } else {
-        Mernel::ProfilerScope scope("segmentation");
+    tileZone.m_innerAreaSegments = tileZone.m_innerAreaUsable.splitByMaxArea(tileZone.m_rngZoneSettings.m_segmentAreaSize);
+    auto borderNet               = MapTileArea::getInnerBorderNet(tileZone.m_innerAreaSegments);
 
-        const int k = zoneArea / tileZone.m_rngZoneSettings.m_segmentAreaSize;
-
-        KMeansSegmentation seg;
-        seg.m_points.reserve(zoneArea);
-        for (auto* cell : tileZone.m_innerAreaUsable.m_innerArea) {
-            seg.m_points.push_back({ cell });
-        }
-
-        seg.initRandomClusterCentoids(k, m_rng);
-        seg.run(m_logOutput);
-
-        for (KMeansSegmentation::Cluster& cluster : seg.m_clusters) {
-            MapTileRegion zoneSeg;
-            for (auto& point : cluster.m_points)
-                zoneSeg.insert(point->m_pos);
-
-            tileZone.m_innerAreaSegments.push_back(MapTileArea{ .m_innerArea = std::move(zoneSeg) });
-        }
-    }
     tileZone.m_roadNodes.insert(tileZone.m_roadNodesHighPriority);
     tileZone.m_roadNodes.doSort();
 
@@ -184,16 +174,8 @@ void RoadHelper::placeRoads(TileZone& tileZone)
         area.removeEdgeFromInnerArea();
 
         for (auto* cell : area.m_innerEdge) {
-            cell->m_segmentIndex     = i;
-            bool hasNeighbourInRoads = false;
-            for (MapTilePtr cellAdj : cell->m_allNeighbours) {
-                const bool same = cellAdj->m_segmentIndex == cell->m_segmentIndex && cellAdj->m_zone == cell->m_zone;
-                if (same)
-                    continue;
-                if (tileZone.m_innerAreaSegmentsRoads.contains(cellAdj))
-                    hasNeighbourInRoads = true;
-            }
-            if (!hasNeighbourInRoads)
+            cell->m_segmentIndex = i;
+            if (borderNet.contains(cell))
                 tileZone.m_innerAreaSegmentsRoads.insert(cell);
         }
 
@@ -275,6 +257,31 @@ void RoadHelper::placeRoads(TileZone& tileZone)
         }
     }
 
+    {
+        // correct zigzag road tiles.
+        for (MapTilePtr cell : tileZone.m_innerAreaUsable.m_innerArea) {
+            const bool roadB = tileZone.m_innerAreaSegmentsRoads.contains(cell->m_neighborB);
+            const bool roadT = tileZone.m_innerAreaSegmentsRoads.contains(cell->m_neighborT);
+            const bool roadR = tileZone.m_innerAreaSegmentsRoads.contains(cell->m_neighborR);
+            const bool roadL = tileZone.m_innerAreaSegmentsRoads.contains(cell->m_neighborL);
+
+            const bool roadTL = tileZone.m_innerAreaSegmentsRoads.contains(cell->m_neighborTL);
+            const bool roadTR = tileZone.m_innerAreaSegmentsRoads.contains(cell->m_neighborTR);
+            const bool roadBL = tileZone.m_innerAreaSegmentsRoads.contains(cell->m_neighborBL);
+            const bool roadBR = tileZone.m_innerAreaSegmentsRoads.contains(cell->m_neighborBR);
+
+            const bool roadX = tileZone.m_innerAreaSegmentsRoads.contains(cell);
+
+            const int crossRoads = roadB + roadT + roadR + roadL;
+            const int diagRoads  = roadTL + roadTR + roadBL + roadBR;
+
+            if (!roadX && crossRoads == 3 && diagRoads == 0) {
+                tileZone.m_innerAreaSegmentsRoads.insert(cell);
+                tileZone.m_innerAreaSegmentsRoads.doSort();
+            }
+        }
+    }
+
     std::vector<MapTilePtr> unconnectedRoadNodes(tileZone.m_roadNodes.cbegin(), tileZone.m_roadNodes.cend());
     if (unconnectedRoadNodes.size() <= 1)
         return;
@@ -297,6 +304,7 @@ void RoadHelper::placeRoads(TileZone& tileZone)
 
                 auto otherRoadNodes = tileZone.m_roadNodes;
                 otherRoadNodes.erase(townCell);
+                otherRoadNodes.doSort();
                 bool okNear = false;
                 for (auto* nearCell : roadCellsNearTheTown.m_innerArea) {
                     if (otherRoadNodes.contains(nearCell)) {

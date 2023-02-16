@@ -4,11 +4,13 @@
  * See LICENSE file for details.
  */
 #include "MapTileArea.hpp"
+#include "KMeans.hpp"
 
 #include "MernelPlatform/Profiler.hpp"
 
 #include <iostream>
 #include <unordered_set>
+#include <sstream>
 
 namespace FreeHeroes {
 
@@ -152,12 +154,67 @@ std::vector<MapTileArea> MapTileArea::splitByFloodFill(bool useDiag, MapTilePtr 
             }
         }
 
-        current.m_innerArea.doSort();
+        current.makeEdgeFromInnerArea();
         for (auto* tile : current.m_innerArea)
             remain.erase(tile);
         result.push_back(std::move(current));
     }
 
+    return result;
+}
+
+std::vector<MapTileArea> MapTileArea::splitByMaxArea(size_t maxArea) const
+{
+    std::vector<MapTileArea> result;
+    size_t                   zoneArea = m_innerArea.size();
+    if (!zoneArea)
+        return result;
+
+    const size_t k = (zoneArea + maxArea + 1) / maxArea;
+
+    if (k == 1) {
+        result.push_back(*this);
+    } else {
+        Mernel::ProfilerScope scope("segmentation");
+
+        KMeansSegmentation seg;
+        seg.m_points.reserve(zoneArea);
+        for (auto* cell : m_innerArea) {
+            seg.m_points.push_back({ cell });
+        }
+
+        seg.initEqualCentoids(k);
+        std::ostringstream os;
+        seg.run(os);
+
+        for (KMeansSegmentation::Cluster& cluster : seg.m_clusters) {
+            MapTileRegion zoneSeg;
+            for (auto& point : cluster.m_points)
+                zoneSeg.insert(point->m_pos);
+
+            zoneSeg.doSort();
+            result.push_back(MapTileArea{ .m_innerArea = std::move(zoneSeg) });
+        }
+    }
+    for (auto& area : result)
+        area.makeEdgeFromInnerArea();
+    return result;
+}
+
+MapTileArea MapTileArea::getInnerBorderNet(const std::vector<MapTileArea>& areas)
+{
+    MapTileArea result;
+    for (size_t i = 0; i < areas.size(); ++i) {
+        const MapTileArea& areaX = areas[i];
+        for (size_t k = i + 1; k < areas.size(); ++k) {
+            const MapTileArea& areaY = areas[k];
+            for (auto* innerCellX : areaX.m_innerEdge) {
+                if (areaY.m_outsideEdge.contains(innerCellX))
+                    result.m_innerArea.insert(innerCellX);
+            }
+        }
+    }
+    result.m_innerArea.doSort();
     return result;
 }
 

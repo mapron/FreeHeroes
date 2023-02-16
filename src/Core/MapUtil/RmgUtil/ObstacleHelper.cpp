@@ -105,11 +105,13 @@ std::vector<const ObstacleBucket*> ObstacleIndex::find(const Core::LibraryObject
 }
 
 ObstacleHelper::ObstacleHelper(FHMap&                        map,
+                               std::vector<TileZone>&        tileZones,
                                MapTileContainer&             tileContainer,
                                Core::IRandomGenerator* const rng,
                                const Core::IGameDatabase*    database,
                                std::ostream&                 logOutput)
     : m_map(map)
+    , m_tileZones(tileZones)
     , m_tileContainer(tileContainer)
     , m_rng(rng)
     , m_database(database)
@@ -173,16 +175,20 @@ void ObstacleHelper::placeObstacles()
     for (auto& row : mapMask.data)
         row.resize(mapMask.width);
 
-    m_tileContainer.m_needBeBlocked.doSort();
-    m_tileContainer.m_tentativeBlocked.doSort();
+    for (auto& tileZone : m_tileZones) {
+        tileZone.m_needBeBlocked.doSort();
+        tileZone.m_tentativeBlocked.doSort();
 
-    for (MapTilePtr cell : m_tileContainer.m_needBeBlocked)
-        mapMask.data[cell->m_pos.m_y][cell->m_pos.m_x] = 1;
-    for (MapTilePtr cell : m_tileContainer.m_tentativeBlocked) {
-        mapMask.data[cell->m_pos.m_y][cell->m_pos.m_x] = 2;
+        for (MapTilePtr cell : tileZone.m_needBeBlocked)
+            mapMask.data[cell->m_pos.m_y][cell->m_pos.m_x] = 1;
+        for (MapTilePtr cell : tileZone.m_tentativeBlocked) {
+            mapMask.data[cell->m_pos.m_y][cell->m_pos.m_x] = 2;
+        }
 
         //m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = 0, .m_valueB = 2 });
     }
+
+    MapTileRegion hasBlocked;
 
     const size_t maxMaskLookupWidth  = 8;
     const size_t maxMaskLookupHeight = 6;
@@ -260,7 +266,7 @@ void ObstacleHelper::placeObstacles()
                         if (mapMask.data[py][px] == 1)
                             mapMask.data[py][px] = 2;
                         auto* cell = m_tileContainer.m_tileIndex.at(maskBitPos);
-                        m_tileContainer.m_blocked.insert(cell);
+                        hasBlocked.insert(cell);
                     }
                     //m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = 0, .m_valueB = 3 });
                 }
@@ -281,12 +287,16 @@ void ObstacleHelper::placeObstacles()
             //    return;
         }
     }
-    m_tileContainer.m_blocked.doSort();
 
-    m_tileContainer.m_needBeBlocked.erase(m_tileContainer.m_blocked);
-    m_tileContainer.m_tentativeBlocked.erase(m_tileContainer.m_blocked);
-    m_tileContainer.m_needBeBlocked.doSort();
-    m_tileContainer.m_tentativeBlocked.doSort();
+    for (auto& tileZone : m_tileZones) {
+        tileZone.m_blocked.insert(hasBlocked);
+        tileZone.m_blocked.doSort();
+
+        tileZone.m_needBeBlocked.erase(tileZone.m_blocked);
+        tileZone.m_tentativeBlocked.erase(tileZone.m_blocked);
+        tileZone.m_needBeBlocked.doSort();
+        tileZone.m_tentativeBlocked.doSort();
+    }
 }
 
 }

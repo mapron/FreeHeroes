@@ -41,6 +41,10 @@ struct TileZone {
     MapTileRegion m_roadNodes;
     MapTileRegion m_roadNodesHighPriority;
 
+    MapTileRegion m_blocked;
+    MapTileRegion m_needBeBlocked;
+    MapTileRegion m_tentativeBlocked;
+
     int64_t m_relativeArea   = 0;
     int64_t m_absoluteArea   = 0;
     int64_t m_absoluteRadius = 0;

@@ -212,7 +212,7 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
     }
 
     m_stopAfter = stringToStage(stopAfterStage);
-    //m_stopAfter = Stage::ZoneTilesInitial;
+    //m_stopAfter = Stage::RoadsPlacement;
 
     Mernel::ProfilerContext                profileContext;
     Mernel::ProfilerDefaultContextSwitcher switcher(profileContext);
@@ -482,7 +482,7 @@ void FHTemplateProcessor::runZoneTilesRefinement()
 
 void FHTemplateProcessor::runTownsPlacement()
 {
-    auto placeTown = [this](FHTown town, FHPos pos, Core::LibraryPlayerConstPtr player, Core::LibraryFactionConstPtr faction) {
+    auto placeTown = [this](FHTown town, FHPos pos, TileZone& tileZone, Core::LibraryPlayerConstPtr player, Core::LibraryFactionConstPtr faction) {
         if (!faction)
             faction = getRandomFaction(false);
         town.m_factionId = faction;
@@ -518,15 +518,19 @@ void FHTemplateProcessor::runTownsPlacement()
             }
         }
         m_map.m_towns.push_back(town);
+        MapTileArea townArea;
         for (int x = 0; x < 5; x++) {
             for (int y = 0; y < 3; y++) {
                 auto townTilePos = pos;
                 townTilePos.m_x -= x;
                 townTilePos.m_y -= y;
                 if (m_tileContainer.m_tileIndex.contains(townTilePos))
-                    m_tileContainer.m_blocked.insert(m_tileContainer.m_tileIndex[townTilePos]);
+                    townArea.m_innerArea.insert(m_tileContainer.m_tileIndex[townTilePos]);
             }
         }
+        townArea.makeEdgeFromInnerArea();
+        tileZone.m_blocked.insert(townArea.m_innerArea);
+        tileZone.m_innerAreaSegmentsRoads.insert(townArea.m_outsideEdge);
     };
 
     auto playerNone = m_database->players()->find(std::string(Core::LibraryPlayer::s_none));
@@ -557,7 +561,7 @@ void FHTemplateProcessor::runTownsPlacement()
         for (size_t i = 0; i < towns.size(); ++i) {
             auto player  = towns[i].m_playerControlled ? tileZone.m_rngZoneSettings.m_player : playerNone;
             auto faction = towns[i].m_useZoneFaction ? tileZone.m_mainTownFaction : nullptr;
-            placeTown(towns[i].m_town, townPositions[i]->m_pos, player, faction);
+            placeTown(towns[i].m_town, townPositions[i]->m_pos, tileZone, player, faction);
         }
 
         for (auto&& pos : townPositions) {
@@ -565,6 +569,7 @@ void FHTemplateProcessor::runTownsPlacement()
             tileZone.m_roadNodesHighPriority.insert(pos2);
             roadHelper.placeRoad({ pos, pos2 });
         }
+        tileZone.m_blocked.doSort();
     }
 }
 
@@ -655,15 +660,17 @@ void FHTemplateProcessor::runCorrectObjectTerrains()
 
 void FHTemplateProcessor::runObstacles()
 {
-    ObstacleHelper obstacleHelper(m_map, m_tileContainer, m_rng, m_database, m_logOutput);
+    ObstacleHelper obstacleHelper(m_map, m_tileZones, m_tileContainer, m_rng, m_database, m_logOutput);
     obstacleHelper.placeObstacles();
 
-    for (auto* tile : m_tileContainer.m_needBeBlocked) {
-        m_logOutput << m_indent << "still require to be blocked: " << tile->toPrintableString() << "\n";
-    }
-    m_tileContainer.m_tentativeBlocked.clear();
-    if (!m_tileContainer.m_needBeBlocked.empty()) {
-        throw std::runtime_error("Some block tiles are not set.");
+    for (auto& tileZone : m_tileZones) {
+        for (auto* tile : tileZone.m_needBeBlocked) {
+            m_logOutput << m_indent << "still require to be blocked: " << tile->toPrintableString() << "\n";
+        }
+        tileZone.m_tentativeBlocked.clear();
+        if (!tileZone.m_needBeBlocked.empty()) {
+            throw std::runtime_error("Some block tiles are not set.");
+        }
     }
 }
 
@@ -850,6 +857,7 @@ void FHTemplateProcessor::placeDebugInfo()
 {
     if (m_stopAfter == Stage::Invalid)
         return;
+
     for (auto& tileZone : m_tileZones) {
         if (m_stopAfter <= Stage::TownsPlacement) {
             m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = tileZone.m_startTile->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 1 }); // red
@@ -862,6 +870,12 @@ void FHTemplateProcessor::placeDebugInfo()
             }
             for (auto* cell : tileZone.m_area.m_outsideEdge) {
                 m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 3 });
+            }
+        }
+
+        if (m_stopAfter <= Stage::BorderRoads) {
+            for (auto* cell : tileZone.m_blocked) {
+                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = 0, .m_valueB = 4 });
             }
         }
 

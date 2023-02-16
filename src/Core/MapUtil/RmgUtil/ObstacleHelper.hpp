@@ -38,6 +38,7 @@ struct FHMap;
 class ObstacleHelper {
 public:
     ObstacleHelper(FHMap&                        map,
+                   std::vector<TileZone>&        tileZones,
                    MapTileContainer&             tileContainer,
                    Core::IRandomGenerator* const rng,
                    const Core::IGameDatabase*    database,
@@ -47,6 +48,7 @@ public:
 
 private:
     FHMap&                           m_map;
+    std::vector<TileZone>&           m_tileZones;
     MapTileContainer&                m_tileContainer;
     Core::IRandomGenerator* const    m_rng;
     const Core::IGameDatabase* const m_database;

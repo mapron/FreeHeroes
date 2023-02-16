@@ -88,6 +88,11 @@ public:
 
         size_t getSize() const { return m_points.size(); }
 
+        int64_t distanceTo(Point& point) const
+        {
+            return point.getDistance(m_centroid) * 1000 / m_radius;
+        }
+
         std::string getCentroidStr() const
         {
             return m_centroid.toPrintableString();
@@ -141,6 +146,19 @@ public:
                 }
             }
         }
+
+        initClustersByCentroids(std::vector<size_t>(usedPointIds.cbegin(), usedPointIds.cend()));
+    }
+
+    void initEqualCentoids(size_t K)
+    {
+        std::sort(m_points.begin(), m_points.end());
+
+        std::set<size_t> usedPointIds;
+        size_t           step = m_points.size() / K;
+
+        for (size_t i = 0; i < K; i++)
+            usedPointIds.insert(i * step);
 
         initClustersByCentroids(std::vector<size_t>(usedPointIds.cbegin(), usedPointIds.cend()));
     }

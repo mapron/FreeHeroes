@@ -13,11 +13,11 @@ namespace FreeHeroes {
 
 KMeansSegmentation::Cluster* KMeansSegmentation::getNearestClusterId(Point& point)
 {
-    int64_t  minDist          = point.getDistance(m_clusters[0].m_centroid) * 1000 / m_clusters[0].m_radius;
+    int64_t  minDist          = m_clusters[0].distanceTo(point);
     Cluster* nearestClusterId = &m_clusters[0];
 
     for (size_t i = 1; i < m_clusters.size(); i++) {
-        const int64_t dist = point.getDistance(m_clusters[i].m_centroid) * 1000 / m_clusters[i].m_radius;
+        const int64_t dist = m_clusters[i].distanceTo(point);
         if (dist < minDist) {
             minDist          = dist;
             nearestClusterId = &m_clusters[i];

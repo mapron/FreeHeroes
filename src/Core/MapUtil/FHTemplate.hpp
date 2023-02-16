@@ -239,7 +239,7 @@ struct FHRngZone {
     int64_t m_guardMax   = 0;
     int64_t m_guardBlock = 0;
 
-    int m_segmentAreaSize = 250;
+    size_t m_segmentAreaSize = 250;
 
     bool m_isNormal = false;
 

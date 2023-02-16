@@ -129,6 +129,8 @@ public:
     }
     bool contains(const Key& key) const
     {
+        ensureSorted();
+
         return m_index.find(key) != m_index.cend();
     }
 

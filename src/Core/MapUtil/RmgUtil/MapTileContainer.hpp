@@ -20,10 +20,6 @@ struct MapTileContainer {
 
     std::set<TileZone*> m_dirtyZones; // zone ids that must be re-read from the map.
 
-    MapTileRegion m_blocked;
-    MapTileRegion m_needBeBlocked;
-    MapTileRegion m_tentativeBlocked;
-
     void init(int width, int height, int depth);
 
     void checkAllTerrains(const MapTileRegion& posPlaced);

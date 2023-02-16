@@ -346,7 +346,7 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
         }
 
         for (auto* pos : bundle.m_protectionBorder) {
-            m_tileContainer.m_needBeBlocked.insert(pos);
+            tileZone.m_needBeBlocked.insert(pos);
 
             //m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = tileZone.m_index, .m_valueB = 1 });
         }
@@ -370,25 +370,35 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
     }
 
     {
-        MapTileRegion blocked;
-        for (auto* tile : m_consumeResult.m_cells) {
-            bool everyNTileIsFree = true;
-            for (auto* ntile : tile->m_allNeighbours) {
-                if (m_consumeResult.m_cells.contains(ntile))
-                    continue;
-                everyNTileIsFree = false;
-                break;
+        MapTileArea blockedEst;
+        blockedEst.m_innerArea = m_consumeResult.m_cells;
+        auto          parts    = blockedEst.splitByFloodFill(false);
+        MapTileRegion needBlock;
+        for (auto& part : parts) {
+            if (part.m_innerArea.size() < 3)
+                continue;
+            const size_t maxArea = 12;
+
+            auto segments  = part.splitByMaxArea(maxArea);
+            auto borderNet = MapTileArea::getInnerBorderNet(segments);
+
+            for (const auto& seg : segments) {
+                for (auto* tile : seg.m_innerArea) {
+                    if (borderNet.contains(tile))
+                        continue;
+
+                    needBlock.insert(tile);
+                }
             }
-            if (everyNTileIsFree)
-                blocked.insert(tile);
         }
+        needBlock.doSort();
 
-        m_tileContainer.m_needBeBlocked.insert(blocked);
-        m_consumeResult.m_cells.erase(blocked);
-        m_consumeResult.m_cellsForUnguardedInner.erase(blocked);
-        m_consumeResult.m_cellsForUnguardedRoads.erase(blocked);
+        tileZone.m_needBeBlocked.insert(needBlock);
+        m_consumeResult.m_cells.erase(needBlock);
+        m_consumeResult.m_cellsForUnguardedInner.erase(needBlock);
+        m_consumeResult.m_cellsForUnguardedRoads.erase(needBlock);
 
-        m_tileContainer.m_needBeBlocked.doSort();
+        tileZone.m_needBeBlocked.doSort();
         m_consumeResult.m_cells.doSort();
         m_consumeResult.m_cellsForUnguardedInner.doSort();
         m_consumeResult.m_cellsForUnguardedRoads.doSort();
@@ -429,6 +439,7 @@ bool ObjectBundleSet::placeOnMap(ObjectBundle& bundle)
         auto* pos = (*cellSource)[m_rng->gen(cellSource->size() - 1)];
 
         auto tryPlaceInner = [pos, &bundle, cellSource](FHPos delta) -> bool {
+            Mernel::ProfilerScope scope("tryPlaceInner");
             bundle.m_absPos = pos->neighbourByOffset(delta);
             bundle.estimateOccupied();
             if (!bundle.m_absPosIsValid)
@@ -476,17 +487,23 @@ bool ObjectBundleSet::placeOnMap(ObjectBundle& bundle)
                 item.m_obj->place();
             }
 
-            m_consumeResult.m_cells.erase(bundle.m_allArea);
+            {
+                Mernel::ProfilerScope scope1("erase");
+                m_consumeResult.m_cells.erase(bundle.m_allArea);
 
-            m_consumeResult.m_cellsForUnguardedInner.erase(bundle.m_fitArea);
-            m_consumeResult.m_cellsForUnguardedRoads.erase(bundle.m_fitArea);
+                m_consumeResult.m_cellsForUnguardedInner.erase(bundle.m_fitArea);
+                m_consumeResult.m_cellsForUnguardedRoads.erase(bundle.m_fitArea);
 
-            m_consumeResult.m_cellsForUnguardedInner.erase(bundle.m_guardRegion);
-            m_consumeResult.m_cellsForUnguardedRoads.erase(bundle.m_guardRegion);
+                m_consumeResult.m_cellsForUnguardedInner.erase(bundle.m_guardRegion);
+                m_consumeResult.m_cellsForUnguardedRoads.erase(bundle.m_guardRegion);
+            }
 
-            m_consumeResult.m_cells.doSort();
-            m_consumeResult.m_cellsForUnguardedInner.doSort();
-            m_consumeResult.m_cellsForUnguardedRoads.doSort();
+            {
+                Mernel::ProfilerScope scope2("doSort");
+                m_consumeResult.m_cells.doSort();
+                m_consumeResult.m_cellsForUnguardedInner.doSort();
+                m_consumeResult.m_cellsForUnguardedRoads.doSort();
+            }
 
             return true;
         }
