@@ -221,6 +221,7 @@ void ObjectBundle::estimateOccupied()
 
     m_fitArea.insert(m_protectionBorder);
     m_fitArea.insert(m_estimatedOccupied);
+    m_fitArea.insert(m_guardRegion);
     m_fitArea.doSort();
 
     m_absPosIsValid = true;
@@ -368,6 +369,12 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
             continue;
         }
     }
+    const size_t segTotal      = tileZone.m_innerAreaUsable.m_innerArea.size() - tileZone.m_innerAreaSegmentsRoads.size();
+    const size_t remainArea    = m_consumeResult.m_cells.size();
+    const size_t remainPercent = (remainArea * 100 / segTotal);
+    m_logOutput << m_indent << "remaining size=" << remainArea << " / " << segTotal << "\n";
+    if (remainPercent < 10)
+        m_logOutput << m_indent << "Warning: only " << remainPercent << "% left\n";
 
     {
         MapTileArea blockedEst;

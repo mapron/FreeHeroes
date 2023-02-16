@@ -58,7 +58,7 @@ void estimateArtScore(Core::LibraryArtifactConstPtr art, Core::MapScore& score)
     if (std::find(art->tags.cbegin(), art->tags.cend(), Core::LibraryArtifact::Tag::Control) != art->tags.cend())
         attr = Core::ScoreAttr::Control;
 
-    score[attr] = art->value;
+    score[attr] += art->value;
 }
 
 void estimateSpellScore(Core::LibrarySpellConstPtr spell, Core::MapScore& score, bool asAnySpell)
@@ -70,9 +70,9 @@ void estimateSpellScore(Core::LibrarySpellConstPtr spell, Core::MapScore& score,
         attr = Core::ScoreAttr::SpellOffensive;
 
     if (asAnySpell)
-        score[Core::ScoreAttr::SpellAny] = spell->value;
+        score[Core::ScoreAttr::SpellAny] += spell->value;
     else
-        score[attr] = spell->value;
+        score[attr] += spell->value;
 }
 
 void estimateSpellListScore(const std::vector<Core::LibrarySpellConstPtr>& spells, Core::MapScore& score, bool asAnySpell)

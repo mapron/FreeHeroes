@@ -122,9 +122,9 @@
 "sod.artifact.misc.eagle2"            : {"class":"treasure", "value": 2000 , "cost": 2000 , "guard":  4000, "untranslatedName": "Charm EagleEye"         ,"slot":"misc"   , "calc": ["if h.eagleEyeChance:num() > 0 then h.eagleEyeChance:add(10 , 100) end" ]},
 "sod.artifact.misc.eagle3"            : {"class":"minor"   , "value": 3000 , "cost": 3000 , "guard": 10000, "untranslatedName": "Charm EagleEye"         ,"slot":"misc"   , "calc": ["if h.eagleEyeChance:num() > 0 then h.eagleEyeChance:add(15 , 100) end" ]},
 
-"sod.artifact.neck.diplomacy1"        : {"class":"major"   , "value": 5000 , "cost": 5000 , "guard": 10000, "untranslatedName": "Neck Diplomacy"         ,"slot":"neck"   , "calc": ["h.surrenderDiscount:add(10 , 100)" ]},
-"sod.artifact.ring.diplomacy2"        : {"class":"major"   , "value": 5000 , "cost": 5000 , "guard": 10000, "untranslatedName": "Ring Diplomacy"         ,"slot":"ring"   , "calc": ["h.surrenderDiscount:add(10 , 100)" ]},
-"sod.artifact.cape.diplomacy3"        : {"class":"major"   , "value": 5000 , "cost": 5000 , "guard": 10000, "untranslatedName": "Cape Diplomacy"         ,"slot":"cape"   , "calc": ["h.surrenderDiscount:add(10 , 100)" ]},
+"sod.artifact.neck.diplomacy1"        : {"class":"major"   , "value": 4000 , "cost": 5000 , "guard": 10000, "untranslatedName": "Neck Diplomacy"         ,"slot":"neck"   , "calc": ["h.surrenderDiscount:add(10 , 100)" ]},
+"sod.artifact.ring.diplomacy2"        : {"class":"major"   , "value": 4000 , "cost": 5000 , "guard": 10000, "untranslatedName": "Ring Diplomacy"         ,"slot":"ring"   , "calc": ["h.surrenderDiscount:add(10 , 100)" ]},
+"sod.artifact.cape.diplomacy3"        : {"class":"major"   , "value": 4000 , "cost": 5000 , "guard": 10000, "untranslatedName": "Cape Diplomacy"         ,"slot":"cape"   , "calc": ["h.surrenderDiscount:add(10 , 100)" ]},
 
 "hota.artifact.misc.interfere"        : {"class":"minor"   , "value": 7000 , "cost": 5000 , "guard": 15000, "untranslatedName": "Charm Interfere 10"      ,"slot":"misc"   , "calc": ["h.spReduceOpp:add(10, 100)"  ]},
 "hota.artifact.ring.interfere"        : {"class":"minor"   , "value": 7000 , "cost": 5000 , "guard": 15000, "untranslatedName": "Ring Interfere 10"       ,"slot":"ring"   , "calc": ["h.spReduceOpp:add(10, 100)"  ]},
