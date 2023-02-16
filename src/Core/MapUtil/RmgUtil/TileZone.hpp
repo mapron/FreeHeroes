@@ -40,6 +40,7 @@ struct TileZone {
 
     MapTileRegion m_roadNodes;
     MapTileRegion m_roadNodesHighPriority;
+    MapTileRegion m_breakGuardTiles;
 
     MapTileRegion m_blocked;
     MapTileRegion m_needBeBlocked;

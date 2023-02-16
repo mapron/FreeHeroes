@@ -146,7 +146,7 @@ struct SpellFilter {
         if (!levels.empty()) {
             result = result && std::find(levels.cbegin(), levels.cend(), spell->level) != levels.cend();
         }
-        if (!schools.empty()) {
+        if (!schools.empty() && spell->school != MagicSchool::Any) {
             result = result && std::find(schools.cbegin(), schools.cend(), spell->school) != schools.cend();
         }
         if (!tags.empty()) {

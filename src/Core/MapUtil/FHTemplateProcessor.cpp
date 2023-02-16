@@ -557,6 +557,10 @@ void FHTemplateProcessor::runTownsPlacement()
                 townPositions.push_back(m_tileContainer.m_tileIndex.at(cluster.m_centroid));
             }
         }
+        auto centroidCell = tileZone.m_centroid;
+        std::sort(townPositions.begin(), townPositions.end(), [centroidCell](MapTilePtr l, MapTilePtr r) {
+            return posDistance(centroidCell, l) < posDistance(centroidCell, r);
+        });
 
         for (size_t i = 0; i < towns.size(); ++i) {
             auto player  = towns[i].m_playerControlled ? tileZone.m_rngZoneSettings.m_player : playerNone;

@@ -79,7 +79,8 @@ void RoadHelper::makeBorders(std::vector<TileZone>& tileZones)
         MapTilePtr cell = (*it);
         cell->m_zone->m_roadNodesHighPriority.insert(cell);
 
-        if (connections.m_guard || !connections.m_mirrorGuard.empty()) {
+        const bool guarded = connections.m_guard || !connections.m_mirrorGuard.empty();
+        if (guarded) {
             Guard guard;
             guard.m_id           = connectionId;
             guard.m_value        = connections.m_guard;
@@ -87,12 +88,16 @@ void RoadHelper::makeBorders(std::vector<TileZone>& tileZones)
             guard.m_pos          = cell;
             guard.m_zone         = nullptr;
             m_guards.push_back(guard);
+
+            cell->m_zone->m_breakGuardTiles.insert(cell);
         }
         MapTilePtr ncellFound = nullptr;
 
         for (MapTilePtr ncell : cell->m_allNeighbours) {
             if (!ncellFound && ncell && ncell->m_zone != cell->m_zone) {
                 ncell->m_zone->m_roadNodesHighPriority.insert(ncell);
+                if (guarded)
+                    ncell->m_zone->m_breakGuardTiles.insert(ncell);
                 ncellFound = ncell;
             }
         }

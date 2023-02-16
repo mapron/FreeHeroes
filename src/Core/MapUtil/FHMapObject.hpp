@@ -45,7 +45,7 @@ struct FHTown : public FHPlayerControlledObject {
     Core::LibraryFactionConstPtr m_factionId = nullptr;
     bool                         m_hasFort{ false };
     uint32_t                     m_questIdentifier = 0;
-    bool                         m_spellResearch{ false };
+    bool                         m_spellResearch{ true };
     bool                         m_hasCustomBuildings{ false };
     bool                         m_hasGarison{ false };
 

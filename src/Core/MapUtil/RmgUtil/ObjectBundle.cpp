@@ -242,17 +242,29 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
 {
     Mernel::ProfilerScope scope("consume");
 
-    m_consumeResult = {};
+    m_consumeResult           = {};
+    MapTileRegion safePadding = tileZone.m_roadNodesHighPriority;
+    {
+        auto guards = tileZone.m_breakGuardTiles;
+        guards.doSort();
+        guards = blurSet(guards, true, false);
+        safePadding.insert(guards);
+        safePadding.doSort();
+        safePadding = blurSet(safePadding, true, false);
+    }
 
     for (auto& seg : tileZone.m_innerAreaSegments) {
         ZoneSegment zs;
         zs.m_cells = seg.m_innerArea;
+        zs.m_cells.doSort();
+        zs.m_cells.erase(safePadding);
         zs.m_cells.doSort();
         zs.m_cellsForUnguardedInner = zs.m_cells;
         m_consumeResult.m_segments.push_back(std::move(zs));
     }
 
     m_consumeResult.m_cellsForUnguardedRoads = tileZone.m_placedRoads;
+    m_consumeResult.m_cellsForUnguardedRoads.erase(safePadding);
     m_consumeResult.m_cellsForUnguardedRoads.doSort();
 
     for (const auto& group : generated.m_groups) {
