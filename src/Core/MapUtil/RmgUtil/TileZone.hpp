@@ -25,8 +25,8 @@ struct TileZone {
     Core::LibraryFactionConstPtr m_rewardsFaction  = nullptr;
     Core::LibraryPlayerConstPtr  m_player          = nullptr;
 
-    FHPos m_startTile;
-    FHPos m_centroid;
+    MapTilePtr m_startTile = nullptr;
+    MapTilePtr m_centroid  = nullptr;
 
     MapTileArea m_area;
 

@@ -1184,10 +1184,13 @@ void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
         return l.m_targetScoreTotal > r.m_targetScoreTotal;
     });
 
+    const bool doLog = false;
+
     for (ObjectGroup& group : m_groups) {
         const auto& scoreSettings = *group.m_scoreSettings;
 
-        m_logOutput << indentBase << group.m_id << " start\n";
+        if (doLog)
+            m_logOutput << indentBase << group.m_id << " start\n";
         Core::MapScore currentScore;
 
         std::vector<IObjectFactoryPtr> objectFactories;
@@ -1205,7 +1208,8 @@ void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
         int       i         = 0;
         for (; i < iterLimit; i++) {
             if (!generateOneObject(group.m_targetScore, currentScore, objectFactories, group)) {
-                m_logOutput << indentBase << group.m_id << " finished on [" << i << "] iteration\n";
+                if (doLog)
+                    m_logOutput << indentBase << group.m_id << " finished on [" << i << "] iteration\n";
                 break;
             }
         }
@@ -1217,10 +1221,12 @@ void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
         auto deficitSum     = totalScoreValue(deficitScore);
         auto allowedDeficit = targetSum * scoreSettings.m_tolerancePercent / 100;
 
-        m_logOutput << indentBase << group.m_id << " target score:" << group.m_targetScore << "\n";
-        m_logOutput << indentBase << group.m_id << " end score:" << currentScore << "\n";
-        m_logOutput << indentBase << group.m_id << " deficit score:" << deficitScore << "\n";
-        m_logOutput << indentBase << group.m_id << " checking deficit tolerance: " << deficitSum << " <= " << allowedDeficit << "...\n";
+        if (doLog) {
+            m_logOutput << indentBase << group.m_id << " target score:" << group.m_targetScore << "\n";
+            m_logOutput << indentBase << group.m_id << " end score:" << currentScore << "\n";
+            m_logOutput << indentBase << group.m_id << " deficit score:" << deficitScore << "\n";
+            m_logOutput << indentBase << group.m_id << " checking deficit tolerance: " << deficitSum << " <= " << allowedDeficit << "...\n";
+        }
         if (deficitSum > allowedDeficit)
             throw std::runtime_error("Deficit score for '" + group.m_id + "' exceed tolerance!");
     }

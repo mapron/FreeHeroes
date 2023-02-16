@@ -5,14 +5,15 @@
  */
 #pragma once
 
-#include <vector>
+#include <algorithm>
+#include <cassert>
 #include <set>
 #include <string>
-#include <cassert>
 #include <tuple>
+#include <vector>
 
 #include "TemplateUtils.hpp"
-#include "../FHTileMap.hpp"
+#include "MapTile.hpp"
 
 #include "IRandomGenerator.hpp"
 
@@ -22,72 +23,45 @@ class KMeansSegmentation {
 public:
     struct Cluster;
     struct Point {
-        int      m_x         = 0;
-        int      m_y         = 0;
-        int      m_zUnused   = 0;
-        Cluster* m_clusterId = nullptr;
+        MapTilePtr m_pos       = nullptr;
+        Cluster*   m_clusterId = nullptr;
 
         constexpr Point() noexcept = default;
-        constexpr Point(const FHPos& pos) noexcept
+        constexpr Point(MapTilePtr pos) noexcept
         {
-            m_x       = pos.m_x;
-            m_y       = pos.m_y;
-            m_zUnused = pos.m_z;
-        }
-        constexpr Point(int x, int y, int z) noexcept
-        {
-            m_x       = x;
-            m_y       = y;
-            m_zUnused = z;
-        }
-
-        constexpr FHPos toPos() const noexcept
-        {
-            return { m_x, m_y, m_zUnused };
+            m_pos = pos;
         }
 
         Cluster* getCluster() const noexcept { return m_clusterId; }
 
         void setCluster(Cluster* val) { m_clusterId = val; }
 
-        constexpr int  getVal(size_t pos) const noexcept { return pos == 0 ? m_x : m_y; }
-        constexpr void setVal(size_t pos, int val) noexcept
-        {
-            if (pos == 0)
-                m_x = val;
-            else
-                m_y = val;
-        }
-
         constexpr int64_t getDistance(const Point& another) const noexcept
         {
-            const int64_t diffX = m_x - another.m_x;
-            const int64_t diffY = m_y - another.m_y;
-            return intSqrt(diffX * diffX + diffY * diffY);
+            return posDistance(m_pos->m_pos, another.m_pos->m_pos);
         }
-
-        constexpr auto asTuple() const noexcept
+        constexpr int64_t getDistance(const FHPos& another) const noexcept
         {
-            return std::tie(m_x, m_y);
+            return posDistance(m_pos->m_pos, another);
         }
 
         constexpr bool operator<(const Point& another) const noexcept
         {
-            return asTuple() < another.asTuple();
+            return m_pos->m_pos < another.m_pos->m_pos;
         }
     };
 
     struct Cluster {
-        Point               m_centroid;
+        FHPos               m_centroid;
         std::vector<Point*> m_points;
         size_t              m_index  = 0;
         int64_t             m_radius = 100;
 
         Cluster() = default;
-        Cluster(Point* centroid_)
+        Cluster(Point* centroid)
         {
-            m_centroid = *centroid_;
-            addPoint(centroid_);
+            m_centroid = centroid->m_pos->m_pos;
+            addPoint(centroid);
         }
         void addPoint(Point* p)
         {
@@ -114,15 +88,9 @@ public:
 
         size_t getSize() const { return m_points.size(); }
 
-        constexpr int getCentroidByPos(size_t pos) const noexcept { return m_centroid.getVal(pos); }
-
-        constexpr const Point& getCentroid() const noexcept { return m_centroid; }
-
-        constexpr void setCentroidByPos(size_t pos, int val) noexcept { m_centroid.setVal(pos, val); }
-
         std::string getCentroidStr() const
         {
-            return "(" + std::to_string(m_centroid.m_x) + ", " + std::to_string(m_centroid.m_y) + ")";
+            return m_centroid.toPrintableString();
         }
     };
 

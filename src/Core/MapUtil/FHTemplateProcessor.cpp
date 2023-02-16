@@ -198,9 +198,12 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
         tileZone.m_index           = i;
         tileZone.m_rng             = m_rng;
         tileZone.m_tileContainer   = &m_tileContainer;
-        tileZone.m_startTile.m_x   = m_rng->genDispersed(rngZone.m_centerAvg.m_x, rngZone.m_centerDispersion.m_x);
-        tileZone.m_startTile.m_y   = m_rng->genDispersed(rngZone.m_centerAvg.m_y, rngZone.m_centerDispersion.m_y);
-        tileZone.m_relativeArea    = m_rng->genDispersed(rngZone.m_relativeSizeAvg, rngZone.m_relativeSizeDispersion);
+        FHPos startTile;
+        startTile.m_x        = m_rng->genDispersed(rngZone.m_centerAvg.m_x, rngZone.m_centerDispersion.m_x);
+        startTile.m_y        = m_rng->genDispersed(rngZone.m_centerAvg.m_y, rngZone.m_centerDispersion.m_y);
+        tileZone.m_startTile = m_tileContainer.m_tileIndex.at(startTile);
+
+        tileZone.m_relativeArea = m_rng->genDispersed(rngZone.m_relativeSizeAvg, rngZone.m_relativeSizeDispersion);
 
         m_totalRelativeArea += tileZone.m_relativeArea;
         if (tileZone.m_relativeArea <= 0)
@@ -209,7 +212,7 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
     }
 
     m_stopAfter = stringToStage(stopAfterStage);
-    //m_stopAfter = Stage::RoadsPlacement;
+    //m_stopAfter = Stage::ZoneTilesInitial;
 
     Mernel::ProfilerContext                profileContext;
     Mernel::ProfilerDefaultContextSwitcher switcher(profileContext);
@@ -290,18 +293,20 @@ void FHTemplateProcessor::runZoneCenterPlacement()
         bool vertical   = m_rng->genSmall(1) == 1;
         bool horizontal = m_rng->genSmall(1) == 1;
         for (auto& tileZone : m_tileZones) {
+            auto newPos = tileZone.m_startTile->m_pos;
             if (horizontal)
-                tileZone.m_startTile.m_x = w - tileZone.m_startTile.m_x - 1;
+                newPos.m_x = w - newPos.m_x - 1;
             if (vertical)
-                tileZone.m_startTile.m_y = h - tileZone.m_startTile.m_y - 1;
+                newPos.m_y = h - newPos.m_y - 1;
+            tileZone.m_startTile = m_tileContainer.m_tileIndex.at(newPos);
         }
     }
     if (m_map.m_template.m_rotationDegreeDispersion) {
         const int rotationDegree = m_rng->genDispersed(0, m_map.m_template.m_rotationDegreeDispersion);
         m_logOutput << m_indent << "starting rotation of zones to " << rotationDegree << " degrees\n";
         for (auto& tileZone : m_tileZones) {
-            auto newPos          = rotateChebyshev(tileZone.m_startTile, rotationDegree, w, h);
-            tileZone.m_startTile = newPos;
+            auto newPos          = rotateChebyshev(tileZone.m_startTile->m_pos, rotationDegree, w, h);
+            tileZone.m_startTile = m_tileContainer.m_tileIndex.at(newPos);
         }
     }
     if (!m_totalRelativeArea)
@@ -322,7 +327,7 @@ void FHTemplateProcessor::runZoneTilesInitial()
 
         m_logOutput << m_indent << "zone [" << tileZone.m_id << "] area=" << tileZone.m_absoluteArea
                     << ", radius=" << tileZone.m_absoluteRadius
-                    << ", startTile=" << tileZone.m_startTile.toPrintableString()
+                    << ", startTile=" << tileZone.m_startTile->toPrintableString()
                     << ", townFaction=" << tileZone.m_mainTownFaction->id
                     << ", rewardFaction=" << tileZone.m_rewardsFaction->id
                     << ", terrain=" << tileZone.m_terrain->id
@@ -332,23 +337,22 @@ void FHTemplateProcessor::runZoneTilesInitial()
 
     KMeansSegmentation seg;
 
-    std::map<KMeansSegmentation::Point, size_t> zonePoints;
+    std::map<MapTilePtr, size_t> zonePoints;
     for (auto& tileZone : m_tileZones) {
-        KMeansSegmentation::Point p{ tileZone.m_startTile };
-        zonePoints[p] = tileZone.m_index;
+        zonePoints[tileZone.m_startTile] = tileZone.m_index;
     }
 
-    //std::vector<KMeansSegmentation::Point> points;
     std::vector<size_t> kIndexes(m_tileZones.size());
     seg.m_points.reserve(w * h);
     int z = 0;
     for (int x = 0; x < w; ++x) {
         for (int y = 0; y < h; ++y) {
-            KMeansSegmentation::Point p(x, y, z);
-            if (zonePoints.contains(p)) {
-                kIndexes[zonePoints[p]] = seg.m_points.size();
+            FHPos pos{ x, y, z };
+            auto* tile = m_tileContainer.m_tileIndex.at(pos);
+            if (zonePoints.contains(tile)) {
+                kIndexes[zonePoints[tile]] = seg.m_points.size();
             }
-            seg.m_points.push_back(p);
+            seg.m_points.push_back({ tile });
         }
     }
     seg.initClustersByCentroids(kIndexes);
@@ -364,11 +368,11 @@ void FHTemplateProcessor::runZoneTilesInitial()
     for (KMeansSegmentation::Cluster& cluster : seg.m_clusters) {
         size_t idx          = cluster.m_index;
         auto&  tileZone     = m_tileZones[idx];
-        auto   centroid     = FHPos{ .m_x = cluster.getCentroid().m_x, .m_y = cluster.getCentroid().m_y };
-        tileZone.m_centroid = centroid;
+        FHPos  centroid     = cluster.m_centroid;
+        tileZone.m_centroid = m_tileContainer.m_tileIndex.at(centroid);
         for (KMeansSegmentation::Point* point : cluster.m_points) {
-            auto p                                    = point->toPos();
-            m_tileContainer.m_tileIndex.at(p)->m_zone = &m_tileZones[idx];
+            auto* tile   = point->m_pos;
+            tile->m_zone = &tileZone;
         }
     }
     for (auto& tileZone : m_tileZones) {
@@ -530,8 +534,8 @@ void FHTemplateProcessor::runTownsPlacement()
     RoadHelper roadHelper(m_map, m_tileContainer, m_rng, m_logOutput);
 
     for (auto& tileZone : m_tileZones) {
-        std::vector<FHPos> townPositions;
-        const auto&        towns = tileZone.m_rngZoneSettings.m_towns;
+        std::vector<MapTilePtr> townPositions;
+        const auto&             towns = tileZone.m_rngZoneSettings.m_towns;
         if (towns.size() == 0) {
             continue;
         } else if (towns.size() == 1) {
@@ -540,26 +544,25 @@ void FHTemplateProcessor::runTownsPlacement()
             KMeansSegmentation seg;
             seg.m_points.reserve(tileZone.m_area.m_innerArea.size());
             for (auto* cell : tileZone.m_area.m_innerArea)
-                seg.m_points.push_back({ cell->m_pos });
+                seg.m_points.push_back({ cell });
 
             seg.initRandomClusterCentoids(towns.size(), m_rng);
             seg.run(m_logOutput);
 
             for (KMeansSegmentation::Cluster& cluster : seg.m_clusters) {
-                townPositions.push_back(cluster.getCentroid().toPos());
+                townPositions.push_back(m_tileContainer.m_tileIndex.at(cluster.m_centroid));
             }
         }
 
         for (size_t i = 0; i < towns.size(); ++i) {
             auto player  = towns[i].m_playerControlled ? tileZone.m_rngZoneSettings.m_player : playerNone;
             auto faction = towns[i].m_useZoneFaction ? tileZone.m_mainTownFaction : nullptr;
-            placeTown(towns[i].m_town, townPositions[i], player, faction);
+            placeTown(towns[i].m_town, townPositions[i]->m_pos, player, faction);
         }
 
         for (auto&& pos : townPositions) {
-            auto pos2 = pos;
-            pos2.m_y++;
-            tileZone.m_roadNodesHighPriority.insert(m_tileContainer.m_tileIndex.at(pos2));
+            auto pos2 = pos->m_neighborB;
+            tileZone.m_roadNodesHighPriority.insert(pos2);
             roadHelper.placeRoad({ pos, pos2 });
         }
     }
@@ -849,8 +852,8 @@ void FHTemplateProcessor::placeDebugInfo()
         return;
     for (auto& tileZone : m_tileZones) {
         if (m_stopAfter <= Stage::TownsPlacement) {
-            m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = tileZone.m_startTile, .m_valueA = tileZone.m_index, .m_valueB = 1 }); // red
-            m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = tileZone.m_centroid, .m_valueA = tileZone.m_index, .m_valueB = 3 });
+            m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = tileZone.m_startTile->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 1 }); // red
+            m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = tileZone.m_centroid->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 3 });
         }
 
         if (m_stopAfter <= Stage::ZoneTilesRefinement) {

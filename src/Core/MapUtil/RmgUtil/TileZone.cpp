@@ -27,7 +27,7 @@ FHPos TileZone::makeCentroid(const MapTileRegion& region)
 
 void TileZone::estimateCentroid()
 {
-    m_centroid = makeCentroid(m_area.m_innerArea);
+    m_centroid = m_tileContainer->m_tileIndex.at(makeCentroid(m_area.m_innerArea));
 }
 
 void TileZone::readFromMap()
@@ -41,7 +41,7 @@ void TileZone::readFromMap()
     }
     m_area.m_innerArea.doSort();
 
-    auto floodRegions  = m_area.splitByFloodFill(false, m_tileContainer->m_tileIndex.at(m_centroid));
+    auto floodRegions  = m_area.splitByFloodFill(false, m_centroid);
     m_area.m_innerArea = floodRegions[0].m_innerArea;
     for (size_t i = 1; i < floodRegions.size(); i++) {
         for (auto* tile : floodRegions[i].m_innerArea)
@@ -81,7 +81,7 @@ bool TileZone::tryGrowOnceToNeighbour(size_t limit, TileZone* prioritized)
                 return true;
             if (l->m_zone && !r->m_zone)
                 return false;
-            return posDistance(l->m_pos, this->m_centroid) < posDistance(r->m_pos, this->m_centroid);
+            return posDistance(l->m_pos, this->m_centroid->m_pos) < posDistance(r->m_pos, this->m_centroid->m_pos);
         });
         nextEdge.resize(limit);
     }

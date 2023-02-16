@@ -6,6 +6,7 @@
 #pragma once
 
 #include "../FHPos.hpp"
+#include "TemplateUtils.hpp"
 
 #include <vector>
 
@@ -42,5 +43,10 @@ struct MapTile {
 
     std::string toPrintableString() const noexcept;
 };
+
+constexpr inline int64_t posDistance(MapTilePtr from, MapTilePtr to)
+{
+    return posDistance(from->m_pos, to->m_pos);
+}
 
 }

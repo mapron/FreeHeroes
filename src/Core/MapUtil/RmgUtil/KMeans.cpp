@@ -13,11 +13,11 @@ namespace FreeHeroes {
 
 KMeansSegmentation::Cluster* KMeansSegmentation::getNearestClusterId(Point& point)
 {
-    int64_t  minDist          = m_clusters[0].getCentroid().getDistance(point) * 1000 / m_clusters[0].m_radius;
+    int64_t  minDist          = point.getDistance(m_clusters[0].m_centroid) * 1000 / m_clusters[0].m_radius;
     Cluster* nearestClusterId = &m_clusters[0];
 
     for (size_t i = 1; i < m_clusters.size(); i++) {
-        const int64_t dist = m_clusters[i].getCentroid().getDistance(point) * 1000 / m_clusters[i].m_radius;
+        const int64_t dist = point.getDistance(m_clusters[i].m_centroid) * 1000 / m_clusters[i].m_radius;
         if (dist < minDist) {
             minDist          = dist;
             nearestClusterId = &m_clusters[i];
@@ -31,9 +31,7 @@ void KMeansSegmentation::runIter()
 {
     bool done = true;
 
-// Add all points to their nearest cluster
-#pragma omp parallel for reduction(&& \
-                                   : done)
+    // Add all points to their nearest cluster
     for (size_t i = 0, cnt = m_points.size(); i < cnt; i++) {
         Cluster* currentClusterId = m_points[i].getCluster();
         Cluster* nearestClusterId = getNearestClusterId(m_points[i]);
@@ -55,17 +53,16 @@ void KMeansSegmentation::runIter()
     // Recalculating the center of each cluster
     for (size_t i = 0, cnt = m_clusters.size(); i < cnt; i++) {
         const size_t clusterSize = m_clusters[i].getSize();
+        const auto&  cluster     = m_clusters[i];
 
-        for (int j = 0; j < 2; j++) {
-            int64_t sum = 0;
-            if (clusterSize > 0) {
-#pragma omp parallel for reduction(+ \
-                                   : sum)
-                for (size_t p = 0; p < clusterSize; p++) {
-                    sum += m_clusters[i].getPoint(p)->getVal(j);
-                }
-                m_clusters[i].setCentroidByPos(j, sum / clusterSize);
+        int64_t sumX = 0;
+        int64_t sumY = 0;
+        if (clusterSize > 0) {
+            for (size_t p = 0; p < clusterSize; p++) {
+                sumX += cluster.getPoint(p)->m_pos->m_pos.m_x;
+                sumY += cluster.getPoint(p)->m_pos->m_pos.m_y;
             }
+            m_clusters[i].m_centroid = { int(sumX / clusterSize), int(sumY / clusterSize) };
         }
     }
 

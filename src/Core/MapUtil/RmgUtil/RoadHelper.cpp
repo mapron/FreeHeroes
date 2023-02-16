@@ -148,7 +148,7 @@ void RoadHelper::makeBorders(std::vector<TileZone>& tileZones)
 
 void RoadHelper::placeRoads(TileZone& tileZone)
 {
-    Mernel::ProfilerScope topScope("placeRoads");
+    //Mernel::ProfilerScope topScope("placeRoads");
 
     size_t zoneArea = tileZone.m_innerAreaUsable.m_innerArea.size();
     if (zoneArea < (size_t) tileZone.m_rngZoneSettings.m_segmentAreaSize * 2) {
@@ -161,7 +161,7 @@ void RoadHelper::placeRoads(TileZone& tileZone)
         KMeansSegmentation seg;
         seg.m_points.reserve(zoneArea);
         for (auto* cell : tileZone.m_innerAreaUsable.m_innerArea) {
-            seg.m_points.push_back({ cell->m_pos });
+            seg.m_points.push_back({ cell });
         }
 
         seg.initRandomClusterCentoids(k, m_rng);
@@ -169,10 +169,9 @@ void RoadHelper::placeRoads(TileZone& tileZone)
 
         for (KMeansSegmentation::Cluster& cluster : seg.m_clusters) {
             MapTileRegion zoneSeg;
-            for (auto& point : cluster.m_points) {
-                auto* cell = m_tileContainer.m_tileIndex.at(point->toPos());
-                zoneSeg.insert(cell);
-            }
+            for (auto& point : cluster.m_points)
+                zoneSeg.insert(point->m_pos);
+
             tileZone.m_innerAreaSegments.push_back(MapTileArea{ .m_innerArea = std::move(zoneSeg) });
         }
     }
@@ -282,7 +281,7 @@ void RoadHelper::placeRoads(TileZone& tileZone)
 
     tileZone.m_roadNodesHighPriority.doSort();
     {
-        Mernel::ProfilerScope scope("making extra innerAreaSegments");
+        //Mernel::ProfilerScope scope("making extra innerAreaSegments");
         for (auto* townCell : tileZone.m_roadNodesHighPriority) {
             MapTileRegion allPossibleRoads = tileZone.m_innerAreaSegmentsRoads;
 
@@ -340,8 +339,8 @@ void RoadHelper::placeRoads(TileZone& tileZone)
     }
 
     {
-        Mernel::ProfilerScope scope("final road lookup");
-        MapTileRegion         pathAsRegion;
+        //Mernel::ProfilerScope scope("final road lookup");
+        MapTileRegion pathAsRegion;
         while (!unconnectedRoadNodes.empty()) {
             MapTilePtr cell = unconnectedRoadNodes.back();
             unconnectedRoadNodes.pop_back();
@@ -376,15 +375,20 @@ void RoadHelper::placeRoad(TileZone& tileZone, const MapTilePtrList& tileList)
     tileZone.m_placedRoads.insert(tileList);
     tileZone.m_placedRoads.doSort();
 
+    placeRoad(tileList);
+}
+
+void RoadHelper::placeRoad(const MapTilePtrList& tileList)
+{
     std::vector<FHPos> path;
     path.reserve(tileList.size());
     for (auto* cell : tileList)
         path.push_back(cell->m_pos);
 
-    placeRoad(std::move(path));
+    placeRoadPath(std::move(path));
 }
 
-void RoadHelper::placeRoad(std::vector<FHPos> path)
+void RoadHelper::placeRoadPath(std::vector<FHPos> path)
 {
     if (path.empty())
         return;
@@ -399,7 +403,7 @@ void RoadHelper::placeRoad(std::vector<FHPos> path)
 
 MapTilePtrList RoadHelper::aStarPath(TileZone& zone, MapTilePtr start, MapTilePtr end, bool allTiles)
 {
-    Mernel::ProfilerScope scope("aStarPath");
+    //Mernel::ProfilerScope scope("aStarPath");
 
     AstarGenerator generator;
     generator.setPoints(start, end);
