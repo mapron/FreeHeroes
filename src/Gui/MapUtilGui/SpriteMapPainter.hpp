@@ -23,7 +23,8 @@ public:
 
     void paintMinimap(QPainter*        painter,
                       const SpriteMap* spriteMap,
-                      QSize            minimapSize) const;
+                      QSize            minimapSize,
+                      QRectF           visible) const;
 
 private:
     const SpritePaintSettings* m_settings;

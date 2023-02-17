@@ -12,6 +12,7 @@
 #include <QBoxLayout>
 #include <QMouseEvent>
 #include <QDebug>
+#include <QScrollBar>
 
 namespace FreeHeroes {
 
@@ -108,7 +109,6 @@ void SceneView::refreshScale()
     this->resetTransform();
     this->scale(ratio, ratio);
 }
-
 void SceneView::mousePressEvent(QMouseEvent* event)
 {
     if ((event->modifiers() & Qt::ControlModifier) || event->button() == Qt::MiddleButton) {
@@ -165,4 +165,31 @@ void SceneView::wheelEvent(QWheelEvent* event)
     QFrame::wheelEvent(event);
 }
 
+void SceneView::resizeEvent(QResizeEvent* event)
+{
+    updateVisibleInner();
+    QGraphicsView::resizeEvent(event);
+}
+
+void SceneView::scrollContentsBy(int dx, int dy)
+{
+    updateVisibleInner();
+    QGraphicsView::scrollContentsBy(dx, dy);
+}
+
+void SceneView::updateVisibleInner()
+{
+    QPointF    tl(horizontalScrollBar()->value(), verticalScrollBar()->value());
+    QPointF    br      = tl + viewport()->rect().bottomRight();
+    QTransform mat     = transform().inverted();
+    QRectF     visible = mat.mapRect(QRectF(tl, br));
+
+    QRectF sceneAbs = sceneRect();
+
+    QSizeF  newSize(std::min(1.0, visible.width() / sceneAbs.width()), std::min(1.0, visible.height() / sceneAbs.height()));
+    QPointF newTopLeft(visible.left() / sceneAbs.width(), visible.top() / sceneAbs.height());
+    QRectF  visibleRel(newTopLeft, newSize);
+
+    emit updateVisible(visibleRel);
+}
 }

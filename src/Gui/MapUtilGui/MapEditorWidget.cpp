@@ -147,6 +147,11 @@ MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDataba
         if (!m_impl->m_viewSettings.m_inspectByHover)
             m_impl->m_inspectorWidget->displayInfo(x, y, z);
     });
+    connect(m_impl->m_view, &SceneView::updateVisible, m_impl->m_minimapWidget, &MiniMapWidget::updateVisible);
+    connect(m_impl->m_minimapWidget, &MiniMapWidget::minimapDrag, this, [this](QPointF point) {
+        QPointF absPos(m_impl->m_scene->width() * point.x(), m_impl->m_scene->height() * point.y());
+        m_impl->m_view->centerOn(absPos);
+    });
 
     resize(1000, 800);
 

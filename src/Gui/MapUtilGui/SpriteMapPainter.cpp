@@ -296,7 +296,10 @@ void SpriteMapPainter::paint(QPainter*        painter,
     }
 }
 
-void SpriteMapPainter::paintMinimap(QPainter* painter, const SpriteMap* spriteMap, QSize minimapSize) const
+void SpriteMapPainter::paintMinimap(QPainter*        painter,
+                                    const SpriteMap* spriteMap,
+                                    QSize            minimapSize,
+                                    QRectF           visible) const
 {
     if (spriteMap->m_planes.empty())
         return;
@@ -311,6 +314,13 @@ void SpriteMapPainter::paintMinimap(QPainter* painter, const SpriteMap* spriteMa
     }
 
     painter->drawPixmap(QRect(QPoint(0, 0), minimapSize), QPixmap::fromImage(img));
+
+    QSizeF  newSize(visible.width() * minimapSize.width(), visible.height() * minimapSize.height());
+    QPointF newTopLeft(visible.left() * minimapSize.width(), visible.top() * minimapSize.height());
+    QRectF  visibleScaled(newTopLeft, newSize);
+
+    painter->setPen(QColor(Qt::white));
+    painter->drawRect(visibleScaled);
 }
 
 }

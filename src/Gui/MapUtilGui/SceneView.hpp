@@ -47,6 +47,7 @@ public:
 
 signals:
     void scaleChangeRequested(int delta);
+    void updateVisible(QRectF visible);
 
 protected:
     void mousePressEvent(QMouseEvent* event) override;
@@ -54,7 +55,10 @@ protected:
     void mouseDoubleClickEvent(QMouseEvent* event) override;
 
     void wheelEvent(QWheelEvent* event) override;
-
+    void resizeEvent(QResizeEvent* event) override;
+    void scrollContentsBy(int dx, int dy) override;
+    
+    void updateVisibleInner();
 private:
     SpritePaintSettings* const m_settings = nullptr;
 };
