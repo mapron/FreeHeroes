@@ -34,11 +34,17 @@ public:
     virtual uint64_t             genSumSmallN(size_t n, uint8_t max)        = 0;
     virtual std::vector<uint8_t> genSmallSequence(size_t size, uint8_t max) = 0;
 
-    virtual int64_t genDispersed(int64_t avg, uint64_t dispersion)
+    int64_t genDispersed(int64_t avg, uint64_t dispersion)
     {
         if (!dispersion)
             return avg;
         return avg - dispersion + gen(dispersion * 2);
+    }
+    int64_t genMinMax(int64_t min, int64_t max)
+    {
+        min = std::min(max, min);
+
+        return min + gen(max - min);
     }
 };
 

@@ -219,7 +219,11 @@ void MapToolWindow::generateMap()
         converter.run(MapConverter::Task::FHTplToFHMap);
         if (!gamename.empty()) {
             converter.m_mapFH.m_name  = gamename + " - " + converter.m_mapFH.m_name;
-            converter.m_mapFH.m_descr = gamename + " - " + converter.m_mapFH.m_descr + " - " + std::to_string(seed);
+            converter.m_mapFH.m_descr = gamename + " - " + converter.m_mapFH.m_descr + "\n";
+            if (m_ui->checkBoxShowSeed->isChecked())
+                converter.m_mapFH.m_descr += "\nseed:" + std::to_string(seed);
+            converter.m_mapFH.m_descr += "\ngeneratorVersion:" + m_version.toStdString();
+            converter.m_mapFH.m_descr += "\nbuildId:" + m_buildId.toStdString();
         }
 
         converter.run(MapConverter::Task::SaveH3M);

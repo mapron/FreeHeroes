@@ -6,6 +6,7 @@
 #pragma once
 
 #include "../FHPos.hpp"
+#include "../FHTemplate.hpp"
 
 #include "LibraryFwd.hpp"
 #include "MapScore.hpp"
@@ -22,7 +23,6 @@ class IRandomGenerator;
 
 struct FHMap;
 struct FHRngZone;
-struct FHScoreSettings;
 
 class ObjectGenerator {
 public:
@@ -66,7 +66,10 @@ public:
         std::string             m_id;
         Core::MapScore          m_targetScore;
         int64_t                 m_targetScoreTotal = 0;
-        const FHScoreSettings*  m_scoreSettings    = nullptr;
+        FHScoreSettings         m_scoreSettings;
+
+        void scale(int64_t armyPercent,
+                   int64_t goldPercent);
     };
 
 public:
@@ -83,7 +86,9 @@ public:
     void generate(const FHRngZone&             zoneSettings,
                   Core::LibraryFactionConstPtr mainFaction,
                   Core::LibraryFactionConstPtr rewardsFaction,
-                  Core::LibraryTerrainConstPtr terrain);
+                  Core::LibraryTerrainConstPtr terrain,
+                  int64_t                      armyPercent,
+                  int64_t                      goldPercent);
 
     bool generateOneObject(const Core::MapScore& targetScore, Core::MapScore& currentScore, std::vector<IObjectFactoryPtr>& objectFactories, ObjectGroup& group);
 

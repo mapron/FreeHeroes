@@ -118,7 +118,7 @@ struct CommonRecordList {
         m_active    = 0;
         m_index.clear();
         for (size_t i = 0; const Record& rec : m_records) {
-            if (rec.m_enabled) {
+            if (rec.m_enabled && rec.m_frequency > 0) {
                 m_index[m_frequency] = i;
                 m_frequency += rec.m_frequency;
                 m_active++;
@@ -1152,7 +1152,9 @@ struct ObjectGenerator::ObjectFactoryMine : public AbstractFactory<RecordMine> {
 void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
                                Core::LibraryFactionConstPtr mainFaction,
                                Core::LibraryFactionConstPtr rewardsFaction,
-                               Core::LibraryTerrainConstPtr terrain)
+                               Core::LibraryTerrainConstPtr terrain,
+                               int64_t                      armyPercent,
+                               int64_t                      goldPercent)
 {
     static const std::string indentBase("      ");
     Mernel::ProfilerScope    scope("generate");
@@ -1167,16 +1169,18 @@ void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
         }
         Core::MapScore targetScore;
 
-        for (const auto& [key, val] : scoreSettings.m_score)
-            targetScore[key] = val.m_target;
-
         ObjectGroup group;
         group.m_id           = scoreId;
         group.m_guardPercent = scoreSettings.m_guardPercent;
 
+        group.m_scoreSettings = scoreSettings;
+        group.scale(armyPercent, goldPercent);
+
+        for (const auto& [key, val] : group.m_scoreSettings.m_score)
+            targetScore[key] = val.m_target;
+
         group.m_targetScore      = targetScore;
         group.m_targetScoreTotal = totalScoreValue(targetScore);
-        group.m_scoreSettings    = &scoreSettings;
         m_groups.push_back(group);
     }
 
@@ -1184,10 +1188,10 @@ void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
         return l.m_targetScoreTotal > r.m_targetScoreTotal;
     });
 
-    const bool doLog = false;
+    const bool doLog = true;
 
     for (ObjectGroup& group : m_groups) {
-        const auto& scoreSettings = *group.m_scoreSettings;
+        const auto& scoreSettings = group.m_scoreSettings;
 
         if (doLog)
             m_logOutput << indentBase << group.m_id << " start\n";
@@ -1312,4 +1316,26 @@ bool ObjectGenerator::terrainViable(const Core::ObjectDefMappings& defMapping, C
     return correctObjIndex(index, defMapping, requiredTerrain);
 }
 
+void ObjectGenerator::ObjectGroup::scale(int64_t armyPercent, int64_t goldPercent)
+{
+    auto applyPercent = [](FHScoreSettings::ScoreScope& scope, int64_t percent) {
+        scope.m_target = scope.m_target * percent / 100;
+        if (percent < 100 && scope.m_minSingle != -1) {
+            scope.m_minSingle = scope.m_minSingle * percent / 100;
+        }
+    };
+
+    if (armyPercent != 100) {
+        if (m_scoreSettings.m_score.contains(Core::ScoreAttr::Army)) {
+            auto& armyScore = m_scoreSettings.m_score[Core::ScoreAttr::Army];
+            applyPercent(armyScore, armyPercent);
+        }
+    }
+    if (goldPercent != 100) {
+        if (m_scoreSettings.m_score.contains(Core::ScoreAttr::Gold)) {
+            auto& goldScore = m_scoreSettings.m_score[Core::ScoreAttr::Gold];
+            applyPercent(goldScore, goldPercent);
+        }
+    }
+}
 }

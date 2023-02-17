@@ -621,6 +621,13 @@ void FHTemplateProcessor::runRoadsPlacement()
 void FHTemplateProcessor::runRewards()
 {
     m_logOutput << m_indent << "RNG TEST A:" << m_rng->gen(1000000) << "\n";
+
+    const auto&   diffSett    = m_map.m_template.m_userSettings.m_difficulty;
+    const int64_t armyPercent = m_rng->genMinMax(diffSett.m_minArmyPercent, diffSett.m_maxArmyPercent);
+    const int64_t goldPercent = m_rng->genMinMax(diffSett.m_minGoldPercent, diffSett.m_maxGoldPercent);
+
+    m_logOutput << m_indent << "armyPercent=" << armyPercent << ", goldPercent=" << goldPercent << "\n";
+
     ObjectBundleSet bundleSet(m_rng, m_tileContainer, m_logOutput);
     for (auto& tileZone : m_tileZones) {
         if (tileZone.m_rngZoneSettings.m_scoreTargets.empty())
@@ -632,7 +639,9 @@ void FHTemplateProcessor::runRewards()
         gen.generate(tileZone.m_rngZoneSettings,
                      tileZone.m_mainTownFaction,
                      tileZone.m_rewardsFaction,
-                     tileZone.m_terrain);
+                     tileZone.m_terrain,
+                     armyPercent,
+                     goldPercent);
 
         if (!bundleSet.consume(gen, tileZone)) {
             // throw std::runtime_error("Failed to fit some objects into zone '" + tileZone.m_id + "'");
@@ -699,10 +708,7 @@ void FHTemplateProcessor::runObstacles()
 void FHTemplateProcessor::runGuards()
 {
     const auto& diffSett = m_map.m_template.m_userSettings.m_difficulty;
-    const auto  maxGuard = diffSett.m_maxGuardsPercent;
-    const auto  minGuard = std::min(maxGuard, diffSett.m_minGuardsPercent);
-
-    m_userMultiplyGuard = minGuard + m_rng->gen(maxGuard - minGuard);
+    m_userMultiplyGuard  = m_rng->genMinMax(diffSett.m_minGuardsPercent, diffSett.m_maxGuardsPercent);
 
     auto makeCandidates = [this](int64_t value) {
         std::map<int, int> unitLevelScore;

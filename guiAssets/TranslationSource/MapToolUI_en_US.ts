@@ -24,23 +24,23 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="229"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="233"/>
         <source>Error occured</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="229"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="233"/>
         <source>Error occured during template generation. 
 Check text area with log at &apos;extra&apos; tab and contact developers.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="248"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="252"/>
         <source>Success</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="248"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="252"/>
         <source>Error!</source>
         <translation type="unfinished"></translation>
     </message>
@@ -205,17 +205,17 @@ Check text area with log at &apos;extra&apos; tab and contact developers.</sourc
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="534"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="557"/>
         <source>Version: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="546"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="569"/>
         <source>Build id: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="658"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="681"/>
         <source>Show in Editor...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -245,12 +245,17 @@ Check text area with log at &apos;extra&apos; tab and contact developers.</sourc
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="618"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="527"/>
+        <source>Show seed value in generated map description (no secure)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="641"/>
         <source>Generate map from template</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="638"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="661"/>
         <source>Status:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -265,7 +270,7 @@ Check text area with log at &apos;extra&apos; tab and contact developers.</sourc
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="553"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="576"/>
         <source>Diagnostic info for developer</source>
         <translation type="unfinished"></translation>
     </message>
@@ -285,7 +290,7 @@ Check text area with log at &apos;extra&apos; tab and contact developers.</sourc
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="578"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="601"/>
         <source>Generation log</source>
         <translation type="unfinished"></translation>
     </message>

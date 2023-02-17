@@ -3,7 +3,7 @@
 	"seed": 0,
 	"name": "JC",
 	"descr": "Jebus Cross Balanced",
-	"tileMap":{"depth":1,"height":100,"width":100},
+	"tileMap":{"depth":1,"height":144,"width":144},
 	"players": {
 		"Red" : {"human": true},
 		"Blue": {"human": true}
@@ -11,7 +11,7 @@
 	"template": {
         "zones" : {
             "Common"  : { 
-                "centerDispersion": {"x": 5 , "y": 5 }, "relativeSizeAvg": 100, "relativeSizeDispersion": 10, "segmentAreaSize": 250,
+                "centerDispersion": {"x": 5 , "y": 5 }, "relativeSizeAvg": 100, "relativeSizeDispersion": 1, "segmentAreaSize": 250,
                 "towns": [
                     {"town":{"isMain":true, "hasFort":true,"hasCustomBuildings":true,"buildings":["townHall1","fort1","tavern","mageGuild1","t1","t2"],"garisonRmg":[{"levels":[10],"value":1000}]},"playerControlled":true, "useZoneFaction": true}, 
                     {"town":{"garisonRmg":[{"levels":[10],"value":2000},{"levels":[20],"value":1000},{"levels":[30],"value":1000}]}}, 
@@ -38,7 +38,6 @@
                     },
                     "Mid": {
                         "isEnabled": true,
-                        "tolerancePercent": 8,
                         "score": {
                             "Army":           { "target": 50000, "maxSingle": 12000},
                             "ArtStat":        { "target": 15000, "maxSingle": 7000, "minSingle": 2500},
@@ -67,9 +66,9 @@
                             "ArmyDwelling":   { "target": 10000 ,"maxSingle": 2200},
                             "ArtStat":        { "target": 6000 , "maxSingle": 2400},
                             "ArtSupport":     { "target": 8000 , "maxSingle": 2400},
-                            "Gold":           { "target": 50000, "maxSingle": 2000},
+                            "Gold":           { "target": 80000, "maxSingle": 2000},
                             "Resource":       { "target": 100000, "maxSingle": 2500},
-                            "Experience":     { "target": 20000, "maxSingle": 2000},
+                            "Experience":     { "target": 30000, "maxSingle": 2000},
                             "Upgrade"   :     { "target": 5000, "maxSingle": 3000},
                             "ResourceGen":    { "target": 30000},
                             "SpellAny":       { "target": 20000, "maxSingle": 1800},
@@ -224,7 +223,7 @@
             },
             "Treasure": {
                 "base": "Common",
-                "centerDispersion": {"x": 15, "y": 15}, "relativeSizeAvg": 130, "relativeSizeDispersion": 20, "terrain": "sod.terrain.sand",
+                "centerDispersion": {"x": 1, "y": 1}, "relativeSizeAvg": 130, "relativeSizeDispersion": 5, "terrain": "sod.terrain.sand",
                 "zoneGuardPercent": 150,
                 "towns": [
                     {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}, "useZoneFaction": true}, 
@@ -239,7 +238,62 @@
                     "banks": {
                         "isEnabled": true,
                         "records": {
-                            "utopia": {"bank": "sod.map.utopia", "frequency": 2000, "guard": 30000 }
+                            "utopia": {"bank": "sod.map.utopia"           , "frequency": 2000, "guard": 30000 },
+                            "consa" : {"bank": "sod.map.conservatory"     , "frequency": 2000, "guard": -1  },
+                            "hive"  : {"bank": "sod.map.hive"             , "frequency": 4000, "guard": -1  },
+                            "shop"  : {"bank": "hota.map.experimentalShop", "frequency": 2000, "guard":  -1 },
+                            "picket": {"bank": "hota.map.wolfRaiderPicket", "frequency": 4000, "guard":  -1 }
+                        }
+                    },
+                    "mines": {
+                        "isEnabled": true,
+                        "records": {
+                            "wood"    : { "frequency": 0 },
+                            "ore"     : { "frequency": 0 },
+                            "mercury" : { "frequency": 0 },
+                            "sulfur"  : { "frequency": 0 },
+                            "crystal" : { "frequency": 0 },
+                            "gems"    : { "frequency": 0 }
+                        }
+                    },
+                    "dwellings": {
+                        "isEnabled": true,
+                        "records": {
+                            "T1"          : { "frequency": 0  },
+                            "T2"          : { "frequency": 0  },
+                            "T3"          : { "frequency": 0  },
+                            "T4"          : { "frequency": 0  },
+                            "T5"          : { "frequency": 0  },
+                            "T6"          : { "frequency":  1000 },
+                            "T7"          : { "frequency":  1500 }
+                        }
+                    },
+                    "pandoras": {
+                        "isEnabled": true,
+                        "records": {
+                            "gold5K"   : { "frequency": 10 },
+                            "gold7K"   : { "frequency": 10 },
+                            "gold10K"  : { "frequency": 10 },
+                            "gold12K"  : { "frequency": 10 },
+                            "gold15K"  : { "frequency": 10 },
+                            "gold20K"  : { "frequency": 10 },
+                            "gold25K"  : { "frequency": 10 },
+
+                            "T1"       : { "frequency": 0     },
+                            "T2A"      : { "frequency": 0     },
+                            "T2B"      : { "frequency": 0     },
+                            "T3A"      : { "frequency": 0     },
+                            "T3B"      : { "frequency": 0     },
+                            "T4A"      : { "frequency": 0     },
+                            "T4B"      : { "frequency": 0     },
+                            "T5A"      : { "frequency": 0     },
+                            "T5B"      : { "frequency": 0     },
+                            "T6A"      : { "frequency": 300   },
+                            "T6B"      : { "frequency": 300   },
+                            "T7A"      : { "frequency": 300   },
+                            "T7B"      : { "frequency": 300   },
+                            "T8"       : { "frequency": 300   }
+
                         }
                     }
                 },
@@ -249,8 +303,8 @@
                         "isEnabled": true,
                         "tolerancePercent": 15,
                         "score": {
-                            "Army":           { "target": 200000  , "minSingle": 10000, "maxSingle" : -1},
-                            "ArmyDwelling":   { "target": 20000   , "minSingle": 4000, "maxSingle" : -1},
+                            "Army":           { "target": 300000  , "minSingle": 10000, "maxSingle" : -1},
+                            "ArmyDwelling":   { "target": 30000   , "minSingle": 2000, "maxSingle" : -1},
                             "ArtStat":        { "target": 350000  , "minSingle": 5000, "maxSingle" : -1},
                             "ArtSupport":     { "target": 200000  , "minSingle": 8000, "maxSingle" : -1},
                             "Gold":           { "target": 300000  , "minSingle": 8000, "maxSingle" : -1},
@@ -282,15 +336,24 @@
                     },
                     "Low": {
                         "isEnabled": false
+                    },
+                    "TreasureLow": {
+                        "isEnabled": true,
+                        "guardPercent": 0,
+                        "score": {
+                            "Gold":           { "target": 40000, "maxSingle": 2000},
+                            "Experience":     { "target": 20000, "maxSingle": 2000},
+                            "ResourceGen":    { "target": 30000}
+                        }
                     }
                 }
             },
     
-            "P1": { "base": "Common"  , "isNormal": true,  "player": "Red" , "centerAvg": {"x": 10, "y": 10}  },
-            "P2": { "base": "Common"  , "isNormal": true,  "player": "Blue", "centerAvg": {"x": 90, "y": 90}  },
-            "P3": { "base": "Common"  , "isNormal": true,  "player": "None", "centerAvg": {"x": 90, "y": 10}  },
-            "P4": { "base": "Common"  , "isNormal": true,  "player": "None", "centerAvg": {"x": 10, "y": 90}  },
-            "CC": { "base": "Treasure", "isNormal": true,  "player": "None", "centerAvg": {"x": 50, "y": 50}  }
+            "P1": { "base": "Common"  , "isNormal": true,  "player": "Red" , "centerAvg": {"x": 15 , "y": 15 }  },
+            "P2": { "base": "Common"  , "isNormal": true,  "player": "Blue", "centerAvg": {"x": 120, "y": 120}  },
+            "P3": { "base": "Common"  , "isNormal": true,  "player": "None", "centerAvg": {"x": 120, "y": 15 }  },
+            "P4": { "base": "Common"  , "isNormal": true,  "player": "None", "centerAvg": {"x": 15 , "y": 120}  },
+            "CC": { "base": "Treasure", "isNormal": true,  "player": "None", "centerAvg": {"x": 72 , "y": 72 }  }
         },
         "connections": {
             "CC_P1": { "from": "CC", "to": "P1", "guard": 100000 },

@@ -24,24 +24,24 @@
         <translation>Генерация...</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="229"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="233"/>
         <source>Error occured</source>
         <translation>Произошла ошибка</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="229"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="233"/>
         <source>Error occured during template generation. 
 Check text area with log at &apos;extra&apos; tab and contact developers.</source>
         <translation>Ошибка во время генерации по шаблону.
 Проверьте поле стекстом на вкладке &quot;Экстра&quot; и сообщите разработчикам.</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="248"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="252"/>
         <source>Success</source>
         <translation>Успех</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="248"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="252"/>
         <source>Error!</source>
         <translation>Ошибка!</translation>
     </message>
@@ -206,17 +206,17 @@ Check text area with log at &apos;extra&apos; tab and contact developers.</sourc
         <translation>Путь к карте формата FreeHeroes JSON</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="534"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="557"/>
         <source>Version: </source>
         <translation>Версия: </translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="546"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="569"/>
         <source>Build id: </source>
         <translation>ID сборки:</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="658"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="681"/>
         <source>Show in Editor...</source>
         <translation>Показать в Редакторе...</translation>
     </message>
@@ -246,12 +246,17 @@ Check text area with log at &apos;extra&apos; tab and contact developers.</sourc
         <translation>Новый посев</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="618"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="527"/>
+        <source>Show seed value in generated map description (no secure)</source>
+        <translation>Записывать значение посева в сгенерированную карту (небезопасно)</translation>
+    </message>
+    <message>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="641"/>
         <source>Generate map from template</source>
         <translation>Генерировать карту из шаблона</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="638"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="661"/>
         <source>Status:</source>
         <translation>Статус</translation>
     </message>
@@ -266,7 +271,7 @@ Check text area with log at &apos;extra&apos; tab and contact developers.</sourc
         <translation>Настройки сложности</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="553"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="576"/>
         <source>Diagnostic info for developer</source>
         <translation>Диагностическиая информация для разработчика</translation>
     </message>
@@ -286,7 +291,7 @@ Check text area with log at &apos;extra&apos; tab and contact developers.</sourc
         <translation>Увеличивать значения посева на 1</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="578"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="601"/>
         <source>Generation log</source>
         <translation>Журнал генерации</translation>
     </message>

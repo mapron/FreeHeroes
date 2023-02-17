@@ -37,7 +37,7 @@ struct FHScoreSettings {
     AttrMap m_score;
     bool    m_isEnabled{ false };
     int     m_guardPercent     = 100;
-    int     m_tolerancePercent = 5;
+    int     m_tolerancePercent = 10;
 
     bool isValidValue(Core::ScoreAttr attr, int64_t value) const noexcept
     {
