@@ -80,11 +80,16 @@ void SpriteMapPainter::paint(QPainter*        painter,
     auto drawCell = [painter, tileSize, animationFrameOffsetTerrain, animationFrameOffsetObjects, this](const SpriteMap::Cell& cell, int x, int y, bool isOverlayPass) {
         for (const auto& item : cell.m_items) {
             auto sprite = item.m_sprite->get();
+
             if (!sprite)
                 continue;
             Gui::ISprite::SpriteSequencePtr seq = sprite->getFramesForGroup(item.m_spriteGroup);
             if (!seq)
                 continue;
+            const bool isFilteredOut = m_settings->m_filter != SpriteMap::Layer::Invalid && item.m_layer != m_settings->m_filter;
+            if (isFilteredOut && isOverlayPass) {
+                continue;
+            }
 
             const auto psrHash = item.m_x * 7U + item.m_y * 13U;
 
@@ -115,7 +120,19 @@ void SpriteMapPainter::paint(QPainter*        painter,
             if (boundingSize.width() > tileSize || boundingSize.height() > tileSize) {
                 painter->translate(-boundingSize.width() + tileSize, -boundingSize.height() + tileSize);
             }
-            painter->setOpacity(item.m_opacity);
+
+            double opacity = item.m_opacity;
+            if (isFilteredOut) {
+                if (item.m_layer == SpriteMap::Layer::Terrain)
+                    opacity = 1.0;
+                else if (item.m_opacity != 1.0) {
+                    opacity = 0.0;
+                } else {
+                    opacity = 0.25;
+                }
+            }
+            painter->setOpacity(opacity);
+
             if (!isOverlayPass)
                 painter->drawPixmap(frame.m_paddingLeftTop, frame.m_frame);
             painter->setOpacity(1.0);

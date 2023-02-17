@@ -29,6 +29,7 @@
 
 #include <QBoxLayout>
 #include <QCheckBox>
+#include <QComboBox>
 
 #include <QGraphicsView>
 #include <QGraphicsItem>
@@ -42,6 +43,26 @@ namespace FreeHeroes {
 
 namespace {
 const uint32_t g_mapAnimationInterval = 160;
+
+const std::vector<SpriteMap::Layer> g_allLayerTypes{
+    SpriteMap::Layer::Invalid,
+    SpriteMap::Layer::Terrain,
+    SpriteMap::Layer::Town,
+    SpriteMap::Layer::Hero,
+    SpriteMap::Layer::Resource,
+    SpriteMap::Layer::Artifact,
+    SpriteMap::Layer::Monster,
+    SpriteMap::Layer::Dwelling,
+    SpriteMap::Layer::Bank,
+    SpriteMap::Layer::Mine,
+    SpriteMap::Layer::Pandora,
+    SpriteMap::Layer::Shrine,
+    SpriteMap::Layer::SkillHut,
+    SpriteMap::Layer::Scholar,
+    SpriteMap::Layer::QuestHut,
+    SpriteMap::Layer::GeneralVisitable,
+    SpriteMap::Layer::Decoration,
+};
 }
 
 struct MapEditorWidget::Impl {
@@ -92,9 +113,16 @@ MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDataba
         QCheckBox* showMinimap     = new QCheckBox(tr("Minimap"), this);
         QCheckBox* showSettings    = new QCheckBox(tr("Display settings"), this);
         QCheckBox* showInspector   = new QCheckBox(tr("Inspector"), this);
+        QComboBox* filterType      = new QComboBox(this);
         showMinimap->setChecked(true);
         showSettings->setChecked(true);
         showInspector->setChecked(true);
+
+        filterType->addItem(tr("- select layer filter -"));
+        for (int i = 1; i < (int) g_allLayerTypes.size(); i++) {
+            filterType->addItem(SpriteMap::layerTypeToString(g_allLayerTypes[i]));
+        }
+
         connect(viewUnderground, &QCheckBox::clicked, this, [this](bool state) {
             m_impl->m_depth = state;
             showCurrentItem();
@@ -108,6 +136,11 @@ MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDataba
         connect(showInspector, &QCheckBox::clicked, this, [this](bool state) {
             m_impl->m_inspectorWidget->setVisible(state);
         });
+        connect(filterType, qOverload<int>(&QComboBox::currentIndexChanged), this, [this, filterType] {
+            SpriteMap::Layer layer                          = g_allLayerTypes[filterType->currentIndex()];
+            m_impl->m_viewSettings.m_paintSettings.m_filter = layer;
+            updateAll();
+        });
 
         layoutTop->addWidget(viewUnderground);
         layoutTop->addWidget(scaleWidget);
@@ -115,6 +148,7 @@ MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDataba
         layoutTop->addWidget(showMinimap);
         layoutTop->addWidget(showSettings);
         layoutTop->addWidget(showInspector);
+        layoutTop->addWidget(filterType);
     }
 
     layout->addLayout(layoutTop);

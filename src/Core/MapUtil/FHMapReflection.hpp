@@ -227,6 +227,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_pos,
     m_order,
     m_defIndex,
+    m_guard,
+    m_score,
 
     m_visitableId)
 
