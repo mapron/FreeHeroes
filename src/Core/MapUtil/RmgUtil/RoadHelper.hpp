@@ -26,9 +26,9 @@ public:
 
     void placeRoads(TileZone& tileZone);
 
-    void placeRoad(TileZone& tileZone, const MapTilePtrList& tileList);
-    void placeRoad(const MapTilePtrList& tileList);
-    void placeRoadPath(std::vector<FHPos> path);
+    void placeRoad(TileZone& tileZone, const MapTilePtrList& tileList, int level);
+    void placeRoad(const MapTilePtrList& tileList, int level);
+    void placeRoadPath(std::vector<FHPos> path, int level);
 
 public:
     struct Guard {

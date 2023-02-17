@@ -292,6 +292,8 @@ struct FHRngUserSettings {
     DifficultySettings m_difficulty;
 
     FHRoadType m_defaultRoad     = FHRoadType::Cobblestone;
+    FHRoadType m_innerRoad       = FHRoadType::Gravel;
+    FHRoadType m_borderRoad      = FHRoadType::Dirt;
     int        m_difficultyScale = 100;
     int        m_mapSize         = 144;
     bool       m_hasUnderground  = false;

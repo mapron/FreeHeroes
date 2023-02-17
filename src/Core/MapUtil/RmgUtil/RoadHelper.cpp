@@ -287,8 +287,8 @@ void RoadHelper::placeRoads(TileZone& tileZone)
         }
     }
 
-    std::vector<MapTilePtr> unconnectedRoadNodes(tileZone.m_roadNodes.cbegin(), tileZone.m_roadNodes.cend());
-    if (unconnectedRoadNodes.size() <= 1)
+    std::vector<MapTilePtr> unconnectedRoadNodesAll(tileZone.m_roadNodes.cbegin(), tileZone.m_roadNodes.cend());
+    if (unconnectedRoadNodesAll.size() <= 1)
         return;
 
     tileZone.m_roadNodesHighPriority.doSort();
@@ -334,26 +334,40 @@ void RoadHelper::placeRoads(TileZone& tileZone)
         }
     }
 
-    std::sort(unconnectedRoadNodes.begin(), unconnectedRoadNodes.end(), [&tileZone](MapTilePtr l, MapTilePtr r) {
-        const bool lHigh = tileZone.m_roadNodesHighPriority.contains(l);
-        const bool rHigh = tileZone.m_roadNodesHighPriority.contains(r);
+    std::vector<MapTilePtrList> unconnectedRoadNodesByLevel;
+    unconnectedRoadNodesByLevel.resize(3);
 
-        const bool lNonBorder = !tileZone.m_innerAreaUsable.m_innerEdge.contains(l);
-        const bool rNonBorder = !tileZone.m_innerAreaUsable.m_innerEdge.contains(r);
+    for (MapTilePtr node : unconnectedRoadNodesAll) {
+        const bool isHigh = tileZone.m_roadNodesHighPriority.contains(node);
 
-        return std::tuple{ lHigh, lNonBorder, l->m_pos } < std::tuple{ rHigh, rNonBorder, r->m_pos };
-    });
-
-    std::vector<MapTilePtr> connected;
-    {
-        MapTilePtr cell = unconnectedRoadNodes.back();
-        unconnectedRoadNodes.pop_back();
-        connected.push_back(cell);
+        const bool isBorder = tileZone.m_innerAreaUsable.m_innerEdge.contains(node);
+        if (isHigh)
+            unconnectedRoadNodesByLevel[0].push_back(node);
+        else if (isBorder)
+            unconnectedRoadNodesByLevel[2].push_back(node);
+        else
+            unconnectedRoadNodesByLevel[1].push_back(node);
     }
 
-    {
+    MapTileRegion           pathAsRegion;
+    std::vector<MapTilePtr> connected;
+    for (int level = 0; level < 3; ++level) {
+        MapTilePtrList& unconnectedRoadNodes = unconnectedRoadNodesByLevel[level];
+        std::sort(unconnectedRoadNodes.begin(), unconnectedRoadNodes.end(), [](MapTilePtr l, MapTilePtr r) {
+            return l->m_pos < r->m_pos;
+        });
+
+        if (unconnectedRoadNodes.empty())
+            continue;
+
+        if (connected.empty()) {
+            MapTilePtr cell = unconnectedRoadNodes.back();
+            unconnectedRoadNodes.pop_back();
+            connected.push_back(cell);
+        }
+
         //Mernel::ProfilerScope scope("final road lookup");
-        MapTileRegion pathAsRegion;
+
         while (!unconnectedRoadNodes.empty()) {
             MapTilePtr cell = unconnectedRoadNodes.back();
             unconnectedRoadNodes.pop_back();
@@ -370,46 +384,67 @@ void RoadHelper::placeRoads(TileZone& tileZone)
             connected.push_back(cell);
             pathAsRegion.insert(path);
 
-            placeRoad(tileZone, std::move(path));
+            placeRoad(tileZone, std::move(path), level);
         }
-        pathAsRegion.doSort();
-        for (MapTileArea& area : tileZone.m_innerAreaSegments) {
-            area.m_innerArea.erase(pathAsRegion);
-            area.m_innerArea.doSort();
-        }
+    }
+
+    pathAsRegion.doSort();
+    for (MapTileArea& area : tileZone.m_innerAreaSegments) {
+        area.m_innerArea.erase(pathAsRegion);
+        area.m_innerArea.doSort();
     }
 }
 
-void RoadHelper::placeRoad(TileZone& tileZone, const MapTilePtrList& tileList)
+void RoadHelper::placeRoad(TileZone& tileZone, const MapTilePtrList& tileList, int level)
 {
     if (tileList.empty())
         return;
 
+    MapTileArea filtered;
+    for (auto* cell : tileList) {
+        if (!tileZone.m_placedRoads.contains(cell))
+            filtered.m_innerArea.insert(cell);
+    }
+    filtered.doSort();
+    auto         segments  = filtered.splitByFloodFill(false);
+    const size_t minLength = (segments.size() == 1 && level < 2) ? 1 : (level == 0 ? 3 : 7);
+    for (auto& seg : segments) {
+        auto roadLength = seg.m_innerArea.size();
+        if (roadLength < minLength)
+            continue;
+
+        MapTilePtrList filteredPath(seg.m_innerArea.cbegin(), seg.m_innerArea.cend());
+        placeRoad(std::move(filteredPath), level);
+    }
+
     tileZone.m_placedRoads.insert(tileList);
     tileZone.m_placedRoads.doSort();
-
-    placeRoad(tileList);
 }
 
-void RoadHelper::placeRoad(const MapTilePtrList& tileList)
+void RoadHelper::placeRoad(const MapTilePtrList& tileList, int level)
 {
     std::vector<FHPos> path;
     path.reserve(tileList.size());
     for (auto* cell : tileList)
         path.push_back(cell->m_pos);
 
-    placeRoadPath(std::move(path));
+    placeRoadPath(std::move(path), level);
 }
 
-void RoadHelper::placeRoadPath(std::vector<FHPos> path)
+void RoadHelper::placeRoadPath(std::vector<FHPos> path, int level)
 {
     if (path.empty())
         return;
-    if (m_map.m_template.m_userSettings.m_defaultRoad == FHRoadType::Invalid)
+    FHRoad road;
+    road.m_type = m_map.m_template.m_userSettings.m_defaultRoad;
+    if (level == 1)
+        road.m_type = m_map.m_template.m_userSettings.m_innerRoad;
+    if (level == 2)
+        road.m_type = m_map.m_template.m_userSettings.m_borderRoad;
+
+    if (road.m_type == FHRoadType::Invalid)
         return;
 
-    FHRoad road;
-    road.m_type  = m_map.m_template.m_userSettings.m_defaultRoad;
     road.m_tiles = std::move(path);
     m_map.m_roads.push_back(std::move(road));
 }

@@ -82,6 +82,7 @@ Check text area with log at &apos;extra&apos; tab and contact developers.</sourc
     <name>MapToolWindow</name>
     <message>
         <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="24"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="172"/>
         <source>Main</source>
         <translation type="unfinished"></translation>
     </message>
@@ -146,127 +147,145 @@ Check text area with log at &apos;extra&apos; tab and contact developers.</sourc
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="145"/>
-        <source>Roads</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="153"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="180"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="211"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="242"/>
         <source>No</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="158"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="185"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="216"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="247"/>
         <source>Dirt 75%</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="163"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="190"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="221"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="252"/>
         <source>Gravel 65%</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="168"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="195"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="226"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="257"/>
         <source>Cobblestone 50%</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="191"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="203"/>
+        <source>Inner</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="234"/>
+        <source>Border</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="280"/>
         <source>Generator destination:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="205"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="294"/>
         <source>Map file name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="225"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="314"/>
         <source>Map in-game name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="245"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="334"/>
         <source>FreeHeroes map JSON</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="445"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="534"/>
         <source>Version: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="457"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="546"/>
         <source>Build id: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="569"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="658"/>
         <source>Show in Editor...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="269"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="358"/>
         <source>H3M map output</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="301"/>
-        <source>Generate</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="327"/>
-        <source>Seed:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="337"/>
-        <source>NewSeed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="529"/>
-        <source>Generate map from template</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="549"/>
-        <source>Status:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="370"/>
-        <source>Player settings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="380"/>
-        <source>Difficulty settings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="464"/>
-        <source>Diagnostic info for developer</source>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="165"/>
+        <source>Roads:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="390"/>
+        <source>Generate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="416"/>
+        <source>Seed:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="426"/>
+        <source>NewSeed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="618"/>
+        <source>Generate map from template</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="638"/>
+        <source>Status:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="459"/>
+        <source>Player settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="469"/>
+        <source>Difficulty settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="553"/>
+        <source>Diagnostic info for developer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="479"/>
         <source>Extra</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="401"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="490"/>
         <source>Create fresh seed before every Generate press</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="408"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="497"/>
         <source>Increment seed values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="489"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="578"/>
         <source>Generation log</source>
         <translation type="unfinished"></translation>
     </message>

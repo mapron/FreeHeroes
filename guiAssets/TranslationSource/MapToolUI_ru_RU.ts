@@ -83,6 +83,7 @@ Check text area with log at &apos;extra&apos; tab and contact developers.</sourc
     <name>MapToolWindow</name>
     <message>
         <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="24"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="172"/>
         <source>Main</source>
         <translation>Основные</translation>
     </message>
@@ -147,127 +148,145 @@ Check text area with log at &apos;extra&apos; tab and contact developers.</sourc
         <translation>С подземельем (не реализовано)</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="145"/>
-        <source>Roads</source>
-        <translation>Дороги</translation>
-    </message>
-    <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="153"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="180"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="211"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="242"/>
         <source>No</source>
         <translation>Нет</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="158"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="185"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="216"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="247"/>
         <source>Dirt 75%</source>
         <translation>Грязь 75%</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="163"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="190"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="221"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="252"/>
         <source>Gravel 65%</source>
         <translation>Брусчатка 65%</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="168"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="195"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="226"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="257"/>
         <source>Cobblestone 50%</source>
         <translation>Гранитные 50%</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="191"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="203"/>
+        <source>Inner</source>
+        <translation>Внутренние</translation>
+    </message>
+    <message>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="234"/>
+        <source>Border</source>
+        <translation>Края</translation>
+    </message>
+    <message>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="280"/>
         <source>Generator destination:</source>
         <translation>Цель для генерации:</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="205"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="294"/>
         <source>Map file name</source>
         <translation>Имя файла карты</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="225"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="314"/>
         <source>Map in-game name</source>
         <translation>Имя карты отображаемое в игре</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="245"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="334"/>
         <source>FreeHeroes map JSON</source>
         <translation>Путь к карте формата FreeHeroes JSON</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="445"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="534"/>
         <source>Version: </source>
         <translation>Версия: </translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="457"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="546"/>
         <source>Build id: </source>
         <translation>ID сборки:</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="569"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="658"/>
         <source>Show in Editor...</source>
         <translation>Показать в Редакторе...</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="269"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="358"/>
         <source>H3M map output</source>
         <translation>Путь к карте формата H3M</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="301"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="165"/>
+        <source>Roads:</source>
+        <translation>Дороги:</translation>
+    </message>
+    <message>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="390"/>
         <source>Generate</source>
         <translation>Генерация</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="327"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="416"/>
         <source>Seed:</source>
         <translation>Посев (seed):</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="337"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="426"/>
         <source>NewSeed</source>
         <translation>Новый посев</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="529"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="618"/>
         <source>Generate map from template</source>
         <translation>Генерировать карту из шаблона</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="549"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="638"/>
         <source>Status:</source>
         <translation>Статус</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="370"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="459"/>
         <source>Player settings</source>
         <translation>Настройки игроков</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="380"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="469"/>
         <source>Difficulty settings</source>
         <translation>Настройки сложности</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="464"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="553"/>
         <source>Diagnostic info for developer</source>
         <translation>Диагностическиая информация для разработчика</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="390"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="479"/>
         <source>Extra</source>
         <translation>Экстра</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="401"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="490"/>
         <source>Create fresh seed before every Generate press</source>
         <translation>Создавать новый посев каждый раз перед Генерацией</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="408"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="497"/>
         <source>Increment seed values</source>
         <translation>Увеличивать значения посева на 1</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="489"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.ui" line="578"/>
         <source>Generation log</source>
         <translation>Журнал генерации</translation>
     </message>

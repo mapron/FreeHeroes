@@ -571,7 +571,7 @@ void FHTemplateProcessor::runTownsPlacement()
         for (auto&& pos : townPositions) {
             auto pos2 = pos->m_neighborB;
             tileZone.m_roadNodesHighPriority.insert(pos2);
-            roadHelper.placeRoad({ pos, pos2 });
+            roadHelper.placeRoad({ pos, pos2 }, 0);
         }
         tileZone.m_blocked.doSort();
     }
@@ -600,6 +600,21 @@ void FHTemplateProcessor::runRoadsPlacement()
 
     for (auto& tileZone : m_tileZones) {
         roadHelper.placeRoads(tileZone);
+
+        //        for (auto* cell : tileZone.m_placedRoads) {
+        //            m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 3 });
+        //        }
+
+        //        for (auto* cell : tileZone.m_roadNodes) {
+        //            m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 2 });
+        //        }
+        //        for (auto* cell : tileZone.m_roadNodesHighPriority) {
+        //            m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 1 });
+        //        }
+        //        for (auto* cell : tileZone.m_roadNodes) {
+        //            if (tileZone.m_innerAreaUsable.m_innerEdge.contains(cell))
+        //                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 4 });
+        //        }
     }
 }
 
@@ -885,20 +900,6 @@ void FHTemplateProcessor::placeDebugInfo()
                 m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = 0, .m_valueB = 4 });
             }
         }
-
-        /*
-        for (auto* cell : tileZone.m_innerAreaUsable.m_innerEdge) {
-            m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 1 });
-        }
-        for (auto* cell : tileZone.m_innerAreaSegmentsRoads) {
-            if (!tileZone.m_innerAreaUsable.m_innerEdge.contains(cell))
-                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 3 });
-            else
-                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 4 });
-        }
-        for (auto* cell : tileZone.m_roadNodes) {
-            m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 2 });
-        }*/
 
         if (m_stopAfter <= Stage::RoadsPlacement) {
             for (auto* cell : tileZone.m_roadNodes) {

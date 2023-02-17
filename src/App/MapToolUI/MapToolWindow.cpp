@@ -287,7 +287,9 @@ void MapToolWindow::loadUserSettings()
         }
     }
 
-    m_ui->comboBoxRoads->setCurrentIndex(static_cast<int>(m_userSettings->m_defaultRoad));
+    m_ui->comboBoxRoadsMain->setCurrentIndex(static_cast<int>(m_userSettings->m_defaultRoad));
+    m_ui->comboBoxRoadsInner->setCurrentIndex(static_cast<int>(m_userSettings->m_innerRoad));
+    m_ui->comboBoxRoadsBorder->setCurrentIndex(static_cast<int>(m_userSettings->m_borderRoad));
     m_ui->checkBoxUnderground->setChecked(m_userSettings->m_hasUnderground);
 }
 
@@ -300,7 +302,9 @@ bool MapToolWindow::saveUserSettings()
         m_ui->templateSettingsWidget->save();
         m_ui->tabDifficultySettingsWidget->save();
         m_userSettings->m_mapSize        = m_ui->comboBoxMapSize->currentData().toInt();
-        m_userSettings->m_defaultRoad    = static_cast<FHRoadType>(m_ui->comboBoxRoads->currentIndex());
+        m_userSettings->m_defaultRoad    = static_cast<FHRoadType>(m_ui->comboBoxRoadsMain->currentIndex());
+        m_userSettings->m_innerRoad      = static_cast<FHRoadType>(m_ui->comboBoxRoadsInner->currentIndex());
+        m_userSettings->m_borderRoad     = static_cast<FHRoadType>(m_ui->comboBoxRoadsBorder->currentIndex());
         m_userSettings->m_hasUnderground = m_ui->checkBoxUnderground->isChecked();
 
         Core::PropertyTreeWriterDatabase writer;

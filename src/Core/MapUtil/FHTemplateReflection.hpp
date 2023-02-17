@@ -204,6 +204,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_difficulty,
     m_difficultyScale,
     m_defaultRoad,
+    m_innerRoad,
+    m_borderRoad,
     m_mapSize,
     m_hasUnderground)
 
