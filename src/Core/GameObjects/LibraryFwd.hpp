@@ -47,5 +47,7 @@ using LibraryUnitConstPtr             = const LibraryUnit*;
 
 struct ObjectDefIndex;
 struct ObjectDefMappings;
+struct PlanarMask;
+struct CombinedMask;
 
 }

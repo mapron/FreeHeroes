@@ -7,6 +7,8 @@
 
 #include "IGuiResource.hpp"
 
+#include "LibraryObjectDef.hpp"
+
 #include <vector>
 #include <map>
 #include <string>
@@ -57,8 +59,6 @@ struct SpriteMap {
         bool  m_flipHor       = false;
         bool  m_flipVert      = false;
         bool  m_shiftHalfTile = false;
-        int   m_width         = 1;
-        int   m_height        = 1;
 
         int m_x        = 0;
         int m_y        = 0;
@@ -67,7 +67,7 @@ struct SpriteMap {
 
         double m_opacity = 1.0;
 
-        BlockMask m_blockMask;
+        Core::CombinedMask m_blockMask;
 
         std::vector<std::pair<std::string, std::string>> m_info;
         std::string                                      m_overlayInfo;
@@ -181,6 +181,8 @@ struct SpritePaintSettings {
     bool m_animateObjects = true;
     bool m_grid           = true;
     bool m_gridOnTop      = false;
+    bool m_blockMask      = false;
+    bool m_overlay        = true;
     int  m_gridOpacity    = 110;
     int  m_tileSize       = 32;
 

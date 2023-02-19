@@ -41,6 +41,8 @@ ViewSettingsWidget::ViewSettingsWidget(ViewSettings* settings, QWidget* parent)
 
     addEditor(new CheckBoxEditor(&settings->m_paintSettings.m_grid, tr("Show grid"), this));
     addEditor(new CheckBoxEditor(&settings->m_paintSettings.m_gridOnTop, tr("Draw grid on top"), this));
+    addEditor(new CheckBoxEditor(&settings->m_paintSettings.m_blockMask, tr("Show block mask"), this));
+    addEditor(new CheckBoxEditor(&settings->m_paintSettings.m_overlay, tr("Show overlays"), this));
 
     addEditor(new CheckBoxEditor(&settings->m_paintSettings.m_animateObjects, tr("Animate objects"), this));
     addEditor(new CheckBoxEditor(&settings->m_paintSettings.m_animateTerrain, tr("Animate terrain"), this));

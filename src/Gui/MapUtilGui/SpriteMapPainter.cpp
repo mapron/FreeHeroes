@@ -240,12 +240,35 @@ void SpriteMapPainter::paint(QPainter*        painter,
     }
 
     // item text overlay
-    for (const auto& [priority, grid] : spriteMap->m_planes[m_depth].m_grids) {
-        if (priority < 0)
-            continue;
-        for (const auto& [rowIndex, row] : grid.m_rows) {
-            for (const auto& [colIndex, cell] : row.m_cells) {
-                drawCell(cell, colIndex, rowIndex, true);
+    if (m_settings->m_overlay) {
+        for (const auto& [priority, grid] : spriteMap->m_planes[m_depth].m_grids) {
+            if (priority < 0)
+                continue;
+            for (const auto& [rowIndex, row] : grid.m_rows) {
+                for (const auto& [colIndex, cell] : row.m_cells) {
+                    drawCell(cell, colIndex, rowIndex, true);
+                }
+            }
+        }
+    }
+
+    // block mask
+    if (m_settings->m_blockMask) {
+        for (const auto& [y, row] : spriteMap->m_planes[m_depth].m_merged.m_rows) {
+            for (const auto& [x, cell] : row.m_cells) {
+                auto oldTransform = painter->transform();
+                painter->translate(x * tileSize, y * tileSize);
+
+                QRect cellRect(0, 0, tileSize, tileSize);
+                painter->setPen(Qt::NoPen);
+                if (cell.m_blocked && !cell.m_visitable) {
+                    painter->fillRect(cellRect, QColor(0xff, 0, 0, 70));
+                }
+                if (cell.m_visitable) {
+                    painter->fillRect(cellRect, QColor(0xff, 0xff, 0, 50));
+                }
+
+                painter->setTransform(oldTransform);
             }
         }
     }

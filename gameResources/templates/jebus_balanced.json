@@ -45,8 +45,8 @@
                             "Gold":           { "target": 50000, "maxSingle": 15000, "minSingle": 2500},
                             "Resource":       { "target": 40000, "maxSingle": 15000, "minSingle": 2500},
                             "Experience":     { "target": 50000, "maxSingle": 12000, "minSingle": 2500},
-                            "SpellOffensive": { "target": 30000, "maxSingle": 6000, "minSingle": 2000},
-                            "SpellCommon":    { "target": 40000, "maxSingle": 6000, "minSingle": 2000},
+                            "SpellOffensive": { "target": 30000, "maxSingle": 6000, "minSingle": 500},
+                            "SpellCommon":    { "target": 40000, "maxSingle": 6000, "minSingle": 500},
                             "Support":        { "target": 5000 , "minSingle": 1000},
                             "Upgrade"   :     { "target": 10000, "maxSingle": 9000, "minSingle": 2000}
                         },
@@ -138,7 +138,7 @@
                             "spEarth"  : { "frequency": 300 , "guard": 30000, "reward": {"spells":  {"schools": ["earth"] , "notTags"   : ["control"]   } } },
                             "spFire"   : { "frequency": 300 , "guard": 25000, "reward": {"spells":  {"schools": ["fire" ] , "notTags"   : ["control"]   } } },
                             "spWater"  : { "frequency": 300 , "guard": 20000, "reward": {"spells":  {"schools": ["water"] , "notTags"   : ["control"]   } } },
-                            "spAll"    : { "frequency": 200 , "guard": 70000, "reward": {"spells":  {"all": true   } } },
+                            "spAll"    : { "frequency": 99200 , "guard": 70000, "reward": {"spells":  {"all": true   } } },
                             
                             "T1"       : { "frequency": 200 , "guard": 10000, "reward": {"randomUnits":  [{"levels":[10, 11, 12],"value":  5000}] }  },
                             "T2A"      : { "frequency": 150 , "guard": 10000, "reward": {"randomUnits":  [{"levels":[20, 21, 22],"value":  5000}] }  },

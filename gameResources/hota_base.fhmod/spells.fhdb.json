@@ -36,7 +36,7 @@
 "sod.spell.forgetfulness"             : [     true    ,      false      ,        true         , "temp"      , "bad"  , "units"        ,  "water"  ,  3     ,     12      ,     4000   , "Forgetfulness"                                         ],
 "sod.spell.blind"                     : [     true    ,      false      ,        true         , "temp"      , "bad"  , "units"        ,  "fire"   ,  2     ,     10      ,     2000   , "Blind"                                                 ],
 
-"sod.spell.magicArrow"                : [     true    ,      false      ,        true         , "offensive" , ""     , "units"        ,  "any"    ,  2     ,     5       ,     2000   , "Magic Arrow"                ],
+"sod.spell.magicArrow"                : [     true    ,      false      ,        true         , "offensive" , ""     , "units"        ,  "any"    ,  1     ,     5       ,     1000   , "Magic Arrow"                ],
 "sod.spell.iceBolt"                   : [     true    ,      false      ,        true         , "offensive" , ""     , "units"        ,  "water"  ,  2     ,     8       ,     3000   , "Ice Bolt"                   ],
 "sod.spell.lightningBolt"             : [     true    ,      false      ,        true         , "offensive" , ""     , "units"        ,  "air"    ,  2     ,     10      ,     3000   , "Lightning Bolt"             ],
 "sod.spell.implosion"                 : [     true    ,      false      ,        true         , "offensive" , ""     , "units"        ,  "earth"  ,  5     ,     30      ,    16000   , "Implosion"                  ],

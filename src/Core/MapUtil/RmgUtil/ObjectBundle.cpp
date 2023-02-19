@@ -149,40 +149,22 @@ void ObjectBundle::estimateOccupied()
     }
     if (m_type == ObjectGenerator::IObject::Type::Visitable) {
         MapTilePtr mainPos = m_absPos;
-        for (size_t index = 0; auto& item : m_items) {
+        for (auto& item : m_items) {
             item.m_absPos = m_absPos;
             auto* def     = item.m_obj->getDef();
             assert(def);
 
-            // std::cerr << item.m_obj->getId() << "-> " << def->blockMapPlanar.width << "x" << def->blockMapPlanar.height << "\n";
-
-            const FHPos blockMaskSizePos{ (int) def->blockMapPlanar.width - 1, (int) def->blockMapPlanar.height - 1, 0 };
-            const FHPos visitMaskSizePos{ (int) def->visitMapPlanar.width - 1, (int) def->visitMapPlanar.height - 1, 0 };
-
-            for (size_t my = 0; my < def->blockMapPlanar.height; ++my) {
-                for (size_t mx = 0; mx < def->blockMapPlanar.width; ++mx) {
-                    if (def->blockMapPlanar.data[my][mx] == 0)
-                        continue;
-                    FHPos maskBitPos{ (int) mx, (int) my, 0 };
-                    auto  occPos = m_absPos->neighbourByOffset(FHPos{} - blockMaskSizePos + maskBitPos);
-                    if (!occPos)
-                        return;
-                    m_estimatedOccupied.insert(occPos);
-                }
+            for (auto&& point : def->combinedMask.m_blocked) {
+                auto occPos = m_absPos->neighbourByOffset(FHPos{ point.m_x, point.m_y });
+                if (!occPos)
+                    return;
+                m_estimatedOccupied.insert(occPos);
             }
-
-            for (size_t my = 0; my < def->visitMapPlanar.height; ++my) {
-                for (size_t mx = 0; mx < def->visitMapPlanar.width; ++mx) {
-                    if (def->visitMapPlanar.data[my][mx] == 0)
-                        continue;
-                    FHPos maskBitPos{ (int) mx, (int) my, 0 };
-                    mainPos = m_absPos->neighbourByOffset(FHPos{} - visitMaskSizePos + maskBitPos);
-                    if (!mainPos)
-                        return;
-                }
+            for (auto&& point : def->combinedMask.m_visitable) {
+                mainPos = m_absPos->neighbourByOffset(FHPos{ point.m_x, point.m_y });
+                if (!mainPos)
+                    return;
             }
-
-            index++;
         }
 
         if (m_guard) {

@@ -71,8 +71,7 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     auto makeItemByDef = [&makeItemById](SpriteMap::Layer layer, Core::LibraryObjectDefConstPtr def, const FHPos& pos) -> SpriteMap::Item {
         auto resourceIdDef = def->substituteFor ? def->substituteFor : def;
         auto item          = makeItemById(layer, resourceIdDef->id, pos, def->priority);
-        item.m_width       = def->blockMapPlanar.width;
-        item.m_height      = def->blockMapPlanar.height;
+        item.m_blockMask   = def->combinedMask;
         if (def != resourceIdDef)
             item.addInfo("substDef", def->id);
         return item;
@@ -314,6 +313,26 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     result.m_width  = fhMap.m_tileMap.m_width;
     result.m_height = fhMap.m_tileMap.m_height;
     result.m_depth  = fhMap.m_tileMap.m_depth;
+
+    auto checkCell = [&result](const SpriteMap::Cell& cell, int x, int y, int z) {
+        for (const auto& item : cell.m_items) {
+            for (auto& point : item.m_blockMask.m_blocked)
+                result.m_planes[z].m_merged.m_rows[y + point.m_y].m_cells[x + point.m_x].m_blocked = true;
+            for (auto& point : item.m_blockMask.m_visitable)
+                result.m_planes[z].m_merged.m_rows[y + point.m_y].m_cells[x + point.m_x].m_visitable = true;
+        }
+    };
+
+    for (int z = 0; const auto& plane : result.m_planes) {
+        for (const auto& [priority, grid] : plane.m_grids) {
+            for (const auto& [rowIndex, row] : grid.m_rows) {
+                for (const auto& [colIndex, cell] : row.m_cells) {
+                    checkCell(cell, colIndex, rowIndex, z);
+                }
+            }
+        }
+        z++;
+    }
 
     return result;
 }

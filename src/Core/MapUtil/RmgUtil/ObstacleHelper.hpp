@@ -17,7 +17,7 @@ class IGameDatabase;
 
 struct ObstacleBucket {
     std::vector<Core::LibraryMapObstacleConstPtr> m_objects;
-    Core::LibraryObjectDef::PlanarMask            m_mask;
+    Core::PlanarMask                              m_mask;
     size_t                                        m_area = 0;
 };
 using ObstacleBucketList = std::vector<ObstacleBucket>;
@@ -28,10 +28,10 @@ struct ObstacleIndex {
     void add(Core::LibraryMapObstacleConstPtr obj);
     void doSort();
 
-    bool isEmpty(const Core::LibraryObjectDef::PlanarMask& mask, size_t xOffset, size_t yOffset, size_t w, size_t h);
+    bool isEmpty(const Core::PlanarMask& mask, size_t xOffset, size_t yOffset, size_t w, size_t h);
 
     // mask is 8x6, for example. we will search for an object that fits int top-left corner.
-    std::vector<const ObstacleBucket*> find(const Core::LibraryObjectDef::PlanarMask& mask, size_t xOffset, size_t yOffset);
+    std::vector<const ObstacleBucket*> find(const Core::PlanarMask& mask, size_t xOffset, size_t yOffset);
 };
 
 struct FHMap;

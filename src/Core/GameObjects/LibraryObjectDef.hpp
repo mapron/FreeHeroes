@@ -14,6 +14,40 @@
 
 namespace FreeHeroes::Core {
 
+struct PlanarMask {
+    std::vector<std::vector<uint8_t>> m_rows; // rows of cols of bits.  from top left corner, to right and then to bottom.
+
+    size_t m_width  = 0;
+    size_t m_height = 0;
+
+    bool operator==(const PlanarMask&) const noexcept = default;
+};
+
+struct CombinedMask {
+    struct Cell {
+        bool m_blocked   = false;
+        bool m_visitable = false;
+
+        bool operator==(const Cell&) const noexcept = default;
+    };
+    struct Point {
+        int m_x = 0; // offset from bottom right corner
+        int m_y = 0;
+
+        auto operator<=>(const Point&) const noexcept = default;
+    };
+
+    std::vector<std::vector<Cell>> m_rows; // rows of cols of cells.  from top left corner, to right and then to bottom.
+
+    std::set<Point> m_blocked;
+    std::set<Point> m_visitable;
+
+    size_t m_width  = 0;
+    size_t m_height = 0;
+
+    bool operator==(const CombinedMask&) const noexcept = default;
+};
+
 struct LibraryObjectDef {
     int                  legacyId = -1;
     std::string          id;
@@ -51,17 +85,10 @@ struct LibraryObjectDef {
         LibraryUnitConstPtr         unit         = nullptr;
     } mappings; // generated
 
-    struct PlanarMask {
-        std::vector<std::vector<uint8_t>> data; // rows of cols of bits.  from top left corner, to right and then to bottom.
-
-        size_t width  = 0;
-        size_t height = 0;
-
-        bool operator==(const PlanarMask&) const noexcept = default;
-    };
-
     PlanarMask blockMapPlanar;
     PlanarMask visitMapPlanar;
+
+    CombinedMask combinedMask;
 
     LibraryObjectDefConstPtr get(const std::string& substitutionId) const noexcept
     {

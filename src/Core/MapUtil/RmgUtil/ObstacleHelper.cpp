@@ -20,8 +20,8 @@ void ObstacleIndex::add(Core::LibraryMapObstacleConstPtr obj)
     auto* def = obj->objectDefs.get({});
     assert(def);
     auto mask = def->blockMapPlanar;
-    auto w    = mask.width;
-    auto h    = mask.height;
+    auto w    = mask.m_width;
+    auto h    = mask.m_height;
     if (!w || !h)
         return;
 
@@ -35,7 +35,7 @@ void ObstacleIndex::add(Core::LibraryMapObstacleConstPtr obj)
     }
     ObstacleBucket buck;
     buck.m_mask = mask;
-    buck.m_area = mask.height * mask.width;
+    buck.m_area = mask.m_height * mask.m_width;
     buck.m_objects.push_back(obj);
     bucketList.push_back(std::move(buck));
 }
@@ -50,11 +50,11 @@ void ObstacleIndex::doSort()
     //}
 }
 
-bool ObstacleIndex::isEmpty(const Core::LibraryObjectDef::PlanarMask& mask, size_t xOffset, size_t yOffset, size_t w, size_t h)
+bool ObstacleIndex::isEmpty(const Core::PlanarMask& mask, size_t xOffset, size_t yOffset, size_t w, size_t h)
 {
-    for (size_t y = 0; y < h && (y + yOffset) < mask.height; ++y) {
-        for (size_t x = 0; x < w && (x + xOffset) < mask.width; ++x) {
-            const uint8_t requiredBlockBit = mask.data[y + yOffset][x + xOffset];
+    for (size_t y = 0; y < h && (y + yOffset) < mask.m_height; ++y) {
+        for (size_t x = 0; x < w && (x + xOffset) < mask.m_width; ++x) {
+            const uint8_t requiredBlockBit = mask.m_rows[y + yOffset][x + xOffset];
             if (requiredBlockBit)
                 return false;
         }
@@ -62,26 +62,26 @@ bool ObstacleIndex::isEmpty(const Core::LibraryObjectDef::PlanarMask& mask, size
     return true;
 }
 
-std::vector<const ObstacleBucket*> ObstacleIndex::find(const Core::LibraryObjectDef::PlanarMask& mask, size_t xOffset, size_t yOffset)
+std::vector<const ObstacleBucket*> ObstacleIndex::find(const Core::PlanarMask& mask, size_t xOffset, size_t yOffset)
 {
-    auto w = mask.width;
-    auto h = mask.height;
+    auto w = mask.m_width;
+    auto h = mask.m_height;
     if (!w || !h)
         return {};
 
-    auto isMaskFit = [&mask, xOffset, yOffset](const Core::LibraryObjectDef::PlanarMask& maskObj) {
-        const auto w       = mask.width - xOffset;
-        const auto h       = mask.height - yOffset;
-        const auto wmin    = std::min(maskObj.width, w);
-        const auto hmin    = std::min(maskObj.height, h);
+    auto isMaskFit = [&mask, xOffset, yOffset](const Core::PlanarMask& maskObj) {
+        const auto w       = mask.m_width - xOffset;
+        const auto h       = mask.m_height - yOffset;
+        const auto wmin    = std::min(maskObj.m_width, w);
+        const auto hmin    = std::min(maskObj.m_height, h);
         size_t     overlap = 0;
         for (size_t y = 0; y < hmin; ++y) {
-            const auto& row = mask.data[y + yOffset];
+            const auto& row = mask.m_rows[y + yOffset];
             for (size_t x = 0; x < wmin; ++x) {
                 const bool emptyBlockBit    = row[x + xOffset] == 0;
                 const bool requiredBlockBit = row[x + xOffset] == 1;
                 //const bool tentativeBlockBit = row[x + xOffset] == 2;
-                const bool objBlockBit = maskObj.data[y][x] == 1;
+                const bool objBlockBit = maskObj.m_rows[y][x] == 1;
                 if (objBlockBit) {
                     overlap++;
                     if (emptyBlockBit)
@@ -168,21 +168,21 @@ void ObstacleHelper::placeObstacles()
     }
     obstacleIndex.doSort();
 
-    Core::LibraryObjectDef::PlanarMask mapMask;
-    mapMask.width  = m_map.m_tileMap.m_width;
-    mapMask.height = m_map.m_tileMap.m_height;
-    mapMask.data.resize(mapMask.height);
-    for (auto& row : mapMask.data)
-        row.resize(mapMask.width);
+    Core::PlanarMask mapMask;
+    mapMask.m_width  = m_map.m_tileMap.m_width;
+    mapMask.m_height = m_map.m_tileMap.m_height;
+    mapMask.m_rows.resize(mapMask.m_height);
+    for (auto& row : mapMask.m_rows)
+        row.resize(mapMask.m_width);
 
     for (auto& tileZone : m_tileZones) {
         tileZone.m_needBeBlocked.doSort();
         tileZone.m_tentativeBlocked.doSort();
 
         for (MapTilePtr cell : tileZone.m_needBeBlocked)
-            mapMask.data[cell->m_pos.m_y][cell->m_pos.m_x] = 1;
+            mapMask.m_rows[cell->m_pos.m_y][cell->m_pos.m_x] = 1;
         for (MapTilePtr cell : tileZone.m_tentativeBlocked) {
-            mapMask.data[cell->m_pos.m_y][cell->m_pos.m_x] = 2;
+            mapMask.m_rows[cell->m_pos.m_y][cell->m_pos.m_x] = 2;
         }
 
         //m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = 0, .m_valueB = 2 });
@@ -203,9 +203,9 @@ void ObstacleHelper::placeObstacles()
         }
     }*/
 
-    for (size_t y = 0; y < mapMask.height; ++y) {
+    for (size_t y = 0; y < mapMask.m_height; ++y) {
         Core::LibraryMapObstacleConstPtr prev = nullptr;
-        for (size_t x = 0; x < mapMask.width; ++x) {
+        for (size_t x = 0; x < mapMask.m_width; ++x) {
             //if (mapMask.data[y][x] == 0)
             //    continue;
             if (obstacleIndex.isEmpty(mapMask, x, y, maxMaskLookupWidth, maxMaskLookupHeight))
@@ -228,8 +228,8 @@ void ObstacleHelper::placeObstacles()
                     auto* def = obst->objectDefs.get({}); // @todo: substitutions?
 
                     FHPos objPos = mapPos;
-                    objPos.m_x += def->blockMapPlanar.width - 1;
-                    objPos.m_y += def->blockMapPlanar.height - 1;
+                    objPos.m_x += def->blockMapPlanar.m_width - 1;
+                    objPos.m_y += def->blockMapPlanar.m_height - 1;
                     if (!m_tileContainer.m_tileIndex.contains(objPos))
                         continue;
 
@@ -255,16 +255,16 @@ void ObstacleHelper::placeObstacles()
             auto* def = obst->objectDefs.get({});
             assert(def);
 
-            for (size_t my = 0; my < def->blockMapPlanar.height; ++my) {
-                for (size_t mx = 0; mx < def->blockMapPlanar.width; ++mx) {
-                    if (def->blockMapPlanar.data[my][mx] == 0)
+            for (size_t my = 0; my < def->blockMapPlanar.m_height; ++my) {
+                for (size_t mx = 0; mx < def->blockMapPlanar.m_width; ++mx) {
+                    if (def->blockMapPlanar.m_rows[my][mx] == 0)
                         continue;
                     size_t px = x + mx;
                     size_t py = y + my;
                     FHPos  maskBitPos{ (int) px, (int) py, 0 };
-                    if (py < mapMask.height && px < mapMask.width) {
-                        if (mapMask.data[py][px] == 1)
-                            mapMask.data[py][px] = 2;
+                    if (py < mapMask.m_height && px < mapMask.m_width) {
+                        if (mapMask.m_rows[py][px] == 1)
+                            mapMask.m_rows[py][px] = 2;
                         auto* cell = m_tileContainer.m_tileIndex.at(maskBitPos);
                         hasBlocked.insert(cell);
                     }
@@ -273,8 +273,8 @@ void ObstacleHelper::placeObstacles()
             }
 
             FHPos objPos = mapPos;
-            objPos.m_x += def->blockMapPlanar.width - 1;
-            objPos.m_y += def->blockMapPlanar.height - 1;
+            objPos.m_x += def->blockMapPlanar.m_width - 1;
+            objPos.m_y += def->blockMapPlanar.m_height - 1;
 
             FHObstacle fhOb;
             fhOb.m_id  = obst;
