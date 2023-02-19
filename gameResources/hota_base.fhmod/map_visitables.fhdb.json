@@ -31,7 +31,7 @@
 "hota.visitable.prospectorGen"             : [ "ResourceGen"   ,      500 ,    1000  , "avtprosp"  ],
 "sod.visitable.leanToWithResource"         : [ "ResourceGen"   ,      500 ,    1000  ,  "avmlean0"  ],
 
-"sod.visitable.learningStone"              : [ "Experience"    ,     1500 ,    1000  , { "m": { "": "avsgzbo0", "S": "avsgzbs0" }}  ],
+"sod.visitable.learningStone"              : [ "Experience"    ,     2500 ,    3000  , { "m": { "": "avsgzbo0", "S": "avsgzbs0" }}  ],
 "hota.visitable.gazebo"                    : [ "Experience"    ,     4000 ,     500  , "avxgazeb"  ],
 "sod.visitable.treeOfKnowledge"            : [ "Experience"    ,     5000 ,     500  , { "m": { "": "avxtrek0", "S": "avxtrks0"}} ],
 

@@ -93,8 +93,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone::GeneratorDwelling::Record,
     m_level,
-    m_weeks,
-    m_castles,
+    m_value,
     m_frequency,
     m_guard)
 

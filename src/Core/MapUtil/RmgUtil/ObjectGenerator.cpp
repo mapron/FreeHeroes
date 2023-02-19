@@ -966,12 +966,14 @@ struct ObjectGenerator::ObjectFactoryDwelling : public AbstractFactory<RecordDwe
             std::vector<Core::LibraryDwellingConstPtr> dwells = dwellByLevel[value.m_level];
 
             for (auto* dwell : dwells) {
-                int scoreValue = 0;
-                for (auto* unit : dwell->creatureIds) {
-                    const int v          = unit->value;
-                    const int baseGrowth = unit->growth;
-                    const int growth     = baseGrowth * value.m_weeks + value.m_castles;
-                    scoreValue += growth * v;
+                int scoreValue = value.m_value;
+                if (value.m_value == -1) {
+                    scoreValue = 0;
+                    for (auto* unit : dwell->creatureIds) {
+                        const int v          = unit->value;
+                        const int baseGrowth = unit->growth;
+                        scoreValue += baseGrowth * v;
+                    }
                 }
 
                 auto rec = RecordDwelling{ .m_id = dwell, .m_value = scoreValue, .m_guard = value.m_guard };

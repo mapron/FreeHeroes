@@ -186,8 +186,7 @@ struct FHRngZone {
     struct GeneratorDwelling : public GeneratorCommon {
         struct Record {
             int m_level     = 0;
-            int m_weeks     = 1;
-            int m_castles   = 0;
+            int m_value     = 2000;
             int m_frequency = 1000;
             int m_guard     = -1;
 
