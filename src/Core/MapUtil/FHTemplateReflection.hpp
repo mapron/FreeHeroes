@@ -122,6 +122,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone::GeneratorMine::Record,
     m_resourceId,
     m_frequency,
+    m_minZone,
+    m_maxZone,
     m_guard,
     m_value)
 

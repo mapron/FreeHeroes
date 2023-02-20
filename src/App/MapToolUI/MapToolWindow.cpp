@@ -58,7 +58,7 @@ MapToolWindow::MapToolWindow(
     , m_modelsProvider(modelsProvider)
     , m_userSettings(std::make_unique<FHRngUserSettings>())
 {
-    m_version = "1.0.0";
+    m_version = "1.0.1";
 
     {
         auto buildDate = QLocale("en_US").toDate(QString(__DATE__).simplified(), "MMM d yyyy");

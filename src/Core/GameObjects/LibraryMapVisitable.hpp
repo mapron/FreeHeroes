@@ -28,6 +28,8 @@ struct LibraryMapVisitable {
     ScoreAttr attr      = ScoreAttr::Invalid;
     int       value     = 0;
     int       frequency = 0;
+    int       minZone   = -1;
+    int       maxZone   = -1;
     VisitKind visitKind = VisitKind::Normal;
 
     ObjectDefMappings objectDefs;

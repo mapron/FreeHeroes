@@ -37,13 +37,13 @@ public:
             Removable, // Prison
         };
 
-        virtual void           setPos(FHPos pos) = 0;
-        virtual void           place() const     = 0;
-        virtual Core::MapScore getScore() const  = 0;
-        virtual void           disable()         = 0;
-        virtual std::string    getId() const     = 0;
-        virtual int64_t        getGuard() const  = 0;
-        virtual Type           getType() const   = 0;
+        virtual void           setPos(FHPos pos)          = 0;
+        virtual void           place() const              = 0;
+        virtual Core::MapScore getScore() const           = 0;
+        virtual void           setAccepted(bool accepted) = 0;
+        virtual std::string    getId() const              = 0;
+        virtual int64_t        getGuard() const           = 0;
+        virtual Type           getType() const            = 0;
         virtual FHPos          getOffset() const { return FHPos{}; }
 
         virtual Core::LibraryObjectDefConstPtr getDef() const { return nullptr; }

@@ -209,6 +209,8 @@ struct FHRngZone {
             int m_frequency = 1000;
             int m_guard     = 1000;
             int m_value     = 500;
+            int m_minZone   = -1;
+            int m_maxZone   = -1;
 
             bool operator==(const Record&) const noexcept = default;
         };

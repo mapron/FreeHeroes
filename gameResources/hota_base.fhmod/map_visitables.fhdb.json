@@ -54,6 +54,8 @@
 "sod.visitable.tradingPost"                : [ "Support"       ,     8000 ,     500  , { "m": { "": "avxpost0",  "A": "avxpstr0", "S": "avxpssn"}}  ],
 "sod.visitable.freelancersGuild"           : [ "Support"       ,     2000 ,     300  , "avxfgld"  ],
 "sod.visitable.redwoodObservatory"         : [ "Support"       ,      500 ,    2000  , { "m": { "": "avxredw", "A": "avxreds0", "B": "avwtobtw", "C": "avxpllr0"}}  ],
+"sod.visitable.obelisk"                    : [ "Support"       ,      500 ,    1000  ,  { "m": { "": "avxoblb", "G": "avxoblg", "K": "avxoblk", "R": "avxoblr", "O": "avxoblo", 
+                                                    "P": "avxoblp", "W": "avxoblw", "Y": "avxobly", "OR": "avxoblor", "T": "avxoblt" }} ],
 
 "hota.visitable.alchemistLab"              : [ "Support"       ,    10000 ,     500  , { "m": { "":"avxtrmtw", "S": "avxtrmts"}}  ],
 "hota.visitable.trailblaizer"              : [ "Support"       ,      400 ,     200  , "avstrblz"  ],
@@ -92,8 +94,6 @@
 "sod.resource.barrelOnWater"               : [ "Resource"      ,     1000 ,    1000  , "avabrrlw" ],
 
 "sod.visitable.coverOfDarkness"            : [ ""              ,        0 ,    1000  , "avxcovr0"  ],
-"sod.visitable.obelisk"                    : [ ""              ,        0 ,    1000  ,  { "m": { "": "avxoblb", "G": "avxoblg", "K": "avxoblk", "R": "avxoblr", "O": "avxoblo", 
-                                                    "P": "avxoblp", "W": "avxoblw", "Y": "avxobly", "OR": "avxoblor", "T": "avxoblt" }} ],
 "sod.visitable.witchHut"                   : [ ""              ,        0 ,    1000  , { "m": { "":  "avswtch0", "S": "avswtcs0"}} ],
 "sod.visitable.scholar"                    : [ ""              ,        0 ,    1000  ,  "avxschl0"  ],
 "sod.visitable.questHut"                   : [ ""              ,        0 ,    1000  , { "m": { "":  "avxseeb0", "A": "avxseer0", "B": "avxseey0", "C": "avxseec0", "D": "avxseee0" , "W": "wt_seerh" }} ],
@@ -144,5 +144,29 @@
 
 }
 
-}]
+},
+
+{
+"scope": "mapVisitables",
+"compactCols":                               [ "minZone", "maxZone" ],
+
+"records": {
+
+"sod.visitable.altar"                      : [ 1, -1 ],
+"sod.visitable.hillFortWood"               : [ 1, -1 ],
+"sod.visitable.magicSpring"                : [ 1,  1 ],
+"sod.visitable.magicWell"                  : [ 1,  1 ],
+"sod.visitable.stables"                    : [ 1,  1 ],
+"sod.visitable.tradingPost"                : [ 1, -1 ],
+"sod.visitable.obelisk"                    : [ 1,  1 ],
+
+"hota.visitable.alchemistLab"              : [ 1, -1 ],
+"hota.visitable.wateringPlace"             : [ 1,  1 ],
+"hota.visitable.junkman"                   : [ 1, -1 ]
+
+
+}
+
+}
+]
 

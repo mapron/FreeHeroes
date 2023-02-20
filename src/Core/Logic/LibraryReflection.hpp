@@ -1007,6 +1007,8 @@ STRUCT_REFLECTION_STRINGIFY(
     attr,
     value,
     frequency,
+    minZone,
+    maxZone,
     visitKind,
     objectDefs
 )

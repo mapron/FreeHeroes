@@ -98,6 +98,10 @@ struct CommonRecord {
     uint64_t m_frequency = 0;
     uint64_t m_attempts  = 1;
 
+    int m_generatedCounter = 0;
+    int m_minLimit         = -1;
+    int m_maxLimit         = -1;
+
     Child& setFreq(int freq)
     {
         m_frequency = freq;
@@ -118,9 +122,14 @@ struct CommonRecordList {
         m_active    = 0;
         m_index.clear();
         for (size_t i = 0; const Record& rec : m_records) {
-            if (rec.m_enabled && rec.m_frequency > 0) {
+            auto freq = rec.m_frequency;
+            if (rec.m_enabled && freq > 0) {
+                if (rec.m_minLimit > 0) {
+                    if (rec.m_generatedCounter < rec.m_minLimit)
+                        freq = 1000000;
+                }
                 m_index[m_frequency] = i;
-                m_frequency += rec.m_frequency;
+                m_frequency += freq;
                 m_active++;
             }
             i++;
@@ -143,6 +152,17 @@ struct CommonRecordList {
         if (record.m_attempts == 0) {
             record.m_enabled = false;
             updateFrequency();
+        }
+    }
+
+    void onAccept(Record& record)
+    {
+        record.m_generatedCounter++;
+        if (record.m_maxLimit != -1) {
+            if (record.m_generatedCounter >= record.m_maxLimit) {
+                record.m_enabled = false;
+                updateFrequency();
+            }
         }
     }
 };
@@ -345,12 +365,20 @@ struct ObjectGenerator::AbstractObject : public IObject {
     void           setPos(FHPos pos) override { m_obj.m_pos = pos; }
     void           place() const override { m_map->m_objects.container<T>().push_back(m_obj); }
     Core::MapScore getScore() const override { return m_obj.m_score; }
-    void           disable() override { m_onDisable(); }
-    int64_t        getGuard() const override { return m_obj.m_guard; }
+
+    void setAccepted(bool accepted) override
+    {
+        if (accepted)
+            m_onAccept();
+        else
+            m_onDisable();
+    }
+    int64_t getGuard() const override { return m_obj.m_guard; }
 
     T                     m_obj;
-    FHMap*                m_map = nullptr;
-    std::function<void()> m_onDisable;
+    FHMap*                m_map       = nullptr;
+    std::function<void()> m_onDisable = [] {};
+    std::function<void()> m_onAccept  = [] {};
 };
 
 template<class T>
@@ -1054,6 +1082,8 @@ struct ObjectGenerator::ObjectFactoryVisitable : public AbstractFactory<RecordVi
             RecordVisitable record;
             record.m_obj.m_visitableId = visitable;
             record.m_frequency         = visitable->frequency;
+            record.m_maxLimit          = visitable->maxZone;
+            record.m_minLimit          = visitable->minZone;
             Core::MapScore score;
             const int      scoreValue = visitable->value;
             if (!scoreValue)
@@ -1081,6 +1111,9 @@ struct ObjectGenerator::ObjectFactoryVisitable : public AbstractFactory<RecordVi
         ObjectVisitable obj;
         obj.m_onDisable = [this, &record] {
             m_records.onDisable(record);
+        };
+        obj.m_onAccept = [this, &record] {
+            m_records.onAccept(record);
         };
         obj.m_map = &m_map;
         obj.m_obj = record.m_obj;
@@ -1122,6 +1155,8 @@ struct ObjectGenerator::ObjectFactoryMine : public AbstractFactory<RecordMine> {
 
             auto scoreValue    = value.m_value;
             record.m_frequency = value.m_frequency;
+            record.m_maxLimit  = value.m_maxZone;
+            record.m_minLimit  = value.m_minZone;
             ObjectGenerator::correctObjIndex(record.m_obj.m_defIndex, record.m_obj.m_id->minesDefs, terrain);
             record.m_obj.m_guard       = value.m_guard;
             record.m_obj.m_player      = none;
@@ -1141,6 +1176,9 @@ struct ObjectGenerator::ObjectFactoryMine : public AbstractFactory<RecordMine> {
         ObjectMine obj;
         obj.m_onDisable = [this, &record] {
             m_records.onDisable(record);
+        };
+        obj.m_onAccept = [this, &record] {
+            m_records.onAccept(record);
         };
         obj.m_map = &m_map;
         obj.m_obj = record.m_obj;
@@ -1275,13 +1313,13 @@ bool ObjectGenerator::generateOneObject(const Core::MapScore& targetScore, Core:
 
             Core::MapScore currentScoreTmp = currentScore + obj->getScore();
             if (isScoreOverflow(currentScoreTmp)) {
-                obj->disable();
+                obj->setAccepted(false);
                 return true;
             }
             currentScore = currentScoreTmp;
 
             // m_logOutput << indent << "add '" << obj->getId() << "' score=" << obj->getScore() << " guard=" << obj->getGuard() << "; current factory freq=" << fac->totalFreq() << ", active=" << fac->totalActiveRecords() << "\n";
-
+            obj->setAccepted(true);
             group.m_objects.push_back(obj);
             return true;
         }
