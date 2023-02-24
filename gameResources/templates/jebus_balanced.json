@@ -13,9 +13,9 @@
             "Common"  : { 
                 "centerDispersion": {"x": 5 , "y": 5 }, "relativeSizeAvg": 100, "relativeSizeDispersion": 1, "segmentAreaSize": 250,
                 "towns": [
-                    {"town":{"isMain":true, "hasFort":true,"hasCustomBuildings":true,"buildings":["townHall1","fort1","tavern","mageGuild1","t1","t2"],"garisonRmg":[{"levels":[10],"value":1000}]},"playerControlled":true, "useZoneFaction": true}, 
-                    {"town":{"garisonRmg":[{"levels":[10],"value":2000},{"levels":[20],"value":1000},{"levels":[30],"value":1000}]}}, 
-                    {"town":{"garisonRmg":[{"levels":[10],"value":2000},{"levels":[20],"value":1000},{"levels":[30],"value":1000}]}}],
+                    {"town":{"isMain":true, "hasFort":true,"hasCustomBuildings":true,"buildings":["townHall1","fort1","tavern","t1","t2"],"garisonRmg":[{"levels":[10],"value":1000}]},"playerControlled":true, "useZoneFaction": true}, 
+                    {"town":{"hasCustomBuildings":true,"buildings":["townHall1","tavern","t1","t2"], "garisonRmg":[{"levels":[10],"value":2000},{"levels":[20],"value":1000},{"levels":[30],"value":1000}]}}, 
+                    {"town":{"hasCustomBuildings":true,"buildings":["townHall1","tavern","t1","t2"], "garisonRmg":[{"levels":[10],"value":2000},{"levels":[20],"value":1000},{"levels":[30],"value":1000}]}}],
                 
                 "scoreTargets": {
                     "High": {
@@ -23,7 +23,7 @@
                         "tolerancePercent": 15,
                         "score": {
                             "Army":           { "target": 50000 , "maxSingle": 20000, "minSingle": 8000 },
-                            "ArmyDwelling":   { "target": 20000 , "maxSingle": 10000, "minSingle": 10000},
+                            "ArmyDwelling":   { "target": 20000 , "maxSingle": 20000, "minSingle": 10000},
                             "ArtStat":        { "target": 30000 , "maxSingle": 15000, "minSingle": 4000 },
                             "ArtSupport":     { "target": 20000 , "maxSingle": 10000, "minSingle": 4000 },
                             "Gold":           { "target": 60000 , "maxSingle": 50000, "minSingle": 3000 },
@@ -32,7 +32,7 @@
                             "SpellOffensive": { "target": 60000 , "minSingle":  5000},
                             "SpellCommon":    { "target": 20000 , "minSingle":  5000},
 
-                            "Control":        { "target":  70000, "maxSingle": 30000}
+                            "Control":        { "target":  85000, "maxSingle": 30000}
                         }
                     },
                     "Mid": {
@@ -40,8 +40,8 @@
                         "score": {
                             "Army":           { "target": 40000, "maxSingle": 12000},
                             "ArmyDwelling":   { "target": 10000, "maxSingle": 9000, "minSingle": 4000},
-                            "ArtStat":        { "target": 15000, "maxSingle": 7000, "minSingle": 2500},
-                            "ArtSupport":     { "target": 10000, "maxSingle": 7000, "minSingle": 2500},
+                            "ArtStat":        { "target": 25000, "maxSingle": 7000, "minSingle": 2500},
+                            "ArtSupport":     { "target": 15000, "maxSingle": 7000, "minSingle": 2500},
                             "Gold":           { "target": 30000, "maxSingle": 15000, "minSingle": 2500},
                             "Resource":       { "target": 40000, "maxSingle": 15000, "minSingle": 2500},
                             "Experience":     { "target": 40000, "maxSingle": 12000, "minSingle": 3000},
@@ -65,7 +65,7 @@
                         "score":{
                             "ArmyDwelling":   { "target": 20000 ,"maxSingle": 3900},
                             "ArtStat":        { "target": 6000 , "maxSingle": 2400},
-                            "ArtSupport":     { "target": 8000 , "maxSingle": 2400},
+                            "ArtSupport":     { "target": 4000 , "maxSingle": 2400},
                             "Gold":           { "target": 80000, "maxSingle": 2000},
                             "Resource":       { "target": 100000, "maxSingle": 2500},
                             "Experience":     { "target": 30000, "maxSingle": 2500},
@@ -85,19 +85,18 @@
                     "banks": {
                         "isEnabled": true,
                         "records": {
-                            "utopia": {"bank": "sod.map.utopia"           , "frequency": 10000, "guard": -1 }
                         }
                     },
                     "artifacts": {
                         "isEnabled": true,
                         "records": {
-                            "treasure"     : { "frequency": 2000, "filter": {"classes": ["treasure"], "notTags": ["stats"]               } },
-                            "minor"        : { "frequency": 1500, "filter": {"classes": ["minor"   ], "notTags": ["stats"]               } },
-                            "major"        : { "frequency": 1500, "filter": {"classes": ["major"   ], "notTags": ["stats"]               } },
+                            "treasure"     : { "frequency":  100, "filter": {"classes": ["treasure"], "notTags": ["stats"]               } },
+                            "minor"        : { "frequency":  300, "filter": {"classes": ["minor"   ], "notTags": ["stats"]               } },
+                            "major"        : { "frequency":  500, "filter": {"classes": ["major"   ], "notTags": ["stats"]               } },
                             "relic"        : { "frequency": 1000, "filter": {"classes": ["relic"   ], "notTags": ["stats", "control"]    } },
-                            "treasureStat" : { "frequency": 2000, "filter": {"classes": ["treasure"], "tags"   : ["stats"]               } },
-                            "minorStat"    : { "frequency": 1500, "filter": {"classes": ["minor"   ], "tags"   : ["stats"]               } },
-                            "majorStat"    : { "frequency": 1500, "filter": {"classes": ["major"   ], "tags"   : ["stats"]               } },
+                            "treasureStat" : { "frequency":  100, "filter": {"classes": ["treasure"], "tags"   : ["stats"]               } },
+                            "minorStat"    : { "frequency":  300, "filter": {"classes": ["minor"   ], "tags"   : ["stats"]               } },
+                            "majorStat"    : { "frequency":  500, "filter": {"classes": ["major"   ], "tags"   : ["stats"]               } },
                             "relicStat"    : { "frequency": 1000, "filter": {"classes": ["relic"   ], "tags"   : ["stats"], "notTags": ["control"]    } },
                             "control"      : { "frequency": 4000, "filter": {"classes": ["relic"   ], "tags"   : ["control"]             } }
                         }
@@ -203,7 +202,8 @@
                             "T4"          : { "frequency":  400, "level": 40, "value": 4000 , "guard": 4000  },
                             "T5"          : { "frequency":  400, "level": 50, "value": 5000 , "guard": 5000  },
                             "T6"          : { "frequency":  400, "level": 60, "value": 6000 , "guard": 8000  },
-                            "T7"          : { "frequency":  400, "level": 70, "value": 10000, "guard": 12000 },
+                            "T7"          : { "frequency":  400, "level": 70, "value": 10000, "guard": 12000 ,
+                                              "factionValues": {"sod.faction.castle": 20000}  },
                             "T8"          : { "frequency":  200, "level": 80, "value": -1   , "guard": 20000 },
                             "warMachine"  : { "frequency":  100, "level": 90, "value": 3000 , "guard": 4000  }
                         }
@@ -231,9 +231,8 @@
                 "centerDispersion": {"x": 1, "y": 1}, "relativeSizeAvg": 130, "relativeSizeDispersion": 5, "terrain": "sod.terrain.sand",
                 "zoneGuardPercent": 150,
                 "towns": [
-                    {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}, "useZoneFaction": true}, 
-                    {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}},
-                    {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}}],
+                    {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}, "useZoneFaction": true, "tilesToTarget": 8, "closeToConnection":"CC_P1"}, 
+                    {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}, "useZoneFaction": true, "tilesToTarget": 8, "closeToConnection":"CC_P2"}],
 
                 "guardMin": 20000,
                 "guardMax": 150000,
@@ -243,7 +242,7 @@
                     "banks": {
                         "isEnabled": true,
                         "records": {
-                            "utopia": {"bank": "sod.map.utopia"           , "frequency": 113000, "guard": 30000 },
+                            "utopia": {"bank": "sod.map.utopia"           , "frequency": 20000, "guard": 30000 },
                             "consa" : {"bank": "sod.map.conservatory"     , "frequency": 2000, "guard": -1  },
                             "hive"  : {"bank": "sod.map.hive"             , "frequency": 4000, "guard": -1  },
                             "shop"  : {"bank": "hota.map.experimentalShop", "frequency": 2000, "guard":  -1 },

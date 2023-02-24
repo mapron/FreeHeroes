@@ -6,7 +6,7 @@
 "sod.map.crypt"             : {
     "untranslatedName": "Crypt",
     "guardValue": 2000,
-    "frequency": 1000,
+    "frequency": 2000,
     
     "rewards": [
         {"resources":"1500"},
@@ -25,7 +25,7 @@
 "sod.map.utopia"           : {
     "untranslatedName": "Utopia",
     "guardValue": 20000,
-    "frequency": 3000,
+    "frequency": 10000,
     
     "rewards": [
         {"resources":"20000","artifacts":[{"classes": ["relic"]},{"classes": ["major"]},{"classes": ["minor"]},{"classes": ["treasure"]}]},
@@ -80,7 +80,7 @@
 "hota.map.blackTower"             : {
     "untranslatedName": "Black tower",
     "guardValue": 3000,
-    "frequency": 1000,
+    "frequency": 4000,
     
     "fieldLayout": "std",
     "rewards": [
@@ -100,7 +100,7 @@
 "hota.map.mansion"             : {
     "untranslatedName": "Mansion",
     "guardValue": 10000,
-    "frequency": 500,
+    "frequency": 5000,
     
     "rewards": [
         {"resources": "2500,mercury=2,sulfur=2,crystal=2,gems=2","artifacts":[{"classes": ["major"]}]},
@@ -156,7 +156,7 @@
 "hota.map.churchyard"           : {
     "untranslatedName": "Churchyard",
     "guardValue": 3000,
-    "frequency": 1000,
+    "frequency": 4000,
     
     "fieldLayout": "churchyard2",
     "rewards": [
