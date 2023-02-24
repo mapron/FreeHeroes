@@ -95,7 +95,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_level,
     m_value,
     m_frequency,
-    m_guard)
+    m_guard,
+    m_factionValues)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone::GeneratorDwelling,
@@ -240,6 +241,9 @@ template<>
 inline constexpr const bool s_isStringMap<FHRngZone::GeneratorMine::Map>{ true };
 template<>
 inline constexpr const bool s_isStringMap<FHRngZone::ScoreMap>{ true };
+template<>
+inline constexpr const bool s_isStringMap<FHRngZone::GeneratorDwelling::Record::FactionMap>{ true };
+
 template<>
 inline constexpr const bool s_isStringMap<FHScoreSettings::AttrMap>{ true };
 template<>

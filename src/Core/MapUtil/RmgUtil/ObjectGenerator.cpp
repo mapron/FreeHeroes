@@ -1011,8 +1011,11 @@ struct ObjectGenerator::ObjectFactoryDwelling : public AbstractFactory<RecordDwe
                 if (rec.m_guard == -1) {
                     rec.m_guard = scoreValue * 2;
                 }
+                if (value.m_factionValues.contains(dwellFaction)) {
+                    rec.m_value = value.m_factionValues.at(dwellFaction);
+                }
                 rec.m_frequency = value.m_frequency;
-                if (scoreSettings.isValidValue(Core::ScoreAttr::ArmyDwelling, scoreValue))
+                if (scoreSettings.isValidValue(Core::ScoreAttr::ArmyDwelling, rec.m_value))
                     m_records.m_records.push_back(rec);
             }
         }

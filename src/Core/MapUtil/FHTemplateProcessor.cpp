@@ -647,7 +647,7 @@ void FHTemplateProcessor::runRewards()
         if (tileZone.m_rngZoneSettings.m_scoreTargets.empty())
             continue;
 
-        //if (tileZone.m_id != "P4")
+        //if (tileZone.m_id != "P1")
         //    continue;
 
         m_logOutput << m_indent << " --- generate : " << tileZone.m_id << " --- \n";

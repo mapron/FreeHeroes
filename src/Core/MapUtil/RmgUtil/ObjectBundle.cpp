@@ -285,8 +285,9 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
         int64_t      min  = tileZone.m_rngZoneSettings.m_guardMin;
         int64_t      max  = tileZone.m_rngZoneSettings.m_guardMax;
         obj.m_targetGuard = min + m_rng->gen(max - min);
+        obj.m_itemLimit   = 1;
         if (type == ObjectGenerator::IObject::Type::Pickable)
-            obj.m_itemLimit = 1 + m_rng->genSmall(3);
+            obj.m_itemLimit += m_rng->genSmall(3);
 
         obj.m_type          = type;
         obj.m_guardPosition = g_allPositions[m_rng->genSmall(g_allPositions.size() - 1)];
@@ -326,7 +327,9 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
             if (bundleGuarded.tryPush(newItem))
                 continue;
             pushIfNeeded();
-            bundleGuarded.tryPush(newItem);
+
+            if (!bundleGuarded.tryPush(newItem))
+                throw std::runtime_error("sanity check failed: failed push to empty bundle.");
         }
         if (bundleGuarded.m_items.size())
             pushIfNeeded();

@@ -191,6 +191,9 @@ struct FHRngZone {
             int m_frequency = 1000;
             int m_guard     = -1;
 
+            using FactionMap = std::map<Core::LibraryFactionConstPtr, int>;
+            FactionMap m_factionValues;
+
             bool operator==(const Record&) const noexcept = default;
         };
         using Map = std::map<std::string, Record>;
