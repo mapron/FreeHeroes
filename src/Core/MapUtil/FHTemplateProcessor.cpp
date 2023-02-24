@@ -699,7 +699,7 @@ void FHTemplateProcessor::runCorrectObjectTerrains()
 void FHTemplateProcessor::runObstacles()
 {
     ObstacleHelper obstacleHelper(m_map, m_tileZones, m_tileContainer, m_rng, m_database, m_logOutput);
-    obstacleHelper.placeObstacles();
+    obstacleHelper.placeObstacles(3);
 
     for (auto& tileZone : m_tileZones) {
         for (auto* tile : tileZone.m_needBeBlocked) {

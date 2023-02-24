@@ -44,7 +44,7 @@ public:
                    const Core::IGameDatabase*    database,
                    std::ostream&                 logOutput);
 
-    void placeObstacles();
+    void placeObstacles(size_t minSuitable);
 
 private:
     FHMap&                           m_map;

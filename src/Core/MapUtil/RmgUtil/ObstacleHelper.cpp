@@ -119,7 +119,7 @@ ObstacleHelper::ObstacleHelper(FHMap&                        map,
 {
 }
 
-void ObstacleHelper::placeObstacles()
+void ObstacleHelper::placeObstacles(size_t minSuitable)
 {
     ObstacleIndex obstacleIndex;
     using Type = Core::LibraryMapObstacle::Type;
@@ -222,6 +222,7 @@ void ObstacleHelper::placeObstacles()
 
             std::vector<Core::LibraryMapObstacleConstPtr> suitable;
             for (const ObstacleBucket* bucket : buckets) {
+                //std::cerr << "bucket: " << bucket->m_area << "" << "\n";
                 for (auto* obst : bucket->m_objects) {
                     if (obst == prev)
                         continue;
@@ -235,9 +236,14 @@ void ObstacleHelper::placeObstacles()
 
                     Core::LibraryTerrainConstPtr requiredTerrain = m_tileContainer.m_tileIndex.at(objPos)->m_zone->m_terrain;
 
-                    if (def->terrainsSoftCache.contains(requiredTerrain))
+                    if (def->terrainsSoftCache.contains(requiredTerrain)) {
                         suitable.push_back(obst);
+                        // auto xx = obst->objectDefs.get({})->combinedMask;
+                        //std::cerr << "suitable: " << obst->id << " = " << xx.m_width << "x" << xx.m_height << "\n";
+                    }
                 }
+                if (suitable.size() >= minSuitable)
+                    break;
             }
             //{
             //    FHPos pos{ (int) x, (int) y, 0 };
