@@ -57,9 +57,10 @@ struct ObjectBundle {
     int64_t m_targetGuard  = 0;
     size_t  m_segmentIndex = 0;
 
-    void sumGuard();
 
     void estimateOccupied();
+
+    bool tryPush(const Item& item);
 
     //bool placeOnMap(std::set<FHPos>& availableCells, Core::IRandomGenerator* const rng);
 

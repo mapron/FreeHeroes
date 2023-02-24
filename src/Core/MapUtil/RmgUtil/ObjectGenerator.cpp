@@ -559,6 +559,7 @@ struct RecordArtifact : public CommonRecord<RecordArtifact> {
 struct ObjectGenerator::ObjectFactoryArtifact : public AbstractFactory<RecordArtifact> {
     struct ObjectArtifact : public AbstractObjectWithId<FHArtifact> {
         Type getType() const override { return Type::Pickable; }
+        bool preventDuplicates() const override { return true; }
     };
 
     ObjectFactoryArtifact(FHMap& map, const FHRngZone::GeneratorArtifact& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng, ArtifactPool* artifactPool)
@@ -661,6 +662,7 @@ struct ObjectGenerator::ObjectFactoryResourcePile : public AbstractFactory<Recor
 struct ObjectPandora : public ObjectGenerator::AbstractObject<FHPandora> {
     std::string getId() const override { return m_obj.m_generationId; }
     Type        getType() const override { return Type::Pickable; }
+    bool        preventDuplicates() const override { return true; }
 };
 
 struct RecordPandora : public CommonRecord<RecordPandora> {
@@ -886,6 +888,7 @@ struct RecordSpellScroll : public CommonRecord<RecordSpellScroll> {
 struct ObjectGenerator::ObjectFactoryScroll : public AbstractFactory<RecordSpellScroll> {
     struct ObjectScroll : public AbstractObjectWithId<FHArtifact> {
         Type getType() const override { return Type::Pickable; }
+        bool preventDuplicates() const override { return true; }
     };
 
     ObjectFactoryScroll(FHMap& map, const FHRngZone::GeneratorScroll& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng, SpellPool* spellPool)

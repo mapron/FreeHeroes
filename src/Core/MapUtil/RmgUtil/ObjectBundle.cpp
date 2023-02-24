@@ -61,13 +61,6 @@ MapTileRegion blurSet(MapTileRegion&& source, bool diag, bool excludeOriginal = 
 
 }
 
-void ObjectBundle::sumGuard()
-{
-    m_guard = 0;
-    for (auto& item : m_items)
-        m_guard += item.m_guard;
-}
-
 void ObjectBundle::estimateOccupied()
 {
     Mernel::ProfilerScope scope("estimateOccupied");
@@ -210,6 +203,29 @@ void ObjectBundle::estimateOccupied()
     m_absPosIsValid = true;
 }
 
+bool ObjectBundle::tryPush(const Item& item)
+{
+    if (m_items.size() >= m_itemLimit)
+        return false;
+
+    int64_t newGuard = m_guard + item.m_guard;
+
+    if (!m_items.empty()) {
+        if (newGuard > m_targetGuard)
+            return false;
+    }
+    if (item.m_obj->preventDuplicates()) {
+        for (auto& existingItem : m_items) {
+            if (existingItem.m_obj->getId() == item.m_obj->getId())
+                return false;
+        }
+    }
+    m_guard = newGuard;
+
+    m_items.push_back(item);
+    return true;
+}
+
 std::string ObjectBundle::toPrintableString() const
 {
     std::ostringstream os;
@@ -295,18 +311,9 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
 
         ObjectBundle bundleGuarded = makeNewObjectBundle(type);
 
-        auto pushIfNeeded = [this, &tileZone, &bundleGuarded, &makeNewObjectBundle](bool force) {
-            bundleGuarded.sumGuard();
+        auto pushIfNeeded = [this, &tileZone, &bundleGuarded, &makeNewObjectBundle]() {
             bundleGuarded.m_considerBlock = bundleGuarded.m_guard > tileZone.m_rngZoneSettings.m_guardBlock;
-
-            if (!force && bundleGuarded.m_guard < bundleGuarded.m_targetGuard) {
-                if (bundleGuarded.m_items.size() < bundleGuarded.m_itemLimit)
-                    return;
-            }
-            if (!bundleGuarded.m_items.size())
-                return;
-
-            bundleGuarded.m_absPos = m_tileContainer.m_centerTile;
+            bundleGuarded.m_absPos        = m_tileContainer.m_centerTile;
             bundleGuarded.estimateOccupied();
             assert(bundleGuarded.m_absPosIsValid);
 
@@ -315,10 +322,14 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
         };
 
         for (const auto& item : bucket.m_guarded) {
-            bundleGuarded.m_items.push_back(ObjectBundle::Item{ .m_obj = item.m_obj, .m_guard = item.m_guard });
-            pushIfNeeded(false);
+            auto newItem = ObjectBundle::Item{ .m_obj = item.m_obj, .m_guard = item.m_guard };
+            if (bundleGuarded.tryPush(newItem))
+                continue;
+            pushIfNeeded();
+            bundleGuarded.tryPush(newItem);
         }
-        pushIfNeeded(true);
+        if (bundleGuarded.m_items.size())
+            pushIfNeeded();
     }
 
     std::sort(m_consumeResult.m_bundlesGuarded.begin(), m_consumeResult.m_bundlesGuarded.end(), [](const ObjectBundle& l, const ObjectBundle& r) {

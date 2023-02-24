@@ -47,6 +47,7 @@ public:
         virtual FHPos          getOffset() const { return FHPos{}; }
 
         virtual Core::LibraryObjectDefConstPtr getDef() const { return nullptr; }
+        virtual bool                           preventDuplicates() const { return false; }
     };
 
     using IObjectPtr = std::shared_ptr<IObject>;
