@@ -23,6 +23,7 @@ struct TileZone {
     Core::LibraryTerrainConstPtr m_terrain         = nullptr;
     Core::LibraryFactionConstPtr m_mainTownFaction = nullptr;
     Core::LibraryFactionConstPtr m_rewardsFaction  = nullptr;
+    Core::LibraryFactionConstPtr m_dwellFaction    = nullptr;
     Core::LibraryPlayerConstPtr  m_player          = nullptr;
 
     MapTilePtr m_startTile = nullptr;

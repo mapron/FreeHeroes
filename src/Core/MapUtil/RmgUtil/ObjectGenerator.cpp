@@ -965,7 +965,7 @@ struct ObjectGenerator::ObjectFactoryDwelling : public AbstractFactory<RecordDwe
                           const FHScoreSettings&              scoreSettings,
                           const Core::IGameDatabase*          database,
                           Core::IRandomGenerator* const       rng,
-                          Core::LibraryFactionConstPtr        mainFaction)
+                          Core::LibraryFactionConstPtr        dwellFaction)
         : AbstractFactory<RecordDwelling>(map, database, rng)
     {
         if (!genSettings.m_isEnabled)
@@ -978,7 +978,7 @@ struct ObjectGenerator::ObjectFactoryDwelling : public AbstractFactory<RecordDwe
             if (dwelling->creatureIds.empty())
                 continue;
             Core::LibraryFactionConstPtr f = dwelling->creatureIds[0]->faction;
-            if (f != mainFaction)
+            if (f != dwellFaction)
                 continue;
 
             int level = 0;
@@ -1190,8 +1190,8 @@ struct ObjectGenerator::ObjectFactoryMine : public AbstractFactory<RecordMine> {
 // ---------------------------------------------------------------------------------------
 
 void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
-                               Core::LibraryFactionConstPtr mainFaction,
                                Core::LibraryFactionConstPtr rewardsFaction,
+                               Core::LibraryFactionConstPtr dwellFaction,
                                Core::LibraryTerrainConstPtr terrain,
                                int64_t                      armyPercent,
                                int64_t                      goldPercent)
@@ -1244,7 +1244,7 @@ void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
         objectFactories.push_back(std::make_shared<ObjectFactoryPandora>(m_map, zoneSettings.m_generators.m_pandoras, scoreSettings, m_database, m_rng, rewardsFaction));
         objectFactories.push_back(std::make_shared<ObjectFactoryShrine>(m_map, zoneSettings.m_generators.m_shrines, scoreSettings, m_database, m_rng, &spellPool));
         objectFactories.push_back(std::make_shared<ObjectFactoryScroll>(m_map, zoneSettings.m_generators.m_scrolls, scoreSettings, m_database, m_rng, &spellPool));
-        objectFactories.push_back(std::make_shared<ObjectFactoryDwelling>(m_map, zoneSettings.m_generators.m_dwellings, scoreSettings, m_database, m_rng, mainFaction));
+        objectFactories.push_back(std::make_shared<ObjectFactoryDwelling>(m_map, zoneSettings.m_generators.m_dwellings, scoreSettings, m_database, m_rng, dwellFaction));
         objectFactories.push_back(std::make_shared<ObjectFactoryVisitable>(m_map, zoneSettings.m_generators.m_visitables, scoreSettings, m_database, m_rng, terrain));
         objectFactories.push_back(std::make_shared<ObjectFactoryMine>(m_map, zoneSettings.m_generators.m_mines, scoreSettings, m_database, m_rng, terrain));
 

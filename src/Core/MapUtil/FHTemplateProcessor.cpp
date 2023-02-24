@@ -173,6 +173,7 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
         tileZone.m_player          = rngZone.m_player;
         tileZone.m_mainTownFaction = rngZone.m_mainTownFaction;
         tileZone.m_rewardsFaction  = rngZone.m_rewardsFaction;
+        tileZone.m_dwellFaction    = rngZone.m_dwellingFaction;
         if (!tileZone.m_mainTownFaction) {
             if (m_playerInfo.contains(tileZone.m_player)) {
                 tileZone.m_mainTownFaction = m_playerInfo[tileZone.m_player].m_faction;
@@ -183,6 +184,9 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
         }
         if (!tileZone.m_rewardsFaction) {
             tileZone.m_rewardsFaction = tileZone.m_mainTownFaction;
+        }
+        if (!tileZone.m_dwellFaction) {
+            tileZone.m_dwellFaction = tileZone.m_mainTownFaction;
         }
         assert(tileZone.m_mainTownFaction);
         assert(tileZone.m_rewardsFaction);
@@ -640,8 +644,8 @@ void FHTemplateProcessor::runRewards()
 
         ObjectGenerator gen(m_map, m_database, m_rng, m_logOutput);
         gen.generate(tileZone.m_rngZoneSettings,
-                     tileZone.m_mainTownFaction,
                      tileZone.m_rewardsFaction,
+                     tileZone.m_dwellFaction,
                      tileZone.m_terrain,
                      armyPercent,
                      goldPercent);

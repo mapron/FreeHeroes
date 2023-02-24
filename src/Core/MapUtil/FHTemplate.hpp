@@ -82,6 +82,7 @@ struct FHRngZone {
     Core::LibraryPlayerConstPtr  m_player          = nullptr;
     Core::LibraryFactionConstPtr m_mainTownFaction = nullptr;
     Core::LibraryFactionConstPtr m_rewardsFaction  = nullptr;
+    Core::LibraryFactionConstPtr m_dwellingFaction = nullptr;
     Core::LibraryTerrainConstPtr m_terrain         = nullptr;
 
     std::vector<FHRngZoneTown> m_towns;

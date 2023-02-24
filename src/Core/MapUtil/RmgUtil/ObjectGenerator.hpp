@@ -84,8 +84,8 @@ public:
     {}
 
     void generate(const FHRngZone&             zoneSettings,
-                  Core::LibraryFactionConstPtr mainFaction,
                   Core::LibraryFactionConstPtr rewardsFaction,
+                  Core::LibraryFactionConstPtr dwellFaction,
                   Core::LibraryTerrainConstPtr terrain,
                   int64_t                      armyPercent,
                   int64_t                      goldPercent);

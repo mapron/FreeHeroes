@@ -149,6 +149,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_player,
     m_mainTownFaction,
     m_rewardsFaction,
+    m_dwellingFaction,
     m_terrain,
     m_towns,
     m_centerAvg,
