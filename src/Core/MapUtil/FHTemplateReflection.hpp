@@ -19,7 +19,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZoneTown,
     m_town,
     m_playerControlled,
-    m_useZoneFaction)
+    m_useZoneFaction,
+    m_tilesToTarget,
+    m_closeToConnection)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHScoreSettings::ScoreScope,

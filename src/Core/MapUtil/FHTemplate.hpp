@@ -16,9 +16,11 @@
 namespace FreeHeroes {
 
 struct FHRngZoneTown {
-    FHTown m_town;
-    bool   m_playerControlled = false;
-    bool   m_useZoneFaction   = false;
+    FHTown      m_town;
+    bool        m_playerControlled = false;
+    bool        m_useZoneFaction   = false;
+    int         m_tilesToTarget    = -1;
+    std::string m_closeToConnection;
 
     bool operator==(const FHRngZoneTown&) const noexcept = default;
 };

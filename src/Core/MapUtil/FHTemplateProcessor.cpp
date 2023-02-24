@@ -35,8 +35,8 @@ ENUM_REFLECTION_STRINGIFY(
     ZoneTilesInitial,
     ZoneTilesExpand,
     ZoneTilesRefinement,
-    TownsPlacement,
     BorderRoads,
+    TownsPlacement,
     RoadsPlacement,
     Rewards,
     CorrectObjectTerrains,
@@ -225,8 +225,8 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
                          Stage::ZoneTilesInitial,
                          Stage::ZoneTilesExpand,
                          Stage::ZoneTilesRefinement,
-                         Stage::TownsPlacement,
                          Stage::BorderRoads,
+                         Stage::TownsPlacement,
                          Stage::RoadsPlacement,
                          Stage::Rewards,
                          Stage::CorrectObjectTerrains,
@@ -269,10 +269,10 @@ void FHTemplateProcessor::runCurrentStage()
             return runZoneTilesExpand();
         case Stage::ZoneTilesRefinement:
             return runZoneTilesRefinement();
-        case Stage::TownsPlacement:
-            return runTownsPlacement();
         case Stage::BorderRoads:
             return runBorderRoads();
+        case Stage::TownsPlacement:
+            return runTownsPlacement();
         case Stage::RoadsPlacement:
             return runRoadsPlacement();
         case Stage::Rewards:
@@ -484,6 +484,23 @@ void FHTemplateProcessor::runZoneTilesRefinement()
     placeTerrainZones();
 }
 
+void FHTemplateProcessor::runBorderRoads()
+{
+    RoadHelper roadHelper(m_map, m_tileContainer, m_rng, m_logOutput);
+    roadHelper.makeBorders(m_tileZones);
+
+    for (auto& guard : roadHelper.m_guards) {
+        m_guards.push_back(Guard{
+            .m_value        = guard.m_value,
+            .m_id           = guard.m_id,
+            .m_mirrorFromId = guard.m_mirrorFromId,
+            .m_pos          = guard.m_pos,
+            .m_zone         = guard.m_zone,
+            .m_joinable     = guard.m_joinable,
+        });
+    }
+}
+
 void FHTemplateProcessor::runTownsPlacement()
 {
     auto placeTown = [this](FHTown town, FHPos pos, TileZone& tileZone, Core::LibraryPlayerConstPtr player, Core::LibraryFactionConstPtr faction) {
@@ -569,6 +586,28 @@ void FHTemplateProcessor::runTownsPlacement()
         });
 
         for (size_t i = 0; i < towns.size(); ++i) {
+            if (towns[i].m_closeToConnection.empty())
+                continue;
+            auto radius = towns[i].m_tilesToTarget;
+            if (radius <= 0)
+                continue;
+
+            auto                    connectionTile = tileZone.m_namedTiles.at(towns[i].m_closeToConnection);
+            std::vector<MapTilePtr> tilesInRadius;
+            for (auto* zoneTile : tileZone.m_innerAreaUsable.m_innerArea) {
+                auto distance = posDistance(connectionTile, zoneTile);
+                if (distance < radius - 1 || distance > radius + 1)
+                    continue;
+                tilesInRadius.push_back(zoneTile);
+            }
+
+            auto it          = std::min_element(tilesInRadius.cbegin(), tilesInRadius.cend(), [centroidCell](MapTilePtr l, MapTilePtr r) {
+                return posDistance(centroidCell, l) < posDistance(centroidCell, r);
+            });
+            townPositions[i] = *it;
+        }
+
+        for (size_t i = 0; i < towns.size(); ++i) {
             auto player  = towns[i].m_playerControlled ? tileZone.m_rngZoneSettings.m_player : playerNone;
             auto faction = towns[i].m_useZoneFaction ? tileZone.m_mainTownFaction : nullptr;
             placeTown(towns[i].m_town, townPositions[i]->m_pos, tileZone, player, faction);
@@ -588,23 +627,8 @@ void FHTemplateProcessor::runTownsPlacement()
             tileZone.m_innerAreaTowns.insert(areaTowns.m_outsideEdge);
             tileZone.m_innerAreaTowns.doSort();
         }
-    }
-}
-
-void FHTemplateProcessor::runBorderRoads()
-{
-    RoadHelper roadHelper(m_map, m_tileContainer, m_rng, m_logOutput);
-    roadHelper.makeBorders(m_tileZones);
-
-    for (auto& guard : roadHelper.m_guards) {
-        m_guards.push_back(Guard{
-            .m_value        = guard.m_value,
-            .m_id           = guard.m_id,
-            .m_mirrorFromId = guard.m_mirrorFromId,
-            .m_pos          = guard.m_pos,
-            .m_zone         = guard.m_zone,
-            .m_joinable     = guard.m_joinable,
-        });
+        tileZone.m_innerAreaUsable.m_innerArea.erase(tileZone.m_blocked);
+        tileZone.m_innerAreaUsable.makeEdgeFromInnerArea();
     }
 }
 

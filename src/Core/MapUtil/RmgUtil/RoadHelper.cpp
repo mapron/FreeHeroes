@@ -93,10 +93,14 @@ void RoadHelper::makeBorders(std::vector<TileZone>& tileZones)
                 ncellFound = ncell;
             }
         }
-        assert(ncellFound);
+        if (!ncellFound)
+            throw std::runtime_error("Failed to get connection neighbour tile");
 
         MapTilePtr cellFrom = cell->m_zone == &tileZoneFrom ? cell : ncellFound;
-        //MapTilePtr cellTo   = cell->m_zone == &tileZoneFrom ? ncellFound : cell;
+        MapTilePtr cellTo   = cell->m_zone == &tileZoneFrom ? ncellFound : cell;
+
+        cellFrom->m_zone->m_namedTiles[connectionId] = cellFrom;
+        cellTo->m_zone->m_namedTiles[connectionId]   = cellTo;
 
         if (guarded) {
             Guard guard;

@@ -48,6 +48,8 @@ struct TileZone {
     MapTileRegion m_needBeBlocked;
     MapTileRegion m_tentativeBlocked;
 
+    std::map<std::string, MapTilePtr> m_namedTiles;
+
     int64_t m_relativeArea   = 0;
     int64_t m_absoluteArea   = 0;
     int64_t m_absoluteRadius = 0;

@@ -31,8 +31,8 @@ public:
         ZoneTilesInitial,
         ZoneTilesExpand,
         ZoneTilesRefinement,
-        TownsPlacement,
         BorderRoads,
+        TownsPlacement,
         RoadsPlacement,
         Rewards,
         CorrectObjectTerrains,
@@ -49,8 +49,8 @@ private:
     void runZoneTilesInitial();
     void runZoneTilesExpand();
     void runZoneTilesRefinement();
-    void runTownsPlacement();
     void runBorderRoads();
+    void runTownsPlacement();
     void runRoadsPlacement();
     void runRewards();
     void runCorrectObjectTerrains();
