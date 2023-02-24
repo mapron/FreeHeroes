@@ -537,6 +537,15 @@ GameDatabase::GameDatabase(const Mernel::PropertyTree& recordObjectMaps)
         if (!spell->isTeachable)
             continue;
 
+        if (0) {
+            auto name = spell->untranslatedName;
+            if (spell->presentationParams.name.ts.contains("en_US"))
+                name = spell->presentationParams.name.ts.at("en_US");
+            if (spell->presentationParams.name.ts.contains("ru_RU"))
+                name = spell->presentationParams.name.ts.at("ru_RU");
+            Logger(Logger::Warning) << name << "\t\t" << spell->value << "\t" << (spell->value * 2);
+        }
+
         LibraryArtifact art;
         art.id                           = "sod.artifact." + spell->id;
         art.scrollSpell                  = spell;
@@ -630,6 +639,19 @@ GameDatabase::GameDatabase(const Mernel::PropertyTree& recordObjectMaps)
             artifact->cost = artifact->value;
         if (artifact->guard == -1)
             artifact->guard = artifact->value * 2;
+    }
+    std::sort(m_impl->m_artifacts.m_unsorted.begin(), m_impl->m_artifacts.m_unsorted.end(), [](auto* l, auto* r) {
+        return l->sortOrdering() < r->sortOrdering();
+    });
+    for (auto* artifact : m_impl->m_artifacts.m_unsorted) {
+        if (0) {
+            auto name = artifact->untranslatedName;
+            if (artifact->presentationParams.name.ts.contains("en_US"))
+                name = artifact->presentationParams.name.ts.at("en_US");
+            if (artifact->presentationParams.name.ts.contains("ru_RU"))
+                name = artifact->presentationParams.name.ts.at("ru_RU");
+            Logger(Logger::Warning) << name << "\t\t" << artifact->value << "\t" << artifact->guard;
+        }
 
         m_impl->m_artifacts.m_sorted.push_back(artifact);
     }
