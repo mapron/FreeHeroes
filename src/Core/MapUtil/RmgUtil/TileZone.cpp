@@ -135,4 +135,20 @@ void TileZone::fillUnzoned()
     }
 }
 
+int TileZone::getRoadLevel(MapTilePtr node) const
+{
+    const bool isHigh = m_roadNodesHighPriority.contains(node);
+    if (isHigh || m_innerAreaTowns.contains(node))
+        return 0;
+
+    const bool isBorder = m_innerAreaUsable.m_innerEdge.contains(node);
+    if (isBorder)
+        return 2;
+
+    if (m_roadNodes.contains(node))
+        return 1;
+
+    return -1;
+}
+
 }

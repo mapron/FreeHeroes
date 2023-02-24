@@ -534,6 +534,8 @@ void FHTemplateProcessor::runTownsPlacement()
         }
         townArea.makeEdgeFromInnerArea();
         tileZone.m_blocked.insert(townArea.m_innerArea);
+        tileZone.m_innerAreaTowns.insert(townArea.m_innerArea);
+        tileZone.m_innerAreaTowns.insert(townArea.m_outsideEdge);
         tileZone.m_innerAreaSegmentsRoads.insert(townArea.m_outsideEdge);
     };
 
@@ -578,6 +580,14 @@ void FHTemplateProcessor::runTownsPlacement()
             roadHelper.placeRoad({ pos, pos2 }, 0);
         }
         tileZone.m_blocked.doSort();
+        tileZone.m_innerAreaTowns.doSort();
+        {
+            MapTileArea areaTowns;
+            areaTowns.m_innerArea = tileZone.m_innerAreaTowns;
+            areaTowns.makeEdgeFromInnerArea();
+            tileZone.m_innerAreaTowns.insert(areaTowns.m_outsideEdge);
+            tileZone.m_innerAreaTowns.doSort();
+        }
     }
 }
 
@@ -913,15 +923,12 @@ void FHTemplateProcessor::placeDebugInfo()
                 m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = 0, .m_valueB = 4 });
             }
         }
-
         if (m_stopAfter <= Stage::RoadsPlacement) {
             for (auto* cell : tileZone.m_roadNodes) {
-                // if (tileZone.m_innerAreaUsable.m_innerEdge.contains(cell))
-                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 2 });
+                const int roadLevel  = tileZone.getRoadLevel(cell);
+                const int debugValue = roadLevel == 0 ? 1 : (roadLevel == 2 ? 4 : 2);
+                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = debugValue });
             }
-            //for (auto* cell : tileZone.m_roadNodesTowns) {
-            //    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 1 });
-            //}
             for (auto* cell : tileZone.m_innerAreaSegmentsRoads) {
                 if (!tileZone.m_roadNodes.contains(cell))
                     m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 3 });

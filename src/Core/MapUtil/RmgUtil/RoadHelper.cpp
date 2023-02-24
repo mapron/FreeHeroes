@@ -10,6 +10,8 @@
 
 #include "MernelPlatform/Profiler.hpp"
 
+#include <iostream>
+
 namespace FreeHeroes {
 
 RoadHelper::RoadHelper(FHMap&                        map,
@@ -280,7 +282,7 @@ void RoadHelper::placeRoads(TileZone& tileZone)
             const int crossRoads = roadB + roadT + roadR + roadL;
             const int diagRoads  = roadTL + roadTR + roadBL + roadBR;
 
-            if (!roadX && crossRoads == 3 && diagRoads == 0) {
+            if (!roadX && crossRoads >= 3 && diagRoads == 0) {
                 tileZone.m_innerAreaSegmentsRoads.insert(cell);
                 tileZone.m_innerAreaSegmentsRoads.doSort();
             }
@@ -334,19 +336,48 @@ void RoadHelper::placeRoads(TileZone& tileZone)
         }
     }
 
+    {
+        // unite separate networks
+        MapTileArea roadNet;
+        roadNet.m_innerArea    = tileZone.m_innerAreaSegmentsRoads;
+        auto disconnectedParts = roadNet.splitByFloodFill(true);
+        if (disconnectedParts.size() > 1) {
+            std::sort(disconnectedParts.begin(), disconnectedParts.end(), [](const MapTileArea& r, const MapTileArea& l) {
+                return r.m_innerArea.size() < l.m_innerArea.size();
+            });
+            MapTileArea mainPart = disconnectedParts.back();
+            disconnectedParts.pop_back();
+            auto  mainCentroid     = TileZone::makeCentroid(mainPart.m_innerArea);
+            auto* mainCentroidTile = m_tileContainer.m_tileIndex.at(mainCentroid);
+            for (const MapTileArea& part : disconnectedParts) {
+                if (part.m_innerArea.size() <= 2)
+                    continue;
+                auto       it      = std::min_element(part.m_innerArea.cbegin(), part.m_innerArea.cend(), [mainCentroidTile](MapTilePtr l, MapTilePtr r) {
+                    return posDistance(mainCentroidTile, l) < posDistance(mainCentroidTile, r);
+                });
+                MapTilePtr closest = (*it);
+
+                auto it2 = std::min_element(mainPart.m_innerArea.cbegin(), mainPart.m_innerArea.cend(), [closest](MapTilePtr l, MapTilePtr r) {
+                    return posDistance(closest, l) < posDistance(closest, r);
+                });
+
+                MapTilePtr closestMain = (*it2);
+
+                auto path = aStarPath(tileZone, closest, closestMain, true);
+                tileZone.m_innerAreaSegmentsRoads.insert(path);
+            }
+
+            tileZone.m_innerAreaSegmentsRoads.doSort();
+        }
+    }
+
     std::vector<MapTilePtrList> unconnectedRoadNodesByLevel;
     unconnectedRoadNodesByLevel.resize(3);
 
     for (MapTilePtr node : unconnectedRoadNodesAll) {
-        const bool isHigh = tileZone.m_roadNodesHighPriority.contains(node);
-
-        const bool isBorder = tileZone.m_innerAreaUsable.m_innerEdge.contains(node);
-        if (isHigh)
-            unconnectedRoadNodesByLevel[0].push_back(node);
-        else if (isBorder)
-            unconnectedRoadNodesByLevel[2].push_back(node);
-        else
-            unconnectedRoadNodesByLevel[1].push_back(node);
+        const int roadLevel = tileZone.getRoadLevel(node);
+        assert(roadLevel >= 0);
+        unconnectedRoadNodesByLevel[roadLevel].push_back(node);
     }
 
     MapTileRegion           pathAsRegion;
@@ -372,14 +403,32 @@ void RoadHelper::placeRoads(TileZone& tileZone)
             MapTilePtr cell = unconnectedRoadNodes.back();
             unconnectedRoadNodes.pop_back();
 
-            auto       it      = std::min_element(connected.cbegin(), connected.cend(), [cell, &tileZone](MapTilePtr l, MapTilePtr r) {
-                const int64_t lBorderMult = tileZone.m_innerAreaUsable.m_innerEdge.contains(l) ? 3 : 1;
-                const int64_t rBorderMult = tileZone.m_innerAreaUsable.m_innerEdge.contains(r) ? 3 : 1;
+            std::vector<MapTilePtr> connectedTmp = connected;
+
+            std::sort(connectedTmp.begin(), connectedTmp.end(), [cell, &tileZone](MapTilePtr l, MapTilePtr r) {
+                const int     roadLevelL  = tileZone.getRoadLevel(l);
+                const int     roadLevelR  = tileZone.getRoadLevel(r);
+                const int64_t lBorderMult = roadLevelL + 1;
+                const int64_t rBorderMult = roadLevelR + 1;
 
                 return posDistance(cell->m_pos, l->m_pos) * lBorderMult < posDistance(cell->m_pos, r->m_pos) * rBorderMult;
             });
-            MapTilePtr closest = *it;
-            auto       path    = aStarPath(tileZone, cell, closest, false);
+            if (connectedTmp.size() > 4)
+                connectedTmp.resize(4);
+
+            std::vector<MapTilePtrList> pathAlternatives;
+            for (MapTilePtr closest : connectedTmp) {
+                auto path = aStarPath(tileZone, cell, closest, false);
+                if (!path.empty())
+                    pathAlternatives.push_back(std::move(path));
+            }
+            if (pathAlternatives.empty())
+                continue;
+
+            std::sort(pathAlternatives.begin(), pathAlternatives.end(), [](const MapTilePtrList& l, const MapTilePtrList& r) {
+                return l.size() < r.size();
+            });
+            auto path = pathAlternatives[0];
 
             connected.push_back(cell);
             pathAsRegion.insert(path);
@@ -433,7 +482,7 @@ void RoadHelper::placeRoad(const MapTilePtrList& tileList, int level)
 
 void RoadHelper::placeRoadPath(std::vector<FHPos> path, int level)
 {
-    if (path.empty())
+    if (path.empty() || level < 0)
         return;
     FHRoad road;
     road.m_type = m_map.m_template.m_userSettings.m_defaultRoad;

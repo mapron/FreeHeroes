@@ -33,6 +33,7 @@ struct TileZone {
 
     MapTileArea   m_innerAreaUsable;
     MapTileRegion m_innerAreaBottomLine;
+    MapTileRegion m_innerAreaTowns;
 
     std::vector<MapTileArea> m_innerAreaSegments;
 
@@ -79,6 +80,8 @@ struct TileZone {
     void fillDeficit(int thresholdPercent, TileZone* prioritized);
 
     void fillUnzoned();
+
+    int getRoadLevel(MapTilePtr node) const;
 };
 
 }
