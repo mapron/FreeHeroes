@@ -52,6 +52,7 @@ SetupWindow::SetupWindow()
             dir += "/FreeHeroes";
         m_ui->destPath->setText(dir);
     });
+    setWindowIcon(QIcon(":/Application/Logo/64.png"));
 }
 
 SetupWindow::~SetupWindow()

@@ -194,6 +194,7 @@ EmulatorMainWidget::EmulatorMainWidget(const Gui::IGraphicsLibrary*         grap
 
     setWindowTitle(tr("Battle emulator"));
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    setWindowIcon(QIcon(":/Application/Logo/64_battle.png"));
 }
 
 EmulatorMainWidget::~EmulatorMainWidget() = default;

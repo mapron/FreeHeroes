@@ -439,6 +439,8 @@ AddTarget(TYPE app_ui NAME BattleEmulator
         CoreLogic
         BattleLogic
     QT_MODULES Widgets
+    WIN_ICON
+        ${CMAKE_CURRENT_SOURCE_DIR}/guiAssets/64_battle.ico
     UIC_POSTPROCESS_SCRIPTS
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
@@ -455,6 +457,8 @@ AddTarget(TYPE app_ui NAME MapEditor
         GuiInt
         MapUtilGui
     QT_MODULES Widgets
+    WIN_ICON
+        ${CMAKE_CURRENT_SOURCE_DIR}/guiAssets/64_map.ico
     UIC_POSTPROCESS_SCRIPTS
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
@@ -481,6 +485,8 @@ AddTarget(TYPE app_ui NAME MapToolUI
         MapUtil
         MapUtilGui
     QT_MODULES Widgets
+    WIN_ICON
+        ${CMAKE_CURRENT_SOURCE_DIR}/guiAssets/64_map.ico
     UIC_POSTPROCESS_SCRIPTS
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
@@ -502,6 +508,8 @@ AddTarget(TYPE app_ui NAME Launcher
         GuiInt
         MernelPlatform
     QT_MODULES Widgets
+    WIN_ICON
+        ${CMAKE_CURRENT_SOURCE_DIR}/guiAssets/64.ico
     UIC_POSTPROCESS_SCRIPTS
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )

@@ -159,6 +159,7 @@ MapToolWindow::MapToolWindow(
     updatePaths();
 
     setWindowTitle(tr("Random map generator") + " - v. " + m_version);
+    setWindowIcon(QIcon(":/Application/Logo/64_map.png"));
 }
 
 MapToolWindow::~MapToolWindow()

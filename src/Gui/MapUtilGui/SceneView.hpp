@@ -57,8 +57,9 @@ protected:
     void wheelEvent(QWheelEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
     void scrollContentsBy(int dx, int dy) override;
-    
+
     void updateVisibleInner();
+
 private:
     SpritePaintSettings* const m_settings = nullptr;
 };

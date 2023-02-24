@@ -194,6 +194,8 @@ MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDataba
         for (auto* sprite : m_impl->m_mapSprites)
             sprite->tick(tick);
     });
+
+    setWindowIcon(QIcon(":/Application/Logo/64_map.png"));
 }
 MapEditorWidget::~MapEditorWidget()
 {
