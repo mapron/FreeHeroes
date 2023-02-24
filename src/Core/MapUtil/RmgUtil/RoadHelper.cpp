@@ -82,17 +82,7 @@ void RoadHelper::makeBorders(std::vector<TileZone>& tileZones)
         cell->m_zone->m_roadNodesHighPriority.insert(cell);
 
         const bool guarded = connections.m_guard || !connections.m_mirrorGuard.empty();
-        if (guarded) {
-            Guard guard;
-            guard.m_id           = connectionId;
-            guard.m_value        = connections.m_guard;
-            guard.m_mirrorFromId = connections.m_mirrorGuard;
-            guard.m_pos          = cell;
-            guard.m_zone         = nullptr;
-            m_guards.push_back(guard);
 
-            cell->m_zone->m_breakGuardTiles.insert(cell);
-        }
         MapTilePtr ncellFound = nullptr;
 
         for (MapTilePtr ncell : cell->m_allNeighbours) {
@@ -104,6 +94,22 @@ void RoadHelper::makeBorders(std::vector<TileZone>& tileZones)
             }
         }
         assert(ncellFound);
+
+        MapTilePtr cellFrom = cell->m_zone == &tileZoneFrom ? cell : ncellFound;
+        //MapTilePtr cellTo   = cell->m_zone == &tileZoneFrom ? ncellFound : cell;
+
+        if (guarded) {
+            Guard guard;
+            guard.m_id           = connectionId;
+            guard.m_value        = connections.m_guard;
+            guard.m_mirrorFromId = connections.m_mirrorGuard;
+            guard.m_pos          = cellFrom;
+            guard.m_zone         = nullptr;
+            m_guards.push_back(guard);
+
+            cellFrom->m_zone->m_breakGuardTiles.insert(cellFrom);
+        }
+
         MapTileRegion forErase({ cell, ncellFound, cell->m_neighborT, ncellFound->m_neighborT, cell->m_neighborL, ncellFound->m_neighborL });
         forErase.doSort();
         border.erase(forErase);
@@ -513,6 +519,9 @@ MapTilePtrList RoadHelper::aStarPath(TileZone& zone, MapTilePtr start, MapTilePt
         nonCollideSet = zone.m_innerAreaSegmentsRoads;
     }
     nonCollideSet.doSort();
+    nonCollideSet.erase(zone.m_needBeBlocked);
+    nonCollideSet.doSort();
+
     generator.setNonCollision(std::move(nonCollideSet));
 
     auto path = generator.findPath();
@@ -561,8 +570,10 @@ MapTilePtrList RoadHelper::aStarPath(TileZone& zone, MapTilePtr start, MapTilePt
                 path.push_back(extra1);
             else if (zone.m_placedRoads.contains(extra2))
                 path.push_back(extra2);
-            else
+            else if (!zone.m_needBeBlocked.contains(extra1))
                 path.push_back(extra1);
+            else if (!zone.m_needBeBlocked.contains(extra2))
+                path.push_back(extra2);
         }
     }
 
