@@ -71,5 +71,7 @@ AddTarget(TYPE app_ui NAME InstallerSelfExtractor OUTPUT_NAME FreeHeroes_Install
     EXCLUDE_FROM_ALL
     EXTRA_SOURCES
         ${CMAKE_BINARY_DIR}/installer_resource.rc
+    WIN_ICON
+        ${CMAKE_CURRENT_SOURCE_DIR}/guiAssets/64.ico
 )
 add_dependencies(InstallerSelfExtractor InstallArchive)

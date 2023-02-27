@@ -27,7 +27,7 @@ const QString g_mapTool        = "MapToolUI.exe";
 LauncherWindow::LauncherWindow(Mode mode)
     : m_ui(std::make_unique<Ui::LauncherWindow>())
 {
-    setWindowFlags(windowFlags() &~ Qt::WindowMinMaxButtonsHint);
+    setWindowFlags(windowFlags() & ~Qt::WindowMinMaxButtonsHint);
     m_ui->setupUi(this);
     connect(m_ui->pushButtonEmulator, &QAbstractButton::clicked, this, [] {
         QProcess::startDetached(g_battleEmulator, {});
