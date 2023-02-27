@@ -32,6 +32,7 @@ configure_file(${CMAKE_CURRENT_LIST_DIR}/cmake/GitCommit.hpp.in ${CMAKE_CURRENT_
 #[[
 ########## Compile flags ##########
 #]]
+include(utils)
 
 #handling options
 if (WARNING_AS_ERROR)
