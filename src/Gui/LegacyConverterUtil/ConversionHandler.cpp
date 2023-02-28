@@ -311,7 +311,7 @@ void ConversionHandler::writeJsonFromProperty()
 void ConversionHandler::binaryDeserializeArchive()
 {
     ByteOrderBuffer           bobuffer(m_binaryBuffer);
-    ByteOrderDataStreamReader reader(bobuffer, ByteOrderDataStream::LITTLE_ENDIAN);
+    ByteOrderDataStreamReader reader(bobuffer, ByteOrderDataStream::s_littleEndian);
 
     try {
         *m_archive = Archive{ &m_logOutput };
@@ -328,7 +328,7 @@ void ConversionHandler::binarySerializeArchive()
 {
     m_binaryBuffer = {};
     ByteOrderBuffer           bobuffer(m_binaryBuffer);
-    ByteOrderDataStreamWriter writer(bobuffer, ByteOrderDataStream::LITTLE_ENDIAN);
+    ByteOrderDataStreamWriter writer(bobuffer, ByteOrderDataStream::s_littleEndian);
 
     writer << *m_archive;
 }
@@ -360,7 +360,7 @@ void ConversionHandler::readArchiveFromFolder()
 void ConversionHandler::binaryDeserializeSprite()
 {
     ByteOrderBuffer           bobuffer(m_binaryBuffer);
-    ByteOrderDataStreamReader reader(bobuffer, ByteOrderDataStream::LITTLE_ENDIAN);
+    ByteOrderDataStreamReader reader(bobuffer, ByteOrderDataStream::s_littleEndian);
 
     try {
         *m_sprite = SpriteFile{};
@@ -381,7 +381,7 @@ void ConversionHandler::binaryDeserializeSprite()
 void ConversionHandler::binaryDeserializeSpriteMsk()
 {
     ByteOrderBuffer           bobuffer(m_binaryBuffer);
-    ByteOrderDataStreamReader reader(bobuffer, ByteOrderDataStream::LITTLE_ENDIAN);
+    ByteOrderDataStreamReader reader(bobuffer, ByteOrderDataStream::s_littleEndian);
     m_sprite->readMSK(reader);
 }
 
@@ -389,7 +389,7 @@ void ConversionHandler::binarySerializeSprite()
 {
     m_binaryBuffer = {};
     ByteOrderBuffer           bobuffer(m_binaryBuffer);
-    ByteOrderDataStreamWriter writer(bobuffer, ByteOrderDataStream::LITTLE_ENDIAN);
+    ByteOrderDataStreamWriter writer(bobuffer, ByteOrderDataStream::s_littleEndian);
 
     m_sprite->writeBinary(writer);
 }

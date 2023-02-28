@@ -428,7 +428,7 @@ void MapConverter::binaryDeserializeH3M()
         throw std::runtime_error("Buffer needs to be in Uncompressed state.");
 
     ByteOrderBuffer           bobuffer(m_binaryBuffer);
-    ByteOrderDataStreamReader reader(bobuffer, ByteOrderDataStream::LITTLE_ENDIAN);
+    ByteOrderDataStreamReader reader(bobuffer, ByteOrderDataStream::s_littleEndian);
 
     try {
         reader >> m_mapH3M;
@@ -443,7 +443,7 @@ void MapConverter::binarySerializeH3M()
 {
     m_binaryBuffer = {};
     ByteOrderBuffer           bobuffer(m_binaryBuffer);
-    ByteOrderDataStreamWriter writer(bobuffer, ByteOrderDataStream::LITTLE_ENDIAN);
+    ByteOrderDataStreamWriter writer(bobuffer, ByteOrderDataStream::s_littleEndian);
 
     writer << m_mapH3M;
 
@@ -466,7 +466,7 @@ void MapConverter::binaryDeserializeH3SVG()
         throw std::runtime_error("Buffer needs to be in Uncompressed state.");
 
     ByteOrderBuffer           bobuffer(m_binaryBuffer);
-    ByteOrderDataStreamReader reader(bobuffer, ByteOrderDataStream::LITTLE_ENDIAN);
+    ByteOrderDataStreamReader reader(bobuffer, ByteOrderDataStream::s_littleEndian);
 
     try {
         reader >> m_mapH3SVG;
@@ -480,7 +480,7 @@ void MapConverter::binarySerializeH3SVG()
 {
     m_binaryBuffer = {};
     ByteOrderBuffer           bobuffer(m_binaryBuffer);
-    ByteOrderDataStreamWriter writer(bobuffer, ByteOrderDataStream::LITTLE_ENDIAN);
+    ByteOrderDataStreamWriter writer(bobuffer, ByteOrderDataStream::s_littleEndian);
 
     writer << m_mapH3SVG;
 

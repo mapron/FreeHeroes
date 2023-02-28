@@ -164,7 +164,7 @@ void BitmapFile::readFromBlob(ByteArrayHolder& blob)
         throw std::runtime_error("Need to specify bitmap Compression and PixFormat");
 
     ByteOrderBuffer           bobuffer(blob);
-    ByteOrderDataStreamReader stream(bobuffer, ByteOrderDataStream::LITTLE_ENDIAN);
+    ByteOrderDataStreamReader stream(bobuffer, ByteOrderDataStream::s_littleEndian);
 
     if (m_compression >= Compression::RLE1 && m_compression <= Compression::RLE3) {
         m_rleData.m_rleRows.resize(m_height);
@@ -257,7 +257,7 @@ void BitmapFile::writeToBlob(ByteArrayHolder& blob) const
 
     ByteOrderBuffer bobuffer(blob);
 
-    ByteOrderDataStreamWriter stream(bobuffer, ByteOrderDataStream::LITTLE_ENDIAN);
+    ByteOrderDataStreamWriter stream(bobuffer, ByteOrderDataStream::s_littleEndian);
 
     if (m_compression >= Compression::RLE1 && m_compression <= Compression::RLE3) {
         // this is for RLE round-trip only.
