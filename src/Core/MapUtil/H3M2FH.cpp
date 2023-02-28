@@ -889,6 +889,7 @@ Core::Reward H3M2FHConverter::convertRewardHut(const MapSeerHut& hut) const
             case 2: fhReward.statBonus.magic.spellPower   = hut.m_rVal; break;
             case 3: fhReward.statBonus.magic.intelligence = hut.m_rVal; break;
         }
+        break;
             // clang-format on
         }
 
