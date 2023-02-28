@@ -44,7 +44,15 @@ if (WARNING_AS_ERROR)
             -Wno-error=redundant-move
             -Wno-error=implicit-fallthrough
             )
-        AddCompilerFlagIfSupported(-Wno-error=implicit-int-float-conversion)
+        AddCompilerFlagIfSupported(
+            -Wno-error=implicit-int-float-conversion
+            -Wno-error=class-memaccess
+            -Wno-error=uninitialized
+            -Wno-error=maybe-uninitialized
+            -Wno-error=restrict
+            -Wno-error=unused-function
+            -Wno-error=deprecated-declarations
+        )
     endif()
 endif()
 
@@ -515,6 +523,7 @@ AddTarget(TYPE app_ui NAME Launcher
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
 
+if (WIN32)
 AddTarget(TYPE app_ui NAME PostInstallSetup
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/PostInstallSetup
     LINK_LIBRARIES
@@ -524,6 +533,7 @@ AddTarget(TYPE app_ui NAME PostInstallSetup
     UIC_POSTPROCESS_SCRIPTS
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
+endif()
 
 # tests
 

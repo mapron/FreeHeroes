@@ -56,6 +56,7 @@ void H3Map::VictoryCondition::readBinary(ByteOrderDataStreamReader& stream)
         case VictoryConditionType::BUILDCITY:
         {
             stream >> m_pos >> m_hallLevel >> m_castleLevel;
+            break;
         }
         case VictoryConditionType::BUILDGRAIL:
         {
@@ -131,6 +132,7 @@ void H3Map::VictoryCondition::writeBinary(ByteOrderDataStreamWriter& stream) con
         case VictoryConditionType::BUILDCITY:
         {
             stream << m_pos << m_hallLevel << m_castleLevel;
+            break;
         }
         case VictoryConditionType::BUILDGRAIL:
         {

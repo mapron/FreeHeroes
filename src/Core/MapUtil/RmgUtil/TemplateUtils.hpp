@@ -130,7 +130,7 @@ constexpr inline int64_t intSqrt(const int64_t value) noexcept
     int64_t result = 3;
     if (!std::is_constant_evaluated()) { // DO NOT 'if constexpr' here! Also, replace to 'if consteval' later.
         // speedup so runtime will only use 1-2 loop iterations.
-        result = static_cast<int64_t>(std::sqrtl(value)) - 1;
+        result = static_cast<int64_t>(sqrtl(value)) - 1;
     }
 
     int64_t estimate = result * result;

@@ -15,6 +15,7 @@
 #include "MernelPlatform/FileIOUtils.hpp"
 
 #include "IResourceLibrary.hpp"
+#include <list>
 
 namespace FreeHeroes::Core {
 using namespace Mernel;
