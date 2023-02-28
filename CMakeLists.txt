@@ -44,7 +44,15 @@ if (WARNING_AS_ERROR)
             -Wno-error=redundant-move
             -Wno-error=implicit-fallthrough
             )
-        AddCompilerFlagIfSupported(-Wno-error=implicit-int-float-conversion)
+        AddCompilerFlagIfSupported(
+            -Wno-error=implicit-int-float-conversion
+            -Wno-error=class-memaccess
+            -Wno-error=uninitialized
+            -Wno-error=maybe-uninitialized
+            -Wno-error=restrict
+            -Wno-error=unused-function
+            -Wno-error=deprecated-declarations
+        )
     endif()
 endif()
 
@@ -258,6 +266,7 @@ AddTarget(TYPE shared NAME GuiUtils OUTPUT_PREFIX FH
 AddTarget(TYPE shared NAME GuiWidgets OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Widgets
     EXPORT_INCLUDES
+    INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Widgets
     LINK_LIBRARIES
         GuiInt MernelPlatform GameObjects GameInt SoundInt
 
@@ -270,6 +279,7 @@ AddTarget(TYPE shared NAME GuiWidgets OUTPUT_PREFIX FH
 AddTarget(TYPE shared NAME GuiEditor OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Editor
     EXPORT_INCLUDES
+    INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Editor
     LINK_LIBRARIES
         GuiInt MernelPlatform GameObjects GameInt SoundInt
         GuiGameWrappers
@@ -424,6 +434,7 @@ AddTarget( TYPE app_console NAME GameLegacyConverterCLI
 
 AddTarget(TYPE app_ui NAME BattleEmulator
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/BattleEmulator
+    INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/src/App/BattleEmulator
     LINK_LIBRARIES
         MernelPlatform
         GuiInt
@@ -466,6 +477,7 @@ AddTarget(TYPE app_ui NAME MapEditor
 
 AddTarget(TYPE app_ui NAME MapToolUI
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/MapToolUI
+    INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/src/App/MapToolUI
     LINK_LIBRARIES
         MernelPlatform
         MernelReflection
@@ -515,6 +527,7 @@ AddTarget(TYPE app_ui NAME Launcher
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
 
+if (WIN32)
 AddTarget(TYPE app_ui NAME PostInstallSetup
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/PostInstallSetup
     LINK_LIBRARIES
@@ -524,6 +537,7 @@ AddTarget(TYPE app_ui NAME PostInstallSetup
     UIC_POSTPROCESS_SCRIPTS
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
+endif()
 
 # tests
 

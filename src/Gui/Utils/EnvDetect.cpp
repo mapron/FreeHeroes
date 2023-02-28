@@ -39,7 +39,7 @@ Mernel::std_path FreeHeroes::findHeroes3Installation(bool hotaAllowed) noexcept
 
 #else
 
-Mernel::std_path FreeHeroes::findHeroes3Installation(bool)
+Mernel::std_path FreeHeroes::findHeroes3Installation(bool) noexcept
 {
     return {};
 }
