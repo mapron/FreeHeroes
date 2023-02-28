@@ -266,7 +266,6 @@ AddTarget(TYPE shared NAME GuiUtils OUTPUT_PREFIX FH
 AddTarget(TYPE shared NAME GuiWidgets OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Widgets
     EXPORT_INCLUDES
-    INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Widgets
     LINK_LIBRARIES
         GuiInt MernelPlatform GameObjects GameInt SoundInt
 
@@ -279,7 +278,6 @@ AddTarget(TYPE shared NAME GuiWidgets OUTPUT_PREFIX FH
 AddTarget(TYPE shared NAME GuiEditor OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Editor
     EXPORT_INCLUDES
-    INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Editor
     LINK_LIBRARIES
         GuiInt MernelPlatform GameObjects GameInt SoundInt
         GuiGameWrappers
@@ -434,7 +432,6 @@ AddTarget( TYPE app_console NAME GameLegacyConverterCLI
 
 AddTarget(TYPE app_ui NAME BattleEmulator
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/BattleEmulator
-    INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/src/App/BattleEmulator
     LINK_LIBRARIES
         MernelPlatform
         GuiInt
@@ -477,7 +474,6 @@ AddTarget(TYPE app_ui NAME MapEditor
 
 AddTarget(TYPE app_ui NAME MapToolUI
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/MapToolUI
-    INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/src/App/MapToolUI
     LINK_LIBRARIES
         MernelPlatform
         MernelReflection
