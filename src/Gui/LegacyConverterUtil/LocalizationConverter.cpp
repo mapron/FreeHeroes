@@ -118,6 +118,9 @@ void LocalizationConverter::extractSOD(const std_path& txtSubdir, const std_path
     } else if (pikemanLocalized == "Pikenier") {
         localeId = "de_DE";
         encoding = "Windows-1252";
+    } else if (pikemanLocalized.startsWith("\xC7\xB9\xB1\xF8")) { // Chinese
+        localeId = "zh_CN";
+        encoding = "GB18030";
     }
     //units.create.en_US
     //<subjectName>.<localeId>
@@ -259,6 +262,9 @@ void LocalizationConverter::extractHOTA(const std_path& jsonSubdir, const std_pa
     } else if (cannonLocalized.startsWith("Kanone")) { // German
         localeId = "de_DE";
         encoding = "Windows-1252";
+    } else if (locTable[0][1].startsWith("\xbc\xd3\xc5\xa9\xc5\xda")) { // Chinese
+        localeId = "zh_CN";
+        encoding = "GB18030";
     }
 
     Logger(Logger::Notice) << "localeId=" << localeId << ", encoding=" << encoding.toStdString();
