@@ -197,6 +197,7 @@ struct LibraryArtifact {
         std::string   iconBonus;
 
         TranslationMap name;
+        TranslationMap descr;
     };
 
     std::string              id;

@@ -341,11 +341,14 @@ ENUM_REFLECTION_PAIRED(LibrarySecondarySkill::HandlerType,
 )
 
 
-STRUCT_REFLECTION_PAIRED(
+STRUCT_REFLECTION_STRINGIFY(
     LibrarySecondarySkill::Presentation,
-    "levels",                      levels,
-    "order",                       order,
-    "name",                        name
+    levels,
+    order,
+    name,
+    descrBasic,
+    descrAdvanced,
+    descrExpert
 )
 
 STRUCT_REFLECTION_PAIRED(
@@ -507,7 +510,12 @@ STRUCT_REFLECTION_PAIRED(
     "spriteProjectile",            spriteProjectile,
     "soundHasShoot",               soundHasShoot,
     "soundHasMovementStart",       soundHasMovementStart,
-    "name",                        name
+    "name",                        name,
+    "namePlural",                  namePlural,
+    "namePluralExt",               namePluralExt,
+    "namePluralExt2",              namePluralExt2,
+    "nameAsTarget",                nameAsTarget,
+    "nameAsTargetPlural",          nameAsTargetPlural
 )
 
 
@@ -610,7 +618,8 @@ STRUCT_REFLECTION_PAIRED(
     "order",                      order,
     "orderGroup",                 orderGroup,
     "orderCategory",              orderCategory,
-    "name",                       name
+    "name",                       name,
+    "descr",                      descr
 )
 
 STRUCT_REFLECTION_PAIRED(
@@ -809,7 +818,12 @@ STRUCT_REFLECTION_PAIRED(
     "animation",                   animation,
     "sound",                       sound,
     "name",                        name,
-    "shortName",                   shortName
+    "shortName",                   shortName,
+        
+    "descrNormal",                 descrNormal,
+    "descrBasic",                  descrBasic,
+    "descrAdvanced",               descrAdvanced,
+    "descrExpert",                 descrExpert
 )
 
 

@@ -45,6 +45,11 @@ struct LibrarySpell {
         TranslationMap name;
         TranslationMap shortName;
 
+        TranslationMap descrNormal;
+        TranslationMap descrBasic;
+        TranslationMap descrAdvanced;
+        TranslationMap descrExpert;
+
         int configOrder = 0;
         int order       = 0;
     };

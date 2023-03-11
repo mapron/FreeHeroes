@@ -180,6 +180,7 @@ bool Application::load()
     if (m_options.contains(Option::QtTranslations)) {
         m_impl->appConfig->globalMutable().localeItems << "en_US"
                                                        << "ru_RU"
+                                                       << "pl_PL"
                                                        << "de_DE"
                                                        << "zh_CN";
 

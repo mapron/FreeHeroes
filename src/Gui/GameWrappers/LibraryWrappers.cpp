@@ -27,12 +27,18 @@ namespace FreeHeroes::Gui {
 
 namespace {
 
+// Chinese
+// 0 - singular/plural
+int pluralSelector_CN(int n)
+{
+    return 0;
+}
+
 // English
 // 0 - singular, 1 - plural
 // default is plural.
-[[maybe_unused]] int pluralSelector_EN(int n, int availableSize)
+int pluralSelector_EN(int n)
 {
-    assert(availableSize > 1);
     assert(n >= -1);
     if (n == -1) // default
         return 1;
@@ -45,26 +51,31 @@ namespace {
 // Polish
 // 0 - singular, 1 - plural, [2 - 2..4 ] [3 - 5+ ]
 // default is plural.
-[[maybe_unused]] int pluralSelector_PL(int n, int availableSize)
+int pluralSelector_PL(int n)
 {
-    assert(availableSize > 1);
     assert(n >= -1);
     if (n == -1) // default
         return 1;
     if (n == 1)
         return 0;
     if ((n % 10) >= 2 && (n % 10) <= 4 && ((n % 100 < 10) || (n % 100 > 20)))
-        return availableSize > 2 ? 2 : 1;
+        return 2;
 
-    return availableSize > 3 ? 3 : 1;
+    return 3; // see comment for pluralSelector_CYR.
 }
 
-// Russian
+// Ukranian/Russian
 // 0 - singular, 1 - plural, [2 - 2..4 ] [3 - 5+ ]
 // default is plural.
-[[maybe_unused]] int pluralSelector_RU(int n, int availableSize)
+// example.
+// 0, singular, "Магог", "Титан"
+// 1, abstract plural, "Магоги", "Титаны"
+// 2, dual form "Магога", "Титана"
+// 3, true plural form "Магогов", "Титанов"
+// usage of abstract plural form near the number sounds bad, like '2 Титаны'.
+// Sadly, original game does not provide those translations, so we rely on what FH project ships first, then fallback to abstract plural form.
+int pluralSelector_CYR(int n)
 {
-    assert(availableSize > 1);
     assert(n >= -1);
     if (n == -1) // default
         return 1;
@@ -72,9 +83,32 @@ namespace {
         return 0;
 
     if ((n % 10) >= 2 && (n % 10) <= 4 && ((n % 100 < 10) || (n % 100 > 20)))
-        return availableSize > 2 ? 2 : 1;
+        return 2;
 
-    return availableSize > 3 ? 3 : 1;
+    return 3;
+}
+
+// I wish I could reuse plural forms logic from Qt. Sadly, all those rules are hardcoded into 'lrelease' tool and not accessible.
+int pluralSelector(int n)
+{
+    const auto currentLocale = QCoreApplication::instance()->property("currentLocale").toString();
+    if (currentLocale == "zh_CN")
+        return pluralSelector_CN(n);
+    if (currentLocale == "ru_RU" || currentLocale == "uk_UA")
+        return pluralSelector_CYR(n);
+    if (currentLocale == "pl_PL")
+        return pluralSelector_PL(n);
+
+    return pluralSelector_EN(n);
+}
+
+bool isValidTranslation(const Core::TranslationMap& tsMap)
+{
+    const auto currentLocale = QCoreApplication::instance()->property("currentLocale").toString().toStdString();
+    if (tsMap.ts.contains(currentLocale)) {
+        return !tsMap.ts.at(currentLocale).empty();
+    }
+    return false;
 }
 
 QString translateHelper(const Core::TranslationMap& tsMap,
@@ -153,9 +187,9 @@ QString GuiArtifact::getName(int n) const
 
 QString GuiArtifact::getDescr() const
 {
-    QString localizedDesc = ""; /*= translateHelper(TranslationContextName<Core::LibraryArtifact>::context,
+    QString localizedDesc = translateHelper(getSource()->presentationParams.descr,
                                             getSource()->untranslatedName,
-                                            getSource()->id + ".descr");*/
+                                            getSource()->id);
     return prepareDescription(localizedDesc);
 }
 
@@ -210,15 +244,40 @@ GuiUnit::GuiUnit(Sound::IMusicBox*, const IGraphicsLibrary* graphicsLibrary, Cor
     }
 }
 
+QString GuiUnit::getName(int n) const
+{
+    QString localizedName = getNameWithCountImpl(n);
+    return localizedName;
+}
+
 QString GuiUnit::getNameWithCount(int n, GuiUnit::Variation variation) const
 {
-    auto id = getSource()->id;
-    if (variation == Variation::AsTarget)
-        id = id + ".accusative";
-    QString localizedName = translateHelper(getSource()->presentationParams.name, getSource()->untranslatedName, id, n);
+    QString localizedName = getNameWithCountImpl(n, variation);
     if (n > 0)
         return tr("%1 %2").arg(n).arg(localizedName);
 
+    return localizedName;
+}
+
+QString GuiUnit::getNameWithCountImpl(int n, Variation variation) const
+{
+    const int                   pluralForm = pluralSelector(n);
+    auto&                       p          = getSource()->presentationParams;
+    const Core::TranslationMap* tsMap      = &p.name;
+    if (pluralForm > 0 && isValidTranslation(p.namePlural))
+        tsMap = &p.namePlural;
+    if (pluralForm == 2 && isValidTranslation(p.namePluralExt))
+        tsMap = &p.namePluralExt;
+    if (pluralForm == 3 && isValidTranslation(p.namePluralExt2))
+        tsMap = &p.namePluralExt2;
+
+    if (variation == Variation::AsTarget) {
+        if (pluralForm == 0 && isValidTranslation(p.nameAsTarget))
+            tsMap = &p.nameAsTarget;
+        if (pluralForm > 0 && isValidTranslation(p.nameAsTargetPlural))
+            tsMap = &p.nameAsTargetPlural;
+    }
+    QString localizedName = translateHelper(*tsMap, getSource()->untranslatedName, getSource()->id, n);
     return localizedName;
 }
 
@@ -311,10 +370,14 @@ GuiSkill::GuiSkill(Sound::IMusicBox*, const IGraphicsLibrary* graphicsLibrary, C
 
 QString GuiSkill::getDescription(int level) const
 {
-    static const QList<std::string> suffixes{ ".basic", ".advanced", ".expert" };
-    QString                         localizedDesc = ""; /*translateHelper(TranslationContextName<Core::LibrarySecondarySkill>::context,
+    if (level < 0 || level > 2)
+        return {};
+    auto&                                    p = getSource()->presentationParams;
+    std::vector<const Core::TranslationMap*> maps{ &p.descrBasic, &p.descrAdvanced, &p.descrExpert };
+
+    QString localizedDesc = translateHelper(*maps.at(level),
                                             getSource()->untranslatedName,
-                                            getSource()->id + suffixes.value(level));*/
+                                            getSource()->id);
     return prepareDescription(localizedDesc);
 }
 
@@ -340,11 +403,13 @@ GuiSpell::GuiSpell(Sound::IMusicBox* musicBox, const IGraphicsLibrary* graphicsL
 
 QString GuiSpell::getDescription(int level, int hintDamage) const
 {
-    static const QList<std::string> suffixes{ ".normal", ".basic", ".advanced", ".expert" };
-    QString                         localizedDesc = ""; /* translateHelper(TranslationContextName<Core::LibrarySpell>::context,
+    auto&                                    p = getSource()->presentationParams;
+    std::vector<const Core::TranslationMap*> maps{ &p.descrNormal, &p.descrBasic, &p.descrAdvanced, &p.descrExpert };
+
+    QString localizedDesc = translateHelper(*maps.at(level),
                                             getSource()->untranslatedName,
-                                            getSource()->id + suffixes.value(level));*/
-    localizedDesc                                 = prepareDescription(localizedDesc);
+                                            getSource()->id);
+    localizedDesc         = prepareDescription(localizedDesc);
     if (hintDamage > 0) {
         localizedDesc += "<br><br>" + tr("Inflicts damage:") + " " + QString::number(hintDamage);
     }

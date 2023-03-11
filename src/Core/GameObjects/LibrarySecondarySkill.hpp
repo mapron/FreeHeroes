@@ -23,6 +23,10 @@ struct LibrarySecondarySkill {
         int                        order = 0;
 
         TranslationMap name;
+
+        TranslationMap descrBasic;
+        TranslationMap descrAdvanced;
+        TranslationMap descrExpert;
     };
 
     std::string id;

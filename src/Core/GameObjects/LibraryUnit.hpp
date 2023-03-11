@@ -134,6 +134,11 @@ struct LibraryUnit {
         std::string spriteProjectile;
 
         TranslationMap name;
+        TranslationMap namePlural;
+        TranslationMap namePluralExt;
+        TranslationMap namePluralExt2;
+        TranslationMap nameAsTarget;
+        TranslationMap nameAsTargetPlural;
     };
 
     std::string id;

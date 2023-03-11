@@ -81,7 +81,9 @@ public:
         Normal,
         AsTarget
     };
+    QString getName(int n = -1) const;
     QString getNameWithCount(int n, Variation variation = Variation::Normal) const;
+    QString getNameWithCountImpl(int n, Variation variation = Variation::Normal) const;
 
     QPixmap   getPortraitSmall() const { return m_portraitSmall->get(); }
     QPixmap   getPortraitLarge() const { return m_portraitLarge->get(); }
