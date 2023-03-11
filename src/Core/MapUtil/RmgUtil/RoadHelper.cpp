@@ -495,11 +495,18 @@ void RoadHelper::placeRoadPath(std::vector<FHPos> path, int level)
     if (path.empty() || level < 0)
         return;
     FHRoad road;
-    road.m_type = m_map.m_template.m_userSettings.m_defaultRoad;
+    auto&  settings = m_map.m_template.m_userSettings;
+    road.m_type     = settings.m_defaultRoad;
     if (level == 1)
-        road.m_type = m_map.m_template.m_userSettings.m_innerRoad;
+        road.m_type = settings.m_innerRoad;
     if (level == 2)
-        road.m_type = m_map.m_template.m_userSettings.m_borderRoad;
+        road.m_type = settings.m_borderRoad;
+
+    if (path.size() <= 2 && level == 1) {
+        if (settings.m_defaultRoad != settings.m_innerRoad && settings.m_innerRoad != FHRoadType::Invalid) {
+            road.m_type = settings.m_defaultRoad;
+        }
+    }
 
     if (road.m_type == FHRoadType::Invalid)
         return;
