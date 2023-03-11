@@ -167,13 +167,7 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
         info.m_extraHero    = heroGen(info.m_extraHero, info.m_faction, info.m_extraHeroGen);
     }
 
-    m_tileZones.resize(regionCount);
-    for (int i = 0; const auto& [key, rngZone] : m_map.m_template.m_zones) {
-        auto& tileZone             = m_tileZones[i];
-        tileZone.m_player          = rngZone.m_player;
-        tileZone.m_mainTownFaction = rngZone.m_mainTownFaction;
-        tileZone.m_rewardsFaction  = rngZone.m_rewardsFaction;
-        tileZone.m_dwellFaction    = rngZone.m_dwellingFaction;
+    auto factionSetup = [this](TileZone& tileZone) {
         if (!tileZone.m_mainTownFaction) {
             if (m_playerInfo.contains(tileZone.m_player)) {
                 tileZone.m_mainTownFaction = m_playerInfo[tileZone.m_player].m_faction;
@@ -190,18 +184,30 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
         }
         assert(tileZone.m_mainTownFaction);
         assert(tileZone.m_rewardsFaction);
-        tileZone.m_terrain = rngZone.m_terrain;
+        tileZone.m_terrain = tileZone.m_rngZoneSettings.m_terrain;
         if (!tileZone.m_terrain)
             tileZone.m_terrain = tileZone.m_mainTownFaction->nativeTerrain;
         int z = 0;
         if (!z && tileZone.m_terrain->nonUnderground) {
             tileZone.m_terrain = tileZone.m_terrain->nonUnderground;
         }
+    };
+
+    m_tileZones.resize(regionCount);
+    for (int i = 0; const auto& [key, rngZone] : m_map.m_template.m_zones) {
+        auto& tileZone             = m_tileZones[i];
+        tileZone.m_player          = rngZone.m_player;
+        tileZone.m_mainTownFaction = rngZone.m_mainTownFaction;
+        tileZone.m_rewardsFaction  = rngZone.m_rewardsFaction;
+        tileZone.m_dwellFaction    = rngZone.m_dwellingFaction;
         tileZone.m_rngZoneSettings = rngZone;
-        tileZone.m_id              = key;
-        tileZone.m_index           = i;
-        tileZone.m_rng             = m_rng;
-        tileZone.m_tileContainer   = &m_tileContainer;
+        if (rngZone.m_excludeFactionZones.empty())
+            factionSetup(tileZone);
+
+        tileZone.m_id            = key;
+        tileZone.m_index         = i;
+        tileZone.m_rng           = m_rng;
+        tileZone.m_tileContainer = &m_tileContainer;
         FHPos startTile;
         startTile.m_x        = m_rng->genDispersed(rngZone.m_centerAvg.m_x, rngZone.m_centerDispersion.m_x);
         startTile.m_y        = m_rng->genDispersed(rngZone.m_centerAvg.m_y, rngZone.m_centerDispersion.m_y);
@@ -213,6 +219,12 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
         if (tileZone.m_relativeArea <= 0)
             throw std::runtime_error("Zone: " + key + " has nonpositive relative size");
         i++;
+    }
+    for (auto& tileZone : m_tileZones) {
+        if (!tileZone.m_rngZoneSettings.m_excludeFactionZones.empty()) {
+            tileZone.m_mainTownFaction = getRandomPlayableFaction(tileZone.m_rngZoneSettings.m_excludeFactionZones);
+            factionSetup(tileZone);
+        }
     }
 
     m_stopAfter = stringToStage(stopAfterStage);
@@ -504,8 +516,6 @@ void FHTemplateProcessor::runBorderRoads()
 void FHTemplateProcessor::runTownsPlacement()
 {
     auto placeTown = [this](FHTown town, FHPos pos, TileZone& tileZone, Core::LibraryPlayerConstPtr player, Core::LibraryFactionConstPtr faction) {
-        if (!faction)
-            faction = getRandomFaction(false);
         town.m_factionId = faction;
 
         pos.m_x += 2;
@@ -585,14 +595,15 @@ void FHTemplateProcessor::runTownsPlacement()
             return posDistance(centroidCell, l) < posDistance(centroidCell, r);
         });
 
-        for (size_t i = 0; i < towns.size(); ++i) {
-            if (towns[i].m_closeToConnection.empty())
+        for (size_t i = 0; const auto& [_, town] : towns) {
+            i++;
+            if (town.m_closeToConnection.empty())
                 continue;
-            auto radius = towns[i].m_tilesToTarget;
+            auto radius = town.m_tilesToTarget;
             if (radius <= 0)
                 continue;
 
-            auto                    connectionTile = tileZone.m_namedTiles.at(towns[i].m_closeToConnection);
+            auto                    connectionTile = tileZone.m_namedTiles.at(town.m_closeToConnection);
             std::vector<MapTilePtr> tilesInRadius;
             for (auto* zoneTile : tileZone.m_innerAreaUsable.m_innerArea) {
                 auto distance = posDistance(connectionTile, zoneTile);
@@ -601,16 +612,20 @@ void FHTemplateProcessor::runTownsPlacement()
                 tilesInRadius.push_back(zoneTile);
             }
 
-            auto it          = std::min_element(tilesInRadius.cbegin(), tilesInRadius.cend(), [centroidCell](MapTilePtr l, MapTilePtr r) {
+            auto it              = std::min_element(tilesInRadius.cbegin(), tilesInRadius.cend(), [centroidCell](MapTilePtr l, MapTilePtr r) {
                 return posDistance(centroidCell, l) < posDistance(centroidCell, r);
             });
-            townPositions[i] = *it;
+            townPositions[i - 1] = *it;
         }
 
-        for (size_t i = 0; i < towns.size(); ++i) {
-            auto player  = towns[i].m_playerControlled ? tileZone.m_rngZoneSettings.m_player : playerNone;
-            auto faction = towns[i].m_useZoneFaction ? tileZone.m_mainTownFaction : nullptr;
-            placeTown(towns[i].m_town, townPositions[i]->m_pos, tileZone, player, faction);
+        for (size_t i = 0; const auto& [_, town] : towns) {
+            auto player  = town.m_playerControlled ? tileZone.m_rngZoneSettings.m_player : playerNone;
+            auto faction = town.m_useZoneFaction ? tileZone.m_mainTownFaction : nullptr;
+            if (!faction)
+                faction = getRandomPlayableFaction(town.m_excludeFactionZones);
+
+            placeTown(town.m_town, townPositions[i]->m_pos, tileZone, player, faction);
+            i++;
         }
 
         for (auto&& pos : townPositions) {
@@ -977,6 +992,18 @@ Core::LibraryFactionConstPtr FHTemplateProcessor::getRandomFaction(bool rewardOn
     return result;
 }
 
+Core::LibraryFactionConstPtr FHTemplateProcessor::getRandomPlayableFaction(const std::set<std::string>& excludedZoneIds)
+{
+    std::vector<Core::LibraryFactionConstPtr> factions;
+    auto                                      excluded = getExcludedFactions(excludedZoneIds);
+    for (auto* faction : m_playableFactions)
+        if (!excluded.contains(faction))
+            factions.push_back(faction);
+
+    auto faction = factions[m_rng->genSmall(factions.size() - 1)];
+    return faction;
+}
+
 Core::LibraryHeroConstPtr FHTemplateProcessor::getRandomHero(Core::LibraryFactionConstPtr faction)
 {
     std::vector<Core::LibraryHeroConstPtr> heroes;
@@ -1022,6 +1049,16 @@ int FHTemplateProcessor::getPossibleCount(Core::LibraryUnitConstPtr unit, int64_
 
     possibleCount = value / unitValue;
     return possibleCount;
+}
+
+std::set<Core::LibraryFactionConstPtr> FHTemplateProcessor::getExcludedFactions(const std::set<std::string>& zoneIds) const
+{
+    std::set<Core::LibraryFactionConstPtr> result;
+    for (auto& tileZone : m_tileZones) {
+        if (zoneIds.contains(tileZone.m_id) && tileZone.m_mainTownFaction)
+            result.insert(tileZone.m_mainTownFaction);
+    }
+    return result;
 }
 
 bool FHTemplateProcessor::CmpPlayers::operator()(Core::LibraryPlayerConstPtr a, Core::LibraryPlayerConstPtr b) const

@@ -12,10 +12,10 @@
         "zones" : {
             "Common"  : { 
                 "centerDispersion": {"x": 5 , "y": 5 }, "relativeSizeAvg": 100, "relativeSizeDispersion": 1, "segmentAreaSize": 250,
-                "towns": [
-                    {"town":{"isMain":true, "hasFort":true,"hasCustomBuildings":true,"buildings":["townHall1","fort1","tavern","t1","t2"],"garisonRmg":[{"levels":[10],"value":1000}]},"playerControlled":true, "useZoneFaction": true}, 
-                    {"town":{"hasCustomBuildings":true,"buildings":["townHall1","tavern","t1","t2"], "garisonRmg":[{"levels":[10],"value":2000},{"levels":[20],"value":1000},{"levels":[30],"value":1000}]}}, 
-                    {"town":{"hasCustomBuildings":true,"buildings":["townHall1","tavern","t1","t2"], "garisonRmg":[{"levels":[10],"value":2000},{"levels":[20],"value":1000},{"levels":[30],"value":1000}]}}],
+                "towns": {
+                    "main" : {"town":{"isMain":true, "hasFort":true,"hasCustomBuildings":true,"buildings":["townHall1","fort1","tavern","t1","t2"],"garisonRmg":[{"levels":[10],"value":1000}]},"playerControlled":true, "useZoneFaction": true}, 
+                    "town1": {"town":{"hasCustomBuildings":true,"buildings":["townHall1","tavern","t1","t2"], "garisonRmg":[{"levels":[10],"value":2000},{"levels":[20],"value":1000},{"levels":[30],"value":1000}]}}, 
+                    "town2": {"town":{"hasCustomBuildings":true,"buildings":["townHall1","tavern","t1","t2"], "garisonRmg":[{"levels":[10],"value":2000},{"levels":[20],"value":1000},{"levels":[30],"value":1000}]}}},
                 
                 "scoreTargets": {
                     "High": {
@@ -232,9 +232,13 @@
                 "base": "Common",
                 "centerDispersion": {"x": 1, "y": 1}, "relativeSizeAvg": 130, "relativeSizeDispersion": 5, "terrain": "sod.terrain.sand",
                 "zoneGuardPercent": 150,
-                "towns": [
-                    {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}, "useZoneFaction": true, "tilesToTarget": 8, "closeToConnection":"CC_P1"}, 
-                    {"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}, "useZoneFaction": true, "tilesToTarget": 8, "closeToConnection":"CC_P2"}],
+                "excludeFactionZones":["P1", "P2"],
+                "towns": {
+                    "main" : null,
+                    "town1": null,
+                    "town2": null,
+                    "P1":{"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}, "useZoneFaction": true, "tilesToTarget": 8, "closeToConnection":"CC_P1"}, 
+                    "P2":{"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}, "useZoneFaction": true, "tilesToTarget": 8, "closeToConnection":"CC_P2"}},
 
                 "guardMin": 20000,
                 "guardMax": 150000,
@@ -339,8 +343,10 @@
                 }
             },
     
-            "P1": { "base": "Common"  , "isNormal": true,  "player": "Red" , "centerAvg": {"x": 15 , "y": 15 }  },
-            "P2": { "base": "Common"  , "isNormal": true,  "player": "Blue", "centerAvg": {"x": 120, "y": 120}  },
+            "P1": { "base": "Common"  , "isNormal": true,  "player": "Red" , "centerAvg": {"x": 15 , "y": 15 }  ,
+                "towns": {"town1":{"excludeFactionZones":["P1"] }, "town2":{"excludeFactionZones":["P1"]} } },
+            "P2": { "base": "Common"  , "isNormal": true,  "player": "Blue", "centerAvg": {"x": 120, "y": 120}  ,
+                "towns": {"town1":{"excludeFactionZones":["P2"] }, "town2":{"excludeFactionZones":["P2"]} } },
             "P3": { "base": "Common"  , "isNormal": true,  "player": "None", "centerAvg": {"x": 120, "y": 15 }  },
             "P4": { "base": "Common"  , "isNormal": true,  "player": "None", "centerAvg": {"x": 15 , "y": 120}  },
             "CC": { "base": "Treasure", "isNormal": true,  "player": "None", "centerAvg": {"x": 72 , "y": 72 }  }

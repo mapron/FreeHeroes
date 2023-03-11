@@ -16,11 +16,12 @@
 namespace FreeHeroes {
 
 struct FHRngZoneTown {
-    FHTown      m_town;
-    bool        m_playerControlled = false;
-    bool        m_useZoneFaction   = false;
-    int         m_tilesToTarget    = -1;
-    std::string m_closeToConnection;
+    FHTown                m_town;
+    bool                  m_playerControlled = false;
+    bool                  m_useZoneFaction   = false;
+    int                   m_tilesToTarget    = -1;
+    std::string           m_closeToConnection;
+    std::set<std::string> m_excludeFactionZones;
 
     bool operator==(const FHRngZoneTown&) const noexcept = default;
 };
@@ -87,14 +88,17 @@ struct FHRngZone {
     Core::LibraryFactionConstPtr m_dwellingFaction = nullptr;
     Core::LibraryTerrainConstPtr m_terrain         = nullptr;
 
-    std::vector<FHRngZoneTown> m_towns;
-    FHPos                      m_centerAvg;
-    FHPos                      m_centerDispersion;
+    using TownMap = std::map<std::string, FHRngZoneTown>;
+    TownMap m_towns;
+    FHPos   m_centerAvg;
+    FHPos   m_centerDispersion;
 
     int m_relativeSizeAvg        = 100;
     int m_relativeSizeDispersion = 0;
     int m_zoneGuardPercent       = 100;
     int m_zoneGuardDispersion    = 5;
+
+    std::set<std::string> m_excludeFactionZones;
 
     using ScoreMap = std::map<std::string, FHScoreSettings>;
 

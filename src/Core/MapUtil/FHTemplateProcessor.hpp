@@ -61,9 +61,11 @@ private:
     void placeTerrainZones();
     void placeDebugInfo();
 
-    Core::LibraryFactionConstPtr getRandomFaction(bool rewardOnly);
-    Core::LibraryHeroConstPtr    getRandomHero(Core::LibraryFactionConstPtr faction);
-    int                          getPossibleCount(Core::LibraryUnitConstPtr unit, int64_t value) const;
+    Core::LibraryFactionConstPtr           getRandomFaction(bool rewardOnly);
+    Core::LibraryFactionConstPtr           getRandomPlayableFaction(const std::set<std::string>& excludedZoneIds);
+    Core::LibraryHeroConstPtr              getRandomHero(Core::LibraryFactionConstPtr faction);
+    int                                    getPossibleCount(Core::LibraryUnitConstPtr unit, int64_t value) const;
+    std::set<Core::LibraryFactionConstPtr> getExcludedFactions(const std::set<std::string>& zoneIds) const;
 
 private:
     MapTileContainer       m_tileContainer;

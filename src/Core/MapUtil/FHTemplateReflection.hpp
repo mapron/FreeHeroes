@@ -21,7 +21,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_playerControlled,
     m_useZoneFaction,
     m_tilesToTarget,
-    m_closeToConnection)
+    m_closeToConnection,
+    m_excludeFactionZones)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHScoreSettings::ScoreScope,
@@ -161,6 +162,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_relativeSizeDispersion,
     m_zoneGuardPercent,
     m_zoneGuardDispersion,
+    m_excludeFactionZones,
     m_scoreTargets,
     m_generators,
     m_guardMin,
@@ -250,6 +252,8 @@ template<>
 inline constexpr const bool s_isStringMap<FHScoreSettings::AttrMap>{ true };
 template<>
 inline constexpr const bool s_isStringMap<FHRngUserSettings::PlayersMap>{ true };
+template<>
+inline constexpr const bool s_isStringMap<FHRngZone::TownMap>{ true };
 template<>
 inline constexpr const bool s_isStringMap<FHTemplate::RngZoneMap>{ true };
 template<>
