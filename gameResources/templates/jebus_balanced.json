@@ -344,9 +344,9 @@
             },
     
             "P1": { "base": "Common"  , "isNormal": true,  "player": "Red" , "centerAvg": {"x": 15 , "y": 15 }  ,
-                "towns": {"town1":{"excludeFactionZones":["P1"] }, "town2":{"excludeFactionZones":["P1"]} } },
+                "towns": {"town1":{"excludeFactionZones":["P1"] }, "town2":{"excludeFactionZones":["P1"]}, "main": {"tilesToTarget": 20, "closeToConnection":"CC_P1" } } },
             "P2": { "base": "Common"  , "isNormal": true,  "player": "Blue", "centerAvg": {"x": 120, "y": 120}  ,
-                "towns": {"town1":{"excludeFactionZones":["P2"] }, "town2":{"excludeFactionZones":["P2"]} } },
+                "towns": {"town1":{"excludeFactionZones":["P2"] }, "town2":{"excludeFactionZones":["P2"]}, "main": {"tilesToTarget": 20, "closeToConnection":"CC_P2" } } },
             "P3": { "base": "Common"  , "isNormal": true,  "player": "None", "centerAvg": {"x": 120, "y": 15 }  },
             "P4": { "base": "Common"  , "isNormal": true,  "player": "None", "centerAvg": {"x": 15 , "y": 120}  },
             "CC": { "base": "Treasure", "isNormal": true,  "player": "None", "centerAvg": {"x": 72 , "y": 72 }  }

@@ -54,6 +54,8 @@ void KMeansSegmentation::runIter()
     for (size_t i = 0, cnt = m_clusters.size(); i < cnt; i++) {
         const size_t clusterSize = m_clusters[i].getSize();
         const auto&  cluster     = m_clusters[i];
+        if (cluster.m_speed == 0)
+            continue;
 
         int64_t sumX = 0;
         int64_t sumY = 0;

@@ -56,6 +56,7 @@ public:
         std::vector<Point*> m_points;
         size_t              m_index  = 0;
         int64_t             m_radius = 100;
+        int                 m_speed  = 100;
 
         Cluster() = default;
         Cluster(Point* centroid)
@@ -122,12 +123,19 @@ public:
         m_clusters.resize(K);
 
         for (size_t i = 0; i < K; i++) {
-            const size_t index = centroidPointIndexList[i];
-            m_clusters[i]      = Cluster(&m_points[index]);
-
-            m_clusters[i].m_index = i;
-            m_points[index].setCluster(&m_clusters[i]);
+            const size_t pointIndex = centroidPointIndexList[i];
+            initCluster(i, pointIndex, false);
         }
+    }
+
+    void initCluster(size_t i, size_t pointIndex, bool fix)
+    {
+        m_clusters[i] = Cluster(&m_points[pointIndex]);
+
+        m_clusters[i].m_index = i;
+        if (fix)
+            m_clusters[i].m_speed = 0;
+        m_points[pointIndex].setCluster(&m_clusters[i]);
     }
 
     void initRandomClusterCentoids(size_t K, Core::IRandomGenerator* rng)

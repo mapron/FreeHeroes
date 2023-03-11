@@ -571,30 +571,13 @@ void FHTemplateProcessor::runTownsPlacement()
     RoadHelper roadHelper(m_map, m_tileContainer, m_rng, m_logOutput);
 
     for (auto& tileZone : m_tileZones) {
-        std::vector<MapTilePtr> townPositions;
-        const auto&             towns = tileZone.m_rngZoneSettings.m_towns;
-        if (towns.size() == 0) {
+        const auto& towns = tileZone.m_rngZoneSettings.m_towns;
+        if (towns.size() == 0)
             continue;
-        } else if (towns.size() == 1) {
-            townPositions.push_back(tileZone.m_centroid);
-        } else {
-            KMeansSegmentation seg;
-            seg.m_points.reserve(tileZone.m_area.m_innerArea.size());
-            for (auto* cell : tileZone.m_area.m_innerArea)
-                seg.m_points.push_back({ cell });
 
-            seg.initRandomClusterCentoids(towns.size(), m_rng);
-            seg.run(m_logOutput);
+        std::vector<MapTilePtr> townPositions(towns.size());
 
-            for (KMeansSegmentation::Cluster& cluster : seg.m_clusters) {
-                townPositions.push_back(m_tileContainer.m_tileIndex.at(cluster.m_centroid));
-            }
-        }
         auto centroidCell = tileZone.m_centroid;
-        std::sort(townPositions.begin(), townPositions.end(), [centroidCell](MapTilePtr l, MapTilePtr r) {
-            return posDistance(centroidCell, l) < posDistance(centroidCell, r);
-        });
-
         for (size_t i = 0; const auto& [_, town] : towns) {
             i++;
             if (town.m_closeToConnection.empty())
@@ -616,6 +599,59 @@ void FHTemplateProcessor::runTownsPlacement()
                 return posDistance(centroidCell, l) < posDistance(centroidCell, r);
             });
             townPositions[i - 1] = *it;
+        }
+
+        if (towns.size() == 1) {
+            if (!townPositions[0])
+                townPositions[0] = tileZone.m_centroid;
+        } else {
+            KMeansSegmentation seg;
+            seg.m_points.reserve(tileZone.m_area.m_innerArea.size());
+            for (auto* cell : tileZone.m_area.m_innerArea) {
+                seg.m_points.push_back({ cell });
+            }
+
+            std::vector<MapTilePtr> townPositionsEst;
+            {
+                KMeansSegmentation segCopy = seg;
+                segCopy.initRandomClusterCentoids(towns.size(), m_rng);
+                segCopy.run(m_logOutput);
+                for (KMeansSegmentation::Cluster& cluster : segCopy.m_clusters)
+                    townPositionsEst.push_back(m_tileContainer.m_tileIndex.at(cluster.m_centroid));
+            }
+
+            seg.initRandomClusterCentoids(towns.size(), m_rng);
+
+            std::map<MapTilePtr, size_t> cell2pointindex;
+            for (size_t i = 0; i < seg.m_points.size(); ++i) {
+                cell2pointindex[seg.m_points[i].m_pos] = i;
+            }
+            for (size_t i = 0; i < townPositions.size(); ++i) {
+                auto* cell = townPositions[i];
+                if (!cell)
+                    continue;
+
+                const size_t index = cell2pointindex.at(cell);
+                seg.initCluster(i, index, true);
+
+                auto it = std::min_element(townPositionsEst.begin(), townPositionsEst.end(), [cell](MapTilePtr l, MapTilePtr r) {
+                    return posDistance(cell, l) < posDistance(cell, r);
+                });
+                townPositionsEst.erase(it);
+            }
+            for (size_t i = 0; i < townPositions.size(); ++i) {
+                if (townPositions[i])
+                    continue;
+                const size_t index = cell2pointindex.at(townPositionsEst.back());
+                townPositionsEst.pop_back();
+                seg.initCluster(i, index, false);
+            }
+            seg.run(m_logOutput);
+
+            for (size_t i = 0; KMeansSegmentation::Cluster & cluster : seg.m_clusters) {
+                townPositions[i] = (m_tileContainer.m_tileIndex.at(cluster.m_centroid));
+                i++;
+            }
         }
 
         for (size_t i = 0; const auto& [_, town] : towns) {
