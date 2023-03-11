@@ -818,6 +818,9 @@ void FHTemplateProcessor::runGuards()
             auto possibleCount = getPossibleCount(unit, value);
             if (possibleCount < 5)
                 continue;
+            if (possibleCount < 10 && unit->level < 50)
+                continue;
+
             int score = 0;
             if (possibleCount < 10)
                 score = 1;
@@ -840,6 +843,8 @@ void FHTemplateProcessor::runGuards()
         for (Core::LibraryUnitConstPtr unit : m_guardUnits) {
             auto possibleCount = getPossibleCount(unit, value);
             if (possibleCount < 5)
+                continue;
+            if (possibleCount < 10 && unit->level < 50)
                 continue;
             const int levelDiff = (unit->level / 10) - optimalGuardLevel;
             if (levelDiff < -1 || levelDiff > 2)
