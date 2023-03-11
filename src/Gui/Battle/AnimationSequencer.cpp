@@ -255,7 +255,7 @@ AnimationSequencer::AnimationSequencer(const Gui::IAppSettings::Battle& battleSe
 
 AnimationSequencer::AnimationSequencerHandle* AnimationSequencer::addHandle(BattleStackSpriteItemPtr item, BattleStackConstPtr stack)
 {
-    m_handles << AnimationSequencerHandle{ this, item, stack };
+    m_handles.push_back(AnimationSequencerHandle{ this, item, stack });
     return &m_handles.back();
 }
 

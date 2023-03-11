@@ -14,6 +14,8 @@
 #include "IAppSettings.hpp"
 #include "AnimationTree.hpp"
 
+#include <deque>
+
 namespace FreeHeroes::Gui {
 
 class AnimationSequencer {
@@ -118,11 +120,11 @@ public:
     void enableSuperSpeed(bool superspeed);
 
 private:
-    QList<AnimationSequencerHandle> m_handles;
-    const Gui::IAppSettings::Battle m_battleSettings;
-    Sound::IMusicBox*               m_musicBox;
-    Gui::AnimationTree              m_tree;
-    bool                            m_superspeed = false;
+    std::deque<AnimationSequencerHandle> m_handles;
+    const Gui::IAppSettings::Battle      m_battleSettings;
+    Sound::IMusicBox*                    m_musicBox;
+    Gui::AnimationTree                   m_tree;
+    bool                                 m_superspeed = false;
 };
 
 }
