@@ -8,6 +8,7 @@
 #include "IGuiResource.hpp"
 
 #include "LibraryObjectDef.hpp"
+#include "MapScore.hpp"
 
 #include <vector>
 #include <map>
@@ -68,6 +69,7 @@ struct SpriteMap {
         double m_opacity = 1.0;
 
         Core::CombinedMask m_blockMask;
+        Core::MapScore     m_score;
 
         std::vector<std::pair<std::string, std::string>> m_info;
         std::string                                      m_overlayInfo;
@@ -201,7 +203,8 @@ struct SpritePaintSettings {
     };
 
     LayerRules       m_globalRules;
-    SpriteMap::Layer m_filter = SpriteMap::Layer::Invalid;
+    SpriteMap::Layer m_filterLayer = SpriteMap::Layer::Invalid;
+    Core::ScoreAttr  m_filterAttr  = Core::ScoreAttr::Invalid;
 
     std::map<SpriteMap::Layer, LayerRules> m_specificRules;
 

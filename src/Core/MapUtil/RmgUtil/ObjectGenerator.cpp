@@ -24,7 +24,7 @@ namespace FreeHeroes {
 
 namespace {
 
-Core::MapScore estimateReward(const Core::Reward& reward)
+Core::MapScore estimateReward(const Core::Reward& reward, Core::ScoreAttr armyAttr = Core::ScoreAttr::ArmyAux)
 {
     Core::MapScore score;
     for (const auto& [id, count] : reward.resources.data) {
@@ -42,7 +42,7 @@ Core::MapScore estimateReward(const Core::Reward& reward)
         armyValue += unit.m_value;
     }
     if (armyValue)
-        score[Core::ScoreAttr::Army] = armyValue;
+        score[armyAttr] = armyValue;
 
     if (reward.gainedExp)
         score[Core::ScoreAttr::Experience] = reward.gainedExp * 5 / 4;
@@ -490,7 +490,7 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
                     }
 
                     {
-                        const Core::MapScore score = estimateReward(reward);
+                        const Core::MapScore score = estimateReward(reward, Core::ScoreAttr::Army);
 
                         if (!scoreSettings.isValidScore(score)) {
                             continue;
@@ -528,7 +528,7 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
         obj.m_map                 = &m_map;
 
         const Core::Reward& reward = record.m_id->rewards[record.m_id->variants[record.m_guardsVariant].rewardIndex];
-        Core::MapScore      score  = estimateReward(reward);
+        Core::MapScore      score  = estimateReward(reward, Core::ScoreAttr::Army);
 
         {
             const Core::ArtifactFilter firstFilter = reward.artifacts.empty() ? Core::ArtifactFilter{} : reward.artifacts[0];

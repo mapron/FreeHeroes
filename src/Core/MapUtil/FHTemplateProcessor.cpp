@@ -675,18 +675,27 @@ void FHTemplateProcessor::runRewards()
         //    continue;
 
         m_logOutput << m_indent << " --- generate : " << tileZone.m_id << " --- \n";
+        auto      objects     = m_map.m_objects;
+        const int maxAttempts = 3;
+        for (int i = 1; i <= maxAttempts; ++i) {
+            const bool      lastAttempt = i == maxAttempts;
+            ObjectGenerator gen(m_map, m_database, m_rng, m_logOutput);
+            gen.generate(tileZone.m_rngZoneSettings,
+                         tileZone.m_rewardsFaction,
+                         tileZone.m_dwellFaction,
+                         tileZone.m_terrain,
+                         armyPercent,
+                         goldPercent);
 
-        ObjectGenerator gen(m_map, m_database, m_rng, m_logOutput);
-        gen.generate(tileZone.m_rngZoneSettings,
-                     tileZone.m_rewardsFaction,
-                     tileZone.m_dwellFaction,
-                     tileZone.m_terrain,
-                     armyPercent,
-                     goldPercent);
-
-        if (!bundleSet.consume(gen, tileZone)) {
-            throw std::runtime_error("Failed to fit some objects into zone '" + tileZone.m_id + "'");
+            if (!bundleSet.consume(gen, tileZone)) {
+                if (lastAttempt)
+                    throw std::runtime_error("Failed to fit some objects into zone '" + tileZone.m_id + "'");
+                m_map.m_objects = objects; // restore map data and try again.
+            } else {
+                break;
+            }
         }
+
         //for (auto* cell : bundleSet.m_consumeResult.m_centroidsALL) {
         //    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 1 }); // red
         //}

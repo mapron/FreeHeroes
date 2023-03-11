@@ -7,6 +7,7 @@
 #include "SpriteMapPainter.hpp"
 
 #include "SpriteMap.hpp"
+#include "MapScore.hpp"
 
 #include <QPainter>
 #include <QDebug>
@@ -86,7 +87,8 @@ void SpriteMapPainter::paint(QPainter*        painter,
             Gui::ISprite::SpriteSequencePtr seq = sprite->getFramesForGroup(item.m_spriteGroup);
             if (!seq)
                 continue;
-            const bool isFilteredOut = m_settings->m_filter != SpriteMap::Layer::Invalid && item.m_layer != m_settings->m_filter;
+            const bool isFilteredOut = (m_settings->m_filterLayer != SpriteMap::Layer::Invalid && item.m_layer != m_settings->m_filterLayer)
+                                       || (m_settings->m_filterAttr != Core::ScoreAttr::Invalid && !item.m_score.contains(m_settings->m_filterAttr));
             if (isFilteredOut && isOverlayPass) {
                 continue;
             }

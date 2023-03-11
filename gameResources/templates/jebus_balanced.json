@@ -24,6 +24,7 @@
                         "score": {
                             "Army":           { "target": 50000 , "maxSingle": 20000, "minSingle": 8000 },
                             "ArmyDwelling":   { "target": 20000 , "maxSingle": 20000, "minSingle": 10000},
+                            "ArmyAux":        { "target": 25000 , "maxSingle": 15000, "minSingle": 10000},
                             "ArtStat":        { "target": 30000 , "maxSingle": 15000, "minSingle": 4000 },
                             "ArtSupport":     { "target": 20000 , "maxSingle": 10000, "minSingle": 4000 },
                             "Gold":           { "target": 60000 , "maxSingle": 50000, "minSingle": 3000 },
@@ -40,6 +41,7 @@
                         "score": {
                             "Army":           { "target": 40000, "maxSingle": 12000},
                             "ArmyDwelling":   { "target": 10000, "maxSingle": 9000, "minSingle": 4000},
+                            "ArmyAux":        { "target": 15000, "maxSingle": 9000},
                             "ArtStat":        { "target": 25000, "maxSingle": 7000, "minSingle": 2500},
                             "ArtSupport":     { "target": 15000, "maxSingle": 7000, "minSingle": 2500},
                             "Gold":           { "target": 30000, "maxSingle": 15000, "minSingle": 2500},
@@ -144,20 +146,20 @@
                             "spWater"  : { "frequency": 300 , "guard": 20000, "reward": {"spells":  {"schools": ["water"] , "notTags"   : ["control"]   } } },
                             "spAll"    : { "frequency":   0 , "guard": 70000, "reward": {"spells":  {"all": true   } } },
                             
-                            "T1"       : { "frequency": 200 , "guard": 10000, "reward": {"randomUnits":  [{"levels":[10, 11, 12],"value":  5000}] }  },
-                            "T2A"      : { "frequency": 150 , "guard": 10000, "reward": {"randomUnits":  [{"levels":[20, 21, 22],"value":  5000}] }  },
-                            "T2B"      : { "frequency": 150 , "guard": 15000, "reward": {"randomUnits":  [{"levels":[20, 21, 22],"value":  7500}] }  },
-                            "T3A"      : { "frequency": 100 , "guard": 15000, "reward": {"randomUnits":  [{"levels":[30, 31, 32],"value":  7500}] }  },
-                            "T3B"      : { "frequency": 100 , "guard": 20000, "reward": {"randomUnits":  [{"levels":[30, 31, 32],"value": 10000}] }  },
-                            "T4A"      : { "frequency": 100 , "guard": 20000, "reward": {"randomUnits":  [{"levels":[40, 41, 42],"value": 10000}] }  },
-                            "T4B"      : { "frequency": 100 , "guard": 25000, "reward": {"randomUnits":  [{"levels":[40, 41, 42],"value": 12500}] }  },
-                            "T5A"      : { "frequency": 100 , "guard": 25000, "reward": {"randomUnits":  [{"levels":[50, 51, 52],"value": 12500}] }  },
-                            "T5B"      : { "frequency": 100 , "guard": 30000, "reward": {"randomUnits":  [{"levels":[50, 51, 52],"value": 15000}] }  },
-                            "T6A"      : { "frequency": 70  , "guard": 40000, "reward": {"randomUnits":  [{"levels":[60, 61    ],"value": 20000}] }  },
-                            "T6B"      : { "frequency": 70  , "guard": 50000, "reward": {"randomUnits":  [{"levels":[60, 61    ],"value": 25000}] }  },
-                            "T7A"      : { "frequency": 70  , "guard":    -1, "reward": {"randomUnits":  [{"levels":[70, 71    ],"value": 30000}] }  },
-                            "T7B"      : { "frequency": 70  , "guard":    -1, "reward": {"randomUnits":  [{"levels":[70, 71    ],"value": 50000}] }  },
-                            "T8"       : { "frequency": 70  , "guard":    -1, "reward": {"randomUnits":  [{"levels":[80        ],"value":200000}] }  }
+                            "T1"       : { "frequency":  100, "guard": 10000, "reward": {"randomUnits":  [{"levels":[10, 11, 12],"value":  5000}] }  },
+                            "T2A"      : { "frequency":  200, "guard": 10000, "reward": {"randomUnits":  [{"levels":[20, 21, 22],"value":  5000}] }  },
+                            "T2B"      : { "frequency":  500, "guard": 15000, "reward": {"randomUnits":  [{"levels":[20, 21, 22],"value":  7500}] }  },
+                            "T3A"      : { "frequency": 1000, "guard": 15000, "reward": {"randomUnits":  [{"levels":[30, 31, 32],"value":  7500}] }  },
+                            "T3B"      : { "frequency": 1000, "guard": 20000, "reward": {"randomUnits":  [{"levels":[30, 31, 32],"value": 10000}] }  },
+                            "T4A"      : { "frequency": 1000, "guard": 20000, "reward": {"randomUnits":  [{"levels":[40, 41, 42],"value": 10000}] }  },
+                            "T4B"      : { "frequency": 1000, "guard": 25000, "reward": {"randomUnits":  [{"levels":[40, 41, 42],"value": 12500}] }  },
+                            "T5A"      : { "frequency": 1000, "guard": 25000, "reward": {"randomUnits":  [{"levels":[50, 51, 52],"value": 12500}] }  },
+                            "T5B"      : { "frequency": 1000, "guard": 30000, "reward": {"randomUnits":  [{"levels":[50, 51, 52],"value": 15000}] }  },
+                            "T6A"      : { "frequency": 2000, "guard": 40000, "reward": {"randomUnits":  [{"levels":[60, 61    ],"value": 20000}] }  },
+                            "T6B"      : { "frequency": 2000, "guard": 50000, "reward": {"randomUnits":  [{"levels":[60, 61    ],"value": 25000}] }  },
+                            "T7A"      : { "frequency": 2000, "guard":    -1, "reward": {"randomUnits":  [{"levels":[70, 71    ],"value": 26000}] }  },
+                            "T7B"      : { "frequency": 2000, "guard":    -1, "reward": {"randomUnits":  [{"levels":[70, 71    ],"value": 40000}] }  },
+                            "T8"       : { "frequency": 2000, "guard":    -1, "reward": {"randomUnits":  [{"levels":[80        ],"value":200000}] }  }
 
                         }
                     },
@@ -290,8 +292,9 @@
                         "isEnabled": true,
                         "tolerancePercent": 15,
                         "score": {
-                            "Army":           { "target": 300000  , "minSingle": 10000, "maxSingle" : -1},
+                            "Army":           { "target": 250000  , "minSingle": 10000, "maxSingle" : -1},
                             "ArmyDwelling":   { "target": 40000   , "minSingle":  6000, "maxSingle" : -1},
+                            "ArmyAux":        { "target": 150000  , "minSingle": 10000, "maxSingle" : -1},
                             "ArtStat":        { "target": 350000  , "minSingle":  5000, "maxSingle" : -1},
                             "ArtSupport":     { "target": 200000  , "minSingle":  8000, "maxSingle" : -1},
                             "Gold":           { "target": 160000  , "minSingle":  8000, "maxSingle" : -1},

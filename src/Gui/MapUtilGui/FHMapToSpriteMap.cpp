@@ -80,6 +80,7 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     auto addValueInfo = [](SpriteMap::Item* item, const FHCommonObject& obj) {
         if (obj.m_guard)
             item->addInfo("Guard", std::to_string(obj.m_guard));
+        item->m_score = obj.m_score;
         for (const auto& [key, value] : obj.m_score) {
             item->addInfo(FHScoreSettings::attrToString(key) + " Value", std::to_string(value));
         }

@@ -131,6 +131,7 @@ ENUM_REFLECTION_STRINGIFY(
     Invalid,
     Army,
     ArmyDwelling,
+    ArmyAux,
     ArtStat,
     ArtSupport,
     Gold,

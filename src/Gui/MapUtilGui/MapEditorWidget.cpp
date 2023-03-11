@@ -63,6 +63,25 @@ const std::vector<SpriteMap::Layer> g_allLayerTypes{
     SpriteMap::Layer::GeneralVisitable,
     SpriteMap::Layer::Decoration,
 };
+
+const std::vector<Core::ScoreAttr> g_allAttrTypes{
+    Core::ScoreAttr::Invalid,
+    Core::ScoreAttr::Army,
+    Core::ScoreAttr::ArmyDwelling,
+    Core::ScoreAttr::ArmyAux,
+    Core::ScoreAttr::ArtStat,
+    Core::ScoreAttr::ArtSupport,
+    Core::ScoreAttr::Gold,
+    Core::ScoreAttr::Resource,
+    Core::ScoreAttr::ResourceGen,
+    Core::ScoreAttr::Experience,
+    Core::ScoreAttr::Control,
+    Core::ScoreAttr::Upgrade,
+    Core::ScoreAttr::SpellOffensive,
+    Core::ScoreAttr::SpellCommon,
+    Core::ScoreAttr::SpellAny,
+    Core::ScoreAttr::Support,
+};
 }
 
 struct MapEditorWidget::Impl {
@@ -114,6 +133,7 @@ MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDataba
         QCheckBox* showSettings    = new QCheckBox(tr("Display settings"), this);
         QCheckBox* showInspector   = new QCheckBox(tr("Inspector"), this);
         QComboBox* filterType      = new QComboBox(this);
+        QComboBox* filterValue     = new QComboBox(this);
         showMinimap->setChecked(true);
         showSettings->setChecked(true);
         showInspector->setChecked(true);
@@ -121,6 +141,10 @@ MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDataba
         filterType->addItem(tr("- select layer filter -"));
         for (int i = 1; i < (int) g_allLayerTypes.size(); i++) {
             filterType->addItem(SpriteMap::layerTypeToString(g_allLayerTypes[i]));
+        }
+        filterValue->addItem(tr("- select attr filter -"));
+        for (int i = 1; i < (int) g_allAttrTypes.size(); i++) {
+            filterValue->addItem(QString::fromStdString(FHScoreSettings::attrToString(g_allAttrTypes[i])));
         }
 
         connect(viewUnderground, &QCheckBox::clicked, this, [this](bool state) {
@@ -137,8 +161,13 @@ MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDataba
             m_impl->m_inspectorWidget->setVisible(state);
         });
         connect(filterType, qOverload<int>(&QComboBox::currentIndexChanged), this, [this, filterType] {
-            SpriteMap::Layer layer                          = g_allLayerTypes[filterType->currentIndex()];
-            m_impl->m_viewSettings.m_paintSettings.m_filter = layer;
+            SpriteMap::Layer layer                               = g_allLayerTypes[filterType->currentIndex()];
+            m_impl->m_viewSettings.m_paintSettings.m_filterLayer = layer;
+            updateAll();
+        });
+        connect(filterValue, qOverload<int>(&QComboBox::currentIndexChanged), this, [this, filterValue] {
+            Core::ScoreAttr attr                                = g_allAttrTypes[filterValue->currentIndex()];
+            m_impl->m_viewSettings.m_paintSettings.m_filterAttr = attr;
             updateAll();
         });
 
@@ -149,6 +178,7 @@ MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDataba
         layoutTop->addWidget(showSettings);
         layoutTop->addWidget(showInspector);
         layoutTop->addWidget(filterType);
+        layoutTop->addWidget(filterValue);
     }
 
     layout->addLayout(layoutTop);

@@ -15,6 +15,7 @@ enum class ScoreAttr
 
     Army,
     ArmyDwelling,
+    ArmyAux,
     ArtStat,
     ArtSupport,
     Gold,

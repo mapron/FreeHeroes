@@ -65,7 +65,7 @@
 "hota.visitable.junkman"                   : [ "Support"       ,      500 ,     300  , "avxjnkmn"  ],
 "hota.visitable.townGate"                  : [ "Support"       ,    10000 ,     200  , "avxtwngt"  ],
 
-"sod.visitable.refugeeCamp"                : [ "ArmyDwelling"  ,     4000 ,    1000  , "avgrefg0"  ],
+"sod.visitable.refugeeCamp"                : [ "ArmyAux"       ,     4000 ,    1000  , "avgrefg0"  ],
 
 "sod.visitable.swanPond"                   : [ ""              ,        0 ,    1000  , { "m": { "": "avsclvd0", "A": "avsclvg0", "B": "avsclvs0"}}  ],
 "sod.visitable.corpse"                     : [ ""              ,        0 ,    1000  , { "m": { "": "avxskds0", "A": "avxskds1", "B": "avxskds2"}}  ],
@@ -84,7 +84,7 @@
 "hota.visitable.waterAcademy"              : [ ""              ,        0 ,    1000  ,  "avswacad"  ],
 "hota.visitable.diggableGrave"             : [ ""              ,        0 ,    1000  ,  "avxgravw"  ],
 
-"hota.visitable.ancientLamp"               : [ "Army"          ,     3000 ,    2000  , "avtglam" ],
+"hota.visitable.ancientLamp"               : [ "ArmyAux"       ,     3000 ,    4000  , "avtglam" ],
 "sod.resource.campfire"                    : [ "Gold"          ,     1000 ,    2000  , { "m": { "": "adcfra", "A": "avxcfsn0", "B": "avxcflv0", "C": "avxcfds0"}} ],
 "sod.resource.treasureChest"               : [ "Experience"    ,     2000 ,    4000  , "avtchst0" ],
 "sod.resource.flotSam"                     : [ "Gold"          ,     1000 ,    1000  , "avaflot0" ],
