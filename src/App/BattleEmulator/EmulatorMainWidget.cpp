@@ -45,12 +45,11 @@
 #include "AdventureKingdom.hpp"
 
 // Platform
-#include "MernelPlatform/Profiler.hpp"
+#include "MernelPlatform/AppLocations.hpp"
 #include "MernelPlatform/Logger.hpp"
+#include "MernelPlatform/Profiler.hpp"
 
 #include <QInputDialog>
-/// @todo some  AppLocationManager for paths??
-#include <QStandardPaths>
 #include <QSet>
 #include <QTimer>
 
@@ -184,7 +183,7 @@ EmulatorMainWidget::EmulatorMainWidget(const Gui::IGraphicsLibrary*         grap
     onTerrainChanged();
 
     m_replayManager = std::make_unique<ReplayFileManager>();
-    m_replayManager->setRoot(QString2stdPath(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation)) / "Replays");
+    m_replayManager->setRoot(Mernel::AppLocations("FreeHeroes").getAppdataDir() / "Replays");
     m_replayManager->load();
 
     m_ui->comboBoxReplaySelect->setModel(m_replayManager.get());

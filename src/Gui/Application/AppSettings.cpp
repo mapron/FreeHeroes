@@ -7,8 +7,9 @@
 
 #include "SettingsWidget.hpp"
 
+#include "MernelPlatform/AppLocations.hpp"
+
 #include <QSettings>
-#include <QStandardPaths>
 
 namespace FreeHeroes::Gui {
 
@@ -161,7 +162,8 @@ void AppSettings::showSettingsEditor(QWidget* parent)
 
 std::unique_ptr<QSettings> getUiDefaultSettings()
 {
-    QString filename = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + "/AppSettings.ini";
+    auto    appData  = Mernel::AppLocations("FreeHeroes").getAppdataDir();
+    QString filename = QString::fromStdString(Mernel::path2string(appData / "AppSettings.ini"));
     return std::make_unique<QSettings>(filename, QSettings::IniFormat);
 }
 

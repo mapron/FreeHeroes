@@ -21,7 +21,6 @@
 #include "MusicBox.hpp"
 
 #include <QApplication>
-#include <QStandardPaths>
 #include <QSettings>
 #include <QResource>
 #include <QDebug>

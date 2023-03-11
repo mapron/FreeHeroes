@@ -46,6 +46,7 @@ private:
 private:
     std::unique_ptr<Ui::ConverterDialog>      m_ui;
     std::unique_ptr<GameExtract>              m_extract;
+    const Mernel::std_path                    m_appData;
     Mernel::std_path                          m_hotaInstallDir;
     QSettings                                 m_converterSettings;
     const Core::IGameDatabaseContainer* const m_databaseContainer;

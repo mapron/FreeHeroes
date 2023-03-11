@@ -18,8 +18,8 @@
 // Platform
 #include "MernelPlatform/ShellUtils.hpp"
 #include "MernelPlatform/Logger.hpp"
+#include "MernelPlatform/AppLocations.hpp"
 
-#include <QStandardPaths>
 #include <QFileDialog>
 #include <QDateTime>
 #include <QMessageBox>
@@ -43,15 +43,13 @@ void displayStatus(QLabel* label, bool status)
 ConverterDialog::ConverterDialog(const Core::IGameDatabaseContainer* databaseContainer, QWidget* parent)
     : QDialog(parent)
     , m_ui(std::make_unique<Ui::ConverterDialog>())
-    , m_converterSettings(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + "/ConverterSettings.ini", QSettings::IniFormat)
+    , m_appData(Mernel::AppLocations("FreeHeroes").getAppdataDir())
+    , m_converterSettings(QString::fromStdString(path2string(m_appData / "ConverterSettings.ini")), QSettings::IniFormat)
     , m_databaseContainer(databaseContainer)
 {
     m_ui->setupUi(this);
 
-    QString localData = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
-    if (localData.endsWith("/") || localData.endsWith("\\"))
-        localData = localData.mid(0, localData.size() - 1);
-    m_ui->dstPath->setText(localData + "/Resources/Imported");
+    m_ui->dstPath->setText(QString::fromStdString(path2string(m_appData / "Resources" / "Imported")));
     m_ui->dstPath->setFrame(false);
 
     QString path = m_converterSettings.value("srcPath").toString();
