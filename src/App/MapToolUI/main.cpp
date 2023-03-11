@@ -22,7 +22,6 @@ int main(int argc, char* argv[])
 
     Gui::Application fhApp(&fhCoreApp,
                            { Gui::Application::Option::QtTranslations,
-                             Gui::Application::Option::Translations,
                              Gui::Application::Option::GraphicsLibrary,
                              Gui::Application::Option::MusicBox,
                              Gui::Application::Option::CursorLibrary,

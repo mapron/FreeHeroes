@@ -8,7 +8,6 @@
 
 // Gui
 #include "GraphicsLibrary.hpp"
-#include "LocalizationManager.hpp"
 #include "CursorLibrary.hpp"
 #include "MernelPlatform/Profiler.hpp"
 #include "AppSettings.hpp"
@@ -26,6 +25,7 @@
 #include <QSettings>
 #include <QResource>
 #include <QDebug>
+#include <QTranslator>
 
 // uncomment to show registered resources in Qt ":/.../" paths.
 //#define SHOW_RESOURCES_DEBUG
@@ -70,8 +70,6 @@ void loggerQtOutput(QtMsgType type, const QMessageLogContext& context, const QSt
 
 struct Application::Impl {
     CoreApplication*                          coreApp;
-    std::unique_ptr<LocalizationManager>      locEn;
-    std::unique_ptr<LocalizationManager>      locMain;
     std::vector<std::unique_ptr<QTranslator>> translators;
 
     QString                      appConfigIniPath;
@@ -173,22 +171,6 @@ bool Application::load()
         QObject::connect(m_impl->appConfig.get(), &AppSettings::setEffectsVolume, box.get(), &Sound::MusicBox::setEffectsVolume);
     }
 
-    if (m_options.contains(Option::Translations)) {
-        m_impl->appConfig->globalMutable().localeItems << "en_US"
-                                                       << "ru_RU"
-                                                       << "de_DE";
-        QString       currentLocale = m_impl->appConfig->global().localeId;
-        ProfilerScope scope("localization");
-
-        m_impl->locEn.reset(new LocalizationManager("en_US", m_impl->coreApp->getResourceLibrary()));
-        QApplication::installTranslator(m_impl->locEn.get());
-
-        if (currentLocale != "en_US") {
-            m_impl->locMain.reset(new LocalizationManager(currentLocale, m_impl->coreApp->getResourceLibrary()));
-            QApplication::installTranslator(m_impl->locMain.get());
-        }
-    }
-
 #ifdef SHOW_RESOURCES_DEBUG
     QDirIterator it(":/", QDirIterator::Subdirectories);
     while (it.hasNext()) {
@@ -197,11 +179,17 @@ bool Application::load()
 #endif
 
     if (m_options.contains(Option::QtTranslations)) {
+        m_impl->appConfig->globalMutable().localeItems << "en_US"
+                                                       << "ru_RU"
+                                                       << "de_DE"
+                                                       << "zh_CN";
+
         QStringList moduleNames;
         if (!m_impl->extraTs.isEmpty())
             moduleNames << m_impl->extraTs;
         moduleNames << "FreeHeroesCore";
         QString currentLocale = m_impl->appConfig->global().localeId;
+        QApplication::instance()->setProperty("currentLocale", currentLocale);
         for (const auto& name : moduleNames)
             m_impl->addTranslator(QString(":/Translations/%1_%2.qm").arg(name).arg(currentLocale));
     }

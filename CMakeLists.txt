@@ -232,16 +232,6 @@ AddTarget(TYPE shared NAME GuiResource OUTPUT_PREFIX FH
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
 
-AddTarget(TYPE shared NAME GuiLocalization OUTPUT_PREFIX FH
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Localization
-    EXPORT_INCLUDES
-    LINK_LIBRARIES
-        GuiInt MernelPlatform GameObjects
-    QT_MODULES Widgets
-    UIC_POSTPROCESS_SCRIPTS
-        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
-    )
-
 AddTarget(TYPE shared NAME GuiGameWrappers OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/GameWrappers
     EXPORT_INCLUDES
@@ -320,7 +310,6 @@ AddTarget(TYPE shared NAME GuiApplication OUTPUT_PREFIX FH
         GuiBattle
         GuiWidgets
         GuiResource
-        GuiLocalization
         GuiGameWrappers
         SoundPlayer
     QT_MODULES Widgets

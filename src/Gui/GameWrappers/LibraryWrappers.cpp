@@ -21,26 +21,76 @@
 
 #include <QCoreApplication>
 #include <QIcon>
+#include <QVariant>
 
 namespace FreeHeroes::Gui {
 
 namespace {
+
+// English
+// 0 - singular, 1 - plural
+// default is plural.
+[[maybe_unused]] int pluralSelector_EN(int n, int availableSize)
+{
+    assert(availableSize > 1);
+    assert(n >= -1);
+    if (n == -1) // default
+        return 1;
+
+    if (n == 1)
+        return 0;
+    return 1;
+}
+
+// Polish
+// 0 - singular, 1 - plural, [2 - 2..4 ] [3 - 5+ ]
+// default is plural.
+[[maybe_unused]] int pluralSelector_PL(int n, int availableSize)
+{
+    assert(availableSize > 1);
+    assert(n >= -1);
+    if (n == -1) // default
+        return 1;
+    if (n == 1)
+        return 0;
+    if ((n % 10) >= 2 && (n % 10) <= 4 && ((n % 100 < 10) || (n % 100 > 20)))
+        return availableSize > 2 ? 2 : 1;
+
+    return availableSize > 3 ? 3 : 1;
+}
+
+// Russian
+// 0 - singular, 1 - plural, [2 - 2..4 ] [3 - 5+ ]
+// default is plural.
+[[maybe_unused]] int pluralSelector_RU(int n, int availableSize)
+{
+    assert(availableSize > 1);
+    assert(n >= -1);
+    if (n == -1) // default
+        return 1;
+    if (n % 10 == 1 && n % 100 != 11)
+        return 0;
+
+    if ((n % 10) >= 2 && (n % 10) <= 4 && ((n % 100 < 10) || (n % 100 > 20)))
+        return availableSize > 2 ? 2 : 1;
+
+    return availableSize > 3 ? 3 : 1;
+}
 
 QString translateHelper(const Core::TranslationMap& tsMap,
                         const std::string&          untranslatedName,
                         const std::string&          key,
                         int                         n = -1)
 {
-    if (tsMap.ts.contains("ru_RU")) {
-        return QString::fromStdString(tsMap.ts.at("ru_RU"));
+    const auto currentLocale = QCoreApplication::instance()->property("currentLocale").toString().toStdString();
+    if (tsMap.ts.contains(currentLocale)) {
+        return QString::fromStdString(tsMap.ts.at(currentLocale));
     }
-    if (tsMap.ts.contains("de_DE")) {
-        return QString::fromStdString(tsMap.ts.at("de_DE"));
-    }
+    // en_US is default fallback locale.
     if (tsMap.ts.contains("en_US")) {
         return QString::fromStdString(tsMap.ts.at("en_US"));
     }
-
+    // try untranslatedName, if it is empty too - create placeholder from object id. id can't be empty.
     return untranslatedName.empty() ? QString("$(%1)").arg(key.c_str()) : QString::fromStdString(untranslatedName);
 }
 
@@ -152,6 +202,7 @@ GuiUnit::GuiUnit(Sound::IMusicBox*, const IGraphicsLibrary* graphicsLibrary, Cor
         const bool isWide = source->traits.large;
         m_battleSprite    = graphicsLibrary->getObjectAnimation(isWide ? "stub_unit_wide" : "stub_unit_normal");
         Q_ASSERT(m_battleSprite->exists());
+        // Q_ASSERT(m_battleSprite->get());
     }
     if (!source->presentationParams.spriteProjectile.empty() && !m_projectileSprite->exists()) {
         m_projectileSprite = graphicsLibrary->getObjectAnimation("stub_projectile");
@@ -164,7 +215,7 @@ QString GuiUnit::getNameWithCount(int n, GuiUnit::Variation variation) const
     auto id = getSource()->id;
     if (variation == Variation::AsTarget)
         id = id + ".accusative";
-    QString localizedName = ""; //translateHelper(TranslationContextName<Core::LibraryUnit>::context, getSource()->untranslatedName, id, n);
+    QString localizedName = translateHelper(getSource()->presentationParams.name, getSource()->untranslatedName, id, n);
     if (n > 0)
         return tr("%1 %2").arg(n).arg(localizedName);
 

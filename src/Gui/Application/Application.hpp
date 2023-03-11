@@ -33,7 +33,6 @@ public:
     enum class Option
     {
         QtTranslations,
-        Translations,
         GraphicsLibrary,
         MusicBox,
         CursorLibrary,
@@ -45,7 +44,6 @@ public:
     Application(Core::CoreApplication* coreApp,
                 std::set<Option>       options = std::set<Option>{
                     Option::QtTranslations,
-                    Option::Translations,
                     Option::GraphicsLibrary,
                     Option::MusicBox,
                     Option::CursorLibrary,
@@ -56,7 +54,6 @@ public:
                 const std::string&     tsExtraModule)
         : Application(coreApp,
                       std::set<Option>{ Option::QtTranslations,
-                                        Option::Translations,
                                         Option::GraphicsLibrary,
                                         Option::MusicBox,
                                         Option::CursorLibrary,
