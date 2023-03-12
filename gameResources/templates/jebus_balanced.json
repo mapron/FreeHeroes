@@ -301,7 +301,7 @@
                             "ArmyAux":        { "target": 150000  , "minSingle": 10000, "maxSingle" : -1},
                             "ArtStat":        { "target": 350000  , "minSingle":  5000, "maxSingle" : -1},
                             "ArtSupport":     { "target": 200000  , "minSingle":  8000, "maxSingle" : -1},
-                            "Gold":           { "target": 160000  , "minSingle":  8000, "maxSingle" : -1},
+                            "Gold":           { "target": 300000  , "minSingle":  8000, "maxSingle" : -1},
                             "Resource":       { "target": 90000   , "minSingle":  8000, "maxSingle" : -1},
                             
                             "Experience":     { "target": 50000   , "minSingle":  8000, "maxSingle" : -1},
@@ -309,7 +309,7 @@
                             "SpellCommon":    { "target":  80000  , "minSingle":  5000, "maxSingle" : -1},
                             "Upgrade"   :     { "target": 25000   , "minSingle":  3000, "maxSingle" : -1},
                 
-                            "Control":        { "target": 320000  , "minSingle": 40000, "maxSingle" : -1}
+                            "Control":        { "target": 320000  , "minSingle": 40000, "maxSingle" : 40000, "maxGroup": 40000 }
                         }
                     },
                     "TreasureMid": {

@@ -91,7 +91,7 @@ public:
                   int64_t                      armyPercent,
                   int64_t                      goldPercent);
 
-    bool generateOneObject(const Core::MapScore& targetScore, Core::MapScore& currentScore, std::vector<IObjectFactoryPtr>& objectFactories, ObjectGroup& group);
+    bool generateOneObject(const Core::MapScore& targetScore, const Core::MapScore& groupLimits, Core::MapScore& currentScore, std::vector<IObjectFactoryPtr>& objectFactories, ObjectGroup& group);
 
     static bool correctObjIndex(Core::ObjectDefIndex& defIndex, const Core::ObjectDefMappings& defMapping, Core::LibraryTerrainConstPtr requiredTerrain);
     static bool terrainViable(const Core::ObjectDefMappings& defMapping, Core::LibraryTerrainConstPtr requiredTerrain);

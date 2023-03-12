@@ -28,7 +28,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHScoreSettings::ScoreScope,
     m_target,
     m_minSingle,
-    m_maxSingle)
+    m_maxSingle,
+    m_maxGroup)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHScoreSettings,

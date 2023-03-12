@@ -31,6 +31,7 @@ struct FHScoreSettings {
         int64_t m_target    = 0;
         int64_t m_minSingle = -1;
         int64_t m_maxSingle = -1;
+        int64_t m_maxGroup  = -1;
 
         bool operator==(const ScoreScope&) const noexcept = default;
     };

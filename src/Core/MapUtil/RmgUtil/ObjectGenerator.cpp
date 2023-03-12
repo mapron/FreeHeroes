@@ -215,18 +215,7 @@ private:
             if (!okFilter(art, enableFilter, scoreSettings))
                 return {};
 
-            return { .m_art = art, .m_onDiscard = [this, art] {
-                        /*if (std::find(art->tags.cbegin(), art->tags.cend(), Core::LibraryArtifact::Tag::Control) != art->tags.cend()) {
-                            std::cerr << "discard art:" << art->id << ", current=[";
-                            for (auto* art1 : m_current)
-                                std::cerr << art1->id << ", ";
-                            std::cerr << "], high=[";
-                            for (auto* art1 : m_currentHigh)
-                                std::cerr << art1->id << ", ";
-                            std::cerr << "]\n";
-                        }*/
-                        m_currentHigh.push_back(art);
-                    } };
+            return { .m_art = art, .m_onDiscard = [this, art] { m_currentHigh.push_back(art); } };
         }
     };
     std::map<ArtifactSet, SubPool> m_pools;
@@ -474,7 +463,7 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
                     else if (artRewards == 1)
                         record.m_attempts = 3;
                     else
-                        record.m_attempts = 5;
+                        record.m_attempts = 9;
                 }
 
                 m_records.m_records.push_back(record);
@@ -505,8 +494,6 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
             for (const auto& filter : reward.artifacts) {
                 auto accArt = m_artifactPool->make(filter, filter, firstFilter == filter, m_scoreSettings);
 
-                //if (std::find(accArt.m_art->tags.cbegin(), accArt.m_art->tags.cend(), Core::LibraryArtifact::Tag::Control) != accArt.m_art->tags.cend())
-                //    std::cerr << "make bank:" << accArt.m_art->id << "\n";
                 assert(accArt.m_art);
                 obj.m_obj.m_artifacts.push_back(accArt.m_art);
                 estimateArtScore(accArt.m_art, score);
@@ -573,10 +560,8 @@ struct ObjectGenerator::ObjectFactoryArtifact : public AbstractFactory<RecordArt
 
         ObjectArtifact obj;
 
-        obj.m_map   = &m_map;
-        auto accArt = m_artifactPool->make(record.m_pool, record.m_filter, true, m_scoreSettings);
-        //if (std::find(accArt.m_art->tags.cbegin(), accArt.m_art->tags.cend(), Core::LibraryArtifact::Tag::Control) != accArt.m_art->tags.cend())
-        //    std::cerr << "make art:" << accArt.m_art->id << "\n";
+        obj.m_map      = &m_map;
+        auto accArt    = m_artifactPool->make(record.m_pool, record.m_filter, true, m_scoreSettings);
         obj.m_obj.m_id = accArt.m_art;
         assert(obj.m_obj.m_id);
         obj.m_onDisable = [this, &record, accArt] {
@@ -1227,7 +1212,10 @@ void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
 
         if (doLog)
             m_logOutput << indentBase << group.m_id << " start\n";
-        Core::MapScore currentScore;
+        Core::MapScore currentScore, groupLimits;
+        for (const auto& [attr, sscope] : scoreSettings.m_score)
+            if (sscope.m_maxGroup != -1)
+                groupLimits[attr] = sscope.m_maxGroup;
 
         std::vector<IObjectFactoryPtr> objectFactories;
         objectFactories.push_back(std::make_shared<ObjectFactoryBank>(m_map, zoneSettings.m_generators.m_banks, scoreSettings, m_database, m_rng, &artifactPool, terrain));
@@ -1243,7 +1231,7 @@ void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
         const int iterLimit = 100000;
         int       i         = 0;
         for (; i < iterLimit; i++) {
-            if (!generateOneObject(group.m_targetScore, currentScore, objectFactories, group)) {
+            if (!generateOneObject(group.m_targetScore, groupLimits, currentScore, objectFactories, group)) {
                 if (doLog)
                     m_logOutput << indentBase << group.m_id << " finished on [" << i << "] iteration\n";
                 break;
@@ -1268,7 +1256,7 @@ void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
     }
 }
 
-bool ObjectGenerator::generateOneObject(const Core::MapScore& targetScore, Core::MapScore& currentScore, std::vector<IObjectFactoryPtr>& objectFactories, ObjectGroup& group)
+bool ObjectGenerator::generateOneObject(const Core::MapScore& targetScore, const Core::MapScore& groupLimits, Core::MapScore& currentScore, std::vector<IObjectFactoryPtr>& objectFactories, ObjectGroup& group)
 {
     Mernel::ProfilerScope    scope("oneObject");
     static const std::string indent("        ");
@@ -1292,6 +1280,17 @@ bool ObjectGenerator::generateOneObject(const Core::MapScore& targetScore, Core:
         return false;
     };
 
+    auto isGroupOverflow = [&groupLimits](const Core::MapScore& current) {
+        for (const auto& [key, val] : current) {
+            if (!groupLimits.contains(key))
+                continue;
+            const auto limitVal = groupLimits.at(key);
+            if (val > limitVal)
+                return true;
+        }
+        return false;
+    };
+
     uint64_t indexWeight = 0, baseWeight = 0;
     for (IObjectFactoryPtr& fac : objectFactories) {
         indexWeight += fac->totalFreq();
@@ -1304,7 +1303,8 @@ bool ObjectGenerator::generateOneObject(const Core::MapScore& targetScore, Core:
                 throw std::runtime_error("Object '" + obj->getId() + "' has no score!");
 
             Core::MapScore currentScoreTmp = currentScore + obj->getScore();
-            if (isScoreOverflow(currentScoreTmp)) {
+            if (isScoreOverflow(currentScoreTmp) || isGroupOverflow(obj->getScore())) {
+                // m_logOutput << indent << "overflow '" << obj->getId() << "' score=" << obj->getScore() << ", current=" << currentScore << "\n";
                 obj->setAccepted(false);
                 return true;
             }
