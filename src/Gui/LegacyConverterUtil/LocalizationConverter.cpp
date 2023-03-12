@@ -262,7 +262,7 @@ void LocalizationConverter::extractHOTA(const std_path& jsonSubdir, const std_pa
     } else if (cannonLocalized.startsWith("Kanone")) { // German
         localeId = "de_DE";
         encoding = "Windows-1252";
-    } else if (locTable[0][1].startsWith("\xbc\xd3\xc5\xa9\xc5\xda")) { // Chinese
+    } else if (cannonLocalized.startsWith("\xbc\xd3\xc5\xa9\xc5\xda")) { // Chinese
         localeId = "zh_CN";
         encoding = "GB18030";
     }
