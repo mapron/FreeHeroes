@@ -139,6 +139,12 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_records)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRngZone::GeneratorSkillHut,
+    m_isEnabled,
+    m_frequency,
+    m_guard)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone::Generators,
     m_banks,
     m_artifacts,
@@ -148,7 +154,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_scrolls,
     m_dwellings,
     m_visitables,
-    m_mines)
+    m_mines,
+    m_skillHuts)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone,

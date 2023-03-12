@@ -231,6 +231,12 @@ struct FHRngZone {
 
         bool operator==(const GeneratorMine&) const noexcept = default;
     };
+    struct GeneratorSkillHut : public GeneratorCommon {
+        bool operator==(const GeneratorSkillHut&) const noexcept = default;
+
+        int m_frequency = 1000;
+        int m_guard     = 3000;
+    };
 
     struct Generators {
         GeneratorBank         m_banks;
@@ -242,6 +248,7 @@ struct FHRngZone {
         GeneratorDwelling     m_dwellings;
         GeneratorVisitable    m_visitables;
         GeneratorMine         m_mines;
+        GeneratorSkillHut     m_skillHuts;
 
         bool operator==(const Generators&) const noexcept = default;
     };

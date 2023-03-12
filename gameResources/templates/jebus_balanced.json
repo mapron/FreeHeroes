@@ -224,6 +224,11 @@
                             "crystal" : { "value": 2000, "guard": 3000, "minZone": 1, "maxZone": 2,  "resourceId": "crystal" , "frequency": 1200 },
                             "gems"    : { "value": 2000, "guard": 3000, "minZone": 1, "maxZone": 2,  "resourceId": "gems"    , "frequency": 1200 }
                         }
+                    },
+                    "skillHuts": {
+                        "isEnabled": true,
+                        "frequency": 200,
+                        "guard": 3000
                     }
 
                 }

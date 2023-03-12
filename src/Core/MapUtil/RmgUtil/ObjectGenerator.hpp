@@ -115,6 +115,7 @@ private:
     struct ObjectFactoryDwelling;
     struct ObjectFactoryVisitable;
     struct ObjectFactoryMine;
+    struct ObjectFactorySkillHut;
 
 private:
     FHMap&                           m_map;

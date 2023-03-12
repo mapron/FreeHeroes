@@ -36,6 +36,9 @@ struct LibrarySecondarySkill {
     int frequencyWarrior = 0;
     int frequencyMage    = 0;
 
+    int  value       = -1;
+    bool isTeachable = true;
+
     enum class HandlerType
     {
         Special,

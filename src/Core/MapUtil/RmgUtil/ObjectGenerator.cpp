@@ -1061,8 +1061,8 @@ struct ObjectGenerator::ObjectFactoryVisitable : public AbstractFactory<RecordVi
             record.m_frequency         = visitable->frequency;
             record.m_maxLimit          = visitable->maxZone;
             record.m_minLimit          = visitable->minZone;
-            Core::MapScore score;
-            const int      scoreValue = visitable->value;
+
+            const int scoreValue = visitable->value;
             if (!scoreValue)
                 throw std::runtime_error("'" + visitable->id + "' has no valid score!");
 
@@ -1166,6 +1166,81 @@ struct ObjectGenerator::ObjectFactoryMine : public AbstractFactory<RecordMine> {
 
 // ---------------------------------------------------------------------------------------
 
+struct RecordSkillHut : public CommonRecord<RecordVisitable> {
+    FHSkillHut m_obj;
+};
+
+struct ObjectGenerator::ObjectFactorySkillHut : public AbstractFactory<RecordSkillHut> {
+    struct ObjectSkillHut : public AbstractObject<FHSkillHut> {
+        std::string                    getId() const override { return this->m_obj.m_visitableId->id; }
+        Type                           getType() const override { return Type::Visitable; }
+        Core::LibraryObjectDefConstPtr getDef() const override { return m_obj.m_visitableId->objectDefs.get({}); }
+    };
+
+    ObjectFactorySkillHut(FHMap&                              map,
+                          const FHRngZone::GeneratorSkillHut& genSettings,
+                          const FHScoreSettings&              scoreSettings,
+                          const Core::IGameDatabase*          database,
+                          Core::IRandomGenerator* const       rng)
+        : AbstractFactory<RecordSkillHut>(map, database, rng)
+    {
+        if (!genSettings.m_isEnabled)
+            return;
+
+        auto* visitable = database->mapVisitables()->find("sod.visitable.witchHut");
+        assert(visitable);
+
+        for (auto* skill : database->secSkills()->records()) {
+            if (map.m_disabledSkills.isDisabled(map.m_isWaterMap, skill))
+                continue;
+            if (!skill->isTeachable)
+                continue;
+
+            RecordSkillHut record;
+            record.m_obj.m_visitableId = visitable;
+            record.m_frequency         = genSettings.m_frequency;
+            record.m_maxLimit          = visitable->maxZone;
+            record.m_minLimit          = visitable->minZone;
+
+            const int scoreValue = skill->value;
+            if (!scoreValue)
+                throw std::runtime_error("'" + skill->id + "' has no valid score!");
+
+            const Core::ScoreAttr attr = Core::ScoreAttr::Upgrade;
+
+            record.m_obj.m_score[attr] = scoreValue;
+
+            record.m_obj.m_guard = genSettings.m_guard;
+
+            if (scoreSettings.isValidValue(attr, scoreValue)) {
+                m_records.m_records.push_back(record);
+            }
+        }
+
+        m_records.updateFrequency();
+    }
+
+    IObjectPtr make(uint64_t rngFreq) override
+    {
+        const size_t index  = m_records.getFreqIndex(rngFreq);
+        auto&        record = m_records.m_records[index];
+
+        ObjectSkillHut obj;
+        obj.m_onDisable = [this, &record] {
+            m_records.onDisable(record);
+        };
+        obj.m_onAccept = [this, &record] {
+            m_records.onAccept(record);
+        };
+        obj.m_map = &m_map;
+        obj.m_obj = record.m_obj;
+
+        return std::make_shared<ObjectSkillHut>(std::move(obj));
+    }
+};
+
+// ---------------------------------------------------------------------------------------
+
 void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
                                Core::LibraryFactionConstPtr rewardsFaction,
                                Core::LibraryFactionConstPtr dwellFaction,
@@ -1227,6 +1302,7 @@ void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
         objectFactories.push_back(std::make_shared<ObjectFactoryDwelling>(m_map, zoneSettings.m_generators.m_dwellings, scoreSettings, m_database, m_rng, dwellFaction));
         objectFactories.push_back(std::make_shared<ObjectFactoryVisitable>(m_map, zoneSettings.m_generators.m_visitables, scoreSettings, m_database, m_rng, terrain));
         objectFactories.push_back(std::make_shared<ObjectFactoryMine>(m_map, zoneSettings.m_generators.m_mines, scoreSettings, m_database, m_rng, terrain));
+        objectFactories.push_back(std::make_shared<ObjectFactorySkillHut>(m_map, zoneSettings.m_generators.m_skillHuts, scoreSettings, m_database, m_rng));
 
         const int iterLimit = 100000;
         int       i         = 0;

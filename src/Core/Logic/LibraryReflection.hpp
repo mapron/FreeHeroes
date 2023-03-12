@@ -358,6 +358,8 @@ STRUCT_REFLECTION_PAIRED(
     "legacyId",                    legacyId,
     "frequencyWarrior",            frequencyWarrior,
     "frequencyMage",               frequencyMage,
+    "value",                       value,
+    "isTeachable",                 isTeachable,
     "handler",                     handler,
     "calc",                        calc,
     "isWaterContent",              isWaterContent,
