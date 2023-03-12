@@ -16,6 +16,8 @@
 #include "LibraryMapVisitable.hpp"
 #include "LibraryPlayer.hpp"
 
+#include "ScoreUtil.hpp"
+
 #include "IGraphicsLibrary.hpp"
 
 namespace FreeHeroes {
@@ -269,8 +271,10 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
             artPos.m_x -= index % 2;
             artPos.m_y -= index / 2;
             index++;
-            auto* artdef       = art->objectDefs.get({});
-            auto* artItem      = result.addItem(makeItemByDef(SpriteMap::Layer::Artifact, artdef, artPos).setPriority(SpriteMap::s_objectMaxPriority + 2));
+
+            auto* artdef  = art->objectDefs.get({});
+            auto* artItem = result.addItem(makeItemByDef(SpriteMap::Layer::Artifact, artdef, artPos).setPriority(SpriteMap::s_objectMaxPriority + 2));
+            estimateArtScore(art, artItem->m_score);
             artItem->m_opacity = 0.8;
         }
     }

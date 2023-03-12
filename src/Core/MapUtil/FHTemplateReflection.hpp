@@ -52,6 +52,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone::GeneratorArtifact::Record,
     m_frequency,
+    m_pool,
     m_filter)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(

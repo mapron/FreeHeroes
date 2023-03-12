@@ -14,6 +14,7 @@
 #include "ObjectGenerator.hpp"
 
 #include "../FHMap.hpp"
+#include "../ScoreUtil.hpp"
 
 #include "MernelPlatform/Profiler.hpp"
 
@@ -21,76 +22,6 @@
 #include <functional>
 
 namespace FreeHeroes {
-
-namespace {
-
-Core::MapScore estimateReward(const Core::Reward& reward, Core::ScoreAttr armyAttr = Core::ScoreAttr::ArmyAux)
-{
-    Core::MapScore score;
-    for (const auto& [id, count] : reward.resources.data) {
-        const int amount = count / id->pileSize;
-        const int value  = amount * id->value;
-        auto      attr   = (id->rarity == Core::LibraryResource::Rarity::Gold) ? Core::ScoreAttr::Gold : Core::ScoreAttr::Resource;
-        score[attr] += value;
-    }
-
-    int64_t armyValue = 0;
-    for (const auto& unit : reward.units) {
-        armyValue += unit.count * unit.unit->value;
-    }
-    for (const auto& unit : reward.randomUnits) {
-        armyValue += unit.m_value;
-    }
-    if (armyValue)
-        score[armyAttr] = armyValue;
-
-    if (reward.gainedExp)
-        score[Core::ScoreAttr::Experience] = reward.gainedExp * 5 / 4;
-
-    return score;
-}
-
-void estimateArtScore(Core::LibraryArtifactConstPtr art, Core::MapScore& score)
-{
-    auto attr = Core::ScoreAttr::ArtSupport;
-    if (std::find(art->tags.cbegin(), art->tags.cend(), Core::LibraryArtifact::Tag::Stats) != art->tags.cend())
-        attr = Core::ScoreAttr::ArtStat;
-    if (std::find(art->tags.cbegin(), art->tags.cend(), Core::LibraryArtifact::Tag::Control) != art->tags.cend())
-        attr = Core::ScoreAttr::Control;
-
-    score[attr] += art->value;
-}
-
-void estimateSpellScore(Core::LibrarySpellConstPtr spell, Core::MapScore& score, bool asAnySpell)
-{
-    auto attr = Core::ScoreAttr::SpellCommon;
-    if (std::find(spell->tags.cbegin(), spell->tags.cend(), Core::LibrarySpell::Tag::Control) != spell->tags.cend())
-        attr = Core::ScoreAttr::Control;
-    if (std::find(spell->tags.cbegin(), spell->tags.cend(), Core::LibrarySpell::Tag::OffensiveSummon) != spell->tags.cend())
-        attr = Core::ScoreAttr::SpellOffensive;
-
-    if (asAnySpell)
-        score[Core::ScoreAttr::SpellAny] += spell->value;
-    else
-        score[attr] += spell->value;
-}
-
-void estimateSpellListScore(const std::vector<Core::LibrarySpellConstPtr>& spells, Core::MapScore& score, bool asAnySpell)
-{
-    for (Core::LibrarySpellConstPtr spell : spells) {
-        Core::MapScore one;
-        estimateSpellScore(spell, one, asAnySpell);
-        for (const auto& [attr, value] : one) {
-            score[attr] = std::max(score[attr], value);
-        }
-    }
-    // make sure spell list is worth 150% of maximum value
-    for (auto& [attr, value] : score) {
-        value = value * 3 / 2;
-    }
-}
-
-}
 
 template<class Child>
 struct CommonRecord {
@@ -167,6 +98,12 @@ struct CommonRecordList {
     }
 };
 
+struct AcceptableArtifact {
+    Core::LibraryArtifactConstPtr m_art        = nullptr;
+    std::function<void()>         m_onDiscard  = [] {};
+    bool                          m_forceReset = false;
+};
+
 class ArtifactPool {
 public:
     using ArtifactSet = std::set<Core::LibraryArtifactConstPtr>;
@@ -195,15 +132,15 @@ public:
         }
     }
 
-    Core::LibraryArtifactConstPtr make(const Core::ArtifactFilter& filter, bool enableFilter, const FHScoreSettings& scoreSettings)
+    AcceptableArtifact make(const Core::ArtifactFilter& pool, const Core::ArtifactFilter& filter, bool enableFilter, const FHScoreSettings& scoreSettings)
     {
-        ArtList artList = filter.filterPossible(m_artifacts);
+        ArtList artList = pool.filterPossible(m_artifacts);
         if (artList.empty())
-            return nullptr;
+            return {};
 
         ArtifactSet artSet(artList.cbegin(), artList.cend());
         m_pools[artSet].m_artList = artList;
-        return m_pools[artSet].make(m_rng, enableFilter, scoreSettings);
+        return m_pools[artSet].make(filter, m_rng, enableFilter, scoreSettings);
     }
     bool isEmpty(const Core::ArtifactFilter& filter, bool enableFilter, const FHScoreSettings& scoreSettings) const
     {
@@ -224,38 +161,72 @@ private:
     struct SubPool {
         ArtList m_artList;
         ArtList m_current;
+        ArtList m_currentHigh;
 
-        Core::LibraryArtifactConstPtr make(Core::IRandomGenerator* rng, bool enableFilter, const FHScoreSettings& scoreSettings)
+        AcceptableArtifact make(const Core::ArtifactFilter& filter, Core::IRandomGenerator* rng, bool enableFilter, const FHScoreSettings& scoreSettings)
         {
             bool hasReset = false;
             if (m_current.empty()) {
                 m_current = m_artList;
                 hasReset  = true;
             }
-            auto art = makeOne(rng, enableFilter, scoreSettings);
+            auto art = makeOne(filter, rng, enableFilter, scoreSettings);
 
-            while (!art) {
-                if (m_current.empty()) {
+            while (!art.m_art) {
+                if (m_current.empty() || art.m_forceReset) {
                     if (hasReset)
-                        return nullptr;
+                        return {};
                     m_current = m_artList;
                     hasReset  = true;
                 }
-                art = makeOne(rng, enableFilter, scoreSettings);
+                art = makeOne(filter, rng, enableFilter, scoreSettings);
             }
-
+            if (!art.m_art) {
+                return {};
+            }
             return art;
         }
 
-        Core::LibraryArtifactConstPtr makeOne(Core::IRandomGenerator* rng, bool enableFilter, const FHScoreSettings& scoreSettings)
+        AcceptableArtifact makeOne(const Core::ArtifactFilter& filter, Core::IRandomGenerator* rng, bool enableFilter, const FHScoreSettings& scoreSettings)
         {
-            auto index = rng->gen(m_current.size() - 1);
-            auto art   = m_current[index];
-            m_current.erase(m_current.begin() + index);
-            if (!okFilter(art, enableFilter, scoreSettings))
-                return nullptr;
+            if (!m_currentHigh.empty()) {
+                auto art = makeOne(m_currentHigh, filter, rng, enableFilter, scoreSettings);
+                if (art.m_art) {
+                    art.m_forceReset = false;
+                    return art;
+                }
+            }
+            return makeOne(m_current, filter, rng, enableFilter, scoreSettings);
+        }
 
-            return art;
+        AcceptableArtifact makeOne(ArtList& current, const Core::ArtifactFilter& filter, Core::IRandomGenerator* rng, bool enableFilter, const FHScoreSettings& scoreSettings)
+        {
+            ArtList currentFiltered = filter.filterPossible(current);
+            if (currentFiltered.empty())
+                return { .m_forceReset = true };
+
+            Core::LibraryArtifactConstPtr art = nullptr;
+
+            auto index = rng->gen(currentFiltered.size() - 1);
+            art        = currentFiltered[index];
+            auto it    = std::find(current.begin(), current.end(), art);
+            current.erase(it);
+
+            if (!okFilter(art, enableFilter, scoreSettings))
+                return {};
+
+            return { .m_art = art, .m_onDiscard = [this, art] {
+                        /*if (std::find(art->tags.cbegin(), art->tags.cend(), Core::LibraryArtifact::Tag::Control) != art->tags.cend()) {
+                            std::cerr << "discard art:" << art->id << ", current=[";
+                            for (auto* art1 : m_current)
+                                std::cerr << art1->id << ", ";
+                            std::cerr << "], high=[";
+                            for (auto* art1 : m_currentHigh)
+                                std::cerr << art1->id << ", ";
+                            std::cerr << "]\n";
+                        }*/
+                        m_currentHigh.push_back(art);
+                    } };
         }
     };
     std::map<ArtifactSet, SubPool> m_pools;
@@ -519,9 +490,8 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
 
         const bool upgraded = record.m_id->upgradedStackIndex == -1 ? false : m_rng->genSmall(3) == 0;
         ObjectBank obj;
-        obj.m_onDisable = [this, &record] {
-            m_records.onDisable(record);
-        };
+
+        std::vector<AcceptableArtifact> accArts;
         obj.m_obj.m_id            = record.m_id;
         obj.m_obj.m_guardsVariant = record.m_guardsVariant;
         obj.m_obj.m_upgradedStack = upgraded ? FHBank::UpgradedStack::Yes : FHBank::UpgradedStack::No;
@@ -533,15 +503,26 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
         {
             const Core::ArtifactFilter firstFilter = reward.artifacts.empty() ? Core::ArtifactFilter{} : reward.artifacts[0];
             for (const auto& filter : reward.artifacts) {
-                auto art = m_artifactPool->make(filter, firstFilter == filter, m_scoreSettings);
-                assert(art);
-                obj.m_obj.m_artifacts.push_back(art);
+                auto accArt = m_artifactPool->make(filter, filter, firstFilter == filter, m_scoreSettings);
 
-                estimateArtScore(art, score);
+                //if (std::find(accArt.m_art->tags.cbegin(), accArt.m_art->tags.cend(), Core::LibraryArtifact::Tag::Control) != accArt.m_art->tags.cend())
+                //    std::cerr << "make bank:" << accArt.m_art->id << "\n";
+                assert(accArt.m_art);
+                obj.m_obj.m_artifacts.push_back(accArt.m_art);
+                estimateArtScore(accArt.m_art, score);
+                accArts.push_back(std::move(accArt));
             }
         }
         obj.m_obj.m_score = score;
         obj.m_obj.m_guard = record.m_guardValue;
+        obj.m_onDisable   = [this, &record, accArts] {
+            m_records.onDisable(record);
+            for (const auto& art : accArts)
+                art.m_onDiscard();
+        };
+        obj.m_onAccept = [this, &record] {
+            m_records.onAccept(record);
+        };
 
         return std::make_shared<ObjectBank>(std::move(obj));
     }
@@ -554,6 +535,7 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
 
 struct RecordArtifact : public CommonRecord<RecordArtifact> {
     Core::ArtifactFilter m_filter;
+    Core::ArtifactFilter m_pool;
 };
 
 struct ObjectGenerator::ObjectFactoryArtifact : public AbstractFactory<RecordArtifact> {
@@ -574,7 +556,7 @@ struct ObjectGenerator::ObjectFactoryArtifact : public AbstractFactory<RecordArt
             if (m_artifactPool->isEmpty(value.m_filter, true, scoreSettings))
                 continue;
 
-            auto rec = RecordArtifact{ .m_filter = value.m_filter };
+            auto rec = RecordArtifact{ .m_filter = value.m_filter, .m_pool = value.m_pool };
 
             rec.m_attempts = 3;
 
@@ -590,13 +572,17 @@ struct ObjectGenerator::ObjectFactoryArtifact : public AbstractFactory<RecordArt
         auto&        record = m_records.m_records[index];
 
         ObjectArtifact obj;
-        obj.m_onDisable = [this, &record] {
-            m_records.onDisable(record);
-        };
-        obj.m_map = &m_map;
 
-        obj.m_obj.m_id = m_artifactPool->make(record.m_filter, true, m_scoreSettings);
+        obj.m_map   = &m_map;
+        auto accArt = m_artifactPool->make(record.m_pool, record.m_filter, true, m_scoreSettings);
+        //if (std::find(accArt.m_art->tags.cbegin(), accArt.m_art->tags.cend(), Core::LibraryArtifact::Tag::Control) != accArt.m_art->tags.cend())
+        //    std::cerr << "make art:" << accArt.m_art->id << "\n";
+        obj.m_obj.m_id = accArt.m_art;
         assert(obj.m_obj.m_id);
+        obj.m_onDisable = [this, &record, accArt] {
+            m_records.onDisable(record);
+            accArt.m_onDiscard();
+        };
 
         estimateArtScore(obj.m_obj.m_id, obj.m_obj.m_score);
 

@@ -717,17 +717,18 @@ void FHTemplateProcessor::runRewards()
 
     m_logOutput << m_indent << "armyPercent=" << armyPercent << ", goldPercent=" << goldPercent << "\n";
 
-    ObjectBundleSet bundleSet(m_rng, m_tileContainer, m_logOutput);
     for (auto& tileZone : m_tileZones) {
         if (tileZone.m_rngZoneSettings.m_scoreTargets.empty())
             continue;
 
-        //if (tileZone.m_id != "P1")
+        ObjectBundleSet bundleSet(m_rng, m_tileContainer, m_logOutput);
+        //if (tileZone.m_id != "CC")
         //    continue;
 
         m_logOutput << m_indent << " --- generate : " << tileZone.m_id << " --- \n";
-        auto      objects     = m_map.m_objects;
-        const int maxAttempts = 3;
+        auto      objects       = m_map.m_objects;
+        auto      needBeBlocked = tileZone.m_needBeBlocked;
+        const int maxAttempts   = 3;
         for (int i = 1; i <= maxAttempts; ++i) {
             const bool      lastAttempt = i == maxAttempts;
             ObjectGenerator gen(m_map, m_database, m_rng, m_logOutput);
@@ -741,24 +742,25 @@ void FHTemplateProcessor::runRewards()
             if (!bundleSet.consume(gen, tileZone)) {
                 if (lastAttempt)
                     throw std::runtime_error("Failed to fit some objects into zone '" + tileZone.m_id + "'");
-                m_map.m_objects = objects; // restore map data and try again.
+                m_map.m_objects          = objects; // restore map data and try again.
+                tileZone.m_needBeBlocked = needBeBlocked;
             } else {
                 break;
             }
         }
 
+        for (auto& guardBundle : bundleSet.m_guards) {
+            Guard guard;
+            guard.m_value    = guardBundle.m_value;
+            guard.m_pos      = guardBundle.m_pos;
+            guard.m_zone     = guardBundle.m_zone;
+            guard.m_joinable = true;
+            m_guards.push_back(guard);
+        }
+
         //for (auto* cell : bundleSet.m_consumeResult.m_centroidsALL) {
         //    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 1 }); // red
         //}
-    }
-
-    for (auto& guardBundle : bundleSet.m_guards) {
-        Guard guard;
-        guard.m_value    = guardBundle.m_value;
-        guard.m_pos      = guardBundle.m_pos;
-        guard.m_zone     = guardBundle.m_zone;
-        guard.m_joinable = true;
-        m_guards.push_back(guard);
     }
 
     m_logOutput << m_indent << "RNG TEST B:" << m_rng->gen(1000000) << "\n";

@@ -18,7 +18,7 @@
 "sod.artifact.sword.att5"             : {"class":"major"   , "value":    -1 , "untranslatedName": "Sword +5"  ,"slot":"sword", "statBonus": {"ad":{"attack": 5 } } },
 "sod.artifact.sword.att6"             : {"class":"major"   , "value":    -1 , "untranslatedName": "Sword +6"  ,"slot":"sword", "statBonus": {"ad":{"attack": 6 } } },
 "hota.artifact.sword.att7"            : {"class":"major"   , "value":    -1 , "untranslatedName": "Sword +7"  ,"slot":"sword", "statBonus": {"ad":{"attack": 7 } } },
-"sod.artifact.sword.att12"            : {"class":"relic"   , "value": 10000 , "untranslatedName": "Sword +12" ,"slot":"sword", "statBonus": {"ad":{"attack": 12, "defense":-3} } },
+"sod.artifact.sword.att12"            : {"class":"relic"   , "value": 15000 , "untranslatedName": "Sword +12" ,"slot":"sword", "statBonus": {"ad":{"attack": 12, "defense":-3} } },
 
 "sod.artifact.shield.def2"            : {"class":"treasure", "value":    -1 ,  "untranslatedName": "Shield +2" ,"slot":"shield", "statBonus": {"ad":{"defense": 2 } } },
 "sod.artifact.shield.def3"            : {"class":"minor"   , "value":    -1 ,  "untranslatedName": "Shield +3" ,"slot":"shield", "statBonus": {"ad":{"defense": 3 } } },
@@ -26,7 +26,7 @@
 "sod.artifact.shield.def5"            : {"class":"major"   , "value":    -1 ,  "untranslatedName": "Shield +5" ,"slot":"shield", "statBonus": {"ad":{"defense": 5 } } },
 "sod.artifact.shield.def6"            : {"class":"major"   , "value":    -1 ,  "untranslatedName": "Shield +6" ,"slot":"shield", "statBonus": {"ad":{"defense": 6 } } },
 "hota.artifact.shield.def7"           : {"class":"major"   , "value":    -1 ,  "untranslatedName": "Shield +7" ,"slot":"shield", "statBonus": {"ad":{"defense": 7 } } },
-"sod.artifact.shield.def12"           : {"class":"relic"   , "value": 10000 ,  "untranslatedName": "Shield +12","slot":"shield", "statBonus": {"ad":{"defense": 12, "attack":-3} } },
+"sod.artifact.shield.def12"           : {"class":"relic"   , "value": 12000 ,  "untranslatedName": "Shield +12","slot":"shield", "statBonus": {"ad":{"defense": 12, "attack":-3} } },
 
 "sod.artifact.helm.int1"              : {"class":"treasure", "value":    -1 , "untranslatedName": "Helm +1"   ,"slot":"helm", "statBonus": {"magic":{"int": 1 } } },
 "sod.artifact.helm.int2"              : {"class":"treasure", "value":    -1 , "untranslatedName": "Helm +2"   ,"slot":"helm", "statBonus": {"magic":{"int": 2 } } },
@@ -34,7 +34,7 @@
 "sod.artifact.helm.int4"              : {"class":"minor"   , "value":    -1 , "untranslatedName": "Helm +4"   ,"slot":"helm", "statBonus": {"magic":{"int": 4 } } },
 "sod.artifact.helm.int5"              : {"class":"major"   , "value":    -1 , "untranslatedName": "Helm +5"   ,"slot":"helm", "statBonus": {"magic":{"int": 5 } } },
 "hota.artifact.helm.int6"             : {"class":"major"   , "value":    -1 , "untranslatedName": "Helm +6"   ,"slot":"helm", "statBonus": {"magic":{"int": 6 } } },
-"sod.artifact.helm.int10"             : {"class":"relic"   , "value": 10000 , "untranslatedName": "Helm +10"  ,"slot":"helm", "statBonus": {"magic":{"int": 10, "sp": -2  } } },
+"sod.artifact.helm.int10"             : {"class":"relic"   , "value": 12000 , "untranslatedName": "Helm +10"  ,"slot":"helm", "statBonus": {"magic":{"int": 10, "sp": -2  } } },
 
 "sod.artifact.torso.spl1"             : {"class":"treasure", "value":    -1 , "untranslatedName": "Torso +1"  ,"slot":"torso", "statBonus": {"magic":{"sp": 1 } } },
 "sod.artifact.torso.spl2"             : {"class":"treasure", "value":    -1 , "untranslatedName": "Torso +2"  ,"slot":"torso", "statBonus": {"magic":{"sp": 2 } } },
@@ -42,14 +42,14 @@
 "sod.artifact.torso.spl4"             : {"class":"minor"   , "value":    -1 , "untranslatedName": "Torso +4"  ,"slot":"torso", "statBonus": {"magic":{"sp": 4 } } },
 "sod.artifact.torso.spl5"             : {"class":"major"   , "value":    -1 , "untranslatedName": "Torso +5"  ,"slot":"torso", "statBonus": {"magic":{"sp": 5 } } },
 "hota.artifact.torso.spl6"            : {"class":"major"   , "value":    -1 , "untranslatedName": "Torso +6"  ,"slot":"torso", "statBonus": {"magic":{"sp": 6 } } },
-"sod.artifact.torso.spl10"            : {"class":"relic"   , "value": 10000 , "untranslatedName": "Torso +10" ,"slot":"torso", "statBonus": {"magic":{"sp": 10, "int": -2  } } },
+"sod.artifact.torso.spl10"            : {"class":"relic"   , "value": 15000 , "untranslatedName": "Torso +10" ,"slot":"torso", "statBonus": {"magic":{"sp": 10, "int": -2  } } },
 
 "sod.artifact.torso.all1"             : {"class":"minor"   , "value":    -1 , "untranslatedName": "Torso +1 all"  ,"slot":"torso" , "statBonus": {"ad":{"attack": 1, "defense": 1}, "magic":{"sp": 1, "int": 1} } },
 "sod.artifact.boots.all2"             : {"class":"relic"   , "value":    -1 , "untranslatedName": "Boots +2 all"  ,"slot":"boots" , "statBonus": {"ad":{"attack": 2, "defense": 2}, "magic":{"sp": 2, "int": 2} } },
 "sod.artifact.neck.all3"              : {"class":"relic"   , "value":    -1 , "untranslatedName": "Neck +3 all"   ,"slot":"neck"  , "statBonus": {"ad":{"attack": 3, "defense": 3}, "magic":{"sp": 3, "int": 3} } },
-"sod.artifact.shield.all4"            : {"class":"relic"   , "value":    -1 , "untranslatedName": "Shield +4 all" ,"slot":"shield", "statBonus": {"ad":{"attack": 4, "defense": 4}, "magic":{"sp": 4, "int": 4} } },
-"sod.artifact.sword.all5"             : {"class":"relic"   , "value":    -1 , "untranslatedName": "Sword +5 all"  ,"slot":"sword" , "statBonus": {"ad":{"attack": 5, "defense": 5}, "magic":{"sp": 5, "int": 5} } },
-"sod.artifact.helm.all6"              : {"class":"relic"   , "value":    -1 , "untranslatedName": "Helm +6 all"   ,"slot":"helm"  , "statBonus": {"ad":{"attack": 6, "defense": 6}, "magic":{"sp": 6, "int": 6} } },
+"sod.artifact.shield.all4"            : {"class":"relic"   , "value": 20000 , "untranslatedName": "Shield +4 all" ,"slot":"shield", "statBonus": {"ad":{"attack": 4, "defense": 4}, "magic":{"sp": 4, "int": 4} } },
+"sod.artifact.sword.all5"             : {"class":"relic"   , "value": 25000 , "untranslatedName": "Sword +5 all"  ,"slot":"sword" , "statBonus": {"ad":{"attack": 5, "defense": 5}, "magic":{"sp": 5, "int": 5} } },
+"sod.artifact.helm.all6"              : {"class":"relic"   , "value": 32000 , "untranslatedName": "Helm +6 all"   ,"slot":"helm"  , "statBonus": {"ad":{"attack": 6, "defense": 6}, "magic":{"sp": 6, "int": 6} } },
 
 
 "sod.artifact.ring.attDef1"           : {"class":"treasure", "value":    -1 , "untranslatedName": "Ring AttDef +1"    ,"slot":"ring"   , "statBonus": {"ad":{"attack": 1, "defense": 1} } },

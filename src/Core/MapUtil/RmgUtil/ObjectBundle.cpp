@@ -242,6 +242,7 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
     Mernel::ProfilerScope scope("consume");
 
     m_consumeResult           = {};
+    m_guards                  = {};
     MapTileRegion safePadding = tileZone.m_roadNodesHighPriority;
     {
         auto guards = tileZone.m_breakGuardTiles;

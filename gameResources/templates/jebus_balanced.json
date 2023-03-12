@@ -92,15 +92,15 @@
                     "artifacts": {
                         "isEnabled": true,
                         "records": {
-                            "treasure"     : { "frequency":  100, "filter": {"classes": ["treasure"], "notTags": ["stats"]               } },
-                            "minor"        : { "frequency":  300, "filter": {"classes": ["minor"   ], "notTags": ["stats"]               } },
-                            "major"        : { "frequency":  500, "filter": {"classes": ["major"   ], "notTags": ["stats"]               } },
-                            "relic"        : { "frequency": 1000, "filter": {"classes": ["relic"   ], "notTags": ["stats", "control"]    } },
-                            "treasureStat" : { "frequency":  100, "filter": {"classes": ["treasure"], "tags"   : ["stats"]               } },
-                            "minorStat"    : { "frequency":  300, "filter": {"classes": ["minor"   ], "tags"   : ["stats"]               } },
-                            "majorStat"    : { "frequency":  500, "filter": {"classes": ["major"   ], "tags"   : ["stats"]               } },
-                            "relicStat"    : { "frequency": 1000, "filter": {"classes": ["relic"   ], "tags"   : ["stats"], "notTags": ["control"]    } },
-                            "control"      : { "frequency": 4000, "filter": {"classes": ["relic"   ], "tags"   : ["control"]             } }
+                            "treasure"     : { "frequency":  100, "pool": {"classes": ["treasure"]}, "filter": {"classes": ["treasure"], "notTags": ["stats"]               } },
+                            "minor"        : { "frequency":  300, "pool": {"classes": ["minor"   ]}, "filter": {"classes": ["minor"   ], "notTags": ["stats"]               } },
+                            "major"        : { "frequency":  500, "pool": {"classes": ["major"   ]}, "filter": {"classes": ["major"   ], "notTags": ["stats"]               } },
+                            "relic"        : { "frequency": 1000, "pool": {"classes": ["relic"   ]}, "filter": {"classes": ["relic"   ], "notTags": ["stats", "control"]    } },
+                            "treasureStat" : { "frequency":  100, "pool": {"classes": ["treasure"]}, "filter": {"classes": ["treasure"], "tags"   : ["stats"]               } },
+                            "minorStat"    : { "frequency":  300, "pool": {"classes": ["minor"   ]}, "filter": {"classes": ["minor"   ], "tags"   : ["stats"]               } },
+                            "majorStat"    : { "frequency":  500, "pool": {"classes": ["major"   ]}, "filter": {"classes": ["major"   ], "tags"   : ["stats"]               } },
+                            "relicStat"    : { "frequency": 1000, "pool": {"classes": ["relic"   ]}, "filter": {"classes": ["relic"   ], "tags"   : ["stats"], "notTags": ["control"]    } },
+                            "control"      : { "frequency": 4000, "pool": {"classes": ["relic"   ]}, "filter": {"classes": ["relic"   ], "tags"   : ["control"]             } }
                         }
                     },
                     "resources": {
@@ -284,8 +284,8 @@
                             "T7B"      : { "frequency": 500   },
                             "T8"       : { "frequency": 500   },
                             
-                            "spControl": { "frequency": 500   },
-                            "spAll"    : { "frequency": 500   }
+                            "spControl": { "frequency": 0   },
+                            "spAll"    : { "frequency": 0   }
 
                         }
                     }
@@ -309,7 +309,7 @@
                             "SpellCommon":    { "target":  80000  , "minSingle":  5000, "maxSingle" : -1},
                             "Upgrade"   :     { "target": 25000   , "minSingle":  3000, "maxSingle" : -1},
                 
-                            "Control":        { "target": 280000  , "minSingle": 35000, "maxSingle" : -1}
+                            "Control":        { "target": 320000  , "minSingle": 40000, "maxSingle" : -1}
                         }
                     },
                     "TreasureMid": {

@@ -126,6 +126,7 @@ struct FHRngZone {
     struct GeneratorArtifact : public GeneratorCommon {
         struct Record {
             Core::ArtifactFilter m_filter;
+            Core::ArtifactFilter m_pool;
             int                  m_frequency = 1000;
 
             bool operator==(const Record&) const noexcept = default;
