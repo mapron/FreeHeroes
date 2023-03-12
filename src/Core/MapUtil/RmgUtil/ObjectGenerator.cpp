@@ -376,6 +376,7 @@ struct RecordBank : public CommonRecord<RecordBank> {
     Core::LibraryMapBankConstPtr m_id            = nullptr;
     int                          m_guardsVariant = 0;
     int                          m_guardValue    = 0;
+    std::string                  m_repulseId;
 };
 
 struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
@@ -383,6 +384,9 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
         std::string                    getId() const override { return m_obj.m_id->id + " [" + std::to_string(m_obj.m_guardsVariant + 1) + "]"; }
         Type                           getType() const override { return Type::Visitable; }
         Core::LibraryObjectDefConstPtr getDef() const override { return m_obj.m_id->objectDefs.get({}); }
+        std::string                    getRepulseId() const override { return m_repulseId; }
+
+        std::string m_repulseId;
     };
 
     ObjectFactoryBank(FHMap&                          map,
@@ -414,8 +418,9 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
             for (auto& var : bank->variants)
                 totalFreq += var.frequencyRel;
 
-            int baseFrequency = bank->frequency;
-            int guardValue    = bank->guardValue;
+            int         baseFrequency = bank->frequency;
+            int         guardValue    = bank->guardValue;
+            std::string repulseId;
 
             {
                 auto it = recordMap.find(bank);
@@ -425,6 +430,8 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
                         baseFrequency = rec.m_frequency;
                     if (rec.m_guard != -1)
                         guardValue = rec.m_guard;
+                    if (!rec.m_repulseId.empty())
+                        repulseId = rec.m_repulseId;
                     if (!rec.m_enabled)
                         continue;
                 }
@@ -435,6 +442,7 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
                 record.m_guardsVariant = i;
                 record.m_id            = bank;
                 record.m_guardValue    = guardValue;
+                record.m_repulseId     = repulseId;
                 record.m_frequency     = baseFrequency * bank->variants[i].frequencyRel / totalFreq;
 
                 {
@@ -483,6 +491,7 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
         std::vector<AcceptableArtifact> accArts;
         obj.m_obj.m_id            = record.m_id;
         obj.m_obj.m_guardsVariant = record.m_guardsVariant;
+        obj.m_repulseId           = record.m_repulseId;
         obj.m_obj.m_upgradedStack = upgraded ? FHBank::UpgradedStack::Yes : FHBank::UpgradedStack::No;
         obj.m_map                 = &m_map;
 
@@ -523,12 +532,17 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
 struct RecordArtifact : public CommonRecord<RecordArtifact> {
     Core::ArtifactFilter m_filter;
     Core::ArtifactFilter m_pool;
+
+    std::string m_repulseId;
 };
 
 struct ObjectGenerator::ObjectFactoryArtifact : public AbstractFactory<RecordArtifact> {
     struct ObjectArtifact : public AbstractObjectWithId<FHArtifact> {
-        Type getType() const override { return Type::Pickable; }
-        bool preventDuplicates() const override { return true; }
+        Type        getType() const override { return Type::Pickable; }
+        bool        preventDuplicates() const override { return true; }
+        std::string getRepulseId() const override { return m_repulseId; }
+
+        std::string m_repulseId;
     };
 
     ObjectFactoryArtifact(FHMap& map, const FHRngZone::GeneratorArtifact& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng, ArtifactPool* artifactPool)
@@ -543,7 +557,7 @@ struct ObjectGenerator::ObjectFactoryArtifact : public AbstractFactory<RecordArt
             if (m_artifactPool->isEmpty(value.m_filter, true, scoreSettings))
                 continue;
 
-            auto rec = RecordArtifact{ .m_filter = value.m_filter, .m_pool = value.m_pool };
+            auto rec = RecordArtifact{ .m_filter = value.m_filter, .m_pool = value.m_pool, .m_repulseId = value.m_repulseId };
 
             rec.m_attempts = 3;
 
@@ -560,9 +574,10 @@ struct ObjectGenerator::ObjectFactoryArtifact : public AbstractFactory<RecordArt
 
         ObjectArtifact obj;
 
-        obj.m_map      = &m_map;
-        auto accArt    = m_artifactPool->make(record.m_pool, record.m_filter, true, m_scoreSettings);
-        obj.m_obj.m_id = accArt.m_art;
+        obj.m_map       = &m_map;
+        auto accArt     = m_artifactPool->make(record.m_pool, record.m_filter, true, m_scoreSettings);
+        obj.m_obj.m_id  = accArt.m_art;
+        obj.m_repulseId = record.m_repulseId;
         assert(obj.m_obj.m_id);
         obj.m_onDisable = [this, &record, accArt] {
             m_records.onDisable(record);
@@ -634,6 +649,9 @@ struct ObjectPandora : public ObjectGenerator::AbstractObject<FHPandora> {
     std::string getId() const override { return m_obj.m_generationId; }
     Type        getType() const override { return Type::Pickable; }
     bool        preventDuplicates() const override { return true; }
+    std::string getRepulseId() const override { return m_repulseId; }
+
+    std::string m_repulseId;
 };
 
 struct RecordPandora : public CommonRecord<RecordPandora> {
@@ -681,6 +699,7 @@ struct ObjectGenerator::ObjectFactoryPandora : public AbstractFactory<RecordPand
             obj.m_obj.m_guard        = value.m_guard;
             obj.m_obj.m_reward       = value.m_reward;
             obj.m_obj.m_score        = estimateReward(value.m_reward);
+            obj.m_repulseId          = value.m_repulseId;
             if (!obj.m_obj.m_reward.spells.isDefault()) {
                 auto filteredSpells = obj.m_obj.m_reward.spells.filterPossible(allSpells);
                 if (filteredSpells.empty())
@@ -767,6 +786,7 @@ struct RecordSpellShrine : public CommonRecord<RecordSpellShrine> {
     Core::LibraryMapVisitableConstPtr m_visitableId = nullptr;
     int                               m_guard       = -1;
     bool                              m_asAnySpell  = false;
+    std::string                       m_repulseId;
 };
 
 struct ObjectGenerator::ObjectFactoryShrine : public AbstractFactory<RecordSpellShrine> {
@@ -775,6 +795,9 @@ struct ObjectGenerator::ObjectFactoryShrine : public AbstractFactory<RecordSpell
 
         Type                           getType() const override { return Type::Visitable; }
         Core::LibraryObjectDefConstPtr getDef() const override { return m_obj.m_visitableId->objectDefs.get({}); }
+        std::string                    getRepulseId() const override { return m_repulseId; }
+
+        std::string m_repulseId;
     };
 
     ObjectFactoryShrine(FHMap& map, const FHRngZone::GeneratorShrine& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng, SpellPool* spellPool)
@@ -811,6 +834,7 @@ struct ObjectGenerator::ObjectFactoryShrine : public AbstractFactory<RecordSpell
                     .m_visitableId = visitables[value.m_visualLevel],
                     .m_guard       = value.m_guard,
                     .m_asAnySpell  = asAnySpell,
+                    .m_repulseId   = value.m_repulseId,
                 };
 
                 m_records.m_records.push_back(rec.setFreq(value.m_frequency));
@@ -832,6 +856,7 @@ struct ObjectGenerator::ObjectFactoryShrine : public AbstractFactory<RecordSpell
         obj.m_map               = &m_map;
         obj.m_obj.m_visitableId = record.m_visitableId;
         obj.m_obj.m_spellId     = m_spellPool->make(record.m_filter, record.m_asAnySpell, m_scoreSettings);
+        obj.m_repulseId         = record.m_repulseId;
 
         assert(obj.m_obj.m_spellId);
 
@@ -854,12 +879,16 @@ struct RecordSpellScroll : public CommonRecord<RecordSpellScroll> {
     Core::SpellFilter m_filter;
     int               m_guard      = -1;
     bool              m_asAnySpell = false;
+    std::string       m_repulseId;
 };
 
 struct ObjectGenerator::ObjectFactoryScroll : public AbstractFactory<RecordSpellScroll> {
     struct ObjectScroll : public AbstractObjectWithId<FHArtifact> {
-        Type getType() const override { return Type::Pickable; }
-        bool preventDuplicates() const override { return true; }
+        Type        getType() const override { return Type::Pickable; }
+        bool        preventDuplicates() const override { return true; }
+        std::string getRepulseId() const override { return m_repulseId; }
+
+        std::string m_repulseId;
     };
 
     ObjectFactoryScroll(FHMap& map, const FHRngZone::GeneratorScroll& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng, SpellPool* spellPool)
@@ -882,7 +911,7 @@ struct ObjectGenerator::ObjectFactoryScroll : public AbstractFactory<RecordSpell
                     continue;
                 }
 
-                auto rec = RecordSpellScroll{ .m_filter = value.m_filter, .m_guard = value.m_guard, .m_asAnySpell = asAnySpell };
+                auto rec = RecordSpellScroll{ .m_filter = value.m_filter, .m_guard = value.m_guard, .m_asAnySpell = asAnySpell, .m_repulseId = value.m_repulseId };
 
                 m_records.m_records.push_back(rec.setFreq(value.m_frequency));
             }
@@ -900,8 +929,9 @@ struct ObjectGenerator::ObjectFactoryScroll : public AbstractFactory<RecordSpell
         obj.m_onDisable = [this, &record] {
             m_records.onDisable(record);
         };
-        obj.m_map    = &m_map;
-        auto spellId = m_spellPool->make(record.m_filter, record.m_asAnySpell, m_scoreSettings);
+        obj.m_map       = &m_map;
+        obj.m_repulseId = record.m_repulseId;
+        auto spellId    = m_spellPool->make(record.m_filter, record.m_asAnySpell, m_scoreSettings);
         assert(spellId);
         obj.m_obj.m_id = m_scrollMapping.at(spellId);
         assert(obj.m_obj.m_id);

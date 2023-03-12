@@ -88,6 +88,12 @@
                     "banks": {
                         "isEnabled": true,
                         "records": {
+                        
+                            "utopia": {"bank": "sod.map.utopia"           , "repulseId": "utopia"   },
+                            "consa" : {"bank": "sod.map.conservatory"     , "repulseId": "armyBank" },
+                            "hive"  : {"bank": "sod.map.hive"             , "repulseId": "armyBank" },
+                            "shop"  : {"bank": "hota.map.experimentalShop", "repulseId": "armyBank" },
+                            "picket": {"bank": "hota.map.wolfRaiderPicket", "repulseId": "armyBank" }
                         }
                     },
                     "artifacts": {
@@ -101,7 +107,7 @@
                             "minorStat"    : { "frequency":  300, "pool": {"classes": ["minor"   ]}, "filter": {"classes": ["minor"   ], "tags"   : ["stats"]               } },
                             "majorStat"    : { "frequency":  500, "pool": {"classes": ["major"   ]}, "filter": {"classes": ["major"   ], "tags"   : ["stats"]               } },
                             "relicStat"    : { "frequency": 1000, "pool": {"classes": ["relic"   ]}, "filter": {"classes": ["relic"   ], "tags"   : ["stats"], "notTags": ["control"]    } },
-                            "control"      : { "frequency": 4000, "pool": {"classes": ["relic"   ]}, "filter": {"classes": ["relic"   ], "tags"   : ["control"]             } }
+                            "control"      : { "frequency": 4000, "pool": {"classes": ["relic"   ]}, "filter": {"classes": ["relic"   ], "tags"   : ["control"]             }, "repulseId": "controlArt" }
                         }
                     },
                     "resources": {
@@ -193,7 +199,7 @@
                             "lvl3off"  : { "frequency":  400,                   "filter": {"levels": [3], "notTags"   : ["control"], "tags": ["offensive"]   } },
                             "lvl4off"  : { "frequency":  300,                   "filter": {"levels": [4], "notTags"   : ["control"], "tags": ["offensive"]   } },
                             "lvl5off"  : { "frequency":  300,                   "filter": {"levels": [5], "notTags"   : ["control"], "tags": ["offensive"]   } },
-                            "control"  : { "frequency":  10000,                 "filter": {                 "tags"    : ["control"]    } }
+                            "control"  : { "frequency":  10000,                 "filter": {                 "tags"    : ["control"]    }, "repulseId": "controlScroll" }
                         }
                     },
                     "dwellings": {

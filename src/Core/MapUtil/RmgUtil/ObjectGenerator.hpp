@@ -45,6 +45,7 @@ public:
         virtual int64_t        getGuard() const           = 0;
         virtual Type           getType() const            = 0;
         virtual FHPos          getOffset() const { return FHPos{}; }
+        virtual std::string    getRepulseId() const { return {}; }
 
         virtual Core::LibraryObjectDefConstPtr getDef() const { return nullptr; }
         virtual bool                           preventDuplicates() const { return false; }

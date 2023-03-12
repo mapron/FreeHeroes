@@ -52,10 +52,11 @@ struct ObjectBundle {
 
     size_t getEstimatedArea() const { return m_fitArea.size(); }
 
-    size_t  m_itemLimit    = 0;
-    bool    m_canPushMore  = false;
-    int64_t m_targetGuard  = 0;
-    size_t  m_segmentIndex = 0;
+    size_t      m_itemLimit    = 0;
+    bool        m_canPushMore  = false;
+    int64_t     m_targetGuard  = 0;
+    size_t      m_segmentIndex = 0;
+    std::string m_repulseId;
 
     void estimateOccupied();
 

@@ -163,7 +163,7 @@ std::vector<MapTileArea> MapTileArea::splitByFloodFill(bool useDiag, MapTilePtr 
     return result;
 }
 
-std::vector<MapTileArea> MapTileArea::splitByMaxArea(std::ostream& os, size_t maxArea) const
+std::vector<MapTileArea> MapTileArea::splitByMaxArea(std::ostream& os, size_t maxArea, bool repulse) const
 {
     std::vector<MapTileArea> result;
     size_t                   zoneArea = m_innerArea.size();
@@ -172,10 +172,10 @@ std::vector<MapTileArea> MapTileArea::splitByMaxArea(std::ostream& os, size_t ma
 
     const size_t k = (zoneArea + maxArea + 1) / maxArea;
 
-    return splitByK(os, k);
+    return splitByK(os, k, repulse);
 }
 
-std::vector<MapTileArea> MapTileArea::splitByK(std::ostream& os, size_t k) const
+std::vector<MapTileArea> MapTileArea::splitByK(std::ostream& os, size_t k, bool repulse) const
 {
     std::vector<MapTileArea> result;
     size_t                   zoneArea = m_innerArea.size();
@@ -195,10 +195,28 @@ std::vector<MapTileArea> MapTileArea::splitByK(std::ostream& os, size_t k) const
         seg.m_iters = 30;
         seg.initEqualCentoids(k);
         seg.run(os);
+        std::vector<KMeansSegmentation::Cluster*> clusters;
+        for (KMeansSegmentation::Cluster& cluster : seg.m_clusters)
+            clusters.push_back(&cluster);
+        if (repulse) {
+            std::vector<KMeansSegmentation::Cluster*> clustersSorted;
+            auto*                                     curr = clusters.back();
+            clusters.pop_back();
+            clustersSorted.push_back(curr);
+            while (!clusters.empty()) {
+                auto it = std::max_element(clusters.begin(), clusters.end(), [curr](KMeansSegmentation::Cluster* l, KMeansSegmentation::Cluster* r) {
+                    return posDistance(curr->m_centroid, l->m_centroid) < posDistance(curr->m_centroid, r->m_centroid);
+                });
+                curr    = *it;
+                clustersSorted.push_back(curr);
+                clusters.erase(it);
+            }
+            clusters = clustersSorted;
+        }
 
-        for (KMeansSegmentation::Cluster& cluster : seg.m_clusters) {
+        for (KMeansSegmentation::Cluster* cluster : clusters) {
             MapTileRegion zoneSeg;
-            for (auto& point : cluster.m_points)
+            for (auto& point : cluster->m_points)
                 zoneSeg.insert(point->m_pos);
 
             assert(zoneSeg.size() > 0);

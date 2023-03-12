@@ -220,7 +220,10 @@ bool ObjectBundle::tryPush(const Item& item)
                 return false;
         }
     }
-    m_guard = newGuard;
+    if (!m_repulseId.empty() && !item.m_obj->getRepulseId().empty())
+        return false;
+    m_guard     = newGuard;
+    m_repulseId = item.m_obj->getRepulseId();
 
     m_items.push_back(item);
     return true;
@@ -352,8 +355,25 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
         m_consumeResult.m_currentSegment %= m_consumeResult.m_segments.size();
     };
 
-    for (auto& bundle : m_consumeResult.m_bundlesGuarded) {
-        setSegToBundle(bundle, 1);
+    {
+        std::map<std::string, std::vector<ObjectBundle*>> objectsByRepulse;
+        for (auto& bundle : m_consumeResult.m_bundlesGuarded)
+            objectsByRepulse[bundle.m_repulseId].push_back(&bundle);
+
+        for (const auto& [key, bundleList] : objectsByRepulse) {
+            if (key.empty())
+                continue;
+            for (auto* bundle : bundleList) {
+                setSegToBundle(*bundle, 1);
+            }
+        }
+        for (const auto& [key, bundleList] : objectsByRepulse) {
+            if (!key.empty())
+                continue;
+            for (auto* bundle : bundleList) {
+                setSegToBundle(*bundle, 1);
+            }
+        }
     }
     for (auto& bundle : m_consumeResult.m_bundlesNonGuarded) {
         setSegToBundle(bundle, 1);

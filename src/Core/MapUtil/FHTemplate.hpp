@@ -116,6 +116,7 @@ struct FHRngZone {
             int                          m_frequency = -1;
             int                          m_guard     = -1;
             bool                         m_enabled   = true;
+            std::string                  m_repulseId;
 
             bool operator==(const Record&) const noexcept = default;
         };
@@ -129,6 +130,7 @@ struct FHRngZone {
             Core::ArtifactFilter m_filter;
             Core::ArtifactFilter m_pool;
             int                  m_frequency = 1000;
+            std::string          m_repulseId;
 
             bool operator==(const Record&) const noexcept = default;
         };
@@ -156,6 +158,7 @@ struct FHRngZone {
             Core::Reward m_reward;
             int          m_frequency = 1000;
             int          m_guard     = -1;
+            std::string  m_repulseId;
 
             bool operator==(const Record&) const noexcept = default;
         };
@@ -171,6 +174,7 @@ struct FHRngZone {
             int               m_visualLevel = 1;
             int               m_frequency   = 1000;
             int               m_guard       = -1;
+            std::string       m_repulseId;
 
             bool operator==(const Record&) const noexcept = default;
         };
@@ -184,6 +188,7 @@ struct FHRngZone {
             Core::SpellFilter m_filter;
             int               m_frequency = 1000;
             int               m_guard     = -1;
+            std::string       m_repulseId;
 
             bool operator==(const Record&) const noexcept = default;
         };
