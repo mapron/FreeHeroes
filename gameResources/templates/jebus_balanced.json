@@ -32,6 +32,7 @@
                             
                             "SpellOffensive": { "target": 60000 , "minSingle":  5000},
                             "SpellCommon":    { "target": 20000 , "minSingle":  5000},
+                            "Support":        { "target": 15000 , "minSingle":  5000},
 
                             "Control":        { "target":  85000, "maxSingle": 30000}
                         }
@@ -49,7 +50,7 @@
                             "Experience":     { "target": 40000, "maxSingle": 12000, "minSingle": 3000},
                             "SpellOffensive": { "target": 20000, "maxSingle": 6000, "minSingle": 2100},
                             "SpellCommon":    { "target": 20000, "maxSingle": 6000, "minSingle": 500},
-                            "Support":        { "target": 5000 , "minSingle": 1001},
+                            "Support":        { "target": 5000 , "minSingle": 1001, "maxSingle": 4900},
                             "Upgrade"   :     { "target": 10000, "maxSingle": 9000, "minSingle": 2000}
                         },
                         "guardPercent": 100
@@ -313,6 +314,7 @@
                             "SpellOffensive": { "target": 120000  , "minSingle":  5000, "maxSingle" : -1},
                             "SpellCommon":    { "target":  80000  , "minSingle":  5000, "maxSingle" : -1},
                             "Upgrade"   :     { "target": 25000   , "minSingle":  3000, "maxSingle" : -1},
+                            "Support":        { "target": 20000   , "minSingle":  6000, "maxSingle" : -1},
                 
                             "Control":        { "target": 320000  , "minSingle": 40000, "maxSingle" : 40000, "maxGroup": 40000 }
                         }

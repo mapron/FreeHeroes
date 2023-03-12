@@ -49,7 +49,7 @@
 "sod.visitable.tavern"                     : [ "Support"       ,      100 ,     200  , { "m": { "": "avxtvrn0", "S": "avxtvrs0", "W": "wt_tvrn01"}}  ],
 "sod.visitable.temple"                     : [ "Support"       ,      100 ,    1000  , "avstmpl0"   ],
 "sod.visitable.denOfThieves"               : [ "Support"       ,      100 ,    1000  , { "m": { "": "avxdent", "A": "avxdend0"  , "S": "avxdens0" }}  ],
-"sod.visitable.wateringHole"               : [ "Support"       ,     5000 ,     100  , "avxwtrh0"  ],
+"sod.visitable.wateringHole"               : [ "Support"       ,      500 ,     100  , "avxwtrh0"  ],
 "sod.visitable.oasis"                      : [ "Support"       ,      200 ,     500  , "avxosis0"  ],
 "sod.visitable.tradingPost"                : [ "Support"       ,     5000 ,     500  , { "m": { "": "avxpost0",  "A": "avxpstr0", "S": "avxpssn"}}  ],
 "sod.visitable.freelancersGuild"           : [ "Support"       ,     2000 ,     300  , "avxfgld"  ],
@@ -63,7 +63,7 @@
 "hota.visitable.mineralSpring"             : [ "Support"       ,     1000 ,     400  , "avxmspr0"  ],
 "hota.visitable.wateringPlace"             : [ "Support"       ,     1000 ,     200  , "avwtplce"  ],
 "hota.visitable.junkman"                   : [ "Support"       ,      500 ,     300  , "avxjnkmn"  ],
-"hota.visitable.townGate"                  : [ "Support"       ,    10000 ,     200  , "avxtwngt"  ],
+"hota.visitable.townGate"                  : [ "Support"       ,    10000 ,     400  , "avxtwngt"  ],
 
 "sod.visitable.refugeeCamp"                : [ "ArmyAux"       ,     4000 ,    1000  , "avgrefg0"  ],
 
@@ -152,17 +152,17 @@
 
 "records": {
 
-"sod.visitable.altar"                      : [ 1, -1 ],
+"sod.visitable.altar"                      : [ 1,  1 ],
 "sod.visitable.hillFortWood"               : [ 1, -1 ],
 "sod.visitable.magicSpring"                : [ 1,  1 ],
 "sod.visitable.magicWell"                  : [ 1,  1 ],
 "sod.visitable.stables"                    : [ 1,  1 ],
-"sod.visitable.tradingPost"                : [ 1, -1 ],
+"sod.visitable.tradingPost"                : [ 1,  1 ],
 "sod.visitable.obelisk"                    : [ 1,  1 ],
 
 "hota.visitable.alchemistLab"              : [ 1, -1 ],
 "hota.visitable.wateringPlace"             : [ 1,  1 ],
-"hota.visitable.junkman"                   : [ 1, -1 ]
+"hota.visitable.junkman"                   : [ 1,  1 ]
 
 
 }
