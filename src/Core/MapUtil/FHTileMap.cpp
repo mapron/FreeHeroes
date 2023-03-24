@@ -709,12 +709,12 @@ void FHTileMap::correctRoads()
         const auto& B  = getNeighbour(pos, flipHor ? +0 : +0, flipVert ? -1 : +1, def);
         // const auto& BR = getNeighbour(pos, flipHor ? -1 : +1, flipVert ? -1 : +1);
 
-        const auto eR  = X.m_roadType == R.m_roadType;
-        const auto eL  = X.m_roadType == L.m_roadType;
-        const auto eT  = X.m_roadType == T.m_roadType;
-        const auto eB  = X.m_roadType == B.m_roadType;
-        const auto eTR = X.m_roadType == TR.m_roadType;
-        const auto eBL = X.m_roadType == BL.m_roadType;
+        const auto eR  = (X.m_roadType == FHRoadType::Invalid) == (R.m_roadType == FHRoadType::Invalid);
+        const auto eL  = (X.m_roadType == FHRoadType::Invalid) == (L.m_roadType == FHRoadType::Invalid);
+        const auto eT  = (X.m_roadType == FHRoadType::Invalid) == (T.m_roadType == FHRoadType::Invalid);
+        const auto eB  = (X.m_roadType == FHRoadType::Invalid) == (B.m_roadType == FHRoadType::Invalid);
+        const auto eTR = (X.m_roadType == FHRoadType::Invalid) == (TR.m_roadType == FHRoadType::Invalid);
+        const auto eBL = (X.m_roadType == FHRoadType::Invalid) == (BL.m_roadType == FHRoadType::Invalid);
 
         auto setView = [&X, flipHor, flipVert](uint8_t min, uint8_t max) {
             X.m_roadViewMin  = min;
