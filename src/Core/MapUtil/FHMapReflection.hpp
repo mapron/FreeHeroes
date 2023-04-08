@@ -160,8 +160,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 
     m_id,
     m_count,
-    m_agressionMin,
-    m_agressionMax,
+    m_aggressionMin,
+    m_aggressionMax,
     m_joinOnlyForMoney,
     m_joinPercent,
     m_questIdentifier,

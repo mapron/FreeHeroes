@@ -686,7 +686,7 @@ struct MapMonster : public MapObjectAbstract {
     bool        m_neverFlees     = false;
     bool        m_notGrowingTeam = false;
 
-    uint32_t m_agressionExact   = 0xffffffffU;
+    uint32_t m_aggressionExact   = 0xffffffffU;
     uint32_t m_joinPercent      = 100;
     bool     m_joinOnlyForMoney = false;
     uint32_t m_upgradedStack    = 0xffffffffU;

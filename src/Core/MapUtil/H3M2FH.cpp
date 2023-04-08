@@ -403,28 +403,28 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 fhMonster.m_questIdentifier = monster->m_questIdentifier;
                 switch (monster->m_joinAppeal) {
                     case 0:
-                        fhMonster.m_agressionMin = 0;
-                        fhMonster.m_agressionMax = 0;
+                        fhMonster.m_aggressionMin = 0;
+                        fhMonster.m_aggressionMax = 0;
                         break;
                     case 1:
-                        fhMonster.m_agressionMin = 1;
-                        fhMonster.m_agressionMax = 7;
+                        fhMonster.m_aggressionMin = 1;
+                        fhMonster.m_aggressionMax = 7;
                         break;
                     case 2:
-                        fhMonster.m_agressionMin = 1;
-                        fhMonster.m_agressionMax = 10;
+                        fhMonster.m_aggressionMin = 1;
+                        fhMonster.m_aggressionMax = 10;
                         break;
                     case 3:
-                        fhMonster.m_agressionMin = 4;
-                        fhMonster.m_agressionMax = 10;
+                        fhMonster.m_aggressionMin = 4;
+                        fhMonster.m_aggressionMax = 10;
                         break;
                     case 4:
-                        fhMonster.m_agressionMin = 10;
-                        fhMonster.m_agressionMax = 10;
+                        fhMonster.m_aggressionMin = 10;
+                        fhMonster.m_aggressionMax = 10;
                         break;
                     case 5:
-                        fhMonster.m_agressionMin = monster->m_agressionExact;
-                        fhMonster.m_agressionMax = monster->m_agressionExact;
+                        fhMonster.m_aggressionMin = monster->m_aggressionExact;
+                        fhMonster.m_aggressionMax = monster->m_aggressionExact;
                         break;
                     default:
                         break;

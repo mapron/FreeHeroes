@@ -901,11 +901,11 @@ void FHTemplateProcessor::runGuards()
         }
 
         if (guard.m_joinable) {
-            fhMonster.m_agressionMin = 4;
-            fhMonster.m_agressionMax = 10;
+            fhMonster.m_aggressionMin = 4;
+            fhMonster.m_aggressionMax = 10;
         } else {
-            fhMonster.m_agressionMin = 10;
-            fhMonster.m_agressionMax = 10;
+            fhMonster.m_aggressionMin = 10;
+            fhMonster.m_aggressionMax = 10;
         }
 
         fhMonster.m_joinOnlyForMoney = true;
