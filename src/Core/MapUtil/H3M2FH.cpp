@@ -260,6 +260,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
         fhPlayer.m_aiPossible             = playerInfo.m_canComputerPlay;
         fhPlayer.m_humanPossible          = playerInfo.m_canHumanPlay;
         fhPlayer.m_generateHeroAtMainTown = playerInfo.m_generateHeroAtMainTown;
+        fhPlayer.m_team                   = playerInfo.m_team == 0xff ? -1 : playerInfo.m_team;
 
         if (playerInfo.m_hasMainTown) {
             mainTowns[playerId] = posFromH3M(playerInfo.m_posOfMainTown, +2);

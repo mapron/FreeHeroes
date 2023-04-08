@@ -105,13 +105,12 @@ private:
 
         bool   m_hasMainTown      = false;
         size_t m_mainTownMapIndex = 0;
+        int    m_team             = -1;
 
         Core::LibraryHeroConstPtr m_startingHero    = nullptr;
         Core::LibraryHeroConstPtr m_extraHero       = nullptr;
         HeroGeneration            m_startingHeroGen = HeroGeneration::RandomStartingFaction;
         HeroGeneration            m_extraHeroGen    = HeroGeneration::None;
-
-        bool m_stdStats = false;
     };
     struct CmpPlayers {
         bool operator()(Core::LibraryPlayerConstPtr a, Core::LibraryPlayerConstPtr b) const;

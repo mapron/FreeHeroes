@@ -211,7 +211,6 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_victoryCondition,
     m_lossCondition,
     m_teamCount,
-    m_teamSettings,
     m_allowedHeroes,
     m_placeholderHeroes,
     m_disposedHeroes,

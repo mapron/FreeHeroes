@@ -14,34 +14,34 @@
         <translation>Генератор случайных карт</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="184"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="185"/>
         <source>Failed to save user settings</source>
         <translation>Не удалось сохранить польз. настройки</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="188"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="189"/>
         <source>Generation...</source>
         <translation>Генерация...</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="233"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="234"/>
         <source>Error occured</source>
         <translation>Произошла ошибка</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="233"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="234"/>
         <source>Error occured during template generation. 
 Check text area with log at &apos;extra&apos; tab and contact developers.</source>
         <translation>Ошибка во время генерации по шаблону.
 Проверьте поле стекстом на вкладке &quot;Экстра&quot; и сообщите разработчикам.</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="252"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="253"/>
         <source>Success</source>
         <translation>Успех</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="252"/>
+        <location filename="../../src/App/MapToolUI/MapToolWindow.cpp" line="253"/>
         <source>Error!</source>
         <translation>Ошибка!</translation>
     </message>
@@ -314,72 +314,115 @@ If min = max, then result will be same every generation.</source>
 <context>
     <name>TemplatePlayerWidget</name>
     <message>
-        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="60"/>
+        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="67"/>
         <source>Red</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="103"/>
-        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="164"/>
+        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="87"/>
+        <source>-</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="92"/>
+        <source>A</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="97"/>
+        <source>B</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="102"/>
+        <source>C</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="107"/>
+        <source>D</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="112"/>
+        <source>E</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="117"/>
+        <source>F</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="122"/>
+        <source>G</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="127"/>
+        <source>H</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="184"/>
+        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="245"/>
         <source>None</source>
         <translation>Нет</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="108"/>
-        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="169"/>
+        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="189"/>
+        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="250"/>
         <source>Random - Any Faction</source>
         <translation>Случайный - любая фракция</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="113"/>
-        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="174"/>
+        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="194"/>
+        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="255"/>
         <source>Random - Starting Faction</source>
         <translation>Случайный - стартовая фракция</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="118"/>
-        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="179"/>
+        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="199"/>
+        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="260"/>
         <source>Fixed - Any</source>
         <translation>Фикс. - Любая фракция</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="123"/>
-        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="184"/>
+        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="204"/>
+        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="265"/>
         <source>Fixed - Starting</source>
         <translation>Фикс. - стартовая фракция</translation>
-    </message>
-    <message>
-        <location filename="../../src/App/MapToolUI/TemplatePlayerWidget.ui" line="202"/>
-        <source>Yes</source>
-        <translation>Да</translation>
     </message>
 </context>
 <context>
     <name>TemplateSettingsWidget</name>
     <message>
-        <location filename="../../src/App/MapToolUI/TemplateSettingsWidget.ui" line="50"/>
+        <location filename="../../src/App/MapToolUI/TemplateSettingsWidget.ui" line="34"/>
+        <source>Enabled</source>
+        <translation>Вкл.</translation>
+    </message>
+    <message>
+        <location filename="../../src/App/MapToolUI/TemplateSettingsWidget.ui" line="63"/>
+        <source>Team</source>
+        <translation>Команда</translation>
+    </message>
+    <message>
+        <location filename="../../src/App/MapToolUI/TemplateSettingsWidget.ui" line="92"/>
         <source>Faction</source>
         <translation>Фракция</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/TemplateSettingsWidget.ui" line="79"/>
+        <location filename="../../src/App/MapToolUI/TemplateSettingsWidget.ui" line="121"/>
         <source>Main hero</source>
         <translation>Главный герой</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/TemplateSettingsWidget.ui" line="108"/>
+        <location filename="../../src/App/MapToolUI/TemplateSettingsWidget.ui" line="150"/>
         <source>Extra hero</source>
         <translation>Доп.  герой</translation>
     </message>
     <message>
-        <location filename="../../src/App/MapToolUI/TemplateSettingsWidget.ui" line="131"/>
-        <source>Standard
-skills</source>
-        <translation>Стандартные
-навыки</translation>
-    </message>
-    <message>
-        <location filename="../../src/App/MapToolUI/TemplateSettingsWidget.ui" line="209"/>
+        <location filename="../../src/App/MapToolUI/TemplateSettingsWidget.ui" line="227"/>
         <source>Clear all</source>
         <translation>Очистить всё</translation>
     </message>

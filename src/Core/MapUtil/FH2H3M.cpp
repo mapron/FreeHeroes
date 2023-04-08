@@ -149,7 +149,13 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         if (tile.m_coastal)
             destTile.m_extTileFlags |= MapTileH3M::Coastal;
     });
-
+    bool    hasTeams    = false;
+    uint8_t currentTeam = 0;
+    for (auto& [playerId, fhPlayer] : src.m_players) {
+        hasTeams = hasTeams || fhPlayer.m_team >= 0;
+        if (fhPlayer.m_team >= 0)
+            currentTeam = static_cast<uint8_t>(fhPlayer.m_team + 1);
+    }
     for (auto& [playerId, fhPlayer] : src.m_players) {
         auto  index    = playerId->legacyId;
         auto& h3player = dest.m_players[index];
@@ -157,6 +163,13 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         h3player.m_canHumanPlay           = fhPlayer.m_humanPossible;
         h3player.m_canComputerPlay        = fhPlayer.m_aiPossible;
         h3player.m_generateHeroAtMainTown = fhPlayer.m_generateHeroAtMainTown;
+        if (hasTeams) {
+            if (fhPlayer.m_team < 0) {
+                h3player.m_team = currentTeam++;
+            } else {
+                h3player.m_team = static_cast<uint8_t>(fhPlayer.m_team);
+            }
+        }
 
         uint16_t factionsBitmask = 0;
         for (Core::LibraryFactionConstPtr faction : fhPlayer.m_startingFactions) {
@@ -165,6 +178,9 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         }
         h3player.m_allowedFactionsBitmask = factionsBitmask;
     }
+    if (hasTeams)
+        dest.m_teamCount = currentTeam;
+
     for (auto& bit : dest.m_allowedHeroes)
         bit = 1;
 

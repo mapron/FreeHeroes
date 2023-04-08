@@ -37,6 +37,7 @@ STRUCT_REFLECTION_PAIRED(
     "ai",                  m_aiPossible,
     "human",               m_humanPossible,
     "factions",            m_startingFactions,
+    "team",                m_team,
     "generateHero",        m_generateHeroAtMainTown
 )
 // clang-format on

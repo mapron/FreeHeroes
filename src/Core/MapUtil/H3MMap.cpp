@@ -344,9 +344,8 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
 
     stream >> m_teamCount;
     if (m_teamCount > 0) {
-        m_teamSettings.resize(m_features->m_players);
-        for (auto& player : m_teamSettings)
-            stream >> player;
+        for (PlayerInfo& playerInfo : m_players)
+            stream >> playerInfo.m_team;
     }
 
     auto readBitsSized = [&stream](std::vector<uint8_t>& bitArray, bool sized, bool invert) {
@@ -516,8 +515,8 @@ void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
     stream << m_teamCount;
 
     if (m_teamCount > 0) {
-        for (auto& player : m_teamSettings)
-            stream << player;
+        for (const PlayerInfo& playerInfo : m_players)
+            stream << playerInfo.m_team;
     }
 
     auto writeBitsSized = [&stream](const std::vector<uint8_t>& bitArray, bool sized, bool invert) {

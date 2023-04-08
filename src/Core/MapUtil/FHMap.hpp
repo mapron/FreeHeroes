@@ -38,6 +38,8 @@ struct FHPlayer {
 
     std::vector<Core::LibraryFactionConstPtr> m_startingFactions;
 
+    int m_team{ -1 };
+
     bool operator==(const FHPlayer&) const noexcept = default;
 };
 

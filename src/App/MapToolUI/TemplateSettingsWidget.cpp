@@ -53,6 +53,16 @@ TemplateSettingsWidget::~TemplateSettingsWidget() = default;
 
 void TemplateSettingsWidget::updateUI()
 {
+    int totalEnabled = 0;
+    for (auto [id, w] : m_mapping)
+        totalEnabled += m_userSettings->m_players[id].m_enabled;
+    if (!totalEnabled) {
+        for (auto [id, w] : m_mapping) {
+            if (w == m_ui->playerWidgetRed || w == m_ui->playerWidgetBlue)
+                m_userSettings->m_players[id].m_enabled = true;
+        }
+    }
+
     for (auto [id, w] : m_mapping) {
         w->setConfig(m_userSettings->m_players[id]);
     }

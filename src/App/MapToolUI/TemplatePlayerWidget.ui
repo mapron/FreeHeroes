@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>648</width>
+    <width>649</width>
     <height>23</height>
    </rect>
   </property>
@@ -29,6 +29,13 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
+   <item>
+    <widget class="QCheckBox" name="checkBoxEnable">
+     <property name="text">
+      <string notr="true"/>
+     </property>
+    </widget>
+   </item>
    <item>
     <widget class="QLabel" name="labelIcon">
      <property name="minimumSize">
@@ -60,6 +67,80 @@
       <string>Red</string>
      </property>
     </widget>
+   </item>
+   <item>
+    <widget class="QComboBox" name="comboBoxTeam">
+     <property name="minimumSize">
+      <size>
+       <width>50</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>50</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <item>
+      <property name="text">
+       <string>-</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>A</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>B</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>C</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>D</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>E</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>F</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>G</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>H</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item>
+    <spacer name="horizontalSpacer_4">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+    </spacer>
    </item>
    <item>
     <widget class="FreeHeroes::Gui::ResizeableComboBox" name="comboBoxFaction">
@@ -193,13 +274,6 @@
        <width>100</width>
        <height>16777215</height>
       </size>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QCheckBox" name="checkBoxStdStat">
-     <property name="text">
-      <string>Yes</string>
      </property>
     </widget>
    </item>

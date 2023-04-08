@@ -128,26 +128,25 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
 
     m_totalRelativeArea = 0;
 
-    for (const auto& [playerId, info] : m_map.m_players) {
-        m_playerInfo[playerId] = {};
-    }
     for (const auto& [key, rngZone] : m_map.m_template.m_zones) {
         if (rngZone.m_player == nullptr || !rngZone.m_player->isPlayable)
             continue;
 
-        if (!m_playerInfo.contains(rngZone.m_player))
-            throw std::runtime_error("You need to define all players used in zones.");
+        if (!m_map.m_template.m_userSettings.m_players[rngZone.m_player].m_enabled)
+            continue;
+
+        m_playerInfo[rngZone.m_player] = {};
     }
     for (auto& [playerId, info] : m_playerInfo) {
-        if (!m_map.m_template.m_userSettings.m_players.contains(playerId))
-            continue;
         auto& pl               = m_map.m_template.m_userSettings.m_players[playerId];
         info.m_faction         = pl.m_faction;
         info.m_startingHero    = pl.m_startingHero;
         info.m_extraHero       = pl.m_extraHero;
         info.m_startingHeroGen = pl.m_startingHeroGen;
         info.m_extraHeroGen    = pl.m_extraHeroGen;
-        info.m_stdStats        = pl.m_stdStats;
+        info.m_team            = pl.m_team;
+
+        m_logOutput << baseIndent << "add player: " << playerId->id << "\n";
     }
 
     auto heroGen = [this](Core::LibraryHeroConstPtr hero, Core::LibraryFactionConstPtr faction, HeroGeneration policy) -> Core::LibraryHeroConstPtr {
@@ -195,8 +194,10 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
 
     m_tileZones.resize(regionCount);
     for (int i = 0; const auto& [key, rngZone] : m_map.m_template.m_zones) {
-        auto& tileZone             = m_tileZones[i];
-        tileZone.m_player          = rngZone.m_player;
+        auto& tileZone    = m_tileZones[i];
+        tileZone.m_player = rngZone.m_player;
+        if (!m_playerInfo.contains(tileZone.m_player))
+            tileZone.m_player = m_database->players()->find(std::string(Core::LibraryPlayer::s_none));
         tileZone.m_mainTownFaction = rngZone.m_mainTownFaction;
         tileZone.m_rewardsFaction  = rngZone.m_rewardsFaction;
         tileZone.m_dwellFaction    = rngZone.m_dwellingFaction;
@@ -655,7 +656,7 @@ void FHTemplateProcessor::runTownsPlacement()
         }
 
         for (size_t i = 0; const auto& [_, town] : towns) {
-            auto player  = town.m_playerControlled ? tileZone.m_rngZoneSettings.m_player : playerNone;
+            auto player  = town.m_playerControlled ? tileZone.m_player : playerNone;
             auto faction = town.m_useZoneFaction ? tileZone.m_mainTownFaction : nullptr;
             if (!faction)
                 faction = getRandomPlayableFaction(town.m_excludeFactionZones);
@@ -928,10 +929,10 @@ void FHTemplateProcessor::runGuards()
 
 void FHTemplateProcessor::runPlayerInfo()
 {
-    auto addHero = [this](FHHero fhhero, Core::LibraryHeroConstPtr heroId, bool stdStats) {
+    auto addHero = [this](FHHero fhhero, Core::LibraryHeroConstPtr heroId) {
         FHHeroData& destHero = fhhero.m_data;
         destHero.m_army.hero = Core::AdventureHero(heroId);
-        if (stdStats) {
+        if (false) { // @todo: beteer hero customization!
             destHero.m_hasSecSkills              = true;
             destHero.m_army.hero.secondarySkills = heroId->isWarrior ? m_map.m_template.m_stdSkillsWarrior : m_map.m_template.m_stdSkillsMage;
         }
@@ -943,6 +944,9 @@ void FHTemplateProcessor::runPlayerInfo()
         FHPlayer& player                = m_map.m_players[playerId];
         player.m_startingFactions       = { info.m_faction };
         player.m_generateHeroAtMainTown = false;
+        player.m_aiPossible             = true;
+        player.m_humanPossible          = true;
+        player.m_team                   = info.m_team;
 
         if (info.m_hasMainTown && info.m_startingHero) {
             const FHTown& mainTown = m_map.m_towns.at(info.m_mainTownMapIndex);
@@ -954,7 +958,7 @@ void FHTemplateProcessor::runPlayerInfo()
             fhhero.m_pos    = pos;
             fhhero.m_isMain = true;
 
-            addHero(std::move(fhhero), info.m_startingHero, info.m_stdStats);
+            addHero(std::move(fhhero), info.m_startingHero);
         }
         if (info.m_hasMainTown && info.m_extraHero) {
             const FHTown& mainTown = m_map.m_towns.at(info.m_mainTownMapIndex);
@@ -967,7 +971,7 @@ void FHTemplateProcessor::runPlayerInfo()
             fhhero.m_player = playerId;
             fhhero.m_pos    = pos;
 
-            addHero(std::move(fhhero), info.m_extraHero, info.m_stdStats);
+            addHero(std::move(fhhero), info.m_extraHero);
         }
     }
 }
