@@ -122,8 +122,8 @@ struct FHMonster : public FHCommonObject {
     Core::LibraryUnitConstPtr m_id    = nullptr;
     uint32_t                  m_count = 0;
 
-    int m_agressionMin = 1;
-    int m_agressionMax = 10;
+    int m_aggressionMin = 1;
+    int m_aggressionMax = 10;
 
     bool m_joinOnlyForMoney = false;
     int  m_joinPercent      = 100;

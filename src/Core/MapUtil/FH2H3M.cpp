@@ -413,20 +413,20 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         auto monster               = std::make_unique<MapMonster>(dest.m_features);
         monster->m_count           = static_cast<uint16_t>(fhMon.m_count);
         monster->m_questIdentifier = fhMon.m_questIdentifier;
-        if (fhMon.m_agressionMax == fhMon.m_agressionMin) {
-            if (fhMon.m_agressionMax == 0)
+        if (fhMon.m_aggressionMax == fhMon.m_aggressionMin) {
+            if (fhMon.m_aggressionMax == 0)
                 monster->m_joinAppeal = 0;
-            else if (fhMon.m_agressionMax == 10)
+            else if (fhMon.m_aggressionMax == 10)
                 monster->m_joinAppeal = 4;
             else {
                 monster->m_joinAppeal     = 5;
-                monster->m_agressionExact = fhMon.m_agressionMax;
+                monster->m_aggressionExact = fhMon.m_aggressionMax;
             }
-        } else if (fhMon.m_agressionMin == 1 && fhMon.m_agressionMax == 7) {
+        } else if (fhMon.m_aggressionMin == 1 && fhMon.m_aggressionMax == 7) {
             monster->m_joinAppeal = 1;
-        } else if (fhMon.m_agressionMin == 1 && fhMon.m_agressionMax == 10) {
+        } else if (fhMon.m_aggressionMin == 1 && fhMon.m_aggressionMax == 10) {
             monster->m_joinAppeal = 2;
-        } else if (fhMon.m_agressionMin == 4 && fhMon.m_agressionMax == 10) {
+        } else if (fhMon.m_aggressionMin == 4 && fhMon.m_aggressionMax == 10) {
             monster->m_joinAppeal = 3;
         } else {
             throw std::runtime_error("unsupported monster appeal");
