@@ -64,11 +64,10 @@ MapFormatFeatures::MapFormatFeatures(MapFormat format, int hotaVer1)
     if (format == MapFormat::HOTA3 && hotaVer1 < 3)
         m_artifactsCount -= 2;
 
-    m_hasQuestIdentifier         = format > MapFormat::ROE;
-    m_stackId16Bit               = format > MapFormat::ROE;
-    m_artId16Bit                 = format > MapFormat::ROE;
-    m_factions16Bit              = format > MapFormat::ROE;
-    m_creatureBanksCustomization = format == MapFormat::HOTA3 && hotaVer1 == 3;
+    m_hasQuestIdentifier = format > MapFormat::ROE;
+    m_stackId16Bit       = format > MapFormat::ROE;
+    m_artId16Bit         = format > MapFormat::ROE;
+    m_factions16Bit      = format > MapFormat::ROE;
 
     m_heroHasExp          = format > MapFormat::AB;
     m_heroHasBio          = format > MapFormat::ROE;

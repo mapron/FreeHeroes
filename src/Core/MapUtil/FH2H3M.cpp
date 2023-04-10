@@ -419,7 +419,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
             else if (fhMon.m_aggressionMax == 10)
                 monster->m_joinAppeal = 4;
             else {
-                monster->m_joinAppeal     = 5;
+                monster->m_joinAppeal      = 5;
                 monster->m_aggressionExact = fhMon.m_aggressionMax;
             }
         } else if (fhMon.m_aggressionMin == 1 && fhMon.m_aggressionMax == 7) {
