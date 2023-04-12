@@ -304,7 +304,6 @@ struct H3Map {
     LossCondition    m_lossCondition;
 
     uint8_t                   m_teamCount = 0;
-    std::vector<uint8_t>      m_teamSettings;
     std::vector<uint8_t>      m_allowedHeroes;
     uint32_t                  m_placeholderHeroes = 0;
     std::vector<DisposedHero> m_disposedHeroes;

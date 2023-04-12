@@ -144,52 +144,52 @@ Abenteuer-Modus</translation>
 <context>
     <name>FreeHeroes::BattleEmulator::EmulatorMainWidget</name>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="141"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="140"/>
         <source>Empty field</source>
         <translation>Leeres Feld</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="150"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="149"/>
         <source>Standard</source>
         <translation>Standard</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="151"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="150"/>
         <source>Map object common</source>
         <translation>Gemeinsames Kartenobjekt</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="152"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="151"/>
         <source>Churchyard 1</source>
         <translation>Friedhof 1</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="153"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="152"/>
         <source>Churchyard 2</source>
         <translation>Friedhof 2</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="154"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="153"/>
         <source>Ruins</source>
         <translation>Ruinen</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="155"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="154"/>
         <source>Spit</source>
         <translation>Spieß</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="178"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="177"/>
         <source>Renaming replay</source>
         <translation>Wiederholung umbenennen</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="178"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="177"/>
         <source>Enter new name:</source>
         <translation>Neuen Namen eingeben:</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="195"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="194"/>
         <source>Battle emulator</source>
         <translation>Kampf Emulator</translation>
     </message>

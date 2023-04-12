@@ -162,7 +162,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_neverFlees,
     m_notGrowingTeam,
     m_joinPercent,
-    m_agressionExact,
+    m_aggressionExact,
     m_joinOnlyForMoney,
     m_upgradedStack,
     m_splitStack)

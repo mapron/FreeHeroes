@@ -145,52 +145,52 @@ adventure mode</source>
 <context>
     <name>FreeHeroes::BattleEmulator::EmulatorMainWidget</name>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="141"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="140"/>
         <source>Empty field</source>
         <translation>Без препятствий на поле</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="150"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="149"/>
         <source>Standard</source>
         <translation>Стандартное</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="151"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="150"/>
         <source>Map object common</source>
         <translation>Обычный объект карты приключений</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="152"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="151"/>
         <source>Churchyard 1</source>
         <translation>Погост 1</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="153"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="152"/>
         <source>Churchyard 2</source>
         <translation>Погост 2</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="154"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="153"/>
         <source>Ruins</source>
         <translation>Руины</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="155"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="154"/>
         <source>Spit</source>
         <translation>Вертеп</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="178"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="177"/>
         <source>Renaming replay</source>
         <translation>Переименование реплея</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="178"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="177"/>
         <source>Enter new name:</source>
         <translation>Введите новое имя:</translation>
     </message>
     <message>
-        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="195"/>
+        <location filename="../../src/App/BattleEmulator/EmulatorMainWidget.cpp" line="194"/>
         <source>Battle emulator</source>
         <translation>Эмулятор сражений</translation>
     </message>

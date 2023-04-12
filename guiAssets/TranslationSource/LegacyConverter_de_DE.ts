@@ -87,42 +87,42 @@
 <context>
     <name>FreeHeroes::ConverterDialog</name>
     <message>
-        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="64"/>
+        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="62"/>
         <source>Resource converter</source>
         <translation type="unfinished">Ressourcen-Konverter</translation>
     </message>
     <message>
-        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="87"/>
+        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="85"/>
         <source>Done in %1 seconds.</source>
         <translation type="unfinished">Erledigt in %1 Sekunden.</translation>
     </message>
     <message>
-        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="104"/>
+        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="102"/>
         <source>FFmpeg not in the PATH, no effect and video will be converted.</source>
         <translation type="unfinished">FFmpeg ist nicht in PATH, kein Effekt und Video wird konvertiert.</translation>
     </message>
     <message>
-        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="115"/>
+        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="113"/>
         <source>Open HotA installation root</source>
         <translation type="unfinished">Öffne HotA Installations-Wurzelverzeichnis</translation>
     </message>
     <message>
-        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="156"/>
+        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="154"/>
         <source>Removing folder contents</source>
         <translation type="unfinished">Entferne Ordnerinhalte</translation>
     </message>
     <message>
-        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="156"/>
+        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="154"/>
         <source>Are you sure?</source>
         <translation type="unfinished">Seid Ihr sicher?</translation>
     </message>
     <message>
-        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="166"/>
+        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="164"/>
         <source>Files are removing...</source>
         <translation type="unfinished">Dateien werden entfernt...</translation>
     </message>
     <message>
-        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="185"/>
+        <location filename="../../src/App/LegacyConverter/ConverterDialog.cpp" line="183"/>
         <source>Cleanup done.</source>
         <translation type="unfinished">Bereinigung erfolgreich.</translation>
     </message>

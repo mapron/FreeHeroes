@@ -294,7 +294,8 @@ struct FHRngUserSettings {
         Core::LibraryHeroConstPtr    m_extraHero       = nullptr;
         HeroGeneration               m_startingHeroGen = HeroGeneration::RandomStartingFaction;
         HeroGeneration               m_extraHeroGen    = HeroGeneration::None;
-        bool                         m_stdStats        = false;
+        int                          m_team            = -1;
+        bool                         m_enabled         = false;
 
         bool operator==(const UserPlayer&) const noexcept = default;
     };

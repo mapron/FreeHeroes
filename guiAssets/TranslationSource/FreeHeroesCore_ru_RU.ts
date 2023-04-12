@@ -427,32 +427,32 @@
 <context>
     <name>FreeHeroes::Gui::GuiArtifact</name>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="115"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="199"/>
         <source>This artifacts is a part of the set: </source>
         <translation>Этот артефакт является частью сборного: </translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="118"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="202"/>
         <source>Parts of set assemblied: {%1} / {%2}</source>
         <translation>Собрано частей: {%1} / {%2}</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="121"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="205"/>
         <source>Last remaining artifact: </source>
         <translation>Недостающий артефакт из набора: </translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="124"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="208"/>
         <source>Congratulations! You found all parts of the set!&lt;br&gt;For assembly, press {Control+Left Click}</source>
         <translation>Поздравляем! Вы нашли все части из набора!&lt;br&gt;Для сборки нажмите {Control+Левый клик}</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="133"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="217"/>
         <source>This artifact can be disassembled into: </source>
         <translation>Этот артефакт может быть разобран на части: </translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="136"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="220"/>
         <source>Press {Control+Left Click} to disassemble</source>
         <translation>Нажмите {Control+Левый клик} для разбора</translation>
     </message>
@@ -460,18 +460,18 @@
 <context>
     <name>FreeHeroes::Gui::GuiHero</name>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="229"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="339"/>
         <source>%1 (+%2/day)</source>
         <translation>%1 (+%2/день)</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="232"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="342"/>
         <source>Dragons</source>
         <comment>speciality</comment>
         <translation>Драконы</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="235"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="345"/>
         <source>Speed</source>
         <comment>speciality</comment>
         <translation>Скорость</translation>
@@ -480,22 +480,22 @@
 <context>
     <name>FreeHeroes::Gui::GuiSkill</name>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="272"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="386"/>
         <source>None</source>
         <translation>Нет</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="272"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="386"/>
         <source>Basic</source>
         <translation>Базовый</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="272"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="386"/>
         <source>Advanced</source>
         <translation>Продвинутый</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="272"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="386"/>
         <source>Expert</source>
         <translation>Экспертный</translation>
     </message>
@@ -503,18 +503,18 @@
 <context>
     <name>FreeHeroes::Gui::GuiSpell</name>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="298"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="414"/>
         <source>Inflicts damage:</source>
         <translation>Наносит урон:</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="308"/>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="310"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="424"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="426"/>
         <source>lvl.</source>
         <translation>ур.</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="310"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="426"/>
         <source>Mana:</source>
         <translation>Мана:</translation>
     </message>
@@ -522,7 +522,7 @@
 <context>
     <name>FreeHeroes::Gui::GuiUnit</name>
     <message>
-        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="169"/>
+        <location filename="../../src/Gui/GameWrappers/LibraryWrappers.cpp" line="257"/>
         <source>%1 %2</source>
         <translation>%1 %2</translation>
     </message>
@@ -1809,27 +1809,37 @@
 <context>
     <name>FreeHeroes::MapEditorWidget</name>
     <message>
-        <location filename="../../src/Gui/MapUtilGui/MapEditorWidget.cpp" line="91"/>
+        <location filename="../../src/Gui/MapUtilGui/MapEditorWidget.cpp" line="131"/>
         <source>Underground</source>
         <translation>Подземелье</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/MapUtilGui/MapEditorWidget.cpp" line="92"/>
+        <location filename="../../src/Gui/MapUtilGui/MapEditorWidget.cpp" line="132"/>
         <source>Minimap</source>
         <translation>Миникарта</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/MapUtilGui/MapEditorWidget.cpp" line="93"/>
+        <location filename="../../src/Gui/MapUtilGui/MapEditorWidget.cpp" line="133"/>
         <source>Display settings</source>
         <translation>Настройки отображения</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/MapUtilGui/MapEditorWidget.cpp" line="94"/>
+        <location filename="../../src/Gui/MapUtilGui/MapEditorWidget.cpp" line="134"/>
         <source>Inspector</source>
         <translation>Инспектор</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/MapUtilGui/MapEditorWidget.cpp" line="208"/>
+        <location filename="../../src/Gui/MapUtilGui/MapEditorWidget.cpp" line="141"/>
+        <source>- select layer filter -</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/MapUtilGui/MapEditorWidget.cpp" line="145"/>
+        <source>- select attr filter -</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/MapUtilGui/MapEditorWidget.cpp" line="279"/>
         <source>Error occured</source>
         <translation>Ошибка</translation>
     </message>
@@ -1847,17 +1857,27 @@
         <translation>Сетка поверх всего</translation>
     </message>
     <message>
+        <location filename="../../src/Gui/MapUtilGui/ViewSettingsWidget.cpp" line="44"/>
+        <source>Show block mask</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../../src/Gui/MapUtilGui/ViewSettingsWidget.cpp" line="45"/>
+        <source>Show overlays</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Gui/MapUtilGui/ViewSettingsWidget.cpp" line="47"/>
         <source>Animate objects</source>
         <translation>Анимация объектов</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/MapUtilGui/ViewSettingsWidget.cpp" line="46"/>
+        <location filename="../../src/Gui/MapUtilGui/ViewSettingsWidget.cpp" line="48"/>
         <source>Animate terrain</source>
         <translation>Анимация поверхности</translation>
     </message>
     <message>
-        <location filename="../../src/Gui/MapUtilGui/ViewSettingsWidget.cpp" line="48"/>
+        <location filename="../../src/Gui/MapUtilGui/ViewSettingsWidget.cpp" line="50"/>
         <source>Inspect by hover</source>
         <translation>Инспекция при наведении</translation>
     </message>

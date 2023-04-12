@@ -208,7 +208,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_extraHero,
     m_startingHeroGen,
     m_extraHeroGen,
-    m_stdStats)
+    m_team,
+    m_enabled)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngUserSettings::DifficultySettings,

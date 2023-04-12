@@ -44,11 +44,10 @@ struct MapFormatFeatures {
 
     int m_monstersMapXOffset = 0;
 
-    bool m_hasQuestIdentifier         = false;
-    bool m_stackId16Bit               = false;
-    bool m_artId16Bit                 = false;
-    bool m_factions16Bit              = false;
-    bool m_creatureBanksCustomization = false;
+    bool m_hasQuestIdentifier = false;
+    bool m_stackId16Bit       = false;
+    bool m_artId16Bit         = false;
+    bool m_factions16Bit      = false;
 
     bool m_heroHasExp          = false;
     bool m_heroHasBio          = false;
@@ -686,7 +685,7 @@ struct MapMonster : public MapObjectAbstract {
     bool        m_neverFlees     = false;
     bool        m_notGrowingTeam = false;
 
-    uint32_t m_agressionExact   = 0xffffffffU;
+    uint32_t m_aggressionExact  = 0xffffffffU;
     uint32_t m_joinPercent      = 100;
     bool     m_joinOnlyForMoney = false;
     uint32_t m_upgradedStack    = 0xffffffffU;
