@@ -690,6 +690,89 @@ void FHTileMap::correctTerrainTypes(Core::LibraryTerrainConstPtr dirtTerrain,
     });
 }
 
+void FHTileMap::clearRoads(std::vector<FHTown> m_towns)
+{
+    for (bool reverseOrder : {false, true}) {
+        for (int z = 0; z < m_depth; ++z) {
+            for (int y = (reverseOrder) ? m_height - 1 : 0; (reverseOrder) ? y >= 0 : y < m_height; (reverseOrder) ? --y : ++y) {
+                for (int x = (reverseOrder) ? m_width - 1 : 0; (reverseOrder) ? x >= 0 : x < m_width; (reverseOrder) ? --x : ++x) {
+                    const FHPos pos{ x, y, z };
+
+                    // process only road tiles
+                    if (!get(pos).isRoad())
+                        continue;
+                    // exclude town entrance tiles
+                    if (std::any_of(m_towns.begin(), m_towns.end(), [=](FHTown& town) { return ((town.m_pos.m_x - 2 == x) && (town.m_pos.m_y == y) && (town.m_pos.m_z == z)); }))
+                        continue;
+
+                    const Tile def;
+
+                    bool TL = getNeighbour(pos, -1, -1, def).isRoad();
+                    bool T  = getNeighbour(pos, +0, -1, def).isRoad();
+                    bool TR = getNeighbour(pos, +1, -1, def).isRoad();
+                    bool L  = getNeighbour(pos, -1, +0, def).isRoad();
+                    //bool X  = get(pos).isRoad();
+                    bool R  = getNeighbour(pos, +1, +0, def).isRoad();
+                    bool BL = getNeighbour(pos, -1, +1, def).isRoad();
+                    bool B  = getNeighbour(pos, +0, +1, def).isRoad();
+                    bool BR = getNeighbour(pos, +1, +1, def).isRoad();
+
+                    // road redundancy check: if road removal will not affect its orthogonal neighbouring roads mutual connection status
+                    // (which is decided whether they are connected by diagonal neighbours), such road is renundant. delete it!
+                    if ((T && L && TL || T && R && TR || B && L && BL || B && R && BR) && (!T || !L || TL) && (!T || !R || TR) && (!B || !L || BL) && (!B || !R || BR))
+                    {
+                        get(pos).m_roadType = FHRoadType::Invalid;
+                    }
+
+                    // special case: road "knots"
+                    // it's only solvable when there's at least one passable tile around so we can place replacement road there 
+                    //                
+                    //  ╠╦═           ║ ╔ 
+                    // ═╩╣     ->    ═╩╦╝
+                    // 
+                    
+                    // -- TODO
+
+                    // search for one tile long "dead-ends": if a road has only one non-diagonal neighbour, and that neigbour has more than 2 neighbours,
+                    // that given road is dead-end to be safely cleared
+                    //       
+                    // ══╩══
+                    int totalAdjRoads = 0;
+                    FHPos adjPos{ x, y, z };
+                    for (auto& it : {
+                             FHPos{ x, y - 1, z },
+                             FHPos{ x - 1, y, z },
+                             FHPos{ x + 1, y, z },
+                             FHPos{ x, y + 1, z },
+                         }) {
+                        if (inBounds(it.m_x, it.m_y) && get(it).isRoad()) {
+                            totalAdjRoads++;
+                            adjPos = it;
+                        }
+                    }
+                    if (totalAdjRoads == 1) {
+                        int totalNextAdjRoads = 0;
+                        for (auto& it : {
+                                 FHPos{ adjPos.m_x, adjPos.m_y - 1, z },
+                                 FHPos{ adjPos.m_x - 1, adjPos.m_y, z },
+                                 FHPos{ adjPos.m_x + 1, adjPos.m_y, z },
+                                 FHPos{ adjPos.m_x, adjPos.m_y + 1, z },
+                             }) {
+                            if (inBounds(it.m_x, it.m_y) && get(it).isRoad())
+                                totalNextAdjRoads++;
+                        }
+
+                        if (totalNextAdjRoads > 2)
+                        {
+                            get(pos).m_roadType = FHRoadType::Invalid;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 void FHTileMap::correctRoads()
 {
     // true = pattern found

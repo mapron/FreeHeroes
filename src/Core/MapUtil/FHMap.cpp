@@ -115,6 +115,7 @@ void FHMap::initTiles(const Core::IGameDatabase* database)
 
     if (m_tileMapUpdateRequired) {
         m_tileMap.correctTerrainTypes(dirtTerrain, sandTerrain, waterTerrain);
+        m_tileMap.clearRoads(m_towns);
         m_tileMap.correctRoads();
         m_tileMap.correctRivers();
     }

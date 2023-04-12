@@ -13,6 +13,7 @@
 #include "MapUtilExport.hpp"
 
 #include "FHPos.hpp"
+#include "FHMapObject.hpp"
 
 namespace FreeHeroes {
 
@@ -156,6 +157,7 @@ struct MAPUTIL_EXPORT FHTileMap {
                              Core::LibraryTerrainConstPtr sandTerrain,
                              Core::LibraryTerrainConstPtr waterTerrain);
 
+    void clearRoads(std::vector<FHTown> m_towns);
     void correctRoads();
     void correctRivers();
 
