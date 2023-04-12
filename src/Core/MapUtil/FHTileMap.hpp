@@ -68,6 +68,11 @@ struct MAPUTIL_EXPORT FHTileMap {
         int m_tileCount      = 0;
         int m_tileCountClear = 0;
 
+        bool isRoad() const
+        {
+            return m_roadType != FHRoadType::Invalid;
+        };
+
         bool setViewBorderSpecial(Core::LibraryTerrain::BorderType borderType);
         bool setViewBorderMixed(Core::LibraryTerrain::BorderType borderType);
         bool setViewBorderSandOrDirt(Core::LibraryTerrain::BorderType borderType, bool sandBorder);
