@@ -147,40 +147,40 @@
 
 "records" : {
 
-"sod.skill.offense"         : [ "Offense"     ,                 8   ,               3    , "stat"      ,  4000   ],
-"sod.skill.armourer"        : [ "Armourer"    ,                 6   ,               3    , "stat"      ,  2000   ],
-"sod.skill.archery"         : [ "Archery"     ,                 7   ,               3    , "stat"      ,  2000   ],
+"sod.skill.offense"         : [ "Offense"     ,                 8   ,               3    , "stat"      ,  6000   ],
+"sod.skill.armourer"        : [ "Armourer"    ,                 6   ,               3    , "stat"      ,  3000   ],
+"sod.skill.archery"         : [ "Archery"     ,                 7   ,               3    , "stat"      ,  3000   ],
 
-"sod.skill.leadership"      : [ "Leadership"  ,                 5   ,               2    , "stat"      ,  1000   ],
-"sod.skill.luck"            : [ "Luck"        ,                 2   ,               3    , "stat"      ,  1000   ],
-"sod.skill.intelligence"    : [ "Intelligence",                 2   ,               7    , "stat"      ,  1000   ],
+"sod.skill.leadership"      : [ "Leadership"  ,                 5   ,               2    , "stat"      ,  2000   ],
+"sod.skill.luck"            : [ "Luck"        ,                 2   ,               3    , "stat"      ,  2000   ],
+"sod.skill.intelligence"    : [ "Intelligence",                 2   ,               7    , "stat"      ,  2000   ],
 
-"sod.skill.magicAir"        : [ "Air Magic"   ,                 2   ,               3    , "school"    ,  6000   ],
-"sod.skill.magicEarth"      : [ "Earth Magic" ,                 3   ,               4    , "school"    ,  6000   ],
-"sod.skill.magicFire"       : [ "Fire Magic"  ,                 2   ,               3    , "school"    ,  2000   ],
-"sod.skill.magicWater"      : [ "Water Magic" ,                 2   ,               3    , "school"    ,  1000   ],
+"sod.skill.magicAir"        : [ "Air Magic"   ,                 2   ,               3    , "school"    ,  8000   ],
+"sod.skill.magicEarth"      : [ "Earth Magic" ,                 3   ,               4    , "school"    ,  8000   ],
+"sod.skill.magicFire"       : [ "Fire Magic"  ,                 2   ,               3    , "school"    ,  3000   ],
+"sod.skill.magicWater"      : [ "Water Magic" ,                 2   ,               3    , "school"    ,  2000   ],
 
-"sod.skill.pathfind"        : [ "Pathfind"    ,                 6   ,               3    , "special"   ,  1000   ],
-"sod.skill.logistics"       : [ "Logistics"   ,                 7   ,               3    , "stat"      ,  5000   ],
-"sod.skill.navigation"      : [ "Navigation"  ,                 5   ,               4    , "stat"      ,  1000   ],
-"sod.skill.scouting"        : [ "Scouting"    ,                 5   ,               2    , "stat"      ,  1000   ],
-"sod.skill.diplomacy"       : [ "Diplomacy"   ,                 3   ,               4    , "stat"      ,  1000   ],
+"sod.skill.pathfind"        : [ "Pathfind"    ,                 6   ,               3    , "special"   ,  2000   ],
+"sod.skill.logistics"       : [ "Logistics"   ,                 7   ,               3    , "stat"      ,  7000   ],
+"sod.skill.navigation"      : [ "Navigation"  ,                 5   ,               4    , "stat"      ,  2000   ],
+"sod.skill.scouting"        : [ "Scouting"    ,                 5   ,               2    , "stat"      ,  2000   ],
+"sod.skill.diplomacy"       : [ "Diplomacy"   ,                 3   ,               4    , "stat"      ,  2000   ],
 
-"sod.skill.wisdom"          : [ "Wisdom"      ,                 3   ,               8    , "wisdom"    ,  2000   ],
-"sod.skill.mysticism"       : [ "Mysticism"   ,                 3   ,               7    , "stat"      ,  1000   ],
+"sod.skill.wisdom"          : [ "Wisdom"      ,                 3   ,               8    , "wisdom"    ,  3000   ],
+"sod.skill.mysticism"       : [ "Mysticism"   ,                 3   ,               7    , "stat"      ,  2000   ],
 
-"sod.skill.ballistics"      : [ "Ballistics"  ,                 7   ,               5    , "special"   ,   500   ],
-"sod.skill.eagleEye"        : [ "Eagle Eye"   ,                 2   ,               7    , "stat"      ,   500   ],
-"sod.skill.necromancy"      : [ "Necromancy"  ,                 0   ,               0    , "stat"      ,  1000   ],
-"sod.skill.estates"         : [ "Estates"     ,                 3   ,               3    , "stat"      ,   800   ],
-"sod.skill.scholar"         : [ "Scholar"     ,                 1   ,               7    , "stat"      ,  1000   ],
-"sod.skill.tactics"         : [ "Tactics"     ,                 6   ,               2    , "special"   ,  2000   ],
-"sod.skill.artillery"       : [ "Artillery"   ,                 6   ,               1    , "special"   ,  1000   ],
-"sod.skill.learning"        : [ "Learning"    ,                 4   ,               4    , "stat"      ,   500   ],
-"sod.skill.sorcery"         : [ "Sorcery"     ,                 2   ,               6    , "stat"      ,   500   ],
-"sod.skill.resistance"      : [ "Resistance"  ,                 5   ,               1    , "stat"      ,  1000   ],
-"sod.skill.firstAid"        : [ "First Aid"   ,                 2   ,               6    , "special"   ,   500   ],
-"hota.skill.interfere"      : [ "Interference",                 5   ,               0    , "stat"      ,  1000   ]
+"sod.skill.ballistics"      : [ "Ballistics"  ,                 7   ,               5    , "special"   ,  1000   ],
+"sod.skill.eagleEye"        : [ "Eagle Eye"   ,                 2   ,               7    , "stat"      ,  1000   ],
+"sod.skill.necromancy"      : [ "Necromancy"  ,                 0   ,               0    , "stat"      ,  2000   ],
+"sod.skill.estates"         : [ "Estates"     ,                 3   ,               3    , "stat"      ,  1500   ],
+"sod.skill.scholar"         : [ "Scholar"     ,                 1   ,               7    , "stat"      ,  2000   ],
+"sod.skill.tactics"         : [ "Tactics"     ,                 6   ,               2    , "special"   ,  3000   ],
+"sod.skill.artillery"       : [ "Artillery"   ,                 6   ,               1    , "special"   ,  2000   ],
+"sod.skill.learning"        : [ "Learning"    ,                 4   ,               4    , "stat"      ,  1000   ],
+"sod.skill.sorcery"         : [ "Sorcery"     ,                 2   ,               6    , "stat"      ,  1000   ],
+"sod.skill.resistance"      : [ "Resistance"  ,                 5   ,               1    , "stat"      ,  2000   ],
+"sod.skill.firstAid"        : [ "First Aid"   ,                 2   ,               6    , "special"   ,  1000   ],
+"hota.skill.interfere"      : [ "Interference",                 5   ,               0    , "stat"      ,  2000   ]
 
 }
 

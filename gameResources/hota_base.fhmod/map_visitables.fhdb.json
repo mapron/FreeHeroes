@@ -5,7 +5,7 @@
 "records": {
 
 "sod.visitable.arena"                      : [ "Upgrade"       ,     3500 ,     500  , "avsarna0" ],
-"sod.visitable.marlettoTower"              : [ "Upgrade"       ,     1500 ,    1000  , "avsmarl"  ],
+"sod.visitable.marlettoTower"              : [ "Upgrade"       ,     1500 ,     500  , "avsmarl"  ],
 "sod.visitable.gardenOfRevelation"         : [ "Upgrade"       ,     1500 ,    1000  , "avsgrdn0" ],
 "sod.visitable.libraryOfEnlightenment"     : [ "Upgrade"       ,    10000 ,    1000  ,  { "m": { "":"avslibr0", "A": "avslibs0"  }} ],
 "sod.visitable.schoolOfMagic"              : [ "Upgrade"       ,     1000 ,     500  ,  { "m": { "":"avsschm0", "A": "avsschm1"  }} ],

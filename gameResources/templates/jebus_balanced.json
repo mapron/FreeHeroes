@@ -68,7 +68,7 @@
                             "Gold":           { "target": 80000, "maxSingle": 2000},
                             "Resource":       { "target": 100000, "maxSingle": 2500},
                             "Experience":     { "target": 30000, "maxSingle": 2500},
-                            "Upgrade"   :     { "target": 5000, "maxSingle": 3000},
+                            "Upgrade"   :     { "target": 10000, "maxSingle": 3000},
                             "ResourceGen":    { "target": 50000},
                             "SpellAny":       { "target": 20000, "maxSingle": 1800},
                             "Support":        { "target": 2000 , "maxSingle": 1000}
@@ -230,7 +230,7 @@
                     },
                     "skillHuts": {
                         "isEnabled": true,
-                        "frequency": 200,
+                        "frequency": 50,
                         "guard": 3000
                     }
 
