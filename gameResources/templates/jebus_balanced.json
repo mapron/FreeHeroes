@@ -44,8 +44,8 @@
                             "Gold":           { "target": 30000, "maxSingle": 15000, "minSingle": 2500},
                             "Resource":       { "target": 40000, "maxSingle": 15000, "minSingle": 2500},
                             "Experience":     { "target": 40000, "maxSingle": 12000, "minSingle": 3000},
-                            "SpellOffensive": { "target": 20000, "maxSingle": 6000, "minSingle": 2100},
-                            "SpellCommon":    { "target": 20000, "maxSingle": 6000, "minSingle": 500},
+                            "SpellOffensive": { "target": 10000, "maxSingle": 6000, "minSingle": 2100},
+                            "SpellCommon":    { "target": 10000, "maxSingle": 6000, "minSingle": 500},
                             "Support":        { "target": 5000 , "minSingle": 1001, "maxSingle": 4900},
                             "Upgrade"   :     { "target": 10000, "maxSingle": 9000, "minSingle": 2000}
                         },
@@ -70,7 +70,7 @@
                             "Experience":     { "target": 30000, "maxSingle": 2500},
                             "Upgrade"   :     { "target": 10000, "maxSingle": 3000},
                             "ResourceGen":    { "target": 50000},
-                            "SpellAny":       { "target": 20000, "maxSingle": 1800},
+                            "SpellAny":       { "target": 10000, "maxSingle": 1800},
                             "Support":        { "target": 2000 , "maxSingle": 1000}
                         },
                         "guardPercent": 0
