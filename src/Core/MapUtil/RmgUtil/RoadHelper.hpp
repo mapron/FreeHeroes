@@ -43,6 +43,7 @@ public:
     std::vector<Guard> m_guards;
 
 private:
+    MapTileRegion  redundantCleanup(TileZone& tileZone);
     MapTilePtrList aStarPath(TileZone& zone, MapTilePtr start, MapTilePtr end, bool allTiles);
 
 private:

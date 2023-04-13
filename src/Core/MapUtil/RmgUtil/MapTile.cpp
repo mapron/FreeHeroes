@@ -7,6 +7,18 @@
 
 namespace FreeHeroes {
 
+FHPos MapTile::Transform::apply(FHPos pos) const noexcept
+{
+    if (m_flipHor)
+        pos.m_x = -pos.m_x;
+    if (m_flipVert)
+        pos.m_y = -pos.m_y;
+    if (m_transpose)
+        std::swap(pos.m_x, pos.m_y);
+
+    return pos;
+}
+
 MapTilePtr MapTile::neighbourByOffset(FHPos offset) noexcept
 {
     if (offset == FHPos{})
@@ -70,6 +82,14 @@ MapTilePtr MapTile::neighbourByOffset(FHPos offset) noexcept
         return near->neighbourByOffset(offsetRest);
 
     return nullptr;
+}
+
+MapTilePtrList MapTile::neighboursByOffsets(const std::vector<FHPos>& offsets, const Transform& transform) noexcept
+{
+    MapTilePtrList result(offsets.size());
+    for (size_t i = 0; i < result.size(); ++i)
+        result[i] = neighbourByOffset(transform.apply(offsets[i]));
+    return result;
 }
 
 std::string MapTile::toPrintableString() const noexcept

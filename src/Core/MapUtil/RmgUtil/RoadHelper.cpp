@@ -390,7 +390,7 @@ void RoadHelper::placeRoads(TileZone& tileZone)
         unconnectedRoadNodesByLevel[roadLevel].push_back(node);
     }
 
-    MapTileRegion           pathAsRegion;
+    MapTileRegion           pathAsRegion; // all placed roads as cell region
     std::vector<MapTilePtr> connected;
     for (int level = 0; level < 3; ++level) {
         MapTilePtrList& unconnectedRoadNodes = unconnectedRoadNodesByLevel[level];
@@ -447,11 +447,24 @@ void RoadHelper::placeRoads(TileZone& tileZone)
         }
     }
 
+    // redundant road cleanup
+    {
+        MapTileRegion erasedTiles;
+
+        do {
+            erasedTiles = redundantCleanup(tileZone);
+            pathAsRegion.doSort();
+            pathAsRegion.erase(erasedTiles);
+        } while (!erasedTiles.empty());
+    }
+
     pathAsRegion.doSort();
     for (MapTileArea& area : tileZone.m_innerAreaSegments) {
         area.m_innerArea.erase(pathAsRegion);
         area.m_innerArea.doSort();
     }
+    for (const TileZone::Road& road : tileZone.m_pendingRoads)
+        placeRoad(road.m_path, road.m_level);
 }
 
 void RoadHelper::placeRoad(TileZone& tileZone, const MapTilePtrList& tileList, int level)
@@ -465,15 +478,10 @@ void RoadHelper::placeRoad(TileZone& tileZone, const MapTilePtrList& tileList, i
             filtered.m_innerArea.insert(cell);
     }
     filtered.doSort();
-    auto         segments  = filtered.splitByFloodFill(false);
-    const size_t minLength = (segments.size() == 1 && level < 2) ? 1 : (level == 0 ? 3 : 7);
+    auto segments = filtered.splitByFloodFill(false);
     for (auto& seg : segments) {
-        auto roadLength = seg.m_innerArea.size();
-        if (roadLength < minLength)
-            continue;
-
         MapTilePtrList filteredPath(seg.m_innerArea.cbegin(), seg.m_innerArea.cend());
-        placeRoad(std::move(filteredPath), level);
+        tileZone.m_pendingRoads.push_back(TileZone::Road{ std::move(filteredPath), level });
     }
 
     tileZone.m_placedRoads.insert(tileList);
@@ -513,6 +521,208 @@ void RoadHelper::placeRoadPath(std::vector<FHPos> path, int level)
 
     road.m_tiles = std::move(path);
     m_map.m_roads.push_back(std::move(road));
+}
+
+MapTileRegion RoadHelper::redundantCleanup(TileZone& tileZone)
+{
+    MapTileRegion pendingRegion;
+    for (TileZone::Road& road : tileZone.m_pendingRoads) {
+        for (auto* cell : road.m_path)
+            pendingRegion.insert(cell);
+    }
+
+    pendingRegion.doSort();
+
+    // check that every tile in tiles argument is
+    // mustBeRoad=true  - contains  in pendingRegion
+    // mustBeRoad=false - not exist in pendingRegion
+    auto checkTileListAllOf = [&pendingRegion](const MapTilePtrList& tiles, bool mustBeRoad) {
+        for (auto* cell : tiles) {
+            const bool isRoad = pendingRegion.contains(cell);
+            if (mustBeRoad && !isRoad)
+                return false;
+            if (!mustBeRoad && isRoad)
+                return false;
+        }
+        return true;
+    };
+
+    auto applyCorrectionPattern = [&pendingRegion, &checkTileListAllOf](const std::vector<FHPos>&              offsetsCheckRoad,
+                                                                        const std::vector<FHPos>&              offsetsCheckNonRoad,
+                                                                        const std::vector<MapTile::Transform>& transforms) {
+        const auto allRoadTiles = pendingRegion;
+        for (auto* cell : allRoadTiles) {
+            for (const MapTile::Transform& transform : transforms) {
+                const MapTilePtrList tilesCheckRoad    = cell->neighboursByOffsets(offsetsCheckRoad, transform);
+                const MapTilePtrList tilesCheckNonRoad = cell->neighboursByOffsets(offsetsCheckNonRoad, transform);
+
+                if (checkTileListAllOf(tilesCheckRoad, true) && checkTileListAllOf(tilesCheckNonRoad, false)) {
+                    pendingRegion.erase(cell);
+                    // we need to update search index after every erasure;
+                    // is is relatively slow but fortunately we'll do very few of those.
+                    // otherwise we fail pathAsRegion.contains() above on next step.
+                    pendingRegion.doSort();
+                }
+            }
+        }
+    };
+
+    {
+        // Detect pattern, R - road, . - non-road, remove central road C
+        // R R R
+        // R C .
+        // R . .
+        const std::vector<FHPos> offsetsCheckRoad{
+            { -1, -1 }, // TL
+            { +0, -1 }, // T
+            { +1, -1 }, // TR
+            { -1, +0 }, // L
+            { -1, +1 }, // BL
+        };
+        const std::vector<FHPos> offsetsCheckNonRoad{
+            { +1, +0 }, // R
+            { +0, +1 }, // B
+            { +1, +1 }, // BR
+        };
+        const std::vector<MapTile::Transform> transforms{
+            MapTile::Transform{ .m_transpose = false, .m_flipHor = false, .m_flipVert = false },
+            MapTile::Transform{ .m_transpose = false, .m_flipHor = true, .m_flipVert = false },
+            MapTile::Transform{ .m_transpose = false, .m_flipHor = false, .m_flipVert = true },
+            MapTile::Transform{ .m_transpose = false, .m_flipHor = true, .m_flipVert = true },
+        };
+        applyCorrectionPattern(offsetsCheckRoad, offsetsCheckNonRoad, transforms);
+    }
+
+    {
+        // Detect pattern, R - road, . - non-road, X - anything = remove central road C
+        // R R X
+        // R C .
+        // R R X
+        const std::vector<FHPos> offsetsCheckRoad{
+            { -1, -1 }, // TL
+            { +0, -1 }, // T
+            { -1, +0 }, // L
+            { -1, +1 }, // BL
+            { +0, +1 }, // B
+        };
+        const std::vector<FHPos> offsetsCheckNonRoad{
+            //{ +1, -1 }, // TR
+            { +1, +0 }, // R
+            //{ +1, +1 }, // BR
+        };
+        const std::vector<MapTile::Transform> transforms{
+            MapTile::Transform{ .m_transpose = false, .m_flipHor = false, .m_flipVert = false },
+            MapTile::Transform{ .m_transpose = false, .m_flipHor = true, .m_flipVert = true },
+            MapTile::Transform{ .m_transpose = true, .m_flipHor = false, .m_flipVert = false },
+            MapTile::Transform{ .m_transpose = true, .m_flipHor = true, .m_flipVert = true },
+        };
+        applyCorrectionPattern(offsetsCheckRoad, offsetsCheckNonRoad, transforms);
+    }
+
+    {
+        // Detect pattern, R - road, . - non-road, remove central road C
+        // R R .
+        // R C .
+        // R . .
+        const std::vector<FHPos> offsetsCheckRoad{
+            { -1, -1 }, // TL
+            { +0, -1 }, // T
+            { -1, +0 }, // L
+            { -1, +1 }, // BL
+        };
+        const std::vector<FHPos> offsetsCheckNonRoad{
+            { +1, -1 }, // TR
+            { +1, +0 }, // R
+            { +0, +1 }, // B
+            { +1, +1 }, // BR
+        };
+        const std::vector<MapTile::Transform> transforms{
+            MapTile::Transform{ .m_transpose = false, .m_flipHor = false, .m_flipVert = false },
+            MapTile::Transform{ .m_transpose = false, .m_flipHor = true, .m_flipVert = false },
+            MapTile::Transform{ .m_transpose = false, .m_flipHor = false, .m_flipVert = true },
+            MapTile::Transform{ .m_transpose = false, .m_flipHor = true, .m_flipVert = true },
+
+            MapTile::Transform{ .m_transpose = true, .m_flipHor = false, .m_flipVert = false },
+            MapTile::Transform{ .m_transpose = true, .m_flipHor = true, .m_flipVert = false },
+            MapTile::Transform{ .m_transpose = true, .m_flipHor = false, .m_flipVert = true },
+            MapTile::Transform{ .m_transpose = true, .m_flipHor = true, .m_flipVert = true },
+        };
+        applyCorrectionPattern(offsetsCheckRoad, offsetsCheckNonRoad, transforms);
+    }
+
+    {
+        // Detect pattern, R - road, . - non-road, remove central road C
+        // R . .
+        // R C .
+        // R . .
+        const std::vector<FHPos> offsetsCheckRoad{
+            { -1, -1 }, // TL
+            { -1, +0 }, // L
+            { -1, +1 }, // BL
+        };
+        const std::vector<FHPos> offsetsCheckNonRoad{
+            { +0, -1 }, // T
+            { +1, -1 }, // TR
+            { +1, +0 }, // R
+            { +0, +1 }, // B
+            { +1, +1 }, // BR
+        };
+        const std::vector<MapTile::Transform> transforms{
+            MapTile::Transform{ .m_transpose = false, .m_flipHor = false, .m_flipVert = false },
+            MapTile::Transform{ .m_transpose = false, .m_flipHor = true, .m_flipVert = true },
+            MapTile::Transform{ .m_transpose = true, .m_flipHor = false, .m_flipVert = false },
+            MapTile::Transform{ .m_transpose = true, .m_flipHor = true, .m_flipVert = true },
+        };
+        applyCorrectionPattern(offsetsCheckRoad, offsetsCheckNonRoad, transforms);
+    }
+
+    {
+        // Detect pattern, R - road, . - non-road, X - anything = remove central road C
+        // . . R X
+        // . C R R
+        // . . . X
+        const std::vector<FHPos> offsetsCheckRoad{
+            { +1, -1 }, // TR
+            { +1, +0 }, // R
+            { +2, +0 }, // R2
+        };
+        const std::vector<FHPos> offsetsCheckNonRoad{
+            { -1, -1 }, // TL
+            { +0, -1 }, // T
+            { -1, +0 }, // L
+            { -1, +1 }, // BL
+            { +0, +1 }, // B
+            { +1, +1 }, // BR
+        };
+        const std::vector<MapTile::Transform> transforms{
+            MapTile::Transform{ .m_transpose = false, .m_flipHor = false, .m_flipVert = false },
+            MapTile::Transform{ .m_transpose = false, .m_flipHor = true, .m_flipVert = false },
+            MapTile::Transform{ .m_transpose = false, .m_flipHor = false, .m_flipVert = true },
+            MapTile::Transform{ .m_transpose = false, .m_flipHor = true, .m_flipVert = true },
+
+            MapTile::Transform{ .m_transpose = true, .m_flipHor = false, .m_flipVert = false },
+            MapTile::Transform{ .m_transpose = true, .m_flipHor = true, .m_flipVert = false },
+            MapTile::Transform{ .m_transpose = true, .m_flipHor = false, .m_flipVert = true },
+            MapTile::Transform{ .m_transpose = true, .m_flipHor = true, .m_flipVert = true },
+        };
+        applyCorrectionPattern(offsetsCheckRoad, offsetsCheckNonRoad, transforms);
+    }
+
+    MapTileRegion erasedTiles;
+    // remove tiles from all pending tileZone roads that do not exist in pendingRegion
+    for (TileZone::Road& road : tileZone.m_pendingRoads) {
+        MapTilePtrList tilesFiltered;
+        tilesFiltered.reserve(road.m_path.size());
+        for (auto* cell : road.m_path) {
+            if (pendingRegion.contains(cell))
+                tilesFiltered.push_back(cell);
+            else
+                erasedTiles.insert(cell);
+        }
+        road.m_path = std::move(tilesFiltered);
+    }
+    erasedTiles.doSort();
+    return erasedTiles;
 }
 
 MapTilePtrList RoadHelper::aStarPath(TileZone& zone, MapTilePtr start, MapTilePtr end, bool allTiles)

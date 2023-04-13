@@ -15,6 +15,11 @@ class IRandomGenerator;
 }
 
 struct TileZone {
+    struct Road {
+        MapTilePtrList m_path;
+        int            m_level = 0;
+    };
+
     int                          m_index = 0;
     std::string                  m_id;
     FHRngZone                    m_rngZoneSettings;
@@ -37,8 +42,9 @@ struct TileZone {
 
     std::vector<MapTileArea> m_innerAreaSegments;
 
-    MapTileRegion m_innerAreaSegmentsRoads;
-    MapTileRegion m_placedRoads;
+    MapTileRegion     m_innerAreaSegmentsRoads;
+    MapTileRegion     m_placedRoads;
+    std::vector<Road> m_pendingRoads;
 
     MapTileRegion m_roadNodes;
     MapTileRegion m_roadNodesHighPriority;
