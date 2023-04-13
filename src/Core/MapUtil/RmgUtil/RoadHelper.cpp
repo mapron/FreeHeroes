@@ -463,6 +463,8 @@ void RoadHelper::placeRoads(TileZone& tileZone)
         area.m_innerArea.erase(pathAsRegion);
         area.m_innerArea.doSort();
     }
+    correctRoadTypes(tileZone, 0);
+    correctRoadTypes(tileZone, 1);
     for (const TileZone::Road& road : tileZone.m_pendingRoads)
         placeRoad(road.m_path, road.m_level);
 }
@@ -723,6 +725,73 @@ MapTileRegion RoadHelper::redundantCleanup(TileZone& tileZone)
     }
     erasedTiles.doSort();
     return erasedTiles;
+}
+
+void RoadHelper::correctRoadTypes(TileZone& tileZone, int pass)
+{
+    std::map<MapTilePtr, int> roadLevels;
+    std::map<MapTilePtr, int> correctedLevels;
+    MapTilePtrList            pendingRoadTiles;
+    for (const TileZone::Road& road : tileZone.m_pendingRoads) {
+        for (auto* cell : road.m_path) {
+            if (roadLevels.contains(cell))
+                throw std::runtime_error("Duplicate road placement at:" + cell->toPrintableString());
+            roadLevels[cell] = road.m_level;
+            pendingRoadTiles.push_back(cell);
+        }
+    }
+    for (MapTilePtr cell : pendingRoadTiles) {
+        std::map<int, int> neighbourRoadLevels;
+        for (auto* ncell : cell->m_allNeighbours) {
+            auto it = roadLevels.find(ncell);
+            if (it == roadLevels.cend())
+                continue;
+            const int neighbourTileLevel = it->second;
+            neighbourRoadLevels[neighbourTileLevel]++;
+        }
+
+        const int currentLevel = roadLevels.at(cell);
+
+        if (neighbourRoadLevels.size() == 1 && pass == 0) {
+            const int neighbourTileLevel = neighbourRoadLevels.begin()->first;
+
+            if (currentLevel == neighbourTileLevel)
+                continue;
+
+            correctedLevels[cell] = neighbourTileLevel;
+        }
+        if (neighbourRoadLevels.size() == 2 && pass == 1) {
+            auto currIt = neighbourRoadLevels.find(currentLevel);
+            if (currIt == neighbourRoadLevels.cend())
+                continue;
+            auto nIt = currIt;
+            if (nIt == neighbourRoadLevels.begin())
+                ++nIt;
+            else
+                --nIt;
+
+            const int currentCount = currIt->second;
+
+            const int neighbourTileLevel = nIt->first;
+            const int neighbourTileCount = nIt->second;
+            if (neighbourTileCount <= currentCount)
+                continue;
+
+            correctedLevels[cell] = neighbourTileLevel;
+        }
+    }
+    std::vector<TileZone::Road> extraPendingRoads;
+    for (TileZone::Road& road : tileZone.m_pendingRoads) {
+        for (size_t i = 0; i < road.m_path.size(); ++i) {
+            MapTilePtr cell = road.m_path[i];
+            if (correctedLevels.contains(cell)) {
+                road.m_path.erase(road.m_path.begin() + i);
+                extraPendingRoads.push_back(TileZone::Road{ .m_path = { cell }, .m_level = correctedLevels[cell] });
+            }
+        }
+    }
+
+    tileZone.m_pendingRoads.insert(tileZone.m_pendingRoads.end(), extraPendingRoads.cbegin(), extraPendingRoads.cend());
 }
 
 MapTilePtrList RoadHelper::aStarPath(TileZone& zone, MapTilePtr start, MapTilePtr end, bool allTiles)

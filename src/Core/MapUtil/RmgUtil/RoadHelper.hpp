@@ -44,6 +44,7 @@ public:
 
 private:
     MapTileRegion  redundantCleanup(TileZone& tileZone);
+    void           correctRoadTypes(TileZone& tileZone, int pass);
     MapTilePtrList aStarPath(TileZone& zone, MapTilePtr start, MapTilePtr end, bool allTiles);
 
 private:
