@@ -31,7 +31,7 @@
 "hota.visitable.prospectorGen"             : [ "ResourceGen"   ,      500 ,    1000  , "avtprosp"  ],
 "sod.visitable.leanToWithResource"         : [ "ResourceGen"   ,      500 ,    1000  ,  "avmlean0"  ],
 
-"sod.visitable.learningStone"              : [ "Experience"    ,     2500 ,    3000  , { "m": { "": "avsgzbo0", "S": "avsgzbs0" }}  ],
+"sod.visitable.learningStone"              : [ "Experience"    ,     2500 ,    2000  , { "m": { "": "avsgzbo0", "S": "avsgzbs0" }}  ],
 "hota.visitable.gazebo"                    : [ "Experience"    ,     4000 ,     500  , "avxgazeb"  ],
 "sod.visitable.treeOfKnowledge"            : [ "Experience"    ,     5000 ,     500  , { "m": { "": "avxtrek0", "S": "avxtrks0"}} ],
 
@@ -86,7 +86,7 @@
 
 "hota.visitable.ancientLamp"               : [ "ArmyAux"       ,     3000 ,    4000  , "avtglam" ],
 "sod.resource.campfire"                    : [ "Gold"          ,     1000 ,    2000  , { "m": { "": "adcfra", "A": "avxcfsn0", "B": "avxcflv0", "C": "avxcfds0"}} ],
-"sod.resource.treasureChest"               : [ "Experience"    ,     2000 ,    4000  , "avtchst0" ],
+"sod.resource.treasureChest"               : [ "Experience"    ,     1500 ,    4000  , "avtchst0" ],
 "sod.resource.flotSam"                     : [ "Gold"          ,     1000 ,    1000  , "avaflot0" ],
 "sod.resource.jetSam"                      : [ "Gold"          ,     1000 ,    1000  , "avacratw" ],
 "sod.resource.seaChest"                    : [ "Experience"    ,     2000 ,    1000  , "avxccht0" ],
