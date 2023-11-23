@@ -6,7 +6,7 @@
 "records": {
 
 "sod.spell.shield"                    : [     true    ,      false      ,        true         , "temp"      , "good" , "units"        ,  "earth"  ,  1     ,     5       ,      500   , "Shield"                                                ],
-"sod.spell.airShield"                 : [     true    ,      false      ,        true         , "temp"      , "good" , "units"        ,  "air"    ,  1     ,     12      ,      500   , "Air Shild"                                             ],
+"sod.spell.airShield"                 : [     true    ,      false      ,        true         , "temp"      , "good" , "units"        ,  "air"    ,  3     ,     12      ,      500   , "Air Shild"                                             ],
 "sod.spell.fireShield"                : [     true    ,      false      ,        true         , "temp"      , "good" , "units"        ,  "fire"   ,  4     ,     16      ,     8000   , "Fire Shield"                                           ],
 "sod.spell.protectFromAir"            : [     true    ,      false      ,        true         , "temp"      , "good" , "units"        ,  "air"    ,  2     ,     7       ,     2000   , "Protection From Air"                                   ],
 "sod.spell.protectFromFire"           : [     true    ,      false      ,        true         , "temp"      , "good" , "units"        ,  "fire"   ,  1     ,     5       ,      500   , "Protection From Fire"                                  ],
