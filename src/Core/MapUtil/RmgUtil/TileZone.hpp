@@ -14,10 +14,20 @@ namespace Core {
 class IRandomGenerator;
 }
 
+enum class RoadLevel
+{
+    NoRoad = -1,
+    Towns  = 0,
+    Exits,
+    InnerPoints,
+    BorderPoints,
+    Hidden,
+};
+
 struct TileZone {
     struct Road {
         MapTilePtrList m_path;
-        int            m_level = 0;
+        RoadLevel      m_level = RoadLevel::NoRoad;
     };
 
     int                          m_index = 0;
@@ -48,11 +58,14 @@ struct TileZone {
 
     MapTileRegion m_roadNodes;
     MapTileRegion m_roadNodesHighPriority;
+    MapTileRegion m_roadNodesTowns;
     MapTileRegion m_breakGuardTiles;
 
     MapTileRegion m_blocked;
     MapTileRegion m_needBeBlocked;
     MapTileRegion m_tentativeBlocked;
+
+    std::map<int, MapTileRegion> m_regionsByHeat;
 
     std::map<std::string, MapTilePtr> m_namedTiles;
 
@@ -89,7 +102,7 @@ struct TileZone {
 
     void fillUnzoned();
 
-    int getRoadLevel(MapTilePtr node) const;
+    RoadLevel getRoadLevel(MapTilePtr node) const;
 };
 
 }

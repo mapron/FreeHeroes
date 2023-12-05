@@ -34,7 +34,8 @@ struct MapTile {
     MapTilePtr m_neighborBL = nullptr;
     MapTilePtr m_neighborBR = nullptr;
 
-    MapTilePtrList m_allNeighbours;
+    MapTilePtrList m_orthogonalNeighbours;
+    MapTilePtrList m_diagNeighbours;
     MapTilePtrList m_allNeighboursWithDiag;
 
     struct Transform {
@@ -45,7 +46,7 @@ struct MapTile {
         FHPos apply(FHPos pos) const noexcept;
     };
 
-    const MapTilePtrList& neighboursList(bool useDiag) const noexcept { return useDiag ? m_allNeighboursWithDiag : m_allNeighbours; }
+    const MapTilePtrList& neighboursList(bool useDiag) const noexcept { return useDiag ? m_allNeighboursWithDiag : m_orthogonalNeighbours; }
 
     MapTilePtr     neighbourByOffset(FHPos offset) noexcept;
     MapTilePtrList neighboursByOffsets(const std::vector<FHPos>& offsets, const Transform& transform) noexcept;

@@ -286,7 +286,9 @@ void SpriteMapPainter::paint(QPainter*        painter,
                 painter->translate(x * tileSize, y * tileSize);
                 const auto halfTile = tileSize / 2;
 
-                if (!debugPiece.m_b) {
+                const bool debugHeat = true;
+
+                if (!debugPiece.m_b && !debugHeat) {
                     for (int x1 = 0; x1 < 2; ++x1) {
                         for (int y1 = 0; y1 < 2; ++y1) {
                             auto  color = (x1 + y1) % 2 ? darkColor : lightColor;
@@ -295,6 +297,19 @@ void SpriteMapPainter::paint(QPainter*        painter,
                         }
                     }
                 }
+                QList<QColor> heatColors{
+                    QColor(Qt::black),
+                    QColor("#F40400"),
+                    QColor("#FF4600"),
+                    QColor("#FFBF00"),
+                    QColor("#D1DF11"),
+                    QColor("#3EF649"),
+                    QColor("#00D57D"),
+                    QColor("#0084B3"),
+                    QColor("#0024F3"),
+                    QColor("#7B05FF"),
+                    QColor("#9D00C4"),
+                };
                 QRect cellRect(0, 0, tileSize, tileSize);
                 painter->setPen(Qt::black);
                 QFont font = painter->font();
@@ -324,8 +339,17 @@ void SpriteMapPainter::paint(QPainter*        painter,
 
                 if (debugPiece.m_b)
                     painter->drawEllipse(cellRect);
-                else
-                    painter->drawText(cellRect, Qt::AlignCenter, QString("A: %1\nB: %2\nC: %3").arg(debugPiece.m_a).arg(debugPiece.m_b).arg(debugPiece.m_c));
+                else if (debugHeat) {
+                    auto c = heatColors.value(debugPiece.m_c, QColor(Qt::black));
+                    c.setAlpha(100);
+                    painter->setBrush(c);
+                    cellRect.adjust(tileSize / 6, tileSize / 6, -tileSize / 6, -tileSize / 6);
+                    if (debugPiece.m_c % 2)
+                        painter->drawEllipse(cellRect);
+                    else
+                        painter->drawRect(cellRect);
+                } else
+                    painter->drawText(cellRect, Qt::AlignCenter, QString("A: %1\nC: %3").arg(debugPiece.m_a).arg(debugPiece.m_c));
 
                 painter->setTransform(oldTransform);
             }

@@ -29,21 +29,21 @@ void MapTileContainer::init(int width, int height, int depth)
                 MapTilePtr tile = &m_tiles[index++];
                 if (x > 0) {
                     tile->m_neighborL = m_tileIndex.at({ x - 1, y, z });
-                    tile->m_allNeighbours.push_back(tile->m_neighborL);
+                    tile->m_orthogonalNeighbours.push_back(tile->m_neighborL);
                 }
                 if (y > 0) {
                     tile->m_neighborT = m_tileIndex.at({ x, y - 1, z });
-                    tile->m_allNeighbours.push_back(tile->m_neighborT);
+                    tile->m_orthogonalNeighbours.push_back(tile->m_neighborT);
                 }
                 if (x < width - 1) {
                     tile->m_neighborR = m_tileIndex.at({ x + 1, y, z });
-                    tile->m_allNeighbours.push_back(tile->m_neighborR);
+                    tile->m_orthogonalNeighbours.push_back(tile->m_neighborR);
                 }
                 if (y < height - 1) {
                     tile->m_neighborB = m_tileIndex.at({ x, y + 1, z });
-                    tile->m_allNeighbours.push_back(tile->m_neighborB);
+                    tile->m_orthogonalNeighbours.push_back(tile->m_neighborB);
                 }
-                tile->m_allNeighboursWithDiag = tile->m_allNeighbours;
+                tile->m_allNeighboursWithDiag = tile->m_orthogonalNeighbours;
             }
         }
     }
@@ -61,14 +61,22 @@ void MapTileContainer::init(int width, int height, int depth)
                 if (tile->m_neighborB)
                     tile->m_neighborBR = tile->m_neighborB->m_neighborR;
 
-                if (tile->m_neighborTL)
+                if (tile->m_neighborTL) {
                     tile->m_allNeighboursWithDiag.push_back(tile->m_neighborTL);
-                if (tile->m_neighborTR)
+                    tile->m_diagNeighbours.push_back(tile->m_neighborTL);
+                }
+                if (tile->m_neighborTR) {
                     tile->m_allNeighboursWithDiag.push_back(tile->m_neighborTR);
-                if (tile->m_neighborBL)
+                    tile->m_diagNeighbours.push_back(tile->m_neighborTR);
+                }
+                if (tile->m_neighborBL) {
                     tile->m_allNeighboursWithDiag.push_back(tile->m_neighborBL);
-                if (tile->m_neighborBR)
+                    tile->m_diagNeighbours.push_back(tile->m_neighborBL);
+                }
+                if (tile->m_neighborBR) {
                     tile->m_allNeighboursWithDiag.push_back(tile->m_neighborBR);
+                    tile->m_diagNeighbours.push_back(tile->m_neighborBR);
+                }
             }
         }
     }

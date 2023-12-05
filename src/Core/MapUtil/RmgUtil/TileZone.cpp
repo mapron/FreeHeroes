@@ -135,20 +135,24 @@ void TileZone::fillUnzoned()
     }
 }
 
-int TileZone::getRoadLevel(MapTilePtr node) const
+RoadLevel TileZone::getRoadLevel(MapTilePtr node) const
 {
+    const bool isTown = m_roadNodesTowns.contains(node);
+    if (isTown)
+        return RoadLevel::Towns;
+
     const bool isHigh = m_roadNodesHighPriority.contains(node);
-    if (isHigh || m_innerAreaTowns.contains(node))
-        return 0;
+    if (isHigh)
+        return RoadLevel::Exits;
 
     const bool isBorder = m_innerAreaUsable.m_innerEdge.contains(node);
     if (isBorder)
-        return 2;
+        return RoadLevel::BorderPoints;
 
     if (m_roadNodes.contains(node))
-        return 1;
+        return RoadLevel::InnerPoints;
 
-    return -1;
+    return RoadLevel::NoRoad;
 }
 
 }

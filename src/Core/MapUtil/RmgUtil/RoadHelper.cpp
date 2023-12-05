@@ -4,7 +4,6 @@
  * See LICENSE file for details.
  */
 #include "RoadHelper.hpp"
-#include "KMeans.hpp"
 #include "AstarGenerator.hpp"
 #include "../FHMap.hpp"
 
@@ -84,8 +83,8 @@ void RoadHelper::makeBorders(std::vector<TileZone>& tileZones)
         const bool guarded = connections.m_guard || !connections.m_mirrorGuard.empty();
 
         MapTilePtr ncellFound = nullptr;
-
-        for (MapTilePtr ncell : cell->m_allNeighbours) {
+        
+        for (MapTilePtr ncell : cell->m_orthogonalNeighbours) {
             if (!ncellFound && ncell && ncell->m_zone != cell->m_zone) {
                 ncell->m_zone->m_roadNodesHighPriority.insert(ncell);
                 if (guarded)
@@ -138,7 +137,7 @@ void RoadHelper::makeBorders(std::vector<TileZone>& tileZones)
     needBeBlocked.doSort();
     for (const auto& [key, border] : borderTiles) {
         for (auto* cell : border) {
-            for (MapTilePtr ncell : cell->m_allNeighbours) {
+            for (MapTilePtr ncell : cell->m_orthogonalNeighbours) {
                 if (needBeBlocked.contains(ncell))
                     continue;
                 if (noExpandTiles.contains(ncell))
@@ -206,8 +205,8 @@ void RoadHelper::placeRoads(TileZone& tileZone)
             std::set<std::pair<TileZone*, size_t>> neighAreaBorders;
             if (!cell->m_neighborB || !cell->m_neighborT || !cell->m_neighborL || !cell->m_neighborR)
                 neighAreaBorders.insert(std::pair<TileZone*, size_t>{ nullptr, 0 });
-
-            for (MapTilePtr cellAdj : cell->m_allNeighbours) {
+            
+            for (MapTilePtr cellAdj : cell->m_orthogonalNeighbours) {
                 if (area.contains(cellAdj))
                     continue;
                 size_t    neighbourSegIndex = cellAdj->m_segmentIndex;
@@ -381,25 +380,20 @@ void RoadHelper::placeRoads(TileZone& tileZone)
         }
     }
 
-    std::vector<MapTilePtrList> unconnectedRoadNodesByLevel;
-    unconnectedRoadNodesByLevel.resize(3);
+    std::map<RoadLevel, MapTilePtrList> unconnectedRoadNodesByLevel;
 
     for (MapTilePtr node : unconnectedRoadNodesAll) {
-        const int roadLevel = tileZone.getRoadLevel(node);
-        assert(roadLevel >= 0);
+        const RoadLevel roadLevel = tileZone.getRoadLevel(node);
+        assert(roadLevel >= RoadLevel::Towns);
         unconnectedRoadNodesByLevel[roadLevel].push_back(node);
     }
 
     MapTileRegion           pathAsRegion; // all placed roads as cell region
     std::vector<MapTilePtr> connected;
-    for (int level = 0; level < 3; ++level) {
-        MapTilePtrList& unconnectedRoadNodes = unconnectedRoadNodesByLevel[level];
+    for (auto& [level, unconnectedRoadNodes] : unconnectedRoadNodesByLevel) {
         std::sort(unconnectedRoadNodes.begin(), unconnectedRoadNodes.end(), [](MapTilePtr l, MapTilePtr r) {
             return l->m_pos < r->m_pos;
         });
-
-        if (unconnectedRoadNodes.empty())
-            continue;
 
         if (connected.empty()) {
             MapTilePtr cell = unconnectedRoadNodes.back();
@@ -416,10 +410,10 @@ void RoadHelper::placeRoads(TileZone& tileZone)
             std::vector<MapTilePtr> connectedTmp = connected;
 
             std::sort(connectedTmp.begin(), connectedTmp.end(), [cell, &tileZone](MapTilePtr l, MapTilePtr r) {
-                const int     roadLevelL  = tileZone.getRoadLevel(l);
-                const int     roadLevelR  = tileZone.getRoadLevel(r);
-                const int64_t lBorderMult = roadLevelL + 1;
-                const int64_t rBorderMult = roadLevelR + 1;
+                const RoadLevel roadLevelL  = tileZone.getRoadLevel(l);
+                const RoadLevel roadLevelR  = tileZone.getRoadLevel(r);
+                const int64_t   lBorderMult = static_cast<int>(roadLevelL) + 1;
+                const int64_t   rBorderMult = static_cast<int>(roadLevelR) + 1;
 
                 return posDistance(cell->m_pos, l->m_pos) * lBorderMult < posDistance(cell->m_pos, r->m_pos) * rBorderMult;
             });
@@ -469,7 +463,7 @@ void RoadHelper::placeRoads(TileZone& tileZone)
         placeRoad(road.m_path, road.m_level);
 }
 
-void RoadHelper::placeRoad(TileZone& tileZone, const MapTilePtrList& tileList, int level)
+void RoadHelper::placeRoad(TileZone& tileZone, const MapTilePtrList& tileList, RoadLevel level)
 {
     if (tileList.empty())
         return;
@@ -490,7 +484,7 @@ void RoadHelper::placeRoad(TileZone& tileZone, const MapTilePtrList& tileList, i
     tileZone.m_placedRoads.doSort();
 }
 
-void RoadHelper::placeRoad(const MapTilePtrList& tileList, int level)
+void RoadHelper::placeRoad(const MapTilePtrList& tileList, RoadLevel level)
 {
     std::vector<FHPos> path;
     path.reserve(tileList.size());
@@ -500,19 +494,22 @@ void RoadHelper::placeRoad(const MapTilePtrList& tileList, int level)
     placeRoadPath(std::move(path), level);
 }
 
-void RoadHelper::placeRoadPath(std::vector<FHPos> path, int level)
+void RoadHelper::placeRoadPath(std::vector<FHPos> path, RoadLevel level)
 {
-    if (path.empty() || level < 0)
+    if (path.empty() || level == RoadLevel::NoRoad)
         return;
+
     FHRoad road;
     auto&  settings = m_map.m_template.m_userSettings;
     road.m_type     = settings.m_defaultRoad;
-    if (level == 1)
+    if (level == RoadLevel::InnerPoints)
         road.m_type = settings.m_innerRoad;
-    if (level == 2)
+    if (level == RoadLevel::BorderPoints)
         road.m_type = settings.m_borderRoad;
+    if (level == RoadLevel::Hidden)
+        road.m_type = FHRoadType::Invalid;
 
-    if (path.size() <= 2 && level == 1) {
+    if (path.size() <= 2 && level == RoadLevel::InnerPoints) {
         if (settings.m_defaultRoad != settings.m_innerRoad && settings.m_innerRoad != FHRoadType::Invalid) {
             road.m_type = settings.m_defaultRoad;
         }
@@ -729,9 +726,9 @@ MapTileRegion RoadHelper::redundantCleanup(TileZone& tileZone)
 
 void RoadHelper::correctRoadTypes(TileZone& tileZone, int pass)
 {
-    std::map<MapTilePtr, int> roadLevels;
-    std::map<MapTilePtr, int> correctedLevels;
-    MapTilePtrList            pendingRoadTiles;
+    std::map<MapTilePtr, RoadLevel> roadLevels;
+    std::map<MapTilePtr, RoadLevel> correctedLevels;
+    MapTilePtrList                  pendingRoadTiles;
     for (const TileZone::Road& road : tileZone.m_pendingRoads) {
         for (auto* cell : road.m_path) {
             if (roadLevels.contains(cell))
@@ -741,19 +738,19 @@ void RoadHelper::correctRoadTypes(TileZone& tileZone, int pass)
         }
     }
     for (MapTilePtr cell : pendingRoadTiles) {
-        std::map<int, int> neighbourRoadLevels;
-        for (auto* ncell : cell->m_allNeighbours) {
+        std::map<RoadLevel, int> neighbourRoadLevels;
+        for (auto* ncell : cell->m_orthogonalNeighbours) {
             auto it = roadLevels.find(ncell);
             if (it == roadLevels.cend())
                 continue;
-            const int neighbourTileLevel = it->second;
+            const RoadLevel neighbourTileLevel = it->second;
             neighbourRoadLevels[neighbourTileLevel]++;
         }
 
-        const int currentLevel = roadLevels.at(cell);
+        const RoadLevel currentLevel = roadLevels.at(cell);
 
         if (neighbourRoadLevels.size() == 1 && pass == 0) {
-            const int neighbourTileLevel = neighbourRoadLevels.begin()->first;
+            const RoadLevel neighbourTileLevel = neighbourRoadLevels.begin()->first;
 
             if (currentLevel == neighbourTileLevel)
                 continue;
@@ -772,8 +769,8 @@ void RoadHelper::correctRoadTypes(TileZone& tileZone, int pass)
 
             const int currentCount = currIt->second;
 
-            const int neighbourTileLevel = nIt->first;
-            const int neighbourTileCount = nIt->second;
+            const RoadLevel neighbourTileLevel = nIt->first;
+            const int       neighbourTileCount = nIt->second;
             if (neighbourTileCount <= currentCount)
                 continue;
 
@@ -794,7 +791,7 @@ void RoadHelper::correctRoadTypes(TileZone& tileZone, int pass)
     tileZone.m_pendingRoads.insert(tileZone.m_pendingRoads.end(), extraPendingRoads.cbegin(), extraPendingRoads.cend());
 }
 
-MapTilePtrList RoadHelper::aStarPath(TileZone& zone, MapTilePtr start, MapTilePtr end, bool allTiles)
+MapTilePtrList RoadHelper::aStarPath(TileZone& zone, MapTilePtr start, MapTilePtr end, bool allTiles) const
 {
     //Mernel::ProfilerScope scope("aStarPath");
 

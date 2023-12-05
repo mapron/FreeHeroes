@@ -38,6 +38,7 @@ ENUM_REFLECTION_STRINGIFY(
     BorderRoads,
     TownsPlacement,
     RoadsPlacement,
+    HeatMap,
     Rewards,
     CorrectObjectTerrains,
     Obstacles,
@@ -241,6 +242,7 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
                          Stage::BorderRoads,
                          Stage::TownsPlacement,
                          Stage::RoadsPlacement,
+                         Stage::HeatMap,
                          Stage::Rewards,
                          Stage::CorrectObjectTerrains,
                          Stage::Obstacles,
@@ -288,6 +290,8 @@ void FHTemplateProcessor::runCurrentStage()
             return runTownsPlacement();
         case Stage::RoadsPlacement:
             return runRoadsPlacement();
+        case Stage::HeatMap:
+            return runHeatMap();
         case Stage::Rewards:
             return runRewards();
         case Stage::CorrectObjectTerrains:
@@ -668,8 +672,11 @@ void FHTemplateProcessor::runTownsPlacement()
         for (auto&& pos : townPositions) {
             auto pos2 = pos->m_neighborB;
             tileZone.m_roadNodesHighPriority.insert(pos2);
-            roadHelper.placeRoad({ pos, pos2 }, 0);
+            tileZone.m_roadNodesTowns.insert(pos2);
+            roadHelper.placeRoad({ pos, pos2 }, RoadLevel::Towns);
         }
+
+        tileZone.m_roadNodesTowns.doSort();
         tileZone.m_blocked.doSort();
         tileZone.m_innerAreaTowns.doSort();
         {
@@ -707,6 +714,130 @@ void FHTemplateProcessor::runRoadsPlacement()
         //        }
     }
 }
+void FHTemplateProcessor::runHeatMap()
+{
+    using TileIntMapping = std::map<MapTilePtr, int>;
+    using WeightTileMap  = std::map<int, MapTilePtrList>;
+
+    for (auto& tileZone : m_tileZones) {
+        TileIntMapping costs;
+        for (auto tile : tileZone.m_innerAreaUsable.m_innerArea)
+            costs[tile] = 100;
+        for (auto& road : tileZone.m_pendingRoads) {
+            int cost = 100;
+            if (road.m_level == RoadLevel::Towns)
+                cost = 20;
+            if (road.m_level == RoadLevel::Exits)
+                cost = 40;
+            if (road.m_level == RoadLevel::InnerPoints || road.m_level == RoadLevel::BorderPoints)
+                cost = 70;
+            for (auto tile : road.m_path)
+                costs[tile] = cost;
+        }
+
+        std::set<MapTilePtr> remaining, completed, edgeSet;
+
+        TileIntMapping resultDistance;
+        for (auto tile : tileZone.m_roadNodesTowns)
+            completed.insert(tile);
+        if (completed.empty()) {
+            for (auto tile : tileZone.m_roadNodesHighPriority)
+                completed.insert(tile);
+        }
+        edgeSet = completed;
+
+        for (auto tile : tileZone.m_innerAreaUsable.m_innerArea) {
+            if (!completed.contains(tile))
+                remaining.insert(tile);
+        }
+
+        WeightTileMap edge;
+        for (auto tile : completed)
+            edge[0].push_back(tile);
+
+        auto calcCost = [&costs](MapTilePtr one, MapTilePtr two, bool diag) -> int {
+            const int costOne = costs.at(one);
+            const int costTwo = costs.at(two);
+            const int cost    = std::max(costOne, costTwo);
+            return diag ? cost * 141 / 100 : cost;
+        };
+
+        auto consumePrevEdge = [&edge, &edgeSet, &resultDistance, &remaining, &completed, &calcCost]() -> bool {
+            if (edge.empty())
+                return false;
+
+            const int            lowestCost      = edge.begin()->first;
+            const MapTilePtrList lowestCostTiles = edge.begin()->second;
+            edge.erase(edge.begin());
+
+            for (auto tile : lowestCostTiles) {
+                resultDistance[tile] = lowestCost;
+                completed.insert(tile);
+                edgeSet.erase(tile);
+                remaining.erase(tile);
+            }
+            for (auto tile : lowestCostTiles) {
+                for (bool diag : { false, true }) {
+                    auto& nlist = diag ? tile->m_diagNeighbours : tile->m_orthogonalNeighbours;
+                    for (auto ntile : nlist) {
+                        if (completed.contains(ntile) || edgeSet.contains(ntile) || !remaining.contains(ntile))
+                            continue;
+                        const int cost = calcCost(tile, ntile, diag) + lowestCost;
+                        edgeSet.insert(ntile);
+                        edge[cost].push_back(ntile);
+                    }
+                }
+            }
+
+            return true;
+        };
+
+        while (consumePrevEdge()) {
+            ;
+        }
+
+        std::map<int, int> heatFrequencies;
+        for (const auto& [tile, w] : resultDistance)
+            heatFrequencies[w]++;
+
+        const int maxHeat           = 10;
+        const int totalTiles        = costs.size();
+        int       currentHeatTarget = 1;
+        int       currentHeatCnt    = currentHeatTarget * totalTiles / maxHeat;
+        int       totalCnt          = 0;
+
+        std::map<int, int> heatThresholds;
+        heatThresholds[0] = 0;
+        int maxcost       = 0;
+        for (const auto& [w, cnt] : heatFrequencies) {
+            totalCnt += cnt;
+            maxcost = std::max(maxcost, w);
+            if (totalCnt > currentHeatCnt) {
+                heatThresholds[w] = currentHeatTarget;
+                currentHeatTarget++;
+                currentHeatCnt = currentHeatTarget * totalTiles / maxHeat;
+            }
+        }
+        heatThresholds[maxcost] = maxHeat;
+        TileIntMapping resultHeat;
+        for (const auto& [tile, w] : resultDistance) {
+            auto it = heatThresholds.lower_bound(w); // first [w2, heat] where w2 >= w
+            assert(it != heatThresholds.cend());
+            const int heat   = std::max(1, std::min(maxHeat, it->second));
+            resultHeat[tile] = heat;
+            tileZone.m_regionsByHeat[heat].insert(tile);
+        }
+
+        for (auto& [heat, region] : tileZone.m_regionsByHeat)
+            region.doSort();
+
+        if (0) {
+            for (auto& [heat, region] : tileZone.m_regionsByHeat)
+                for (const auto& tile : region)
+                    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = tile->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 0, .m_valueC = heat });
+        }
+    }
+}
 
 void FHTemplateProcessor::runRewards()
 {
@@ -722,9 +853,10 @@ void FHTemplateProcessor::runRewards()
         if (tileZone.m_rngZoneSettings.m_scoreTargets.empty())
             continue;
 
-        ObjectBundleSet bundleSet(m_rng, m_tileContainer, m_logOutput);
-        //if (tileZone.m_id != "CC")
+        //if (tileZone.m_id != "P1")
         //    continue;
+
+        ObjectBundleSet bundleSet(m_rng, m_tileContainer, m_logOutput);
 
         m_logOutput << m_indent << " --- generate : " << tileZone.m_id << " --- \n";
         auto      objects       = m_map.m_objects;
@@ -1020,8 +1152,8 @@ void FHTemplateProcessor::placeDebugInfo()
         }
         if (m_stopAfter <= Stage::RoadsPlacement) {
             for (auto* cell : tileZone.m_roadNodes) {
-                const int roadLevel  = tileZone.getRoadLevel(cell);
-                const int debugValue = roadLevel == 0 ? 1 : (roadLevel == 2 ? 4 : 2);
+                const RoadLevel roadLevel  = tileZone.getRoadLevel(cell);
+                const int       debugValue = roadLevel == RoadLevel::Towns || roadLevel == RoadLevel::Exits ? 1 : (roadLevel == RoadLevel::BorderPoints ? 4 : 2);
                 m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = debugValue });
             }
             for (auto* cell : tileZone.m_innerAreaSegmentsRoads) {

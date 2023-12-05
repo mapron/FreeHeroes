@@ -26,9 +26,9 @@ public:
 
     void placeRoads(TileZone& tileZone);
 
-    void placeRoad(TileZone& tileZone, const MapTilePtrList& tileList, int level);
-    void placeRoad(const MapTilePtrList& tileList, int level);
-    void placeRoadPath(std::vector<FHPos> path, int level);
+    void placeRoad(TileZone& tileZone, const MapTilePtrList& tileList, RoadLevel level);
+    void placeRoad(const MapTilePtrList& tileList, RoadLevel level);
+    void placeRoadPath(std::vector<FHPos> path, RoadLevel level);
 
 public:
     struct Guard {
@@ -45,7 +45,7 @@ public:
 private:
     MapTileRegion  redundantCleanup(TileZone& tileZone);
     void           correctRoadTypes(TileZone& tileZone, int pass);
-    MapTilePtrList aStarPath(TileZone& zone, MapTilePtr start, MapTilePtr end, bool allTiles);
+    MapTilePtrList aStarPath(TileZone& zone, MapTilePtr start, MapTilePtr end, bool allTiles) const;
 
 private:
     FHMap&                        m_map;

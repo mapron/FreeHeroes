@@ -34,6 +34,7 @@ public:
         BorderRoads,
         TownsPlacement,
         RoadsPlacement,
+        HeatMap,
         Rewards,
         CorrectObjectTerrains,
         Obstacles,
@@ -52,6 +53,7 @@ private:
     void runBorderRoads();
     void runTownsPlacement();
     void runRoadsPlacement();
+    void runHeatMap();
     void runRewards();
     void runCorrectObjectTerrains();
     void runObstacles();
