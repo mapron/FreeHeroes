@@ -46,7 +46,10 @@ public:
     Node* findNodeOnList(NodeSet& nodes, MapTilePtr coordinates);
 
 public:
-    AstarGenerator();
+    AstarGenerator(bool useDiag = true)
+        : m_useDiag(useDiag)
+    {}
+
     void setPoints(MapTilePtr source, MapTilePtr target)
     {
         m_source = source;
@@ -59,8 +62,8 @@ public:
     void setNonCollision(MapTileRegion nonCollision) { m_nonCollision = std::move(nonCollision); }
 
 private:
-    std::vector<FHPos> m_directions;
-    MapTileRegion      m_nonCollision;
+    const bool    m_useDiag;
+    MapTileRegion m_nonCollision;
 
     MapTilePtr m_source = nullptr;
     MapTilePtr m_target = nullptr;

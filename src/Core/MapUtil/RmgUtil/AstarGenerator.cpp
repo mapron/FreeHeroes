@@ -20,13 +20,6 @@ uint64_t AstarGenerator::Node::getScore()
     return m_G + m_H;
 }
 
-AstarGenerator::AstarGenerator()
-{
-    m_directions = {
-        { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 }, { -1, -1 }, { 1, 1 }, { -1, 1 }, { 1, -1 }
-    };
-}
-
 MapTilePtrList AstarGenerator::findPath()
 {
     m_success = false;
@@ -57,13 +50,12 @@ MapTilePtrList AstarGenerator::findPath()
         closedSet.add(current);
         openSet.erase(current_it);
 
-        for (uint64_t i = 0; i < m_directions.size(); ++i) {
-            MapTilePtr newCoordinates(current->m_pos->neighbourByOffset(m_directions[i]));
-            if (!newCoordinates || !m_nonCollision.contains(newCoordinates) || findNodeOnList(closedSet, newCoordinates)) {
-                continue;
+        auto applyCandidate = [this, current, &openSet, &closedSet](uint64_t cost, MapTilePtr newCoordinates) {
+            if (!m_nonCollision.contains(newCoordinates) || findNodeOnList(closedSet, newCoordinates)) {
+                return;
             }
 
-            uint64_t totalCost = current->m_G + ((i < 4) ? 10 : 14);
+            uint64_t totalCost = current->m_G + cost;
 
             Node* successorRaw = findNodeOnList(openSet, newCoordinates);
             if (successorRaw == nullptr) {
@@ -74,6 +66,15 @@ MapTilePtrList AstarGenerator::findPath()
             } else if (totalCost < successorRaw->m_G) {
                 successorRaw->m_parent = current.get();
                 successorRaw->m_G      = totalCost;
+            }
+        };
+        
+        for (MapTilePtr newCoordinates : current->m_pos->m_orthogonalNeighbours) {
+            applyCandidate(10, newCoordinates);
+        }
+        if (m_useDiag) {
+            for (MapTilePtr newCoordinates : current->m_pos->m_diagNeighbours) {
+                applyCandidate(14, newCoordinates);
             }
         }
     }
