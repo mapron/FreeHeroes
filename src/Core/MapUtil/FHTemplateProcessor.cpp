@@ -568,7 +568,7 @@ void FHTemplateProcessor::runTownsPlacement()
         tileZone.m_blocked.insert(townArea.m_innerArea);
         tileZone.m_innerAreaTowns.insert(townArea.m_innerArea);
         tileZone.m_innerAreaTowns.insert(townArea.m_outsideEdge);
-        tileZone.m_innerAreaSegmentsRoads.insert(townArea.m_outsideEdge);
+        tileZone.m_possibleRoadsArea.insert(townArea.m_outsideEdge);
     };
 
     auto playerNone = m_database->players()->find(std::string(Core::LibraryPlayer::s_none));
@@ -697,23 +697,10 @@ void FHTemplateProcessor::runRoadsPlacement()
 
     for (auto& tileZone : m_tileZones) {
         roadHelper.placeRoads(tileZone);
-
-        //        for (auto* cell : tileZone.m_placedRoads) {
-        //            m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 3 });
-        //        }
-
-        //        for (auto* cell : tileZone.m_roadNodes) {
-        //            m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 2 });
-        //        }
-        //        for (auto* cell : tileZone.m_roadNodesHighPriority) {
-        //            m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 1 });
-        //        }
-        //        for (auto* cell : tileZone.m_roadNodes) {
-        //            if (tileZone.m_innerAreaUsable.m_innerEdge.contains(cell))
-        //                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 4 });
-        //        }
+        roadHelper.refineSegments(tileZone);
     }
 }
+
 void FHTemplateProcessor::runHeatMap()
 {
     using TileIntMapping = std::map<MapTilePtr, int>;
@@ -723,7 +710,7 @@ void FHTemplateProcessor::runHeatMap()
         TileIntMapping costs;
         for (auto tile : tileZone.m_innerAreaUsable.m_innerArea)
             costs[tile] = 100;
-        for (auto& road : tileZone.m_pendingRoads) {
+        for (auto& road : tileZone.m_roads) {
             int cost = 100;
             if (road.m_level == RoadLevel::Towns)
                 cost = 20;
@@ -830,12 +817,6 @@ void FHTemplateProcessor::runHeatMap()
 
         for (auto& [heat, region] : tileZone.m_regionsByHeat)
             region.doSort();
-
-        if (0) {
-            for (auto& [heat, region] : tileZone.m_regionsByHeat)
-                for (const auto& tile : region)
-                    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = tile->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 0, .m_valueC = heat });
-        }
     }
 }
 
@@ -1145,21 +1126,32 @@ void FHTemplateProcessor::placeDebugInfo()
             }
         }
 
-        if (m_stopAfter <= Stage::BorderRoads) {
+        if (m_stopAfter == Stage::BorderRoads) {
             for (auto* cell : tileZone.m_blocked) {
                 m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = 0, .m_valueB = 4 });
             }
         }
-        if (m_stopAfter <= Stage::RoadsPlacement) {
-            for (auto* cell : tileZone.m_roadNodes) {
+        if (m_stopAfter == Stage::RoadsPlacement) {
+            for (auto* cell : tileZone.m_placedRoads) {
                 const RoadLevel roadLevel  = tileZone.getRoadLevel(cell);
                 const int       debugValue = roadLevel == RoadLevel::Towns || roadLevel == RoadLevel::Exits ? 1 : (roadLevel == RoadLevel::BorderPoints ? 4 : 2);
                 m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = debugValue });
             }
-            for (auto* cell : tileZone.m_innerAreaSegmentsRoads) {
-                if (!tileZone.m_roadNodes.contains(cell))
-                    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 3 });
+            for (auto& seg : tileZone.m_innerAreaSegments) {
+                for (auto* cell : seg.m_innerArea) {
+                    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = (int) cell->m_segmentIndex, .m_valueB = 5 });
+                }
             }
+            for (auto* cell : tileZone.m_possibleRoadsArea) {
+                if (!tileZone.m_roadNodes.contains(cell))
+                    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = (int) cell->m_segmentIndex, .m_valueB = 3 });
+            }
+        }
+
+        if (m_stopAfter == Stage::HeatMap) {
+            for (auto& [heat, region] : tileZone.m_regionsByHeat)
+                for (const auto& tile : region)
+                    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = tile->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 0, .m_valueC = heat });
         }
     }
 }

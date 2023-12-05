@@ -68,7 +68,7 @@ MapTilePtrList AstarGenerator::findPath()
                 successorRaw->m_G      = totalCost;
             }
         };
-        
+
         for (MapTilePtr newCoordinates : current->m_pos->m_orthogonalNeighbours) {
             applyCandidate(10, newCoordinates);
         }

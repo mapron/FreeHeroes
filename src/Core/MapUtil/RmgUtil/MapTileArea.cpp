@@ -84,6 +84,56 @@ void MapTileArea::removeEdgeFromInnerArea()
     m_innerArea.doSort();
 }
 
+bool MapTileArea::refineEdge(RefineTask task, const MapTileRegion& allowedArea, size_t index)
+{
+    if (task == RefineTask::RemoveHollows) {
+        MapTilePtrList additional;
+        for (MapTilePtr cell : m_outsideEdge) {
+            if (!allowedArea.contains(cell) || (cell->m_segmentIndex > 0 && cell->m_segmentIndex != index))
+                continue;
+            const int adjucent = m_innerArea.contains(cell->m_neighborB)
+                                 + m_innerArea.contains(cell->m_neighborT)
+                                 + m_innerArea.contains(cell->m_neighborR)
+                                 + m_innerArea.contains(cell->m_neighborL);
+
+            if (adjucent >= 3) {
+                cell->m_segmentIndex = index;
+                additional.push_back(cell);
+            }
+        }
+        m_innerArea.insert(additional);
+    }
+    if (task == RefineTask::RemoveSpikes) {
+        MapTilePtrList removal;
+        for (MapTilePtr cell : m_innerEdge) {
+            const int adjucent = m_innerArea.contains(cell->m_neighborB)
+                                 + m_innerArea.contains(cell->m_neighborT)
+                                 + m_innerArea.contains(cell->m_neighborR)
+                                 + m_innerArea.contains(cell->m_neighborL);
+
+            if (adjucent <= 1) {
+                cell->m_segmentIndex = 0;
+                removal.push_back(cell);
+            }
+        }
+        m_innerArea.erase(removal);
+    }
+    if (task == RefineTask::Expand) {
+        MapTilePtrList additional;
+        for (MapTilePtr cell : m_outsideEdge) {
+            if (!allowedArea.contains(cell) || (cell->m_segmentIndex > 0 && cell->m_segmentIndex != index))
+                continue;
+
+            cell->m_segmentIndex = index;
+            additional.push_back(cell);
+        }
+        m_innerArea.insert(additional);
+    }
+
+    makeEdgeFromInnerArea();
+    return true;
+}
+
 MapTileRegion MapTileArea::getBottomEdge() const
 {
     MapTileRegion result;

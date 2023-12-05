@@ -334,12 +334,13 @@ void SpriteMapPainter::paint(QPainter*        painter,
                 }
                 if (debugPiece.m_b == 5) {
                     painter->setBrush(Qt::lightGray);
-                    cellRect.adjust(tileSize / 3, tileSize / 3, -tileSize / 3, -tileSize / 3);
+                    cellRect.adjust(tileSize / 5, tileSize / 5, -tileSize / 5, -tileSize / 5);
                 }
 
-                if (debugPiece.m_b)
+                if (debugPiece.m_b) {
                     painter->drawEllipse(cellRect);
-                else if (debugHeat) {
+                    painter->drawText(cellRect, Qt::AlignCenter, QString("%1").arg(debugPiece.m_a));
+                } else if (debugHeat) {
                     auto c = heatColors.value(debugPiece.m_c, QColor(Qt::black));
                     c.setAlpha(100);
                     painter->setBrush(c);

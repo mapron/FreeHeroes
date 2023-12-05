@@ -52,9 +52,9 @@ struct TileZone {
 
     std::vector<MapTileArea> m_innerAreaSegments;
 
-    MapTileRegion     m_innerAreaSegmentsRoads;
+    MapTileRegion     m_possibleRoadsArea;
     MapTileRegion     m_placedRoads;
-    std::vector<Road> m_pendingRoads;
+    std::vector<Road> m_roads;
 
     MapTileRegion m_roadNodes;
     MapTileRegion m_roadNodesHighPriority;

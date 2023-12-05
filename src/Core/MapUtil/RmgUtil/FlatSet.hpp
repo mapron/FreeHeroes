@@ -22,10 +22,11 @@ class FlatSet {
 
 public:
     FlatSet() = default;
-    FlatSet(List data) noexcept
+    explicit FlatSet(List data) noexcept
         : m_data(std::move(data))
     {
         m_sorted = m_data.empty();
+        doSort();
     }
 
     auto begin() const
@@ -83,12 +84,11 @@ public:
 
         std::set<Key> tmpSet(m_data.begin(), m_data.end());
         m_data.resize(tmpSet.size());
-        m_index.clear();
         for (size_t index = 0; const Key& key : tmpSet) {
             m_data[index] = key;
-            m_index[key]  = index;
             index++;
         }
+        recalcIndex();
         m_sorted = true;
     }
     void insert(const Key& key)
@@ -100,6 +100,12 @@ public:
     {
         m_data.insert(m_data.end(), flatSet.m_data.cbegin(), flatSet.m_data.cend());
         if (!flatSet.empty())
+            m_sorted = false;
+    }
+    void insert(const List& list)
+    {
+        m_data.insert(m_data.end(), list.cbegin(), list.cend());
+        if (!list.empty())
             m_sorted = false;
     }
     void erase(const Key& key)
@@ -127,6 +133,11 @@ public:
         }
         m_data = std::move(newData);
     }
+    void erase(const List& flatList)
+    {
+        erase(FlatSet(flatList));
+    }
+
     bool contains(const Key& key) const
     {
         ensureSorted();
@@ -146,6 +157,13 @@ private:
         }
 
         return m_data.end();
+    }
+
+    void recalcIndex()
+    {
+        m_index.clear();
+        for (size_t index = 0; index < m_data.size(); ++index)
+            m_index[m_data[index]] = index;
     }
 
     void ensureSorted() const

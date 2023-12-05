@@ -18,6 +18,13 @@ struct MapTileArea {
     MapTileRegion m_innerEdge;   // subset of innerArea;
     MapTileRegion m_outsideEdge; // is not subset of inner area.
 
+    enum class RefineTask
+    {
+        RemoveHollows,
+        RemoveSpikes,
+        Expand,
+    };
+
     static void addIf(MapTileRegion& reg, MapTilePtr cell, auto&& predicate)
     {
         if (!cell)
@@ -35,6 +42,8 @@ struct MapTileArea {
     void makeOutsideEdge();
 
     void removeEdgeFromInnerArea();
+
+    bool refineEdge(RefineTask task, const MapTileRegion& allowedArea, size_t index);
 
     bool contains(MapTilePtr cell) const
     {

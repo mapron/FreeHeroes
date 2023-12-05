@@ -442,7 +442,7 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
     for (auto& zs : m_consumeResult.m_segments) {
         remainArea += zs.m_cells.size();
     }
-    const size_t segTotal      = tileZone.m_innerAreaUsable.m_innerArea.size() - tileZone.m_innerAreaSegmentsRoads.size();
+    const size_t segTotal      = tileZone.m_innerAreaUsable.m_innerArea.size() - tileZone.m_possibleRoadsArea.size();
     const size_t remainPercent = (remainArea * 100 / segTotal);
     m_logOutput << m_indent << "remaining size=" << remainArea << " / " << segTotal << "\n";
     if (remainPercent < 10)

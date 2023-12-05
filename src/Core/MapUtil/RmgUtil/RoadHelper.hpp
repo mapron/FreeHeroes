@@ -25,8 +25,9 @@ public:
     void makeBorders(std::vector<TileZone>& tileZones);
 
     void placeRoads(TileZone& tileZone);
+    void refineSegments(TileZone& tileZone);
 
-    void placeRoad(TileZone& tileZone, const MapTilePtrList& tileList, RoadLevel level);
+    void prepareRoad(TileZone& tileZone, const MapTilePtrList& tileList, RoadLevel level);
     void placeRoad(const MapTilePtrList& tileList, RoadLevel level);
     void placeRoadPath(std::vector<FHPos> path, RoadLevel level);
 
