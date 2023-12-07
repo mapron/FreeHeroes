@@ -230,7 +230,7 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
     }
 
     m_stopAfter = stringToStage(stopAfterStage);
-    //m_stopAfter = Stage::RoadsPlacement;
+    //m_stopAfter = Stage::Rewards;
 
     Mernel::ProfilerContext                profileContext;
     Mernel::ProfilerDefaultContextSwitcher switcher(profileContext);
@@ -1152,6 +1152,24 @@ void FHTemplateProcessor::placeDebugInfo()
             for (auto& [heat, region] : tileZone.m_regionsByHeat)
                 for (const auto& tile : region)
                     m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = tile->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 0, .m_valueC = heat });
+        }
+
+        if (m_stopAfter == Stage::Rewards) {
+            for (auto& seg : tileZone.m_innerAreaSegments) {
+                for (auto* cell : seg.m_innerEdge) {
+                    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = (int) cell->m_segmentIndex, .m_valueB = 3 });
+                }
+            }
+
+            for (auto* cell : tileZone.m_rewardTilesMain) {
+                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = 0, .m_valueB = 2 });
+            }
+            for (auto* cell : tileZone.m_rewardTilesDanger) {
+                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = 0, .m_valueB = 1 });
+            }
+            for (auto* cell : tileZone.m_rewardTilesSpacing) {
+                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = 0, .m_valueB = 4 });
+            }
         }
     }
 }

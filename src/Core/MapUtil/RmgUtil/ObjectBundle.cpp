@@ -17,17 +17,6 @@ namespace FreeHeroes {
 
 namespace {
 
-const std::vector<ObjectBundle::GuardPosition> g_allPositions{
-    ObjectBundle::GuardPosition::TL,
-    ObjectBundle::GuardPosition::T,
-    ObjectBundle::GuardPosition::TR,
-    ObjectBundle::GuardPosition::L,
-    ObjectBundle::GuardPosition::R,
-    ObjectBundle::GuardPosition::BL,
-    ObjectBundle::GuardPosition::B,
-    ObjectBundle::GuardPosition::BR
-};
-
 // clang-format off
 const std::vector<FHPos> g_deltasToTry{ 
     FHPos{}, 
@@ -41,6 +30,9 @@ const std::vector<FHPos> g_deltasToTry{
 
 MapTileRegion blurSet(const MapTileRegion& source, bool diag, bool excludeOriginal = true)
 {
+    if (source.empty())
+        return {};
+
     MapTileRegion result;
     for (auto pos : source) {
         result.insert(pos);
@@ -53,26 +45,30 @@ MapTileRegion blurSet(const MapTileRegion& source, bool diag, bool excludeOrigin
     }
     return result;
 }
-MapTileRegion blurSet(MapTileRegion&& source, bool diag, bool excludeOriginal = true)
-{
-    source.doSort();
-    return blurSet(source, diag, excludeOriginal);
-}
 
 }
 
-void ObjectBundle::estimateOccupied()
+bool ObjectBundle::estimateOccupied(MapTilePtr absPos, MapTilePtr cetroid)
 {
     Mernel::ProfilerScope scope("estimateOccupied");
-    m_estimatedOccupied.clear();
-    m_protectionBorder.clear();
-    m_blurForPassable.clear();
+    m_rewardArea.clear();
+    m_extraObstacles.clear();
+    m_unpassableArea.clear();
+    m_occupiedArea.clear();
+
+    m_dangerZone.clear();
+    m_occupiedWithDangerZone.clear();
+    m_passAroundEdge.clear();
     m_allArea.clear();
-    m_fitArea.clear();
-    m_guardRegion.clear();
+
     m_absPosIsValid = false;
-    if (!m_absPos)
-        return;
+    if (!absPos)
+        return false;
+    m_absPos = absPos;
+
+    auto guardPosition = posDirectionTo(cetroid->m_pos, absPos->m_pos);
+    if (guardPosition == FHPosDirection::Invalid)
+        guardPosition = FHPosDirection::B;
 
     if (m_type == ObjectGenerator::IObject::Type::Pickable) {
         size_t       itemCount      = m_items.size();
@@ -86,58 +82,60 @@ void ObjectBundle::estimateOccupied()
             itemOffset.m_x -= index % itemRectWidth;
             auto visualPos = m_absPos->neighbourByOffset(itemOffset);
             if (!visualPos)
-                return;
+                return false;
 
-            m_estimatedOccupied.insert(visualPos);
+            m_rewardArea.insert(visualPos);
             item.m_absPos = visualPos->neighbourByOffset(item.m_obj->getOffset());
             if (!item.m_absPos)
-                return;
+                return false;
 
             index++;
         }
+        m_rewardArea.doSort();
 
         if (m_guard) {
             FHPos guardOffset;
 
-            if (m_guardPosition == GuardPosition::B) {
+            if (guardPosition == FHPosDirection::B) {
                 guardOffset.m_y++;
             }
-            if (m_guardPosition == GuardPosition::BR) {
+            if (guardPosition == FHPosDirection::BR) {
                 guardOffset.m_y++;
                 guardOffset.m_x++;
             }
-            if (m_guardPosition == GuardPosition::BL) {
+            if (guardPosition == FHPosDirection::BL) {
                 guardOffset.m_y++;
                 guardOffset.m_x -= itemRectWidth;
             }
-            if (m_guardPosition == GuardPosition::R) {
+            if (guardPosition == FHPosDirection::R) {
                 guardOffset.m_x++;
             }
-            if (m_guardPosition == GuardPosition::TR) {
+            if (guardPosition == FHPosDirection::TR) {
                 guardOffset.m_x++;
                 guardOffset.m_y -= itemRectHeight;
             }
-            if (m_guardPosition == GuardPosition::T) {
+            if (guardPosition == FHPosDirection::T) {
                 guardOffset.m_y -= itemRectHeight;
             }
-            if (m_guardPosition == GuardPosition::TL) {
+            if (guardPosition == FHPosDirection::TL) {
                 guardOffset.m_y -= itemRectHeight;
                 guardOffset.m_x -= itemRectWidth;
             }
-            if (m_guardPosition == GuardPosition::L) {
+            if (guardPosition == FHPosDirection::L) {
                 guardOffset.m_x -= itemRectWidth;
             }
 
             m_guardAbsPos = m_absPos->neighbourByOffset(guardOffset);
             if (!m_guardAbsPos)
-                return;
+                return false;
 
-            m_guardRegion = blurSet(MapTileRegion({ m_guardAbsPos }), true, false);
+            m_dangerZone = blurSet(MapTileRegion({ m_guardAbsPos }), true, false);
 
-            m_estimatedOccupied.doSort();
-            m_protectionBorder = blurSet(m_estimatedOccupied, true);
-            m_protectionBorder.erase(m_guardRegion);
-            m_protectionBorder.doSort();
+            m_extraObstacles = blurSet(m_rewardArea, true);
+            m_extraObstacles.erase(m_dangerZone);
+            m_extraObstacles.doSort();
+
+            m_unpassableArea = m_extraObstacles;
         }
     }
     if (m_type == ObjectGenerator::IObject::Type::Visitable) {
@@ -150,57 +148,55 @@ void ObjectBundle::estimateOccupied()
             for (auto&& point : def->combinedMask.m_blocked) {
                 auto occPos = m_absPos->neighbourByOffset(FHPos{ point.m_x, point.m_y });
                 if (!occPos)
-                    return;
-                m_estimatedOccupied.insert(occPos);
+                    return false;
+                m_rewardArea.insert(occPos);
             }
             for (auto&& point : def->combinedMask.m_visitable) {
                 mainPos = m_absPos->neighbourByOffset(FHPos{ point.m_x, point.m_y });
                 if (!mainPos)
-                    return;
+                    return false;
             }
         }
+        m_rewardArea.doSort();
+        m_unpassableArea = m_rewardArea;
 
         if (m_guard) {
             FHPos guardOffset;
             guardOffset.m_y++;
-            if (m_guardPosition == GuardPosition::TL || m_guardPosition == GuardPosition::L || m_guardPosition == GuardPosition::BL)
+            if (guardPosition == FHPosDirection::TL || guardPosition == FHPosDirection::L || guardPosition == FHPosDirection::BL)
                 guardOffset.m_x--;
-            if (m_guardPosition == GuardPosition::TR || m_guardPosition == GuardPosition::R || m_guardPosition == GuardPosition::BR)
+            if (guardPosition == FHPosDirection::TR || guardPosition == FHPosDirection::R || guardPosition == FHPosDirection::BR)
                 guardOffset.m_x++;
             m_guardAbsPos = mainPos->neighbourByOffset(guardOffset);
             if (!m_guardAbsPos)
-                return;
-            m_guardRegion = blurSet(MapTileRegion({ m_guardAbsPos }), true, false);
+                return false;
+            m_dangerZone = blurSet(MapTileRegion({ m_guardAbsPos }), true, false);
         }
     }
 
-    if (m_guard) {
-        if (!m_considerBlock)
-            m_estimatedOccupied.insert(m_guardAbsPos);
-        else
-            m_estimatedOccupied.insert(m_guardRegion);
-    }
+    m_rewardArea.doSort();
 
-    m_estimatedOccupied.doSort();
+    m_occupiedArea.insert(m_extraObstacles);
+    m_occupiedArea.insert(m_rewardArea);
+    if (m_guardAbsPos)
+        m_occupiedArea.insert(m_guardAbsPos);
+    m_occupiedArea.doSort();
 
-    if (m_guard || m_type == ObjectGenerator::IObject::Type::Visitable) {
-        auto current = m_estimatedOccupied;
-        current.insert(m_protectionBorder);
-        current.doSort();
+    m_dangerZone.erase(m_occupiedArea);
+    m_dangerZone.doSort();
 
-        m_blurForPassable = blurSet(current, false);
-    }
-    m_allArea.insert(m_protectionBorder);
-    m_allArea.insert(m_blurForPassable);
-    m_allArea.insert(m_estimatedOccupied);
+    m_occupiedWithDangerZone = m_occupiedArea;
+    m_occupiedWithDangerZone.insert(m_dangerZone);
+    m_occupiedWithDangerZone.doSort();
+
+    m_passAroundEdge = blurSet(m_occupiedWithDangerZone, false);
+
+    m_allArea = m_occupiedWithDangerZone;
+    m_allArea.insert(m_passAroundEdge);
     m_allArea.doSort();
 
-    m_fitArea.insert(m_protectionBorder);
-    m_fitArea.insert(m_estimatedOccupied);
-    m_fitArea.insert(m_guardRegion);
-    m_fitArea.doSort();
-
     m_absPosIsValid = true;
+    return true;
 }
 
 bool ObjectBundle::tryPush(const Item& item)
@@ -258,11 +254,14 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
 
     for (auto& seg : tileZone.m_innerAreaSegments) {
         ZoneSegment zs;
-        zs.m_cells = seg.m_innerArea;
+        zs.m_innerEdge = seg.m_innerEdge;
+        zs.m_cells     = seg.m_innerArea;
         zs.m_cells.doSort();
         zs.m_cells.erase(safePadding);
         zs.m_cells.doSort();
         zs.m_cellsForUnguardedInner = zs.m_cells;
+        FHPos centroid              = TileZone::makeCentroid(zs.m_cells);
+        zs.m_mainCetroid            = m_tileContainer.m_tileIndex.at(centroid);
         m_consumeResult.m_segments.push_back(std::move(zs));
     }
 
@@ -293,8 +292,7 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
         if (type == ObjectGenerator::IObject::Type::Pickable)
             obj.m_itemLimit += m_rng->genSmall(3);
 
-        obj.m_type          = type;
-        obj.m_guardPosition = g_allPositions[m_rng->genSmall(g_allPositions.size() - 1)];
+        obj.m_type = type;
 
         return obj;
     };
@@ -303,9 +301,8 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
         for (const auto& item : bucket.m_nonGuarded) {
             ObjectBundle bundleNonGuarded;
             bundleNonGuarded.m_items.push_back(ObjectBundle::Item{ .m_obj = item.m_obj });
-            bundleNonGuarded.m_type   = type;
-            bundleNonGuarded.m_absPos = m_tileContainer.m_centerTile;
-            bundleNonGuarded.estimateOccupied();
+            bundleNonGuarded.m_type = type;
+            bundleNonGuarded.estimateOccupied(m_tileContainer.m_centerTile, m_tileContainer.m_centerTile);
             assert(bundleNonGuarded.m_absPosIsValid);
 
             if (type == ObjectGenerator::IObject::Type::Pickable)
@@ -318,8 +315,7 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
 
         auto pushIfNeeded = [this, &tileZone, &bundleGuarded, &makeNewObjectBundle]() {
             bundleGuarded.m_considerBlock = bundleGuarded.m_guard > tileZone.m_rngZoneSettings.m_guardBlock;
-            bundleGuarded.m_absPos        = m_tileContainer.m_centerTile;
-            bundleGuarded.estimateOccupied();
+            bundleGuarded.estimateOccupied(m_tileContainer.m_centerTile, m_tileContainer.m_centerTile);
             assert(bundleGuarded.m_absPosIsValid);
 
             m_consumeResult.m_bundlesGuarded.push_back(bundleGuarded);
@@ -420,11 +416,13 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
         if (!placeOnMapWrap(bundle, i++, "g"))
             continue;
 
-        for (auto* pos : bundle.m_protectionBorder) {
+        for (auto* pos : bundle.m_extraObstacles) {
             tileZone.m_needBeBlocked.insert(pos);
-
-            //m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = tileZone.m_index, .m_valueB = 1 });
         }
+
+        tileZone.m_rewardTilesMain.insert(bundle.m_occupiedArea);
+        tileZone.m_rewardTilesDanger.insert(bundle.m_dangerZone);
+        tileZone.m_rewardTilesSpacing.insert(bundle.m_passAroundEdge);
 
         if (bundle.m_guard) {
             Guard guard;
@@ -434,9 +432,14 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
             m_guards.push_back(guard);
         }
     }
+    tileZone.m_rewardTilesMain.doSort();
+    tileZone.m_rewardTilesDanger.doSort();
+    tileZone.m_rewardTilesSpacing.doSort();
 
-    for (size_t i = 0; auto& bundle : m_consumeResult.m_bundlesNonGuarded) {
-        placeOnMapWrap(bundle, i++, "u");
+    if (1) {
+        for (size_t i = 0; auto& bundle : m_consumeResult.m_bundlesNonGuarded) {
+            placeOnMapWrap(bundle, i++, "u");
+        }
     }
     size_t remainArea = 0;
     for (auto& zs : m_consumeResult.m_segments) {
@@ -452,7 +455,9 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
         for (auto& zoneSegment : m_consumeResult.m_segments) {
             MapTileArea blockedEst;
             blockedEst.m_innerArea = zoneSegment.m_cells;
-            auto          parts    = blockedEst.splitByFloodFill(false);
+            blockedEst.m_innerArea.erase(zoneSegment.m_innerEdge);
+            blockedEst.m_innerArea.doSort();
+            auto          parts = blockedEst.splitByFloodFill(false);
             MapTileRegion needBlock;
             for (auto& part : parts) {
                 if (part.m_innerArea.size() < 3)
@@ -480,12 +485,13 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
             zoneSegment.m_cells.doSort();
             zoneSegment.m_cellsForUnguardedInner.doSort();
         }
-
-        tileZone.m_needBeBlocked.doSort();
     }
+    tileZone.m_needBeBlocked.doSort();
 
-    for (size_t i = 0; auto& bundle : m_consumeResult.m_bundlesNonGuardedPickable) {
-        placeOnMapWrap(bundle, i++, "p");
+    if (1) {
+        for (size_t i = 0; auto& bundle : m_consumeResult.m_bundlesNonGuardedPickable) {
+            placeOnMapWrap(bundle, i++, "p");
+        }
     }
 
     return successPlacement;
@@ -522,14 +528,12 @@ bool ObjectBundleSet::placeOnMap(ObjectBundle& bundle,
             pos = (*cellSource)[m_rng->gen(cellSource->size() - 1)];
         }
 
-        auto tryPlaceInner = [pos, &bundle, &cellSource](FHPos delta) -> bool {
+        auto tryPlaceInner = [pos, &bundle, &cellSource, &currentSegment](FHPos delta) -> bool {
             Mernel::ProfilerScope scope("tryPlaceInner");
-            bundle.m_absPos = pos->neighbourByOffset(delta + FHPos{ 1, 1 });
-            bundle.estimateOccupied();
-            if (!bundle.m_absPosIsValid)
+            if (!bundle.estimateOccupied(pos->neighbourByOffset(delta + FHPos{ 1, 1 }), currentSegment.m_mainCetroid))
                 return false;
 
-            for (auto* posOcc : bundle.m_fitArea) {
+            for (auto* posOcc : bundle.m_occupiedWithDangerZone) {
                 if (!cellSource->contains(posOcc)) {
                     return false;
                 }
@@ -539,6 +543,7 @@ bool ObjectBundleSet::placeOnMap(ObjectBundle& bundle,
 
         // if first attempt is succeed, we'll try to find near place where we don't fit, and then backup to more close fit.
         if (tryPlaceInner(g_deltasToTry[0])) {
+            //std::cout << "!";
             bool  start     = true;
             FHPos deltaPrev = g_deltasToTry[0];
             for (FHPos delta : g_deltasToTry) {
@@ -555,7 +560,7 @@ bool ObjectBundleSet::placeOnMap(ObjectBundle& bundle,
             tryPlaceInner(deltaPrev);
             return true;
         }
-
+        //std::cout << "#";
         for (FHPos delta : g_deltasToTry) {
             if (tryPlaceInner(delta)) {
                 return true;
@@ -566,6 +571,7 @@ bool ObjectBundleSet::placeOnMap(ObjectBundle& bundle,
 
     for (int i = 0; i < 10; ++i) {
         if (tryPlace()) {
+            //std::cout << ".";
             for (auto& item : bundle.m_items) {
                 item.m_obj->setPos(item.m_absPos->m_pos);
                 item.m_obj->place();
@@ -576,11 +582,11 @@ bool ObjectBundleSet::placeOnMap(ObjectBundle& bundle,
                 Mernel::ProfilerScope scope1("erase");
                 currentSegment.m_cells.erase(bundle.m_allArea);
 
-                currentSegment.m_cellsForUnguardedInner.erase(bundle.m_fitArea);
-                m_consumeResult.m_cellsForUnguardedRoads.erase(bundle.m_fitArea);
+                currentSegment.m_cellsForUnguardedInner.erase(bundle.m_occupiedArea);
+                m_consumeResult.m_cellsForUnguardedRoads.erase(bundle.m_occupiedArea);
 
-                currentSegment.m_cellsForUnguardedInner.erase(bundle.m_guardRegion);
-                m_consumeResult.m_cellsForUnguardedRoads.erase(bundle.m_guardRegion);
+                currentSegment.m_cellsForUnguardedInner.erase(bundle.m_dangerZone);
+                m_consumeResult.m_cellsForUnguardedRoads.erase(bundle.m_dangerZone);
             }
 
             {

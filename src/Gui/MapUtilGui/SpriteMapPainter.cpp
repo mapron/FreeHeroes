@@ -339,7 +339,8 @@ void SpriteMapPainter::paint(QPainter*        painter,
 
                 if (debugPiece.m_b) {
                     painter->drawEllipse(cellRect);
-                    painter->drawText(cellRect, Qt::AlignCenter, QString("%1").arg(debugPiece.m_a));
+                    if (debugPiece.m_a)
+                        painter->drawText(cellRect, Qt::AlignCenter, QString("%1").arg(debugPiece.m_a));
                 } else if (debugHeat) {
                     auto c = heatColors.value(debugPiece.m_c, QColor(Qt::black));
                     c.setAlpha(100);

@@ -30,7 +30,7 @@ struct ObjectBundle {
         R,
         BL,
         B,
-        BR
+        BR,
     };
 
     MapTilePtr m_absPos        = nullptr;
@@ -38,19 +38,23 @@ struct ObjectBundle {
     int64_t    m_guard         = 0;
     bool       m_considerBlock = false;
 
-    ObjectGenerator::IObject::Type m_type          = ObjectGenerator::IObject::Type::Visitable;
-    GuardPosition                  m_guardPosition = GuardPosition::B;
+    ObjectGenerator::IObject::Type m_type = ObjectGenerator::IObject::Type::Visitable;
 
-    MapTileRegion m_estimatedOccupied;
-    MapTileRegion m_protectionBorder;
-    MapTileRegion m_blurForPassable;
-    MapTileRegion m_guardRegion;
-    MapTileRegion m_allArea;
-    MapTileRegion m_fitArea;
+    MapTileRegion m_rewardArea;
+    MapTileRegion m_extraObstacles;
+
+    MapTileRegion m_unpassableArea; // extraObstacles + [rewardArea optional]
+    MapTileRegion m_occupiedArea;   // tiles that physically takes place on map (both removable and permanent). reward+obstacles+guard
+
+    MapTileRegion m_dangerZone;             // tiles that under attack of guard but not occupied
+    MapTileRegion m_occupiedWithDangerZone; // occupied + danger
+
+    MapTileRegion m_passAroundEdge;
+    MapTileRegion m_allArea; // occupied + danger + passAround
 
     bool m_absPosIsValid = false;
 
-    size_t getEstimatedArea() const { return m_fitArea.size(); }
+    size_t getEstimatedArea() const { return m_allArea.size(); }
 
     size_t      m_itemLimit    = 0;
     bool        m_canPushMore  = false;
@@ -58,7 +62,7 @@ struct ObjectBundle {
     size_t      m_segmentIndex = 0;
     std::string m_repulseId;
 
-    void estimateOccupied();
+    bool estimateOccupied(MapTilePtr absPos, MapTilePtr cetroid);
 
     bool tryPush(const Item& item);
 
@@ -80,11 +84,13 @@ public:
     };
 
     struct ZoneSegment {
+        MapTileRegion m_innerEdge;
         MapTileRegion m_cells;
         MapTileRegion m_cellsForUnguardedInner;
 
         size_t         m_objectCount = 0;
         MapTilePtrList m_centroids;
+        MapTilePtr     m_mainCetroid = nullptr;
     };
 
     struct ConsumeResult {

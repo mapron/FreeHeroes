@@ -34,6 +34,59 @@ constexpr inline FHPos posNeighbour(FHPos point, int dx, int dy)
     return point;
 }
 
+enum class FHPosDirection
+{
+    Invalid,
+    T,
+    TR,
+    R,
+    BR,
+    B,
+    BL,
+    L,
+    TL,
+};
+
+// assume coorditane plane oriented from top-left corner to bottom-right
+constexpr FHPosDirection posDirectionTo(const FHPos& from, const FHPos& to) noexcept
+{
+    if (from == to || from.m_z != to.m_z)
+        return FHPosDirection::Invalid;
+
+    const int dx = to.m_x - from.m_x;
+    const int dy = to.m_y - from.m_y;
+
+    if (dx == 0 && dy == 0)
+        return FHPosDirection::Invalid;
+    if (dx == 0) {
+        return dy > 0 ? FHPosDirection::B : FHPosDirection::T;
+    }
+    if (dy == 0) {
+        return dx > 0 ? FHPosDirection::R : FHPosDirection::L;
+    }
+
+    const int  absDx      = dx > 0 ? dx : -dx;
+    const int  absDy      = dy > 0 ? dy : -dy;
+    const bool horizontal = absDx > absDy;
+
+    // 2/5 is a approximation for tangent(22.5)=0.414
+    // 5/2 is a approximation for tangent(67.5)=2.41
+    // diagonal = atan of absolute shifts somewhat between 22.5 and 67.5
+    const bool diag = (absDx * 5 > absDy * 2) && (absDx * 2 < absDy * 5);
+    if (diag) {
+    }
+
+    if (dx >= 0 && dy >= 0) { // Bottom-right square
+        return diag ? FHPosDirection::BR : (horizontal ? FHPosDirection::R : FHPosDirection::B);
+    } else if (dx <= 0 && dy <= 0) { // Top-left square
+        return diag ? FHPosDirection::TL : (horizontal ? FHPosDirection::L : FHPosDirection::T);
+    } else if (dx <= 0 && dy >= 0) { // Bottom-left square
+        return diag ? FHPosDirection::BL : (horizontal ? FHPosDirection::L : FHPosDirection::B);
+    } else { // Top-right square
+        return diag ? FHPosDirection::TR : (horizontal ? FHPosDirection::R : FHPosDirection::T);
+    }
+}
+
 inline FHPos operator+(const FHPos& left_, const FHPos& right_)
 {
     return { left_.m_x + right_.m_x, left_.m_y + right_.m_y };

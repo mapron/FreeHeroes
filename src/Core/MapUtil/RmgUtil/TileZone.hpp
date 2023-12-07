@@ -65,6 +65,10 @@ struct TileZone {
     MapTileRegion m_needBeBlocked;
     MapTileRegion m_tentativeBlocked;
 
+    MapTileRegion m_rewardTilesMain;
+    MapTileRegion m_rewardTilesDanger;
+    MapTileRegion m_rewardTilesSpacing;
+
     std::map<int, MapTileRegion> m_regionsByHeat;
 
     std::map<std::string, MapTilePtr> m_namedTiles;
