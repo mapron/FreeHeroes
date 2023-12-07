@@ -14,13 +14,15 @@ namespace FreeHeroes {
 
 struct TileZone;
 struct MapTile;
+struct MapTileContainer;
 using MapTilePtr     = MapTile*;
 using MapTilePtrList = std::vector<MapTilePtr>;
 struct MapTile {
     FHPos m_pos;
 
-    TileZone* m_zone         = nullptr;
-    size_t    m_segmentIndex = 0;
+    MapTileContainer* m_container    = nullptr;
+    TileZone*         m_zone         = nullptr;
+    size_t            m_segmentIndex = 0;
 
     bool m_exFix = false;
 

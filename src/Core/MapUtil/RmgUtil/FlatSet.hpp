@@ -36,15 +36,12 @@ public:
         updateIndex();
     }
 
+    bool operator==(const FlatSet&) const = default;
+
     auto begin() const { return m_data.begin(); }
     auto end() const { return m_data.end(); }
     auto cbegin() const { return m_data.cbegin(); }
     auto cend() const { return m_data.cend(); }
-
-    auto begin() { return m_data.begin(); }
-    auto end() { return m_data.end(); }
-    auto cbegin() { return m_data.cbegin(); }
-    auto cend() { return m_data.cend(); }
 
     void clear()
     {
@@ -159,6 +156,14 @@ public:
     bool contains(const Key& key) const
     {
         return m_index.contains(key);
+    }
+
+    void updateAllValues(auto&& callback)
+    {
+        for (auto& key : m_data) {
+            key = callback(key);
+        }
+        updateIndex();
     }
 
 private:

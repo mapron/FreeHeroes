@@ -4,6 +4,9 @@
  * See LICENSE file for details.
  */
 #include "MapTile.hpp"
+#include "MapTileContainer.hpp"
+
+#include "MernelPlatform/Profiler.hpp"
 
 namespace FreeHeroes {
 
@@ -21,15 +24,11 @@ FHPos MapTile::Transform::apply(FHPos pos) const noexcept
 
 MapTilePtr MapTile::neighbourByOffset(FHPos offset) noexcept
 {
+    //Mernel::ProfilerScope scope("neighbourByOffset");
     if (offset == FHPos{})
         return this;
-    if (offset.m_z)
-        return nullptr;
 
-    const int absx = offset.m_x < 0 ? -offset.m_x : offset.m_x;
-    const int absy = offset.m_y < 0 ? -offset.m_y : offset.m_y;
-
-    if (absx <= 1 && absy <= 1) {
+    if (offset.m_z == 0) {
         switch (offset.m_y) {
             case -1:
             {
@@ -65,23 +64,9 @@ MapTilePtr MapTile::neighbourByOffset(FHPos offset) noexcept
         }
     }
 
-    FHPos offsetOne;
-    if (offset.m_x > 0)
-        offsetOne.m_x = 1;
-    if (offset.m_y > 0)
-        offsetOne.m_y = 1;
-    if (offset.m_x < 0)
-        offsetOne.m_x = -1;
-    if (offset.m_y < 0)
-        offsetOne.m_y = -1;
-
-    FHPos offsetRest = offset - offsetOne;
-
-    auto near = neighbourByOffset(offsetOne);
-    if (near)
-        return near->neighbourByOffset(offsetRest);
-
-    return nullptr;
+    const auto pos = m_pos + offset;
+    auto       it  = m_container->m_tileIndex.find(pos);
+    return it == m_container->m_tileIndex.cend() ? nullptr : it->second;
 }
 
 MapTilePtrList MapTile::neighboursByOffsets(const std::vector<FHPos>& offsets, const Transform& transform) noexcept

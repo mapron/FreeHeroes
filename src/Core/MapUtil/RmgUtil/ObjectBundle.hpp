@@ -52,9 +52,13 @@ struct ObjectBundle {
     MapTileRegion m_passAroundEdge;
     MapTileRegion m_allArea; // occupied + danger + passAround
 
+    FHPosDirection m_guardPosition = FHPosDirection::B;
+
     bool m_absPosIsValid = false;
 
     size_t getEstimatedArea() const { return m_allArea.size(); }
+
+    auto getSortTuple() const { return std::tuple{ getEstimatedArea(), m_absPos }; }
 
     size_t      m_itemLimit    = 0;
     bool        m_canPushMore  = false;
@@ -65,8 +69,6 @@ struct ObjectBundle {
     bool estimateOccupied(MapTilePtr absPos, MapTilePtr cetroid);
 
     bool tryPush(const Item& item);
-
-    //bool placeOnMap(std::set<FHPos>& availableCells, Core::IRandomGenerator* const rng);
 
     std::string toPrintableString() const;
 };

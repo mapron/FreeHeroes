@@ -17,8 +17,9 @@ void MapTileContainer::init(int width, int height, int depth)
             for (int x = 0; x < width; ++x) {
                 MapTilePtr tile = &m_tiles[index++];
                 FHPos      p{ x, y, z };
-                m_tileIndex[p] = tile;
-                tile->m_pos    = p;
+                m_tileIndex[p]    = tile;
+                tile->m_pos       = p;
+                tile->m_container = this;
             }
         }
     }

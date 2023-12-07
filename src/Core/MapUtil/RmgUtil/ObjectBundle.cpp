@@ -49,6 +49,57 @@ MapTileRegion blurSet(const MapTileRegion& source, bool diag, bool excludeOrigin
 
 bool ObjectBundle::estimateOccupied(MapTilePtr absPos, MapTilePtr cetroid)
 {
+    if (!absPos)
+        return false;
+
+    auto guardPosition = posDirectionTo(cetroid->m_pos, absPos->m_pos);
+    if (guardPosition == FHPosDirection::Invalid)
+        guardPosition = FHPosDirection::B;
+
+    if (m_absPosIsValid && m_guardPosition == guardPosition) {
+        Mernel::ProfilerScope scope("estimate shift");
+        auto                  delta = absPos->m_pos - m_absPos->m_pos;
+        m_absPos                    = absPos;
+
+        auto shiftArea = [this, delta](MapTileRegion& area, std::string desc) {
+            if (!m_absPosIsValid)
+                return;
+
+            area.updateAllValues([delta, this](MapTilePtr tile) {
+                tile = tile->neighbourByOffset(delta);
+                if (!tile) {
+                    m_absPosIsValid = false;
+                }
+                return tile;
+            });
+        };
+        shiftArea(m_rewardArea, "m_rewardArea");
+        shiftArea(m_extraObstacles, "m_extraObstacles");
+        shiftArea(m_unpassableArea, "m_unpassableArea");
+        shiftArea(m_occupiedArea, "m_occupiedArea");
+
+        shiftArea(m_dangerZone, "m_dangerZone");
+        shiftArea(m_occupiedWithDangerZone, "m_occupiedWithDangerZone");
+        shiftArea(m_passAroundEdge, "m_passAroundEdge");
+        shiftArea(m_allArea, "m_allArea");
+
+        if (m_guardAbsPos) {
+            m_guardAbsPos = m_guardAbsPos->neighbourByOffset(delta);
+            if (!m_guardAbsPos)
+                m_absPosIsValid = false;
+        }
+
+        for (auto& item : m_items) {
+            item.m_absPos = item.m_absPos->neighbourByOffset(delta);
+            if (!item.m_absPos) {
+                m_absPosIsValid = false;
+            }
+        }
+
+        if (m_absPosIsValid)
+            return true;
+    }
+
     Mernel::ProfilerScope scope("estimateOccupied");
     m_rewardArea.clear();
     m_extraObstacles.clear();
@@ -61,13 +112,9 @@ bool ObjectBundle::estimateOccupied(MapTilePtr absPos, MapTilePtr cetroid)
     m_allArea.clear();
 
     m_absPosIsValid = false;
-    if (!absPos)
-        return false;
-    m_absPos = absPos;
 
-    auto guardPosition = posDirectionTo(cetroid->m_pos, absPos->m_pos);
-    if (guardPosition == FHPosDirection::Invalid)
-        guardPosition = FHPosDirection::B;
+    m_absPos        = absPos;
+    m_guardPosition = guardPosition;
 
     if (m_type == ObjectGenerator::IObject::Type::Pickable) {
         size_t       itemCount      = m_items.size();
@@ -310,8 +357,9 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
 
         for (const auto& item : bucket.m_guarded) {
             auto newItem = ObjectBundle::Item{ .m_obj = item.m_obj, .m_guard = item.m_guard };
-            if (bundleGuarded.tryPush(newItem))
+            if (bundleGuarded.tryPush(newItem)) {
                 continue;
+            }
             pushIfNeeded();
 
             if (!bundleGuarded.tryPush(newItem))
@@ -322,10 +370,10 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
     }
 
     std::sort(m_consumeResult.m_bundlesGuarded.begin(), m_consumeResult.m_bundlesGuarded.end(), [](const ObjectBundle& l, const ObjectBundle& r) {
-        return l.getEstimatedArea() > r.getEstimatedArea();
+        return l.getSortTuple() > r.getSortTuple();
     });
     std::sort(m_consumeResult.m_bundlesNonGuarded.begin(), m_consumeResult.m_bundlesNonGuarded.end(), [](const ObjectBundle& l, const ObjectBundle& r) {
-        return l.getEstimatedArea() > r.getEstimatedArea();
+        return l.getSortTuple() > r.getSortTuple();
     });
 
     std::string m_indent = "        ";
@@ -538,12 +586,15 @@ bool ObjectBundleSet::placeOnMap(ObjectBundle& bundle,
             tryPlaceInner(deltaPrev);
             return true;
         }
+        Mernel::ProfilerScope scope1("failed");
         //std::cout << "#";
         for (FHPos delta : g_deltasToTry) {
             //std::cout << "*";
             if (tryPlaceInner(delta)) {
+                Mernel::ProfilerScope scope2("deltashelp");
                 return true;
             }
+            Mernel::ProfilerScope scope3("deltasNOThelp");
         }
         return false;
     };
@@ -559,7 +610,6 @@ bool ObjectBundleSet::placeOnMap(ObjectBundle& bundle,
             if (rngCentroidIndex != size_t(-1))
                 currentSegment.m_centroids.erase(currentSegment.m_centroids.begin() + rngCentroidIndex);
             {
-                Mernel::ProfilerScope scope1("erase");
                 currentSegment.m_cells.erase(bundle.m_allArea);
 
                 currentSegment.m_cellsForUnguardedInner.erase(bundle.m_occupiedArea);
