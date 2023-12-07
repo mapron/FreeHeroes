@@ -1310,7 +1310,7 @@ void ObjectGenerator::generate(const FHRngZone&             zoneSettings,
         return l.m_targetScoreTotal > r.m_targetScoreTotal;
     });
 
-    const bool doLog = true;
+    const bool doLog = false;
 
     for (ObjectGroup& group : m_groups) {
         const auto& scoreSettings = group.m_scoreSettings;

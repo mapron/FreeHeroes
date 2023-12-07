@@ -34,8 +34,6 @@ struct MapTileArea {
         reg.insert(cell);
     }
 
-    void doSort();
-
     void makeEdgeFromInnerArea();
     void removeNonInnerFromInnerEdge();
 
@@ -56,13 +54,13 @@ struct MapTileArea {
     {
         bool result = false;
         lastGrowed.clear();
+        lastGrowed.reserve(m_outsideEdge.size());
         for (auto* pos : m_outsideEdge) {
             if (predicate(pos)) {
                 result = true;
                 lastGrowed.insert(pos);
             }
         }
-        lastGrowed.doSort();
         return result;
     }
 

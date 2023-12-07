@@ -39,7 +39,6 @@ void TileZone::readFromMap()
         if (cell.m_zone == this)
             m_area.m_innerArea.insert(&cell);
     }
-    m_area.m_innerArea.doSort();
 
     auto floodRegions  = m_area.splitByFloodFill(false, m_centroid);
     m_area.m_innerArea = floodRegions[0].m_innerArea;

@@ -57,7 +57,6 @@ void RoadHelper::makeBorders(std::vector<TileZone>& tileZones)
                 if (cell->m_zone == &tileZoneFirst)
                     twoSideBorder.insert(cell);
             }
-            twoSideBorder.doSort();
             borderTiles[key] = twoSideBorder;
         }
     }
@@ -114,13 +113,10 @@ void RoadHelper::makeBorders(std::vector<TileZone>& tileZones)
         }
 
         MapTileRegion forErase({ cell, ncellFound, cell->m_neighborT, ncellFound->m_neighborT, cell->m_neighborL, ncellFound->m_neighborL });
-        forErase.doSort();
         border.erase(forErase);
-        border.doSort();
 
         connectionUnblockableCells.insert(cell);
     }
-    connectionUnblockableCells.doSort();
     MapTileRegion noExpandTiles;
     for (MapTile& tile : m_tileContainer.m_tiles) {
         for (auto* cell : connectionUnblockableCells) {
@@ -128,13 +124,11 @@ void RoadHelper::makeBorders(std::vector<TileZone>& tileZones)
                 noExpandTiles.insert(&tile);
         }
     }
-    noExpandTiles.doSort();
     MapTileRegion needBeBlocked;
     MapTileRegion tentativeBlocked;
     for (const auto& [key, border] : borderTiles) {
         needBeBlocked.insert(border);
     }
-    needBeBlocked.doSort();
     for (const auto& [key, border] : borderTiles) {
         for (auto* cell : border) {
             for (MapTilePtr ncell : cell->m_orthogonalNeighbours) {
@@ -147,8 +141,6 @@ void RoadHelper::makeBorders(std::vector<TileZone>& tileZones)
         }
     }
 
-    tentativeBlocked.doSort();
-
     for (auto& tileZone : tileZones) {
         tileZone.m_innerAreaUsable = {};
         for (auto* cell : tileZone.m_area.m_innerArea) {
@@ -157,8 +149,6 @@ void RoadHelper::makeBorders(std::vector<TileZone>& tileZones)
             if (tentativeBlocked.contains(cell))
                 tileZone.m_tentativeBlocked.insert(cell);
         }
-        tileZone.m_needBeBlocked.doSort();
-        tileZone.m_tentativeBlocked.doSort();
         for (auto* cell : tileZone.m_area.m_innerArea) {
             if (tileZone.m_blocked.contains(cell)
                 || tileZone.m_needBeBlocked.contains(cell)
@@ -182,7 +172,6 @@ void RoadHelper::placeRoads(TileZone& tileZone)
     auto borderNet               = MapTileArea::getInnerBorderNet(tileZone.m_innerAreaSegments);
 
     tileZone.m_roadNodes.insert(tileZone.m_roadNodesHighPriority);
-    tileZone.m_roadNodes.doSort();
 
     for (size_t i = 0; auto& area : tileZone.m_innerAreaSegments) {
         i++;
@@ -222,14 +211,12 @@ void RoadHelper::placeRoads(TileZone& tileZone)
                 }
                 if (minDistance > 2) {
                     tileZone.m_roadNodes.insert(cell);
-                    tileZone.m_roadNodes.doSort();
                 }
             }
         }
     }
 
     tileZone.m_possibleRoadsArea.insert(tileZone.m_roadNodes);
-    tileZone.m_possibleRoadsArea.doSort();
 
     {
         // sometimes we have 'deadends' caused by  if (!hasNeighbourInRoads) condition above.
@@ -241,7 +228,6 @@ void RoadHelper::placeRoads(TileZone& tileZone)
                     roadNeighbours.insert(ncell);
             }
         }
-        roadNeighbours.doSort();
         for (MapTilePtr cell : roadNeighbours) {
             const bool roadB = tileZone.m_possibleRoadsArea.contains(cell->m_neighborB);
             const bool roadT = tileZone.m_possibleRoadsArea.contains(cell->m_neighborT);
@@ -268,7 +254,6 @@ void RoadHelper::placeRoads(TileZone& tileZone)
 
             if (addForVert1 || addForHorz1) {
                 tileZone.m_possibleRoadsArea.insert(cell);
-                tileZone.m_possibleRoadsArea.doSort();
             }
         }
     }
@@ -293,7 +278,6 @@ void RoadHelper::placeRoads(TileZone& tileZone)
 
             if (!roadX && crossRoads >= 3 && diagRoads == 0) {
                 tileZone.m_possibleRoadsArea.insert(cell);
-                tileZone.m_possibleRoadsArea.doSort();
             }
         }
     }
@@ -302,14 +286,12 @@ void RoadHelper::placeRoads(TileZone& tileZone)
     if (unconnectedRoadNodesAll.size() <= 1)
         return;
 
-    tileZone.m_roadNodesHighPriority.doSort();
     {
         //Mernel::ProfilerScope scope("making extra innerAreaSegments");
         for (auto* townCell : tileZone.m_roadNodesHighPriority) {
             MapTileRegion allPossibleRoads = tileZone.m_possibleRoadsArea;
 
             allPossibleRoads.erase(townCell);
-            allPossibleRoads.doSort();
             if (allPossibleRoads.empty())
                 break;
 
@@ -320,7 +302,6 @@ void RoadHelper::placeRoads(TileZone& tileZone)
 
                 auto otherRoadNodes = tileZone.m_roadNodes;
                 otherRoadNodes.erase(townCell);
-                otherRoadNodes.doSort();
                 bool okNear = false;
                 for (auto* nearCell : roadCellsNearTheTown.m_innerArea) {
                     if (otherRoadNodes.contains(nearCell)) {
@@ -332,7 +313,6 @@ void RoadHelper::placeRoads(TileZone& tileZone)
                     allPossibleRoads.erase(roadCellsNearTheTown.m_innerArea);
                 }
             }
-            allPossibleRoads.doSort();
 
             auto it = std::min_element(allPossibleRoads.cbegin(), allPossibleRoads.cend(), [townCell](MapTilePtr l, MapTilePtr r) {
                 return posDistance(townCell->m_pos, l->m_pos) < posDistance(townCell->m_pos, r->m_pos);
@@ -341,7 +321,6 @@ void RoadHelper::placeRoads(TileZone& tileZone)
             MapTilePtr closest = *it;
             auto       path    = aStarPath(tileZone, townCell, closest, true);
             tileZone.m_possibleRoadsArea.insert(path);
-            tileZone.m_possibleRoadsArea.doSort();
         }
     }
 
@@ -375,8 +354,6 @@ void RoadHelper::placeRoads(TileZone& tileZone)
                 auto path = aStarPath(tileZone, closest, closestMain, true);
                 tileZone.m_possibleRoadsArea.insert(path);
             }
-
-            tileZone.m_possibleRoadsArea.doSort();
         }
     }
 
@@ -447,15 +424,12 @@ void RoadHelper::placeRoads(TileZone& tileZone)
 
         do {
             erasedTiles = redundantCleanup(tileZone);
-            pathAsRegion.doSort();
             pathAsRegion.erase(erasedTiles);
         } while (!erasedTiles.empty());
     }
 
-    pathAsRegion.doSort();
     for (MapTileArea& area : tileZone.m_innerAreaSegments) {
         area.m_innerArea.erase(pathAsRegion);
-        area.m_innerArea.doSort();
     }
     correctRoadTypes(tileZone, 0);
     correctRoadTypes(tileZone, 1);
@@ -464,7 +438,6 @@ void RoadHelper::placeRoads(TileZone& tileZone)
         placeRoad(road.m_path, road.m_level);
         tileZone.m_placedRoads.insert(road.m_path);
     }
-    tileZone.m_placedRoads.doSort();
 
     for (auto& area : tileZone.m_innerAreaSegments)
         area.makeEdgeFromInnerArea();
@@ -474,13 +447,11 @@ void RoadHelper::refineSegments(TileZone& tileZone)
 {
     auto innerWithoutRoads = tileZone.m_innerAreaUsable.m_innerArea;
     innerWithoutRoads.erase(tileZone.m_placedRoads);
-    innerWithoutRoads.doSort();
     {
         auto noSegmentArea = innerWithoutRoads;
         for (auto& seg : tileZone.m_innerAreaSegments) {
             noSegmentArea.erase(seg.m_innerArea);
         }
-        noSegmentArea.doSort();
         for (auto cell : noSegmentArea)
             cell->m_segmentIndex = 0;
     }
@@ -506,7 +477,6 @@ void RoadHelper::prepareRoad(TileZone& tileZone, const MapTilePtrList& tileList,
         if (!tileZone.m_placedRoads.contains(cell))
             filtered.m_innerArea.insert(cell);
     }
-    filtered.doSort();
     auto segments = filtered.splitByFloodFill(false);
     for (auto& seg : segments) {
         MapTilePtrList filteredPath(seg.m_innerArea.cbegin(), seg.m_innerArea.cend());
@@ -514,7 +484,6 @@ void RoadHelper::prepareRoad(TileZone& tileZone, const MapTilePtrList& tileList,
     }
 
     tileZone.m_placedRoads.insert(tileList);
-    tileZone.m_placedRoads.doSort();
 }
 
 void RoadHelper::placeRoad(const MapTilePtrList& tileList, RoadLevel level)
@@ -558,12 +527,11 @@ void RoadHelper::placeRoadPath(std::vector<FHPos> path, RoadLevel level)
 MapTileRegion RoadHelper::redundantCleanup(TileZone& tileZone)
 {
     MapTileRegion pendingRegion;
+    pendingRegion.reserve(tileZone.m_roads.size() * 5);
     for (TileZone::Road& road : tileZone.m_roads) {
         for (auto* cell : road.m_path)
             pendingRegion.insert(cell);
     }
-
-    pendingRegion.doSort();
 
     // check that every tile in tiles argument is
     // mustBeRoad=true  - contains  in pendingRegion
@@ -590,10 +558,6 @@ MapTileRegion RoadHelper::redundantCleanup(TileZone& tileZone)
 
                 if (checkTileListAllOf(tilesCheckRoad, true) && checkTileListAllOf(tilesCheckNonRoad, false)) {
                     pendingRegion.erase(cell);
-                    // we need to update search index after every erasure;
-                    // is is relatively slow but fortunately we'll do very few of those.
-                    // otherwise we fail pathAsRegion.contains() above on next step.
-                    pendingRegion.doSort();
                 }
             }
         }
@@ -753,7 +717,6 @@ MapTileRegion RoadHelper::redundantCleanup(TileZone& tileZone)
         }
         road.m_path = std::move(tilesFiltered);
     }
-    erasedTiles.doSort();
     return erasedTiles;
 }
 
@@ -838,9 +801,7 @@ MapTilePtrList RoadHelper::aStarPath(TileZone& zone, MapTilePtr start, MapTilePt
     } else {
         nonCollideSet = zone.m_possibleRoadsArea;
     }
-    nonCollideSet.doSort();
     nonCollideSet.erase(zone.m_needBeBlocked);
-    nonCollideSet.doSort();
 
     generator.setNonCollision(std::move(nonCollideSet));
 

@@ -176,9 +176,6 @@ void ObstacleHelper::placeObstacles(size_t minSuitable)
         row.resize(mapMask.m_width);
 
     for (auto& tileZone : m_tileZones) {
-        tileZone.m_needBeBlocked.doSort();
-        tileZone.m_tentativeBlocked.doSort();
-
         for (MapTilePtr cell : tileZone.m_needBeBlocked)
             mapMask.m_rows[cell->m_pos.m_y][cell->m_pos.m_x] = 1;
         for (MapTilePtr cell : tileZone.m_tentativeBlocked) {
@@ -296,12 +293,9 @@ void ObstacleHelper::placeObstacles(size_t minSuitable)
 
     for (auto& tileZone : m_tileZones) {
         tileZone.m_blocked.insert(hasBlocked);
-        tileZone.m_blocked.doSort();
 
         tileZone.m_needBeBlocked.erase(tileZone.m_blocked);
         tileZone.m_tentativeBlocked.erase(tileZone.m_blocked);
-        tileZone.m_needBeBlocked.doSort();
-        tileZone.m_tentativeBlocked.doSort();
     }
 }
 

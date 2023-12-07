@@ -14,18 +14,9 @@
 
 namespace FreeHeroes {
 
-void MapTileArea::doSort()
-{
-    //Mernel::ProfilerScope scope("doSort");
-    m_innerArea.doSort();
-    m_innerEdge.doSort();
-    m_outsideEdge.doSort();
-}
-
 void MapTileArea::makeEdgeFromInnerArea()
 {
     //Mernel::ProfilerScope scope("makeEdgeFromInnerArea");
-    doSort();
 
     m_innerEdge = m_innerArea;
     removeNonInnerFromInnerEdge();
@@ -34,7 +25,6 @@ void MapTileArea::makeEdgeFromInnerArea()
 void MapTileArea::removeNonInnerFromInnerEdge()
 {
     //Mernel::ProfilerScope scope("removeNonInnerFromInnerEdge");
-    doSort();
     auto edge = m_innerEdge;
     m_innerEdge.clear();
 
@@ -59,7 +49,6 @@ void MapTileArea::removeNonInnerFromInnerEdge()
 
         m_innerEdge.insert(cell);
     }
-    doSort();
 
     makeOutsideEdge();
 }
@@ -67,6 +56,7 @@ void MapTileArea::removeNonInnerFromInnerEdge()
 void MapTileArea::makeOutsideEdge()
 {
     m_outsideEdge.clear();
+    m_outsideEdge.reserve(m_innerEdge.size());
     auto predicate = [this](MapTilePtr cell) {
         return cell && !m_innerArea.contains(cell);
     };
@@ -74,14 +64,12 @@ void MapTileArea::makeOutsideEdge()
         for (auto* ncell : cell->neighboursList(m_diagonalGrowth))
             addIf(m_outsideEdge, ncell, predicate);
     }
-    doSort();
 }
 
 void MapTileArea::removeEdgeFromInnerArea()
 {
     //Mernel::ProfilerScope scope("removeEdgeFromInnerArea");
     m_innerArea.erase(m_innerEdge);
-    m_innerArea.doSort();
 }
 
 bool MapTileArea::refineEdge(RefineTask task, const MapTileRegion& allowedArea, size_t index)
@@ -137,6 +125,7 @@ bool MapTileArea::refineEdge(RefineTask task, const MapTileRegion& allowedArea, 
 MapTileRegion MapTileArea::getBottomEdge() const
 {
     MapTileRegion result;
+    result.reserve(m_innerEdge.size() / 3);
     for (MapTilePtr cell : m_innerEdge) {
         const bool hasB      = m_innerArea.contains(cell->m_neighborB);
         const bool hasBR     = m_innerArea.contains(cell->m_neighborBR);
@@ -145,7 +134,6 @@ MapTileRegion MapTileArea::getBottomEdge() const
         if (hasBCount < 2)
             result.insert(cell);
     }
-    result.doSort();
     return result;
 }
 
@@ -153,7 +141,6 @@ MapTileArea MapTileArea::floodFillDiagonalByInnerEdge(MapTilePtr cellStart) cons
 {
     MapTileArea innerEdgeArea;
     innerEdgeArea.m_innerArea = this->m_innerEdge;
-    innerEdgeArea.m_innerArea.doSort();
 
     auto segments = innerEdgeArea.splitByFloodFill(true, cellStart);
     if (segments.empty())
@@ -266,11 +253,11 @@ std::vector<MapTileArea> MapTileArea::splitByK(std::ostream& os, size_t k, bool 
 
         for (KMeansSegmentation::Cluster* cluster : clusters) {
             MapTileRegion zoneSeg;
+            zoneSeg.reserve(cluster->m_points.size());
             for (auto& point : cluster->m_points)
                 zoneSeg.insert(point->m_pos);
 
             assert(zoneSeg.size() > 0);
-            zoneSeg.doSort();
             result.push_back(MapTileArea{ .m_innerArea = std::move(zoneSeg) });
         }
     }
@@ -292,7 +279,6 @@ MapTileArea MapTileArea::getInnerBorderNet(const std::vector<MapTileArea>& areas
             }
         }
     }
-    result.m_innerArea.doSort();
     return result;
 }
 

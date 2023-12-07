@@ -9,13 +9,14 @@
 #include <set>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 #include <algorithm>
 #include <stdexcept>
 
+#include "MernelPlatform/Profiler.hpp"
+
 namespace FreeHeroes {
 
-/// This is not usual flat_set container you probably expect.
-/// This class require user to manually call doSort() function they need to access data after any change.
 template<class Key>
 class FlatSet {
     using List = std::vector<Key>;
@@ -25,158 +26,153 @@ public:
     explicit FlatSet(List data) noexcept
         : m_data(std::move(data))
     {
-        m_sorted = m_data.empty();
-        doSort();
+        //Mernel::ProfilerScope scoope2("FlatSet list ctor");
+        std::sort(m_data.begin(), m_data.end());
+        if (!m_data.empty()) {
+            auto resIt   = std::unique(m_data.begin(), m_data.end());
+            auto newSize = std::distance(m_data.begin(), resIt);
+            m_data.resize(newSize);
+        }
+        updateIndex();
     }
 
-    auto begin() const
-    {
-        ensureSorted();
-        return m_data.begin();
-    }
+    auto begin() const { return m_data.begin(); }
     auto end() const { return m_data.end(); }
-    auto cbegin() const
-    {
-        ensureSorted();
-        return m_data.cbegin();
-    }
+    auto cbegin() const { return m_data.cbegin(); }
     auto cend() const { return m_data.cend(); }
 
-    auto begin()
-    {
-        ensureSorted();
-        return m_data.begin();
-    }
+    auto begin() { return m_data.begin(); }
     auto end() { return m_data.end(); }
-    auto cbegin()
-    {
-        ensureSorted();
-        return m_data.cbegin();
-    }
+    auto cbegin() { return m_data.cbegin(); }
     auto cend() { return m_data.cend(); }
 
     void clear()
     {
         m_data.clear();
         m_index.clear();
-        m_sorted = true;
     }
 
-    bool empty() const noexcept
+    bool empty() const noexcept { return m_data.empty(); }
+
+    size_t size() const noexcept { return m_data.size(); }
+
+    const Key& operator[](size_t offset) const { return m_data[offset]; }
+
+    void reserve(size_t size) { m_data.reserve(size); }
+
+    void reserveExtra(size_t size)
     {
-        return m_data.empty();
+        m_data.reserve(m_data.size() + size);
     }
 
-    size_t size() const noexcept
-    {
-        return m_data.size();
-    }
-
-    const Key& operator[](size_t offset) const
-    {
-        return m_data[offset];
-    }
-
-    void doSort()
-    {
-        if (m_sorted)
-            return;
-
-        std::set<Key> tmpSet(m_data.begin(), m_data.end());
-        m_data.resize(tmpSet.size());
-        for (size_t index = 0; const Key& key : tmpSet) {
-            m_data[index] = key;
-            index++;
-        }
-        recalcIndex();
-        m_sorted = true;
-    }
     void insert(const Key& key)
     {
-        m_data.push_back(key);
-        m_sorted = false;
+        // Mernel::ProfilerScope scoope("insert key");
+        auto it = m_index.find(key);
+        if (it != m_index.cend())
+            return;
+
+        m_index.insert(it, key);
+        if (m_data.empty()) {
+            m_data.push_back(key);
+            return;
+        }
+
+        if (key < m_data[0]) {
+            m_data.insert(m_data.begin(), key);
+            return;
+        }
+        auto itn = std::upper_bound(m_data.begin(), m_data.end(), key); // data{1,3,5}: key{2}, it => "3"  key{9}, it => "END"
+        m_data.insert(itn, key);
     }
-    void insert(const FlatSet& flatSet)
+    void insert(FlatSet flatSet)
     {
-        m_data.insert(m_data.end(), flatSet.m_data.cbegin(), flatSet.m_data.cend());
-        if (!flatSet.empty())
-            m_sorted = false;
+        //Mernel::ProfilerScope scoope("insert set");
+        if (flatSet.empty())
+            return;
+
+        if (empty()) {
+            *this = std::move(flatSet);
+            return;
+        }
+
+        if (flatSet.size() > size()) { // prefer inserting smaller stuff into larger stuff.
+            flatSet.insert(*this);
+            *this = std::move(flatSet);
+            return;
+        }
+        if (flatSet.size() <= 16) { // arbitrary chosen "small set to insert" value.
+
+            m_data.reserve(m_data.size() + flatSet.size());
+            for (const auto& key : flatSet)
+                insert(key);
+            return;
+        }
+
+        //Mernel::ProfilerScope scoope2("set_union");
+        List tmp;
+        tmp.resize(m_data.size() + flatSet.size());
+        auto resIt   = std::set_union(m_data.cbegin(), m_data.cend(), flatSet.m_data.cbegin(), flatSet.m_data.cend(), tmp.begin());
+        auto newSize = std::distance(tmp.begin(), resIt);
+        tmp.resize(newSize);
+        m_data = std::move(tmp);
+        updateIndex();
     }
     void insert(const List& list)
     {
-        m_data.insert(m_data.end(), list.cbegin(), list.cend());
-        if (!list.empty())
-            m_sorted = false;
+        //Mernel::ProfilerScope scoope("insert list");
+        insert(FlatSet(list));
     }
     void erase(const Key& key)
     {
+        //Mernel::ProfilerScope scoope("erase key");
         if (m_data.empty())
             return;
 
-        auto it = find(key);
-        if (it != end()) {
-            m_data.erase(it);
-            m_sorted = false;
-        }
+        auto itn = m_index.find(key);
+        if (itn == m_index.end())
+            return;
+        m_index.erase(itn);
+
+        auto i = std::lower_bound(m_data.begin(), m_data.end(), key); // data{1,3,5}: key{5}, it => "3"  key{9}, it => "END"
+        m_data.erase(i);
     }
     void erase(const FlatSet& flatSet)
     {
+        //Mernel::ProfilerScope scoope("erase set");
         if (flatSet.empty() || m_data.empty())
             return;
 
-        m_sorted = false;
-        List newData;
-        newData.reserve(m_data.size());
-        for (const Key& key : m_data) {
-            if (!flatSet.contains(key))
-                newData.push_back(key);
-        }
-        m_data = std::move(newData);
+        for (const auto& key : flatSet)
+            erase(key);
     }
-    void erase(const List& flatList)
+    void erase(const List& list)
     {
-        erase(FlatSet(flatList));
+        //Mernel::ProfilerScope scoope("erase list");
+        if (list.empty() || m_data.empty())
+            return;
+
+        for (const auto& key : list)
+            erase(key);
     }
 
     bool contains(const Key& key) const
     {
-        ensureSorted();
-
-        return m_index.find(key) != m_index.cend();
+        return m_index.contains(key);
     }
 
 private:
-    auto find(const Key& key) const
+    void updateIndex()
     {
-        ensureSorted();
-
-        auto it = m_index.find(key);
-        if (it != m_index.cend()) {
-            size_t i = it->second;
-            return m_data.begin() + i;
-        }
-
-        return m_data.end();
-    }
-
-    void recalcIndex()
-    {
+        //Mernel::ProfilerScope scoope2("updateIndex");
         m_index.clear();
-        for (size_t index = 0; index < m_data.size(); ++index)
-            m_index[m_data[index]] = index;
-    }
-
-    void ensureSorted() const
-    {
-        if (!m_sorted)
-            throw std::runtime_error("doSort() is required for FlatSet.");
+        m_index.insert(m_data.cbegin(), m_data.cend());
     }
 
 private:
-    std::unordered_map<Key, size_t> m_index;
+    std::unordered_set<Key> m_index;
 
-    List m_data;
-    bool m_sorted = true;
+    List m_data; // sorted.
 };
 
 }

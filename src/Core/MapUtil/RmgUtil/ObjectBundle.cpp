@@ -34,14 +34,13 @@ MapTileRegion blurSet(const MapTileRegion& source, bool diag, bool excludeOrigin
         return {};
 
     MapTileRegion result;
+    result.reserve(source.size() * 3);
     for (auto pos : source) {
         result.insert(pos);
         result.insert(pos->neighboursList(diag));
     }
-    result.doSort();
     if (excludeOriginal) {
         result.erase(source);
-        result.doSort();
     }
     return result;
 }
@@ -75,6 +74,7 @@ bool ObjectBundle::estimateOccupied(MapTilePtr absPos, MapTilePtr cetroid)
         const size_t maxRowSize     = 2;
         const size_t itemRectHeight = (itemCount + maxRowSize - 1) / maxRowSize;
         const size_t itemRectWidth  = std::min(maxRowSize, itemCount);
+        m_rewardArea.reserve(m_items.size());
         for (size_t index = 0; auto& item : m_items) {
             FHPos itemOffset;
 
@@ -91,7 +91,6 @@ bool ObjectBundle::estimateOccupied(MapTilePtr absPos, MapTilePtr cetroid)
 
             index++;
         }
-        m_rewardArea.doSort();
 
         if (m_guard) {
             FHPos guardOffset;
@@ -133,7 +132,6 @@ bool ObjectBundle::estimateOccupied(MapTilePtr absPos, MapTilePtr cetroid)
 
             m_extraObstacles = blurSet(m_rewardArea, true);
             m_extraObstacles.erase(m_dangerZone);
-            m_extraObstacles.doSort();
 
             m_unpassableArea = m_extraObstacles;
         }
@@ -157,7 +155,6 @@ bool ObjectBundle::estimateOccupied(MapTilePtr absPos, MapTilePtr cetroid)
                     return false;
             }
         }
-        m_rewardArea.doSort();
         m_unpassableArea = m_rewardArea;
 
         if (m_guard) {
@@ -174,26 +171,20 @@ bool ObjectBundle::estimateOccupied(MapTilePtr absPos, MapTilePtr cetroid)
         }
     }
 
-    m_rewardArea.doSort();
-
     m_occupiedArea.insert(m_extraObstacles);
     m_occupiedArea.insert(m_rewardArea);
     if (m_guardAbsPos)
         m_occupiedArea.insert(m_guardAbsPos);
-    m_occupiedArea.doSort();
 
     m_dangerZone.erase(m_occupiedArea);
-    m_dangerZone.doSort();
 
     m_occupiedWithDangerZone = m_occupiedArea;
     m_occupiedWithDangerZone.insert(m_dangerZone);
-    m_occupiedWithDangerZone.doSort();
 
     m_passAroundEdge = blurSet(m_occupiedWithDangerZone, false);
 
     m_allArea = m_occupiedWithDangerZone;
     m_allArea.insert(m_passAroundEdge);
-    m_allArea.doSort();
 
     m_absPosIsValid = true;
     return true;
@@ -245,10 +236,8 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
     MapTileRegion safePadding = tileZone.m_roadNodesHighPriority;
     {
         auto guards = tileZone.m_breakGuardTiles;
-        guards.doSort();
-        guards = blurSet(guards, true, false);
+        guards      = blurSet(guards, true, false);
         safePadding.insert(guards);
-        safePadding.doSort();
         safePadding = blurSet(safePadding, true, false);
     }
 
@@ -256,9 +245,7 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
         ZoneSegment zs;
         zs.m_innerEdge = seg.m_innerEdge;
         zs.m_cells     = seg.m_innerArea;
-        zs.m_cells.doSort();
         zs.m_cells.erase(safePadding);
-        zs.m_cells.doSort();
         zs.m_cellsForUnguardedInner = zs.m_cells;
         FHPos centroid              = TileZone::makeCentroid(zs.m_cells);
         zs.m_mainCetroid            = m_tileContainer.m_tileIndex.at(centroid);
@@ -267,7 +254,6 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
 
     m_consumeResult.m_cellsForUnguardedRoads = tileZone.m_placedRoads;
     m_consumeResult.m_cellsForUnguardedRoads.erase(safePadding);
-    m_consumeResult.m_cellsForUnguardedRoads.doSort();
 
     for (const auto& group : generated.m_groups) {
         for (const auto& obj : group.m_objects) {
@@ -432,9 +418,6 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
             m_guards.push_back(guard);
         }
     }
-    tileZone.m_rewardTilesMain.doSort();
-    tileZone.m_rewardTilesDanger.doSort();
-    tileZone.m_rewardTilesSpacing.doSort();
 
     if (1) {
         for (size_t i = 0; auto& bundle : m_consumeResult.m_bundlesNonGuarded) {
@@ -456,7 +439,6 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
             MapTileArea blockedEst;
             blockedEst.m_innerArea = zoneSegment.m_cells;
             blockedEst.m_innerArea.erase(zoneSegment.m_innerEdge);
-            blockedEst.m_innerArea.doSort();
             auto          parts = blockedEst.splitByFloodFill(false);
             MapTileRegion needBlock;
             for (auto& part : parts) {
@@ -476,17 +458,12 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
                     }
                 }
             }
-            needBlock.doSort();
 
             tileZone.m_needBeBlocked.insert(needBlock);
             zoneSegment.m_cells.erase(needBlock);
             zoneSegment.m_cellsForUnguardedInner.erase(needBlock);
-
-            zoneSegment.m_cells.doSort();
-            zoneSegment.m_cellsForUnguardedInner.doSort();
         }
     }
-    tileZone.m_needBeBlocked.doSort();
 
     if (1) {
         for (size_t i = 0; auto& bundle : m_consumeResult.m_bundlesNonGuardedPickable) {
@@ -520,7 +497,8 @@ bool ObjectBundleSet::placeOnMap(ObjectBundle& bundle,
     size_t rngCentroidIndex = size_t(-1);
 
     auto tryPlace = [this, &bundle, &currentSegment, useCentroids, useRoad, &rngCentroidIndex, &cellSource]() -> bool {
-        MapTilePtr pos;
+        Mernel::ProfilerScope scope("tryPlace");
+        MapTilePtr            pos;
         if (useCentroids && !useRoad && !currentSegment.m_centroids.empty()) {
             rngCentroidIndex = m_rng->gen(currentSegment.m_centroids.size() - 1);
             pos              = currentSegment.m_centroids[rngCentroidIndex];
@@ -529,7 +507,6 @@ bool ObjectBundleSet::placeOnMap(ObjectBundle& bundle,
         }
 
         auto tryPlaceInner = [pos, &bundle, &cellSource, &currentSegment](FHPos delta) -> bool {
-            Mernel::ProfilerScope scope("tryPlaceInner");
             if (!bundle.estimateOccupied(pos->neighbourByOffset(delta + FHPos{ 1, 1 }), currentSegment.m_mainCetroid))
                 return false;
 
@@ -547,6 +524,7 @@ bool ObjectBundleSet::placeOnMap(ObjectBundle& bundle,
             bool  start     = true;
             FHPos deltaPrev = g_deltasToTry[0];
             for (FHPos delta : g_deltasToTry) {
+                //std::cout << "*";
                 if (start) {
                     start = false;
                     continue;
@@ -562,6 +540,7 @@ bool ObjectBundleSet::placeOnMap(ObjectBundle& bundle,
         }
         //std::cout << "#";
         for (FHPos delta : g_deltasToTry) {
+            //std::cout << "*";
             if (tryPlaceInner(delta)) {
                 return true;
             }
@@ -570,8 +549,9 @@ bool ObjectBundleSet::placeOnMap(ObjectBundle& bundle,
     };
 
     for (int i = 0; i < 10; ++i) {
+        //if (i > 0)
+        //    std::cout << "R";
         if (tryPlace()) {
-            //std::cout << ".";
             for (auto& item : bundle.m_items) {
                 item.m_obj->setPos(item.m_absPos->m_pos);
                 item.m_obj->place();
@@ -587,13 +567,6 @@ bool ObjectBundleSet::placeOnMap(ObjectBundle& bundle,
 
                 currentSegment.m_cellsForUnguardedInner.erase(bundle.m_dangerZone);
                 m_consumeResult.m_cellsForUnguardedRoads.erase(bundle.m_dangerZone);
-            }
-
-            {
-                Mernel::ProfilerScope scope2("doSort");
-                currentSegment.m_cells.doSort();
-                currentSegment.m_cellsForUnguardedInner.doSort();
-                m_consumeResult.m_cellsForUnguardedRoads.doSort();
             }
 
             return true;

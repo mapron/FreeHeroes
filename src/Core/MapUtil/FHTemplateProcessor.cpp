@@ -490,7 +490,6 @@ void FHTemplateProcessor::runZoneTilesRefinement()
     for (auto& tileZone : m_tileZones) {
         placed.insert(tileZone.m_area.m_innerArea);
     }
-    placed.doSort();
 
     m_tileContainer.checkAllTerrains(placed);
     for (auto& tileZone : m_tileZones) {
@@ -676,15 +675,11 @@ void FHTemplateProcessor::runTownsPlacement()
             roadHelper.placeRoad({ pos, pos2 }, RoadLevel::Towns);
         }
 
-        tileZone.m_roadNodesTowns.doSort();
-        tileZone.m_blocked.doSort();
-        tileZone.m_innerAreaTowns.doSort();
         {
             MapTileArea areaTowns;
             areaTowns.m_innerArea = tileZone.m_innerAreaTowns;
             areaTowns.makeEdgeFromInnerArea();
             tileZone.m_innerAreaTowns.insert(areaTowns.m_outsideEdge);
-            tileZone.m_innerAreaTowns.doSort();
         }
         tileZone.m_innerAreaUsable.m_innerArea.erase(tileZone.m_blocked);
         tileZone.m_innerAreaUsable.makeEdgeFromInnerArea();
@@ -814,9 +809,6 @@ void FHTemplateProcessor::runHeatMap()
             resultHeat[tile] = heat;
             tileZone.m_regionsByHeat[heat].insert(tile);
         }
-
-        for (auto& [heat, region] : tileZone.m_regionsByHeat)
-            region.doSort();
     }
 }
 
