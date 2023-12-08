@@ -7,12 +7,14 @@
 
 #include "MapTileArea.hpp"
 
+#include "MapUtilExport.hpp"
+
 #include <set>
 #include <unordered_map>
 
 namespace FreeHeroes {
 
-struct MapTileContainer {
+struct MAPUTIL_EXPORT MapTileContainer {
     std::vector<MapTile> m_tiles;
 
     std::unordered_map<FHPos, MapTilePtr> m_tileIndex;

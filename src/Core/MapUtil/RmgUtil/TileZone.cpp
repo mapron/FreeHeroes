@@ -11,23 +11,9 @@
 
 namespace FreeHeroes {
 
-FHPos TileZone::makeCentroid(const MapTileRegion& region)
-{
-    int64_t sumX = 0, sumY = 0;
-    int64_t size = region.size();
-    for (const auto* cell : region) {
-        sumX += cell->m_pos.m_x;
-        sumY += cell->m_pos.m_y;
-    }
-    sumX /= size;
-    sumY /= size;
-    int z = 0;
-    return FHPos{ static_cast<int>(sumX), static_cast<int>(sumY), z };
-}
-
 void TileZone::estimateCentroid()
 {
-    m_centroid = m_tileContainer->m_tileIndex.at(makeCentroid(m_area.m_innerArea));
+    m_centroid = MapTileArea::makeCentroid(m_area.m_innerArea);
 }
 
 void TileZone::readFromMap()

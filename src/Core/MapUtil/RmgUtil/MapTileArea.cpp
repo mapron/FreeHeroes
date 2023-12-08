@@ -5,6 +5,7 @@
  */
 #include "MapTileArea.hpp"
 #include "KMeans.hpp"
+#include "MapTileContainer.hpp"
 
 #include "MernelPlatform/Profiler.hpp"
 
@@ -266,6 +267,55 @@ std::vector<MapTileArea> MapTileArea::splitByK(std::ostream& os, size_t k, bool 
     return result;
 }
 
+MapTilePtr MapTileArea::makeCentroid(const MapTileRegion& region, bool ensureInbounds)
+{
+    if (region.empty())
+        return nullptr;
+
+    MapTileContainer* tileContainer = region[0]->m_container;
+
+    int64_t   sumX = 0, sumY = 0;
+    int64_t   size = region.size();
+    const int z    = region[0]->m_pos.m_z;
+    for (const auto* cell : region) {
+        sumX += cell->m_pos.m_x;
+        sumY += cell->m_pos.m_y;
+    }
+    sumX /= size;
+    sumY /= size;
+    const auto pos      = FHPos{ static_cast<int>(sumX), static_cast<int>(sumY), z };
+    MapTilePtr centroid = tileContainer->m_tileIndex.at(pos);
+    if (ensureInbounds && !region.contains(centroid)) {
+        auto it  = std::min_element(region.cbegin(), region.cend(), [centroid](MapTilePtr l, MapTilePtr r) {
+            return posDistance(centroid, l, 100) < posDistance(centroid, r, 100);
+        });
+        centroid = (*it);
+    }
+
+    /// let's make centroid tile as close to center of mass as possible
+
+    auto estimateAvgDistance = [&region](MapTilePtr centerTile) -> int64_t {
+        int64_t result = 0;
+        for (const auto* cell : region) {
+            result += posDistance(centerTile, cell, 100);
+        }
+        return result;
+    };
+    int64_t result = estimateAvgDistance(centroid);
+
+    for (MapTilePtr tile : centroid->m_allNeighboursWithDiag) {
+        if (ensureInbounds && !region.contains(tile))
+            continue;
+        auto altResult = estimateAvgDistance(tile);
+        if (altResult < result) {
+            result   = altResult;
+            centroid = tile;
+        }
+    }
+
+    return centroid;
+}
+
 MapTileArea MapTileArea::getInnerBorderNet(const std::vector<MapTileArea>& areas)
 {
     MapTileArea result;
@@ -280,6 +330,63 @@ MapTileArea MapTileArea::getInnerBorderNet(const std::vector<MapTileArea>& areas
         }
     }
     return result;
+}
+
+std::pair<MapTileArea::CollisionResult, FHPos> MapTileArea::getCollisionShiftForObject(const MapTileRegion& object, const MapTileRegion& obstacle, bool invertObstacle)
+{
+    if (object.empty() || obstacle.empty())
+        return std::pair{ CollisionResult::InvalidInputs, FHPos{} };
+
+    const MapTileRegion intersection = invertObstacle ? object.diffWith(obstacle) : object.intersectWith(obstacle);
+    if (intersection.empty())
+        return std::pair{ CollisionResult::NoCollision, FHPos{} };
+
+    if (intersection == object)
+        return std::pair{ CollisionResult::ImpossibleShift, FHPos{} };
+
+    const MapTilePtr collisionCentroid = MapTileArea::makeCentroid(intersection, false);
+
+    MapTileRegion objectWithoutObstacle = object;
+    objectWithoutObstacle.erase(collisionCentroid);
+
+    FHPos topLeftBoundary = object[0]->m_pos, rightBottomBoundary = object[0]->m_pos;
+    for (auto* tile : object) {
+        topLeftBoundary.m_x     = std::min(topLeftBoundary.m_x, tile->m_pos.m_x);
+        topLeftBoundary.m_y     = std::min(topLeftBoundary.m_y, tile->m_pos.m_y);
+        rightBottomBoundary.m_x = std::max(rightBottomBoundary.m_x, tile->m_pos.m_x);
+        rightBottomBoundary.m_y = std::max(rightBottomBoundary.m_y, tile->m_pos.m_y);
+    }
+    FHPos     diff       = rightBottomBoundary - topLeftBoundary;
+    const int width      = diff.m_x + 1;
+    const int height     = diff.m_y + 1;
+    const int horRadius  = width / 2; // 1x1 => 0, 2x2 -> 1, 3x3 -> 1 , 4x4 -> 2
+    const int vertRadius = height / 2;
+
+    const MapTilePtr objectCentroid = MapTileArea::makeCentroid(objectWithoutObstacle, false);
+
+    FHPos collisionOffset = objectCentroid->m_pos - collisionCentroid->m_pos;
+    int   cx              = collisionOffset.m_x;
+    int   cy              = collisionOffset.m_y;
+    if (cx == 0 && cy == 0)
+        return std::pair{ CollisionResult::ImpossibleShift, FHPos{} };
+
+    if (cx > 0) {
+        if (horRadius > 1)
+            cx = horRadius - cx + 1;
+    }
+    if (cx < 0) {
+        if (horRadius > 1)
+            cx = -horRadius - cx - 1;
+    }
+    if (cy > 0) {
+        if (vertRadius > 1)
+            cy = vertRadius - cy + 1;
+    }
+    if (cy < 0) {
+        if (horRadius > 1)
+            cy = -vertRadius - cy - 1;
+    }
+    return std::pair{ CollisionResult::HasShift, FHPos{ cx, cy } };
 }
 
 }

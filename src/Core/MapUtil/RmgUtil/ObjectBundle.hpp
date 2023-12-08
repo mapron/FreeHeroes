@@ -35,6 +35,7 @@ struct ObjectBundle {
 
     MapTilePtr m_absPos        = nullptr;
     MapTilePtr m_guardAbsPos   = nullptr;
+    MapTilePtr m_centerPos     = nullptr;
     int64_t    m_guard         = 0;
     bool       m_considerBlock = false;
 

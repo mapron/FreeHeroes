@@ -19,12 +19,8 @@ namespace {
 
 // clang-format off
 const std::vector<FHPos> g_deltasToTry{ 
-    FHPos{}, 
     FHPos{ -1,  0 }, FHPos{ +1,  0 }, FHPos{  0, -1 }, FHPos{  0, +1 },
-    FHPos{ -2,  0 }, FHPos{ +2,  0 }, FHPos{  0, -2 }, FHPos{  0, +2 },
     FHPos{ -1, -1 }, FHPos{ +1, -1 }, FHPos{ +1, +1 }, FHPos{ -1, +1 },
-    FHPos{ -2, -2 }, FHPos{ +2, -2 }, FHPos{ +2, +2 }, FHPos{ -2, +2 },
-    FHPos{ -3,  0 }, FHPos{ +3,  0 }, FHPos{  0, -3 }, FHPos{  0, +3 },
 };
 // clang-format on
 
@@ -86,6 +82,11 @@ bool ObjectBundle::estimateOccupied(MapTilePtr absPos, MapTilePtr cetroid)
         if (m_guardAbsPos) {
             m_guardAbsPos = m_guardAbsPos->neighbourByOffset(delta);
             if (!m_guardAbsPos)
+                m_absPosIsValid = false;
+        }
+        if (m_centerPos) {
+            m_centerPos = m_centerPos->neighbourByOffset(delta);
+            if (!m_centerPos)
                 m_absPosIsValid = false;
         }
 
@@ -227,11 +228,20 @@ bool ObjectBundle::estimateOccupied(MapTilePtr absPos, MapTilePtr cetroid)
 
     m_occupiedWithDangerZone = m_occupiedArea;
     m_occupiedWithDangerZone.insert(m_dangerZone);
+    for (auto* tile : m_occupiedWithDangerZone) {
+        if (tile->m_orthogonalNeighbours.size() != 4) {
+            return false;
+        }
+    }
 
-    m_passAroundEdge = blurSet(m_occupiedWithDangerZone, false);
+    const bool unguardedPickable = (m_type == ObjectGenerator::IObject::Type::Pickable && !m_guard);
+    if (!unguardedPickable)
+        m_passAroundEdge = blurSet(m_occupiedWithDangerZone, false);
 
     m_allArea = m_occupiedWithDangerZone;
     m_allArea.insert(m_passAroundEdge);
+
+    m_centerPos = MapTileArea::makeCentroid(m_allArea);
 
     m_absPosIsValid = true;
     return true;
@@ -294,8 +304,7 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
         zs.m_cells     = seg.m_innerArea;
         zs.m_cells.erase(safePadding);
         zs.m_cellsForUnguardedInner = zs.m_cells;
-        FHPos centroid              = TileZone::makeCentroid(zs.m_cells);
-        zs.m_mainCetroid            = m_tileContainer.m_tileIndex.at(centroid);
+        zs.m_mainCetroid            = MapTileArea::makeCentroid(zs.m_cells);
         m_consumeResult.m_segments.push_back(std::move(zs));
     }
 
@@ -419,10 +428,9 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
         area.m_innerArea = zs.m_cells;
         auto parts       = area.splitByK(m_logOutput, zs.m_objectCount);
         for (auto& part : parts) {
-            FHPos centroid = TileZone::makeCentroid(part.m_innerArea);
-            auto* cell     = m_tileContainer.m_tileIndex.at(centroid);
-            zs.m_centroids.push_back(cell);
-            m_consumeResult.m_centroidsALL.push_back(cell);
+            auto* centroid = MapTileArea::makeCentroid(part.m_innerArea);
+            zs.m_centroids.push_back(centroid);
+            m_consumeResult.m_centroidsALL.push_back(centroid);
         }
     }
     bool successPlacement = true;
@@ -470,6 +478,9 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
     if (1) {
         for (size_t i = 0; auto& bundle : m_consumeResult.m_bundlesNonGuarded) {
             placeOnMapWrap(bundle, i++, "u");
+
+            tileZone.m_rewardTilesMain.insert(bundle.m_occupiedArea);
+            tileZone.m_rewardTilesSpacing.insert(bundle.m_passAroundEdge);
         }
     }
     size_t remainArea = 0;
@@ -516,6 +527,9 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
     if (1) {
         for (size_t i = 0; auto& bundle : m_consumeResult.m_bundlesNonGuardedPickable) {
             placeOnMapWrap(bundle, i++, "p");
+
+            tileZone.m_rewardTilesMain.insert(bundle.m_occupiedArea);
+            tileZone.m_rewardTilesSpacing.insert(bundle.m_passAroundEdge);
         }
     }
 
@@ -553,44 +567,57 @@ bool ObjectBundleSet::placeOnMap(ObjectBundle& bundle,
         } else {
             pos = (*cellSource)[m_rng->gen(cellSource->size() - 1)];
         }
+        FHPos                        newPossibleShift = g_invalidPos;
+        MapTileArea::CollisionResult collisionResult  = MapTileArea::CollisionResult::InvalidInputs;
 
-        auto tryPlaceInner = [pos, &bundle, &cellSource, &currentSegment](FHPos delta) -> bool {
-            if (!bundle.estimateOccupied(pos->neighbourByOffset(delta + FHPos{ 1, 1 }), currentSegment.m_mainCetroid))
+        auto tryPlaceInner = [&pos, &bundle, &cellSource, &currentSegment, &newPossibleShift, &collisionResult]() -> bool {
+            if (!bundle.estimateOccupied(pos, currentSegment.m_mainCetroid))
                 return false;
 
-            for (auto* posOcc : bundle.m_occupiedWithDangerZone) {
-                if (!cellSource->contains(posOcc)) {
-                    return false;
-                }
-            }
-            return true;
+            if (cellSource->size() < bundle.m_occupiedWithDangerZone.size())
+                return false;
+
+            std::tie(collisionResult, newPossibleShift) = MapTileArea::getCollisionShiftForObject(bundle.m_occupiedWithDangerZone, *cellSource, true);
+            if (collisionResult == MapTileArea::CollisionResult::NoCollision)
+                return true;
+
+            return false;
         };
 
         // if first attempt is succeed, we'll try to find near place where we don't fit, and then backup to more close fit.
-        if (tryPlaceInner(g_deltasToTry[0])) {
-            //std::cout << "!";
-            bool  start     = true;
-            FHPos deltaPrev = g_deltasToTry[0];
+        if (tryPlaceInner()) {
+            auto originalPos = pos;
             for (FHPos delta : g_deltasToTry) {
-                //std::cout << "*";
-                if (start) {
-                    start = false;
-                    continue;
+                pos = originalPos;
+                for (int i = 0; i < 3; ++i) {
+                    Mernel::ProfilerScope scope1("reposition");
+                    pos = pos->neighbourByOffset(delta);
+                    if (!pos)
+                        break;
+
+                    // if we found that shifting to neighbor stop make us fail...
+                    if (!tryPlaceInner()) {
+                        // ...backup to previous successful spot
+                        pos = pos->neighbourByOffset(FHPos{} - delta);
+                        return tryPlaceInner();
+                    }
                 }
-                if (!tryPlaceInner(delta)) {
-                    tryPlaceInner(deltaPrev);
-                    return true;
-                }
-                deltaPrev = delta;
             }
-            tryPlaceInner(deltaPrev);
-            return true;
+            pos = originalPos;
+            return tryPlaceInner();
         }
         Mernel::ProfilerScope scope1("failed");
-        //std::cout << "#";
-        for (FHPos delta : g_deltasToTry) {
-            //std::cout << "*";
-            if (tryPlaceInner(delta)) {
+        if (collisionResult != MapTileArea::CollisionResult::HasShift) {
+            Mernel::ProfilerScope scope2("noshift");
+            return false;
+        }
+
+        for (int i = 0; i < 3; ++i) {
+            pos = pos->neighbourByOffset(newPossibleShift);
+            if (!pos)
+                return false;
+
+            if (tryPlaceInner()) {
                 Mernel::ProfilerScope scope2("deltashelp");
                 return true;
             }

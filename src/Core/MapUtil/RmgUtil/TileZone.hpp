@@ -91,8 +91,6 @@ struct TileZone {
         return getAreaDeficit() * 100 / m_absoluteArea;
     }
 
-    static FHPos makeCentroid(const MapTileRegion& region);
-
     void estimateCentroid();
 
     void readFromMap();

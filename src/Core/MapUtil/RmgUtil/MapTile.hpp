@@ -8,6 +8,8 @@
 #include "../FHPos.hpp"
 #include "TemplateUtils.hpp"
 
+#include "MapUtilExport.hpp"
+
 #include <vector>
 
 namespace FreeHeroes {
@@ -15,9 +17,10 @@ namespace FreeHeroes {
 struct TileZone;
 struct MapTile;
 struct MapTileContainer;
-using MapTilePtr     = MapTile*;
-using MapTilePtrList = std::vector<MapTilePtr>;
-struct MapTile {
+using MapTilePtr      = MapTile*;
+using MapTileConstPtr = const MapTile*;
+using MapTilePtrList  = std::vector<MapTilePtr>;
+struct MAPUTIL_EXPORT MapTile {
     FHPos m_pos;
 
     MapTileContainer* m_container    = nullptr;
@@ -56,9 +59,9 @@ struct MapTile {
     std::string toPrintableString() const noexcept;
 };
 
-constexpr inline int64_t posDistance(MapTilePtr from, MapTilePtr to)
+constexpr inline int64_t posDistance(MapTileConstPtr from, MapTileConstPtr to, int64_t mult = 1)
 {
-    return posDistance(from->m_pos, to->m_pos);
+    return posDistance(from->m_pos, to->m_pos, mult);
 }
 
 }

@@ -534,6 +534,7 @@ AddTarget(TYPE app_console NAME CoreTests OUTPUT_NAME Tests_CoreLogic
         GameInt
 
         CoreLogic
+        MapUtil
 
     gtest gtest_main MernelReflection
     )

@@ -8,11 +8,13 @@
 #include "MapTile.hpp"
 #include "FlatSet.hpp"
 
+#include "MapUtilExport.hpp"
+
 namespace FreeHeroes {
 
 using MapTileRegion = FlatSet<MapTilePtr>;
 
-struct MapTileArea {
+struct MAPUTIL_EXPORT MapTileArea {
     bool          m_diagonalGrowth = false;
     MapTileRegion m_innerArea;
     MapTileRegion m_innerEdge;   // subset of innerArea;
@@ -70,7 +72,17 @@ struct MapTileArea {
     std::vector<MapTileArea> splitByMaxArea(std::ostream& os, size_t maxArea, bool repulse = false) const;
     std::vector<MapTileArea> splitByK(std::ostream& os, size_t k, bool repulse = false) const;
 
-    static MapTileArea getInnerBorderNet(const std::vector<MapTileArea>& areas);
+    enum class CollisionResult
+    {
+        InvalidInputs,
+        NoCollision,
+        ImpossibleShift,
+        HasShift,
+    };
+
+    static MapTilePtr                        makeCentroid(const MapTileRegion& region, bool ensureInbounds = true);
+    static MapTileArea                       getInnerBorderNet(const std::vector<MapTileArea>& areas);
+    static std::pair<CollisionResult, FHPos> getCollisionShiftForObject(const MapTileRegion& object, const MapTileRegion& obstacle, bool invertObstacle = false);
 };
 
 }

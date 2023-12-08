@@ -145,10 +145,10 @@ constexpr inline int64_t intSqrt(const int64_t value) noexcept
     return result - 1;
 }
 
-constexpr inline int64_t posDistance(const FHPos& from, const FHPos& to)
+constexpr inline int64_t posDistance(const FHPos& from, const FHPos& to, int64_t mult = 1)
 {
-    const auto dx = from.m_x - to.m_x;
-    const auto dy = from.m_y - to.m_y;
+    const auto dx = mult * (from.m_x - to.m_x);
+    const auto dy = mult * (from.m_y - to.m_y);
     return intSqrt(dx * dx + dy * dy);
 }
 

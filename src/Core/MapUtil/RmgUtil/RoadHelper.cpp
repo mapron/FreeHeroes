@@ -71,12 +71,8 @@ void RoadHelper::makeBorders(std::vector<TileZone>& tileZones)
         if (border.empty()) {
             throw std::runtime_error("No border between '" + connections.m_from + "' and '" + connections.m_to + "'");
         }
-        FHPos borderCentroid = TileZone::makeCentroid(border); // switch to k-means when we need more than one connection.
+        MapTilePtr cell = MapTileArea::makeCentroid(border); // switch to k-means when we need more than one connection.
 
-        auto       it   = std::min_element(border.cbegin(), border.cend(), [&borderCentroid](MapTilePtr l, MapTilePtr r) {
-            return posDistance(borderCentroid, l->m_pos) < posDistance(borderCentroid, r->m_pos);
-        });
-        MapTilePtr cell = (*it);
         cell->m_zone->m_roadNodesHighPriority.insert(cell);
 
         const bool guarded = connections.m_guard || !connections.m_mirrorGuard.empty();
@@ -335,8 +331,8 @@ void RoadHelper::placeRoads(TileZone& tileZone)
             });
             MapTileArea mainPart = disconnectedParts.back();
             disconnectedParts.pop_back();
-            auto  mainCentroid     = TileZone::makeCentroid(mainPart.m_innerArea);
-            auto* mainCentroidTile = m_tileContainer.m_tileIndex.at(mainCentroid);
+            auto* mainCentroidTile = MapTileArea::makeCentroid(mainPart.m_innerArea);
+
             for (const MapTileArea& part : disconnectedParts) {
                 if (part.m_innerArea.size() <= 2)
                     continue;

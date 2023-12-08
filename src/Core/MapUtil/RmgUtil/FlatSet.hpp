@@ -153,6 +153,34 @@ public:
             erase(key);
     }
 
+    FlatSet intersectWith(const FlatSet& other) const
+    {
+        if (empty() || other.empty())
+            return {};
+
+        FlatSet result;
+        result.m_data.resize(std::max(m_data.size(), other.size()));
+        auto resIt   = std::set_intersection(m_data.cbegin(), m_data.cend(), other.m_data.cbegin(), other.m_data.cend(), result.m_data.begin());
+        auto newSize = std::distance(result.m_data.begin(), resIt);
+        result.m_data.resize(newSize);
+        result.updateIndex();
+        return result;
+    }
+
+    FlatSet diffWith(const FlatSet& other) const
+    {
+        if (empty() || other.empty())
+            return {};
+
+        FlatSet result;
+        result.m_data.resize(std::max(m_data.size(), other.size()));
+        auto resIt   = std::set_difference(m_data.cbegin(), m_data.cend(), other.m_data.cbegin(), other.m_data.cend(), result.m_data.begin());
+        auto newSize = std::distance(result.m_data.begin(), resIt);
+        result.m_data.resize(newSize);
+        result.updateIndex();
+        return result;
+    }
+
     bool contains(const Key& key) const
     {
         return m_index.contains(key);
