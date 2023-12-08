@@ -435,20 +435,30 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
     }
     bool successPlacement = true;
     auto placeOnMapWrap   = [this, &m_indent, &successPlacement](ObjectBundle& bundle, size_t i, const std::string& prefix) {
-        if (placeOnMap(bundle, m_consumeResult.m_segments[bundle.m_segmentIndex], true))
+        Mernel::ProfilerScope scope2("placeOnMapWrap");
+        PlacementResult       lastResult;
+        if ((lastResult = placeOnMap(bundle, m_consumeResult.m_segments[bundle.m_segmentIndex], true)) == PlacementResult::Success)
             return true;
-        if (placeOnMap(bundle, m_consumeResult.m_segments[bundle.m_segmentIndex], false))
+        if ((lastResult = placeOnMap(bundle, m_consumeResult.m_segments[bundle.m_segmentIndex], false)) == PlacementResult::Success)
             return true;
 
         for (int att = 0; att <= 5; ++att) {
             m_consumeResult.m_currentSegment++;
             m_consumeResult.m_currentSegment %= m_consumeResult.m_segments.size();
-            if (placeOnMap(bundle, m_consumeResult.m_segments[m_consumeResult.m_currentSegment], true))
+            if ((lastResult = placeOnMap(bundle, m_consumeResult.m_segments[m_consumeResult.m_currentSegment], true)) == PlacementResult::Success)
                 return true;
-            if (placeOnMap(bundle, m_consumeResult.m_segments[m_consumeResult.m_currentSegment], false))
+            if ((lastResult = placeOnMap(bundle, m_consumeResult.m_segments[m_consumeResult.m_currentSegment], false)) == PlacementResult::Success)
                 return true;
         }
-        m_logOutput << m_indent << prefix << " placement failure [" << i << "]: size=" << bundle.getEstimatedArea() << "; " << bundle.toPrintableString() << "\n";
+        m_logOutput << m_indent << prefix << " placement failure (" << int(lastResult) << ") [" << i << "]: pos=" << (bundle.m_absPos ? bundle.m_absPos->toPrintableString() : "NULL") << " size=" << bundle.getEstimatedArea() << "; " << bundle.toPrintableString() << "\n";
+
+        if (0) {
+            const auto [collisionResult, newPossibleShift] = MapTileArea::getCollisionShiftForObject(bundle.m_occupiedWithDangerZone, bundle.m_lastCellSource, true);
+            m_logOutput << m_indent << prefix << " collisionResult=" << int(collisionResult) << " \n";
+            std::string debug;
+            MapTileArea::compose(bundle.m_occupiedWithDangerZone, bundle.m_lastCellSource, debug, true, true);
+            m_logOutput << debug;
+        }
 
         successPlacement = false;
         return false;
@@ -536,9 +546,9 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
     return successPlacement;
 }
 
-bool ObjectBundleSet::placeOnMap(ObjectBundle& bundle,
-                                 ZoneSegment&  currentSegment,
-                                 bool          useCentroids)
+ObjectBundleSet::PlacementResult ObjectBundleSet::placeOnMap(ObjectBundle& bundle,
+                                                             ZoneSegment&  currentSegment,
+                                                             bool          useCentroids)
 {
     Mernel::ProfilerScope scope("placeOnMap");
 
@@ -554,11 +564,11 @@ bool ObjectBundleSet::placeOnMap(ObjectBundle& bundle,
     }
 
     if (cellSource->empty())
-        return false;
+        return PlacementResult::InsufficientSpaceInSource;
 
     size_t rngCentroidIndex = size_t(-1);
 
-    auto tryPlace = [this, &bundle, &currentSegment, useCentroids, useRoad, &rngCentroidIndex, &cellSource]() -> bool {
+    auto tryPlace = [this, &bundle, &currentSegment, useCentroids, useRoad, &rngCentroidIndex, &cellSource]() -> PlacementResult {
         Mernel::ProfilerScope scope("tryPlace");
         MapTilePtr            pos;
         if (useCentroids && !useRoad && !currentSegment.m_centroids.empty()) {
@@ -567,25 +577,33 @@ bool ObjectBundleSet::placeOnMap(ObjectBundle& bundle,
         } else {
             pos = (*cellSource)[m_rng->gen(cellSource->size() - 1)];
         }
-        FHPos                        newPossibleShift = g_invalidPos;
-        MapTileArea::CollisionResult collisionResult  = MapTileArea::CollisionResult::InvalidInputs;
+        FHPos newPossibleShift = g_invalidPos;
 
-        auto tryPlaceInner = [&pos, &bundle, &cellSource, &currentSegment, &newPossibleShift, &collisionResult]() -> bool {
+        auto tryPlaceInner = [&pos, &bundle, &cellSource, &currentSegment, &newPossibleShift]() -> PlacementResult {
             if (!bundle.estimateOccupied(pos, currentSegment.m_mainCetroid))
-                return false;
+                return PlacementResult::EstimateOccupiedFailure;
 
             if (cellSource->size() < bundle.m_occupiedWithDangerZone.size())
-                return false;
+                return PlacementResult::InsufficientSpaceInSource;
 
-            std::tie(collisionResult, newPossibleShift) = MapTileArea::getCollisionShiftForObject(bundle.m_occupiedWithDangerZone, *cellSource, true);
+            MapTileArea::CollisionResult collisionResult = MapTileArea::CollisionResult::InvalidInputs;
+            bundle.m_lastCellSource                      = *cellSource;
+            std::tie(collisionResult, newPossibleShift)  = MapTileArea::getCollisionShiftForObject(bundle.m_occupiedWithDangerZone, *cellSource, true);
             if (collisionResult == MapTileArea::CollisionResult::NoCollision)
-                return true;
+                return PlacementResult::Success;
 
-            return false;
+            if (collisionResult == MapTileArea::CollisionResult::InvalidInputs)
+                return PlacementResult::InvalidCollisionInputs;
+
+            if (collisionResult == MapTileArea::CollisionResult::ImpossibleShift)
+                return PlacementResult::CollisionImpossibleShift;
+
+            return PlacementResult::CollisionHasShift;
         };
 
+        PlacementResult lastResult;
         // if first attempt is succeed, we'll try to find near place where we don't fit, and then backup to more close fit.
-        if (tryPlaceInner()) {
+        if ((lastResult = tryPlaceInner()) == PlacementResult::Success) {
             auto originalPos = pos;
             for (FHPos delta : g_deltasToTry) {
                 pos = originalPos;
@@ -596,7 +614,7 @@ bool ObjectBundleSet::placeOnMap(ObjectBundle& bundle,
                         break;
 
                     // if we found that shifting to neighbor stop make us fail...
-                    if (!tryPlaceInner()) {
+                    if (tryPlaceInner() != PlacementResult::Success) {
                         // ...backup to previous successful spot
                         pos = pos->neighbourByOffset(FHPos{} - delta);
                         return tryPlaceInner();
@@ -607,29 +625,61 @@ bool ObjectBundleSet::placeOnMap(ObjectBundle& bundle,
             return tryPlaceInner();
         }
         Mernel::ProfilerScope scope1("failed");
-        if (collisionResult != MapTileArea::CollisionResult::HasShift) {
+        if (lastResult != PlacementResult::CollisionHasShift) {
             Mernel::ProfilerScope scope2("noshift");
-            return false;
+            return lastResult;
         }
 
+        if (0) {
+            // clang-format off
+            const std::vector<FHPos> deltasToTry{ 
+                                                    FHPos{}, 
+                                                    FHPos{ -1,  0 }, FHPos{ +1,  0 }, FHPos{  0, -1 }, FHPos{  0, +1 },
+                                                    FHPos{ -2,  0 }, FHPos{ +2,  0 }, FHPos{  0, -2 }, FHPos{  0, +2 },
+                                                    FHPos{ -1, -1 }, FHPos{ +1, -1 }, FHPos{ +1, +1 }, FHPos{ -1, +1 },
+                                                    FHPos{ -2, -2 }, FHPos{ +2, -2 }, FHPos{ +2, +2 }, FHPos{ -2, +2 },
+                                                    FHPos{ -3,  0 }, FHPos{ +3,  0 }, FHPos{  0, -3 }, FHPos{  0, +3 },
+                                                    };
+            // clang-format on
+            auto originalPos = pos;
+            for (FHPos delta : deltasToTry) {
+                pos = originalPos->neighbourByOffset(delta);
+                if ((lastResult = tryPlaceInner()) == PlacementResult::Success) {
+                    Mernel::ProfilerScope scope2("deltashelp");
+                    return lastResult;
+                }
+                Mernel::ProfilerScope scope3("deltasNOThelp");
+            }
+            return lastResult;
+        }
+
+        MapTileRegion used;
+        used.insert(pos);
         for (int i = 0; i < 3; ++i) {
             pos = pos->neighbourByOffset(newPossibleShift);
-            if (!pos)
-                return false;
+            if (used.contains(pos))
+                return PlacementResult::ShiftLoopDetected;
+            used.insert(pos);
 
-            if (tryPlaceInner()) {
+            if (!pos)
+                return PlacementResult::InvalidShiftValue;
+
+            if ((lastResult = tryPlaceInner()) == PlacementResult::Success) {
                 Mernel::ProfilerScope scope2("deltashelp");
-                return true;
+                return lastResult;
             }
             Mernel::ProfilerScope scope3("deltasNOThelp");
+            if (lastResult != PlacementResult::CollisionHasShift)
+                return lastResult;
         }
-        return false;
+        return PlacementResult::RunOutOfShiftRetries;
     };
 
+    PlacementResult lastResult;
     for (int i = 0; i < 10; ++i) {
         //if (i > 0)
         //    std::cout << "R";
-        if (tryPlace()) {
+        if ((lastResult = tryPlace()) == PlacementResult::Success) {
             for (auto& item : bundle.m_items) {
                 item.m_obj->setPos(item.m_absPos->m_pos);
                 item.m_obj->place();
@@ -646,11 +696,12 @@ bool ObjectBundleSet::placeOnMap(ObjectBundle& bundle,
                 m_consumeResult.m_cellsForUnguardedRoads.erase(bundle.m_dangerZone);
             }
 
-            return true;
+            Mernel::ProfilerScope scope3("success");
+            return PlacementResult::Success;
         }
     }
 
-    return false;
+    return lastResult;
 }
 
 }

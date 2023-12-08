@@ -826,7 +826,7 @@ void FHTemplateProcessor::runRewards()
         if (tileZone.m_rngZoneSettings.m_scoreTargets.empty())
             continue;
 
-        //if (tileZone.m_id != "P1")
+        //if (tileZone.m_id != "CC")
         //    continue;
 
         ObjectBundleSet bundleSet(m_rng, m_tileContainer, m_logOutput);
@@ -845,14 +845,15 @@ void FHTemplateProcessor::runRewards()
                          armyPercent,
                          goldPercent);
 
-            if (!bundleSet.consume(gen, tileZone)) {
-                if (lastAttempt)
-                    throw std::runtime_error("Failed to fit some objects into zone '" + tileZone.m_id + "'");
-                m_map.m_objects          = objects; // restore map data and try again.
-                tileZone.m_needBeBlocked = needBeBlocked;
-            } else {
+            if (bundleSet.consume(gen, tileZone))
                 break;
-            }
+
+            if (lastAttempt)
+                throw std::runtime_error("Failed to fit some objects into zone '" + tileZone.m_id + "'");
+            m_logOutput << m_indent << "Failed to fit some objects into zone '" + tileZone.m_id + "', retry"
+                        << "\n";
+            m_map.m_objects          = objects; // restore map data and try again.
+            tileZone.m_needBeBlocked = needBeBlocked;
         }
 
         for (auto& guardBundle : bundleSet.m_guards) {

@@ -389,4 +389,60 @@ std::pair<MapTileArea::CollisionResult, FHPos> MapTileArea::getCollisionShiftFor
     return std::pair{ CollisionResult::HasShift, FHPos{ cx, cy } };
 }
 
+void MapTileArea::decompose(MapTileContainer* tileContainer, MapTileRegion& object, MapTileRegion& obstacle, const std::string& serialized, int width, int height)
+{
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            auto*        tile             = tileContainer->m_tileIndex.at(FHPos{ x, y, 0 });
+            const size_t testOffset       = x + width * y;
+            const char   c                = serialized[testOffset];
+            const bool   objectOccupied   = c == 'O' || c == 'X';
+            const bool   obstacleOccupied = c == '-' || c == 'X';
+            if (objectOccupied)
+                object.insert(tile);
+            if (obstacleOccupied)
+                obstacle.insert(tile);
+        }
+    }
+}
+
+void MapTileArea::compose(const MapTileRegion& object, const MapTileRegion& obstacle, std::string& serialized, bool obstacleInverted, bool printable)
+{
+    MapTileContainer* tileContainer = nullptr;
+    if (!object.empty())
+        tileContainer = object[0]->m_container;
+    if (!obstacle.empty())
+        tileContainer = obstacle[0]->m_container;
+    if (!tileContainer)
+        return;
+
+    const int z      = object.empty() ? obstacle[0]->m_pos.m_z : object[0]->m_pos.m_z;
+    const int width  = tileContainer->m_width;
+    const int height = tileContainer->m_height;
+    serialized.clear();
+    for (int y = 0; y < height; ++y) {
+        if (printable)
+            serialized += '"';
+        for (int x = 0; x < width; ++x) {
+            auto* tile = tileContainer->m_tileIndex.at(FHPos{ x, y, z });
+            //const size_t testOffset = x + width * y;
+            char c;
+
+            const bool objectOccupied   = object.contains(tile);
+            const bool obstacleOccupied = obstacleInverted ? !obstacle.contains(tile) : obstacle.contains(tile);
+            if (objectOccupied && obstacleOccupied)
+                c = 'X';
+            else if (objectOccupied)
+                c = 'O';
+            else if (obstacleOccupied)
+                c = '-';
+            else
+                c = '.';
+            serialized += c;
+        }
+        if (printable)
+            serialized += '"', serialized += '\n';
+    }
+}
+
 }

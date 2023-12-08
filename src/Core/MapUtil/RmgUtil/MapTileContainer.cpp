@@ -10,6 +10,10 @@ namespace FreeHeroes {
 
 void MapTileContainer::init(int width, int height, int depth)
 {
+    m_width  = width;
+    m_height = height;
+    m_depth  = depth;
+
     m_tiles.resize(width * height * depth);
     size_t index = 0;
     for (int z = 0; z < depth; ++z) {

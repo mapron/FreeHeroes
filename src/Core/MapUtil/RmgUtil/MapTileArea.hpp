@@ -83,6 +83,9 @@ struct MAPUTIL_EXPORT MapTileArea {
     static MapTilePtr                        makeCentroid(const MapTileRegion& region, bool ensureInbounds = true);
     static MapTileArea                       getInnerBorderNet(const std::vector<MapTileArea>& areas);
     static std::pair<CollisionResult, FHPos> getCollisionShiftForObject(const MapTileRegion& object, const MapTileRegion& obstacle, bool invertObstacle = false);
+
+    static void decompose(MapTileContainer* tileContainer, MapTileRegion& object, MapTileRegion& obstacle, const std::string& serialized, int width, int height);
+    static void compose(const MapTileRegion& object, const MapTileRegion& obstacle, std::string& serialized, bool obstacleInverted = false, bool printable = false);
 };
 
 }

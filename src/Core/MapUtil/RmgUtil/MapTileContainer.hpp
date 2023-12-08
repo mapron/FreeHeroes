@@ -15,6 +15,10 @@
 namespace FreeHeroes {
 
 struct MAPUTIL_EXPORT MapTileContainer {
+    int m_width  = 0;
+    int m_height = 0;
+    int m_depth  = 0;
+
     std::vector<MapTile> m_tiles;
 
     std::unordered_map<FHPos, MapTilePtr> m_tileIndex;

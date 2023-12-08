@@ -55,6 +55,8 @@ struct ObjectBundle {
 
     FHPosDirection m_guardPosition = FHPosDirection::B;
 
+    MapTileRegion m_lastCellSource;
+
     bool m_absPosIsValid = false;
 
     size_t getEstimatedArea() const { return m_allArea.size(); }
@@ -135,9 +137,24 @@ public:
                  TileZone&              tileZone);
 
 private:
-    bool placeOnMap(ObjectBundle& bundle,
-                    ZoneSegment&  currentSegment,
-                    bool          useCentroids);
+    enum class PlacementResult
+    {
+        Success,
+        InsufficientSpaceInSource,
+        EstimateOccupiedFailure,
+        InvalidShiftValue,
+        InvalidCollisionInputs,
+
+        CollisionImpossibleShift,
+        CollisionHasShift,
+        RunOutOfShiftRetries,
+        ShiftLoopDetected,
+    };
+
+private:
+    PlacementResult placeOnMap(ObjectBundle& bundle,
+                               ZoneSegment&  currentSegment,
+                               bool          useCentroids);
 };
 
 }
