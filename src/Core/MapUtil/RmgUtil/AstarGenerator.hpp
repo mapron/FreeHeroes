@@ -28,22 +28,25 @@ public:
 
     struct NodeSet {
         using Vec = std::vector<std::shared_ptr<Node>>;
-        Vec                            m_data;
-        std::unordered_set<MapTilePtr> m_used;
+        Vec                                   m_data;
+        std::unordered_map<MapTilePtr, Node*> m_used;
 
         void add(std::shared_ptr<Node> node)
         {
             m_data.push_back(node);
-            m_used.insert(node->m_pos);
+            m_used[node->m_pos] = node.get();
         }
         void erase(const Vec::iterator& it)
         {
             m_used.erase(it->get()->m_pos);
             m_data.erase(it);
         }
+        Node* find(MapTilePtr pos) const
+        {
+            auto it = m_used.find(pos);
+            return it == m_used.cend() ? nullptr : it->second;
+        }
     };
-
-    Node* findNodeOnList(NodeSet& nodes, MapTilePtr coordinates);
 
 public:
     AstarGenerator(bool useDiag = true)

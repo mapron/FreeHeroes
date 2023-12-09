@@ -18,22 +18,86 @@
 namespace FreeHeroes {
 
 template<class Key>
+class FlatSetUnsortedList : public std::vector<Key> {
+public:
+    using std::vector<Key>::vector;
+    /*implicit*/ FlatSetUnsortedList(const std::vector<Key>& data)
+        : std::vector<Key>(data)
+    {}
+    /*implicit*/ FlatSetUnsortedList(std::vector<Key>&& data)
+        : std::vector<Key>(std::move(data))
+    {}
+};
+
+template<class Key>
+class FlatSetSortedList : public std::vector<Key> {
+public:
+    using SortedList = FlatSetSortedList<Key>;
+    using std::vector<Key>::vector;
+    /*implicit*/ FlatSetSortedList(const std::vector<Key>& data)
+        : std::vector<Key>(data)
+    {
+        ensureSorted();
+    }
+    /*implicit*/ FlatSetSortedList(std::vector<Key>&& data)
+        : std::vector<Key>(std::move(data))
+    {
+        ensureSorted();
+    }
+
+    void ensureSorted()
+    {
+        std::sort(this->begin(), this->end());
+        if (!this->empty()) {
+            const auto resIt   = std::unique(this->begin(), this->end());
+            const auto newSize = std::distance(this->begin(), resIt);
+            this->resize(newSize);
+        }
+    }
+
+    SortedList unionWith(const SortedList& another) const
+    {
+        SortedList tmp;
+        tmp.resize(this->size() + another.size());
+        auto resIt   = std::set_union(this->cbegin(), this->cend(), another.cbegin(), another.cend(), tmp.begin());
+        auto newSize = std::distance(tmp.begin(), resIt);
+        tmp.resize(newSize);
+        return tmp;
+    }
+    SortedList intersectWith(const SortedList& another) const
+    {
+        SortedList tmp;
+        tmp.resize(std::max(this->size(), another.size()));
+        auto resIt   = std::set_intersection(this->cbegin(), this->cend(), another.cbegin(), another.cend(), tmp.begin());
+        auto newSize = std::distance(tmp.begin(), resIt);
+        tmp.resize(newSize);
+        return tmp;
+    }
+    SortedList diffWith(const SortedList& another) const
+    {
+        SortedList tmp;
+        tmp.resize(std::max(this->size(), another.size()));
+        auto resIt   = std::set_difference(this->cbegin(), this->cend(), another.cbegin(), another.cend(), tmp.begin());
+        auto newSize = std::distance(tmp.begin(), resIt);
+        tmp.resize(newSize);
+        return tmp;
+    }
+};
+
+template<class Key>
 class FlatSet {
-    using List = std::vector<Key>;
+    using UnsortedList = FlatSetUnsortedList<Key>;
+    using SortedList   = FlatSetSortedList<Key>;
 
 public:
     FlatSet() = default;
-    explicit FlatSet(List data) noexcept
+    explicit FlatSet(SortedList data) noexcept
         : m_data(std::move(data))
     {
-        //Mernel::ProfilerScope scoope2("FlatSet list ctor");
-        std::sort(m_data.begin(), m_data.end());
-        if (!m_data.empty()) {
-            auto resIt   = std::unique(m_data.begin(), m_data.end());
-            auto newSize = std::distance(m_data.begin(), resIt);
-            m_data.resize(newSize);
-        }
-        updateIndex();
+    }
+    explicit FlatSet(UnsortedList data) noexcept
+        : m_data(std::move(data))
+    {
     }
 
     bool operator==(const FlatSet&) const = default;
@@ -46,7 +110,6 @@ public:
     void clear()
     {
         m_data.clear();
-        m_index.clear();
     }
 
     bool empty() const noexcept { return m_data.empty(); }
@@ -64,93 +127,81 @@ public:
 
     void insert(const Key& key)
     {
-        // Mernel::ProfilerScope scoope("insert key");
-        auto it = m_index.find(key);
-        if (it != m_index.cend())
-            return;
-
-        m_index.insert(it, key);
         if (m_data.empty()) {
             m_data.push_back(key);
             return;
         }
 
-        if (key < m_data[0]) {
-            m_data.insert(m_data.begin(), key);
+        auto it = std::lower_bound(m_data.begin(), m_data.end(), key);
+        if (it != m_data.end() && !(key < *it))
             return;
-        }
-        auto itn = std::upper_bound(m_data.begin(), m_data.end(), key); // data{1,3,5}: key{2}, it => "3"  key{9}, it => "END"
-        m_data.insert(itn, key);
+
+        m_data.insert(it, key);
     }
-    void insert(FlatSet flatSet)
+    void insert(const SortedList& list)
     {
-        //Mernel::ProfilerScope scoope("insert set");
-        if (flatSet.empty())
+        if (list.empty())
             return;
 
         if (empty()) {
-            *this = std::move(flatSet);
+            m_data = list;
             return;
         }
-
+        if (list.size() <= 16) { // arbitrary chosen "small set to insert" value.
+            m_data.reserve(m_data.size() + list.size());
+            for (const auto& key : list)
+                insert(key);
+            return;
+        }
+        m_data = m_data.unionWith(list);
+    }
+    void insert(const UnsortedList& list)
+    {
+        insert(SortedList(list));
+    }
+    void insert(FlatSet flatSet)
+    {
         if (flatSet.size() > size()) { // prefer inserting smaller stuff into larger stuff.
             flatSet.insert(*this);
             *this = std::move(flatSet);
             return;
         }
-        if (flatSet.size() <= 16) { // arbitrary chosen "small set to insert" value.
 
-            m_data.reserve(m_data.size() + flatSet.size());
-            for (const auto& key : flatSet)
-                insert(key);
-            return;
-        }
+        insert(flatSet.m_data);
+    }
 
-        //Mernel::ProfilerScope scoope2("set_union");
-        List tmp;
-        tmp.resize(m_data.size() + flatSet.size());
-        auto resIt   = std::set_union(m_data.cbegin(), m_data.cend(), flatSet.m_data.cbegin(), flatSet.m_data.cend(), tmp.begin());
-        auto newSize = std::distance(tmp.begin(), resIt);
-        tmp.resize(newSize);
-        m_data = std::move(tmp);
-        updateIndex();
-    }
-    void insert(const List& list)
-    {
-        //Mernel::ProfilerScope scoope("insert list");
-        insert(FlatSet(list));
-    }
     void erase(const Key& key)
     {
-        //Mernel::ProfilerScope scoope("erase key");
         if (m_data.empty())
             return;
 
-        auto itn = m_index.find(key);
-        if (itn == m_index.end())
-            return;
-        m_index.erase(itn);
-
-        auto i = std::lower_bound(m_data.begin(), m_data.end(), key); // data{1,3,5}: key{5}, it => "3"  key{9}, it => "END"
-        m_data.erase(i);
+        auto i = binarySearch(key);
+        if (i != m_data.end())
+            m_data.erase(i);
     }
-    void erase(const FlatSet& flatSet)
+    void erase(const SortedList& list)
     {
-        //Mernel::ProfilerScope scoope("erase set");
-        if (flatSet.empty() || m_data.empty())
-            return;
-
-        for (const auto& key : flatSet)
-            erase(key);
-    }
-    void erase(const List& list)
-    {
-        //Mernel::ProfilerScope scoope("erase list");
         if (list.empty() || m_data.empty())
             return;
 
-        for (const auto& key : list)
-            erase(key);
+        if (list.size() <= 16) { // arbitrary chosen "small set to erase" value.
+            for (const auto& key : list)
+                erase(key);
+            return;
+        }
+        m_data = m_data.diffWith(list);
+    }
+    void erase(const UnsortedList& list)
+    {
+        if (list.empty() || m_data.empty())
+            return;
+
+        erase(SortedList(list));
+    }
+
+    void erase(const FlatSet& flatSet)
+    {
+        erase(flatSet.m_data);
     }
 
     FlatSet intersectWith(const FlatSet& other) const
@@ -159,11 +210,7 @@ public:
             return {};
 
         FlatSet result;
-        result.m_data.resize(std::max(m_data.size(), other.size()));
-        auto resIt   = std::set_intersection(m_data.cbegin(), m_data.cend(), other.m_data.cbegin(), other.m_data.cend(), result.m_data.begin());
-        auto newSize = std::distance(result.m_data.begin(), resIt);
-        result.m_data.resize(newSize);
-        result.updateIndex();
+        result.m_data = m_data.intersectWith(other.m_data);
         return result;
     }
 
@@ -173,17 +220,19 @@ public:
             return {};
 
         FlatSet result;
-        result.m_data.resize(std::max(m_data.size(), other.size()));
-        auto resIt   = std::set_difference(m_data.cbegin(), m_data.cend(), other.m_data.cbegin(), other.m_data.cend(), result.m_data.begin());
-        auto newSize = std::distance(result.m_data.begin(), resIt);
-        result.m_data.resize(newSize);
-        result.updateIndex();
+        result.m_data = m_data.diffWith(other.m_data);
         return result;
     }
 
     bool contains(const Key& key) const
     {
-        return m_index.contains(key);
+        return std::binary_search(m_data.cbegin(), m_data.cend(), key);
+    }
+
+    /// @todo: UNTESTED!
+    bool contains(const SortedList& list) const
+    {
+        return m_data.intersectWith(list).size() == list.size();
     }
 
     void updateAllValues(auto&& callback)
@@ -191,21 +240,20 @@ public:
         for (auto& key : m_data) {
             key = callback(key);
         }
-        updateIndex();
     }
 
 private:
-    void updateIndex()
+    auto binarySearch(const Key& key)
     {
-        //Mernel::ProfilerScope scoope2("updateIndex");
-        m_index.clear();
-        m_index.insert(m_data.cbegin(), m_data.cend());
+        auto it = std::lower_bound(m_data.begin(), m_data.end(), key);
+        if (it != m_data.end() && !(key < *it))
+            return it;
+        else
+            return m_data.end();
     }
 
 private:
-    std::unordered_set<Key> m_index;
-
-    List m_data; // sorted.
+    SortedList m_data;
 };
 
 }

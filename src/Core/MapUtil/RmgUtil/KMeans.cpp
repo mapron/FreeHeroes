@@ -73,6 +73,7 @@ void KMeansSegmentation::runIter()
 
 void KMeansSegmentation::run(std::ostream& os)
 {
+    Mernel::ProfilerScope scope("kmeans run");
     //os << "Before K-Means Clustering: \n";
 
     //for (size_t i = 0; i < m_clusters.size(); i++)

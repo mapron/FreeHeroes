@@ -7,6 +7,7 @@
 
 #include "../FHPos.hpp"
 #include "TemplateUtils.hpp"
+#include "FlatSet.hpp"
 
 #include "MapUtilExport.hpp"
 
@@ -17,9 +18,12 @@ namespace FreeHeroes {
 struct TileZone;
 struct MapTile;
 struct MapTileContainer;
-using MapTilePtr      = MapTile*;
-using MapTileConstPtr = const MapTile*;
-using MapTilePtrList  = std::vector<MapTilePtr>;
+using MapTilePtr           = MapTile*;
+using MapTileConstPtr      = const MapTile*;
+using MapTilePtrList       = FlatSetUnsortedList<MapTilePtr>;
+using MapTilePtrSortedList = FlatSetSortedList<MapTilePtr>;
+using MapTileRegion        = FlatSet<MapTilePtr>;
+
 struct MAPUTIL_EXPORT MapTile {
     FHPos m_pos;
 
@@ -39,9 +43,9 @@ struct MAPUTIL_EXPORT MapTile {
     MapTilePtr m_neighborBL = nullptr;
     MapTilePtr m_neighborBR = nullptr;
 
-    MapTilePtrList m_orthogonalNeighbours;
-    MapTilePtrList m_diagNeighbours;
-    MapTilePtrList m_allNeighboursWithDiag;
+    MapTilePtrSortedList m_orthogonalNeighbours;
+    MapTilePtrSortedList m_diagNeighbours;
+    MapTilePtrSortedList m_allNeighboursWithDiag;
 
     struct Transform {
         bool m_transpose = false;
@@ -51,7 +55,7 @@ struct MAPUTIL_EXPORT MapTile {
         FHPos apply(FHPos pos) const noexcept;
     };
 
-    const MapTilePtrList& neighboursList(bool useDiag) const noexcept { return useDiag ? m_allNeighboursWithDiag : m_orthogonalNeighbours; }
+    const MapTilePtrSortedList& neighboursList(bool useDiag) const noexcept { return useDiag ? m_allNeighboursWithDiag : m_orthogonalNeighbours; }
 
     MapTilePtr     neighbourByOffset(FHPos offset) noexcept;
     MapTilePtrList neighboursByOffsets(const std::vector<FHPos>& offsets, const Transform& transform) noexcept;

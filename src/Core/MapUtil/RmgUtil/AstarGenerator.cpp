@@ -34,11 +34,13 @@ MapTilePtrList AstarGenerator::findPath()
         auto current_it = openSet.m_data.begin();
         current         = *current_it;
 
-        for (auto it = openSet.m_data.begin(); it != openSet.m_data.end(); it++) {
-            auto node = *it;
-            if (node->getScore() <= current->getScore()) {
-                current    = node;
-                current_it = it;
+        {
+            for (auto it = openSet.m_data.begin(); it != openSet.m_data.end(); it++) {
+                auto node = *it;
+                if (node->getScore() <= current->getScore()) {
+                    current    = node;
+                    current_it = it;
+                }
             }
         }
 
@@ -47,17 +49,19 @@ MapTilePtrList AstarGenerator::findPath()
             break;
         }
 
-        closedSet.add(current);
-        openSet.erase(current_it);
+        {
+            closedSet.add(current);
+            openSet.erase(current_it);
+        }
 
         auto applyCandidate = [this, current, &openSet, &closedSet](uint64_t cost, MapTilePtr newCoordinates) {
-            if (!m_nonCollision.contains(newCoordinates) || findNodeOnList(closedSet, newCoordinates)) {
+            if (!m_nonCollision.contains(newCoordinates) || closedSet.find(newCoordinates)) {
                 return;
             }
 
             uint64_t totalCost = current->m_G + cost;
 
-            Node* successorRaw = findNodeOnList(openSet, newCoordinates);
+            Node* successorRaw = openSet.find(newCoordinates);
             if (successorRaw == nullptr) {
                 auto successor = std::make_shared<Node>(newCoordinates, current.get());
                 successor->m_G = totalCost;
@@ -87,18 +91,6 @@ MapTilePtrList AstarGenerator::findPath()
     }
 
     return path;
-}
-
-AstarGenerator::Node* AstarGenerator::findNodeOnList(NodeSet& nodes, MapTilePtr coordinates)
-{
-    if (!nodes.m_used.contains(coordinates))
-        return nullptr;
-
-    for (auto&& node : nodes.m_data) {
-        if (node->m_pos == coordinates)
-            return node.get();
-    }
-    return nullptr;
 }
 
 }

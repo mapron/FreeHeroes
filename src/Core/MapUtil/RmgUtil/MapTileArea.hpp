@@ -6,13 +6,10 @@
 #pragma once
 
 #include "MapTile.hpp"
-#include "FlatSet.hpp"
 
 #include "MapUtilExport.hpp"
 
 namespace FreeHeroes {
-
-using MapTileRegion = FlatSet<MapTilePtr>;
 
 struct MAPUTIL_EXPORT MapTileArea {
     bool          m_diagonalGrowth = false;
@@ -26,15 +23,6 @@ struct MAPUTIL_EXPORT MapTileArea {
         RemoveSpikes,
         Expand,
     };
-
-    static void addIf(MapTileRegion& reg, MapTilePtr cell, auto&& predicate)
-    {
-        if (!cell)
-            return;
-        if (!predicate(cell))
-            return;
-        reg.insert(cell);
-    }
 
     void makeEdgeFromInnerArea();
     void removeNonInnerFromInnerEdge();

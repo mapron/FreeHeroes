@@ -345,7 +345,7 @@ void GameExtract::run(const DetectedSources& sources) const
         }
     }
 
-    sendMessage("archives loaded in " + std::to_string(timer.elapsed()) + " us.");
+    sendMessage("archives loaded in " + std::to_string(timer.elapsedUS()) + " us.");
     sendMessage("Converting data...", true);
 
     TaskQueue       taskQueue;

@@ -108,7 +108,7 @@ void RoadHelper::makeBorders(std::vector<TileZone>& tileZones)
             cellFrom->m_zone->m_breakGuardTiles.insert(cellFrom);
         }
 
-        MapTileRegion forErase({ cell, ncellFound, cell->m_neighborT, ncellFound->m_neighborT, cell->m_neighborL, ncellFound->m_neighborL });
+        MapTileRegion forErase(MapTilePtrList{ cell, ncellFound, cell->m_neighborT, ncellFound->m_neighborT, cell->m_neighborL, ncellFound->m_neighborL });
         border.erase(forErase);
 
         connectionUnblockableCells.insert(cell);
@@ -162,59 +162,62 @@ void RoadHelper::makeBorders(std::vector<TileZone>& tileZones)
 
 void RoadHelper::placeRoads(TileZone& tileZone)
 {
-    //Mernel::ProfilerScope topScope("placeRoads");
+    Mernel::ProfilerScope topScope("placeRoads");
+    {
+        Mernel::ProfilerScope scope("start");
+        // todo: why repulse for K-means? why segments must be far from each other on consequtive indices? I dunno
+        tileZone.m_innerAreaSegments = tileZone.m_innerAreaUsable.splitByMaxArea(m_logOutput, tileZone.m_rngZoneSettings.m_segmentAreaSize, true);
+        auto borderNet               = MapTileArea::getInnerBorderNet(tileZone.m_innerAreaSegments);
 
-    tileZone.m_innerAreaSegments = tileZone.m_innerAreaUsable.splitByMaxArea(m_logOutput, tileZone.m_rngZoneSettings.m_segmentAreaSize, true);
-    auto borderNet               = MapTileArea::getInnerBorderNet(tileZone.m_innerAreaSegments);
+        tileZone.m_roadNodes.insert(tileZone.m_roadNodesHighPriority);
 
-    tileZone.m_roadNodes.insert(tileZone.m_roadNodesHighPriority);
+        for (size_t i = 0; auto& area : tileZone.m_innerAreaSegments) {
+            i++;
+            area.makeEdgeFromInnerArea();
+            area.removeEdgeFromInnerArea();
 
-    for (size_t i = 0; auto& area : tileZone.m_innerAreaSegments) {
-        i++;
-        area.makeEdgeFromInnerArea();
-        area.removeEdgeFromInnerArea();
-
-        for (auto* cell : area.m_innerEdge) {
-            cell->m_segmentIndex = i;
-            if (borderNet.contains(cell))
-                tileZone.m_possibleRoadsArea.insert(cell);
-        }
-
-        for (auto* cell : area.m_innerArea) {
-            cell->m_segmentIndex = i;
-        }
-    }
-
-    for (MapTileArea& area : tileZone.m_innerAreaSegments) {
-        for (MapTilePtr cell : area.m_innerEdge) {
-            std::set<std::pair<TileZone*, size_t>> neighAreaBorders;
-            if (!cell->m_neighborB || !cell->m_neighborT || !cell->m_neighborL || !cell->m_neighborR)
-                neighAreaBorders.insert(std::pair<TileZone*, size_t>{ nullptr, 0 });
-
-            for (MapTilePtr cellAdj : cell->m_orthogonalNeighbours) {
-                if (area.contains(cellAdj))
-                    continue;
-                size_t    neighbourSegIndex = cellAdj->m_segmentIndex;
-                TileZone* neightZone        = cellAdj->m_zone;
-                if (neightZone != &tileZone)
-                    neighbourSegIndex = 0;
-                neighAreaBorders.insert({ neightZone, neighbourSegIndex });
+            for (auto* cell : area.m_innerEdge) {
+                cell->m_segmentIndex = i;
+                if (borderNet.contains(cell))
+                    tileZone.m_possibleRoadsArea.insert(cell);
             }
-            if (neighAreaBorders.size() > 1) {
-                int64_t minDistance = 1000;
-                for (auto* roadCell : tileZone.m_roadNodes) {
-                    minDistance = std::min(minDistance, posDistance(cell->m_pos, roadCell->m_pos));
-                }
-                if (minDistance > 2) {
-                    tileZone.m_roadNodes.insert(cell);
-                }
+
+            for (auto* cell : area.m_innerArea) {
+                cell->m_segmentIndex = i;
             }
         }
-    }
 
-    tileZone.m_possibleRoadsArea.insert(tileZone.m_roadNodes);
+        for (MapTileArea& area : tileZone.m_innerAreaSegments) {
+            for (MapTilePtr cell : area.m_innerEdge) {
+                std::set<std::pair<TileZone*, size_t>> neighAreaBorders;
+                if (!cell->m_neighborB || !cell->m_neighborT || !cell->m_neighborL || !cell->m_neighborR)
+                    neighAreaBorders.insert(std::pair<TileZone*, size_t>{ nullptr, 0 });
+
+                for (MapTilePtr cellAdj : cell->m_orthogonalNeighbours) {
+                    if (area.contains(cellAdj))
+                        continue;
+                    size_t    neighbourSegIndex = cellAdj->m_segmentIndex;
+                    TileZone* neightZone        = cellAdj->m_zone;
+                    if (neightZone != &tileZone)
+                        neighbourSegIndex = 0;
+                    neighAreaBorders.insert({ neightZone, neighbourSegIndex });
+                }
+                if (neighAreaBorders.size() > 1) {
+                    int64_t minDistance = 1000;
+                    for (auto* roadCell : tileZone.m_roadNodes) {
+                        minDistance = std::min(minDistance, posDistance(cell->m_pos, roadCell->m_pos));
+                    }
+                    if (minDistance > 2) {
+                        tileZone.m_roadNodes.insert(cell);
+                    }
+                }
+            }
+        }
+        tileZone.m_possibleRoadsArea.insert(tileZone.m_roadNodes);
+    }
 
     {
+        //Mernel::ProfilerScope scope("deadends");
         // sometimes we have 'deadends' caused by  if (!hasNeighbourInRoads) condition above.
         // Try to bring some connections back by this intrinsic.
         MapTileRegion roadNeighbours;
@@ -255,6 +258,7 @@ void RoadHelper::placeRoads(TileZone& tileZone)
     }
 
     {
+        //Mernel::ProfilerScope scope("zigzag");
         // correct zigzag road tiles.
         for (MapTilePtr cell : tileZone.m_innerAreaUsable.m_innerArea) {
             const bool roadB = tileZone.m_possibleRoadsArea.contains(cell->m_neighborB);
@@ -283,7 +287,7 @@ void RoadHelper::placeRoads(TileZone& tileZone)
         return;
 
     {
-        //Mernel::ProfilerScope scope("making extra innerAreaSegments");
+        Mernel::ProfilerScope scope("extra inner");
         for (auto* townCell : tileZone.m_roadNodesHighPriority) {
             MapTileRegion allPossibleRoads = tileZone.m_possibleRoadsArea;
 
@@ -321,6 +325,7 @@ void RoadHelper::placeRoads(TileZone& tileZone)
     }
 
     {
+        //Mernel::ProfilerScope scope("unite separate");
         // unite separate networks
         MapTileArea roadNet;
         roadNet.m_innerArea    = tileZone.m_possibleRoadsArea;
@@ -374,10 +379,9 @@ void RoadHelper::placeRoads(TileZone& tileZone)
             connected.push_back(cell);
         }
 
-        //Mernel::ProfilerScope scope("final road lookup");
-
         while (!unconnectedRoadNodes.empty()) {
-            MapTilePtr cell = unconnectedRoadNodes.back();
+            Mernel::ProfilerScope scope2("final loop");
+            MapTilePtr            cell = unconnectedRoadNodes.back();
             unconnectedRoadNodes.pop_back();
 
             std::vector<MapTilePtr> connectedTmp = connected;
@@ -390,6 +394,7 @@ void RoadHelper::placeRoads(TileZone& tileZone)
 
                 return posDistance(cell->m_pos, l->m_pos) * lBorderMult < posDistance(cell->m_pos, r->m_pos) * rBorderMult;
             });
+
             if (connectedTmp.size() > 4)
                 connectedTmp.resize(4);
 
@@ -424,6 +429,8 @@ void RoadHelper::placeRoads(TileZone& tileZone)
         } while (!erasedTiles.empty());
     }
 
+    Mernel::ProfilerScope scope("bottom");
+
     for (MapTileArea& area : tileZone.m_innerAreaSegments) {
         area.m_innerArea.erase(pathAsRegion);
     }
@@ -441,7 +448,8 @@ void RoadHelper::placeRoads(TileZone& tileZone)
 
 void RoadHelper::refineSegments(TileZone& tileZone)
 {
-    auto innerWithoutRoads = tileZone.m_innerAreaUsable.m_innerArea;
+    Mernel::ProfilerScope scope("refineSegments");
+    auto                  innerWithoutRoads = tileZone.m_innerAreaUsable.m_innerArea;
     innerWithoutRoads.erase(tileZone.m_placedRoads);
     {
         auto noSegmentArea = innerWithoutRoads;
@@ -522,7 +530,8 @@ void RoadHelper::placeRoadPath(std::vector<FHPos> path, RoadLevel level)
 
 MapTileRegion RoadHelper::redundantCleanup(TileZone& tileZone)
 {
-    MapTileRegion pendingRegion;
+    Mernel::ProfilerScope scope("redundantCleanup");
+    MapTileRegion         pendingRegion;
     pendingRegion.reserve(tileZone.m_roads.size() * 5);
     for (TileZone::Road& road : tileZone.m_roads) {
         for (auto* cell : road.m_path)
@@ -785,7 +794,7 @@ void RoadHelper::correctRoadTypes(TileZone& tileZone, int pass)
 
 MapTilePtrList RoadHelper::aStarPath(TileZone& zone, MapTilePtr start, MapTilePtr end, bool allTiles) const
 {
-    //Mernel::ProfilerScope scope("aStarPath");
+    Mernel::ProfilerScope scope("aStarPath");
 
     AstarGenerator generator;
     generator.setPoints(start, end);

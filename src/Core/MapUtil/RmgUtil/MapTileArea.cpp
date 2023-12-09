@@ -17,19 +17,16 @@ namespace FreeHeroes {
 
 void MapTileArea::makeEdgeFromInnerArea()
 {
-    //Mernel::ProfilerScope scope("makeEdgeFromInnerArea");
-
     m_innerEdge = m_innerArea;
     removeNonInnerFromInnerEdge();
 }
 
 void MapTileArea::removeNonInnerFromInnerEdge()
 {
-    //Mernel::ProfilerScope scope("removeNonInnerFromInnerEdge");
-    auto edge = m_innerEdge;
-    m_innerEdge.clear();
+    MapTilePtrSortedList forErase;
 
-    for (MapTilePtr cell : edge) {
+    Mernel::ProfilerScope scope("make InnerEdge");
+    for (MapTilePtr cell : m_innerEdge) {
         if (m_diagonalGrowth) {
             if (m_innerArea.contains(cell->m_neighborB)
                 && m_innerArea.contains(cell->m_neighborT)
@@ -39,17 +36,16 @@ void MapTileArea::removeNonInnerFromInnerEdge()
                 && m_innerArea.contains(cell->m_neighborTR)
                 && m_innerArea.contains(cell->m_neighborBL)
                 && m_innerArea.contains(cell->m_neighborBR))
-                continue;
+                forErase.push_back(cell);
         } else {
             if (m_innerArea.contains(cell->m_neighborB)
                 && m_innerArea.contains(cell->m_neighborT)
                 && m_innerArea.contains(cell->m_neighborR)
                 && m_innerArea.contains(cell->m_neighborL))
-                continue;
+                forErase.push_back(cell);
         }
-
-        m_innerEdge.insert(cell);
     }
+    m_innerEdge.erase(forErase);
 
     makeOutsideEdge();
 }
@@ -58,18 +54,17 @@ void MapTileArea::makeOutsideEdge()
 {
     m_outsideEdge.clear();
     m_outsideEdge.reserve(m_innerEdge.size());
-    auto predicate = [this](MapTilePtr cell) {
-        return cell && !m_innerArea.contains(cell);
-    };
+
     for (auto* cell : m_innerEdge) {
-        for (auto* ncell : cell->neighboursList(m_diagonalGrowth))
-            addIf(m_outsideEdge, ncell, predicate);
+        for (auto* ncell : cell->neighboursList(m_diagonalGrowth)) {
+            if (!m_innerArea.contains(ncell))
+                m_outsideEdge.insert(ncell);
+        }
     }
 }
 
 void MapTileArea::removeEdgeFromInnerArea()
 {
-    //Mernel::ProfilerScope scope("removeEdgeFromInnerArea");
     m_innerArea.erase(m_innerEdge);
 }
 
@@ -153,23 +148,22 @@ std::vector<MapTileArea> MapTileArea::splitByFloodFill(bool useDiag, MapTilePtr 
 {
     if (m_innerArea.empty())
         return {};
-    //Mernel::ProfilerScope scope("splitByFloodFill");
 
     std::vector<MapTileArea> result;
-    MapTileArea              current;
+    MapTilePtrList           currentBuffer;
 
-    std::unordered_set<MapTilePtr> visited;
-    MapTilePtrList                 currentEdge;
-    auto                           addToCurrent = [&current, &visited, &currentEdge, *this](MapTilePtr cell) {
+    MapTileRegion  visited;
+    MapTilePtrList currentEdge;
+    auto           addToCurrent = [&currentBuffer, &visited, &currentEdge, *this](MapTilePtr cell) {
         if (visited.contains(cell))
             return;
         if (!m_innerArea.contains(cell))
             return;
         visited.insert(cell);
-        current.m_innerArea.insert(cell);
+        currentBuffer.push_back(cell);
         currentEdge.push_back(cell);
     };
-    std::set<MapTilePtr> remain(m_innerArea.begin(), m_innerArea.end());
+    MapTileRegion remain = m_innerArea;
     if (hint) {
         if (!remain.contains(hint))
             throw std::runtime_error("Invalid tile hint provided");
@@ -181,20 +175,19 @@ std::vector<MapTileArea> MapTileArea::splitByFloodFill(bool useDiag, MapTilePtr 
         addToCurrent(startCell);
 
         while (!currentEdge.empty()) {
-            MapTilePtrList nextEdge = currentEdge;
-            currentEdge.clear();
+            MapTilePtrList nextEdge = std::move(currentEdge);
 
             for (MapTilePtr edgeCell : nextEdge) {
-                MapTilePtrList neighbours = edgeCell->neighboursList(useDiag);
+                const auto& neighbours = edgeCell->neighboursList(useDiag);
                 for (auto growedCell : neighbours) {
                     addToCurrent(growedCell);
                 }
             }
         }
-
+        MapTileArea current;
+        current.m_innerArea = MapTileRegion(std::move(currentBuffer));
         current.makeEdgeFromInnerArea();
-        for (auto* tile : current.m_innerArea)
-            remain.erase(tile);
+        remain.erase(current.m_innerArea);
         result.push_back(std::move(current));
     }
 
@@ -223,8 +216,6 @@ std::vector<MapTileArea> MapTileArea::splitByK(std::ostream& os, size_t k, bool 
     if (k == 1) {
         result.push_back(*this);
     } else {
-        Mernel::ProfilerScope scope("segmentation");
-
         KMeansSegmentation seg;
         seg.m_points.reserve(zoneArea);
         for (auto* cell : m_innerArea) {
@@ -233,6 +224,7 @@ std::vector<MapTileArea> MapTileArea::splitByK(std::ostream& os, size_t k, bool 
         seg.m_iters = 30;
         seg.initEqualCentoids(k);
         seg.run(os);
+
         std::vector<KMeansSegmentation::Cluster*> clusters;
         for (KMeansSegmentation::Cluster& cluster : seg.m_clusters)
             clusters.push_back(&cluster);

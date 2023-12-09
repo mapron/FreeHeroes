@@ -663,7 +663,7 @@ MapConverter::ScopeLogger::~ScopeLogger()
 {
     for (int r = 0; r < m_indent; ++r)
         m_output << "  ";
-    m_output << "end " << m_currentTask << " (" << m_timer.elapsed() << " us.)\n";
+    m_output << "end " << m_currentTask << " (" << m_timer.elapsedUS() << " us.)\n";
 }
 
 }

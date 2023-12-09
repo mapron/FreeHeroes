@@ -230,7 +230,7 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
     }
 
     m_stopAfter = stringToStage(stopAfterStage);
-    //m_stopAfter = Stage::Rewards;
+    //m_stopAfter = Stage::RoadsPlacement;
 
     Mernel::ProfilerContext                profileContext;
     Mernel::ProfilerDefaultContextSwitcher switcher(profileContext);
@@ -253,7 +253,7 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage)
         Mernel::ScopeTimer timer;
         m_logOutput << baseIndent << "Start stage: " << stageToString(m_currentStage) << "\n";
         runCurrentStage();
-        m_logOutput << baseIndent << "End stage: " << stageToString(m_currentStage) << " (" << timer.elapsed() << " us.)\n";
+        m_logOutput << baseIndent << "End stage: " << stageToString(m_currentStage) << " (" << timer.elapsedUS() << " us.)\n";
         {
             auto profilerStr = profileContext.printToStr();
             profileContext.clearAll();
@@ -403,6 +403,7 @@ void FHTemplateProcessor::runZoneTilesInitial()
 
 void FHTemplateProcessor::runZoneTilesExpand()
 {
+    Mernel::ProfilerScope scope("runZoneTilesExpand");
     m_tileZonesPtrs.resize(m_tileZones.size());
     for (size_t i = 0; i < m_tileZonesPtrs.size(); ++i)
         m_tileZonesPtrs[i] = &m_tileZones[i];

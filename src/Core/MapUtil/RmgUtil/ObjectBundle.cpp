@@ -176,7 +176,7 @@ bool ObjectBundle::estimateOccupied(MapTilePtr absPos, MapTilePtr cetroid)
             if (!m_guardAbsPos)
                 return false;
 
-            m_dangerZone = blurSet(MapTileRegion({ m_guardAbsPos }), true, false);
+            m_dangerZone = blurSet(MapTileRegion(MapTilePtrSortedList{ m_guardAbsPos }), true, false);
 
             m_extraObstacles = blurSet(m_rewardArea, true);
             m_extraObstacles.erase(m_dangerZone);
@@ -215,7 +215,7 @@ bool ObjectBundle::estimateOccupied(MapTilePtr absPos, MapTilePtr cetroid)
             m_guardAbsPos = mainPos->neighbourByOffset(guardOffset);
             if (!m_guardAbsPos)
                 return false;
-            m_dangerZone = blurSet(MapTileRegion({ m_guardAbsPos }), true, false);
+            m_dangerZone = blurSet(MapTileRegion(MapTilePtrSortedList{ m_guardAbsPos }), true, false);
         }
     }
 

@@ -18,13 +18,15 @@ void TileZone::estimateCentroid()
 
 void TileZone::readFromMap()
 {
-    //Mernel::ProfilerScope scope("readFromMap");
+    Mernel::ProfilerScope scope("readFromMap");
 
     m_area.m_innerArea.clear();
+    MapTilePtrSortedList sortedCells;
     for (auto& cell : m_tileContainer->m_tiles) {
         if (cell.m_zone == this)
-            m_area.m_innerArea.insert(&cell);
+            sortedCells.push_back(&cell);
     }
+    m_area.m_innerArea.insert(sortedCells);
 
     auto floodRegions  = m_area.splitByFloodFill(false, m_centroid);
     m_area.m_innerArea = floodRegions[0].m_innerArea;
