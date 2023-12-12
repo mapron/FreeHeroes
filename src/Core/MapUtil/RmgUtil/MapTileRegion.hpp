@@ -12,6 +12,8 @@
 namespace FreeHeroes {
 struct MapTile;
 using MapTilePtr = MapTile*;
+class MapTileRegion;
+using MapTileRegionList = std::vector<MapTileRegion>;
 
 class MAPUTIL_EXPORT MapTileRegion : public FlatSet<MapTilePtr> {
 public:
@@ -22,6 +24,12 @@ public:
     /*implicit*/ MapTileRegion(FlatSet<MapTilePtr>&& data)
         : FlatSet<MapTilePtr>(std::move(data))
     {}
+
+    MapTileRegionList splitByFloodFill(bool useDiag, MapTilePtr hint = nullptr) const;
+    MapTileRegionList splitByMaxArea(std::ostream& os, size_t maxArea, bool repulse = false) const;
+    MapTileRegionList splitByK(std::ostream& os, size_t k, bool repulse = false) const;
+
+    MapTilePtr makeCentroid(bool ensureInbounds) const;
 };
 
 }

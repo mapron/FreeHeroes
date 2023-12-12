@@ -114,14 +114,14 @@ void RoadHelper::placeRoads(TileZone& tileZone)
                 auto otherRoadNodes = tileZone.m_roadNodes;
                 otherRoadNodes.erase(townCell);
                 bool okNear = false;
-                for (auto* nearCell : roadCellsNearTheTown.m_innerArea) {
+                for (auto* nearCell : roadCellsNearTheTown) {
                     if (otherRoadNodes.contains(nearCell)) {
                         okNear = true;
                         break;
                     }
                 }
                 if (!okNear) {
-                    allPossibleRoads.erase(roadCellsNearTheTown.m_innerArea);
+                    allPossibleRoads.erase(roadCellsNearTheTown);
                 }
             }
 
@@ -140,24 +140,24 @@ void RoadHelper::placeRoads(TileZone& tileZone)
         // unite separate networks
         MapTileRegionWithEdge roadNet;
         roadNet.m_innerArea    = tileZone.m_possibleRoadsArea;
-        auto disconnectedParts = roadNet.splitByFloodFill(true);
+        auto disconnectedParts = roadNet.m_innerArea.splitByFloodFill(true);
         if (disconnectedParts.size() > 1) {
-            std::sort(disconnectedParts.begin(), disconnectedParts.end(), [](const MapTileRegionWithEdge& r, const MapTileRegionWithEdge& l) {
-                return r.m_innerArea.size() < l.m_innerArea.size();
+            std::sort(disconnectedParts.begin(), disconnectedParts.end(), [](const MapTileRegion& r, const MapTileRegion& l) {
+                return r.size() < l.size();
             });
-            MapTileRegionWithEdge mainPart = disconnectedParts.back();
+            MapTileRegion mainPart = disconnectedParts.back();
             disconnectedParts.pop_back();
-            auto* mainCentroidTile = MapTileRegionWithEdge::makeCentroid(mainPart.m_innerArea);
+            auto* mainCentroidTile = mainPart.makeCentroid(true);
 
-            for (const MapTileRegionWithEdge& part : disconnectedParts) {
-                if (part.m_innerArea.size() <= 2)
+            for (const MapTileRegion& part : disconnectedParts) {
+                if (part.size() <= 2)
                     continue;
-                auto       it      = std::min_element(part.m_innerArea.cbegin(), part.m_innerArea.cend(), [mainCentroidTile](MapTilePtr l, MapTilePtr r) {
+                auto       it      = std::min_element(part.cbegin(), part.cend(), [mainCentroidTile](MapTilePtr l, MapTilePtr r) {
                     return posDistance(mainCentroidTile, l) < posDistance(mainCentroidTile, r);
                 });
                 MapTilePtr closest = (*it);
 
-                auto it2 = std::min_element(mainPart.m_innerArea.cbegin(), mainPart.m_innerArea.cend(), [closest](MapTilePtr l, MapTilePtr r) {
+                auto it2 = std::min_element(mainPart.cbegin(), mainPart.cend(), [closest](MapTilePtr l, MapTilePtr r) {
                     return posDistance(closest, l) < posDistance(closest, r);
                 });
 
@@ -262,14 +262,14 @@ void RoadHelper::prepareRoad(TileZone& tileZone, const MapTilePtrList& tileList,
     if (tileList.empty())
         return;
 
-    MapTileRegionWithEdge filtered;
+    MapTileRegion filtered;
     for (auto* cell : tileList) {
         if (!tileZone.m_placedRoads.contains(cell))
-            filtered.m_innerArea.insert(cell);
+            filtered.insert(cell);
     }
     auto segments = filtered.splitByFloodFill(false);
     for (auto& seg : segments) {
-        MapTilePtrList filteredPath(seg.m_innerArea.cbegin(), seg.m_innerArea.cend());
+        MapTilePtrList filteredPath(seg.cbegin(), seg.cend());
         tileZone.m_roads.push_back(TileZone::Road{ std::move(filteredPath), level });
     }
 

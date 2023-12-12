@@ -71,7 +71,7 @@ void SegmentHelper::makeBorders(std::vector<TileZone>& tileZones)
         if (border.empty()) {
             throw std::runtime_error("No border between '" + connections.m_from + "' and '" + connections.m_to + "'");
         }
-        MapTilePtr cell = MapTileRegionWithEdge::makeCentroid(border); // switch to k-means when we need more than one connection.
+        MapTilePtr cell = border.makeCentroid(true); // switch to k-means when we need more than one connection.
 
         cell->m_zone->m_roadNodesHighPriority.insert(cell);
 
@@ -163,14 +163,14 @@ void SegmentHelper::makeBorders(std::vector<TileZone>& tileZones)
 void SegmentHelper::makeSegments(TileZone& tileZone)
 {
     // todo: why repulse for K-means? why segments must be far from each other on consequtive indices? I dunno
-    tileZone.m_innerAreaSegments = tileZone.m_innerAreaUsable.splitByMaxArea(m_logOutput, tileZone.m_rngZoneSettings.m_segmentAreaSize, true);
+    auto segmentList             = tileZone.m_innerAreaUsable.m_innerArea.splitByMaxArea(m_logOutput, tileZone.m_rngZoneSettings.m_segmentAreaSize, true);
+    tileZone.m_innerAreaSegments = MapTileRegionWithEdge::makeEdgeList(segmentList);
     auto borderNet               = MapTileRegionWithEdge::getInnerBorderNet(tileZone.m_innerAreaSegments);
 
     tileZone.m_roadNodes.insert(tileZone.m_roadNodesHighPriority);
 
     for (size_t i = 0; auto& area : tileZone.m_innerAreaSegments) {
         i++;
-        area.makeEdgeFromInnerArea();
         area.removeEdgeFromInnerArea();
 
         for (auto* cell : area.m_innerEdge) {

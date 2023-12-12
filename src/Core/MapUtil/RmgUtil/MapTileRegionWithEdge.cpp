@@ -4,7 +4,6 @@
  * See LICENSE file for details.
  */
 #include "MapTileRegionWithEdge.hpp"
-#include "KMeans.hpp"
 #include "MapTileContainer.hpp"
 
 #include "MernelPlatform/Profiler.hpp"
@@ -133,179 +132,22 @@ MapTileRegion MapTileRegionWithEdge::getBottomEdge() const
     return result;
 }
 
-MapTileRegionWithEdge MapTileRegionWithEdge::floodFillDiagonalByInnerEdge(MapTilePtr cellStart) const
+MapTileRegion MapTileRegionWithEdge::floodFillDiagonalByInnerEdge(MapTilePtr cellStart) const
 {
-    MapTileRegionWithEdge innerEdgeArea;
-    innerEdgeArea.m_innerArea = this->m_innerEdge;
-
-    auto segments = innerEdgeArea.splitByFloodFill(true, cellStart);
+    auto segments = this->m_innerEdge.splitByFloodFill(true, cellStart);
     if (segments.empty())
         return {};
     return segments[0];
 }
 
-std::vector<MapTileRegionWithEdge> MapTileRegionWithEdge::splitByFloodFill(bool useDiag, MapTilePtr hint) const
+MapTileRegionWithEdgeList MapTileRegionWithEdge::makeEdgeList(const MapTileRegionList& regions)
 {
-    if (m_innerArea.empty())
-        return {};
-
-    std::vector<MapTileRegionWithEdge> result;
-    MapTilePtrList                     currentBuffer;
-
-    MapTileRegion  visited;
-    MapTilePtrList currentEdge;
-    auto           addToCurrent = [&currentBuffer, &visited, &currentEdge, *this](MapTilePtr cell) {
-        if (visited.contains(cell))
-            return;
-        if (!m_innerArea.contains(cell))
-            return;
-        visited.insert(cell);
-        currentBuffer.push_back(cell);
-        currentEdge.push_back(cell);
-    };
-    MapTileRegion remain = m_innerArea;
-    if (hint) {
-        if (!remain.contains(hint))
-            throw std::runtime_error("Invalid tile hint provided");
+    MapTileRegionWithEdgeList result(regions.size());
+    for (size_t i = 0; i < regions.size(); ++i) {
+        result[i].m_innerArea = regions[i];
+        result[i].makeEdgeFromInnerArea();
     }
-
-    while (!remain.empty()) {
-        MapTilePtr startCell = hint ? hint : *remain.begin();
-        hint                 = nullptr;
-        addToCurrent(startCell);
-
-        while (!currentEdge.empty()) {
-            MapTilePtrList nextEdge = std::move(currentEdge);
-
-            for (MapTilePtr edgeCell : nextEdge) {
-                const auto& neighbours = edgeCell->neighboursList(useDiag);
-                for (auto growedCell : neighbours) {
-                    addToCurrent(growedCell);
-                }
-            }
-        }
-        MapTileRegionWithEdge current;
-        current.m_innerArea = MapTileRegion(std::move(currentBuffer));
-        current.makeEdgeFromInnerArea();
-        remain.erase(current.m_innerArea);
-        result.push_back(std::move(current));
-    }
-
     return result;
-}
-
-std::vector<MapTileRegionWithEdge> MapTileRegionWithEdge::splitByMaxArea(std::ostream& os, size_t maxArea, bool repulse) const
-{
-    std::vector<MapTileRegionWithEdge> result;
-    size_t                             zoneArea = m_innerArea.size();
-    if (!zoneArea)
-        return result;
-
-    const size_t k = (zoneArea + maxArea + 1) / maxArea;
-
-    return splitByK(os, k, repulse);
-}
-
-std::vector<MapTileRegionWithEdge> MapTileRegionWithEdge::splitByK(std::ostream& os, size_t k, bool repulse) const
-{
-    std::vector<MapTileRegionWithEdge> result;
-    size_t                             zoneArea = m_innerArea.size();
-    if (!zoneArea)
-        return result;
-
-    if (k == 1) {
-        result.push_back(*this);
-    } else {
-        KMeansSegmentation seg;
-        seg.m_points.reserve(zoneArea);
-        for (auto* cell : m_innerArea) {
-            seg.m_points.push_back({ cell });
-        }
-        seg.m_iters = 30;
-        seg.initEqualCentoids(k);
-        seg.run(os);
-
-        std::vector<KMeansSegmentation::Cluster*> clusters;
-        for (KMeansSegmentation::Cluster& cluster : seg.m_clusters)
-            clusters.push_back(&cluster);
-        if (repulse) {
-            std::vector<KMeansSegmentation::Cluster*> clustersSorted;
-            auto*                                     curr = clusters.back();
-            clusters.pop_back();
-            clustersSorted.push_back(curr);
-            while (!clusters.empty()) {
-                auto it = std::max_element(clusters.begin(), clusters.end(), [curr](KMeansSegmentation::Cluster* l, KMeansSegmentation::Cluster* r) {
-                    return posDistance(curr->m_centroid, l->m_centroid) < posDistance(curr->m_centroid, r->m_centroid);
-                });
-                curr    = *it;
-                clustersSorted.push_back(curr);
-                clusters.erase(it);
-            }
-            clusters = clustersSorted;
-        }
-
-        for (KMeansSegmentation::Cluster* cluster : clusters) {
-            MapTileRegion zoneSeg;
-            zoneSeg.reserve(cluster->m_points.size());
-            for (auto& point : cluster->m_points)
-                zoneSeg.insert(point->m_pos);
-
-            assert(zoneSeg.size() > 0);
-            result.push_back(MapTileRegionWithEdge{ .m_innerArea = std::move(zoneSeg) });
-        }
-    }
-    for (auto& area : result)
-        area.makeEdgeFromInnerArea();
-    return result;
-}
-
-MapTilePtr MapTileRegionWithEdge::makeCentroid(const MapTileRegion& region, bool ensureInbounds)
-{
-    if (region.empty())
-        return nullptr;
-
-    MapTileContainer* tileContainer = region[0]->m_container;
-
-    int64_t   sumX = 0, sumY = 0;
-    int64_t   size = region.size();
-    const int z    = region[0]->m_pos.m_z;
-    for (const auto* cell : region) {
-        sumX += cell->m_pos.m_x;
-        sumY += cell->m_pos.m_y;
-    }
-    sumX /= size;
-    sumY /= size;
-    const auto pos      = FHPos{ static_cast<int>(sumX), static_cast<int>(sumY), z };
-    MapTilePtr centroid = tileContainer->m_tileIndex.at(pos);
-    if (ensureInbounds && !region.contains(centroid)) {
-        auto it  = std::min_element(region.cbegin(), region.cend(), [centroid](MapTilePtr l, MapTilePtr r) {
-            return posDistance(centroid, l, 100) < posDistance(centroid, r, 100);
-        });
-        centroid = (*it);
-    }
-
-    /// let's make centroid tile as close to center of mass as possible
-
-    auto estimateAvgDistance = [&region](MapTilePtr centerTile) -> int64_t {
-        int64_t result = 0;
-        for (const auto* cell : region) {
-            result += posDistance(centerTile, cell, 100);
-        }
-        return result;
-    };
-    int64_t result = estimateAvgDistance(centroid);
-
-    for (MapTilePtr tile : centroid->m_allNeighboursWithDiag) {
-        if (ensureInbounds && !region.contains(tile))
-            continue;
-        auto altResult = estimateAvgDistance(tile);
-        if (altResult < result) {
-            result   = altResult;
-            centroid = tile;
-        }
-    }
-
-    return centroid;
 }
 
 MapTileRegionWithEdge MapTileRegionWithEdge::getInnerBorderNet(const std::vector<MapTileRegionWithEdge>& areas)
@@ -336,7 +178,7 @@ std::pair<MapTileRegionWithEdge::CollisionResult, FHPos> MapTileRegionWithEdge::
     if (intersection == object)
         return std::pair{ CollisionResult::ImpossibleShift, FHPos{} };
 
-    const MapTilePtr collisionCentroid = MapTileRegionWithEdge::makeCentroid(intersection, false);
+    const MapTilePtr collisionCentroid = intersection.makeCentroid(false);
 
     MapTileRegion objectWithoutObstacle = object;
     objectWithoutObstacle.erase(collisionCentroid);
@@ -354,7 +196,7 @@ std::pair<MapTileRegionWithEdge::CollisionResult, FHPos> MapTileRegionWithEdge::
     const int horRadius  = width / 2; // 1x1 => 0, 2x2 -> 1, 3x3 -> 1 , 4x4 -> 2
     const int vertRadius = height / 2;
 
-    const MapTilePtr objectCentroid = MapTileRegionWithEdge::makeCentroid(objectWithoutObstacle, false);
+    const MapTilePtr objectCentroid = objectWithoutObstacle.makeCentroid(false);
 
     FHPos collisionOffset = objectCentroid->m_pos - collisionCentroid->m_pos;
     int   cx              = collisionOffset.m_x;

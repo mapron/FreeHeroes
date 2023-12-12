@@ -12,7 +12,11 @@
 
 namespace FreeHeroes {
 
-struct MAPUTIL_EXPORT MapTileRegionWithEdge {
+class MapTileRegionWithEdge;
+using MapTileRegionWithEdgeList = std::vector<MapTileRegionWithEdge>;
+
+class MAPUTIL_EXPORT MapTileRegionWithEdge {
+public:
     bool          m_diagonalGrowth = false;
     MapTileRegion m_innerArea;
     MapTileRegion m_innerEdge;   // subset of innerArea;
@@ -55,11 +59,7 @@ struct MAPUTIL_EXPORT MapTileRegionWithEdge {
         return result;
     }
 
-    MapTileRegionWithEdge floodFillDiagonalByInnerEdge(MapTilePtr cellStart) const;
-
-    std::vector<MapTileRegionWithEdge> splitByFloodFill(bool useDiag, MapTilePtr hint = nullptr) const;
-    std::vector<MapTileRegionWithEdge> splitByMaxArea(std::ostream& os, size_t maxArea, bool repulse = false) const;
-    std::vector<MapTileRegionWithEdge> splitByK(std::ostream& os, size_t k, bool repulse = false) const;
+    MapTileRegion floodFillDiagonalByInnerEdge(MapTilePtr cellStart) const;
 
     enum class CollisionResult
     {
@@ -69,8 +69,8 @@ struct MAPUTIL_EXPORT MapTileRegionWithEdge {
         HasShift,
     };
 
-    static MapTilePtr                        makeCentroid(const MapTileRegion& region, bool ensureInbounds = true);
-    static MapTileRegionWithEdge             getInnerBorderNet(const std::vector<MapTileRegionWithEdge>& areas);
+    static MapTileRegionWithEdgeList         makeEdgeList(const MapTileRegionList& regions);
+    static MapTileRegionWithEdge             getInnerBorderNet(const MapTileRegionWithEdgeList& areas);
     static std::pair<CollisionResult, FHPos> getCollisionShiftForObject(const MapTileRegion& object, const MapTileRegion& obstacle, bool invertObstacle = false);
 
     static void decompose(MapTileContainer* tileContainer, MapTileRegion& object, MapTileRegion& obstacle, const std::string& serialized, int width, int height);

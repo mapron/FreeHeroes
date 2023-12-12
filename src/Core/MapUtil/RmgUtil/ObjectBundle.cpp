@@ -241,7 +241,7 @@ bool ObjectBundle::estimateOccupied(MapTilePtr absPos, MapTilePtr cetroid)
     m_allArea = m_occupiedWithDangerZone;
     m_allArea.insert(m_passAroundEdge);
 
-    m_centerPos = MapTileRegionWithEdge::makeCentroid(m_allArea);
+    m_centerPos = m_allArea.makeCentroid(true);
 
     m_absPosIsValid = true;
     return true;
@@ -304,7 +304,7 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
         zs.m_cells     = seg.m_innerArea;
         zs.m_cells.erase(safePadding);
         zs.m_cellsForUnguardedInner = zs.m_cells;
-        zs.m_mainCetroid            = MapTileRegionWithEdge::makeCentroid(zs.m_cells);
+        zs.m_mainCetroid            = zs.m_cells.makeCentroid(true);
         m_consumeResult.m_segments.push_back(std::move(zs));
     }
 
@@ -426,9 +426,9 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
             continue;
         MapTileRegionWithEdge area;
         area.m_innerArea = zs.m_cells;
-        auto parts       = area.splitByK(m_logOutput, zs.m_objectCount);
+        auto parts       = area.m_innerArea.splitByK(m_logOutput, zs.m_objectCount);
         for (auto& part : parts) {
-            auto* centroid = MapTileRegionWithEdge::makeCentroid(part.m_innerArea);
+            auto* centroid = part.makeCentroid(true);
             zs.m_centroids.push_back(centroid);
             m_consumeResult.m_centroidsALL.push_back(centroid);
         }
@@ -508,18 +508,18 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
             MapTileRegionWithEdge blockedEst;
             blockedEst.m_innerArea = zoneSegment.m_cells;
             blockedEst.m_innerArea.erase(zoneSegment.m_innerEdge);
-            auto          parts = blockedEst.splitByFloodFill(false);
+            auto          parts = blockedEst.m_innerArea.splitByFloodFill(false);
             MapTileRegion needBlock;
             for (auto& part : parts) {
-                if (part.m_innerArea.size() < 3)
+                if (part.size() < 3)
                     continue;
                 const size_t maxArea = 12;
 
                 auto segments  = part.splitByMaxArea(m_logOutput, maxArea);
-                auto borderNet = MapTileRegionWithEdge::getInnerBorderNet(segments);
+                auto borderNet = MapTileRegionWithEdge::getInnerBorderNet(MapTileRegionWithEdge::makeEdgeList(segments));
 
                 for (const auto& seg : segments) {
-                    for (auto* tile : seg.m_innerArea) {
+                    for (auto* tile : seg) {
                         if (borderNet.contains(tile))
                             continue;
 

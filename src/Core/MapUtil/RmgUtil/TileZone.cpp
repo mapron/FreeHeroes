@@ -13,7 +13,7 @@ namespace FreeHeroes {
 
 void TileZone::estimateCentroid()
 {
-    m_centroid = MapTileRegionWithEdge::makeCentroid(m_area.m_innerArea);
+    m_centroid = m_area.m_innerArea.makeCentroid(true);
 }
 
 void TileZone::readFromMap()
@@ -28,10 +28,10 @@ void TileZone::readFromMap()
     }
     m_area.m_innerArea.insert(sortedCells);
 
-    auto floodRegions  = m_area.splitByFloodFill(false, m_centroid);
-    m_area.m_innerArea = floodRegions[0].m_innerArea;
+    auto floodRegions  = m_area.m_innerArea.splitByFloodFill(false, m_centroid);
+    m_area.m_innerArea = floodRegions[0];
     for (size_t i = 1; i < floodRegions.size(); i++) {
-        for (auto* tile : floodRegions[i].m_innerArea)
+        for (auto* tile : floodRegions[i])
             tile->m_zone = nullptr;
     }
 
