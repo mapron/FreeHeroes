@@ -22,26 +22,11 @@ public:
                Core::IRandomGenerator* const rng,
                std::ostream&                 logOutput);
 
-    void makeBorders(std::vector<TileZone>& tileZones);
-
     void placeRoads(TileZone& tileZone);
-    void refineSegments(TileZone& tileZone);
 
     void prepareRoad(TileZone& tileZone, const MapTilePtrList& tileList, RoadLevel level);
     void placeRoad(const MapTilePtrList& tileList, RoadLevel level);
     void placeRoadPath(std::vector<FHPos> path, RoadLevel level);
-
-public:
-    struct Guard {
-        int64_t     m_value = 0;
-        std::string m_id;
-        std::string m_mirrorFromId;
-        MapTilePtr  m_pos      = nullptr;
-        TileZone*   m_zone     = nullptr;
-        bool        m_joinable = false;
-    };
-
-    std::vector<Guard> m_guards;
 
 private:
     MapTileRegion  redundantCleanup(TileZone& tileZone);

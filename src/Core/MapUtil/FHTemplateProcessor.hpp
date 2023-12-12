@@ -33,7 +33,9 @@ public:
         ZoneTilesRefinement,
         BorderRoads,
         TownsPlacement,
+        CellSegmentation,
         RoadsPlacement,
+        SegmentationRefinement,
         HeatMap,
         Rewards,
         CorrectObjectTerrains,
@@ -52,7 +54,9 @@ private:
     void runZoneTilesRefinement();
     void runBorderRoads();
     void runTownsPlacement();
+    void runCellSegmentation();
     void runRoadsPlacement();
+    void runSegmentationRefinement();
     void runHeatMap();
     void runRewards();
     void runCorrectObjectTerrains();

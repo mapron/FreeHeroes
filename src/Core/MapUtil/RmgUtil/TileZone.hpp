@@ -51,6 +51,7 @@ struct TileZone {
     MapTileRegion m_innerAreaTowns;
 
     std::vector<MapTileArea> m_innerAreaSegments;
+    MapTileRegion            m_innerAreaSegmentsUnited;
 
     MapTileRegion     m_possibleRoadsArea;
     MapTileRegion     m_placedRoads;
@@ -69,7 +70,9 @@ struct TileZone {
     MapTileRegion m_rewardTilesDanger;
     MapTileRegion m_rewardTilesSpacing;
 
+    std::map<MapTilePtr, int>    m_tile2heat;
     std::map<int, MapTileRegion> m_regionsByHeat;
+    MapTileRegion                m_specialHeat;
 
     std::map<std::string, MapTilePtr> m_namedTiles;
 

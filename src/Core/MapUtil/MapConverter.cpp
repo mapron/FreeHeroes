@@ -556,7 +556,8 @@ void MapConverter::convertFHTPLtoFH()
                          db,
                          rng.get(),
                          m_logOutput,
-                         m_settings.m_stopAfterStage);
+                         m_settings.m_stopAfterStage,
+                         m_settings.m_showDebugStage);
 }
 
 void MapConverter::checkBinaryInputOutputEquality()

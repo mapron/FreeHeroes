@@ -22,6 +22,7 @@ void generateFromTemplate(FHMap&                     map,
                           const Core::IGameDatabase* database,
                           Core::IRandomGenerator*    rng,
                           std::ostream&              logOutput,
-                          const std::string&         stopAfterStage);
+                          const std::string&         stopAfterStage,
+                          const std::string&         showDebugStage);
 
 }
