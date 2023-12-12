@@ -14,6 +14,7 @@ struct MapTile;
 using MapTilePtr = MapTile*;
 class MapTileRegion;
 using MapTileRegionList = std::vector<MapTileRegion>;
+struct FHPos;
 
 class MAPUTIL_EXPORT MapTileRegion : public FlatSet<MapTilePtr> {
 public:
@@ -25,11 +26,21 @@ public:
         : FlatSet<MapTilePtr>(std::move(data))
     {}
 
+    struct SplitRegionSettings {
+        MapTilePtr m_start  = nullptr;
+        int        m_speed  = 100;
+        int64_t    m_radius = 100;
+    };
+    using SplitRegionSettingsList = std::vector<SplitRegionSettings>;
+
     MapTileRegionList splitByFloodFill(bool useDiag, MapTilePtr hint = nullptr) const;
     MapTileRegionList splitByMaxArea(std::ostream& os, size_t maxArea, bool repulse = false) const;
     MapTileRegionList splitByK(std::ostream& os, size_t k, bool repulse = false) const;
+    MapTileRegionList splitByKExt(const SplitRegionSettingsList& settingsList, size_t iterLimit = 100) const;
 
     MapTilePtr makeCentroid(bool ensureInbounds) const;
+
+    MapTilePtr findClosestPoint(FHPos pos) const;
 };
 
 }

@@ -96,6 +96,7 @@ struct FHRngZone {
 
     int m_relativeSizeAvg        = 100;
     int m_relativeSizeDispersion = 0;
+    int m_centerShiftElasticity  = 100;
     int m_zoneGuardPercent       = 100;
     int m_zoneGuardDispersion    = 5;
 

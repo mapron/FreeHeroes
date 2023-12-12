@@ -174,6 +174,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_centerDispersion,
     m_relativeSizeAvg,
     m_relativeSizeDispersion,
+    m_centerShiftElasticity,
     m_zoneGuardPercent,
     m_zoneGuardDispersion,
     m_excludeFactionZones,

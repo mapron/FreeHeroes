@@ -360,7 +360,7 @@
                 "towns": {"town1":{"excludeFactionZones":["P3"] }, "town2":{"excludeFactionZones":["P3"]}, "main": {"tilesToTarget": 20, "closeToConnection":"CC_P3" } } },
             "P4": { "base": "Common"  , "isNormal": true,  "player": "Green", "centerAvg": {"x": 15 , "y": 120}  ,
                 "towns": {"town1":{"excludeFactionZones":["P4"] }, "town2":{"excludeFactionZones":["P4"]}, "main": {"tilesToTarget": 20, "closeToConnection":"CC_P4" } } },
-            "CC": { "base": "Treasure", "isNormal": true,  "player": "None", "centerAvg": {"x": 72 , "y": 72 }  }
+            "CC": { "base": "Treasure", "isNormal": true,  "player": "None", "centerAvg": {"x": 72 , "y": 72 }, "centerShiftElasticity": 0  }
         },
         "connections": {
             "CC_P1": { "from": "CC", "to": "P1", "guard": 100000 },

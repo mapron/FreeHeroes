@@ -34,6 +34,16 @@ constexpr inline FHPos posNeighbour(FHPos point, int dx, int dy)
     return point;
 }
 
+// return position between from and to, in fraction (nom/den) of distance.
+constexpr inline FHPos posMidPoint(FHPos from, FHPos to, int nom, int den)
+{
+    int64_t dx = to.m_x - from.m_x;
+    int64_t dy = to.m_y - from.m_y;
+    dx         = dx * nom / den;
+    dy         = dy * nom / den;
+    return FHPos{ static_cast<int>(from.m_x + dx), static_cast<int>(from.m_y + dy), from.m_z };
+}
+
 enum class FHPosDirection
 {
     Invalid,

@@ -53,6 +53,8 @@ void MapTileContainer::init(int width, int height, int depth)
             }
         }
     }
+    MapTilePtrSortedList allSorted;
+    allSorted.reserve(m_tiles.size());
     index = 0;
     for (int z = 0; z < depth; ++z) {
         for (int y = 0; y < height; ++y) {
@@ -83,9 +85,11 @@ void MapTileContainer::init(int width, int height, int depth)
                     tile->m_allNeighboursWithDiag.push_back(tile->m_neighborBR);
                     tile->m_diagNeighbours.push_back(tile->m_neighborBR);
                 }
+                allSorted.push_back(tile);
             }
         }
     }
+    m_all = MapTileRegion(std::move(allSorted));
     for (auto& cell : m_tiles) {
         std::sort(cell.m_orthogonalNeighbours.begin(), cell.m_orthogonalNeighbours.end());
         std::sort(cell.m_diagNeighbours.begin(), cell.m_diagNeighbours.end());
@@ -93,15 +97,6 @@ void MapTileContainer::init(int width, int height, int depth)
     }
 
     m_centerTile = m_tileIndex[FHPos{ width / 2, height / 2, 0 }];
-}
-
-void MapTileContainer::checkAllTerrains(const MapTileRegion& posPlaced)
-{
-    for (auto& cell : m_tiles) {
-        if (!posPlaced.contains(&cell)) {
-            throw std::runtime_error("I forget to place tile: " + cell.m_pos.toPrintableString());
-        }
-    }
 }
 
 bool MapTileContainer::fixExclaves() // true = nothing to fix

@@ -9,7 +9,129 @@
 
 #include "KMeans.hpp"
 
+#include <map>
+
 namespace FreeHeroes {
+
+namespace {
+struct KMeansData {
+    struct Cluster {
+        FHPos                m_centroid;
+        FHPos                m_centerMass;
+        MapTilePtrSortedList m_points;
+        size_t               m_pointsCount = 0;
+        int                  m_radius      = 100;
+        int                  m_speed       = 100;
+
+        int64_t distanceTo(MapTilePtr point) const
+        {
+            return posDistance(point->m_pos, m_centroid) * 1000 / m_radius;
+        }
+
+        void updateCentroid()
+        {
+            if (m_speed == 0)
+                return;
+
+            m_centroid = posMidPoint(m_centroid, m_centerMass, m_speed, 100);
+        }
+        void clearMass()
+        {
+            m_centerMass  = FHPos{};
+            m_pointsCount = 0;
+        }
+        void addToMass(FHPos pos)
+        {
+            m_centerMass = m_centerMass + pos;
+            m_pointsCount++;
+        }
+        void finalizeMass()
+        {
+            if (m_pointsCount) {
+                m_centerMass.m_x /= m_pointsCount;
+                m_centerMass.m_y /= m_pointsCount;
+            }
+        }
+    };
+
+    void clearMass()
+    {
+        for (auto& cluster : m_clusters)
+            cluster.clearMass();
+    }
+    void assignPoints(bool isDone)
+    {
+        for (size_t i = 0; MapTilePtr tile : *m_region) {
+            const size_t clusterId = m_nearestIndex[i];
+            m_clusters[clusterId].addToMass(tile->m_pos);
+            if (isDone) {
+                m_clusters[clusterId].m_points.push_back(tile);
+            }
+            i++;
+        }
+    }
+    void finalizeMass()
+    {
+        for (auto& cluster : m_clusters)
+            cluster.finalizeMass();
+    }
+    void updateCentroids()
+    {
+        for (auto& cluster : m_clusters)
+            cluster.updateCentroid();
+    }
+
+    size_t getNearestClusterId(MapTilePtr point) const
+    {
+        int64_t minDist          = m_clusters[0].distanceTo(point);
+        size_t  nearestClusterId = 0;
+
+        for (size_t i = 1; i < m_clusters.size(); i++) {
+            const int64_t dist = m_clusters[i].distanceTo(point);
+            if (dist < minDist) {
+                minDist          = dist;
+                nearestClusterId = i;
+            }
+        }
+
+        return nearestClusterId;
+    }
+
+    bool runIter(bool last)
+    {
+        bool done = true;
+
+        // Add all points to their nearest cluster
+        for (size_t i = 0; MapTilePtr tile : *m_region) {
+            size_t&      currentClusterId = m_nearestIndex[i];
+            const size_t nearestClusterId = getNearestClusterId(tile);
+
+            if (currentClusterId != nearestClusterId) {
+                currentClusterId = nearestClusterId;
+                done             = false;
+            }
+            i++;
+        }
+
+        // clear all existing clusters
+        clearMass();
+
+        // reassign points to their new clusters
+        assignPoints(done || last);
+
+        // calculate new mass points
+        finalizeMass();
+
+        updateCentroids();
+
+        return done;
+    }
+
+    const MapTileRegion* m_region = nullptr;
+    std::vector<size_t>  m_nearestIndex;
+    std::vector<Cluster> m_clusters;
+};
+}
 
 MapTileRegionList MapTileRegion::splitByFloodFill(bool useDiag, MapTilePtr hint) const
 {
@@ -122,6 +244,42 @@ MapTileRegionList MapTileRegion::splitByK(std::ostream& os, size_t k, bool repul
     return result;
 }
 
+MapTileRegionList MapTileRegion::splitByKExt(const SplitRegionSettingsList& settingsList, size_t iterLimit) const
+{
+    if (empty())
+        return {};
+
+    KMeansData   kmeans;
+    const size_t K = settingsList.size();
+    kmeans.m_clusters.resize(K);
+    kmeans.m_region = this;
+    kmeans.m_nearestIndex.resize(size());
+    for (size_t i = 0; i < K; i++) {
+        auto& c      = kmeans.m_clusters[i];
+        c.m_centroid = settingsList[i].m_start->m_pos;
+        c.m_points.reserve(this->size() / K);
+        c.m_radius = settingsList[i].m_radius;
+        c.m_speed  = settingsList[i].m_speed;
+    }
+
+    for (size_t i = 0; i < kmeans.m_nearestIndex.size(); i++) {
+        kmeans.m_nearestIndex[i] = size_t(-1);
+    }
+
+    for (size_t iter = 0; iter < iterLimit; ++iter) {
+        const bool last = iter == iterLimit - 1;
+        if (kmeans.runIter(last))
+            break;
+    }
+
+    MapTileRegionList result;
+    result.resize(K);
+    for (size_t i = 0; i < K; i++) {
+        result[i] = MapTileRegion(kmeans.m_clusters[i].m_points);
+    }
+    return result;
+}
+
 MapTilePtr MapTileRegion::makeCentroid(bool ensureInbounds) const
 {
     const MapTileRegion& region = *this;
@@ -141,12 +299,8 @@ MapTilePtr MapTileRegion::makeCentroid(bool ensureInbounds) const
     sumY /= size;
     const auto pos      = FHPos{ static_cast<int>(sumX), static_cast<int>(sumY), z };
     MapTilePtr centroid = tileContainer->m_tileIndex.at(pos);
-    if (ensureInbounds && !region.contains(centroid)) {
-        auto it  = std::min_element(region.cbegin(), region.cend(), [centroid](MapTilePtr l, MapTilePtr r) {
-            return posDistance(centroid, l, 100) < posDistance(centroid, r, 100);
-        });
-        centroid = (*it);
-    }
+    if (ensureInbounds && !region.contains(centroid))
+        centroid = findClosestPoint(centroid->m_pos);
 
     /// let's make centroid tile as close to center of mass as possible
 
@@ -170,6 +324,16 @@ MapTilePtr MapTileRegion::makeCentroid(bool ensureInbounds) const
     }
 
     return centroid;
+}
+
+MapTilePtr MapTileRegion::findClosestPoint(FHPos pos) const
+{
+    if (empty())
+        return nullptr;
+    auto it = std::min_element(cbegin(), cend(), [pos](MapTilePtr l, MapTilePtr r) {
+        return posDistance(pos, l->m_pos, 100) < posDistance(pos, r->m_pos, 100);
+    });
+    return (*it);
 }
 
 }

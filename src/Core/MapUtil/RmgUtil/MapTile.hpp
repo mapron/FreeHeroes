@@ -17,7 +17,7 @@ namespace FreeHeroes {
 
 struct TileZone;
 struct MapTile;
-struct MapTileContainer;
+class MapTileContainer;
 using MapTilePtr           = MapTile*;
 using MapTileConstPtr      = const MapTile*;
 using MapTilePtrList       = FlatSetUnsortedList<MapTilePtr>;

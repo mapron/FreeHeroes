@@ -22,11 +22,14 @@ void TileZone::readFromMap()
 
     m_area.m_innerArea.clear();
     MapTilePtrSortedList sortedCells;
-    for (auto& cell : m_tileContainer->m_tiles) {
-        if (cell.m_zone == this)
-            sortedCells.push_back(&cell);
+    for (auto* cell : m_tileContainer->m_all) {
+        if (cell->m_zone == this)
+            sortedCells.push_back(cell);
     }
     m_area.m_innerArea.insert(sortedCells);
+
+    if (!m_area.m_innerArea.contains(m_centroid))
+        throw std::runtime_error("Inner area must contain its centroid");
 
     auto floodRegions  = m_area.m_innerArea.splitByFloodFill(false, m_centroid);
     m_area.m_innerArea = floodRegions[0];

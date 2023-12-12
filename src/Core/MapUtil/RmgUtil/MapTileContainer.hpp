@@ -6,6 +6,7 @@
 #pragma once
 
 #include "MapTile.hpp"
+#include "MapTileRegion.hpp"
 
 #include "MapUtilExport.hpp"
 
@@ -14,12 +15,13 @@
 
 namespace FreeHeroes {
 
-struct MAPUTIL_EXPORT MapTileContainer {
+class MAPUTIL_EXPORT MapTileContainer {
+public:
     int m_width  = 0;
     int m_height = 0;
     int m_depth  = 0;
 
-    std::vector<MapTile> m_tiles;
+    MapTileRegion m_all;
 
     std::unordered_map<FHPos, MapTilePtr> m_tileIndex;
     MapTilePtr                            m_centerTile = nullptr;
@@ -28,8 +30,9 @@ struct MAPUTIL_EXPORT MapTileContainer {
 
     void init(int width, int height, int depth);
 
-    void checkAllTerrains(const MapTileRegion& posPlaced);
-
     bool fixExclaves();
+
+private:
+    std::vector<MapTile> m_tiles;
 };
 }

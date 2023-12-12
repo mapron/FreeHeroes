@@ -366,48 +366,22 @@ void FHTemplateProcessor::runZoneTilesInitial()
                     << "\n";
     }
 
-    KMeansSegmentation seg;
-
-    std::map<MapTilePtr, size_t> zonePoints;
+    MapTileRegion::SplitRegionSettingsList settings;
+    settings.resize(m_tileZones.size());
     for (auto& tileZone : m_tileZones) {
-        zonePoints[tileZone.m_startTile] = tileZone.m_index;
+        settings[tileZone.m_index] = MapTileRegion::SplitRegionSettings{
+            .m_start  = tileZone.m_startTile,
+            .m_speed  = tileZone.m_rngZoneSettings.m_centerShiftElasticity,
+            .m_radius = tileZone.m_absoluteRadius,
+        };
     }
-
-    std::vector<size_t> kIndexes(m_tileZones.size());
-    seg.m_points.reserve(w * h);
-    int z = 0;
-    for (int x = 0; x < w; ++x) {
-        for (int y = 0; y < h; ++y) {
-            FHPos pos{ x, y, z };
-            auto* tile = m_tileContainer.m_tileIndex.at(pos);
-            if (zonePoints.contains(tile)) {
-                kIndexes[zonePoints[tile]] = seg.m_points.size();
-            }
-            seg.m_points.push_back({ tile });
-        }
-    }
-    seg.initClustersByCentroids(kIndexes);
-    seg.m_iters = 2;
-    for (KMeansSegmentation::Cluster& cluster : seg.m_clusters) {
-        size_t idx       = cluster.m_index;
-        auto&  tileZone  = m_tileZones[idx];
-        cluster.m_radius = tileZone.m_absoluteRadius;
-    }
-
-    seg.run(m_logOutput);
-
-    for (KMeansSegmentation::Cluster& cluster : seg.m_clusters) {
-        size_t idx          = cluster.m_index;
-        auto&  tileZone     = m_tileZones[idx];
-        FHPos  centroid     = cluster.m_centroid;
-        tileZone.m_centroid = m_tileContainer.m_tileIndex.at(centroid);
-        for (KMeansSegmentation::Point* point : cluster.m_points) {
-            auto* tile   = point->m_pos;
+    auto splitRegions = m_tileContainer.m_all.splitByKExt(settings, 2);
+    for (auto& tileZone : m_tileZones) {
+        tileZone.m_area.m_innerArea = std::move(splitRegions[tileZone.m_index]);
+        for (auto* tile : tileZone.m_area.m_innerArea)
             tile->m_zone = &tileZone;
-        }
-    }
-    for (auto& tileZone : m_tileZones) {
-        tileZone.readFromMap();
+        tileZone.m_area.makeEdgeFromInnerArea();
+        tileZone.m_centroid = tileZone.m_area.m_innerArea.makeCentroid(true);
     }
 }
 
@@ -472,9 +446,9 @@ void FHTemplateProcessor::runZoneTilesRefinement()
                 }
             }
         }
-        for (auto& cell : m_tileContainer.m_tiles) {
-            if (!cell.m_zone) {
-                m_logOutput << m_indent << "Unzoned cell:" << cell.toPrintableString() << "\n";
+        for (auto* cell : m_tileContainer.m_all) {
+            if (!cell->m_zone) {
+                m_logOutput << m_indent << "Unzoned cell:" << cell->toPrintableString() << "\n";
                 result = false;
             }
         }
@@ -502,7 +476,12 @@ void FHTemplateProcessor::runZoneTilesRefinement()
         placed.insert(tileZone.m_area.m_innerArea);
     }
 
-    m_tileContainer.checkAllTerrains(placed);
+    for (auto* cell : m_tileContainer.m_all) {
+        if (!placed.contains(cell)) {
+            throw std::runtime_error("I forget to place tile: " + cell->m_pos.toPrintableString());
+        }
+    }
+
     for (auto& tileZone : m_tileZones) {
         tileZone.estimateCentroid();
     }
@@ -1026,6 +1005,14 @@ void FHTemplateProcessor::placeDebugInfo()
         return;
 
     for (auto& tileZone : m_tileZones) {
+        if (m_showDebug >= Stage::ZoneTilesInitial && m_showDebug <= Stage::ZoneTilesRefinement) {
+            if (auto* cell = tileZone.m_startTile) {
+                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_brushColor = 1, .m_shapeRadius = 4 });
+            }
+            if (auto* cell = tileZone.m_centroid) {
+                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_brushColor = 150, .m_shapeRadius = 4 });
+            }
+        }
         /*
         if (m_showDebug == Stage::TownsPlacement) {
             m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = tileZone.m_startTile->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 1 }); // red

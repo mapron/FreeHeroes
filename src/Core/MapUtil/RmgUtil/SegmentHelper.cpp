@@ -114,10 +114,10 @@ void SegmentHelper::makeBorders(std::vector<TileZone>& tileZones)
         connectionUnblockableCells.insert(cell);
     }
     MapTileRegion noExpandTiles;
-    for (MapTile& tile : m_tileContainer.m_tiles) {
+    for (MapTilePtr tile : m_tileContainer.m_all) {
         for (auto* cell : connectionUnblockableCells) {
-            if (posDistance(tile.m_pos, cell->m_pos) < 4)
-                noExpandTiles.insert(&tile);
+            if (posDistance(tile->m_pos, cell->m_pos) < 4)
+                noExpandTiles.insert(tile);
         }
     }
     MapTileRegion needBeBlocked;

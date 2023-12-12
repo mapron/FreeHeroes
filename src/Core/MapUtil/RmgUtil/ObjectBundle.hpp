@@ -12,7 +12,7 @@
 namespace FreeHeroes {
 
 struct TileZone;
-struct MapTileContainer;
+class MapTileContainer;
 struct ObjectBundle {
     struct Item {
         ObjectGenerator::IObjectPtr m_obj;
