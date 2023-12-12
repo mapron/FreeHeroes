@@ -14,7 +14,6 @@
 #include "LibraryObjectDef.hpp"
 #include "LibraryPlayer.hpp"
 
-#include "RmgUtil/KMeans.hpp"
 #include "RmgUtil/ObjectBundle.hpp"
 #include "RmgUtil/ObjectGenerator.hpp"
 #include "RmgUtil/ObstacleHelper.hpp"
@@ -216,7 +215,7 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage, const std::stri
         FHPos startTile;
         startTile.m_x        = m_rng->genDispersed(rngZone.m_centerAvg.m_x, rngZone.m_centerDispersion.m_x);
         startTile.m_y        = m_rng->genDispersed(rngZone.m_centerAvg.m_y, rngZone.m_centerDispersion.m_y);
-        tileZone.m_startTile = m_tileContainer.m_tileIndex.at(startTile);
+        tileZone.m_startTile = m_tileContainer.m_all.findClosestPoint(startTile);
 
         tileZone.m_relativeArea = m_rng->genDispersed(rngZone.m_relativeSizeAvg, rngZone.m_relativeSizeDispersion);
 
@@ -599,52 +598,53 @@ void FHTemplateProcessor::runTownsPlacement()
             if (!townPositions[0])
                 townPositions[0] = tileZone.m_centroid;
         } else {
-            KMeansSegmentation seg;
-            seg.m_points.reserve(tileZone.m_area.m_innerArea.size());
-            for (auto* cell : tileZone.m_area.m_innerArea) {
-                seg.m_points.push_back({ cell });
+            auto&                                  area = tileZone.m_area.m_innerArea;
+            MapTileRegion::SplitRegionSettingsList settings;
+            const size_t                           K = towns.size();
+            {
+                // random cluster init
+                settings.resize(K);
+                MapTileRegion used;
+                for (size_t i = 0; i < K; i++) {
+                    while (true) {
+                        size_t index = m_rng->gen(area.size() - 1);
+                        auto*  tile  = area[index];
+                        if (!used.contains(tile)) {
+                            used.insert(tile);
+                            break;
+                        }
+                    }
+                }
+                for (size_t i = 0; i < K; i++)
+                    settings[i].m_start = used[i];
             }
+            const auto regionsEst = area.splitByKExt(settings);
 
             std::vector<MapTilePtr> townPositionsEst;
-            {
-                KMeansSegmentation segCopy = seg;
-                segCopy.initRandomClusterCentoids(towns.size(), m_rng);
-                segCopy.run(m_logOutput);
-                for (KMeansSegmentation::Cluster& cluster : segCopy.m_clusters)
-                    townPositionsEst.push_back(m_tileContainer.m_tileIndex.at(cluster.m_centroid));
-            }
 
-            seg.initRandomClusterCentoids(towns.size(), m_rng);
+            for (const auto& cluster : regionsEst)
+                townPositionsEst.push_back(cluster.makeCentroid(true));
 
-            std::map<MapTilePtr, size_t> cell2pointindex;
-            for (size_t i = 0; i < seg.m_points.size(); ++i) {
-                cell2pointindex[seg.m_points[i].m_pos] = i;
-            }
             for (size_t i = 0; i < townPositions.size(); ++i) {
                 auto* cell = townPositions[i];
                 if (!cell)
                     continue;
-
-                const size_t index = cell2pointindex.at(cell);
-                seg.initCluster(i, index, true);
+                // if we have fixed town position here, set speed = 0 and erase closest random position
+                settings[i].m_speed = 0;
+                settings[i].m_start = cell;
 
                 auto it = std::min_element(townPositionsEst.begin(), townPositionsEst.end(), [cell](MapTilePtr l, MapTilePtr r) {
                     return posDistance(cell, l) < posDistance(cell, r);
                 });
                 townPositionsEst.erase(it);
             }
-            for (size_t i = 0; i < townPositions.size(); ++i) {
-                if (townPositions[i])
-                    continue;
-                const size_t index = cell2pointindex.at(townPositionsEst.back());
-                townPositionsEst.pop_back();
-                seg.initCluster(i, index, false);
-            }
-            seg.run(m_logOutput);
+            const auto regions = area.splitByKExt(settings);
 
-            for (size_t i = 0; KMeansSegmentation::Cluster & cluster : seg.m_clusters) {
-                townPositions[i] = (m_tileContainer.m_tileIndex.at(cluster.m_centroid));
-                i++;
+            for (size_t i = 0; i < townPositions.size(); ++i) {
+                auto* cell = townPositions[i];
+                if (cell)
+                    continue;
+                townPositions[i] = regions[i].makeCentroid(true);
             }
         }
 

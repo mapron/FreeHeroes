@@ -162,8 +162,11 @@ void SegmentHelper::makeBorders(std::vector<TileZone>& tileZones)
 
 void SegmentHelper::makeSegments(TileZone& tileZone)
 {
-    // todo: why repulse for K-means? why segments must be far from each other on consequtive indices? I dunno
-    auto segmentList             = tileZone.m_innerAreaUsable.m_innerArea.splitByMaxArea(m_logOutput, tileZone.m_rngZoneSettings.m_segmentAreaSize, true);
+    auto segmentList = tileZone.m_innerAreaUsable.m_innerArea.splitByMaxArea(tileZone.m_rngZoneSettings.m_segmentAreaSize, 30);
+
+    if (segmentList.empty())
+        throw std::runtime_error("No segments in tile zone!");
+
     tileZone.m_innerAreaSegments = MapTileRegionWithEdge::makeEdgeList(segmentList);
     auto borderNet               = MapTileRegionWithEdge::getInnerBorderNet(tileZone.m_innerAreaSegments);
 

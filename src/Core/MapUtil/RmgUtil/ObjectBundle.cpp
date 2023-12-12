@@ -6,7 +6,8 @@
 
 #include "ObjectBundle.hpp"
 #include "TileZone.hpp"
-#include "KMeans.hpp"
+
+#include "IRandomGenerator.hpp"
 
 #include "MernelPlatform/Profiler.hpp"
 
@@ -297,6 +298,8 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
         safePadding.insert(guards);
         safePadding = blurSet(safePadding, true, false);
     }
+    if (tileZone.m_innerAreaSegments.empty())
+        throw std::runtime_error("No segments in tile zone!");
 
     for (auto& seg : tileZone.m_innerAreaSegments) {
         ZoneSegment zs;
@@ -426,9 +429,11 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
             continue;
         MapTileRegionWithEdge area;
         area.m_innerArea = zs.m_cells;
-        auto parts       = area.m_innerArea.splitByK(m_logOutput, zs.m_objectCount);
+        auto parts       = area.m_innerArea.splitByK(zs.m_objectCount, 30);
         for (auto& part : parts) {
             auto* centroid = part.makeCentroid(true);
+            if (!centroid)
+                throw std::runtime_error("Empty part!");
             zs.m_centroids.push_back(centroid);
             m_consumeResult.m_centroidsALL.push_back(centroid);
         }
@@ -515,7 +520,7 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
                     continue;
                 const size_t maxArea = 12;
 
-                auto segments  = part.splitByMaxArea(m_logOutput, maxArea);
+                auto segments  = part.splitByMaxArea(maxArea, 30);
                 auto borderNet = MapTileRegionWithEdge::getInnerBorderNet(MapTileRegionWithEdge::makeEdgeList(segments));
 
                 for (const auto& seg : segments) {

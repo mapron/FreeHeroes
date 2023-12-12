@@ -34,8 +34,8 @@ public:
     using SplitRegionSettingsList = std::vector<SplitRegionSettings>;
 
     MapTileRegionList splitByFloodFill(bool useDiag, MapTilePtr hint = nullptr) const;
-    MapTileRegionList splitByMaxArea(std::ostream& os, size_t maxArea, bool repulse = false) const;
-    MapTileRegionList splitByK(std::ostream& os, size_t k, bool repulse = false) const;
+    MapTileRegionList splitByMaxArea(size_t maxArea, size_t iterLimit = 100) const;
+    MapTileRegionList splitByK(size_t k, size_t iterLimit = 100) const;
     MapTileRegionList splitByKExt(const SplitRegionSettingsList& settingsList, size_t iterLimit = 100) const;
 
     MapTilePtr makeCentroid(bool ensureInbounds) const;

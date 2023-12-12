@@ -7,8 +7,6 @@
 #include "MapTile.hpp"
 #include "MapTileContainer.hpp"
 
-#include "KMeans.hpp"
-
 #include <map>
 
 namespace FreeHeroes {
@@ -181,7 +179,7 @@ MapTileRegionList MapTileRegion::splitByFloodFill(bool useDiag, MapTilePtr hint)
     return result;
 }
 
-MapTileRegionList MapTileRegion::splitByMaxArea(std::ostream& os, size_t maxArea, bool repulse) const
+MapTileRegionList MapTileRegion::splitByMaxArea(size_t maxArea, size_t iterLimit) const
 {
     MapTileRegionList result;
     size_t            zoneArea = this->size();
@@ -190,64 +188,33 @@ MapTileRegionList MapTileRegion::splitByMaxArea(std::ostream& os, size_t maxArea
 
     const size_t k = (zoneArea + maxArea + 1) / maxArea;
 
-    return splitByK(os, k, repulse);
+    return splitByK(k, iterLimit);
 }
 
-MapTileRegionList MapTileRegion::splitByK(std::ostream& os, size_t k, bool repulse) const
+MapTileRegionList MapTileRegion::splitByK(size_t k, size_t iterLimit) const
 {
-    MapTileRegionList result;
-    size_t            zoneArea = this->size();
+    size_t zoneArea = this->size();
     if (!zoneArea)
-        return result;
+        return {};
 
-    if (k == 1) {
-        result.push_back(*this);
-    } else {
-        KMeansSegmentation seg;
-        seg.m_points.reserve(zoneArea);
-        for (auto* cell : *this) {
-            seg.m_points.push_back({ cell });
-        }
-        seg.m_iters = 30;
-        seg.initEqualCentoids(k);
-        seg.run(os);
+    if (k == 1)
+        return { *this };
 
-        std::vector<KMeansSegmentation::Cluster*> clusters;
-        for (KMeansSegmentation::Cluster& cluster : seg.m_clusters)
-            clusters.push_back(&cluster);
-        if (repulse) {
-            std::vector<KMeansSegmentation::Cluster*> clustersSorted;
-            auto*                                     curr = clusters.back();
-            clusters.pop_back();
-            clustersSorted.push_back(curr);
-            while (!clusters.empty()) {
-                auto it = std::max_element(clusters.begin(), clusters.end(), [curr](KMeansSegmentation::Cluster* l, KMeansSegmentation::Cluster* r) {
-                    return posDistance(curr->m_centroid, l->m_centroid) < posDistance(curr->m_centroid, r->m_centroid);
-                });
-                curr    = *it;
-                clustersSorted.push_back(curr);
-                clusters.erase(it);
-            }
-            clusters = clustersSorted;
-        }
-
-        for (KMeansSegmentation::Cluster* cluster : clusters) {
-            MapTileRegion zoneSeg;
-            zoneSeg.reserve(cluster->m_points.size());
-            for (auto& point : cluster->m_points)
-                zoneSeg.insert(point->m_pos);
-
-            assert(zoneSeg.size() > 0);
-            result.push_back(std::move(zoneSeg));
-        }
+    SplitRegionSettingsList settings(k);
+    size_t                  s = size();
+    for (size_t i = 0; i < k; ++i) {
+        settings[i].m_start = (*this)[i * s / k];
     }
-    return result;
+    return splitByKExt(settings);
 }
 
 MapTileRegionList MapTileRegion::splitByKExt(const SplitRegionSettingsList& settingsList, size_t iterLimit) const
 {
     if (empty())
         return {};
+
+    if (settingsList.size() == 1)
+        return { *this };
 
     KMeansData   kmeans;
     const size_t K = settingsList.size();
