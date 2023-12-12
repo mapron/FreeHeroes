@@ -7,7 +7,7 @@
 
 #include "ObjectGenerator.hpp"
 
-#include "MapTileArea.hpp"
+#include "MapTileRegionWithEdge.hpp"
 
 namespace FreeHeroes {
 

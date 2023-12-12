@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  * See LICENSE file for details.
  */
-#include "MapTileArea.hpp"
+#include "MapTileRegionWithEdge.hpp"
 #include "KMeans.hpp"
 #include "MapTileContainer.hpp"
 
@@ -15,13 +15,13 @@
 
 namespace FreeHeroes {
 
-void MapTileArea::makeEdgeFromInnerArea()
+void MapTileRegionWithEdge::makeEdgeFromInnerArea()
 {
     m_innerEdge = m_innerArea;
     removeNonInnerFromInnerEdge();
 }
 
-void MapTileArea::removeNonInnerFromInnerEdge()
+void MapTileRegionWithEdge::removeNonInnerFromInnerEdge()
 {
     MapTilePtrSortedList forErase;
 
@@ -50,7 +50,7 @@ void MapTileArea::removeNonInnerFromInnerEdge()
     makeOutsideEdge();
 }
 
-void MapTileArea::makeOutsideEdge()
+void MapTileRegionWithEdge::makeOutsideEdge()
 {
     m_outsideEdge.clear();
     m_outsideEdge.reserve(m_innerEdge.size());
@@ -63,12 +63,12 @@ void MapTileArea::makeOutsideEdge()
     }
 }
 
-void MapTileArea::removeEdgeFromInnerArea()
+void MapTileRegionWithEdge::removeEdgeFromInnerArea()
 {
     m_innerArea.erase(m_innerEdge);
 }
 
-bool MapTileArea::refineEdge(RefineTask task, const MapTileRegion& allowedArea, size_t index)
+bool MapTileRegionWithEdge::refineEdge(RefineTask task, const MapTileRegion& allowedArea, size_t index)
 {
     if (task == RefineTask::RemoveHollows) {
         MapTilePtrList additional;
@@ -118,7 +118,7 @@ bool MapTileArea::refineEdge(RefineTask task, const MapTileRegion& allowedArea, 
     return true;
 }
 
-MapTileRegion MapTileArea::getBottomEdge() const
+MapTileRegion MapTileRegionWithEdge::getBottomEdge() const
 {
     MapTileRegion result;
     result.reserve(m_innerEdge.size() / 3);
@@ -133,9 +133,9 @@ MapTileRegion MapTileArea::getBottomEdge() const
     return result;
 }
 
-MapTileArea MapTileArea::floodFillDiagonalByInnerEdge(MapTilePtr cellStart) const
+MapTileRegionWithEdge MapTileRegionWithEdge::floodFillDiagonalByInnerEdge(MapTilePtr cellStart) const
 {
-    MapTileArea innerEdgeArea;
+    MapTileRegionWithEdge innerEdgeArea;
     innerEdgeArea.m_innerArea = this->m_innerEdge;
 
     auto segments = innerEdgeArea.splitByFloodFill(true, cellStart);
@@ -144,13 +144,13 @@ MapTileArea MapTileArea::floodFillDiagonalByInnerEdge(MapTilePtr cellStart) cons
     return segments[0];
 }
 
-std::vector<MapTileArea> MapTileArea::splitByFloodFill(bool useDiag, MapTilePtr hint) const
+std::vector<MapTileRegionWithEdge> MapTileRegionWithEdge::splitByFloodFill(bool useDiag, MapTilePtr hint) const
 {
     if (m_innerArea.empty())
         return {};
 
-    std::vector<MapTileArea> result;
-    MapTilePtrList           currentBuffer;
+    std::vector<MapTileRegionWithEdge> result;
+    MapTilePtrList                     currentBuffer;
 
     MapTileRegion  visited;
     MapTilePtrList currentEdge;
@@ -184,7 +184,7 @@ std::vector<MapTileArea> MapTileArea::splitByFloodFill(bool useDiag, MapTilePtr 
                 }
             }
         }
-        MapTileArea current;
+        MapTileRegionWithEdge current;
         current.m_innerArea = MapTileRegion(std::move(currentBuffer));
         current.makeEdgeFromInnerArea();
         remain.erase(current.m_innerArea);
@@ -194,10 +194,10 @@ std::vector<MapTileArea> MapTileArea::splitByFloodFill(bool useDiag, MapTilePtr 
     return result;
 }
 
-std::vector<MapTileArea> MapTileArea::splitByMaxArea(std::ostream& os, size_t maxArea, bool repulse) const
+std::vector<MapTileRegionWithEdge> MapTileRegionWithEdge::splitByMaxArea(std::ostream& os, size_t maxArea, bool repulse) const
 {
-    std::vector<MapTileArea> result;
-    size_t                   zoneArea = m_innerArea.size();
+    std::vector<MapTileRegionWithEdge> result;
+    size_t                             zoneArea = m_innerArea.size();
     if (!zoneArea)
         return result;
 
@@ -206,10 +206,10 @@ std::vector<MapTileArea> MapTileArea::splitByMaxArea(std::ostream& os, size_t ma
     return splitByK(os, k, repulse);
 }
 
-std::vector<MapTileArea> MapTileArea::splitByK(std::ostream& os, size_t k, bool repulse) const
+std::vector<MapTileRegionWithEdge> MapTileRegionWithEdge::splitByK(std::ostream& os, size_t k, bool repulse) const
 {
-    std::vector<MapTileArea> result;
-    size_t                   zoneArea = m_innerArea.size();
+    std::vector<MapTileRegionWithEdge> result;
+    size_t                             zoneArea = m_innerArea.size();
     if (!zoneArea)
         return result;
 
@@ -251,7 +251,7 @@ std::vector<MapTileArea> MapTileArea::splitByK(std::ostream& os, size_t k, bool 
                 zoneSeg.insert(point->m_pos);
 
             assert(zoneSeg.size() > 0);
-            result.push_back(MapTileArea{ .m_innerArea = std::move(zoneSeg) });
+            result.push_back(MapTileRegionWithEdge{ .m_innerArea = std::move(zoneSeg) });
         }
     }
     for (auto& area : result)
@@ -259,7 +259,7 @@ std::vector<MapTileArea> MapTileArea::splitByK(std::ostream& os, size_t k, bool 
     return result;
 }
 
-MapTilePtr MapTileArea::makeCentroid(const MapTileRegion& region, bool ensureInbounds)
+MapTilePtr MapTileRegionWithEdge::makeCentroid(const MapTileRegion& region, bool ensureInbounds)
 {
     if (region.empty())
         return nullptr;
@@ -308,13 +308,13 @@ MapTilePtr MapTileArea::makeCentroid(const MapTileRegion& region, bool ensureInb
     return centroid;
 }
 
-MapTileArea MapTileArea::getInnerBorderNet(const std::vector<MapTileArea>& areas)
+MapTileRegionWithEdge MapTileRegionWithEdge::getInnerBorderNet(const std::vector<MapTileRegionWithEdge>& areas)
 {
-    MapTileArea result;
+    MapTileRegionWithEdge result;
     for (size_t i = 0; i < areas.size(); ++i) {
-        const MapTileArea& areaX = areas[i];
+        const MapTileRegionWithEdge& areaX = areas[i];
         for (size_t k = i + 1; k < areas.size(); ++k) {
-            const MapTileArea& areaY = areas[k];
+            const MapTileRegionWithEdge& areaY = areas[k];
             for (auto* innerCellX : areaX.m_innerEdge) {
                 if (areaY.m_outsideEdge.contains(innerCellX))
                     result.m_innerArea.insert(innerCellX);
@@ -324,7 +324,7 @@ MapTileArea MapTileArea::getInnerBorderNet(const std::vector<MapTileArea>& areas
     return result;
 }
 
-std::pair<MapTileArea::CollisionResult, FHPos> MapTileArea::getCollisionShiftForObject(const MapTileRegion& object, const MapTileRegion& obstacle, bool invertObstacle)
+std::pair<MapTileRegionWithEdge::CollisionResult, FHPos> MapTileRegionWithEdge::getCollisionShiftForObject(const MapTileRegion& object, const MapTileRegion& obstacle, bool invertObstacle)
 {
     if (object.empty() || obstacle.empty())
         return std::pair{ CollisionResult::InvalidInputs, FHPos{} };
@@ -336,7 +336,7 @@ std::pair<MapTileArea::CollisionResult, FHPos> MapTileArea::getCollisionShiftFor
     if (intersection == object)
         return std::pair{ CollisionResult::ImpossibleShift, FHPos{} };
 
-    const MapTilePtr collisionCentroid = MapTileArea::makeCentroid(intersection, false);
+    const MapTilePtr collisionCentroid = MapTileRegionWithEdge::makeCentroid(intersection, false);
 
     MapTileRegion objectWithoutObstacle = object;
     objectWithoutObstacle.erase(collisionCentroid);
@@ -354,7 +354,7 @@ std::pair<MapTileArea::CollisionResult, FHPos> MapTileArea::getCollisionShiftFor
     const int horRadius  = width / 2; // 1x1 => 0, 2x2 -> 1, 3x3 -> 1 , 4x4 -> 2
     const int vertRadius = height / 2;
 
-    const MapTilePtr objectCentroid = MapTileArea::makeCentroid(objectWithoutObstacle, false);
+    const MapTilePtr objectCentroid = MapTileRegionWithEdge::makeCentroid(objectWithoutObstacle, false);
 
     FHPos collisionOffset = objectCentroid->m_pos - collisionCentroid->m_pos;
     int   cx              = collisionOffset.m_x;
@@ -381,7 +381,7 @@ std::pair<MapTileArea::CollisionResult, FHPos> MapTileArea::getCollisionShiftFor
     return std::pair{ CollisionResult::HasShift, FHPos{ cx, cy } };
 }
 
-void MapTileArea::decompose(MapTileContainer* tileContainer, MapTileRegion& object, MapTileRegion& obstacle, const std::string& serialized, int width, int height)
+void MapTileRegionWithEdge::decompose(MapTileContainer* tileContainer, MapTileRegion& object, MapTileRegion& obstacle, const std::string& serialized, int width, int height)
 {
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
@@ -398,7 +398,7 @@ void MapTileArea::decompose(MapTileContainer* tileContainer, MapTileRegion& obje
     }
 }
 
-void MapTileArea::compose(const MapTileRegion& object, const MapTileRegion& obstacle, std::string& serialized, bool obstacleInverted, bool printable)
+void MapTileRegionWithEdge::compose(const MapTileRegion& object, const MapTileRegion& obstacle, std::string& serialized, bool obstacleInverted, bool printable)
 {
     MapTileContainer* tileContainer = nullptr;
     if (!object.empty())

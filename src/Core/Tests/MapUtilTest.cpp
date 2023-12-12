@@ -4,18 +4,19 @@
  * See LICENSE file for details.
  */
 #include "RmgUtil/MapTileContainer.hpp"
+#include "RmgUtil/MapTileRegionWithEdge.hpp"
 
 #include <gtest/gtest.h>
 
 using namespace FreeHeroes;
 
 struct CollisionTestParams {
-    std::string                  m_id;
-    int                          m_width  = 0;
-    int                          m_height = 0;
-    std::string                  m_object;
-    FHPos                        m_shift;
-    MapTileArea::CollisionResult m_result = MapTileArea::CollisionResult::HasShift;
+    std::string                            m_id;
+    int                                    m_width  = 0;
+    int                                    m_height = 0;
+    std::string                            m_object;
+    FHPos                                  m_shift;
+    MapTileRegionWithEdge::CollisionResult m_result = MapTileRegionWithEdge::CollisionResult::HasShift;
 };
 
 std::ostream& operator<<(std::ostream& os, const CollisionTestParams& p)
@@ -45,7 +46,7 @@ const std::vector<CollisionTestParams> testParams{
                     "....."
                     ".....",
         .m_shift  = FHPos{},
-        .m_result = MapTileArea::CollisionResult::InvalidInputs,
+        .m_result = MapTileRegionWithEdge::CollisionResult::InvalidInputs,
     },
     CollisionTestParams{
         .m_id     = "simple1",
@@ -79,7 +80,7 @@ const std::vector<CollisionTestParams> testParams{
                     "....."
                     ".....",
         .m_shift  = FHPos{},
-        .m_result = MapTileArea::CollisionResult::NoCollision,
+        .m_result = MapTileRegionWithEdge::CollisionResult::NoCollision,
     },
     CollisionTestParams{
         .m_id     = "compensated1",
@@ -91,7 +92,7 @@ const std::vector<CollisionTestParams> testParams{
                     ".OOO."
                     ".....",
         .m_shift  = FHPos{},
-        .m_result = MapTileArea::CollisionResult::ImpossibleShift,
+        .m_result = MapTileRegionWithEdge::CollisionResult::ImpossibleShift,
     },
     CollisionTestParams{
         .m_id     = "compensated2",
@@ -103,7 +104,7 @@ const std::vector<CollisionTestParams> testParams{
                     ".OOO."
                     ".....",
         .m_shift  = FHPos{},
-        .m_result = MapTileArea::CollisionResult::ImpossibleShift,
+        .m_result = MapTileRegionWithEdge::CollisionResult::ImpossibleShift,
     },
     CollisionTestParams{
         .m_id     = "compensated3",
@@ -115,7 +116,7 @@ const std::vector<CollisionTestParams> testParams{
                     ".OXX."
                     ".....",
         .m_shift  = FHPos{},
-        .m_result = MapTileArea::CollisionResult::ImpossibleShift,
+        .m_result = MapTileRegionWithEdge::CollisionResult::ImpossibleShift,
     },
 
     CollisionTestParams{
@@ -186,13 +187,13 @@ TEST_P(CollisionTest, Basic)
     MapTileRegion object, obstacle;
     std::string   composeCheck;
 
-    MapTileArea::decompose(&tileContainer, object, obstacle, params.m_object, params.m_width, params.m_height);
+    MapTileRegionWithEdge::decompose(&tileContainer, object, obstacle, params.m_object, params.m_width, params.m_height);
 
-    MapTileArea::compose(object, obstacle, composeCheck);
+    MapTileRegionWithEdge::compose(object, obstacle, composeCheck);
 
     ASSERT_EQ(composeCheck, params.m_object);
 
-    const auto [calcResult, calculatedCollision] = MapTileArea::getCollisionShiftForObject(object, obstacle);
+    const auto [calcResult, calculatedCollision] = MapTileRegionWithEdge::getCollisionShiftForObject(object, obstacle);
     const FHPos expectedCollision                = params.m_shift;
 
     ASSERT_EQ(calculatedCollision, expectedCollision);

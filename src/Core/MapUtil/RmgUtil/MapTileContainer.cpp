@@ -5,6 +5,7 @@
  */
 
 #include "MapTileContainer.hpp"
+#include "MapTileRegion.hpp"
 
 namespace FreeHeroes {
 

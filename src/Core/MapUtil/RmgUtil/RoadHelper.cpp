@@ -107,7 +107,7 @@ void RoadHelper::placeRoads(TileZone& tileZone)
                 break;
 
             {
-                MapTileArea roadsArea;
+                MapTileRegionWithEdge roadsArea;
                 roadsArea.m_innerEdge     = tileZone.m_possibleRoadsArea;
                 auto roadCellsNearTheTown = roadsArea.floodFillDiagonalByInnerEdge(townCell);
 
@@ -138,18 +138,18 @@ void RoadHelper::placeRoads(TileZone& tileZone)
     {
         //Mernel::ProfilerScope scope("unite separate");
         // unite separate networks
-        MapTileArea roadNet;
+        MapTileRegionWithEdge roadNet;
         roadNet.m_innerArea    = tileZone.m_possibleRoadsArea;
         auto disconnectedParts = roadNet.splitByFloodFill(true);
         if (disconnectedParts.size() > 1) {
-            std::sort(disconnectedParts.begin(), disconnectedParts.end(), [](const MapTileArea& r, const MapTileArea& l) {
+            std::sort(disconnectedParts.begin(), disconnectedParts.end(), [](const MapTileRegionWithEdge& r, const MapTileRegionWithEdge& l) {
                 return r.m_innerArea.size() < l.m_innerArea.size();
             });
-            MapTileArea mainPart = disconnectedParts.back();
+            MapTileRegionWithEdge mainPart = disconnectedParts.back();
             disconnectedParts.pop_back();
-            auto* mainCentroidTile = MapTileArea::makeCentroid(mainPart.m_innerArea);
+            auto* mainCentroidTile = MapTileRegionWithEdge::makeCentroid(mainPart.m_innerArea);
 
-            for (const MapTileArea& part : disconnectedParts) {
+            for (const MapTileRegionWithEdge& part : disconnectedParts) {
                 if (part.m_innerArea.size() <= 2)
                     continue;
                 auto       it      = std::min_element(part.m_innerArea.cbegin(), part.m_innerArea.cend(), [mainCentroidTile](MapTilePtr l, MapTilePtr r) {
@@ -242,7 +242,7 @@ void RoadHelper::placeRoads(TileZone& tileZone)
 
     Mernel::ProfilerScope scope("bottom");
 
-    for (MapTileArea& area : tileZone.m_innerAreaSegments) {
+    for (MapTileRegionWithEdge& area : tileZone.m_innerAreaSegments) {
         area.m_innerArea.erase(pathAsRegion);
     }
     correctRoadTypes(tileZone, 0);
@@ -262,7 +262,7 @@ void RoadHelper::prepareRoad(TileZone& tileZone, const MapTilePtrList& tileList,
     if (tileList.empty())
         return;
 
-    MapTileArea filtered;
+    MapTileRegionWithEdge filtered;
     for (auto* cell : tileList) {
         if (!tileZone.m_placedRoads.contains(cell))
             filtered.m_innerArea.insert(cell);

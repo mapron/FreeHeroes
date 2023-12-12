@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "MapTileArea.hpp"
+#include "MapTile.hpp"
 
 #include "MapUtilExport.hpp"
 

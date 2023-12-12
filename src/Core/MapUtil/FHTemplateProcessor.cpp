@@ -564,7 +564,7 @@ void FHTemplateProcessor::runTownsPlacement()
             }
         }
         m_map.m_towns.push_back(town);
-        MapTileArea townArea;
+        MapTileRegionWithEdge townArea;
         for (int x = 0; x < 5; x++) {
             for (int y = 0; y < 3; y++) {
                 auto townTilePos = pos;
@@ -687,7 +687,7 @@ void FHTemplateProcessor::runTownsPlacement()
         }
 
         {
-            MapTileArea areaTowns;
+            MapTileRegionWithEdge areaTowns;
             areaTowns.m_innerArea = tileZone.m_innerAreaTowns;
             areaTowns.makeEdgeFromInnerArea();
             tileZone.m_innerAreaTowns.insert(areaTowns.m_outsideEdge);

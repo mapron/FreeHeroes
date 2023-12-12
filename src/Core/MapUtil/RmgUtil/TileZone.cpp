@@ -13,7 +13,7 @@ namespace FreeHeroes {
 
 void TileZone::estimateCentroid()
 {
-    m_centroid = MapTileArea::makeCentroid(m_area.m_innerArea);
+    m_centroid = MapTileRegionWithEdge::makeCentroid(m_area.m_innerArea);
 }
 
 void TileZone::readFromMap()

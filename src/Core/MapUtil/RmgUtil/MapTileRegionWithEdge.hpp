@@ -6,12 +6,13 @@
 #pragma once
 
 #include "MapTile.hpp"
+#include "MapTileRegion.hpp"
 
 #include "MapUtilExport.hpp"
 
 namespace FreeHeroes {
 
-struct MAPUTIL_EXPORT MapTileArea {
+struct MAPUTIL_EXPORT MapTileRegionWithEdge {
     bool          m_diagonalGrowth = false;
     MapTileRegion m_innerArea;
     MapTileRegion m_innerEdge;   // subset of innerArea;
@@ -35,7 +36,7 @@ struct MAPUTIL_EXPORT MapTileArea {
 
     bool contains(MapTilePtr cell) const
     {
-        return m_innerArea.contains(cell) || m_innerEdge.contains(cell);
+        return m_innerArea.contains(cell);
     }
 
     MapTileRegion getBottomEdge() const;
@@ -54,11 +55,11 @@ struct MAPUTIL_EXPORT MapTileArea {
         return result;
     }
 
-    MapTileArea floodFillDiagonalByInnerEdge(MapTilePtr cellStart) const;
+    MapTileRegionWithEdge floodFillDiagonalByInnerEdge(MapTilePtr cellStart) const;
 
-    std::vector<MapTileArea> splitByFloodFill(bool useDiag, MapTilePtr hint = nullptr) const;
-    std::vector<MapTileArea> splitByMaxArea(std::ostream& os, size_t maxArea, bool repulse = false) const;
-    std::vector<MapTileArea> splitByK(std::ostream& os, size_t k, bool repulse = false) const;
+    std::vector<MapTileRegionWithEdge> splitByFloodFill(bool useDiag, MapTilePtr hint = nullptr) const;
+    std::vector<MapTileRegionWithEdge> splitByMaxArea(std::ostream& os, size_t maxArea, bool repulse = false) const;
+    std::vector<MapTileRegionWithEdge> splitByK(std::ostream& os, size_t k, bool repulse = false) const;
 
     enum class CollisionResult
     {
@@ -69,7 +70,7 @@ struct MAPUTIL_EXPORT MapTileArea {
     };
 
     static MapTilePtr                        makeCentroid(const MapTileRegion& region, bool ensureInbounds = true);
-    static MapTileArea                       getInnerBorderNet(const std::vector<MapTileArea>& areas);
+    static MapTileRegionWithEdge             getInnerBorderNet(const std::vector<MapTileRegionWithEdge>& areas);
     static std::pair<CollisionResult, FHPos> getCollisionShiftForObject(const MapTileRegion& object, const MapTileRegion& obstacle, bool invertObstacle = false);
 
     static void decompose(MapTileContainer* tileContainer, MapTileRegion& object, MapTileRegion& obstacle, const std::string& serialized, int width, int height);

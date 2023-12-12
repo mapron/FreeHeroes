@@ -11,7 +11,7 @@
 #include <set>
 #include <unordered_set>
 
-#include "MapTileArea.hpp"
+#include "MapTileRegionWithEdge.hpp"
 
 namespace FreeHeroes {
 

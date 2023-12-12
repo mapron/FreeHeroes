@@ -241,7 +241,7 @@ bool ObjectBundle::estimateOccupied(MapTilePtr absPos, MapTilePtr cetroid)
     m_allArea = m_occupiedWithDangerZone;
     m_allArea.insert(m_passAroundEdge);
 
-    m_centerPos = MapTileArea::makeCentroid(m_allArea);
+    m_centerPos = MapTileRegionWithEdge::makeCentroid(m_allArea);
 
     m_absPosIsValid = true;
     return true;
@@ -304,7 +304,7 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
         zs.m_cells     = seg.m_innerArea;
         zs.m_cells.erase(safePadding);
         zs.m_cellsForUnguardedInner = zs.m_cells;
-        zs.m_mainCetroid            = MapTileArea::makeCentroid(zs.m_cells);
+        zs.m_mainCetroid            = MapTileRegionWithEdge::makeCentroid(zs.m_cells);
         m_consumeResult.m_segments.push_back(std::move(zs));
     }
 
@@ -424,11 +424,11 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
     for (auto& zs : m_consumeResult.m_segments) {
         if (!zs.m_objectCount)
             continue;
-        MapTileArea area;
+        MapTileRegionWithEdge area;
         area.m_innerArea = zs.m_cells;
         auto parts       = area.splitByK(m_logOutput, zs.m_objectCount);
         for (auto& part : parts) {
-            auto* centroid = MapTileArea::makeCentroid(part.m_innerArea);
+            auto* centroid = MapTileRegionWithEdge::makeCentroid(part.m_innerArea);
             zs.m_centroids.push_back(centroid);
             m_consumeResult.m_centroidsALL.push_back(centroid);
         }
@@ -453,10 +453,10 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
         m_logOutput << m_indent << prefix << " placement failure (" << int(lastResult) << ") [" << i << "]: pos=" << (bundle.m_absPos ? bundle.m_absPos->toPrintableString() : "NULL") << " size=" << bundle.getEstimatedArea() << "; " << bundle.toPrintableString() << "\n";
 
         if (0) {
-            const auto [collisionResult, newPossibleShift] = MapTileArea::getCollisionShiftForObject(bundle.m_occupiedWithDangerZone, bundle.m_lastCellSource, true);
+            const auto [collisionResult, newPossibleShift] = MapTileRegionWithEdge::getCollisionShiftForObject(bundle.m_occupiedWithDangerZone, bundle.m_lastCellSource, true);
             m_logOutput << m_indent << prefix << " collisionResult=" << int(collisionResult) << " \n";
             std::string debug;
-            MapTileArea::compose(bundle.m_occupiedWithDangerZone, bundle.m_lastCellSource, debug, true, true);
+            MapTileRegionWithEdge::compose(bundle.m_occupiedWithDangerZone, bundle.m_lastCellSource, debug, true, true);
             m_logOutput << debug;
         }
 
@@ -503,9 +503,9 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
     if (remainPercent < 10)
         m_logOutput << m_indent << "Warning: only " << remainPercent << "% left\n";
 
-    if (1) {
+    if (2) {
         for (auto& zoneSegment : m_consumeResult.m_segments) {
-            MapTileArea blockedEst;
+            MapTileRegionWithEdge blockedEst;
             blockedEst.m_innerArea = zoneSegment.m_cells;
             blockedEst.m_innerArea.erase(zoneSegment.m_innerEdge);
             auto          parts = blockedEst.splitByFloodFill(false);
@@ -516,7 +516,7 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
                 const size_t maxArea = 12;
 
                 auto segments  = part.splitByMaxArea(m_logOutput, maxArea);
-                auto borderNet = MapTileArea::getInnerBorderNet(segments);
+                auto borderNet = MapTileRegionWithEdge::getInnerBorderNet(segments);
 
                 for (const auto& seg : segments) {
                     for (auto* tile : seg.m_innerArea) {
@@ -534,7 +534,7 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
         }
     }
 
-    if (1) {
+    if (2) {
         for (size_t i = 0; auto& bundle : m_consumeResult.m_bundlesNonGuardedPickable) {
             placeOnMapWrap(bundle, i++, "p");
 
@@ -586,16 +586,16 @@ ObjectBundleSet::PlacementResult ObjectBundleSet::placeOnMap(ObjectBundle& bundl
             if (cellSource->size() < bundle.m_occupiedWithDangerZone.size())
                 return PlacementResult::InsufficientSpaceInSource;
 
-            MapTileArea::CollisionResult collisionResult = MapTileArea::CollisionResult::InvalidInputs;
-            bundle.m_lastCellSource                      = *cellSource;
-            std::tie(collisionResult, newPossibleShift)  = MapTileArea::getCollisionShiftForObject(bundle.m_occupiedWithDangerZone, *cellSource, true);
-            if (collisionResult == MapTileArea::CollisionResult::NoCollision)
+            MapTileRegionWithEdge::CollisionResult collisionResult = MapTileRegionWithEdge::CollisionResult::InvalidInputs;
+            bundle.m_lastCellSource                                = *cellSource;
+            std::tie(collisionResult, newPossibleShift)            = MapTileRegionWithEdge::getCollisionShiftForObject(bundle.m_occupiedWithDangerZone, *cellSource, true);
+            if (collisionResult == MapTileRegionWithEdge::CollisionResult::NoCollision)
                 return PlacementResult::Success;
 
-            if (collisionResult == MapTileArea::CollisionResult::InvalidInputs)
+            if (collisionResult == MapTileRegionWithEdge::CollisionResult::InvalidInputs)
                 return PlacementResult::InvalidCollisionInputs;
 
-            if (collisionResult == MapTileArea::CollisionResult::ImpossibleShift)
+            if (collisionResult == MapTileRegionWithEdge::CollisionResult::ImpossibleShift)
                 return PlacementResult::CollisionImpossibleShift;
 
             return PlacementResult::CollisionHasShift;

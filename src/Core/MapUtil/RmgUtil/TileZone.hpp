@@ -8,6 +8,7 @@
 #include "../FHTemplate.hpp"
 
 #include "MapTileContainer.hpp"
+#include "MapTileRegionWithEdge.hpp"
 
 namespace FreeHeroes {
 namespace Core {
@@ -44,14 +45,14 @@ struct TileZone {
     MapTilePtr m_startTile = nullptr;
     MapTilePtr m_centroid  = nullptr;
 
-    MapTileArea m_area;
+    MapTileRegionWithEdge m_area;
 
-    MapTileArea   m_innerAreaUsable;
-    MapTileRegion m_innerAreaBottomLine;
-    MapTileRegion m_innerAreaTowns;
+    MapTileRegionWithEdge m_innerAreaUsable;
+    MapTileRegion         m_innerAreaBottomLine;
+    MapTileRegion         m_innerAreaTowns;
 
-    std::vector<MapTileArea> m_innerAreaSegments;
-    MapTileRegion            m_innerAreaSegmentsUnited;
+    std::vector<MapTileRegionWithEdge> m_innerAreaSegments;
+    MapTileRegion                      m_innerAreaSegmentsUnited;
 
     MapTileRegion     m_possibleRoadsArea;
     MapTileRegion     m_placedRoads;

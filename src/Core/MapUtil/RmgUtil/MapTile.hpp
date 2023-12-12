@@ -22,7 +22,8 @@ using MapTilePtr           = MapTile*;
 using MapTileConstPtr      = const MapTile*;
 using MapTilePtrList       = FlatSetUnsortedList<MapTilePtr>;
 using MapTilePtrSortedList = FlatSetSortedList<MapTilePtr>;
-using MapTileRegion        = FlatSet<MapTilePtr>;
+
+class MapTileRegion;
 
 struct MAPUTIL_EXPORT MapTile {
     FHPos m_pos;

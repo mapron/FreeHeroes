@@ -71,7 +71,7 @@ void SegmentHelper::makeBorders(std::vector<TileZone>& tileZones)
         if (border.empty()) {
             throw std::runtime_error("No border between '" + connections.m_from + "' and '" + connections.m_to + "'");
         }
-        MapTilePtr cell = MapTileArea::makeCentroid(border); // switch to k-means when we need more than one connection.
+        MapTilePtr cell = MapTileRegionWithEdge::makeCentroid(border); // switch to k-means when we need more than one connection.
 
         cell->m_zone->m_roadNodesHighPriority.insert(cell);
 
@@ -164,7 +164,7 @@ void SegmentHelper::makeSegments(TileZone& tileZone)
 {
     // todo: why repulse for K-means? why segments must be far from each other on consequtive indices? I dunno
     tileZone.m_innerAreaSegments = tileZone.m_innerAreaUsable.splitByMaxArea(m_logOutput, tileZone.m_rngZoneSettings.m_segmentAreaSize, true);
-    auto borderNet               = MapTileArea::getInnerBorderNet(tileZone.m_innerAreaSegments);
+    auto borderNet               = MapTileRegionWithEdge::getInnerBorderNet(tileZone.m_innerAreaSegments);
 
     tileZone.m_roadNodes.insert(tileZone.m_roadNodesHighPriority);
 
@@ -184,7 +184,7 @@ void SegmentHelper::makeSegments(TileZone& tileZone)
         }
     }
 
-    for (MapTileArea& area : tileZone.m_innerAreaSegments) {
+    for (MapTileRegionWithEdge& area : tileZone.m_innerAreaSegments) {
         for (MapTilePtr cell : area.m_innerEdge) {
             std::set<std::pair<TileZone*, size_t>> neighAreaBorders;
             if (!cell->m_neighborB || !cell->m_neighborT || !cell->m_neighborL || !cell->m_neighborR)
@@ -232,13 +232,13 @@ void SegmentHelper::refineSegments(TileZone& tileZone)
     }
     for (size_t index = 0; auto& seg : tileZone.m_innerAreaSegments) {
         index++;
-        seg.refineEdge(MapTileArea::RefineTask::RemoveHollows, innerWithoutRoads, index);
-        seg.refineEdge(MapTileArea::RefineTask::RemoveSpikes, innerWithoutRoads, index);
+        seg.refineEdge(MapTileRegionWithEdge::RefineTask::RemoveHollows, innerWithoutRoads, index);
+        seg.refineEdge(MapTileRegionWithEdge::RefineTask::RemoveSpikes, innerWithoutRoads, index);
 
-        seg.refineEdge(MapTileArea::RefineTask::Expand, innerWithoutRoads, index);
+        seg.refineEdge(MapTileRegionWithEdge::RefineTask::Expand, innerWithoutRoads, index);
 
-        seg.refineEdge(MapTileArea::RefineTask::RemoveHollows, innerWithoutRoads, index);
-        seg.refineEdge(MapTileArea::RefineTask::RemoveSpikes, innerWithoutRoads, index);
+        seg.refineEdge(MapTileRegionWithEdge::RefineTask::RemoveHollows, innerWithoutRoads, index);
+        seg.refineEdge(MapTileRegionWithEdge::RefineTask::RemoveSpikes, innerWithoutRoads, index);
     }
     tileZone.m_innerAreaSegmentsUnited.clear();
     for (auto& seg : tileZone.m_innerAreaSegments) {
