@@ -42,7 +42,7 @@ public:
         PlayerInfo,
     };
 
-    void run(const std::string& stopAfterStage);
+    void run(const std::string& stopAfterStage, const std::string& debugStage);
 
 private:
     void runCurrentStage();
@@ -78,6 +78,7 @@ private:
 
     Stage m_currentStage  = Stage::Invalid;
     Stage m_stopAfter     = Stage::Invalid;
+    Stage m_showDebug     = Stage::Invalid;
     bool  m_terrainPlaced = false;
 
     FHMap&                           m_map;

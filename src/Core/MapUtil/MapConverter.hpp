@@ -46,6 +46,7 @@ public:
         uint64_t         m_seed                    = 0;
         Mernel::std_path m_rngUserSettings;
         std::string      m_stopAfterStage;
+        std::string      m_showDebugStage;
     };
 
     enum class RawState

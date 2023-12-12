@@ -321,9 +321,18 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHDebugTile,
     m_pos,
-    m_valueA,
-    m_valueB,
-    m_valueC)
+    m_brushColor,
+    m_brushAlpha,
+    m_brushPalette,
+    m_penColor,
+    m_penAlpha,
+    m_penPalette,
+    m_textColor,
+    m_textAlpha,
+    m_textPalette,
+    m_shape,
+    m_shapeRadius,
+    m_text)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHMap::Objects,

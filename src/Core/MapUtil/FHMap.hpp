@@ -232,9 +232,23 @@ struct FHScholar : public FHCommonVisitable {
 
 struct FHDebugTile {
     FHPos m_pos;
-    int   m_valueA = 0;
-    int   m_valueB = 0;
-    int   m_valueC = 0;
+
+    int m_brushColor   = 0;   // 0 - transparent, -1 black, -2 white, 1..360 - hue, or 1..palette - paletted hue
+    int m_brushAlpha   = 120; // 0..255
+    int m_brushPalette = 0;   // 0 | 1..16 - amount colors in hue palette. if 0, then hue is final hue, if >0 then hue is made using equal hue spacing
+
+    int m_penColor   = -1;  // see m_brushColor
+    int m_penAlpha   = 120; // see m_brushAlpha
+    int m_penPalette = 0;   // see m_brushPalette
+
+    int m_textColor   = -2;  // see m_brushColor
+    int m_textAlpha   = 255; // see m_brushAlpha
+    int m_textPalette = 0;   // see m_brushPalette
+
+    int m_shape       = 1; // 0 - none, 1 - circle, 2 - square
+    int m_shapeRadius = 2; // 1..4
+
+    std::string m_text;
 };
 
 struct MAPUTIL_EXPORT FHMap {

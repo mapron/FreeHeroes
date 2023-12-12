@@ -89,8 +89,53 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     };
 
     for (auto& tile : fhMap.m_debugTiles) {
-        auto& cell = result.m_planes[tile.m_pos.m_z].m_merged.m_rows[tile.m_pos.m_y].m_cells[tile.m_pos.m_x];
-        cell.m_debug.push_back({ tile.m_valueA, tile.m_valueB, tile.m_valueC });
+        auto& cell    = result.m_planes[tile.m_pos.m_z].m_merged.m_rows[tile.m_pos.m_y].m_cells[tile.m_pos.m_x];
+        auto  makeClr = [](int hue, int paletteSize, int alpha) {
+            // generated 6, 8, 12, 16 hues that perceptually most different on max value and saturation.
+            const std::vector<std::vector<int>> neatHues{
+                 { 13, 45, 132, 183, 210, 314 },
+                 { 8, 38, 61, 163, 187, 208, 266, 325 },
+                 { 7, 31, 45, 64, 138, 171, 187, 200, 214, 273, 307, 335 },
+                 { 10, 28, 39, 50, 68, 108, 161, 177, 188, 198, 209, 220, 276, 297, 324, 341 },
+            };
+
+            if (hue == 0)
+                return QColor(Qt::transparent);
+            if (hue == -1) {
+                QColor clr(Qt::black);
+                clr.setAlpha(alpha);
+                return clr;
+            }
+            if (hue == -2) {
+                QColor clr(Qt::white);
+                clr.setAlpha(alpha);
+                return clr;
+            }
+
+            hue = std::clamp(hue - 1, 0, 359);
+            if (paletteSize > 0) {
+                for (const auto& pal : neatHues) {
+                    const int palSize = pal.size();
+                    if (paletteSize <= palSize) {
+                        hue = std::clamp(hue, 0, paletteSize - 1);
+                        hue = pal[hue];
+                        break;
+                    }
+                }
+            }
+
+            QColor clr;
+            clr.setHsv(hue, 255, 255, alpha);
+            return clr;
+        };
+        cell.m_debug.push_back({
+            .m_shapeColor  = makeClr(tile.m_brushColor, tile.m_brushPalette, tile.m_brushAlpha),
+            .m_penColor    = makeClr(tile.m_penColor, tile.m_penPalette, tile.m_penAlpha),
+            .m_textColor   = makeClr(tile.m_textColor, tile.m_textPalette, tile.m_textAlpha),
+            .m_shape       = tile.m_shape,
+            .m_shapeRadius = tile.m_shapeRadius,
+            .m_text        = QString::fromStdString(tile.m_text),
+        });
     }
 
     fhMap.m_tileMap.eachPosTile([&makeItemById, &result](const FHPos& pos, const FHTileMap::Tile& tile) {

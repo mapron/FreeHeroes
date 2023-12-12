@@ -32,6 +32,7 @@ int main(int argc, char** argv)
                                    "seed",
                                    "rng-settings-file",
                                    "stopAfterStage",
+                                   "showDebugStage",
                                },
                                { "tasks" });
     parser.markRequired({ "tasks" });
@@ -47,6 +48,7 @@ int main(int argc, char** argv)
     const std::string diffJsonFile     = parser.getArg("diff-json-file");
     const std::string seedStr          = parser.getArg("seed");
     const std::string stopAfterStage   = parser.getArg("stopAfterStage");
+    const std::string showDebugStage   = parser.getArg("showDebugStage");
     const std::string rngUserSettings  = parser.getArg("rng-settings-file");
     const uint64_t    seed             = std::strtoull(seedStr.c_str(), nullptr, 10);
 
@@ -88,6 +90,7 @@ int main(int argc, char** argv)
                                .m_seed                    = seed,
                                .m_rngUserSettings         = rngUserSettings,
                                .m_stopAfterStage          = stopAfterStage,
+                               .m_showDebugStage          = showDebugStage,
                            });
 
     for (const std::string& taskStr : tasks) {

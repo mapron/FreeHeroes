@@ -106,9 +106,14 @@ struct SpriteMap {
         bool m_visitable = false;
 
         struct DebugPiece {
-            int m_a = 0;
-            int m_b = 0;
-            int m_c = 0;
+            QColor m_shapeColor;
+            QColor m_penColor;
+            QColor m_textColor;
+
+            int m_shape       = 1; // 0 - none, 1 - circle, 2 - square
+            int m_shapeRadius = 2; // 1..4
+
+            QString m_text;
         };
         std::vector<DebugPiece> m_debug;
     };

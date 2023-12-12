@@ -15,29 +15,6 @@
 
 namespace FreeHeroes {
 
-namespace {
-// just arbitrary and subjective color tables for debug paint purpose.
-
-const std::vector<QColor> g_neatDarkColors{
-    "#FF7A66",
-    "#FFC966",
-    "#87D849",
-    "#40BCBC",
-    "#5261EA",
-    "#A247C6",
-    "#6D6D6D",
-};
-const std::vector<QColor> g_neatLightColors{
-    "#FFD3CC",
-    "#FFECCC",
-    "#E2FFCC",
-    "#C0F7F7",
-    "#D9DCF9",
-    "#E3C1F2",
-    "#E0E0E0",
-};
-}
-
 struct SpriteMapPainter::Impl {
     struct CachePath {
         QPainterPath m_path;
@@ -279,79 +256,31 @@ void SpriteMapPainter::paint(QPainter*        painter,
     for (const auto& [y, row] : spriteMap->m_planes[m_depth].m_merged.m_rows) {
         for (const auto& [x, cell] : row.m_cells) {
             for (const auto& debugPiece : cell.m_debug) {
-                auto darkColor  = g_neatDarkColors[debugPiece.m_a * 17 % g_neatDarkColors.size()];
-                auto lightColor = g_neatLightColors[debugPiece.m_a * 37 % g_neatLightColors.size()];
-
                 auto oldTransform = painter->transform();
                 painter->translate(x * tileSize, y * tileSize);
-                const auto halfTile = tileSize / 2;
 
-                const bool debugHeat = true;
+                if (debugPiece.m_shape) {
+                    painter->setBrush(debugPiece.m_shapeColor);
+                    painter->setPen(QPen(debugPiece.m_penColor, 2));
 
-                if (!debugPiece.m_b && !debugHeat) {
-                    for (int x1 = 0; x1 < 2; ++x1) {
-                        for (int y1 = 0; y1 < 2; ++y1) {
-                            auto  color = (x1 + y1) % 2 ? darkColor : lightColor;
-                            QRect cellRect(x1 * halfTile, y1 * halfTile, halfTile, halfTile);
-                            painter->fillRect(cellRect, color);
-                        }
-                    }
-                }
-                QList<QColor> heatColors{
-                    QColor(Qt::black),
-                    QColor("#F40400"),
-                    QColor("#FF4600"),
-                    QColor("#FFBF00"),
-                    QColor("#D1DF11"),
-                    QColor("#3EF649"),
-                    QColor("#00D57D"),
-                    QColor("#0084B3"),
-                    QColor("#0024F3"),
-                    QColor("#7B05FF"),
-                    QColor("#9D00C4"),
-                };
-                QRect cellRect(0, 0, tileSize, tileSize);
-                painter->setPen(Qt::black);
-                QFont font = painter->font();
-                font.setPixelSize(8);
-                painter->setFont(font);
-                //
-                if (debugPiece.m_b == 1) {
-                    painter->setBrush(Qt::red);
-                    cellRect.adjust(tileSize / 3, tileSize / 3, -tileSize / 3, -tileSize / 3);
-                }
-                if (debugPiece.m_b == 2) {
-                    painter->setBrush(QColor(0, 240, 0, 200));
-                    cellRect.adjust(tileSize / 6, tileSize / 6, -tileSize / 6, -tileSize / 6);
-                }
-                if (debugPiece.m_b == 3) {
-                    painter->setBrush(Qt::darkMagenta);
-                    cellRect.adjust(tileSize / 3, tileSize / 3, -tileSize / 3, -tileSize / 3);
-                }
-                if (debugPiece.m_b == 4) {
-                    painter->setBrush(Qt::darkYellow);
-                    cellRect.adjust(tileSize / 3, tileSize / 3, -tileSize / 3, -tileSize / 3);
-                }
-                if (debugPiece.m_b == 5) {
-                    painter->setBrush(Qt::lightGray);
-                    cellRect.adjust(tileSize / 5, tileSize / 5, -tileSize / 5, -tileSize / 5);
+                    const int radius    = std::clamp(debugPiece.m_shapeRadius, 1, 4);
+                    const int shapeSize = tileSize * radius / 4;
+                    QRect     shapeRect(tileSize / 2 - shapeSize / 2, tileSize / 2 - shapeSize / 2, shapeSize, shapeSize);
+                    if (debugPiece.m_shape == 1)
+                        painter->drawEllipse(shapeRect);
+                    else if (debugPiece.m_shape == 2)
+                        painter->drawRect(shapeRect);
                 }
 
-                if (debugPiece.m_b) {
-                    painter->drawEllipse(cellRect);
-                    if (debugPiece.m_a)
-                        painter->drawText(cellRect, Qt::AlignCenter, QString("%1").arg(debugPiece.m_a));
-                } else if (debugHeat) {
-                    auto c = heatColors.value(debugPiece.m_c, QColor(Qt::black));
-                    c.setAlpha(100);
-                    painter->setBrush(c);
-                    cellRect.adjust(tileSize / 6, tileSize / 6, -tileSize / 6, -tileSize / 6);
-                    if (debugPiece.m_c % 2)
-                        painter->drawEllipse(cellRect);
-                    else
-                        painter->drawRect(cellRect);
-                } else
-                    painter->drawText(cellRect, Qt::AlignCenter, QString("A: %1\nC: %3").arg(debugPiece.m_a).arg(debugPiece.m_c));
+                if (!debugPiece.m_text.isEmpty()) {
+                    QRect cellRect(0, 0, tileSize, tileSize);
+                    QFont font = painter->font();
+                    font.setPixelSize(8);
+                    painter->setFont(font);
+                    painter->setBrush(debugPiece.m_textColor);
+                    painter->setPen(debugPiece.m_textColor);
+                    painter->drawText(cellRect, Qt::AlignCenter, debugPiece.m_text);
+                }
 
                 painter->setTransform(oldTransform);
             }
