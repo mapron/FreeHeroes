@@ -24,15 +24,20 @@ using MapTilePtrList       = FlatSetUnsortedList<MapTilePtr>;
 using MapTilePtrSortedList = FlatSetSortedList<MapTilePtr>;
 
 class MapTileRegion;
+struct MapTileSegment {
+    size_t m_index = 0;
+};
 
 struct MAPUTIL_EXPORT MapTile {
     FHPos m_pos;
 
-    MapTileContainer* m_container    = nullptr;
-    TileZone*         m_zone         = nullptr;
-    size_t            m_segmentIndex = 0;
+    MapTileContainer* m_container     = nullptr;
+    TileZone*         m_zone          = nullptr;
+    MapTileSegment*   m_segmentMedium = nullptr;
 
     bool m_exFix = false;
+
+    MapTilePtr m_self = nullptr;
 
     MapTilePtr m_neighborT = nullptr;
     MapTilePtr m_neighborL = nullptr;
@@ -58,8 +63,10 @@ struct MAPUTIL_EXPORT MapTile {
 
     const MapTilePtrSortedList& neighboursList(bool useDiag) const noexcept { return useDiag ? m_allNeighboursWithDiag : m_orthogonalNeighbours; }
 
-    MapTilePtr     neighbourByOffset(FHPos offset) noexcept;
-    MapTilePtrList neighboursByOffsets(const std::vector<FHPos>& offsets, const Transform& transform) noexcept;
+    MapTilePtr     neighbourByOffset(FHPos offset) const noexcept;
+    MapTilePtrList neighboursByOffsets(const std::vector<FHPos>& offsets, const Transform& transform) const noexcept;
+
+    MapTilePtrList makePathTo(bool diag, MapTileConstPtr dest) const noexcept;
 
     std::string toPrintableString() const noexcept;
 };

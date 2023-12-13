@@ -34,9 +34,10 @@ public:
 
     void makeOutsideEdge();
 
-    void removeEdgeFromInnerArea();
-
-    bool refineEdge(RefineTask task, const MapTileRegion& allowedArea, size_t index);
+    bool refineEdgeRemoveHollows(MapTileRegion& allowedArea);
+    bool refineEdgeRemoveSpikes(MapTileRegion& allowedArea);
+    bool refineEdgeExpand(MapTileRegion& allowedArea);
+    bool refineEdgeShrink(MapTileRegion& allowedArea);
 
     bool contains(MapTilePtr cell) const
     {
@@ -70,11 +71,9 @@ public:
     };
 
     static MapTileRegionWithEdgeList         makeEdgeList(const MapTileRegionList& regions);
-    static MapTileRegionWithEdge             getInnerBorderNet(const MapTileRegionWithEdgeList& areas);
+    static MapTileRegion                     getInnerBorderNet(const MapTileRegionWithEdgeList& areas);
+    static MapTileRegion                     getOuterBorderNet(const MapTileRegionWithEdgeList& areas);
     static std::pair<CollisionResult, FHPos> getCollisionShiftForObject(const MapTileRegion& object, const MapTileRegion& obstacle, bool invertObstacle = false);
-
-    static void decompose(MapTileContainer* tileContainer, MapTileRegion& object, MapTileRegion& obstacle, const std::string& serialized, int width, int height);
-    static void compose(const MapTileRegion& object, const MapTileRegion& obstacle, std::string& serialized, bool obstacleInverted = false, bool printable = false);
 };
 
 }

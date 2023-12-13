@@ -11,15 +11,43 @@
 using namespace FreeHeroes;
 
 struct CollisionTestParams {
-    std::string                            m_id;
-    int                                    m_width  = 0;
-    int                                    m_height = 0;
-    std::string                            m_object;
-    FHPos                                  m_shift;
+    std::string m_id;
+    int         m_width  = 0;
+    int         m_height = 0;
+    std::string m_object;
+    FHPos       m_shift;
+
     MapTileRegionWithEdge::CollisionResult m_result = MapTileRegionWithEdge::CollisionResult::HasShift;
 };
 
+struct FloodTestParams {
+    std::string              m_id;
+    int                      m_width  = 0;
+    int                      m_height = 0;
+    std::string              m_object;
+    std::vector<std::string> m_parts;
+};
+
+struct KmeansTestParams {
+    std::string        m_id;
+    int                m_width  = 0;
+    int                m_height = 0;
+    std::string        m_object;
+    std::vector<FHPos> m_start;
+    std::string        m_parts;
+};
+
 std::ostream& operator<<(std::ostream& os, const CollisionTestParams& p)
+{
+    return os << p.m_id;
+}
+
+std::ostream& operator<<(std::ostream& os, const FloodTestParams& p)
+{
+    return os << p.m_id;
+}
+
+std::ostream& operator<<(std::ostream& os, const KmeansTestParams& p)
 {
     return os << p.m_id;
 }
@@ -35,7 +63,15 @@ class CollisionTest : public ::testing::Test
     , public testing::WithParamInterface<CollisionTestParams> {
 };
 
-const std::vector<CollisionTestParams> testParams{
+class FloodFillTest : public ::testing::Test
+    , public testing::WithParamInterface<FloodTestParams> {
+};
+
+class KmeansTest : public ::testing::Test
+    , public testing::WithParamInterface<KmeansTestParams> {
+};
+
+const std::vector<CollisionTestParams> testParamsCollision{
     CollisionTestParams{
         .m_id     = "invalid",
         .m_width  = 5,
@@ -187,9 +223,9 @@ TEST_P(CollisionTest, Basic)
     MapTileRegion object, obstacle;
     std::string   composeCheck;
 
-    MapTileRegionWithEdge::decompose(&tileContainer, object, obstacle, params.m_object, params.m_width, params.m_height);
+    MapTileRegion::decompose(&tileContainer, object, obstacle, params.m_object, params.m_width, params.m_height);
 
-    MapTileRegionWithEdge::compose(object, obstacle, composeCheck);
+    MapTileRegion::compose(&tileContainer, object, obstacle, composeCheck);
 
     ASSERT_EQ(composeCheck, params.m_object);
 
@@ -202,7 +238,179 @@ TEST_P(CollisionTest, Basic)
 
 INSTANTIATE_TEST_SUITE_P(InstantiationName,
                          CollisionTest,
-                         testing::ValuesIn(testParams),
+                         testing::ValuesIn(testParamsCollision),
                          [](const testing::TestParamInfo<CollisionTestParams>& info) {
+                             return info.param.m_id;
+                         });
+
+const std::vector<FloodTestParams> testParamsFloodFill{
+    FloodTestParams{
+        .m_id     = "simple",
+        .m_width  = 5,
+        .m_height = 5,
+        .m_object = "....."
+                    "..OO."
+                    "..OO."
+                    "....."
+                    ".....",
+        .m_parts  = {
+            "....."
+             "..OO."
+             "..OO."
+             "....."
+             ".....",
+        },
+    },
+    FloodTestParams{
+        .m_id     = "two",
+        .m_width  = 5,
+        .m_height = 5,
+        .m_object = "O...."
+                    "O.OO."
+                    "O.OO."
+                    "O...."
+                    "O....",
+        .m_parts  = {
+            "O...."
+             "O...."
+             "O...."
+             "O...."
+             "O....",
+            "....."
+             "..OO."
+             "..OO."
+             "....."
+             ".....",
+        },
+    },
+
+    FloodTestParams{
+        .m_id     = "seven",
+        .m_width  = 5,
+        .m_height = 5,
+        .m_object = "O...."
+                    "O.OO."
+                    "O.OO."
+                    "O...."
+                    "O....",
+        .m_parts  = {
+            "O...."
+             "O...."
+             "O...."
+             "O...."
+             "O....",
+            "....."
+             "..OO."
+             "..OO."
+             "....."
+             ".....",
+        },
+    },
+
+};
+
+TEST_P(FloodFillTest, Basic)
+{
+    FloodTestParams params = GetParam();
+
+    MapTileContainer tileContainer;
+    tileContainer.init(params.m_width, params.m_height, 1);
+
+    MapTileRegion object, obstacle;
+
+    MapTileRegion::decompose(&tileContainer, object, obstacle, params.m_object, params.m_width, params.m_height);
+
+    MapTileRegionList expectedSegments;
+    for (auto& part : params.m_parts) {
+        MapTileRegion object2, obstacle2;
+
+        MapTileRegion::decompose(&tileContainer, object2, obstacle2, part, params.m_width, params.m_height);
+        expectedSegments.push_back(object2);
+    }
+
+    const auto calculatedSegments = object.splitByFloodFill(true);
+
+    ASSERT_EQ(calculatedSegments, expectedSegments);
+}
+
+INSTANTIATE_TEST_SUITE_P(InstantiationName,
+                         FloodFillTest,
+                         testing::ValuesIn(testParamsFloodFill),
+                         [](const testing::TestParamInfo<FloodTestParams>& info) {
+                             return info.param.m_id;
+                         });
+
+const std::vector<KmeansTestParams> testParamsKmeans{
+    KmeansTestParams{
+        .m_id = "seven",
+
+        .m_width  = 18,
+        .m_height = 10,
+        .m_object = "...OOOOOOOOOOOOOO."
+                    "...OOOOOOOOOOOOOO."
+                    "....OOOOOOOOOOOOO."
+                    "....OOOOOOOOOOOOO."
+                    "....OOOOOOOOOOOOO."
+                    "....OOOOOOOOOOOOO."
+                    ".....OOOOOOOOOOOO."
+                    ".....OOOOOOOOOOOO."
+                    ".....OOOOOOOOO...."
+                    ".....OOO..........",
+        .m_start  = {
+            FHPos(3, 0, 0),
+            FHPos(14, 0, 0),
+            FHPos(12, 1, 0),
+            FHPos(10, 2, 0),
+            FHPos(9, 3, 0),
+            FHPos(8, 4, 0),
+            FHPos(6, 5, 0),
+            FHPos(6, 6, 0),
+            FHPos(5, 7, 0),
+            FHPos(5, 8, 0),
+        },
+        .m_parts = "...00003333111111."
+                   "...00663333111111."
+                   "....6663334411111."
+                   "....6663344441111."
+                   "....7777444422222."
+                   "....7775555222222."
+                   ".....885555522222."
+                   ".....899555522222."
+                   ".....999955522...."
+                   ".....999..........",
+    },
+};
+
+TEST_P(KmeansTest, Basic)
+{
+    KmeansTestParams params = GetParam();
+
+    MapTileContainer tileContainer;
+    tileContainer.init(params.m_width, params.m_height, 1);
+
+    MapTileRegion object, obstacle;
+    MapTileRegion::decompose(&tileContainer, object, obstacle, params.m_object, params.m_width, params.m_height);
+
+    MapTileRegionList expectedSegmentsList;
+    std::string       expectedSegments = params.m_parts;
+    MapTileRegion::decompose(&tileContainer, expectedSegmentsList, expectedSegments, params.m_width, params.m_height);
+
+    MapTileRegion::SplitRegionSettingsList settings;
+    settings.resize(params.m_start.size());
+    for (size_t i = 0; i < params.m_start.size(); ++i)
+        settings[i].m_start = tileContainer.m_tileIndex.at(params.m_start[i]);
+
+    const auto calculatedSegmentsList = object.splitByKExt(settings);
+
+    std::string calculatedSegments;
+    MapTileRegion::compose(&tileContainer, calculatedSegmentsList, calculatedSegments, false);
+
+    ASSERT_EQ(calculatedSegments, expectedSegments);
+}
+
+INSTANTIATE_TEST_SUITE_P(InstantiationName,
+                         KmeansTest,
+                         testing::ValuesIn(testParamsKmeans),
+                         [](const testing::TestParamInfo<KmeansTestParams>& info) {
                              return info.param.m_id;
                          });

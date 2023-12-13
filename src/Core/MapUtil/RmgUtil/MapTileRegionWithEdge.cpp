@@ -62,57 +62,59 @@ void MapTileRegionWithEdge::makeOutsideEdge()
     }
 }
 
-void MapTileRegionWithEdge::removeEdgeFromInnerArea()
+bool MapTileRegionWithEdge::refineEdgeRemoveHollows(MapTileRegion& allowedArea)
 {
-    m_innerArea.erase(m_innerEdge);
-}
+    MapTilePtrSortedList additional;
+    for (MapTilePtr cell : m_outsideEdge) {
+        if (!allowedArea.contains(cell))
+            continue;
+        const int adjucent = m_innerArea.contains(cell->m_neighborB)
+                             + m_innerArea.contains(cell->m_neighborT)
+                             + m_innerArea.contains(cell->m_neighborR)
+                             + m_innerArea.contains(cell->m_neighborL);
 
-bool MapTileRegionWithEdge::refineEdge(RefineTask task, const MapTileRegion& allowedArea, size_t index)
-{
-    if (task == RefineTask::RemoveHollows) {
-        MapTilePtrList additional;
-        for (MapTilePtr cell : m_outsideEdge) {
-            if (!allowedArea.contains(cell) || (cell->m_segmentIndex > 0 && cell->m_segmentIndex != index))
-                continue;
-            const int adjucent = m_innerArea.contains(cell->m_neighborB)
-                                 + m_innerArea.contains(cell->m_neighborT)
-                                 + m_innerArea.contains(cell->m_neighborR)
-                                 + m_innerArea.contains(cell->m_neighborL);
-
-            if (adjucent >= 3) {
-                cell->m_segmentIndex = index;
-                additional.push_back(cell);
-            }
-        }
-        m_innerArea.insert(additional);
-    }
-    if (task == RefineTask::RemoveSpikes) {
-        MapTilePtrList removal;
-        for (MapTilePtr cell : m_innerEdge) {
-            const int adjucent = m_innerArea.contains(cell->m_neighborB)
-                                 + m_innerArea.contains(cell->m_neighborT)
-                                 + m_innerArea.contains(cell->m_neighborR)
-                                 + m_innerArea.contains(cell->m_neighborL);
-
-            if (adjucent <= 1) {
-                cell->m_segmentIndex = 0;
-                removal.push_back(cell);
-            }
-        }
-        m_innerArea.erase(removal);
-    }
-    if (task == RefineTask::Expand) {
-        MapTilePtrList additional;
-        for (MapTilePtr cell : m_outsideEdge) {
-            if (!allowedArea.contains(cell) || (cell->m_segmentIndex > 0 && cell->m_segmentIndex != index))
-                continue;
-
-            cell->m_segmentIndex = index;
+        if (adjucent >= 3) {
             additional.push_back(cell);
         }
-        m_innerArea.insert(additional);
     }
+    allowedArea.erase(additional);
+    m_innerArea.insert(additional);
+    makeEdgeFromInnerArea();
+    return true;
+}
 
+bool MapTileRegionWithEdge::refineEdgeRemoveSpikes(MapTileRegion& allowedArea)
+{
+    MapTilePtrSortedList removal;
+    for (MapTilePtr cell : m_innerEdge) {
+        const int adjucent = m_innerArea.contains(cell->m_neighborB)
+                             + m_innerArea.contains(cell->m_neighborT)
+                             + m_innerArea.contains(cell->m_neighborR)
+                             + m_innerArea.contains(cell->m_neighborL);
+
+        if (adjucent <= 1) {
+            removal.push_back(cell);
+        }
+    }
+    allowedArea.insert(removal);
+    m_innerArea.erase(removal);
+    makeEdgeFromInnerArea();
+    return true;
+}
+
+bool MapTileRegionWithEdge::refineEdgeExpand(MapTileRegion& allowedArea)
+{
+    auto additional = allowedArea.intersectWith(m_outsideEdge);
+    allowedArea.erase(additional);
+    m_innerArea.insert(std::move(additional));
+    makeEdgeFromInnerArea();
+    return true;
+}
+
+bool MapTileRegionWithEdge::refineEdgeShrink(MapTileRegion& allowedArea)
+{
+    m_innerArea.erase(m_innerEdge);
+    allowedArea.insert(m_innerEdge);
     makeEdgeFromInnerArea();
     return true;
 }
@@ -150,17 +152,29 @@ MapTileRegionWithEdgeList MapTileRegionWithEdge::makeEdgeList(const MapTileRegio
     return result;
 }
 
-MapTileRegionWithEdge MapTileRegionWithEdge::getInnerBorderNet(const std::vector<MapTileRegionWithEdge>& areas)
+MapTileRegion MapTileRegionWithEdge::getInnerBorderNet(const std::vector<MapTileRegionWithEdge>& areas)
 {
-    MapTileRegionWithEdge result;
+    MapTileRegion result;
     for (size_t i = 0; i < areas.size(); ++i) {
         const MapTileRegionWithEdge& areaX = areas[i];
         for (size_t k = i + 1; k < areas.size(); ++k) {
             const MapTileRegionWithEdge& areaY = areas[k];
-            for (auto* innerCellX : areaX.m_innerEdge) {
-                if (areaY.m_outsideEdge.contains(innerCellX))
-                    result.m_innerArea.insert(innerCellX);
-            }
+            result.insert(areaX.m_innerEdge.intersectWith(areaY.m_outsideEdge));
+        }
+    }
+    return result;
+}
+
+MapTileRegion MapTileRegionWithEdge::getOuterBorderNet(const MapTileRegionWithEdgeList& areas)
+{
+    MapTileRegion result;
+    for (size_t i = 0; i < areas.size(); ++i) {
+        const MapTileRegionWithEdge& areaX = areas[i];
+        for (size_t k = 0; k < areas.size(); ++k) {
+            if (i == k)
+                continue;
+            const MapTileRegionWithEdge& areaY = areas[k];
+            result.insert(areaX.m_outsideEdge.intersectWith(areaY.m_outsideEdge));
         }
     }
     return result;
@@ -221,62 +235,6 @@ std::pair<MapTileRegionWithEdge::CollisionResult, FHPos> MapTileRegionWithEdge::
             cy = -vertRadius - cy - 1;
     }
     return std::pair{ CollisionResult::HasShift, FHPos{ cx, cy } };
-}
-
-void MapTileRegionWithEdge::decompose(MapTileContainer* tileContainer, MapTileRegion& object, MapTileRegion& obstacle, const std::string& serialized, int width, int height)
-{
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
-            auto*        tile             = tileContainer->m_tileIndex.at(FHPos{ x, y, 0 });
-            const size_t testOffset       = x + width * y;
-            const char   c                = serialized[testOffset];
-            const bool   objectOccupied   = c == 'O' || c == 'X';
-            const bool   obstacleOccupied = c == '-' || c == 'X';
-            if (objectOccupied)
-                object.insert(tile);
-            if (obstacleOccupied)
-                obstacle.insert(tile);
-        }
-    }
-}
-
-void MapTileRegionWithEdge::compose(const MapTileRegion& object, const MapTileRegion& obstacle, std::string& serialized, bool obstacleInverted, bool printable)
-{
-    MapTileContainer* tileContainer = nullptr;
-    if (!object.empty())
-        tileContainer = object[0]->m_container;
-    if (!obstacle.empty())
-        tileContainer = obstacle[0]->m_container;
-    if (!tileContainer)
-        return;
-
-    const int z      = object.empty() ? obstacle[0]->m_pos.m_z : object[0]->m_pos.m_z;
-    const int width  = tileContainer->m_width;
-    const int height = tileContainer->m_height;
-    serialized.clear();
-    for (int y = 0; y < height; ++y) {
-        if (printable)
-            serialized += '"';
-        for (int x = 0; x < width; ++x) {
-            auto* tile = tileContainer->m_tileIndex.at(FHPos{ x, y, z });
-            //const size_t testOffset = x + width * y;
-            char c;
-
-            const bool objectOccupied   = object.contains(tile);
-            const bool obstacleOccupied = obstacleInverted ? !obstacle.contains(tile) : obstacle.contains(tile);
-            if (objectOccupied && obstacleOccupied)
-                c = 'X';
-            else if (objectOccupied)
-                c = 'O';
-            else if (obstacleOccupied)
-                c = '-';
-            else
-                c = '.';
-            serialized += c;
-        }
-        if (printable)
-            serialized += '"', serialized += '\n';
-    }
 }
 
 }

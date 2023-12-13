@@ -73,7 +73,7 @@ void SegmentHelper::makeBorders(std::vector<TileZone>& tileZones)
         }
         MapTilePtr cell = border.makeCentroid(true); // switch to k-means when we need more than one connection.
 
-        cell->m_zone->m_roadNodesHighPriority.insert(cell);
+        cell->m_zone->m_nodes.add(cell, RoadLevel::Exits);
 
         const bool guarded = connections.m_guard || !connections.m_mirrorGuard.empty();
 
@@ -81,7 +81,7 @@ void SegmentHelper::makeBorders(std::vector<TileZone>& tileZones)
 
         for (MapTilePtr ncell : cell->m_orthogonalNeighbours) {
             if (!ncellFound && ncell && ncell->m_zone != cell->m_zone) {
-                ncell->m_zone->m_roadNodesHighPriority.insert(ncell);
+                ncell->m_zone->m_nodes.add(cell, RoadLevel::Exits);
                 if (guarded)
                     ncell->m_zone->m_breakGuardTiles.insert(ncell);
                 ncellFound = ncell;
@@ -162,91 +162,188 @@ void SegmentHelper::makeBorders(std::vector<TileZone>& tileZones)
 
 void SegmentHelper::makeSegments(TileZone& tileZone)
 {
+    // make k-means segmentation
     auto segmentList = tileZone.m_innerAreaUsable.m_innerArea.splitByMaxArea(tileZone.m_rngZoneSettings.m_segmentAreaSize, 30);
 
     if (segmentList.empty())
         throw std::runtime_error("No segments in tile zone!");
 
-    tileZone.m_innerAreaSegments = MapTileRegionWithEdge::makeEdgeList(segmentList);
-    auto borderNet               = MapTileRegionWithEdge::getInnerBorderNet(tileZone.m_innerAreaSegments);
-
-    tileZone.m_roadNodes.insert(tileZone.m_roadNodesHighPriority);
-
-    for (size_t i = 0; auto& area : tileZone.m_innerAreaSegments) {
-        i++;
-        area.removeEdgeFromInnerArea();
-
-        for (auto* cell : area.m_innerEdge) {
-            cell->m_segmentIndex = i;
-            if (borderNet.contains(cell))
-                tileZone.m_possibleRoadsArea.insert(cell);
+    tileZone.setSegments(MapTileRegionWithEdge::makeEdgeList(segmentList));
+    // smooth edges
+    {
+        MapTileRegion allowed;
+        for (auto& seg : tileZone.m_innerAreaSegments) {
+            seg.refineEdgeRemoveSpikes(allowed);
         }
-
-        for (auto* cell : area.m_innerArea) {
-            cell->m_segmentIndex = i;
+        for (auto& seg : tileZone.m_innerAreaSegments) {
+            seg.refineEdgeRemoveHollows(allowed);
         }
     }
 
-    for (MapTileRegionWithEdge& area : tileZone.m_innerAreaSegments) {
-        for (MapTilePtr cell : area.m_innerEdge) {
-            std::set<std::pair<TileZone*, size_t>> neighAreaBorders;
-            if (!cell->m_neighborB || !cell->m_neighborT || !cell->m_neighborL || !cell->m_neighborR)
-                neighAreaBorders.insert(std::pair<TileZone*, size_t>{ nullptr, 0 });
+    // make first iteration of inner network (can have holes)
+    auto borderNet = MapTileRegionWithEdge::getInnerBorderNet(tileZone.getSegments());
 
-            for (MapTilePtr cellAdj : cell->m_orthogonalNeighbours) {
-                if (area.contains(cellAdj))
-                    continue;
-                size_t    neighbourSegIndex = cellAdj->m_segmentIndex;
-                TileZone* neightZone        = cellAdj->m_zone;
-                if (neightZone != &tileZone)
-                    neighbourSegIndex = 0;
-                neighAreaBorders.insert({ neightZone, neighbourSegIndex });
-            }
-            if (neighAreaBorders.size() > 1) {
-                int64_t minDistance = 1000;
-                for (auto* roadCell : tileZone.m_roadNodes) {
-                    minDistance = std::min(minDistance, posDistance(cell->m_pos, roadCell->m_pos));
-                }
-                if (minDistance > 2) {
-                    tileZone.m_roadNodes.insert(cell);
-                }
-            }
-        }
-    }
-    tileZone.m_possibleRoadsArea.insert(tileZone.m_roadNodes);
-    tileZone.m_innerAreaSegmentsUnited.clear();
+    //m_logOutput << "borderNet=" << borderNet.size() << "\n";
+
+    // remove inner network from segments
     for (auto& seg : tileZone.m_innerAreaSegments) {
-        tileZone.m_innerAreaSegmentsUnited.insert(seg.m_innerArea);
+        seg.m_innerArea.erase(borderNet);
+        seg.makeEdgeFromInnerArea();
     }
+
+    // smooth edges
+    MapTileRegion segmentSpikesOnBorder;
+    {
+        MapTileRegion segmentSpikes;
+        for (auto& seg : tileZone.m_innerAreaSegments) {
+            seg.refineEdgeRemoveSpikes(segmentSpikes);
+        }
+        segmentSpikesOnBorder = segmentSpikes.intersectWith(tileZone.m_innerAreaUsable.m_innerEdge);
+    }
+
+    tileZone.updateSegmentIndex();
+
+    // make bordernet as everything non-segment
+    borderNet = tileZone.m_innerAreaUsable.m_innerArea.diffWith(tileZone.m_innerAreaSegmentsUnited);
+
+    //
+
+    MapTileRegion innerNodes;
+    //MapTileRegion outerNodes;
+    // walk over borderNet, calculate local maximum of outsideEdgeCounter for each tile
+    for (MapTilePtr cell : borderNet) {
+        MapTileRegion cellLocal;
+        for (auto* n : cell->m_allNeighboursWithDiag)
+            cellLocal.insert(n->m_orthogonalNeighbours);
+        cellLocal.erase(cell->m_allNeighboursWithDiag);
+        cellLocal.erase(cell);
+        cellLocal.erase(borderNet);
+        //bool isBorder = false;
+
+        std::set<std::pair<bool, MapTileSegment*>> neighAreaBorders; // unique set of neighbor zones
+        for (auto* neighbour : cellLocal) {
+            if (neighbour->m_allNeighboursWithDiag.size() != 8) {
+                neighAreaBorders.insert(std::pair<bool, MapTileSegment*>{ false, nullptr }); // map border
+            }
+
+            MapTileSegment* neighbourSegIndex = neighbour->m_segmentMedium;
+            TileZone*       neightZone        = neighbour->m_zone;
+            bool            selfZone          = neightZone == &tileZone;
+            if (!selfZone)
+                neighbourSegIndex = nullptr;
+
+            neighAreaBorders.insert({ selfZone, neighbourSegIndex });
+        }
+        if (neighAreaBorders.size() >= 3) {
+            innerNodes.insert(cell);
+        }
+    }
+
+    //    if (1)
+    //        return;
+    //    {
+    //        for (MapTilePtr cell : innerNodes) {
+    //            tileZone.m_nodes.addIfNotExist(cell, RoadLevel::InnerPoints);
+    //        }
+    //    }
+    //    if (1)
+    //       return;
+
+    // reduce each road node group to single node.
+    // try town nodes;
+    // try zone inner edge;
+    // try centroid.
+    MapTileRegion innerNodesReduced;
+    MapTileRegion outerNodesReduced;
+    auto          innerNodesSegmentList = innerNodes.splitByFloodFill(true);
+    for (auto& group : innerNodesSegmentList) {
+        if (!tileZone.m_nodes.m_byLevel[RoadLevel::Exits].intersectWith(group).empty())
+            continue;
+        if (!tileZone.m_innerAreaTownsBorders.intersectWith(group).empty())
+            continue;
+
+        auto borderIntersection = tileZone.m_innerAreaUsable.m_innerEdge.intersectWith(group).diffWith(segmentSpikesOnBorder);
+        if (!borderIntersection.empty()) {
+            if (borderIntersection.size() == 1) {
+                if (segmentSpikesOnBorder.contains(borderIntersection[0]))
+                    continue;
+            }
+            outerNodesReduced.insert(borderIntersection[0]);
+            continue;
+        }
+
+        innerNodesReduced.insert(group.makeCentroid(true));
+    }
+    tileZone.m_roadPotentialArea.insert(tileZone.m_nodes.m_all);
+
+    for (MapTilePtr cell : outerNodesReduced)
+        tileZone.m_nodes.add(cell, RoadLevel::BorderPoints);
+    for (MapTilePtr cell : innerNodesReduced)
+        tileZone.m_nodes.add(cell, RoadLevel::InnerPoints);
+
+    tileZone.m_roadPotentialArea.insert(borderNet);
+
+    // make sure everything is connected in m_roadPotentialArea
+    {
+        Mernel::ProfilerScope scope("extra inner");
+        auto                  parts = tileZone.m_roadPotentialArea.splitByFloodFill(true);
+        if (parts.size() >= 2) {
+            auto                 largestIt = std::max_element(parts.cbegin(), parts.cend(), [](const MapTileRegion& l, const MapTileRegion& r) {
+                return l.size() < r.size();
+            });
+            const MapTileRegion* largest   = &(*largestIt);
+            for (const MapTileRegion& orphan : parts) {
+                if (&orphan == largest)
+                    continue;
+                if (orphan.size() < 3 && tileZone.m_nodes.m_all.intersectWith(orphan).empty())
+                    continue;
+                auto* orphanCentroid = orphan.makeCentroid(false);
+
+                auto             itLargest      = std::min_element(largest->cbegin(), largest->cend(), [orphanCentroid](MapTilePtr l, MapTilePtr r) {
+                    return posDistance(orphanCentroid, l, 100) < posDistance(orphanCentroid, r, 100);
+                });
+                const MapTilePtr largestNearest = *itLargest;
+
+                auto itOrphan = std::min_element(orphan.cbegin(), orphan.cend(), [largestNearest](MapTilePtr l, MapTilePtr r) {
+                    return posDistance(largestNearest, l, 100) < posDistance(largestNearest, r, 100);
+                });
+
+                const MapTilePtr closestTileInOrphan = *itOrphan;
+                auto             connection          = closestTileInOrphan->makePathTo(true, largestNearest);
+
+                tileZone.m_roadPotentialArea.insert(connection);
+            }
+        }
+    }
+
+    tileZone.updateSegmentIndex();
 }
 
 void SegmentHelper::refineSegments(TileZone& tileZone)
 {
     Mernel::ProfilerScope scope("refineSegments");
     auto                  innerWithoutRoads = tileZone.m_innerAreaUsable.m_innerArea;
-    innerWithoutRoads.erase(tileZone.m_placedRoads);
-    {
-        auto noSegmentArea = innerWithoutRoads;
-        for (auto& seg : tileZone.m_innerAreaSegments) {
-            noSegmentArea.erase(seg.m_innerArea);
-        }
-        for (auto cell : noSegmentArea)
-            cell->m_segmentIndex = 0;
-    }
-    for (size_t index = 0; auto& seg : tileZone.m_innerAreaSegments) {
-        index++;
-        seg.refineEdge(MapTileRegionWithEdge::RefineTask::RemoveHollows, innerWithoutRoads, index);
-        seg.refineEdge(MapTileRegionWithEdge::RefineTask::RemoveSpikes, innerWithoutRoads, index);
+    innerWithoutRoads.erase(tileZone.m_roads.m_all);
 
-        seg.refineEdge(MapTileRegionWithEdge::RefineTask::Expand, innerWithoutRoads, index);
-
-        seg.refineEdge(MapTileRegionWithEdge::RefineTask::RemoveHollows, innerWithoutRoads, index);
-        seg.refineEdge(MapTileRegionWithEdge::RefineTask::RemoveSpikes, innerWithoutRoads, index);
-    }
-    tileZone.m_innerAreaSegmentsUnited.clear();
     for (auto& seg : tileZone.m_innerAreaSegments) {
-        tileZone.m_innerAreaSegmentsUnited.insert(seg.m_innerArea);
+        seg.m_innerArea.erase(tileZone.m_roads.m_all);
+        seg.makeEdgeFromInnerArea();
+        seg.refineEdgeRemoveSpikes(innerWithoutRoads);
     }
+
+    for (auto& seg : tileZone.m_innerAreaSegments)
+        seg.refineEdgeRemoveHollows(innerWithoutRoads);
+
+    for (auto& seg : tileZone.m_innerAreaSegments)
+        seg.refineEdgeExpand(innerWithoutRoads);
+
+    for (auto& seg : tileZone.m_innerAreaSegments)
+        seg.refineEdgeRemoveSpikes(innerWithoutRoads);
+
+    for (auto& seg : tileZone.m_innerAreaSegments)
+        seg.refineEdgeRemoveHollows(innerWithoutRoads);
+
+    tileZone.updateSegmentIndex();
 }
 
 void SegmentHelper::makeHeatMap(TileZone& tileZone)
@@ -257,27 +354,30 @@ void SegmentHelper::makeHeatMap(TileZone& tileZone)
     TileIntMapping costs;
     for (auto tile : tileZone.m_innerAreaUsable.m_innerArea)
         costs[tile] = 100;
-    for (auto& road : tileZone.m_roads) {
+    for (const auto& [level, area] : tileZone.m_roads.m_byLevel) {
         int cost = 100;
-        if (road.m_level == RoadLevel::Towns)
+        if (level == RoadLevel::Towns)
             cost = 20;
-        if (road.m_level == RoadLevel::Exits)
+        if (level == RoadLevel::Exits)
             cost = 40;
-        if (road.m_level == RoadLevel::InnerPoints || road.m_level == RoadLevel::BorderPoints)
+        if (level == RoadLevel::InnerPoints || level == RoadLevel::BorderPoints)
             cost = 70;
-        for (auto tile : road.m_path)
+        for (auto* tile : area)
             costs[tile] = cost;
     }
 
     std::set<MapTilePtr> remaining, completed, edgeSet;
 
     TileIntMapping resultDistance;
-    for (auto tile : tileZone.m_roadNodesTowns)
+    for (auto tile : tileZone.m_nodes.m_byLevel[RoadLevel::Towns])
         completed.insert(tile);
     if (completed.empty()) {
-        for (auto tile : tileZone.m_roadNodesHighPriority)
+        for (auto tile : tileZone.m_nodes.m_byLevel[RoadLevel::Exits])
             completed.insert(tile);
     }
+    if (completed.empty())
+        completed.insert(tileZone.m_centroid);
+
     edgeSet = completed;
 
     for (auto tile : tileZone.m_innerAreaUsable.m_innerArea) {
@@ -330,36 +430,38 @@ void SegmentHelper::makeHeatMap(TileZone& tileZone)
         ;
     }
 
+    WeightTileMap      resultByDistance;
     std::map<int, int> heatFrequencies;
     for (const auto& [tile, w] : resultDistance)
-        heatFrequencies[w]++;
+        resultByDistance[w].push_back(tile);
 
-    const int maxHeat           = 10;
-    const int totalTiles        = costs.size();
-    int       currentHeatTarget = 1;
-    int       currentHeatCnt    = currentHeatTarget * totalTiles / maxHeat;
-    int       totalCnt          = 0;
-
-    std::map<int, int> heatThresholds;
-    heatThresholds[0] = 0;
-    int maxcost       = 0;
-    for (const auto& [w, cnt] : heatFrequencies) {
-        totalCnt += cnt;
-        maxcost = std::max(maxcost, w);
-        if (totalCnt > currentHeatCnt) {
-            heatThresholds[w] = currentHeatTarget;
-            currentHeatTarget++;
-            currentHeatCnt = currentHeatTarget * totalTiles / maxHeat;
+    MapTilePtrList roadTiles;
+    MapTilePtrList segmentTiles;
+    for (const auto& [_, area] : resultByDistance) {
+        for (auto* tile : area) {
+            if (tileZone.m_roads.m_all.contains(tile))
+                roadTiles.push_back(tile);
+            else
+                segmentTiles.push_back(tile);
         }
     }
-    heatThresholds[maxcost] = maxHeat;
-    TileIntMapping resultHeat;
-    for (const auto& [tile, w] : resultDistance) {
-        auto it = heatThresholds.lower_bound(w); // first [w2, heat] where w2 >= w
-        assert(it != heatThresholds.cend());
-        const int heat             = std::max(1, std::min(maxHeat, it->second));
-        tileZone.m_tile2heat[tile] = heat;
-        tileZone.m_regionsByHeat[heat].insert(tile);
+
+    // 0 * 15 / 10 = 0
+    // 1 * 15 / 10 = 1
+    // 2 * 15 / 10 = 3
+    // 9 * 15 / 10 = 13
+    auto chop = [](const MapTilePtrList& src, TileZone::HeatData& dest, int heat, int maxHeat) {
+        const size_t totalTiles = src.size();
+        const size_t startIndex = heat * totalTiles / maxHeat;
+        const size_t endIndex   = (heat + 1) * totalTiles / maxHeat;
+        for (size_t i = startIndex; i < endIndex; ++i)
+            dest.add(src[i], heat);
+    };
+
+    const int maxHeat = 10; // @todo:
+    for (int heat = 0; heat < maxHeat; heat++) {
+        chop(roadTiles, tileZone.m_roadHeat, heat, maxHeat);
+        chop(segmentTiles, tileZone.m_segmentHeat, heat, maxHeat);
     }
 }
 

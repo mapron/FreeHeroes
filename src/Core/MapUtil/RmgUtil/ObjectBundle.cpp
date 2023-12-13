@@ -291,7 +291,8 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
 
     m_consumeResult           = {};
     m_guards                  = {};
-    MapTileRegion safePadding = tileZone.m_roadNodesHighPriority;
+    MapTileRegion safePadding = tileZone.m_nodes.getRegion(RoadLevel::Towns);
+    safePadding.insert(tileZone.m_nodes.getRegion(RoadLevel::Exits));
     {
         auto guards = tileZone.m_breakGuardTiles;
         guards      = blurSet(guards, true, false);
@@ -311,7 +312,7 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
         m_consumeResult.m_segments.push_back(std::move(zs));
     }
 
-    m_consumeResult.m_cellsForUnguardedRoads = tileZone.m_placedRoads;
+    m_consumeResult.m_cellsForUnguardedRoads.insert(tileZone.m_roads.m_all);
     m_consumeResult.m_cellsForUnguardedRoads.erase(safePadding);
 
     for (const auto& group : generated.m_groups) {
@@ -432,8 +433,13 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
         auto parts       = area.m_innerArea.splitByK(zs.m_objectCount, 30);
         for (auto& part : parts) {
             auto* centroid = part.makeCentroid(true);
-            if (!centroid)
-                throw std::runtime_error("Empty part!");
+            if (!centroid) {
+                m_logOutput << "parts=";
+                for (size_t i = 0; auto& part1 : parts) {
+                    m_logOutput << "[" << i++ << "]=" << part1.size() << "\n";
+                }
+                throw std::runtime_error("Empty part! area.m_innerArea = " + std::to_string(area.m_innerArea.size()) + ", m_objectCount=" + std::to_string(zs.m_objectCount));
+            }
             zs.m_centroids.push_back(centroid);
             m_consumeResult.m_centroidsALL.push_back(centroid);
         }
@@ -461,7 +467,7 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
             const auto [collisionResult, newPossibleShift] = MapTileRegionWithEdge::getCollisionShiftForObject(bundle.m_occupiedWithDangerZone, bundle.m_lastCellSource, true);
             m_logOutput << m_indent << prefix << " collisionResult=" << int(collisionResult) << " \n";
             std::string debug;
-            MapTileRegionWithEdge::compose(bundle.m_occupiedWithDangerZone, bundle.m_lastCellSource, debug, true, true);
+            MapTileRegion::compose(&m_tileContainer, bundle.m_occupiedWithDangerZone, bundle.m_lastCellSource, debug, true, true);
             m_logOutput << debug;
         }
 
@@ -502,7 +508,7 @@ bool ObjectBundleSet::consume(const ObjectGenerator& generated,
     for (auto& zs : m_consumeResult.m_segments) {
         remainArea += zs.m_cells.size();
     }
-    const size_t segTotal      = tileZone.m_innerAreaUsable.m_innerArea.size() - tileZone.m_possibleRoadsArea.size();
+    const size_t segTotal      = tileZone.m_innerAreaSegmentsUnited.size();
     const size_t remainPercent = (remainArea * 100 / segTotal);
     m_logOutput << m_indent << "remaining size=" << remainArea << " / " << segTotal << "\n";
     if (remainPercent < 10)

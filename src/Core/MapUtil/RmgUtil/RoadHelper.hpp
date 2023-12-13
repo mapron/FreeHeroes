@@ -23,15 +23,14 @@ public:
                std::ostream&                 logOutput);
 
     void placeRoads(TileZone& tileZone);
-
-    void prepareRoad(TileZone& tileZone, const MapTilePtrList& tileList, RoadLevel level);
-    void placeRoad(const MapTilePtrList& tileList, RoadLevel level);
-    void placeRoadPath(std::vector<FHPos> path, RoadLevel level);
+    void placeRoad(const MapTileRegion& region, RoadLevel level);
 
 private:
-    MapTileRegion  redundantCleanup(TileZone& tileZone);
-    void           correctRoadTypes(TileZone& tileZone, int pass);
-    MapTilePtrList aStarPath(TileZone& zone, MapTilePtr start, MapTilePtr end, bool allTiles) const;
+    void prepareRoad(TileZone& tileZone, const MapTilePtrList& tileList, RoadLevel level);
+    void placeRoadPath(std::vector<FHPos> path, RoadLevel level);
+
+    bool           redundantCleanup(TileZone& tileZone);
+    MapTilePtrList aStarPath(TileZone& zone, MapTilePtr start, MapTilePtr end) const;
 
 private:
     FHMap&                        m_map;

@@ -15,6 +15,7 @@ using MapTilePtr = MapTile*;
 class MapTileRegion;
 using MapTileRegionList = std::vector<MapTileRegion>;
 struct FHPos;
+class MapTileContainer;
 
 class MAPUTIL_EXPORT MapTileRegion : public FlatSet<MapTilePtr> {
 public:
@@ -41,6 +42,12 @@ public:
     MapTilePtr makeCentroid(bool ensureInbounds) const;
 
     MapTilePtr findClosestPoint(FHPos pos) const;
+
+    static void decompose(MapTileContainer* tileContainer, MapTileRegion& object, MapTileRegion& obstacle, const std::string& serialized, int width, int height);
+    static void compose(MapTileContainer* tileContainer, const MapTileRegion& object, const MapTileRegion& obstacle, std::string& serialized, bool obstacleInverted = false, bool printable = false);
+
+    static void decompose(MapTileContainer* tileContainer, MapTileRegionList& objects, const std::string& serialized, int width, int height);
+    static void compose(MapTileContainer* tileContainer, const MapTileRegionList& objects, std::string& serialized, bool printable = false);
 };
 
 }

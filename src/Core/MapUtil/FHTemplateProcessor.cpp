@@ -258,7 +258,6 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage, const std::stri
         Mernel::ScopeTimer timer;
         m_logOutput << baseIndent << "Start stage: " << stageToString(m_currentStage) << "\n";
         runCurrentStage();
-        m_logOutput << baseIndent << "End stage: " << stageToString(m_currentStage) << " (" << timer.elapsedUS() << " us.)\n";
         {
             auto profilerStr = profileContext.printToStr();
             profileContext.clearAll();
@@ -266,6 +265,8 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage, const std::stri
                 m_logOutput << baseIndent << "Profiler data:\n"
                             << profilerStr;
         }
+        m_logOutput << baseIndent << "End stage: " << stageToString(m_currentStage) << " (" << timer.elapsedUS() << " us.)\n";
+
         if (m_currentStage == m_stopAfter) {
             m_logOutput << baseIndent << "stopping further generation, as 'stopAfter' was provided.\n";
             break;
@@ -353,7 +354,7 @@ void FHTemplateProcessor::runZoneTilesInitial()
     for (auto& tileZone : m_tileZones) {
         const int greedyPercent   = 90;
         tileZone.m_absoluteArea   = tileZone.m_relativeArea * area * greedyPercent / m_totalRelativeArea / 100;
-        tileZone.m_absoluteRadius = static_cast<int64_t>(sqrt(tileZone.m_absoluteArea) / M_PI);
+        tileZone.m_absoluteRadius = intSqrt(tileZone.m_absoluteArea) / 2;
 
         m_logOutput << m_indent << "zone [" << tileZone.m_id << "] area=" << tileZone.m_absoluteArea
                     << ", radius=" << tileZone.m_absoluteRadius
@@ -510,6 +511,8 @@ void FHTemplateProcessor::runTownsPlacement()
 {
     auto placeTown = [this](FHTown town, FHPos pos, TileZone& tileZone, Core::LibraryPlayerConstPtr player, Core::LibraryFactionConstPtr faction) {
         town.m_factionId = faction;
+        //if (1)
+        //   return;
 
         pos.m_x += 2;
         town.m_pos    = pos;
@@ -554,14 +557,14 @@ void FHTemplateProcessor::runTownsPlacement()
         }
         townArea.makeEdgeFromInnerArea();
         tileZone.m_blocked.insert(townArea.m_innerArea);
-        tileZone.m_innerAreaTowns.insert(townArea.m_innerArea);
-        tileZone.m_innerAreaTowns.insert(townArea.m_outsideEdge);
-        tileZone.m_possibleRoadsArea.insert(townArea.m_outsideEdge);
+        tileZone.m_innerAreaTownsBorders.insert(townArea.m_innerArea);
+        tileZone.m_innerAreaTownsBorders.insert(townArea.m_outsideEdge);
+        tileZone.m_roadPotentialArea.insert(townArea.m_outsideEdge);
     };
 
     auto playerNone = m_database->players()->find(std::string(Core::LibraryPlayer::s_none));
 
-    RoadHelper roadHelper(m_map, m_tileContainer, m_rng, m_logOutput);
+    //RoadHelper roadHelper(m_map, m_tileContainer, m_rng, m_logOutput);
 
     for (auto& tileZone : m_tileZones) {
         const auto& towns = tileZone.m_rngZoneSettings.m_towns;
@@ -654,22 +657,23 @@ void FHTemplateProcessor::runTownsPlacement()
             if (!faction)
                 faction = getRandomPlayableFaction(town.m_excludeFactionZones);
 
+            assert(townPositions[i]);
             placeTown(town.m_town, townPositions[i]->m_pos, tileZone, player, faction);
             i++;
         }
 
         for (auto&& pos : townPositions) {
             auto pos2 = pos->m_neighborB;
-            tileZone.m_roadNodesHighPriority.insert(pos2);
-            tileZone.m_roadNodesTowns.insert(pos2);
-            roadHelper.placeRoad({ pos, pos2 }, RoadLevel::Towns);
+            tileZone.m_nodes.add(pos2, RoadLevel::Towns);
+            tileZone.m_roads.add(pos, RoadLevel::Towns);
+            tileZone.m_roads.add(pos2, RoadLevel::Towns);
         }
 
         {
             MapTileRegionWithEdge areaTowns;
-            areaTowns.m_innerArea = tileZone.m_innerAreaTowns;
+            areaTowns.m_innerArea = tileZone.m_innerAreaTownsBorders;
             areaTowns.makeEdgeFromInnerArea();
-            tileZone.m_innerAreaTowns.insert(areaTowns.m_outsideEdge);
+            tileZone.m_innerAreaTownsBorders.insert(areaTowns.m_outsideEdge);
         }
         tileZone.m_innerAreaUsable.m_innerArea.erase(tileZone.m_blocked);
         tileZone.m_innerAreaUsable.makeEdgeFromInnerArea();
@@ -1032,54 +1036,71 @@ void FHTemplateProcessor::placeDebugInfo()
             for (auto* cell : tileZone.m_blocked) {
                 m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = 0, .m_valueB = 4 });
             }
-        }
-        if (m_showDebug == Stage::RoadsPlacement) {
-            for (auto* cell : tileZone.m_placedRoads) {
-                const RoadLevel roadLevel  = tileZone.getRoadLevel(cell);
-                const int       debugValue = roadLevel == RoadLevel::Towns || roadLevel == RoadLevel::Exits ? 1 : (roadLevel == RoadLevel::BorderPoints ? 4 : 2);
-                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = debugValue });
-            }
+        }*/
+        if (m_showDebug == Stage::CellSegmentation) {
             for (auto& seg : tileZone.m_innerAreaSegments) {
-                for (auto* cell : seg.m_innerArea) {
-                    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = (int) cell->m_segmentIndex, .m_valueB = 5 });
+                for (auto* cell : seg.m_innerEdge) {
+                    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_brushColor = 40, .m_shapeRadius = 3 });
                 }
             }
-            for (auto* cell : tileZone.m_possibleRoadsArea) {
-                if (!tileZone.m_roadNodes.contains(cell))
-                    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = (int) cell->m_segmentIndex, .m_valueB = 3 });
+            for (auto* cell : tileZone.m_roadPotentialArea) {
+                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_brushColor = 330, .m_shapeRadius = 1 });
             }
-        }*/
+        }
+        if (m_showDebug == Stage::CellSegmentation || m_showDebug == Stage::RoadsPlacement) {
+            for (const auto& [roadLevel, area] : tileZone.m_nodes.m_byLevel) {
+                for (auto* cell : area) {
+                    if (roadLevel == RoadLevel::NoRoad) // error!
+                        m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_brushColor = 1, .m_shape = 2, .m_shapeRadius = 3 });
+                    else
+                        m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_penColor = int(roadLevel) + 1, .m_penPalette = 6, .m_shape = 2, .m_shapeRadius = 3 });
+                }
+            }
+            for (const auto& [roadLevel, area] : tileZone.m_roads.m_byLevel) {
+                for (auto* cell : area) {
+                    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_brushColor = int(roadLevel) + 1, .m_brushPalette = 6, .m_shape = 2, .m_shapeRadius = 1 });
+                }
+            }
+        }
+        if (m_showDebug == Stage::SegmentationRefinement) {
+            for (auto& seg : tileZone.m_innerAreaSegments) {
+                for (auto* cell : seg.m_innerEdge) {
+                    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_brushColor = 40, .m_shapeRadius = 3, .m_text = std::to_string(seg.m_index) });
+                }
+            }
+        }
 
         if (m_showDebug == Stage::HeatMap) {
-            for (auto& [heat, region] : tileZone.m_regionsByHeat)
-                for (const auto& tile : region) {
-                    int color    = -1; // black
-                    int penColor = 0;  // transparent
-                    int shape    = 1;  // cirlce
+            auto* roadHeat = &tileZone.m_roadHeat;
+            auto* segHeat  = &tileZone.m_segmentHeat;
+            for (auto* heatData : { roadHeat, segHeat }) {
+                const bool isRoad = roadHeat == heatData;
+                for (const auto& [tile, heatLevel] : heatData->m_tileLevels) {
+                    int penColor = isRoad ? -2 : 0;   // white/transparent
+                    int shape    = 1 + heatLevel % 2; // cirlce/square
 
-                    if (heat == 0)
-                        color = 0; // none
-                    if (heat >= 1) {
-                        color = heat; // 1..maxHeat palette
-                        shape = 1 + heat % 2;
-                    }
-                    if (tileZone.m_specialHeat.contains(tile)) {
-                        color = -2; // white
-                    }
-                    if (tileZone.m_placedRoads.contains(tile)) {
-                        penColor = -2; //white;
-                    }
-                    int paletteSize = 10; // @todo
+                    int paletteSize = 10; // @todo:
                     m_map.m_debugTiles.push_back(FHDebugTile{
                         .m_pos          = tile->m_pos,
-                        .m_brushColor   = color,
+                        .m_brushColor   = heatLevel + 1, // heatLevel is 0-based
                         .m_brushPalette = paletteSize,
                         .m_penColor     = penColor,
-                        .m_textColor    = (heat == 1 ? -1 : -2),
-                        .m_shape        = shape,
-                        .m_text         = std::to_string(tile->m_segmentIndex) + "/" + std::to_string(heat),
+                        //.m_textColor    = (heat == 1 ? -1 : -2),
+                        .m_shape = shape,
+                        //.m_text         = std::to_string(heat),
                     });
                 }
+            }
+        }
+        if (m_showDebug == Stage::HeatMap || m_showDebug == Stage::RoadsPlacement) {
+            auto* townMids = &tileZone.m_midTownNodes;
+            auto* exitMids = &tileZone.m_midExitNodes;
+            for (auto* mids : { townMids, exitMids }) {
+                const bool isTown = townMids == mids;
+                for (auto* cell : *mids) {
+                    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_brushColor = isTown ? 1 : 50, .m_brushAlpha = 200, .m_shapeRadius = 4 });
+                }
+            }
         }
         /*
         if (m_showDebug == Stage::Rewards) {

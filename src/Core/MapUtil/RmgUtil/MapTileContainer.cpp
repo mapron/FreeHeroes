@@ -91,6 +91,7 @@ void MapTileContainer::init(int width, int height, int depth)
     }
     m_all = MapTileRegion(std::move(allSorted));
     for (auto& cell : m_tiles) {
+        cell.m_self = &cell;
         std::sort(cell.m_orthogonalNeighbours.begin(), cell.m_orthogonalNeighbours.end());
         std::sort(cell.m_diagNeighbours.begin(), cell.m_diagNeighbours.end());
         std::sort(cell.m_allNeighboursWithDiag.begin(), cell.m_allNeighboursWithDiag.end());

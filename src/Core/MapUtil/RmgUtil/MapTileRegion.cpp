@@ -8,6 +8,7 @@
 #include "MapTileContainer.hpp"
 
 #include <map>
+#include <iostream>
 
 namespace FreeHeroes {
 
@@ -21,9 +22,26 @@ struct KMeansData {
         int                  m_radius      = 100;
         int                  m_speed       = 100;
 
+        std::string toPrintableStringPoints() const
+        {
+            if (m_points.size() > 5)
+                return std::to_string(m_pointsCount);
+            std::string result;
+            for (auto* tile : m_points)
+                result += tile->toPrintableString() + ", ";
+            return "[ " + result + "]";
+        }
+
+        std::string toPrintableString() const
+        {
+            return "{centroid: " + m_centroid.toPrintableString() + ","
+                   + " mass: " + m_centerMass.toPrintableString() + ","
+                   + " points: " + toPrintableStringPoints() + "}";
+        }
+
         int64_t distanceTo(MapTilePtr point) const
         {
-            return posDistance(point->m_pos, m_centroid) * 1000 / m_radius;
+            return posDistance(point->m_pos, m_centroid, 10000) / m_radius;
         }
 
         void updateCentroid()
@@ -37,6 +55,7 @@ struct KMeansData {
         {
             m_centerMass  = FHPos{};
             m_pointsCount = 0;
+            m_points.clear();
         }
         void addToMass(FHPos pos)
         {
@@ -48,6 +67,8 @@ struct KMeansData {
             if (m_pointsCount) {
                 m_centerMass.m_x /= m_pointsCount;
                 m_centerMass.m_y /= m_pointsCount;
+            } else {
+                throw std::runtime_error("no points");
             }
         }
     };
@@ -104,6 +125,16 @@ struct KMeansData {
             size_t&      currentClusterId = m_nearestIndex[i];
             const size_t nearestClusterId = getNearestClusterId(tile);
 
+            if (0) {
+                for (size_t t = 0; t < m_clusters.size(); t++) {
+                    if (m_clusters[t].m_centroid == tile->m_pos) {
+                        if (t != nearestClusterId) {
+                            throw std::runtime_error("WTF K-means cluster mismatch");
+                        }
+                    }
+                }
+            }
+
             if (currentClusterId != nearestClusterId) {
                 currentClusterId = nearestClusterId;
                 done             = false;
@@ -119,6 +150,11 @@ struct KMeansData {
 
         // calculate new mass points
         finalizeMass();
+
+        //        std::cout << "finalizeMass clusters:\n";
+        //        for (size_t i = 0; i < m_clusters.size(); i++) {
+        //            std::cout << "[" << i << "]=" << m_clusters[i].toPrintableString() << "\n";
+        //        }
 
         updateCentroids();
 
@@ -234,9 +270,29 @@ MapTileRegionList MapTileRegion::splitByKExt(const SplitRegionSettingsList& sett
     }
 
     for (size_t iter = 0; iter < iterLimit; ++iter) {
+        //        std::cout << "clusters:\n";
+        //        for (size_t i = 0; i < K; i++) {
+        //            std::cout << "[" << i << "]=" << kmeans.m_clusters[i].toPrintableString() << "\n";
+        //        }
         const bool last = iter == iterLimit - 1;
-        if (kmeans.runIter(last))
-            break;
+        try {
+            if (kmeans.runIter(last))
+                break;
+        }
+        catch (...) {
+            if (0) {
+                std::cout << "exceptionThrown, settings:\n";
+                for (size_t i = 0; i < K; i++) {
+                    std::cout << "[" << i << "]=" << settingsList[i].m_start->m_pos.toPrintableString() << "\n";
+                }
+
+                std::string serialized;
+                compose((*this)[0]->m_container, *this, {}, serialized, false, true);
+                std::cout << serialized;
+            }
+
+            throw;
+        }
     }
 
     MapTileRegionList result;
@@ -301,6 +357,101 @@ MapTilePtr MapTileRegion::findClosestPoint(FHPos pos) const
         return posDistance(pos, l->m_pos, 100) < posDistance(pos, r->m_pos, 100);
     });
     return (*it);
+}
+
+void MapTileRegion::decompose(MapTileContainer* tileContainer, MapTileRegion& object, MapTileRegion& obstacle, const std::string& serialized, int width, int height)
+{
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            auto*        tile             = tileContainer->m_tileIndex.at(FHPos{ x, y, 0 });
+            const size_t testOffset       = x + width * y;
+            const char   c                = serialized[testOffset];
+            const bool   objectOccupied   = c == 'O' || c == 'X';
+            const bool   obstacleOccupied = c == '-' || c == 'X';
+            if (objectOccupied)
+                object.insert(tile);
+            if (obstacleOccupied)
+                obstacle.insert(tile);
+        }
+    }
+}
+
+void MapTileRegion::compose(MapTileContainer* tileContainer, const MapTileRegion& object, const MapTileRegion& obstacle, std::string& serialized, bool obstacleInverted, bool printable)
+{
+    if (!tileContainer)
+        return;
+
+    const int z      = object.empty() ? obstacle[0]->m_pos.m_z : object[0]->m_pos.m_z;
+    const int width  = tileContainer->m_width;
+    const int height = tileContainer->m_height;
+    serialized.clear();
+    for (int y = 0; y < height; ++y) {
+        if (printable)
+            serialized += '"';
+        for (int x = 0; x < width; ++x) {
+            auto* tile = tileContainer->m_tileIndex.at(FHPos{ x, y, z });
+            //const size_t testOffset = x + width * y;
+            char c;
+
+            const bool objectOccupied   = object.contains(tile);
+            const bool obstacleOccupied = obstacleInverted ? !obstacle.contains(tile) : obstacle.contains(tile);
+            if (objectOccupied && obstacleOccupied)
+                c = 'X';
+            else if (objectOccupied)
+                c = 'O';
+            else if (obstacleOccupied)
+                c = '-';
+            else
+                c = '.';
+            serialized += c;
+        }
+        if (printable)
+            serialized += '"', serialized += '\n';
+    }
+}
+
+void MapTileRegion::decompose(MapTileContainer* tileContainer, MapTileRegionList& objects, const std::string& serialized, int width, int height)
+{
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            auto*        tile       = tileContainer->m_tileIndex.at(FHPos{ x, y, 0 });
+            const size_t testOffset = x + width * y;
+            const char   c          = serialized[testOffset];
+            if (c == '.')
+                continue;
+
+            size_t objectIndex = c - '0';
+            if (objectIndex >= objects.size())
+                objects.resize(objectIndex + 1);
+            objects[objectIndex].insert(tile);
+        }
+    }
+}
+
+void MapTileRegion::compose(MapTileContainer* tileContainer, const MapTileRegionList& objects, std::string& serialized, bool printable)
+{
+    const int z      = objects.at(0)[0]->m_pos.m_z;
+    const int width  = tileContainer->m_width;
+    const int height = tileContainer->m_height;
+    serialized.clear();
+    for (int y = 0; y < height; ++y) {
+        if (printable)
+            serialized += '"';
+        for (int x = 0; x < width; ++x) {
+            auto* tile = tileContainer->m_tileIndex.at(FHPos{ x, y, z });
+            //const size_t testOffset = x + width * y;
+            char c = '.';
+            for (size_t o = 0; o < objects.size(); o++) {
+                if (objects[o].contains(tile)) {
+                    c = '0' + o;
+                    break;
+                }
+            }
+            serialized += c;
+        }
+        if (printable)
+            serialized += '"', serialized += '\n';
+    }
 }
 
 }

@@ -125,24 +125,36 @@ void TileZone::fillUnzoned()
     }
 }
 
-RoadLevel TileZone::getRoadLevel(MapTilePtr node) const
+void TileZone::setSegments(MapTileRegionWithEdgeList list)
 {
-    const bool isTown = m_roadNodesTowns.contains(node);
-    if (isTown)
-        return RoadLevel::Towns;
+    m_innerAreaSegments.resize(list.size());
+    for (size_t i = 0; i < list.size(); ++i) {
+        m_innerAreaSegments[i]         = Segment(list[i]);
+        m_innerAreaSegments[i].m_index = i;
+    }
+}
 
-    const bool isHigh = m_roadNodesHighPriority.contains(node);
-    if (isHigh)
-        return RoadLevel::Exits;
+MapTileRegionWithEdgeList TileZone::getSegments() const
+{
+    MapTileRegionWithEdgeList result;
+    result.resize(m_innerAreaSegments.size());
+    for (size_t i = 0; i < result.size(); ++i) {
+        result[i] = m_innerAreaSegments[i];
+    }
+    return result;
+}
 
-    const bool isBorder = m_innerAreaUsable.m_innerEdge.contains(node);
-    if (isBorder)
-        return RoadLevel::BorderPoints;
+void TileZone::updateSegmentIndex()
+{
+    for (auto* tile : m_innerAreaUsable.m_innerArea)
+        tile->m_segmentMedium = nullptr;
 
-    if (m_roadNodes.contains(node))
-        return RoadLevel::InnerPoints;
-
-    return RoadLevel::NoRoad;
+    m_innerAreaSegmentsUnited.clear();
+    for (auto& seg : m_innerAreaSegments) {
+        m_innerAreaSegmentsUnited.insert(seg.m_innerArea);
+        for (auto* tile : seg.m_innerArea)
+            tile->m_segmentMedium = &seg;
+    }
 }
 
 }

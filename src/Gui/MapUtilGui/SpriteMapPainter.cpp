@@ -261,7 +261,7 @@ void SpriteMapPainter::paint(QPainter*        painter,
 
                 if (debugPiece.m_shape) {
                     painter->setBrush(debugPiece.m_shapeColor);
-                    painter->setPen(QPen(debugPiece.m_penColor, 2));
+                    painter->setPen(QPen(debugPiece.m_penColor, 3));
 
                     const int radius    = std::clamp(debugPiece.m_shapeRadius, 1, 4);
                     const int shapeSize = tileSize * radius / 4;

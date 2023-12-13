@@ -53,31 +53,32 @@ MapTilePtrList AstarGenerator::findPath()
             closedSet.add(current);
             openSet.erase(current_it);
         }
+        Node* currentRaw = current.get();
 
-        auto applyCandidate = [this, current, &openSet, &closedSet](uint64_t cost, MapTilePtr newCoordinates) {
+        auto applyCandidate = [this, currentRaw, &openSet, &closedSet](uint64_t cost, MapTilePtr newCoordinates) {
             if (!m_nonCollision.contains(newCoordinates) || closedSet.find(newCoordinates)) {
                 return;
             }
 
-            uint64_t totalCost = current->m_G + cost;
+            uint64_t totalCost = currentRaw->m_G + cost;
 
             Node* successorRaw = openSet.find(newCoordinates);
             if (successorRaw == nullptr) {
-                auto successor = std::make_shared<Node>(newCoordinates, current.get());
+                auto successor = std::make_shared<Node>(newCoordinates, currentRaw);
                 successor->m_G = totalCost;
                 successor->m_H = posDistance(successor->m_pos->m_pos, m_target->m_pos) * 10;
                 openSet.add(successor);
             } else if (totalCost < successorRaw->m_G) {
-                successorRaw->m_parent = current.get();
+                successorRaw->m_parent = currentRaw;
                 successorRaw->m_G      = totalCost;
             }
         };
 
-        for (MapTilePtr newCoordinates : current->m_pos->m_orthogonalNeighbours) {
+        for (MapTilePtr newCoordinates : currentRaw->m_pos->m_orthogonalNeighbours) {
             applyCandidate(10, newCoordinates);
         }
         if (m_useDiag) {
-            for (MapTilePtr newCoordinates : current->m_pos->m_diagNeighbours) {
+            for (MapTilePtr newCoordinates : currentRaw->m_pos->m_diagNeighbours) {
                 applyCandidate(14, newCoordinates);
             }
         }

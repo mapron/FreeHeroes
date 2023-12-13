@@ -237,8 +237,8 @@ struct FHDebugTile {
     int m_brushAlpha   = 120; // 0..255
     int m_brushPalette = 0;   // 0 | 1..16 - amount colors in hue palette. if 0, then hue is final hue, if >0 then hue is made using equal hue spacing
 
-    int m_penColor   = -1;  // see m_brushColor
-    int m_penAlpha   = 120; // see m_brushAlpha
+    int m_penColor   = 0;   // see m_brushColor
+    int m_penAlpha   = 180; // see m_brushAlpha
     int m_penPalette = 0;   // see m_brushPalette
 
     int m_textColor   = -2;  // see m_brushColor
