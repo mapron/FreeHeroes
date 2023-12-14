@@ -14,7 +14,7 @@
                     "town2": {"town":{"hasCustomBuildings":true,"buildings":["townHall1","tavern","t1","t2"], "garisonRmg":[{"levels":[10],"value":2000},{"levels":[20],"value":1000},{"levels":[30],"value":1000}]}}},
                 
                 "scoreTargets": {
-                    "High": {
+                    "10_High": {
                         "isEnabled": true,
                         "tolerancePercent": 15,
                         "score": {
@@ -33,7 +33,7 @@
                             "Control":        { "target":  85000, "maxSingle": 30000}
                         }
                     },
-                    "Mid": {
+                    "20_Mid": {
                         "isEnabled": true,
                         "score": {
                             "Army":           { "target": 40000, "maxSingle": 12000},
@@ -51,7 +51,7 @@
                         },
                         "guardPercent": 100
                     },
-                    "LowGuarded": {
+                    "30_LowGuarded": {
                         "isEnabled": true,
                         "score":{
                             "Experience":     { "target": 20000, "maxSingle": 2000},
@@ -59,7 +59,7 @@
                         },
                         "guardPercent": 100
                     },
-                    "Low": {
+                    "40_Low": {
                         "isEnabled": true,
                         "score":{
                             "ArmyDwelling":   { "target": 20000 ,"maxSingle": 3900},
@@ -300,7 +300,7 @@
                 },
                 
                 "scoreTargets": {
-                    "High": {
+                    "10_High": {
                         "isEnabled": true,
                         "tolerancePercent": 15,
                         "score": {
@@ -321,7 +321,7 @@
                             "Control":        { "target": 320000  , "minSingle": 40000, "maxSingle" : 40000, "maxGroup": 40000 }
                         }
                     },
-                    "TreasureMid": {
+                    "15_TreasureMid": {
                         "isEnabled": true,
                         "tolerancePercent": 15,
                         "score": {
@@ -331,16 +331,16 @@
                             "Resource":       { "target": 10000   , "minSingle": 3000, "maxSingle" : -1}
                         }
                     },
-                    "Mid": {
+                    "20_Mid": {
                         "isEnabled": false
                     },
-                    "LowGuarded": {
+                    "30_LowGuarded": {
                         "isEnabled": false
                     },
-                    "Low": {
+                    "40_Low": {
                         "isEnabled": false
                     },
-                    "TreasureLow": {
+                    "50_TreasureLow": {
                         "isEnabled": true,
                         "guardPercent": 0,
                         "score": {
