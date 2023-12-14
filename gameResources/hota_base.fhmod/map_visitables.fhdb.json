@@ -133,14 +133,14 @@
 
 "records": {
 
-"sod.resource.campfire"                    : [ "Pick"  ],
-"sod.resource.treasureChest"               : [ "Pick"  ],
-"sod.resource.flotSam"                     : [ "Pick"  ],
-"sod.resource.jetSam"                      : [ "Pick"  ],
-"sod.resource.seaChest"                    : [ "Pick"  ],
-"sod.resource.vialOfMana"                  : [ "Pick"  ],
-"sod.resource.barrelOnWater"               : [ "Pick"  ],
-"hota.visitable.ancientLamp"               : [ "Pick"  ]
+"sod.resource.campfire"                    : [ "Pick"   ],
+"sod.resource.treasureChest"               : [ "Pick"   ],
+"sod.resource.flotSam"                     : [ "Pick"   ],
+"sod.resource.jetSam"                      : [ "Pick"   ],
+"sod.resource.seaChest"                    : [ "Pick"   ],
+"sod.resource.vialOfMana"                  : [ "Pick"   ],
+"sod.resource.barrelOnWater"               : [ "Pick"   ],
+"hota.visitable.ancientLamp"               : [ "Remove" ]
 
 }
 

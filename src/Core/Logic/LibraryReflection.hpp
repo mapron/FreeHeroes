@@ -1015,7 +1015,8 @@ ENUM_REFLECTION_STRINGIFY(
 
     Invalid,
     Normal,
-    Pick
+    Pick,
+    Remove
     )
 
 STRUCT_REFLECTION_STRINGIFY(

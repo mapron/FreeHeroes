@@ -20,6 +20,7 @@ struct LibraryMapVisitable {
         Invalid,
         Normal,
         Pick,
+        Remove, // lamp/prison
     };
 
     int         legacyId = -1;
