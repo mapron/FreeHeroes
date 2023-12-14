@@ -15,6 +15,7 @@ SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake ${MERNEL_ROOT}/cmake)
 
 #project options
 option( WARNING_AS_ERROR "" ON )
+option( USE_SANITIZER "" OFF )
 set(FFMPEG_BINARY "" CACHE FILEPATH "Path to ffmpeg binary")
 
 find_package(Git REQUIRED)
@@ -27,7 +28,9 @@ execute_process(
 )
 
 configure_file(${CMAKE_CURRENT_LIST_DIR}/cmake/GitCommit.hpp.in ${CMAKE_CURRENT_BINARY_DIR}/export/GitCommit.hpp)
-
+if (MSVC AND USE_SANITIZER)
+    add_compile_options(/fsanitize=address)
+endif()
 
 #[[
 ########## Compile flags ##########
