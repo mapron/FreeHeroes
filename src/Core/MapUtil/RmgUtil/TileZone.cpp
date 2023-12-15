@@ -82,10 +82,9 @@ bool TileZone::tryGrowOnceToNeighbour(size_t limit, TileZone* prioritized)
         }
         cell->m_zone = this;
 
-        m_area.m_innerEdge.insert(cell);
         m_area.m_innerArea.insert(cell);
     }
-    m_area.removeNonInnerFromInnerEdge();
+    m_area.makeEdgeFromInnerArea();
     return true;
 }
 
@@ -101,10 +100,9 @@ bool TileZone::tryGrowOnceToUnzoned()
     for (MapTilePtr cell : lastGrowed) {
         cell->m_zone = this;
 
-        m_area.m_innerEdge.insert(cell);
         m_area.m_innerArea.insert(cell);
     }
-    m_area.removeNonInnerFromInnerEdge();
+    m_area.makeEdgeFromInnerArea();
     return true;
 }
 

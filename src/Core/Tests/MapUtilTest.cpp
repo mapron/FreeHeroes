@@ -5,10 +5,19 @@
  */
 #include "RmgUtil/MapTileContainer.hpp"
 #include "RmgUtil/MapTileRegionWithEdge.hpp"
+#include "RmgUtil/MapTileRegionSegmentation.hpp"
 
 #include <gtest/gtest.h>
 
 using namespace FreeHeroes;
+
+struct CommonSegmentationParams {
+    std::string m_id;
+    int         m_width  = 0;
+    int         m_height = 0;
+    std::string m_object;
+    std::string m_parts;
+};
 
 struct CollisionTestParams {
     std::string m_id;
@@ -20,21 +29,18 @@ struct CollisionTestParams {
     MapTileRegionWithEdge::CollisionResult m_result = MapTileRegionWithEdge::CollisionResult::HasShift;
 };
 
-struct FloodTestParams {
-    std::string              m_id;
-    int                      m_width  = 0;
-    int                      m_height = 0;
-    std::string              m_object;
-    std::vector<std::string> m_parts;
+struct FloodTestParams : public CommonSegmentationParams {
 };
 
-struct KmeansTestParams {
-    std::string        m_id;
-    int                m_width  = 0;
-    int                m_height = 0;
-    std::string        m_object;
-    std::vector<FHPos> m_start;
-    std::string        m_parts;
+struct KmeansTestParams : public CommonSegmentationParams {
+    std::string m_startPoints;
+};
+
+struct GridTestParams : public CommonSegmentationParams {
+    int  m_gridWidth  = 0;
+    int  m_gridHeight = 0;
+    int  m_threshold  = 0;
+    bool m_uniteCheck = false;
 };
 
 std::ostream& operator<<(std::ostream& os, const CollisionTestParams& p)
@@ -52,6 +58,11 @@ std::ostream& operator<<(std::ostream& os, const KmeansTestParams& p)
     return os << p.m_id;
 }
 
+std::ostream& operator<<(std::ostream& os, const GridTestParams& p)
+{
+    return os << p.m_id;
+}
+
 namespace FreeHeroes {
 std::ostream& operator<<(std::ostream& os, const FHPos& p)
 {
@@ -59,16 +70,67 @@ std::ostream& operator<<(std::ostream& os, const FHPos& p)
 }
 }
 
+class CommonSegmentationTest {
+public:
+    MapTileContainer m_tileContainer;
+    MergedRegion     m_reg;
+    MapTileRegion    m_objectRegion;
+
+    std::string       m_expectedSegmentsStr;
+    MapTileRegionList m_expectedSegments;
+
+    std::string       m_calculatedSegmentsStr;
+    MapTileRegionList m_calculatedSegments;
+    MapTileRegion     m_calculatedSegmentsUnited;
+
+    void prepare(const CommonSegmentationParams& params)
+    {
+        m_tileContainer = MapTileContainer();
+        m_tileContainer.init(params.m_width, params.m_height, 1);
+
+        m_reg = MergedRegion();
+        m_reg.initFromTileContainer(&m_tileContainer, 0);
+
+        m_reg.load(params.m_object);
+        m_objectRegion = m_reg.m_regions['O'];
+
+        m_reg.load(params.m_parts);
+        m_expectedSegmentsStr = MergedRegion::makePrintable(params.m_parts, m_reg.m_width);
+        m_expectedSegments    = m_reg.getList();
+    }
+
+    void makeExpectedStr()
+    {
+        m_reg.setList(m_calculatedSegments);
+        m_calculatedSegmentsStr = m_reg.dump();
+    }
+
+    void uniteSegemnts()
+    {
+        m_calculatedSegmentsUnited.clear();
+        for (const auto& seg : m_calculatedSegments)
+            m_calculatedSegmentsUnited.insert(seg);
+    }
+};
+
 class CollisionTest : public ::testing::Test
-    , public testing::WithParamInterface<CollisionTestParams> {
+    , public testing::WithParamInterface<CollisionTestParams>
+    , public CommonSegmentationTest {
 };
 
 class FloodFillTest : public ::testing::Test
-    , public testing::WithParamInterface<FloodTestParams> {
+    , public testing::WithParamInterface<FloodTestParams>
+    , public CommonSegmentationTest {
 };
 
 class KmeansTest : public ::testing::Test
-    , public testing::WithParamInterface<KmeansTestParams> {
+    , public testing::WithParamInterface<KmeansTestParams>
+    , public CommonSegmentationTest {
+};
+
+class GridTest : public ::testing::Test
+    , public testing::WithParamInterface<GridTestParams>
+    , public CommonSegmentationTest {
 };
 
 const std::vector<CollisionTestParams> testParamsCollision{
@@ -220,14 +282,22 @@ TEST_P(CollisionTest, Basic)
     MapTileContainer tileContainer;
     tileContainer.init(params.m_width, params.m_height, 1);
 
-    MapTileRegion object, obstacle;
-    std::string   composeCheck;
+    //MapTileRegion object, obstacle;
+    std::string composeCheck;
 
-    MapTileRegion::decompose(&tileContainer, object, obstacle, params.m_object, params.m_width, params.m_height);
+    MergedRegion reg;
+    reg.initFromTileContainer(&tileContainer, 0);
+    reg.load(params.m_object);
 
-    MapTileRegion::compose(&tileContainer, object, obstacle, composeCheck);
+    const std::string saveCheck = reg.save();
 
-    ASSERT_EQ(composeCheck, params.m_object);
+    ASSERT_EQ(saveCheck, params.m_object);
+
+    MapTileRegion objectOnly        = reg.m_regions['O'];
+    MapTileRegion obstacleAndObject = reg.m_regions['X'];
+    MapTileRegion obstacleOnly      = reg.m_regions['-'];
+    MapTileRegion object            = objectOnly.unionWith(obstacleAndObject);
+    MapTileRegion obstacle          = obstacleOnly.unionWith(obstacleAndObject);
 
     const auto [calcResult, calculatedCollision] = MapTileRegionWithEdge::getCollisionShiftForObject(object, obstacle);
     const FHPos expectedCollision                = params.m_shift;
@@ -244,7 +314,7 @@ INSTANTIATE_TEST_SUITE_P(InstantiationName,
                          });
 
 const std::vector<FloodTestParams> testParamsFloodFill{
-    FloodTestParams{
+    FloodTestParams{ {
         .m_id     = "simple",
         .m_width  = 5,
         .m_height = 5,
@@ -253,15 +323,13 @@ const std::vector<FloodTestParams> testParamsFloodFill{
                     "..OO."
                     "....."
                     ".....",
-        .m_parts  = {
-            "....."
-             "..OO."
-             "..OO."
-             "....."
-             ".....",
-        },
-    },
-    FloodTestParams{
+        .m_parts  = "....."
+                    "..00."
+                    "..00."
+                    "....."
+                    ".....",
+    } },
+    FloodTestParams{ {
         .m_id     = "two",
         .m_width  = 5,
         .m_height = 5,
@@ -270,67 +338,29 @@ const std::vector<FloodTestParams> testParamsFloodFill{
                     "O.OO."
                     "O...."
                     "O....",
-        .m_parts  = {
-            "O...."
-             "O...."
-             "O...."
-             "O...."
-             "O....",
-            "....."
-             "..OO."
-             "..OO."
-             "....."
-             ".....",
-        },
-    },
-
-    FloodTestParams{
-        .m_id     = "seven",
-        .m_width  = 5,
-        .m_height = 5,
-        .m_object = "O...."
-                    "O.OO."
-                    "O.OO."
-                    "O...."
-                    "O....",
-        .m_parts  = {
-            "O...."
-             "O...."
-             "O...."
-             "O...."
-             "O....",
-            "....."
-             "..OO."
-             "..OO."
-             "....."
-             ".....",
-        },
-    },
+        .m_parts  = "0...."
+                    "0.11."
+                    "0.11."
+                    "0...."
+                    "0....",
+    } },
 
 };
 
-TEST_P(FloodFillTest, Basic)
+TEST_P(FloodFillTest, BasicSegmentation)
 {
-    FloodTestParams params = GetParam();
+    const auto& params = GetParam();
+    this->prepare(params);
 
-    MapTileContainer tileContainer;
-    tileContainer.init(params.m_width, params.m_height, 1);
+    m_calculatedSegments = m_objectRegion.splitByFloodFill(true);
 
-    MapTileRegion object, obstacle;
+    makeExpectedStr();
 
-    MapTileRegion::decompose(&tileContainer, object, obstacle, params.m_object, params.m_width, params.m_height);
+    ASSERT_EQ(m_calculatedSegmentsStr, m_expectedSegmentsStr);
+    ASSERT_EQ(m_calculatedSegments, m_expectedSegments);
 
-    MapTileRegionList expectedSegments;
-    for (auto& part : params.m_parts) {
-        MapTileRegion object2, obstacle2;
-
-        MapTileRegion::decompose(&tileContainer, object2, obstacle2, part, params.m_width, params.m_height);
-        expectedSegments.push_back(object2);
-    }
-
-    const auto calculatedSegments = object.splitByFloodFill(true);
-
-    ASSERT_EQ(calculatedSegments, expectedSegments);
+    uniteSegemnts();
+    ASSERT_EQ(m_objectRegion, m_calculatedSegmentsUnited);
 }
 
 INSTANTIATE_TEST_SUITE_P(InstantiationName,
@@ -342,70 +372,70 @@ INSTANTIATE_TEST_SUITE_P(InstantiationName,
 
 const std::vector<KmeansTestParams> testParamsKmeans{
     KmeansTestParams{
-        .m_id = "seven",
+        {
+            .m_id = "seven",
 
-        .m_width  = 18,
-        .m_height = 10,
-        .m_object = "...OOOOOOOOOOOOOO."
-                    "...OOOOOOOOOOOOOO."
-                    "....OOOOOOOOOOOOO."
-                    "....OOOOOOOOOOOOO."
-                    "....OOOOOOOOOOOOO."
-                    "....OOOOOOOOOOOOO."
-                    ".....OOOOOOOOOOOO."
-                    ".....OOOOOOOOOOOO."
-                    ".....OOOOOOOOO...."
-                    ".....OOO..........",
-        .m_start  = {
-            FHPos(3, 0, 0),
-            FHPos(14, 0, 0),
-            FHPos(12, 1, 0),
-            FHPos(10, 2, 0),
-            FHPos(9, 3, 0),
-            FHPos(8, 4, 0),
-            FHPos(6, 5, 0),
-            FHPos(6, 6, 0),
-            FHPos(5, 7, 0),
-            FHPos(5, 8, 0),
+            .m_width  = 18,
+            .m_height = 10,
+            .m_object = "...OOOOOOOOOOOOOO."
+                        "...OOOOOOOOOOOOOO."
+                        "....OOOOOOOOOOOOO."
+                        "....OOOOOOOOOOOOO."
+                        "....OOOOOOOOOOOOO."
+                        "....OOOOOOOOOOOOO."
+                        ".....OOOOOOOOOOOO."
+                        ".....OOOOOOOOOOOO."
+                        ".....OOOOOOOOO...."
+                        ".....OOO..........",
+            .m_parts  = "...00003333111111."
+                        "...00663333111111."
+                        "....6663334411111."
+                        "....6663344441111."
+                        "....7777444422222."
+                        "....7775555222222."
+                        ".....885555522222."
+                        ".....899555522222."
+                        ".....999955522...."
+                        ".....999..........",
         },
-        .m_parts = "...00003333111111."
-                   "...00663333111111."
-                   "....6663334411111."
-                   "....6663344441111."
-                   "....7777444422222."
-                   "....7775555222222."
-                   ".....885555522222."
-                   ".....899555522222."
-                   ".....999955522...."
-                   ".....999..........",
+        {
+            "...0..........1..."
+            "............2....."
+            "..........3......."
+            ".........4........"
+            "........5........."
+            "......6..........."
+            "......7..........."
+            ".....8............"
+            ".....9............"
+            "..................",
+        },
     },
 };
 
-TEST_P(KmeansTest, Basic)
+TEST_P(KmeansTest, BasicSegmentation)
 {
-    KmeansTestParams params = GetParam();
+    const auto& params = GetParam();
+    this->prepare(params);
 
-    MapTileContainer tileContainer;
-    tileContainer.init(params.m_width, params.m_height, 1);
+    m_reg.load(params.m_startPoints);
+    auto startPointRegions = m_reg.getList();
 
-    MapTileRegion object, obstacle;
-    MapTileRegion::decompose(&tileContainer, object, obstacle, params.m_object, params.m_width, params.m_height);
+    KMeansSegmentationSettings settings;
+    settings.m_items.resize(startPointRegions.size());
+    for (size_t i = 0; i < startPointRegions.size(); ++i) {
+        settings.m_items[i].m_start = startPointRegions[i][0];
+        //std::cout << settings.m_items[i].m_start->toPrintableString() << "\n";
+    }
+    m_calculatedSegments = m_objectRegion.splitByKExt(settings);
 
-    MapTileRegionList expectedSegmentsList;
-    std::string       expectedSegments = params.m_parts;
-    MapTileRegion::decompose(&tileContainer, expectedSegmentsList, expectedSegments, params.m_width, params.m_height);
+    makeExpectedStr();
 
-    MapTileRegion::SplitRegionSettingsList settings;
-    settings.resize(params.m_start.size());
-    for (size_t i = 0; i < params.m_start.size(); ++i)
-        settings[i].m_start = tileContainer.m_tileIndex.at(params.m_start[i]);
+    ASSERT_EQ(m_calculatedSegmentsStr, m_expectedSegmentsStr);
+    ASSERT_EQ(m_calculatedSegments, m_expectedSegments);
 
-    const auto calculatedSegmentsList = object.splitByKExt(settings);
-
-    std::string calculatedSegments;
-    MapTileRegion::compose(&tileContainer, calculatedSegmentsList, calculatedSegments, false);
-
-    ASSERT_EQ(calculatedSegments, expectedSegments);
+    uniteSegemnts();
+    ASSERT_EQ(m_objectRegion, m_calculatedSegmentsUnited);
 }
 
 INSTANTIATE_TEST_SUITE_P(InstantiationName,
@@ -414,3 +444,231 @@ INSTANTIATE_TEST_SUITE_P(InstantiationName,
                          [](const testing::TestParamInfo<KmeansTestParams>& info) {
                              return info.param.m_id;
                          });
+
+const std::vector<GridTestParams> testParamsGrid{
+    GridTestParams{
+        {
+            .m_id = "3x3_small",
+
+            .m_width  = 5,
+            .m_height = 5,
+            .m_object = ".OOO."
+                        "OOOOO"
+                        "OOOOO"
+                        "OOOOO"
+                        ".OOO.",
+
+            .m_parts = ".001."
+                       "00011"
+                       "00011"
+                       "22233"
+                       ".223.",
+        },
+        3,
+        3,
+        0,
+        true,
+    },
+    GridTestParams{
+        {
+            .m_id = "3x3_thresholded",
+
+            .m_width  = 5,
+            .m_height = 5,
+            .m_object = ".OOO."
+                        "OOOOO"
+                        "OOOOO"
+                        "OOOOO"
+                        ".OOO.",
+
+            .m_parts = ".001."
+                       "00011"
+                       "00011"
+                       "222.."
+                       ".22..",
+        },
+        3,
+        3,
+        5,
+    },
+
+    GridTestParams{
+        {
+            .m_id = "3x3_big",
+
+            .m_width  = 18,
+            .m_height = 10,
+            .m_object = "...OOOOOOOOOO....."
+                        "...OOOOOOOOOOO...."
+                        "....OOOOOOOOOOO..."
+                        "....OOOOOOOOOOOO.."
+                        "....OOOOOOOOOOOOO."
+                        "....OOOOOOOOOOOOO."
+                        ".....OOOOOOOOOOOO."
+                        ".....OOOOOOOOOOOO."
+                        ".....OOOOOOOOO...."
+                        ".....OOO..........",
+
+            .m_parts = "...0001112223....."
+                       "...00011122233...."
+                       "....00111222333..."
+                       "....445556667778.."
+                       "....4455566677788."
+                       "....4455566677788."
+                       ".....9AAABBBCCCDD."
+                       ".....9AAABBBCCCDD."
+                       ".....9AAABBBCC...."
+                       ".....EFF..........",
+
+        },
+        3,
+        3,
+        0,
+        true,
+    },
+    GridTestParams{
+        {
+            .m_id = "4x4_big_thresholded",
+
+            .m_width  = 18,
+            .m_height = 10,
+            .m_object = "...OOOOOOOOOO....."
+                        "...OOOOOOOOOOO...."
+                        "....OOOOOOOOOOO..."
+                        "....OOOOOOOOOOOO.."
+                        "....OOOOOOOOOOOOO."
+                        "....OOOOOOOOOOOOO."
+                        ".....OOOOOOOOOOOO."
+                        ".....OOOOOOOOOOOO."
+                        ".....OOOOOOOOO...."
+                        ".....OOO..........",
+
+            .m_parts = "...0000111122....."
+                       "...00001111222...."
+                       "....00011112222..."
+                       "....00011112222..."
+                       "....3334444555566."
+                       "....3334444555566."
+                       ".....334444555566."
+                       ".....334444555566."
+                       ".................."
+                       "..................",
+        },
+        4,
+        4,
+        8,
+    },
+};
+
+TEST_P(GridTest, BasicSegmentation)
+{
+    const auto& params = GetParam();
+    this->prepare(params);
+
+    m_calculatedSegments = m_objectRegion.splitByGrid(params.m_gridWidth, params.m_gridHeight, params.m_threshold);
+
+    makeExpectedStr();
+
+    ASSERT_EQ(m_calculatedSegmentsStr, m_expectedSegmentsStr);
+    ASSERT_EQ(m_calculatedSegments, m_expectedSegments);
+
+    if (params.m_uniteCheck) {
+        uniteSegemnts();
+        ASSERT_EQ(m_objectRegion, m_calculatedSegmentsUnited);
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(InstantiationName,
+                         GridTest,
+                         testing::ValuesIn(testParamsGrid),
+                         [](const testing::TestParamInfo<GridTestParams>& info) {
+                             return info.param.m_id;
+                         });
+
+GTEST_TEST(GridDetection, Basic)
+{
+    /*
+0000011111222.
+0000011111222.
+0000011111222.
+3333344444555.
+3333344444555.
+3333344444555.
+6666677777888.
+6666677777888.
+..............
+
+..............
+..0....1...2..
+..............
+..............
+..3....4...5..
+..............
+..6....7......
+..............
+..............
+*/
+    MapTileContainer tileContainer;
+    tileContainer.init(13, 8, 1);
+    auto settings = MapTileRegionSegmentation::guessKMeansByGrid(tileContainer.m_all, 8);
+
+    std::vector<FHPos> expected{ FHPos(2, 1), FHPos(7, 1), FHPos(11, 1), FHPos(2, 4), FHPos(7, 4), FHPos(11, 4), FHPos(2, 6), FHPos(7, 6) };
+    std::vector<FHPos> actual;
+    for (auto& item : settings.m_items)
+        actual.push_back(item.m_start->m_pos);
+
+    EXPECT_EQ(expected, actual);
+
+    std::vector<int> radiuses{ 36, 37, 41, 37, 37, 42, 30, 22 };
+    for (size_t i = 0; i < settings.m_items.size(); i++)
+        settings.m_items[i].m_radius = radiuses[i];
+
+    ASSERT_NO_THROW(tileContainer.m_all.splitByKExt(settings));
+}
+
+GTEST_TEST(GridDetection, Basic2)
+{
+    MapTileContainer tileContainer;
+    tileContainer.init(20, 18, 1);
+
+    MergedRegion reg;
+    reg.initFromTileContainer(&tileContainer, 0);
+
+    const std::string object = ".........OO........."
+                               ".OOOOOOOOOOO........"
+                               "OOOOOOOOOOOOO......."
+                               "OOOOOOOOOOOOOO......"
+                               "OOOOOOOOOOOOOO......"
+                               "OOOOOOOOOOOOOOO....."
+                               "OOOOOOOOOOOOOOOO...."
+                               "OOOOOOOOOOOOOOOOO..."
+                               "OOOOOOOOOOOOOOOOOO.."
+                               "OOOOOOOOOOOOOOOOOO.."
+                               "OOOOOOOOOOOOOOOOO..."
+                               "OOOOOOOOOOOOOOOOO..."
+                               "...OOOOOOOOOOOOOO..."
+                               ".....OOOOOOOOOOO...."
+                               ".......OOOOOOOOO...."
+                               ".........OOOOOO....."
+                               "...........OOOO....."
+                               "....................";
+
+    reg.load(object);
+    auto objectRegion = reg.m_regions['O'];
+
+    auto settings = MapTileRegionSegmentation::guessKMeansByGrid(objectRegion, 14);
+
+    std::vector<FHPos> actual;
+    for (auto& item : settings.m_items)
+        actual.push_back(item.m_start->m_pos);
+
+    std::vector<int> radiuses{ 37, 37, 37, 42, 42, 42, 41, 36, 37, 36, 42, 42, 46, 22 };
+    for (size_t i = 0; i < settings.m_items.size(); i++)
+        settings.m_items[i].m_radius = radiuses[i];
+
+    ASSERT_NO_THROW(objectRegion.splitByKExt(settings));
+
+    settings.m_items[1].m_start = settings.m_items[0].m_start;
+
+    ASSERT_NO_THROW(objectRegion.splitByKExt(settings));
+}

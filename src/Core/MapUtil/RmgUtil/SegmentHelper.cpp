@@ -162,6 +162,7 @@ void SegmentHelper::makeBorders(std::vector<TileZone>& tileZones)
 
 void SegmentHelper::makeSegments(TileZone& tileZone)
 {
+    Mernel::ProfilerScope scope("makeSegments");
     // make k-means segmentation
     auto segmentList = tileZone.m_innerAreaUsable.m_innerArea.splitByMaxArea(tileZone.m_rngZoneSettings.m_segmentAreaSize, 30);
 
@@ -285,8 +286,7 @@ void SegmentHelper::makeSegments(TileZone& tileZone)
 
     // make sure everything is connected in m_roadPotentialArea
     {
-        Mernel::ProfilerScope scope("extra inner");
-        auto                  parts = tileZone.m_roadPotentialArea.splitByFloodFill(true);
+        auto parts = tileZone.m_roadPotentialArea.splitByFloodFill(true);
         if (parts.size() >= 2) {
             auto                 largestIt = std::max_element(parts.cbegin(), parts.cend(), [](const MapTileRegion& l, const MapTileRegion& r) {
                 return l.size() < r.size();

@@ -238,7 +238,7 @@
             },
             "Treasure": {
                 "base": "Common",
-                "centerDispersion": {"x": 1, "y": 1}, "relativeSizeAvg": 130, "relativeSizeDispersion": 5, "terrain": "sod.terrain.sand",
+                "centerDispersion": {"x": 1, "y": 1}, "relativeSizeAvg": 150, "relativeSizeDispersion": 5, "terrain": "sod.terrain.sand",
                 "zoneGuardPercent": 150,
                 "excludeFactionZones":["P1", "P2", "P3", "P4"],
                 "towns": {

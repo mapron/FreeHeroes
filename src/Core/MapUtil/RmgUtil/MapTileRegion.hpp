@@ -16,6 +16,7 @@ class MapTileRegion;
 using MapTileRegionList = std::vector<MapTileRegion>;
 struct FHPos;
 class MapTileContainer;
+struct KMeansSegmentationSettings;
 
 class MAPUTIL_EXPORT MapTileRegion : public FlatSet<MapTilePtr> {
 public:
@@ -27,27 +28,19 @@ public:
         : FlatSet<MapTilePtr>(std::move(data))
     {}
 
-    struct SplitRegionSettings {
-        MapTilePtr m_start  = nullptr;
-        int        m_speed  = 100;
-        int64_t    m_radius = 100;
-    };
-    using SplitRegionSettingsList = std::vector<SplitRegionSettings>;
-
     MapTileRegionList splitByFloodFill(bool useDiag, MapTilePtr hint = nullptr) const;
     MapTileRegionList splitByMaxArea(size_t maxArea, size_t iterLimit = 100) const;
     MapTileRegionList splitByK(size_t k, size_t iterLimit = 100) const;
-    MapTileRegionList splitByKExt(const SplitRegionSettingsList& settingsList, size_t iterLimit = 100) const;
+    MapTileRegionList splitByKExt(const KMeansSegmentationSettings& settingsList, size_t iterLimit = 100) const;
+    MapTileRegionList splitByGrid(int width, int height, size_t threshold) const;
 
     MapTilePtr makeCentroid(bool ensureInbounds) const;
 
     MapTilePtr findClosestPoint(FHPos pos) const;
 
-    static void decompose(MapTileContainer* tileContainer, MapTileRegion& object, MapTileRegion& obstacle, const std::string& serialized, int width, int height);
-    static void compose(MapTileContainer* tileContainer, const MapTileRegion& object, const MapTileRegion& obstacle, std::string& serialized, bool obstacleInverted = false, bool printable = false);
-
-    static void decompose(MapTileContainer* tileContainer, MapTileRegionList& objects, const std::string& serialized, int width, int height);
-    static void compose(MapTileContainer* tileContainer, const MapTileRegionList& objects, std::string& serialized, bool printable = false);
+    MapTileRegion                           makeInnerEdge(bool useDiag) const { return makeInnerAndOuterEdge(useDiag).first; }
+    MapTileRegion                           makeOuterEdge(bool useDiag) const { return makeInnerAndOuterEdge(useDiag).second; }
+    std::pair<MapTileRegion, MapTileRegion> makeInnerAndOuterEdge(bool useDiag) const;
 };
 
 }

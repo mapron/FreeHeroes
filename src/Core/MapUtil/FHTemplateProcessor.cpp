@@ -14,21 +14,22 @@
 #include "LibraryObjectDef.hpp"
 #include "LibraryPlayer.hpp"
 
-#include "RmgUtil/ObjectBundle.hpp"
+#include "RmgUtil/ZoneObjectDistributor.hpp"
 #include "RmgUtil/ObjectGenerator.hpp"
 #include "RmgUtil/ObstacleHelper.hpp"
 #include "RmgUtil/RoadHelper.hpp"
 #include "RmgUtil/SegmentHelper.hpp"
 #include "RmgUtil/TemplateUtils.hpp"
+#include "RmgUtil/MapTileRegionSegmentation.hpp"
 
 #include <functional>
 #include <stdexcept>
 #include <iostream>
 
 namespace Mernel::Reflection {
-using namespace FreeHeroes;
+
 ENUM_REFLECTION_STRINGIFY(
-    FHTemplateProcessor::Stage,
+    FreeHeroes::FHTemplateProcessor::Stage,
     Invalid,
     Invalid,
     ZoneCenterPlacement,
@@ -261,9 +262,16 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage, const std::stri
         {
             auto profilerStr = profileContext.printToStr();
             profileContext.clearAll();
+            std::string profilerStr2;
+            for (size_t i = 0; i < profilerStr.size(); ++i) {
+                char c = profilerStr[i];
+                profilerStr2 += c;
+                if (c == '\n' && i < profilerStr.size() - 1)
+                    profilerStr2 += m_indent;
+            }
             if (!profilerStr.empty())
                 m_logOutput << baseIndent << "Profiler data:\n"
-                            << profilerStr;
+                            << m_indent << profilerStr2;
         }
         m_logOutput << baseIndent << "End stage: " << stageToString(m_currentStage) << " (" << timer.elapsedUS() << " us.)\n";
 
@@ -366,10 +374,10 @@ void FHTemplateProcessor::runZoneTilesInitial()
                     << "\n";
     }
 
-    MapTileRegion::SplitRegionSettingsList settings;
-    settings.resize(m_tileZones.size());
+    KMeansSegmentationSettings settings;
+    settings.m_items.resize(m_tileZones.size());
     for (auto& tileZone : m_tileZones) {
-        settings[tileZone.m_index] = MapTileRegion::SplitRegionSettings{
+        settings.m_items[tileZone.m_index] = KMeansSegmentationSettings::Item{
             .m_start  = tileZone.m_startTile,
             .m_speed  = tileZone.m_rngZoneSettings.m_centerShiftElasticity,
             .m_radius = tileZone.m_absoluteRadius,
@@ -509,10 +517,8 @@ void FHTemplateProcessor::runBorderRoads()
 
 void FHTemplateProcessor::runTownsPlacement()
 {
-    auto placeTown = [this](FHTown town, FHPos pos, TileZone& tileZone, Core::LibraryPlayerConstPtr player, Core::LibraryFactionConstPtr faction) {
+    auto placeTown = [this](FHTown& town, FHPos pos, TileZone& tileZone, Core::LibraryPlayerConstPtr player, Core::LibraryFactionConstPtr faction) {
         town.m_factionId = faction;
-        //if (1)
-        //   return;
 
         pos.m_x += 2;
         town.m_pos    = pos;
@@ -601,12 +607,12 @@ void FHTemplateProcessor::runTownsPlacement()
             if (!townPositions[0])
                 townPositions[0] = tileZone.m_centroid;
         } else {
-            auto&                                  area = tileZone.m_area.m_innerArea;
-            MapTileRegion::SplitRegionSettingsList settings;
-            const size_t                           K = towns.size();
+            auto&                      area = tileZone.m_area.m_innerArea;
+            KMeansSegmentationSettings settings;
+            const size_t               K = towns.size();
             {
                 // random cluster init
-                settings.resize(K);
+                settings.m_items.resize(K);
                 MapTileRegion used;
                 for (size_t i = 0; i < K; i++) {
                     while (true) {
@@ -619,7 +625,7 @@ void FHTemplateProcessor::runTownsPlacement()
                     }
                 }
                 for (size_t i = 0; i < K; i++)
-                    settings[i].m_start = used[i];
+                    settings.m_items[i].m_start = used[i];
             }
             const auto regionsEst = area.splitByKExt(settings);
 
@@ -633,8 +639,8 @@ void FHTemplateProcessor::runTownsPlacement()
                 if (!cell)
                     continue;
                 // if we have fixed town position here, set speed = 0 and erase closest random position
-                settings[i].m_speed = 0;
-                settings[i].m_start = cell;
+                settings.m_items[i].m_speed = 0;
+                settings.m_items[i].m_start = cell;
 
                 auto it = std::min_element(townPositionsEst.begin(), townPositionsEst.end(), [cell](MapTilePtr l, MapTilePtr r) {
                     return posDistance(cell, l) < posDistance(cell, r);
@@ -658,7 +664,8 @@ void FHTemplateProcessor::runTownsPlacement()
                 faction = getRandomPlayableFaction(town.m_excludeFactionZones);
 
             assert(townPositions[i]);
-            placeTown(town.m_town, townPositions[i]->m_pos, tileZone, player, faction);
+            FHTown townCopy = town.m_town;
+            placeTown(townCopy, townPositions[i]->m_pos, tileZone, player, faction);
             i++;
         }
 
@@ -726,6 +733,10 @@ void FHTemplateProcessor::runRewards()
 
     m_logOutput << m_indent << "armyPercent=" << armyPercent << ", goldPercent=" << goldPercent << "\n";
 
+    const ObjectGenerator gen(m_map, m_database, m_rng, m_logOutput);
+
+    const ZoneObjectDistributor objectDistributor(m_rng, m_tileContainer, m_logOutput);
+
     for (auto& tileZone : m_tileZones) {
         if (tileZone.m_rngZoneSettings.m_scoreTargets.empty())
             continue;
@@ -733,24 +744,30 @@ void FHTemplateProcessor::runRewards()
         //if (tileZone.m_id != "CC")
         //    continue;
 
-        ObjectBundleSet bundleSet(m_rng, m_tileContainer, m_logOutput);
+        ZoneObjectDistributor::DistributionResult distributionResultCopy;
+        distributionResultCopy.init(tileZone);
 
-        m_logOutput << m_indent << " --- generate : " << tileZone.m_id << " --- \n";
         auto      objects       = m_map.m_objects;
         auto      needBeBlocked = tileZone.m_needBeBlocked;
         const int maxAttempts   = 3;
         for (int i = 1; i <= maxAttempts; ++i) {
-            const bool      lastAttempt = i == maxAttempts;
-            ObjectGenerator gen(m_map, m_database, m_rng, m_logOutput);
-            gen.generate(tileZone.m_rngZoneSettings,
-                         tileZone.m_rewardsFaction,
-                         tileZone.m_dwellFaction,
-                         tileZone.m_terrain,
-                         armyPercent,
-                         goldPercent);
+            m_logOutput << m_indent << " --- generate : " << tileZone.m_id << " [" << i << " / " << maxAttempts << "] --- \n";
+            const bool lastAttempt          = i == maxAttempts;
+            auto       zoneObjectGeneration = gen.generate(tileZone.m_rngZoneSettings,
+                                                     tileZone.m_rewardsFaction,
+                                                     tileZone.m_dwellFaction,
+                                                     tileZone.m_terrain,
+                                                     armyPercent,
+                                                     goldPercent);
 
-            if (bundleSet.consume(gen, tileZone))
-                break;
+            auto distributionResult = distributionResultCopy;
+
+            if (objectDistributor.makeInitialDistribution(distributionResult, zoneObjectGeneration)) {
+                if (objectDistributor.doPlaceDistribution(distributionResult)) {
+                    distributionResultCopy = distributionResult;
+                    break;
+                }
+            }
 
             if (lastAttempt)
                 throw std::runtime_error("Failed to fit some objects into zone '" + tileZone.m_id + "'");
@@ -760,11 +777,11 @@ void FHTemplateProcessor::runRewards()
             tileZone.m_needBeBlocked = needBeBlocked;
         }
 
-        for (auto& guardBundle : bundleSet.m_guards) {
+        for (auto& guardBundle : distributionResultCopy.m_guards) {
             Guard guard;
             guard.m_value    = guardBundle.m_value;
             guard.m_pos      = guardBundle.m_pos;
-            guard.m_zone     = guardBundle.m_zone;
+            guard.m_zone     = &tileZone;
             guard.m_joinable = true;
             m_guards.push_back(guard);
         }

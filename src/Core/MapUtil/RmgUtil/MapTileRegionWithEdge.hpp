@@ -30,9 +30,6 @@ public:
     };
 
     void makeEdgeFromInnerArea();
-    void removeNonInnerFromInnerEdge();
-
-    void makeOutsideEdge();
 
     bool refineEdgeRemoveHollows(MapTileRegion& allowedArea);
     bool refineEdgeRemoveSpikes(MapTileRegion& allowedArea);

@@ -16,50 +16,7 @@ namespace FreeHeroes {
 
 void MapTileRegionWithEdge::makeEdgeFromInnerArea()
 {
-    m_innerEdge = m_innerArea;
-    removeNonInnerFromInnerEdge();
-}
-
-void MapTileRegionWithEdge::removeNonInnerFromInnerEdge()
-{
-    MapTilePtrSortedList forErase;
-
-    Mernel::ProfilerScope scope("make InnerEdge");
-    for (MapTilePtr cell : m_innerEdge) {
-        if (m_diagonalGrowth) {
-            if (m_innerArea.contains(cell->m_neighborB)
-                && m_innerArea.contains(cell->m_neighborT)
-                && m_innerArea.contains(cell->m_neighborR)
-                && m_innerArea.contains(cell->m_neighborL)
-                && m_innerArea.contains(cell->m_neighborTL)
-                && m_innerArea.contains(cell->m_neighborTR)
-                && m_innerArea.contains(cell->m_neighborBL)
-                && m_innerArea.contains(cell->m_neighborBR))
-                forErase.push_back(cell);
-        } else {
-            if (m_innerArea.contains(cell->m_neighborB)
-                && m_innerArea.contains(cell->m_neighborT)
-                && m_innerArea.contains(cell->m_neighborR)
-                && m_innerArea.contains(cell->m_neighborL))
-                forErase.push_back(cell);
-        }
-    }
-    m_innerEdge.erase(forErase);
-
-    makeOutsideEdge();
-}
-
-void MapTileRegionWithEdge::makeOutsideEdge()
-{
-    m_outsideEdge.clear();
-    m_outsideEdge.reserve(m_innerEdge.size());
-
-    for (auto* cell : m_innerEdge) {
-        for (auto* ncell : cell->neighboursList(m_diagonalGrowth)) {
-            if (!m_innerArea.contains(ncell))
-                m_outsideEdge.insert(ncell);
-        }
-    }
+    std::tie(m_innerEdge, m_outsideEdge) = m_innerArea.makeInnerAndOuterEdge(m_diagonalGrowth);
 }
 
 bool MapTileRegionWithEdge::refineEdgeRemoveHollows(MapTileRegion& allowedArea)
@@ -136,7 +93,7 @@ MapTileRegion MapTileRegionWithEdge::getBottomEdge() const
 
 MapTileRegion MapTileRegionWithEdge::floodFillDiagonalByInnerEdge(MapTilePtr cellStart) const
 {
-    auto segments = this->m_innerEdge.splitByFloodFill(true, cellStart);
+    auto segments = m_innerEdge.splitByFloodFill(true, cellStart);
     if (segments.empty())
         return {};
     return segments[0];
