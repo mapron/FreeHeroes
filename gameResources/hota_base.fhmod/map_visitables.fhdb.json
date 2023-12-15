@@ -140,7 +140,7 @@
 "sod.resource.seaChest"                    : [ "Pick"   ],
 "sod.resource.vialOfMana"                  : [ "Pick"   ],
 "sod.resource.barrelOnWater"               : [ "Pick"   ],
-"hota.visitable.ancientLamp"               : [ "Remove" ]
+"hota.visitable.ancientLamp"               : [ "Pick"   ]
 
 }
 
