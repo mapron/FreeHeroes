@@ -204,6 +204,18 @@ public:
         erase(flatSet.m_data);
     }
 
+    FlatSet unionWith(const FlatSet& other) const
+    {
+        if (empty())
+            return other;
+        if (other.empty())
+            return *this;
+
+        FlatSet result;
+        result.m_data = m_data.unionWith(other.m_data);
+        return result;
+    }
+
     FlatSet intersectWith(const FlatSet& other) const
     {
         if (empty() || other.empty())
@@ -216,8 +228,10 @@ public:
 
     FlatSet diffWith(const FlatSet& other) const
     {
-        if (empty() || other.empty())
+        if (empty())
             return {};
+        if (other.empty())
+            return *this;
 
         FlatSet result;
         result.m_data = m_data.diffWith(other.m_data);

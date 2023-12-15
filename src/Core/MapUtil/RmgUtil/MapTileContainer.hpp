@@ -32,6 +32,12 @@ public:
 
     bool fixExclaves();
 
+    MapTilePtr find(FHPos pos) const noexcept
+    {
+        auto it = m_tileIndex.find(pos);
+        return it == m_tileIndex.cend() ? nullptr : it->second;
+    }
+
 private:
     std::vector<MapTile> m_tiles;
 };

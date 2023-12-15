@@ -145,11 +145,122 @@ constexpr inline int64_t intSqrt(const int64_t value) noexcept
     return result - 1;
 }
 
+/**
+Implements the 5-order polynomial approximation to sin(x).
+@param i   angle (with 2^15 units/circle)
+@return    16 bit fixed point Sine value (4.12) (ie: +4096 = +1 & -4096 = -1)
+@author Andrew Steadman 
+@link https://www.nullhardware.com/blog/fixed-point-sine-and-cosine-for-embedded-systems
+
+The result is accurate to within +- 1 count. ie: +/-2.44e-4.
+*/
+constexpr inline int16_t fpsin_fixed(int16_t i)
+{
+    /* Convert (signed) input to a value between 0 and 8192. (8192 is pi/2, which is the region of the curve fit). */
+    /* ------------------------------------------------------------------- */
+    i <<= 1;
+    uint8_t c = i < 0; //set carry for output pos/neg
+
+    if (i == (i | 0x4000)) // flip input value to corresponding value in range [0..8192)
+        i = (1 << 15) - i;
+    i = (i & 0x7FFF) >> 1;
+    /* ------------------------------------------------------------------- */
+
+    /* The following section implements the formula:
+     = y * 2^-n * ( A1 - 2^(q-p)* y * 2^-n * y * 2^-n * [B1 - 2^-r * y * 2^-n * C1 * y]) * 2^(a-q)
+    Where the constants are defined as follows:
+    */
+    constexpr const uint32_t A1 = 3370945099UL,
+                             B1 = 2746362156UL,
+                             C1 = 292421UL;
+    constexpr const uint32_t n  = 13,
+                             p  = 32,
+                             q  = 31,
+                             r  = 3,
+                             a  = 12;
+
+    uint32_t y = (C1 * ((uint32_t) i)) >> n;
+    y          = B1 - (((uint32_t) i * y) >> r);
+    y          = (uint32_t) i * (y >> n);
+    y          = (uint32_t) i * (y >> n);
+    y          = A1 - (y >> (p - q));
+    y          = (uint32_t) i * (y >> n);
+    y          = (y + (1UL << (q - a - 1))) >> (q - a); // Rounding
+
+    int16_t result = y;
+    return c ? -result : result;
+}
+
+constexpr inline int16_t fpcos_fixed(int16_t i)
+{
+    return fpsin_fixed((int16_t) (((uint16_t) (i)) + 8192U));
+}
+
+/**
+Wrapper over fpsin_fixed
+@param i   angle int degrees (0...360)
+@return    sine value multiplied by 10000 (-10000...+10000)
+*/
+constexpr int64_t fpsin_deg_impl(int64_t deg)
+{
+    return static_cast<int64_t>(fpsin_fixed(static_cast<int16_t>(deg * 8192 / 90))) * 10000 / 4096;
+}
+
+/// wrapper over fpsin_deg_impl to provide fixed values for common inputs
+constexpr int64_t fpsin_deg(int64_t deg)
+{
+    switch (deg) {
+        case 0:
+        case 180:
+        case 360:
+            return 0;
+        case 30:
+        case 150:
+            return 5000;
+        case 45:
+        case 135:
+            return 7071;
+        case 60:
+        case 120:
+            return 8660;
+        case 90:
+            return 10000;
+        case 210:
+        case 330:
+            return -5000;
+        case 225:
+        case 315:
+            return -7071;
+        case 240:
+        case 300:
+            return -8660;
+        case 270:
+            return -10000;
+    }
+    return fpsin_deg_impl(deg);
+}
+
+constexpr int64_t fpcos_deg(int64_t deg)
+{
+    return fpsin_deg(deg > 270 ? deg - 270 : deg + 90);
+}
+
 constexpr inline int64_t posDistance(const FHPos& from, const FHPos& to, int64_t mult = 1)
 {
     const auto dx = mult * (from.m_x - to.m_x);
     const auto dy = mult * (from.m_y - to.m_y);
     return intSqrt(dx * dx + dy * dy);
+}
+
+/// radius is 10000. degree=0  => (10000, 0)
+constexpr FHPos radiusVector(int degree) noexcept
+{
+    return { static_cast<int>(fpcos_deg(degree)), static_cast<int>(fpsin_deg(degree)) };
+}
+
+constexpr FHPos radiusVector(FHPosDirection direction) noexcept
+{
+    return radiusVector(directionToDegree(direction));
 }
 
 }

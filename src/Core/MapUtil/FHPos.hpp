@@ -97,6 +97,32 @@ constexpr FHPosDirection posDirectionTo(const FHPos& from, const FHPos& to) noex
     }
 }
 
+constexpr int directionToDegree(FHPosDirection direction) noexcept
+{
+    using enum FHPosDirection;
+    switch (direction) {
+        case T:
+            return 270;
+        case TR:
+            return 315;
+        case R:
+            return 0;
+        case BR:
+            return 45;
+        case B:
+            return 90;
+        case BL:
+            return 135;
+        case L:
+            return 180;
+        case TL:
+            return 225;
+        case Invalid:
+            return 0;
+    }
+    return 0;
+}
+
 inline FHPos operator+(const FHPos& left_, const FHPos& right_)
 {
     return { left_.m_x + right_.m_x, left_.m_y + right_.m_y };
