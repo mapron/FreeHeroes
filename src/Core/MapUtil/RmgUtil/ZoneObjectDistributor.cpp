@@ -122,9 +122,9 @@ bool ZoneObjectWrap::estimateOccupied(MapTilePtr absPos, MapTilePtr centroid)
         m_rewardArea = visitMaskRegion.unionWith(blockNotVisitRegion);
         assert((visitMaskRegion.size() + blockNotVisitRegion.size()) > 0);
     }
-    const MapTilePtr lastVisitTile                = visitMaskRegion[visitMaskRegion.size() - 1];
-    const auto       rewardAreaCentroid           = m_rewardArea.makeCentroid(true);
-    const auto [rewardAreaInner, rewardAreaOuter] = m_rewardArea.makeInnerAndOuterEdge(true);
+    const MapTilePtr lastVisitTile      = visitMaskRegion[visitMaskRegion.size() - 1];
+    const auto       rewardAreaCentroid = m_rewardArea.makeCentroid(true);
+    const auto       rewardAreaOuter    = m_rewardArea.makeOuterEdge(true);
 
     const bool isVisitable = m_zoneObject->getType() == IZoneObject::Type::Visitable;
     const bool isPickable  = m_zoneObject->getType() == IZoneObject::Type::Pickable;
@@ -513,11 +513,7 @@ ZoneObjectDistributor::PlacementResult ZoneObjectDistributor::placeOnMap(ZoneObj
 void ZoneObjectDistributor::DistributionResult::init(TileZone& tileZone)
 {
     MapTileRegion safePadding = tileZone.m_nodes.getRegion(RoadLevel::Towns);
-    safePadding.insert(tileZone.m_nodes.getRegion(RoadLevel::Exits));
     {
-        auto guards = tileZone.m_breakGuardTiles;
-        guards      = blurSet(guards, true, false);
-        safePadding.insert(guards);
         safePadding = blurSet(safePadding, true, false);
     }
     if (tileZone.m_innerAreaSegments.empty())

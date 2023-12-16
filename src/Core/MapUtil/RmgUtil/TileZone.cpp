@@ -43,4 +43,87 @@ void TileZone::updateSegmentIndex()
     }
 }
 
+TileZone::TileIntMapping TileZone::makeMoveCosts(bool onlyUsable) const
+{
+    TileIntMapping costs;
+    auto&          area = onlyUsable ? m_innerAreaUsable.m_innerArea : m_area.m_innerArea;
+    for (auto tile : area)
+        costs[tile] = 100;
+    for (const auto& [level, rarea] : m_roads.m_byLevel) {
+        int cost = 100;
+        if (level == RoadLevel::Towns)
+            cost = 20;
+        if (level == RoadLevel::Exits)
+            cost = 40;
+        if (level == RoadLevel::InnerPoints || level == RoadLevel::BorderPoints)
+            cost = 70;
+        for (auto* tile : rarea)
+            costs[tile] = cost;
+    }
+    return costs;
+}
+
+TileZone::WeightTileMap TileZone::computeDistances(const TileIntMapping& costs, std::set<MapTilePtr> completed, std::set<MapTilePtr> remaining, int maxCost, int iters)
+{
+    std::set<MapTilePtr> edgeSet = completed;
+
+    TileZone::TileIntMapping resultDistance;
+
+    WeightTileMap edge;
+    for (auto tile : completed)
+        edge[0].push_back(tile);
+
+    auto calcCost = [&costs](MapTilePtr one, MapTilePtr two, bool diag) -> int {
+        const int costOne = costs.at(one);
+        const int costTwo = costs.at(two);
+        const int cost    = std::max(costOne, costTwo);
+        return diag ? cost * 141 / 100 : cost;
+    };
+
+    auto consumePrevEdge = [maxCost, &edge, &edgeSet, &resultDistance, &remaining, &completed, &calcCost]() -> bool {
+        if (edge.empty())
+            return false;
+
+        const int            lowestCost      = edge.begin()->first;
+        const MapTilePtrList lowestCostTiles = edge.begin()->second;
+        edge.erase(edge.begin());
+
+        if (maxCost > 0 && lowestCost > maxCost)
+            return true;
+
+        for (auto tile : lowestCostTiles) {
+            resultDistance[tile] = lowestCost;
+            completed.insert(tile);
+            edgeSet.erase(tile);
+            remaining.erase(tile);
+        }
+        for (bool diag : { false, true }) {
+            for (auto tile : lowestCostTiles) {
+                auto& nlist = diag ? tile->m_diagNeighbours : tile->m_orthogonalNeighbours;
+                for (auto ntile : nlist) {
+                    if (completed.contains(ntile) || edgeSet.contains(ntile) || !remaining.contains(ntile))
+                        continue;
+                    const int cost = calcCost(tile, ntile, diag) + lowestCost;
+                    edgeSet.insert(ntile);
+                    edge[cost].push_back(ntile);
+                }
+            }
+        }
+
+        return true;
+    };
+
+    for (int i = 0; i < iters; ++i) {
+        if (!consumePrevEdge())
+            break;
+    }
+
+    WeightTileMap resultByDistance;
+
+    for (const auto& [tile, w] : resultDistance)
+        resultByDistance[w].push_back(tile);
+
+    return resultByDistance;
+}
+
 }

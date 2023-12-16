@@ -17,7 +17,6 @@ using MapTileRegionWithEdgeList = std::vector<MapTileRegionWithEdge>;
 
 class MAPUTIL_EXPORT MapTileRegionWithEdge {
 public:
-    bool          m_diagonalGrowth = false;
     MapTileRegion m_innerArea;
     MapTileRegion m_innerEdge;   // subset of innerArea;
     MapTileRegion m_outsideEdge; // is not subset of inner area.

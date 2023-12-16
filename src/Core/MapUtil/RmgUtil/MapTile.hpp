@@ -66,7 +66,7 @@ struct MAPUTIL_EXPORT MapTile {
     MapTilePtr     neighbourByOffset(FHPos offset) const noexcept;
     MapTilePtrList neighboursByOffsets(const std::vector<FHPos>& offsets, const Transform& transform) const noexcept;
 
-    MapTilePtrList makePathTo(bool diag, MapTileConstPtr dest) const noexcept;
+    MapTilePtrList makePathTo(bool diag, MapTileConstPtr dest, bool addEnds) const noexcept;
 
     std::string toPrintableString() const noexcept;
 };

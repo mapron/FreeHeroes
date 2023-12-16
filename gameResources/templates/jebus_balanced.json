@@ -245,8 +245,8 @@
                     "main" : null,
                     "town1": null,
                     "town2": null,
-                    "P1":{"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}, "useZoneFaction": true, "tilesToTarget": 8, "closeToConnection":"CC_P1"}, 
-                    "P2":{"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}, "useZoneFaction": true, "tilesToTarget": 8, "closeToConnection":"CC_P2"}},
+                    "P1":{"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}, "useZoneFaction": true, "tilesToTarget": 8, "closeToConnection":"CC_P1_0_main"}, 
+                    "P2":{"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}, "useZoneFaction": true, "tilesToTarget": 8, "closeToConnection":"CC_P2_0_main"}},
 
                 "guardMin": 20000,
                 "guardMax": 150000,
@@ -353,20 +353,20 @@
             },
     
             "P1": { "base": "Common"  , "isNormal": true,  "player": "Red" , "centerAvg": {"x": 15 , "y": 15 }  ,
-                "towns": {"town1":{"excludeFactionZones":["P1"] }, "town2":{"excludeFactionZones":["P1"]}, "main": {"tilesToTarget": 20, "closeToConnection":"CC_P1" } } },
+                "towns": {"town1":{"excludeFactionZones":["P1"] }, "town2":{"excludeFactionZones":["P1"]}, "main": {"tilesToTarget": 20, "closeToConnection":"CC_P1_0_main" } } },
             "P2": { "base": "Common"  , "isNormal": true,  "player": "Blue", "centerAvg": {"x": 120, "y": 120}  ,
-                "towns": {"town1":{"excludeFactionZones":["P2"] }, "town2":{"excludeFactionZones":["P2"]}, "main": {"tilesToTarget": 20, "closeToConnection":"CC_P2" } } },
+                "towns": {"town1":{"excludeFactionZones":["P2"] }, "town2":{"excludeFactionZones":["P2"]}, "main": {"tilesToTarget": 20, "closeToConnection":"CC_P2_0_main" } } },
             "P3": { "base": "Common"  , "isNormal": true,  "player": "Tan", "centerAvg": {"x": 120, "y": 15 }  ,
-                "towns": {"town1":{"excludeFactionZones":["P3"] }, "town2":{"excludeFactionZones":["P3"]}, "main": {"tilesToTarget": 20, "closeToConnection":"CC_P3" } } },
+                "towns": {"town1":{"excludeFactionZones":["P3"] }, "town2":{"excludeFactionZones":["P3"]}, "main": {"tilesToTarget": 20, "closeToConnection":"CC_P3_0_main" } } },
             "P4": { "base": "Common"  , "isNormal": true,  "player": "Green", "centerAvg": {"x": 15 , "y": 120}  ,
-                "towns": {"town1":{"excludeFactionZones":["P4"] }, "town2":{"excludeFactionZones":["P4"]}, "main": {"tilesToTarget": 20, "closeToConnection":"CC_P4" } } },
+                "towns": {"town1":{"excludeFactionZones":["P4"] }, "town2":{"excludeFactionZones":["P4"]}, "main": {"tilesToTarget": 20, "closeToConnection":"CC_P4_0_main" } } },
             "CC": { "base": "Treasure", "isNormal": true,  "player": "None", "centerAvg": {"x": 72 , "y": 72 }, "centerShiftElasticity": 0  }
         },
         "connections": {
-            "CC_P1": { "from": "CC", "to": "P1", "guard": 100000 },
-            "CC_P2": { "from": "CC", "to": "P2", "mirrorGuard": "CC_P1" },
-            "CC_P3": { "from": "CC", "to": "P3", "guard": 100000 },
-            "CC_P4": { "from": "CC", "to": "P4", "mirrorGuard": "CC_P3" }
+            "CC_P1": { "from": "CC", "to": "P1", "paths": { "CC_P1_0_main": { "guard": 100000               }, "CC_P1_alt1": { "guard": 100000, "road": "BorderPoints"             }, "CC_P1_alt2": { "guard": 100000, "road": "BorderPoints"             } } },
+            "CC_P2": { "from": "CC", "to": "P2", "paths": { "CC_P2_0_main": { "mirrorGuard": "CC_P1_0_main" }, "CC_P2_alt1": { "mirrorGuard": "CC_P1_alt1", "road": "BorderPoints" }, "CC_P2_alt2": { "mirrorGuard": "CC_P1_alt2", "road": "BorderPoints" } } },
+            "CC_P3": { "from": "CC", "to": "P3", "paths": { "CC_P3_0_main": { "guard": 100000               }, "CC_P3_alt1": { "guard": 100000, "road": "BorderPoints"             }, "CC_P3_alt2": { "guard": 100000, "road": "BorderPoints"             } } },
+            "CC_P4": { "from": "CC", "to": "P4", "paths": { "CC_P4_0_main": { "mirrorGuard": "CC_P3_0_main" }, "CC_P4_alt1": { "mirrorGuard": "CC_P3_alt1", "road": "BorderPoints" }, "CC_P4_alt2": { "mirrorGuard": "CC_P3_alt2", "road": "BorderPoints" } } }
         },
 		"rotationDegreeDispersion": 50,
 		"allowFlip": true,

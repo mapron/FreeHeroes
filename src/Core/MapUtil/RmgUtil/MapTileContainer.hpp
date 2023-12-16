@@ -22,6 +22,7 @@ public:
     int m_depth  = 0;
 
     MapTileRegion m_all;
+    MapTileRegion m_innerEdge;
 
     std::unordered_map<FHPos, MapTilePtr> m_tileIndex;
     MapTilePtr                            m_centerTile = nullptr;

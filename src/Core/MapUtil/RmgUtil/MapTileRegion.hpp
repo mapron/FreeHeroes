@@ -17,6 +17,7 @@ using MapTileRegionList = std::vector<MapTileRegion>;
 struct FHPos;
 class MapTileContainer;
 struct KMeansSegmentationSettings;
+struct EdgeSegmentationResults;
 
 class MAPUTIL_EXPORT MapTileRegion : public FlatSet<MapTilePtr> {
 public:
@@ -38,9 +39,22 @@ public:
 
     MapTilePtr findClosestPoint(FHPos pos) const;
 
-    MapTileRegion                           makeInnerEdge(bool useDiag) const { return makeInnerAndOuterEdge(useDiag).first; }
-    MapTileRegion                           makeOuterEdge(bool useDiag) const { return makeInnerAndOuterEdge(useDiag).second; }
-    std::pair<MapTileRegion, MapTileRegion> makeInnerAndOuterEdge(bool useDiag) const;
+    struct EdgeSegmentationParams {
+        bool m_useDiag    = false;
+        bool m_makeInner  = false;
+        bool m_makeOuter  = false;
+        bool m_makeCenter = false;
+    };
+
+    MapTileRegion           makeInnerEdge(bool useDiag) const;
+    MapTileRegion           makeOuterEdge(bool useDiag) const;
+    EdgeSegmentationResults makeInnerAndOuterEdge(EdgeSegmentationParams params) const;
+};
+
+struct EdgeSegmentationResults {
+    MapTileRegion m_inner;
+    MapTileRegion m_outer;
+    MapTileRegion m_center;
 };
 
 }

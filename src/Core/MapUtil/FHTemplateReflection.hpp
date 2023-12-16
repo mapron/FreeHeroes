@@ -15,6 +15,16 @@
 namespace Mernel::Reflection {
 using namespace FreeHeroes;
 
+ENUM_REFLECTION_STRINGIFY(
+    RoadLevel,
+    NoRoad,
+    NoRoad,
+    Towns,
+    Exits,
+    InnerPoints,
+    BorderPoints,
+    Hidden)
+
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZoneTown,
     m_town,
@@ -186,11 +196,17 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_isNormal)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRngConnection::Path,
+    m_road,
+    m_mirrorGuard,
+    m_guard,
+    m_radius)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngConnection,
     m_from,
     m_to,
-    m_mirrorGuard,
-    m_guard)
+    m_paths)
 
 ENUM_REFLECTION_STRINGIFY(
     FHRngUserSettings::HeroGeneration,
@@ -270,8 +286,9 @@ inline constexpr const bool s_isStringMap<FHRngUserSettings::PlayersMap>{ true }
 template<>
 inline constexpr const bool s_isStringMap<FHRngZone::TownMap>{ true };
 template<>
+inline constexpr const bool s_isStringMap<FHRngConnection::PathMap>{ true };
+template<>
 inline constexpr const bool s_isStringMap<FHTemplate::RngZoneMap>{ true };
 template<>
 inline constexpr const bool s_isStringMap<FHTemplate::RngConnectionMap>{ true };
-
 }

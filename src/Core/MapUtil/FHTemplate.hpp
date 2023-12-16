@@ -15,6 +15,16 @@
 
 namespace FreeHeroes {
 
+enum class RoadLevel
+{
+    NoRoad = -1,
+    Towns  = 0,
+    Exits,
+    InnerPoints,
+    BorderPoints,
+    Hidden,
+};
+
 struct FHRngZoneTown {
     FHTown                m_town;
     bool                  m_playerControlled = false;
@@ -274,8 +284,16 @@ struct FHRngConnection {
     std::string m_from;
     std::string m_to;
 
-    std::string m_mirrorGuard;
-    int64_t     m_guard = 0;
+    struct Path {
+        RoadLevel   m_road = RoadLevel::Exits;
+        std::string m_mirrorGuard;
+        int64_t     m_guard  = 0;
+        int         m_radius = 7;
+    };
+
+    using PathMap = std::map<std::string, Path>;
+
+    PathMap m_paths;
 };
 
 struct FHRngUserSettings {

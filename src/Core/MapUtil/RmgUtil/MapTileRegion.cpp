@@ -99,18 +99,31 @@ MapTilePtr MapTileRegion::findClosestPoint(FHPos pos) const
     return (*it);
 }
 
-std::pair<MapTileRegion, MapTileRegion> MapTileRegion::makeInnerAndOuterEdge(bool useDiag) const
+MapTileRegion MapTileRegion::makeInnerEdge(bool useDiag) const
+{
+    return makeInnerAndOuterEdge({ .m_useDiag = useDiag, .m_makeInner = true }).m_inner;
+}
+
+MapTileRegion MapTileRegion::makeOuterEdge(bool useDiag) const
+{
+    return makeInnerAndOuterEdge({ .m_useDiag = useDiag, .m_makeOuter = true }).m_outer;
+}
+
+EdgeSegmentationResults MapTileRegion::makeInnerAndOuterEdge(EdgeSegmentationParams params) const
 {
     //Mernel::ProfilerScope scope("makeInnerAndOuterEdge");
-    const int64_t diameter       = intSqrt(static_cast<int64_t>(size()));
-    const size_t  perimeterInner = diameter * 4;
-    const size_t  perimeterOuter = (diameter + 2) * 4;
-    MapTileRegion inner;
-    MapTileRegion outer;
-    inner.reserve(perimeterInner);
-    outer.reserve(perimeterOuter);
+    const int64_t           diameter       = intSqrt(static_cast<int64_t>(size()));
+    const size_t            perimeterInner = diameter * 4;
+    const size_t            perimeterOuter = (diameter + 2) * 4;
+    EdgeSegmentationResults result;
+    if (params.m_makeInner)
+        result.m_inner.reserve(perimeterInner);
+    if (params.m_makeOuter)
+        result.m_outer.reserve(perimeterOuter);
+    if (params.m_makeCenter)
+        result.m_center.reserve(size());
     for (MapTilePtr cell : *this) {
-        if (useDiag) {
+        if (params.m_useDiag) {
             if (contains(cell->m_neighborB)
                 && contains(cell->m_neighborT)
                 && contains(cell->m_neighborR)
@@ -118,43 +131,32 @@ std::pair<MapTileRegion, MapTileRegion> MapTileRegion::makeInnerAndOuterEdge(boo
                 && contains(cell->m_neighborTL)
                 && contains(cell->m_neighborTR)
                 && contains(cell->m_neighborBL)
-                && contains(cell->m_neighborBR))
+                && contains(cell->m_neighborBR)) {
+                if (params.m_makeCenter)
+                    result.m_center.insert(cell);
                 continue;
+            }
         } else {
             if (contains(cell->m_neighborB)
                 && contains(cell->m_neighborT)
                 && contains(cell->m_neighborR)
-                && contains(cell->m_neighborL))
+                && contains(cell->m_neighborL)) {
+                if (params.m_makeCenter)
+                    result.m_center.insert(cell);
                 continue;
+            }
         }
-        inner.insert(cell);
-        for (auto* ncell : cell->neighboursList(useDiag)) {
-            if (!contains(ncell))
-                outer.insert(ncell);
-        }
-    }
-    /*
-       for (MapTilePtr cell : m_innerEdge) {
-        if (m_diagonalGrowth) {
-            if (m_innerArea.contains(cell->m_neighborB)
-                && m_innerArea.contains(cell->m_neighborT)
-                && m_innerArea.contains(cell->m_neighborR)
-                && m_innerArea.contains(cell->m_neighborL)
-                && m_innerArea.contains(cell->m_neighborTL)
-                && m_innerArea.contains(cell->m_neighborTR)
-                && m_innerArea.contains(cell->m_neighborBL)
-                && m_innerArea.contains(cell->m_neighborBR))
-                forErase.push_back(cell);
-        } else {
-            if (m_innerArea.contains(cell->m_neighborB)
-                && m_innerArea.contains(cell->m_neighborT)
-                && m_innerArea.contains(cell->m_neighborR)
-                && m_innerArea.contains(cell->m_neighborL))
-                forErase.push_back(cell);
+        if (params.m_makeInner)
+            result.m_inner.insert(cell);
+        if (params.m_makeOuter) {
+            for (auto* ncell : cell->neighboursList(params.m_useDiag)) {
+                if (!contains(ncell))
+                    result.m_outer.insert(ncell);
+            }
         }
     }
-*/
-    return std::pair{ std::move(inner), std::move(outer) };
+
+    return result;
 }
 
 }

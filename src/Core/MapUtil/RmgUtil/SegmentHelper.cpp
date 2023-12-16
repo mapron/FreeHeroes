@@ -5,6 +5,7 @@
  */
 #include "SegmentHelper.hpp"
 #include "MapTileRegionSegmentation.hpp"
+#include "AstarGenerator.hpp"
 #include "../FHMap.hpp"
 
 #include "MernelPlatform/Profiler.hpp"
@@ -145,12 +146,19 @@ void SegmentHelper::makeBorders(std::vector<TileZone>& tileZones)
         return key;
     };
 
-    auto findZoneById = [&tileZones](const std::string& id) -> TileZone& {
-        auto it = std::find_if(tileZones.begin(), tileZones.end(), [&id](const TileZone& zone) { return zone.m_id == id; });
-        if (it == tileZones.end())
+    std::map<std::string, TileZone*> zoneIndex;
+    for (auto& tileZone : tileZones) {
+        zoneIndex[tileZone.m_id] = &tileZone;
+    }
+
+    auto findZoneById = [&zoneIndex](const std::string& id) -> TileZone& {
+        auto it = zoneIndex.find(id);
+        if (it == zoneIndex.end())
             throw std::runtime_error("Invalid zone id:" + id);
-        return *it;
+        return *(it->second);
     };
+
+    MapTileRegion allBorderNet;
 
     for (auto& tileZoneFirst : tileZones) {
         for (auto& tileZoneSecond : tileZones) {
@@ -167,105 +175,126 @@ void SegmentHelper::makeBorders(std::vector<TileZone>& tileZones)
                     twoSideBorder.insert(cell);
             }
             borderTiles[key] = twoSideBorder;
+            allBorderNet.insert(twoSideBorder);
         }
     }
 
-    MapTileRegion connectionUnblockableCells;
-
-    for (const auto& [connectionId, connections] : m_map.m_template.m_connections) {
-        auto&          tileZoneFrom = findZoneById(connections.m_from);
-        auto&          tileZoneTo   = findZoneById(connections.m_to);
-        auto           key          = makeKey(tileZoneFrom, tileZoneTo);
-        MapTileRegion& border       = borderTiles[key];
-        if (border.empty()) {
-            throw std::runtime_error("No border between '" + connections.m_from + "' and '" + connections.m_to + "'");
-        }
-        MapTilePtr cell = border.makeCentroid(true); // switch to k-means when we need more than one connection.
-
-        cell->m_zone->m_nodes.add(cell, RoadLevel::Exits);
-
-        const bool guarded = connections.m_guard || !connections.m_mirrorGuard.empty();
-
-        MapTilePtr ncellFound = nullptr;
-
-        for (MapTilePtr ncell : cell->m_orthogonalNeighbours) {
-            if (!ncellFound && ncell && ncell->m_zone != cell->m_zone) {
-                ncell->m_zone->m_nodes.add(cell, RoadLevel::Exits);
-                if (guarded)
-                    ncell->m_zone->m_breakGuardTiles.insert(ncell);
-                ncellFound = ncell;
-            }
-        }
-        if (!ncellFound)
-            throw std::runtime_error("Failed to get connection neighbour tile");
-
-        MapTilePtr cellFrom = cell->m_zone == &tileZoneFrom ? cell : ncellFound;
-        MapTilePtr cellTo   = cell->m_zone == &tileZoneFrom ? ncellFound : cell;
-
-        cellFrom->m_zone->m_namedTiles[connectionId] = cellFrom;
-        cellTo->m_zone->m_namedTiles[connectionId]   = cellTo;
-
-        if (guarded) {
-            Guard guard;
-            guard.m_id           = connectionId;
-            guard.m_value        = connections.m_guard;
-            guard.m_mirrorFromId = connections.m_mirrorGuard;
-            guard.m_pos          = cellFrom;
-            guard.m_zone         = nullptr;
-            m_guards.push_back(guard);
-
-            cellFrom->m_zone->m_breakGuardTiles.insert(cellFrom);
-        }
-
-        MapTileRegion forErase(MapTilePtrList{ cell, ncellFound, cell->m_neighborT, ncellFound->m_neighborT, cell->m_neighborL, ncellFound->m_neighborL });
-        border.erase(forErase);
-
-        connectionUnblockableCells.insert(cell);
-    }
-    MapTileRegion noExpandTiles;
-    for (MapTilePtr tile : m_tileContainer.m_all) {
-        for (auto* cell : connectionUnblockableCells) {
-            if (posDistance(tile->m_pos, cell->m_pos) < 4)
-                noExpandTiles.insert(tile);
-        }
-    }
-    MapTileRegion needBeBlocked;
-    MapTileRegion tentativeBlocked;
-    for (const auto& [key, border] : borderTiles) {
-        needBeBlocked.insert(border);
-    }
-    for (const auto& [key, border] : borderTiles) {
-        for (auto* cell : border) {
-            for (MapTilePtr ncell : cell->m_orthogonalNeighbours) {
-                if (needBeBlocked.contains(ncell))
-                    continue;
-                if (noExpandTiles.contains(ncell))
-                    continue;
-                tentativeBlocked.insert(ncell);
-            }
-        }
-    }
+    // generate blocked tiles
 
     for (auto& tileZone : tileZones) {
-        tileZone.m_innerAreaUsable = {};
-        for (auto* cell : tileZone.m_area.m_innerArea) {
-            if (needBeBlocked.contains(cell))
-                tileZone.m_needPlaceObstacles.insert(cell);
-            if (tentativeBlocked.contains(cell))
-                tileZone.m_needPlaceObstaclesTentative.insert(cell);
+        tileZone.m_protectionBorder   = tileZone.m_area.m_innerArea.makeInnerEdge(true).intersectWith(allBorderNet);
+        tileZone.m_needPlaceObstacles = tileZone.m_protectionBorder;
+
+        const TileZone::TileIntMapping costs = tileZone.makeMoveCosts(false);
+
+        std::set<MapTilePtr> remaining, completed;
+
+        for (auto tile : tileZone.m_protectionBorder)
+            completed.insert(tile);
+
+        for (auto tile : tileZone.m_area.m_innerArea) {
+            remaining.insert(tile);
         }
-        for (auto* cell : tileZone.m_area.m_innerArea) {
-            if (tileZone.m_unpassableArea.contains(cell)
-                || tileZone.m_needPlaceObstacles.contains(cell)
-                || tileZone.m_needPlaceObstaclesTentative.contains(cell))
-                continue;
-            tileZone.m_innerAreaUsable.m_innerArea.insert(cell);
+        const int borderRadius = 2;
+
+        auto resultByDistance = TileZone::computeDistances(costs, completed, remaining, borderRadius * 100);
+
+        MapTilePtrList roadTiles;
+        MapTilePtrList segmentTiles;
+
+        for (const auto& [distance, area] : resultByDistance) {
+            if (distance <= (borderRadius - 1) * 100)
+                tileZone.m_needPlaceObstacles.insert(area);
+            else
+                tileZone.m_needPlaceObstaclesTentative.insert(area);
         }
+
+        tileZone.m_innerAreaUsable.m_innerArea = tileZone.m_area.m_innerArea;
+        tileZone.m_innerAreaUsable.m_innerArea.erase(tileZone.m_needPlaceObstacles);
+        tileZone.m_innerAreaUsable.m_innerArea.erase(tileZone.m_needPlaceObstaclesTentative);
         tileZone.m_innerAreaUsable.makeEdgeFromInnerArea();
 
         auto bottomLine = tileZone.m_innerAreaUsable.getBottomEdge();
         tileZone.m_innerAreaUsable.m_innerArea.erase(bottomLine);
         tileZone.m_innerAreaUsable.makeEdgeFromInnerArea();
+    }
+
+    MapTileRegion connectionUnblockableCells;
+
+    for (const auto& [_, connection] : m_map.m_template.m_connections) {
+        auto&          tileZoneFrom = findZoneById(connection.m_from);
+        auto&          tileZoneTo   = findZoneById(connection.m_to);
+        auto           key          = makeKey(tileZoneFrom, tileZoneTo);
+        MapTileRegion& border       = borderTiles[key];
+        if (border.empty()) {
+            throw std::runtime_error("No border between '" + connection.m_from + "' and '" + connection.m_to + "'"); // @todo: portal connections.
+        }
+        MapTilePtr centroid = border.makeCentroid(true);
+
+        for (const auto& [connectionId, conPath] : connection.m_paths) {
+            MapTilePtr cell = border.findClosestPoint(centroid->m_pos);
+
+            m_logOutput << m_indent << "placing connection '" << connectionId << "' " << connection.m_from << " -> " << connection.m_to << " at " << cell->toPrintableString() << "\n";
+
+            const bool guarded = conPath.m_guard || !conPath.m_mirrorGuard.empty();
+
+            MapTilePtr ncell = nullptr;
+
+            for (MapTilePtr n : cell->m_orthogonalNeighbours) {
+                if (!ncell && n->m_zone != cell->m_zone) {
+                    ncell = n;
+                }
+            }
+            if (!ncell)
+                throw std::runtime_error("Failed to get connection neighbour tile");
+
+            MapTilePtr cellFrom = cell->m_zone == &tileZoneFrom ? cell : ncell;
+            MapTilePtr cellTo   = cell->m_zone == &tileZoneFrom ? ncell : cell;
+
+            auto processCell = [&conPath, &connectionId](MapTilePtr cell) {
+                auto&      tileZone  = *(cell->m_zone);
+                MapTilePtr cellInner = tileZone.m_innerAreaUsable.m_outsideEdge.findClosestPoint(cell->m_pos);
+
+                tileZone.m_nodes.add(cellInner, conPath.m_road);
+
+                tileZone.m_namedTiles[connectionId] = cellInner;
+
+                auto roadFrom = cell->makePathTo(false, cellInner, true);
+                for (auto* tile : roadFrom) {
+                    tileZone.m_roads.add(tile, conPath.m_road);
+                    tileZone.m_needPlaceObstacles.erase(tile);
+                    tileZone.m_needPlaceObstaclesTentative.erase(tile);
+                    for (auto* n : tile->m_orthogonalNeighbours) {
+                        if (!tileZone.m_protectionBorder.contains(n)) {
+                            tileZone.m_needPlaceObstacles.erase(n);
+                            tileZone.m_needPlaceObstaclesTentative.erase(n);
+                        }
+                    }
+                }
+            };
+            processCell(cellFrom);
+            processCell(cellTo);
+
+            if (guarded) {
+                Guard guard;
+                guard.m_id           = connectionId;
+                guard.m_value        = conPath.m_guard;
+                guard.m_mirrorFromId = conPath.m_mirrorGuard;
+                guard.m_pos          = cellFrom;
+                guard.m_zone         = nullptr;
+                m_guards.push_back(guard);
+            }
+
+            MapTileRegion forErase;
+            for (auto* borderCell : border) {
+                if (posDistance(borderCell, cellFrom, 100) < conPath.m_radius * 100) {
+                    forErase.insert(borderCell);
+                }
+            }
+            border.erase(forErase);
+
+            connectionUnblockableCells.insert(cell);
+        }
     }
 }
 
@@ -418,9 +447,17 @@ void SegmentHelper::makeSegments(TileZone& tileZone)
                 });
 
                 const MapTilePtr closestTileInOrphan = *itOrphan;
-                auto             connection          = closestTileInOrphan->makePathTo(true, largestNearest);
 
-                tileZone.m_roadPotentialArea.insert(connection);
+                AstarGenerator generator;
+                generator.setPoints(closestTileInOrphan, largestNearest);
+                auto usable = tileZone.m_innerAreaUsable.m_innerArea;
+                usable.insert(closestTileInOrphan);
+                usable.insert(largestNearest);
+                generator.setNonCollision(std::move(usable));
+
+                auto path = generator.findPath();
+
+                tileZone.m_roadPotentialArea.insert(path);
             }
         }
     }
@@ -457,27 +494,10 @@ void SegmentHelper::refineSegments(TileZone& tileZone)
 
 void SegmentHelper::makeHeatMap(TileZone& tileZone)
 {
-    using TileIntMapping = std::map<MapTilePtr, int>;
-    using WeightTileMap  = std::map<int, MapTilePtrList>;
+    const TileZone::TileIntMapping costs = tileZone.makeMoveCosts();
 
-    TileIntMapping costs;
-    for (auto tile : tileZone.m_innerAreaUsable.m_innerArea)
-        costs[tile] = 100;
-    for (const auto& [level, area] : tileZone.m_roads.m_byLevel) {
-        int cost = 100;
-        if (level == RoadLevel::Towns)
-            cost = 20;
-        if (level == RoadLevel::Exits)
-            cost = 40;
-        if (level == RoadLevel::InnerPoints || level == RoadLevel::BorderPoints)
-            cost = 70;
-        for (auto* tile : area)
-            costs[tile] = cost;
-    }
+    std::set<MapTilePtr> remaining, completed;
 
-    std::set<MapTilePtr> remaining, completed, edgeSet;
-
-    TileIntMapping resultDistance;
     for (auto tile : tileZone.m_nodes.m_byLevel[RoadLevel::Towns])
         completed.insert(tile);
     if (completed.empty()) {
@@ -487,67 +507,18 @@ void SegmentHelper::makeHeatMap(TileZone& tileZone)
     if (completed.empty())
         completed.insert(tileZone.m_centroid);
 
-    edgeSet = completed;
-
     for (auto tile : tileZone.m_innerAreaUsable.m_innerArea) {
         if (!completed.contains(tile))
             remaining.insert(tile);
     }
 
-    WeightTileMap edge;
-    for (auto tile : completed)
-        edge[0].push_back(tile);
-
-    auto calcCost = [&costs](MapTilePtr one, MapTilePtr two, bool diag) -> int {
-        const int costOne = costs.at(one);
-        const int costTwo = costs.at(two);
-        const int cost    = std::max(costOne, costTwo);
-        return diag ? cost * 141 / 100 : cost;
-    };
-
-    auto consumePrevEdge = [&edge, &edgeSet, &resultDistance, &remaining, &completed, &calcCost]() -> bool {
-        if (edge.empty())
-            return false;
-
-        const int            lowestCost      = edge.begin()->first;
-        const MapTilePtrList lowestCostTiles = edge.begin()->second;
-        edge.erase(edge.begin());
-
-        for (auto tile : lowestCostTiles) {
-            resultDistance[tile] = lowestCost;
-            completed.insert(tile);
-            edgeSet.erase(tile);
-            remaining.erase(tile);
-        }
-        for (auto tile : lowestCostTiles) {
-            for (bool diag : { false, true }) {
-                auto& nlist = diag ? tile->m_diagNeighbours : tile->m_orthogonalNeighbours;
-                for (auto ntile : nlist) {
-                    if (completed.contains(ntile) || edgeSet.contains(ntile) || !remaining.contains(ntile))
-                        continue;
-                    const int cost = calcCost(tile, ntile, diag) + lowestCost;
-                    edgeSet.insert(ntile);
-                    edge[cost].push_back(ntile);
-                }
-            }
-        }
-
-        return true;
-    };
-
-    while (consumePrevEdge()) {
-        ;
-    }
-
-    WeightTileMap      resultByDistance;
-    std::map<int, int> heatFrequencies;
-    for (const auto& [tile, w] : resultDistance)
-        resultByDistance[w].push_back(tile);
+    auto resultByDistance = TileZone::computeDistances(costs, completed, remaining);
 
     MapTilePtrList roadTiles;
     MapTilePtrList segmentTiles;
     for (const auto& [_, area] : resultByDistance) {
         for (auto* tile : area) {
+            //m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = tile->m_pos, .m_text = std::to_string(_) });
             if (tileZone.m_roads.m_all.contains(tile))
                 roadTiles.push_back(tile);
             else

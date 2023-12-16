@@ -15,16 +15,6 @@ namespace Core {
 class IRandomGenerator;
 }
 
-enum class RoadLevel
-{
-    NoRoad = -1,
-    Towns  = 0,
-    Exits,
-    InnerPoints,
-    BorderPoints,
-    Hidden,
-};
-
 template<class T, T invalid>
 struct RegionMapping {
     MapTileRegion              m_all;
@@ -115,8 +105,6 @@ struct TileZone {
     MapTileRegion m_midTownNodes; //nodes on the middle of roads connecting two towns. (towns.size - 1)
     MapTileRegion m_midExitNodes; //nodes on the middle of roads connecting exit and town. (exits.size)
 
-    MapTileRegion m_breakGuardTiles;
-
     MapTileRegion m_protectionBorder; // can not be erased from blocked
     MapTileRegion m_unpassableArea;   // tiles that occupied by towns or scheduled
     MapTileRegion m_needPlaceObstacles;
@@ -152,6 +140,13 @@ struct TileZone {
     void                      setSegments(MapTileRegionWithEdgeList list);
     MapTileRegionWithEdgeList getSegments() const;
     void                      updateSegmentIndex();
+
+    using TileIntMapping = std::map<MapTilePtr, int>;
+    using WeightTileMap  = std::map<int, MapTilePtrList>;
+
+    TileIntMapping makeMoveCosts(bool onlyUsable = true) const;
+
+    static WeightTileMap computeDistances(const TileIntMapping& costs, std::set<MapTilePtr> completed, std::set<MapTilePtr> remaining, int maxCost = -1, int iters = 10000);
 };
 
 }

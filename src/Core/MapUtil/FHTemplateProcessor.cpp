@@ -935,18 +935,25 @@ void FHTemplateProcessor::placeDebugInfo()
             for (auto* cell : tileZone.m_area.m_innerEdge) {
                 m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 2 });
             }
-            for (auto* cell : tileZone.m_area.m_outsideEdge) {
-                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 3 });
-            }
+            
         }
         */
         if (m_showDebug == Stage::BorderRoads) {
             for (auto& guard : m_guards) {
                 m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = guard.m_pos->m_pos, .m_brushColor = 1, .m_shapeRadius = 1 });
             }
-            for (auto* cell : tileZone.m_unpassableArea) {
-                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_penColor = 1, .m_shape = 2, .m_shapeRadius = 3 });
+            for (auto* cell : tileZone.m_needPlaceObstacles) {
+                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_penColor = 1, .m_shape = 1, .m_shapeRadius = 3 });
             }
+            for (auto* cell : tileZone.m_needPlaceObstaclesTentative) {
+                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_penColor = 43, .m_shape = 1, .m_shapeRadius = 3 });
+            }
+            //for (auto* cell : tileZone.m_area.m_innerEdge) {
+            //    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_brushColor = 80, .m_brushAlpha = 200, .m_shape = 1, .m_shapeRadius = 1 });
+            //}
+            //for (auto* cell : tileZone.m_innerAreaUsable.m_innerEdge) {
+            //    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_brushColor = 300, .m_brushAlpha = 200, .m_shape = 1, .m_shapeRadius = 1 });
+            //}
         }
         if (m_showDebug == Stage::CellSegmentation) {
             for (auto& seg : tileZone.m_innerAreaSegments) {

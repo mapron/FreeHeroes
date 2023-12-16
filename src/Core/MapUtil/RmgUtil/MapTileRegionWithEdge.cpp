@@ -16,7 +16,9 @@ namespace FreeHeroes {
 
 void MapTileRegionWithEdge::makeEdgeFromInnerArea()
 {
-    std::tie(m_innerEdge, m_outsideEdge) = m_innerArea.makeInnerAndOuterEdge(m_diagonalGrowth);
+    auto result   = m_innerArea.makeInnerAndOuterEdge({ .m_makeInner = true, .m_makeOuter = true });
+    m_innerEdge   = std::move(result.m_inner);
+    m_outsideEdge = std::move(result.m_outer);
 }
 
 bool MapTileRegionWithEdge::refineEdgeRemoveHollows(MapTileRegion& allowedArea)

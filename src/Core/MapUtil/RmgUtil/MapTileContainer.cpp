@@ -89,7 +89,8 @@ void MapTileContainer::init(int width, int height, int depth)
             }
         }
     }
-    m_all = MapTileRegion(std::move(allSorted));
+    m_all       = MapTileRegion(std::move(allSorted));
+    m_innerEdge = m_all.makeInnerEdge(true); // not optimal, but it runs once
     for (auto& cell : m_tiles) {
         cell.m_self = &cell;
         std::sort(cell.m_orthogonalNeighbours.begin(), cell.m_orthogonalNeighbours.end());

@@ -79,14 +79,19 @@ MapTilePtrList MapTile::neighboursByOffsets(const std::vector<FHPos>& offsets, c
     return result;
 }
 
-MapTilePtrList MapTile::makePathTo(bool diag, MapTileConstPtr dest) const noexcept
+MapTilePtrList MapTile::makePathTo(bool diag, MapTileConstPtr dest, bool addEnds) const noexcept
 {
     MapTilePtr     current = m_self;
     MapTilePtrList result;
-    const auto     stepLimit = static_cast<size_t>(posDistance(this, dest, 2) + 3);
+    if (addEnds)
+        result.push_back(current);
+    const auto stepLimit = static_cast<size_t>(posDistance(this, dest, 2) + 3);
     for (size_t step = 0; step < stepLimit; ++step) {
-        if (current == dest)
+        if (current == dest) {
+            if (addEnds)
+                result.push_back(current);
             return result;
+        }
         const auto nlist = current->neighboursList(diag);
 
         auto it = std::min_element(nlist.cbegin(), nlist.cend(), [dest](MapTilePtr l, MapTilePtr r) {
