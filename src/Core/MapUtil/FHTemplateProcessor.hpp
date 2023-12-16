@@ -29,8 +29,6 @@ public:
         Invalid,
         ZoneCenterPlacement,
         ZoneTilesInitial,
-        ZoneTilesExpand,
-        ZoneTilesRefinement,
         BorderRoads,
         TownsPlacement,
         CellSegmentation,
@@ -50,8 +48,6 @@ private:
     void runCurrentStage();
     void runZoneCenterPlacement();
     void runZoneTilesInitial();
-    void runZoneTilesExpand();
-    void runZoneTilesRefinement();
     void runBorderRoads();
     void runTownsPlacement();
     void runCellSegmentation();
@@ -77,8 +73,6 @@ private:
     MapTileContainer       m_tileContainer;
     std::vector<TileZone>  m_tileZones;
     std::vector<TileZone*> m_tileZonesPtrs;
-
-    int64_t m_totalRelativeArea = 0;
 
     Stage m_currentStage  = Stage::Invalid;
     Stage m_stopAfter     = Stage::Invalid;

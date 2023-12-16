@@ -26,8 +26,6 @@ public:
     std::unordered_map<FHPos, MapTilePtr> m_tileIndex;
     MapTilePtr                            m_centerTile = nullptr;
 
-    std::set<TileZone*> m_dirtyZones; // zone ids that must be re-read from the map.
-
     void init(int width, int height, int depth);
 
     bool fixExclaves();

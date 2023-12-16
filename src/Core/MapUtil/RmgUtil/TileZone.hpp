@@ -91,7 +91,6 @@ struct TileZone {
     MapTileRegionWithEdge m_area;
 
     MapTileRegionWithEdge m_innerAreaUsable;
-    MapTileRegion         m_innerAreaBottomLine;
     MapTileRegion         m_innerAreaTownsBorders;
 
     class Segment : public MapTileRegionWithEdge
@@ -118,9 +117,10 @@ struct TileZone {
 
     MapTileRegion m_breakGuardTiles;
 
-    MapTileRegion m_blocked;
-    MapTileRegion m_needBeBlocked;
-    MapTileRegion m_tentativeBlocked;
+    MapTileRegion m_protectionBorder; // can not be erased from blocked
+    MapTileRegion m_unpassableArea;   // tiles that occupied by towns or scheduled
+    MapTileRegion m_needPlaceObstacles;
+    MapTileRegion m_needPlaceObstaclesTentative;
 
     MapTileRegion m_rewardTilesMain;
     MapTileRegion m_rewardTilesDanger;
@@ -148,19 +148,6 @@ struct TileZone {
     {
         return getAreaDeficit() * 100 / m_absoluteArea;
     }
-
-    void estimateCentroid();
-
-    void readFromMap();
-    void readFromMapIfDirty();
-
-    bool tryGrowOnceToNeighbour(size_t limit, TileZone* prioritized);
-
-    bool tryGrowOnceToUnzoned();
-
-    void fillDeficit(int thresholdPercent, TileZone* prioritized);
-
-    void fillUnzoned();
 
     void                      setSegments(MapTileRegionWithEdgeList list);
     MapTileRegionWithEdgeList getSegments() const;

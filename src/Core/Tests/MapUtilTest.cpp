@@ -424,7 +424,7 @@ TEST_P(KmeansTest, BasicSegmentation)
     KMeansSegmentationSettings settings;
     settings.m_items.resize(startPointRegions.size());
     for (size_t i = 0; i < startPointRegions.size(); ++i) {
-        settings.m_items[i].m_start = startPointRegions[i][0];
+        settings.m_items[i].m_initialCentroid = startPointRegions[i][0];
         //std::cout << settings.m_items[i].m_start->toPrintableString() << "\n";
     }
     m_calculatedSegments = m_objectRegion.splitByKExt(settings);
@@ -615,13 +615,13 @@ GTEST_TEST(GridDetection, Basic)
     std::vector<FHPos> expected{ FHPos(2, 1), FHPos(7, 1), FHPos(11, 1), FHPos(2, 4), FHPos(7, 4), FHPos(11, 4), FHPos(2, 6), FHPos(7, 6) };
     std::vector<FHPos> actual;
     for (auto& item : settings.m_items)
-        actual.push_back(item.m_start->m_pos);
+        actual.push_back(item.m_initialCentroid->m_pos);
 
     EXPECT_EQ(expected, actual);
 
     std::vector<int> radiuses{ 36, 37, 41, 37, 37, 42, 30, 22 };
     for (size_t i = 0; i < settings.m_items.size(); i++)
-        settings.m_items[i].m_radius = radiuses[i];
+        settings.m_items[i].m_areaHint = radiuses[i];
 
     ASSERT_NO_THROW(tileContainer.m_all.splitByKExt(settings));
 }
@@ -660,15 +660,15 @@ GTEST_TEST(GridDetection, Basic2)
 
     std::vector<FHPos> actual;
     for (auto& item : settings.m_items)
-        actual.push_back(item.m_start->m_pos);
+        actual.push_back(item.m_initialCentroid->m_pos);
 
     std::vector<int> radiuses{ 37, 37, 37, 42, 42, 42, 41, 36, 37, 36, 42, 42, 46, 22 };
     for (size_t i = 0; i < settings.m_items.size(); i++)
-        settings.m_items[i].m_radius = radiuses[i];
+        settings.m_items[i].m_areaHint = radiuses[i];
 
     ASSERT_NO_THROW(objectRegion.splitByKExt(settings));
 
-    settings.m_items[1].m_start = settings.m_items[0].m_start;
+    settings.m_items[1].m_initialCentroid = settings.m_items[0].m_initialCentroid;
 
     ASSERT_NO_THROW(objectRegion.splitByKExt(settings));
 }

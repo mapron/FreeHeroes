@@ -381,7 +381,7 @@ bool ZoneObjectDistributor::doPlaceDistribution(DistributionResult& distribution
         size_t count    = seg.m_candidateObjectsNormal.size();
         auto   settings = MapTileRegionSegmentation::guessKMeansByGrid(seg.m_originalArea, count);
         for (size_t i = 0; i < count; ++i) {
-            settings.m_items[i].m_radius = intSqrt(seg.m_candidateObjectsNormal[i].getEstimatedArea() * 100);
+            settings.m_items[i].m_areaHint = seg.m_candidateObjectsNormal[i].getEstimatedArea();
         }
         auto objectRegions = seg.m_originalArea.splitByKExt(settings);
         for (size_t i = 0; i < count; ++i) {

@@ -110,8 +110,7 @@ bool MapTileContainer::fixExclaves() // true = nothing to fix
         auto posR = posNeighbour(cell.m_pos, +1, +0);
         auto posB = posNeighbour(cell.m_pos, +0, +1);
 
-        Tile&           tileX    = cell;
-        TileZone* const oldIndex = tileX.m_zone;
+        Tile& tileX = cell;
 
         Tile& tileT = m_tileIndex.contains(posT) ? *m_tileIndex[posT] : cell;
         Tile& tileL = m_tileIndex.contains(posL) ? *m_tileIndex[posL] : cell;
@@ -169,9 +168,6 @@ bool MapTileContainer::fixExclaves() // true = nothing to fix
             continue;
         fixedCount++;
         tileX.m_exFix = true;
-        m_dirtyZones.insert(tileX.m_zone);
-        if (oldIndex)
-            m_dirtyZones.insert(oldIndex);
 
         //map.m_debugTiles.push_back(FHDebugTile{ .m_pos = pos, .m_valueA = cell.m_zone, .m_valueB = 0 });
     }

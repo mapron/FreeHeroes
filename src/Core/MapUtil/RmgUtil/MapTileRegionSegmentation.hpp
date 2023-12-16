@@ -16,9 +16,14 @@ namespace FreeHeroes {
 
 struct KMeansSegmentationSettings {
     struct Item {
-        MapTilePtr m_start  = nullptr;
-        int        m_speed  = 100;
-        int64_t    m_radius = 100;
+        MapTilePtr m_initialCentroid = nullptr;
+        int64_t    m_areaHint        = 100;
+
+        int64_t m_outsideWeight = 3;
+        int64_t m_insideWeight  = 2;
+
+        MapTilePtr m_extraMassPoint  = nullptr;
+        size_t     m_extraMassWeight = 0; // in tiles.
     };
     std::vector<Item> m_items;
 };
@@ -42,6 +47,9 @@ struct MAPUTIL_EXPORT MapTileRegionSegmentation {
 
     static KMeansSegmentationSettings guessKMeansByGrid(const MapTileRegion& region, size_t k);
     static Rect                       getBoundary(const MapTileRegion& region);
+
+    static int64_t getRadiusPromille(int64_t area);
+    static int64_t getArea(int64_t radiusPromille);
 };
 
 using CharMappedRegions = std::map<char, MapTileRegion>;

@@ -11,15 +11,18 @@
 namespace FreeHeroes {
 
 namespace {
-constexpr const int64_t g_maxRadius = 10000; // big enough number so g_maxRadius / radius is order of magnitude with 100.
+
 struct KMeansData {
     struct Cluster {
+        KMeansSegmentationSettings::Item m_settings;
+
+        FHPos m_extraMassPoint;
+
         FHPos                m_centroid;
         FHPos                m_centerMass;
         MapTilePtrSortedList m_points;
         size_t               m_pointsCount    = 0;
-        int64_t              m_radiusInverted = 100;
-        int                  m_speed          = 100;
+        int64_t              m_radiusPromille = 0;
 
         std::string toPrintableStringPoints() const
         {
@@ -38,25 +41,37 @@ struct KMeansData {
                    + " points: " + toPrintableStringPoints() + "}";
         }
 
-        int64_t distanceToSquared(MapTilePtr point) const
+        int64_t distanceTo(MapTilePtr point) const
         {
-            const auto dx = m_radiusInverted * (m_centroid.m_x - point->m_pos.m_x);
-            const auto dy = m_radiusInverted * (m_centroid.m_y - point->m_pos.m_y);
+            const auto dx = int64_t(m_centroid.m_x - point->m_pos.m_x) * 1000; // max 20bit
+            const auto dy = int64_t(m_centroid.m_y - point->m_pos.m_y) * 1000;
 
-            return dx * dx + dy * dy;
+            // prevent branching as much as possible
+            const auto arg = dx * dx + dy * dy; // max 40bit
+
+            const int64_t linearDistancePromille  = intSqrt(arg);
+            const int64_t distanceToCircumference = linearDistancePromille - m_radiusPromille;
+            const bool    isInside                = (distanceToCircumference <= 0);
+            const bool    isOutside               = !isInside;
+            const int64_t innerDistance           = isInside * linearDistancePromille + isOutside * m_radiusPromille;
+            const int64_t outerDistance           = isOutside * distanceToCircumference;
+
+            const int64_t innerWeighted = innerDistance * m_settings.m_insideWeight;
+            const int64_t outerWeighted = outerDistance * m_settings.m_outsideWeight;
+
+            return innerWeighted + outerWeighted;
         }
 
         void updateCentroid()
         {
-            if (m_speed == 0)
-                return;
-
-            m_centroid = posMidPoint(m_centroid, m_centerMass, m_speed, 100);
+            m_centroid = m_centerMass;
         }
+
         void clearMass()
         {
-            m_centerMass  = FHPos{};
-            m_pointsCount = 0;
+            m_centerMass.m_x = m_settings.m_extraMassWeight * m_extraMassPoint.m_x;
+            m_centerMass.m_y = m_settings.m_extraMassWeight * m_extraMassPoint.m_y;
+            m_pointsCount    = m_settings.m_extraMassWeight;
             m_points.clear();
         }
         void addToMass(FHPos pos)
@@ -124,11 +139,11 @@ struct KMeansData {
 
     size_t getNearestClusterId(MapTilePtr point) const
     {
-        auto   minDist          = m_clusters[0].distanceToSquared(point);
+        auto   minDist          = m_clusters[0].distanceTo(point);
         size_t nearestClusterId = 0;
 
         for (size_t i = 1; i < m_clusters.size(); i++) {
-            const auto dist = m_clusters[i].distanceToSquared(point);
+            const auto dist = m_clusters[i].distanceTo(point);
             if (dist < minDist) {
                 minDist          = dist;
                 nearestClusterId = i;
@@ -236,8 +251,17 @@ MapTileRegionList MapTileRegionSegmentation::splitByMaxArea(const MapTileRegion&
         return result;
 
     const size_t k = (zoneArea + maxArea + 1) / maxArea;
+    if (k == 1)
+        return { region };
 
-    return splitByK(region, k, iterLimit);
+    KMeansSegmentationSettings settings;
+    settings.m_items.resize(k);
+    size_t s = region.size();
+    for (size_t i = 0; i < k; ++i) {
+        settings.m_items[i].m_initialCentroid = region[i * s / k];
+        settings.m_items[i].m_areaHint        = zoneArea / k;
+    }
+    return splitByKExt(region, settings, iterLimit);
 }
 
 MapTileRegionList MapTileRegionSegmentation::splitByK(const MapTileRegion& region, size_t k, size_t iterLimit)
@@ -253,9 +277,10 @@ MapTileRegionList MapTileRegionSegmentation::splitByK(const MapTileRegion& regio
     settings.m_items.resize(k);
     size_t s = region.size();
     for (size_t i = 0; i < k; ++i) {
-        settings.m_items[i].m_start = region[i * s / k];
+        settings.m_items[i].m_initialCentroid = region[i * s / k];
+        settings.m_items[i].m_areaHint        = zoneArea / k;
     }
-    return splitByKExt(region, settings);
+    return splitByKExt(region, settings, iterLimit);
 }
 
 MapTileRegionList MapTileRegionSegmentation::splitByKExt(const MapTileRegion& region, const KMeansSegmentationSettings& settingsList, size_t iterLimit)
@@ -274,11 +299,21 @@ MapTileRegionList MapTileRegionSegmentation::splitByKExt(const MapTileRegion& re
     kmeans.m_region = &region;
     kmeans.m_nearestIndex.resize(region.size());
     for (size_t i = 0; i < K; i++) {
-        auto& c      = kmeans.m_clusters[i];
-        c.m_centroid = settingsList.m_items[i].m_start->m_pos;
+        auto& c       = kmeans.m_clusters[i];
+        auto& setting = settingsList.m_items[i];
+        c.m_settings  = setting;
+        if (setting.m_extraMassPoint) {
+            c.m_extraMassPoint = setting.m_extraMassPoint->m_pos;
+            assert(setting.m_extraMassWeight);
+        }
+        assert(setting.m_initialCentroid);
+        assert(setting.m_areaHint > 0);
+        c.m_centroid       = setting.m_initialCentroid->m_pos;
+        c.m_radiusPromille = getRadiusPromille(setting.m_areaHint);
+
+        c.m_radiusPromille /= 2; // absolutely arbitrary number.
+
         c.m_points.reserve(region.size() / K);
-        c.m_radiusInverted = g_maxRadius / settingsList.m_items[i].m_radius;
-        c.m_speed          = settingsList.m_items[i].m_speed;
     }
 
     for (size_t i = 0; i < kmeans.m_nearestIndex.size(); i++) {
@@ -299,7 +334,7 @@ MapTileRegionList MapTileRegionSegmentation::splitByKExt(const MapTileRegion& re
             if (1) {
                 std::cout << "exceptionThrown, settings:\n";
                 for (size_t i = 0; i < K; i++) {
-                    std::cout << "[" << i << "]=" << settingsList.m_items[i].m_start->m_pos.toPrintableString() << " r=" << settingsList.m_items[i].m_radius << " \n";
+                    std::cout << "[" << i << "]=" << settingsList.m_items[i].m_initialCentroid->m_pos.toPrintableString() << " A=" << settingsList.m_items[i].m_areaHint << " \n";
                 }
                 MergedRegion reg;
                 reg.initFromTile(region[0]);
@@ -411,8 +446,8 @@ KMeansSegmentationSettings MapTileRegionSegmentation::guessKMeansByGrid(const Ma
     settings.m_items.resize(k);
 
     for (size_t i = 0; i < k; ++i) {
-        size_t gridIndex            = i * reducedGrid.size() / k;
-        settings.m_items[i].m_start = reducedGrid[gridIndex].makeCentroid(true);
+        size_t gridIndex                      = i * reducedGrid.size() / k;
+        settings.m_items[i].m_initialCentroid = reducedGrid[gridIndex].makeCentroid(true);
     }
     return settings;
 }
@@ -436,6 +471,18 @@ MapTileRegionSegmentation::Rect MapTileRegionSegmentation::getBoundary(const Map
     const size_t boundaryWidth  = 1 + bottomRight.m_x - topLeft.m_x;
     const size_t boundaryHeight = 1 + bottomRight.m_y - topLeft.m_y;
     return { topLeft, bottomRight, boundaryWidth, boundaryHeight };
+}
+
+int64_t MapTileRegionSegmentation::getRadiusPromille(int64_t area)
+{
+    const int64_t veryBadPi = 314;
+    return intSqrt(area * 1'000'000 * 100 / veryBadPi);
+}
+
+int64_t MapTileRegionSegmentation::getArea(int64_t radiusPromille)
+{
+    const int64_t veryBadPi = 314;
+    return radiusPromille * radiusPromille * veryBadPi / 100 / 1'000'000;
 }
 
 void MergedRegion::initFromTileContainer(const MapTileContainer* tileContainer, int z)

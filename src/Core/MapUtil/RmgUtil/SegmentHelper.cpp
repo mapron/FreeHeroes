@@ -4,7 +4,7 @@
  * See LICENSE file for details.
  */
 #include "SegmentHelper.hpp"
-#include "AstarGenerator.hpp"
+#include "MapTileRegionSegmentation.hpp"
 #include "../FHMap.hpp"
 
 #include "MernelPlatform/Profiler.hpp"
@@ -22,6 +22,115 @@ SegmentHelper::SegmentHelper(FHMap&                        map,
     , m_rng(rng)
     , m_logOutput(logOutput)
 {
+}
+
+void SegmentHelper::makeInitialZones(std::vector<TileZone>& tileZones)
+{
+    const int w = m_map.m_tileMap.m_width;
+    const int h = m_map.m_tileMap.m_height;
+
+    const int64_t mapArea = w * h;
+
+    size_t totalRelativeArea = 0;
+    for (auto& tileZone : tileZones) {
+        totalRelativeArea += tileZone.m_relativeArea;
+    }
+    if (!totalRelativeArea)
+        throw std::runtime_error("Total relative area can't be zero");
+
+    for (auto& tileZone : tileZones) {
+        tileZone.m_absoluteArea   = tileZone.m_relativeArea * mapArea / totalRelativeArea;
+        tileZone.m_absoluteRadius = intSqrt(tileZone.m_absoluteArea * 1'000'000);
+
+        m_logOutput << m_indent << "zone [" << tileZone.m_id << "] area=" << tileZone.m_absoluteArea
+                    << ", radius=" << (double(tileZone.m_absoluteRadius) / 1000)
+                    << ", startTile=" << tileZone.m_startTile->toPrintableString()
+                    << ", townFaction=" << tileZone.m_mainTownFaction->id
+                    << ", rewardFaction=" << tileZone.m_rewardsFaction->id
+                    << ", terrain=" << tileZone.m_terrain->id
+                    << ", zoneGuardPercent=" << tileZone.m_rngZoneSettings.m_zoneGuardPercent
+                    << "\n";
+    }
+
+    KMeansSegmentationSettings settings;
+    settings.m_items.resize(tileZones.size());
+    for (auto& tileZone : tileZones) {
+        settings.m_items[tileZone.m_index] = KMeansSegmentationSettings::Item{
+            .m_initialCentroid = tileZone.m_startTile,
+            .m_areaHint        = tileZone.m_absoluteArea,
+            .m_extraMassPoint  = tileZone.m_startTile,
+            .m_extraMassWeight = size_t(tileZone.m_absoluteArea) * 2,
+        };
+    }
+
+    auto splitRegions = m_tileContainer.m_all.splitByKExt(settings, 1);
+    for (auto& tileZone : tileZones) {
+        const auto& zoneArea           = splitRegions[tileZone.m_index];
+        auto&       zoneSettings       = settings.m_items[tileZone.m_index];
+        const auto  centroid           = zoneArea.makeCentroid(true);
+        zoneSettings.m_initialCentroid = centroid;
+
+        m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = centroid->m_pos, .m_brushColor = 330, .m_shapeRadius = 4 });
+    }
+
+    for (int i = 0; i < 10; i++) {
+        bool done = true;
+        for (auto& tileZone : tileZones) {
+            const auto& zoneArea     = splitRegions[tileZone.m_index];
+            auto&       zoneSettings = settings.m_items[tileZone.m_index];
+            //const auto    centroid     = zoneArea.makeCentroid(true);
+            const int64_t intendedArea = tileZone.m_absoluteArea;
+            const int64_t prevArea     = zoneSettings.m_areaHint;
+            const int64_t placedArea   = zoneArea.size();
+
+            const int64_t intendedRadius = MapTileRegionSegmentation::getRadiusPromille(intendedArea);
+            const int64_t prevRadius     = MapTileRegionSegmentation::getRadiusPromille(prevArea);
+            const int64_t placedRadius   = MapTileRegionSegmentation::getRadiusPromille(placedArea);
+
+            const int64_t correctionRadius = std::max(int64_t(100), prevRadius + (intendedRadius - placedRadius));
+
+            const int64_t correctionArea = MapTileRegionSegmentation::getArea(correctionRadius);
+            const int64_t diff           = std::abs(placedArea - intendedArea);
+            const int64_t diffPercent    = diff * 100 / tileZone.m_absoluteArea;
+            //zoneSettings.m_initialCentroid = centroid;
+            zoneSettings.m_areaHint = correctionArea;
+            if (intendedRadius < placedRadius) { // need shrink zone = need bigger distance weight
+                //zoneSettings.m_insideWeight  = zoneSettings.m_insideWeight * (100 + diffPercent) / 100;
+                //zoneSettings.m_outsideWeight = zoneSettings.m_outsideWeight * (100 + diffPercent) / 100;
+            } else if (zoneSettings.m_insideWeight > 10) {
+                //zoneSettings.m_insideWeight  = zoneSettings.m_insideWeight * (100 - diffPercent / 3) / 100;
+                //zoneSettings.m_outsideWeight = zoneSettings.m_outsideWeight * (100 - diffPercent / 3) / 100;
+            }
+
+            if (diff > 10 && diffPercent > 5)
+                done = false;
+
+            m_logOutput << m_indent << "refine step # " << i << " [" << tileZone.m_id << "]: "
+                        << "int. S=" << intendedArea
+                        << ", prev S=" << prevArea
+                        << ", placed S=" << placedArea
+                        << ", next S=" << correctionArea
+                        << ", next r=" << correctionRadius
+                        << ", next W=" << zoneSettings.m_outsideWeight
+                        << " diff=" << diff << " (" << diffPercent << " %)\n";
+        }
+        if (done) {
+            m_logOutput << m_indent << "Finished area refinement successfully, no deficit in areas! \n";
+            break;
+        }
+        m_logOutput << "\n";
+        splitRegions = m_tileContainer.m_all.splitByKExt(settings);
+    }
+
+    for (auto& tileZone : tileZones) {
+        tileZone.m_area.m_innerArea = std::move(splitRegions[tileZone.m_index]);
+        for (auto* tile : tileZone.m_area.m_innerArea)
+            tile->m_zone = &tileZone;
+        tileZone.m_area.makeEdgeFromInnerArea();
+        tileZone.m_centroid = tileZone.m_area.m_innerArea.makeCentroid(true);
+
+        m_logOutput << m_indent << "zone [" << tileZone.m_id << "] areaDeficit=" << tileZone.getAreaDeficit() << "\n";
+    }
 }
 
 void SegmentHelper::makeBorders(std::vector<TileZone>& tileZones)
@@ -141,21 +250,21 @@ void SegmentHelper::makeBorders(std::vector<TileZone>& tileZones)
         tileZone.m_innerAreaUsable = {};
         for (auto* cell : tileZone.m_area.m_innerArea) {
             if (needBeBlocked.contains(cell))
-                tileZone.m_needBeBlocked.insert(cell);
+                tileZone.m_needPlaceObstacles.insert(cell);
             if (tentativeBlocked.contains(cell))
-                tileZone.m_tentativeBlocked.insert(cell);
+                tileZone.m_needPlaceObstaclesTentative.insert(cell);
         }
         for (auto* cell : tileZone.m_area.m_innerArea) {
-            if (tileZone.m_blocked.contains(cell)
-                || tileZone.m_needBeBlocked.contains(cell)
-                || tileZone.m_tentativeBlocked.contains(cell))
+            if (tileZone.m_unpassableArea.contains(cell)
+                || tileZone.m_needPlaceObstacles.contains(cell)
+                || tileZone.m_needPlaceObstaclesTentative.contains(cell))
                 continue;
             tileZone.m_innerAreaUsable.m_innerArea.insert(cell);
         }
         tileZone.m_innerAreaUsable.makeEdgeFromInnerArea();
 
-        tileZone.m_innerAreaBottomLine = tileZone.m_innerAreaUsable.getBottomEdge();
-        tileZone.m_innerAreaUsable.m_innerArea.erase(tileZone.m_innerAreaBottomLine);
+        auto bottomLine = tileZone.m_innerAreaUsable.getBottomEdge();
+        tileZone.m_innerAreaUsable.m_innerArea.erase(bottomLine);
         tileZone.m_innerAreaUsable.makeEdgeFromInnerArea();
     }
 }

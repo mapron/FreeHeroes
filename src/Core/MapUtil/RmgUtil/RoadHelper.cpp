@@ -408,9 +408,9 @@ MapTilePtrList RoadHelper::aStarPath(TileZone& zone, MapTilePtr start, MapTilePt
                 path.push_back(extra1);
             else if (zone.m_roadPotentialArea.contains(extra2))
                 path.push_back(extra2);
-            else if (!zone.m_needBeBlocked.contains(extra1))
+            else if (!zone.m_needPlaceObstacles.contains(extra1))
                 path.push_back(extra1);
-            else if (!zone.m_needBeBlocked.contains(extra2))
+            else if (!zone.m_needPlaceObstacles.contains(extra2))
                 path.push_back(extra2);
         }
         path.push_back(cur);

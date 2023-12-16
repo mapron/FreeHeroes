@@ -22,6 +22,8 @@ public:
                   Core::IRandomGenerator* const rng,
                   std::ostream&                 logOutput);
 
+    void makeInitialZones(std::vector<TileZone>& tileZones);
+
     void makeBorders(std::vector<TileZone>& tileZones);
 
     void makeSegments(TileZone& tileZone);
@@ -41,6 +43,7 @@ public:
     std::vector<Guard> m_guards;
 
 private:
+    std::string                   m_indent = "        ";
     FHMap&                        m_map;
     MapTileContainer&             m_tileContainer;
     Core::IRandomGenerator* const m_rng;

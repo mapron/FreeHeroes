@@ -34,8 +34,6 @@ ENUM_REFLECTION_STRINGIFY(
     Invalid,
     ZoneCenterPlacement,
     ZoneTilesInitial,
-    ZoneTilesExpand,
-    ZoneTilesRefinement,
     BorderRoads,
     TownsPlacement,
     CellSegmentation,
@@ -130,8 +128,6 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage, const std::stri
 
     m_tileContainer.init(m_map.m_tileMap.m_width, m_map.m_tileMap.m_height, m_map.m_tileMap.m_depth);
 
-    m_totalRelativeArea = 0;
-
     for (const auto& [key, rngZone] : m_map.m_template.m_zones) {
         if (rngZone.m_player == nullptr || !rngZone.m_player->isPlayable)
             continue;
@@ -220,7 +216,6 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage, const std::stri
 
         tileZone.m_relativeArea = m_rng->genDispersed(rngZone.m_relativeSizeAvg, rngZone.m_relativeSizeDispersion);
 
-        m_totalRelativeArea += tileZone.m_relativeArea;
         if (tileZone.m_relativeArea <= 0)
             throw std::runtime_error("Zone: " + key + " has nonpositive relative size");
         i++;
@@ -241,8 +236,6 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage, const std::stri
 
     for (Stage stage : { Stage::ZoneCenterPlacement,
                          Stage::ZoneTilesInitial,
-                         Stage::ZoneTilesExpand,
-                         Stage::ZoneTilesRefinement,
                          Stage::BorderRoads,
                          Stage::TownsPlacement,
                          Stage::CellSegmentation,
@@ -294,10 +287,6 @@ void FHTemplateProcessor::runCurrentStage()
             return runZoneCenterPlacement();
         case Stage::ZoneTilesInitial:
             return runZoneTilesInitial();
-        case Stage::ZoneTilesExpand:
-            return runZoneTilesExpand();
-        case Stage::ZoneTilesRefinement:
-            return runZoneTilesRefinement();
         case Stage::BorderRoads:
             return runBorderRoads();
         case Stage::TownsPlacement:
@@ -348,99 +337,12 @@ void FHTemplateProcessor::runZoneCenterPlacement()
             tileZone.m_startTile = m_tileContainer.m_tileIndex.at(newPos);
         }
     }
-    if (!m_totalRelativeArea)
-        throw std::runtime_error("Total relative area can't be zero");
 }
 
 void FHTemplateProcessor::runZoneTilesInitial()
 {
-    const int w = m_map.m_tileMap.m_width;
-    const int h = m_map.m_tileMap.m_height;
-
-    const int64_t area = w * h;
-
-    for (auto& tileZone : m_tileZones) {
-        const int greedyPercent   = 90;
-        tileZone.m_absoluteArea   = tileZone.m_relativeArea * area * greedyPercent / m_totalRelativeArea / 100;
-        tileZone.m_absoluteRadius = intSqrt(tileZone.m_absoluteArea) / 2;
-
-        m_logOutput << m_indent << "zone [" << tileZone.m_id << "] area=" << tileZone.m_absoluteArea
-                    << ", radius=" << tileZone.m_absoluteRadius
-                    << ", startTile=" << tileZone.m_startTile->toPrintableString()
-                    << ", townFaction=" << tileZone.m_mainTownFaction->id
-                    << ", rewardFaction=" << tileZone.m_rewardsFaction->id
-                    << ", terrain=" << tileZone.m_terrain->id
-                    << ", zoneGuardPercent=" << tileZone.m_rngZoneSettings.m_zoneGuardPercent
-                    << "\n";
-    }
-
-    KMeansSegmentationSettings settings;
-    settings.m_items.resize(m_tileZones.size());
-    for (auto& tileZone : m_tileZones) {
-        settings.m_items[tileZone.m_index] = KMeansSegmentationSettings::Item{
-            .m_start  = tileZone.m_startTile,
-            .m_speed  = tileZone.m_rngZoneSettings.m_centerShiftElasticity,
-            .m_radius = tileZone.m_absoluteRadius,
-        };
-    }
-    auto splitRegions = m_tileContainer.m_all.splitByKExt(settings, 2);
-    for (auto& tileZone : m_tileZones) {
-        tileZone.m_area.m_innerArea = std::move(splitRegions[tileZone.m_index]);
-        for (auto* tile : tileZone.m_area.m_innerArea)
-            tile->m_zone = &tileZone;
-        tileZone.m_area.makeEdgeFromInnerArea();
-        tileZone.m_centroid = tileZone.m_area.m_innerArea.makeCentroid(true);
-    }
-}
-
-void FHTemplateProcessor::runZoneTilesExpand()
-{
-    Mernel::ProfilerScope scope("runZoneTilesExpand");
-    m_tileZonesPtrs.resize(m_tileZones.size());
-    for (size_t i = 0; i < m_tileZonesPtrs.size(); ++i)
-        m_tileZonesPtrs[i] = &m_tileZones[i];
-
-    auto fillDeficitIteraction = [this](int thresholdPercent) -> bool {
-        std::sort(m_tileZonesPtrs.begin(), m_tileZonesPtrs.end(), [](TileZone* l, TileZone* r) {
-            return l->getAreaDeficitPercent() > r->getAreaDeficitPercent();
-        });
-        TileZone* zoneF = m_tileZonesPtrs.front();
-        TileZone* zoneH = m_tileZonesPtrs.back();
-        if (zoneF->getAreaDeficitPercent() < thresholdPercent)
-            return false;
-
-        for (TileZone* zone : m_tileZonesPtrs) {
-            zone->fillDeficit(thresholdPercent, zoneH == zoneF ? nullptr : zoneH);
-
-            for (auto& tileZone : m_tileZones) {
-                tileZone.readFromMap();
-                tileZone.estimateCentroid();
-            }
-        }
-
-        for (auto& tileZone : m_tileZones) {
-            m_logOutput << m_indent << "(after optimize " << thresholdPercent << "%) zone [" << tileZone.m_id << "] areaDeficit=" << tileZone.getAreaDeficit() << "\n";
-        }
-        return true;
-    };
-
-    for (auto& tileZone : m_tileZones) {
-        m_logOutput << m_indent << "(before optimize) zone [" << tileZone.m_id << "] areaDeficit=" << tileZone.getAreaDeficit() << "\n";
-    }
-    for (int i = 0; i < 5; ++i) {
-        if (fillDeficitIteraction(10))
-            break;
-    }
-}
-
-void FHTemplateProcessor::runZoneTilesRefinement()
-{
-    for (auto& tileZone : m_tileZones) {
-        tileZone.readFromMap();
-    }
-    for (auto& tileZone : m_tileZones) {
-        tileZone.fillUnzoned();
-    }
+    SegmentHelper helper(m_map, m_tileContainer, m_rng, m_logOutput);
+    helper.makeInitialZones(m_tileZones);
 
     auto checkUnzoned = [this]() {
         bool result = true;
@@ -465,18 +367,6 @@ void FHTemplateProcessor::runZoneTilesRefinement()
         }
     };
 
-    for (int i = 0, limit = 10; i <= limit; ++i) {
-        if (m_tileContainer.fixExclaves()) {
-            m_logOutput << m_indent << "exclaves fixed on [" << i << "] iteration\n";
-            break;
-        }
-        if (i == limit) {
-            throw std::runtime_error("failed to fix all exclaves after [" + std::to_string(i) + "]  iterations!");
-        }
-    }
-    for (auto& tileZone : m_tileZones) {
-        tileZone.readFromMapIfDirty();
-    }
     checkUnzoned();
 
     MapTileRegion placed;
@@ -491,7 +381,7 @@ void FHTemplateProcessor::runZoneTilesRefinement()
     }
 
     for (auto& tileZone : m_tileZones) {
-        tileZone.estimateCentroid();
+        tileZone.m_centroid = tileZone.m_area.m_innerArea.makeCentroid(true);
     }
 
     m_map.m_tileMapUpdateRequired = true;
@@ -562,7 +452,7 @@ void FHTemplateProcessor::runTownsPlacement()
             }
         }
         townArea.makeEdgeFromInnerArea();
-        tileZone.m_blocked.insert(townArea.m_innerArea);
+        tileZone.m_unpassableArea.insert(townArea.m_innerArea);
         tileZone.m_innerAreaTownsBorders.insert(townArea.m_innerArea);
         tileZone.m_innerAreaTownsBorders.insert(townArea.m_outsideEdge);
         tileZone.m_roadPotentialArea.insert(townArea.m_outsideEdge);
@@ -607,7 +497,7 @@ void FHTemplateProcessor::runTownsPlacement()
             if (!townPositions[0])
                 townPositions[0] = tileZone.m_centroid;
         } else {
-            auto&                      area = tileZone.m_area.m_innerArea;
+            auto&                      area = tileZone.m_innerAreaUsable.m_innerArea;
             KMeansSegmentationSettings settings;
             const size_t               K = towns.size();
             {
@@ -625,7 +515,7 @@ void FHTemplateProcessor::runTownsPlacement()
                     }
                 }
                 for (size_t i = 0; i < K; i++)
-                    settings.m_items[i].m_start = used[i];
+                    settings.m_items[i].m_initialCentroid = used[i];
             }
             const auto regionsEst = area.splitByKExt(settings);
 
@@ -638,9 +528,10 @@ void FHTemplateProcessor::runTownsPlacement()
                 auto* cell = townPositions[i];
                 if (!cell)
                     continue;
-                // if we have fixed town position here, set speed = 0 and erase closest random position
-                settings.m_items[i].m_speed = 0;
-                settings.m_items[i].m_start = cell;
+                // if we have fix town, give it high weight and erase closest random position
+                settings.m_items[i].m_initialCentroid = cell;
+                settings.m_items[i].m_extraMassPoint  = cell;
+                settings.m_items[i].m_extraMassWeight = area.size() * 2;
 
                 auto it = std::min_element(townPositionsEst.begin(), townPositionsEst.end(), [cell](MapTilePtr l, MapTilePtr r) {
                     return posDistance(cell, l) < posDistance(cell, r);
@@ -682,7 +573,7 @@ void FHTemplateProcessor::runTownsPlacement()
             areaTowns.makeEdgeFromInnerArea();
             tileZone.m_innerAreaTownsBorders.insert(areaTowns.m_outsideEdge);
         }
-        tileZone.m_innerAreaUsable.m_innerArea.erase(tileZone.m_blocked);
+        tileZone.m_innerAreaUsable.m_innerArea.erase(tileZone.m_unpassableArea);
         tileZone.m_innerAreaUsable.makeEdgeFromInnerArea();
     }
 }
@@ -748,7 +639,7 @@ void FHTemplateProcessor::runRewards()
         distributionResultCopy.init(tileZone);
 
         auto      objects       = m_map.m_objects;
-        auto      needBeBlocked = tileZone.m_needBeBlocked;
+        auto      needBeBlocked = tileZone.m_needPlaceObstacles;
         const int maxAttempts   = 3;
         for (int i = 1; i <= maxAttempts; ++i) {
             m_logOutput << m_indent << " --- generate : " << tileZone.m_id << " [" << i << " / " << maxAttempts << "] --- \n";
@@ -773,8 +664,8 @@ void FHTemplateProcessor::runRewards()
                 throw std::runtime_error("Failed to fit some objects into zone '" + tileZone.m_id + "'");
             m_logOutput << m_indent << "Failed to fit some objects into zone '" + tileZone.m_id + "', retry"
                         << "\n";
-            m_map.m_objects          = objects; // restore map data and try again.
-            tileZone.m_needBeBlocked = needBeBlocked;
+            m_map.m_objects               = objects; // restore map data and try again.
+            tileZone.m_needPlaceObstacles = needBeBlocked;
         }
 
         for (auto& guardBundle : distributionResultCopy.m_guards) {
@@ -826,11 +717,11 @@ void FHTemplateProcessor::runObstacles()
     obstacleHelper.placeObstacles(3);
 
     for (auto& tileZone : m_tileZones) {
-        for (auto* tile : tileZone.m_needBeBlocked) {
+        for (auto* tile : tileZone.m_needPlaceObstacles) {
             m_logOutput << m_indent << "still require to be blocked: " << tile->toPrintableString() << "\n";
         }
-        tileZone.m_tentativeBlocked.clear();
-        if (!tileZone.m_needBeBlocked.empty()) {
+        tileZone.m_needPlaceObstaclesTentative.clear();
+        if (!tileZone.m_needPlaceObstacles.empty()) {
             throw std::runtime_error("Some block tiles are not set.");
         }
     }
@@ -1026,7 +917,7 @@ void FHTemplateProcessor::placeDebugInfo()
         return;
 
     for (auto& tileZone : m_tileZones) {
-        if (m_showDebug >= Stage::ZoneTilesInitial && m_showDebug <= Stage::ZoneTilesRefinement) {
+        if (m_showDebug == Stage::ZoneTilesInitial) {
             if (auto* cell = tileZone.m_startTile) {
                 m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_brushColor = 1, .m_shapeRadius = 4 });
             }
@@ -1048,12 +939,15 @@ void FHTemplateProcessor::placeDebugInfo()
                 m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 3 });
             }
         }
-
+        */
         if (m_showDebug == Stage::BorderRoads) {
-            for (auto* cell : tileZone.m_blocked) {
-                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = 0, .m_valueB = 4 });
+            for (auto& guard : m_guards) {
+                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = guard.m_pos->m_pos, .m_brushColor = 1, .m_shapeRadius = 1 });
             }
-        }*/
+            for (auto* cell : tileZone.m_unpassableArea) {
+                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_penColor = 1, .m_shape = 2, .m_shapeRadius = 3 });
+            }
+        }
         if (m_showDebug == Stage::CellSegmentation) {
             for (auto& seg : tileZone.m_innerAreaSegments) {
                 for (auto* cell : seg.m_innerEdge) {
@@ -1064,7 +958,7 @@ void FHTemplateProcessor::placeDebugInfo()
                 m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_brushColor = 330, .m_shapeRadius = 1 });
             }
         }
-        if (m_showDebug == Stage::CellSegmentation || m_showDebug == Stage::RoadsPlacement) {
+        if (m_showDebug == Stage::CellSegmentation || m_showDebug == Stage::RoadsPlacement || m_showDebug == Stage::BorderRoads) {
             for (const auto& [roadLevel, area] : tileZone.m_nodes.m_byLevel) {
                 for (auto* cell : area) {
                     if (roadLevel == RoadLevel::NoRoad) // error!
