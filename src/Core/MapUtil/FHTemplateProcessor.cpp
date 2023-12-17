@@ -85,11 +85,19 @@ struct DistanceRecord {
 FHTemplateProcessor::FHTemplateProcessor(FHMap&                     map,
                                          const Core::IGameDatabase* database,
                                          Core::IRandomGenerator*    rng,
-                                         std::ostream&              logOutput)
+                                         std::ostream&              logOutput,
+                                         const std::string&         stopAfterStage,
+                                         const std::string&         debugStage,
+                                         const std::string&         tileZoneFilter,
+                                         bool                       extraLogs)
     : m_map(map)
     , m_database(database)
     , m_rng(rng)
     , m_logOutput(logOutput)
+    , m_stopAfter(stringToStage(stopAfterStage))
+    , m_showDebug(stringToStage(debugStage))
+    , m_tileZoneFilter(tileZoneFilter)
+    , m_extraLogging(extraLogs)
 {
     auto& factions = m_database->factions()->records();
     for (auto* faction : factions) {
@@ -113,7 +121,7 @@ FHTemplateProcessor::FHTemplateProcessor(FHMap&                     map,
     }
 }
 
-void FHTemplateProcessor::run(const std::string& stopAfterStage, const std::string& debugStage)
+void FHTemplateProcessor::run()
 {
     std::string baseIndent        = "      ";
     m_indent                      = baseIndent + "  ";
@@ -227,10 +235,6 @@ void FHTemplateProcessor::run(const std::string& stopAfterStage, const std::stri
         }
     }
 
-    m_stopAfter = stringToStage(stopAfterStage);
-    m_showDebug = stringToStage(debugStage);
-    //m_stopAfter = Stage::HeatMap;
-
     Mernel::ProfilerContext                profileContext;
     Mernel::ProfilerDefaultContextSwitcher switcher(profileContext);
 
@@ -341,7 +345,7 @@ void FHTemplateProcessor::runZoneCenterPlacement()
 
 void FHTemplateProcessor::runZoneTilesInitial()
 {
-    SegmentHelper helper(m_map, m_tileContainer, m_rng, m_logOutput);
+    SegmentHelper helper(m_map, m_tileContainer, m_rng, m_logOutput, m_extraLogging);
     helper.makeInitialZones(m_tileZones);
 
     auto checkUnzoned = [this]() {
@@ -390,7 +394,7 @@ void FHTemplateProcessor::runZoneTilesInitial()
 
 void FHTemplateProcessor::runBorderRoads()
 {
-    SegmentHelper segmentHelper(m_map, m_tileContainer, m_rng, m_logOutput);
+    SegmentHelper segmentHelper(m_map, m_tileContainer, m_rng, m_logOutput, m_extraLogging);
     segmentHelper.makeBorders(m_tileZones);
 
     for (auto& guard : segmentHelper.m_guards) {
@@ -580,36 +584,48 @@ void FHTemplateProcessor::runTownsPlacement()
 
 void FHTemplateProcessor::runCellSegmentation()
 {
-    SegmentHelper segmentHelper(m_map, m_tileContainer, m_rng, m_logOutput);
+    SegmentHelper segmentHelper(m_map, m_tileContainer, m_rng, m_logOutput, m_extraLogging);
 
     for (auto& tileZone : m_tileZones) {
+        if (isFilteredOut(tileZone))
+            continue;
+
         segmentHelper.makeSegments(tileZone);
     }
 }
 
 void FHTemplateProcessor::runRoadsPlacement()
 {
-    RoadHelper roadHelper(m_map, m_tileContainer, m_rng, m_logOutput);
+    RoadHelper roadHelper(m_map, m_tileContainer, m_rng, m_logOutput, m_extraLogging);
 
     for (auto& tileZone : m_tileZones) {
+        if (isFilteredOut(tileZone))
+            continue;
+
         roadHelper.placeRoads(tileZone);
     }
 }
 
 void FHTemplateProcessor::runSegmentationRefinement()
 {
-    SegmentHelper segmentHelper(m_map, m_tileContainer, m_rng, m_logOutput);
+    SegmentHelper segmentHelper(m_map, m_tileContainer, m_rng, m_logOutput, m_extraLogging);
 
     for (auto& tileZone : m_tileZones) {
+        if (isFilteredOut(tileZone))
+            continue;
+
         segmentHelper.refineSegments(tileZone);
     }
 }
 
 void FHTemplateProcessor::runHeatMap()
 {
-    SegmentHelper segmentHelper(m_map, m_tileContainer, m_rng, m_logOutput);
+    SegmentHelper segmentHelper(m_map, m_tileContainer, m_rng, m_logOutput, m_extraLogging);
 
     for (auto& tileZone : m_tileZones) {
+        if (isFilteredOut(tileZone))
+            continue;
+
         segmentHelper.makeHeatMap(tileZone);
     }
 }
@@ -626,14 +642,14 @@ void FHTemplateProcessor::runRewards()
 
     const ObjectGenerator gen(m_map, m_database, m_rng, m_logOutput);
 
-    const ZoneObjectDistributor objectDistributor(m_rng, m_tileContainer, m_logOutput);
+    const ZoneObjectDistributor objectDistributor(m_map, m_rng, m_tileContainer, m_logOutput);
 
     for (auto& tileZone : m_tileZones) {
         if (tileZone.m_rngZoneSettings.m_scoreTargets.empty())
             continue;
 
-        //if (tileZone.m_id != "CC")
-        //    continue;
+        if (isFilteredOut(tileZone))
+            continue;
 
         ZoneObjectDistributor::DistributionResult distributionResultCopy;
         distributionResultCopy.init(tileZone);
@@ -676,6 +692,7 @@ void FHTemplateProcessor::runRewards()
             guard.m_joinable = true;
             m_guards.push_back(guard);
         }
+        tileZone.m_needPlaceObstacles.insert(distributionResultCopy.m_needBlock);
 
         //for (auto* cell : bundleSet.m_consumeResult.m_centroidsALL) {
         //    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = tileZone.m_index, .m_valueB = 1 }); // red
@@ -997,7 +1014,7 @@ void FHTemplateProcessor::placeDebugInfo()
                     int penColor = isRoad ? -2 : 0;   // white/transparent
                     int shape    = 1 + heatLevel % 2; // cirlce/square
 
-                    int paletteSize = 10; // @todo:
+                    int paletteSize = tileZone.m_rngZoneSettings.m_maxHeat;
                     m_map.m_debugTiles.push_back(FHDebugTile{
                         .m_pos          = tile->m_pos,
                         .m_brushColor   = heatLevel + 1, // heatLevel is 0-based
@@ -1020,24 +1037,44 @@ void FHTemplateProcessor::placeDebugInfo()
                 }
             }
         }
-        /*
+
         if (m_showDebug == Stage::Rewards) {
             for (auto& seg : tileZone.m_innerAreaSegments) {
-                for (auto* cell : seg.m_innerEdge) {
-                    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = (int) cell->m_segmentIndex, .m_valueB = 3 });
+                for (auto* tile : seg.m_innerEdge) {
+                    int paletteSize = tileZone.m_rngZoneSettings.m_maxHeat;
+                    int heatLevel   = tileZone.m_segmentHeat.getLevel(tile);
+                    m_map.m_debugTiles.push_back(FHDebugTile{
+                        .m_pos         = tile->m_pos,
+                        .m_penColor    = heatLevel + 1, // heatLevel is 0-based
+                        .m_penPalette  = paletteSize,
+                        .m_shape       = 2,
+                        .m_shapeRadius = 4,
+                    });
                 }
             }
 
             for (auto* cell : tileZone.m_rewardTilesMain) {
-                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = 0, .m_valueB = 2 });
+                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_brushColor = 120 });
             }
             for (auto* cell : tileZone.m_rewardTilesDanger) {
-                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = 0, .m_valueB = 1 });
+                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_brushColor = 1 });
             }
             for (auto* cell : tileZone.m_rewardTilesSpacing) {
-                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_valueA = 0, .m_valueB = 4 });
+                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_brushColor = 55, .m_shapeRadius = 1 });
             }
-        }*/
+            for (auto* cell : tileZone.m_rewardTilesFailure) {
+                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_brushColor = 1, .m_brushAlpha = 80, .m_shapeRadius = 4 });
+            }
+            for (auto* cell : tileZone.m_rewardTilesPos) {
+                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_text = "|" });
+            }
+            for (auto* cell : tileZone.m_rewardTilesCenters) {
+                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_text = "X" });
+            }
+            for (auto* cell : tileZone.m_rewardTilesHints) {
+                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_text = "--" });
+            }
+        }
     }
 }
 
@@ -1115,6 +1152,13 @@ std::set<Core::LibraryFactionConstPtr> FHTemplateProcessor::getExcludedFactions(
             result.insert(tileZone.m_mainTownFaction);
     }
     return result;
+}
+
+bool FHTemplateProcessor::isFilteredOut(const TileZone& tileZone) const
+{
+    if (m_tileZoneFilter.empty())
+        return false;
+    return m_tileZoneFilter != tileZone.m_id;
 }
 
 bool FHTemplateProcessor::CmpPlayers::operator()(Core::LibraryPlayerConstPtr a, Core::LibraryPlayerConstPtr b) const

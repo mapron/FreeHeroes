@@ -25,6 +25,20 @@ ENUM_REFLECTION_STRINGIFY(
     BorderPoints,
     Hidden)
 
+ENUM_REFLECTION_STRINGIFY(
+    ZoneObjectType,
+    Segment,
+    Segment,
+    Road,
+
+    MainTown,
+
+    TownMid1,
+    TownMid2,
+    TownMid3,
+
+    ExitMid1)
+
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZoneTown,
     m_town,
@@ -45,8 +59,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHScoreSettings,
     m_score,
     m_isEnabled,
-    m_guardPercent,
-    m_tolerancePercent)
+    m_useGuards,
+    m_preferredHeat,
+    m_objectType)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone::GeneratorBank::Record,

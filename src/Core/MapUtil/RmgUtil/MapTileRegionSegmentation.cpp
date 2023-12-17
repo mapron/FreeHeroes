@@ -10,8 +10,6 @@
 
 namespace FreeHeroes {
 
-namespace {
-
 struct KMeansData {
     struct Cluster {
         KMeansSegmentationSettings::Item m_settings;
@@ -123,7 +121,15 @@ struct KMeansData {
         bool            hasIntersections = false;
         std::set<FHPos> used;
         for (auto& cluster : m_clusters) {
-            hasIntersections = hasIntersections || used.contains(cluster.m_centroid);
+            if (used.contains(cluster.m_centroid)) {
+                hasIntersections = true;
+                break;
+            }
+            if (!m_region->contains(m_container->m_tileIndex.at(cluster.m_centroid))) {
+                hasIntersections = true;
+                break;
+            }
+
             used.insert(cluster.m_centroid);
         }
         if (hasIntersections) {
@@ -189,11 +195,11 @@ struct KMeansData {
         return done;
     }
 
-    const MapTileRegion* m_region = nullptr;
-    std::vector<size_t>  m_nearestIndex;
-    std::vector<Cluster> m_clusters;
+    const MapTileContainer* m_container = nullptr;
+    const MapTileRegion*    m_region    = nullptr;
+    std::vector<size_t>     m_nearestIndex;
+    std::vector<Cluster>    m_clusters;
 };
-}
 
 MapTileRegionList MapTileRegionSegmentation::splitByFloodFill(const MapTileRegion& region, bool useDiag, MapTilePtr hint)
 {
@@ -296,7 +302,8 @@ MapTileRegionList MapTileRegionSegmentation::splitByKExt(const MapTileRegion& re
     KMeansData   kmeans;
     const size_t K = settingsList.m_items.size();
     kmeans.m_clusters.resize(K);
-    kmeans.m_region = &region;
+    kmeans.m_region    = &region;
+    kmeans.m_container = region[0]->m_container;
     kmeans.m_nearestIndex.resize(region.size());
     for (size_t i = 0; i < K; i++) {
         auto& c       = kmeans.m_clusters[i];
@@ -321,10 +328,10 @@ MapTileRegionList MapTileRegionSegmentation::splitByKExt(const MapTileRegion& re
     }
 
     for (size_t iter = 0; iter < iterLimit; ++iter) {
-        //std::cout << "clusters:\n";
-        //for (size_t i = 0; i < K; i++) {
-        //    std::cout << "[" << i << "]=" << kmeans.m_clusters[i].toPrintableString() << "\n";
-        //}
+        //        std::cout << "clusters:\n";
+        //        for (size_t i = 0; i < K; i++) {
+        //            std::cout << "[" << i << "]=" << kmeans.m_clusters[i].toPrintableString() << "\n";
+        //        }
         const bool last = iter == iterLimit - 1;
         try {
             if (kmeans.runIter(last))

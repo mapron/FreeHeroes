@@ -53,14 +53,13 @@ ZoneObjectGeneration ObjectGenerator::generate(const FHRngZone&             zone
         Core::MapScore              targetScore;
 
         ZoneObjectList objectList;
-        const bool     unguarded = scoreSettings.m_guardPercent == 0;
 
         //group.scale(armyPercent, goldPercent);
 
         for (const auto& [key, val] : scoreSettings.m_score)
             targetScore[key] = val.m_target;
 
-        auto targetSum = totalScoreValue(targetScore);
+        //auto targetSum = totalScoreValue(targetScore);
 
         if (doLog)
             m_logOutput << indentBase << scoreId << " start\n";
@@ -70,7 +69,8 @@ ZoneObjectGeneration ObjectGenerator::generate(const FHRngZone&             zone
                 groupLimits[attr] = sscope.m_maxGroup;
 
         std::vector<IObjectFactoryPtr> objectFactories;
-        objectFactories.push_back(std::make_shared<ObjectFactoryBank>(*m_map, zoneSettings.m_generators.m_banks, scoreSettings, m_database, m_rng, &artifactPool, terrain));
+        if (scoreSettings.m_objectType == ZoneObjectType::Segment)
+            objectFactories.push_back(std::make_shared<ObjectFactoryBank>(*m_map, zoneSettings.m_generators.m_banks, scoreSettings, m_database, m_rng, &artifactPool, terrain));
         objectFactories.push_back(std::make_shared<ObjectFactoryArtifact>(*m_map, zoneSettings.m_generators.m_artifacts, scoreSettings, m_database, m_rng, &artifactPool));
         objectFactories.push_back(std::make_shared<ObjectFactoryResourcePile>(*m_map, zoneSettings.m_generators.m_resources, scoreSettings, m_database, m_rng));
         objectFactories.push_back(std::make_shared<ObjectFactoryPandora>(*m_map, zoneSettings.m_generators.m_pandoras, scoreSettings, m_database, m_rng, rewardsFaction));
@@ -93,47 +93,52 @@ ZoneObjectGeneration ObjectGenerator::generate(const FHRngZone&             zone
         if (i >= iterLimit - 1)
             throw std::runtime_error("Iteration limit reached.");
 
-        auto deficitScore        = (targetScore - currentScore);
-        auto deficitSum          = totalScoreValue(deficitScore);
-        auto allowedDeficit      = targetSum * scoreSettings.m_tolerancePercent / 100;
+        //auto deficitScore = (targetScore - currentScore);
+        //auto deficitSum   = totalScoreValue(deficitScore);
+        // auto allowedDeficit      = targetSum * scoreSettings.m_tolerancePercent / 100;
         targetScoreRemainingPrev = currentScore;
 
         if (doLog) {
             m_logOutput << indentBase << scoreId << " target score:" << targetScore << "\n";
             m_logOutput << indentBase << scoreId << " end score:" << currentScore << "\n";
-            m_logOutput << indentBase << scoreId << " deficit score:" << deficitScore << "\n";
-            m_logOutput << indentBase << scoreId << " checking deficit tolerance: " << deficitSum << " <= " << allowedDeficit << "...\n";
+            //m_logOutput << indentBase << scoreId << " deficit score:" << deficitScore << "\n";
+            //m_logOutput << indentBase << scoreId << " checking deficit tolerance: " << deficitSum << " <= " << allowedDeficit << "...\n";
         }
-        if (deficitSum > allowedDeficit)
-            throw std::runtime_error("Deficit score for '" + scoreId + "' exceed tolerance!");
+        //if (deficitSum > allowedDeficit && 0) // @todo: redo deficit
+        //    throw std::runtime_error("Deficit score for '" + scoreId + "' exceed tolerance!");
 
-        ZoneObjectList objectListPickables;
-        ZoneObjectList objectListNotPickables;
-        for (auto& obj : objectList) {
-            result.m_allIds.push_back(obj->getId());
-            if (obj->getType() == IZoneObject::Type::Pickable)
-                objectListPickables.push_back(obj);
-            else
-                objectListNotPickables.push_back(obj);
-        }
+        // group pickables together.
+        if (scoreSettings.m_useGuards) {
+            ZoneObjectList objectListPickables;
+            ZoneObjectList objectListNotPickables;
 
-        if (unguarded) {
-            const size_t pickSize = objectListPickables.size();
-            const size_t roadSize = pickSize / 3; // @todo: customize in template
-            m_logOutput << indentBase << " unguarded roadPickables:" << roadSize << "\n";
-            m_logOutput << indentBase << " unguarded objectListPickables:" << (pickSize - roadSize) << "\n";
-            m_logOutput << indentBase << " unguarded objectListNotPickables:" << objectListNotPickables.size() << "\n";
-            result.m_roadUnguardedPickables.insert(result.m_roadUnguardedPickables.end(), objectListPickables.cbegin(), objectListPickables.cbegin() + roadSize);
-            result.m_segmentsUnguardedPickables.insert(result.m_segmentsUnguardedPickables.end(), objectListPickables.cbegin() + roadSize, objectListPickables.cend());
-            result.m_segmentsUnguardedNonPickables.insert(result.m_segmentsUnguardedNonPickables.end(), objectListNotPickables.cbegin(), objectListNotPickables.cend());
-        } else {
+            for (auto& obj : objectList) {
+                if (obj.m_object->getType() == IZoneObject::Type::Pickable || obj.m_object->getType() == IZoneObject::Type::Joinable)
+                    objectListPickables.push_back(obj);
+                else
+                    objectListNotPickables.push_back(obj);
+            }
             makeGroups(zoneSettings, objectListPickables);
 
-            m_logOutput << indentBase << " guarded objectListPickables:" << objectListPickables.size() << "\n";
-            m_logOutput << indentBase << " guarded objectListNotPickables:" << objectListNotPickables.size() << "\n";
-            result.m_segmentsGuarded.insert(result.m_segmentsGuarded.end(), objectListPickables.cbegin(), objectListPickables.cend());
-            result.m_segmentsGuarded.insert(result.m_segmentsGuarded.end(), objectListNotPickables.cbegin(), objectListNotPickables.cend());
+            objectList = objectListNotPickables;
+            objectList.insert(objectList.end(), objectListPickables.cbegin(), objectListPickables.cend());
         }
+        for (auto& item : objectList) {
+            item.m_objectType    = scoreSettings.m_objectType;
+            item.m_useGuards     = scoreSettings.m_useGuards;
+            item.m_preferredHeat = scoreSettings.m_preferredHeat;
+            item.m_pickable      = item.m_object->getType() == IZoneObject::Type::Pickable || item.m_object->getType() == IZoneObject::Type::Joinable;
+            if (item.m_objectType == ZoneObjectType::Road) {
+                if (item.m_useGuards)
+                    throw std::runtime_error(scoreId + ": using guards on roads unsupported");
+                if (!item.m_pickable)
+                    throw std::runtime_error(scoreId + ": all items must be pickable, " + item.m_object->getId() + " is not.");
+            }
+            result.m_allIds.push_back(item.m_object->getId());
+        }
+        m_logOutput << indentBase << scoreId << " generated:" << objectList.size() << "\n";
+
+        result.m_objects.insert(result.m_objects.end(), objectList.cbegin(), objectList.cend());
     }
     std::sort(result.m_allIds.begin(), result.m_allIds.end());
     return result;
@@ -199,7 +204,7 @@ bool ObjectGenerator::generateOneObject(const Core::MapScore&           targetSc
 
             // m_logOutput << indent << "add '" << obj->getId() << "' score=" << obj->getScore() << " guard=" << obj->getGuard() << "; current factory freq=" << fac->totalFreq() << ", active=" << fac->totalActiveRecords() << "\n";
             obj->setAccepted(true);
-            objectList.push_back(obj);
+            objectList.push_back(ZoneObjectItem{ .m_object = obj });
             return true;
         }
         baseWeight = indexWeight;
@@ -228,13 +233,13 @@ void ObjectGenerator::makeGroups(const FHRngZone& zoneSettings, ZoneObjectList& 
         if (bundleGuardedEmpty)
             return;
         bundleGuarded->updateMask();
-        groupsList.push_back(bundleGuarded);
+        groupsList.push_back(ZoneObjectItem{ .m_object = bundleGuarded });
         bundleGuarded      = makeNewObjectBundle();
         bundleGuardedEmpty = true;
     };
 
     for (const auto& item : objectList) {
-        if (bundleGuarded->tryPush(item)) {
+        if (bundleGuarded->tryPush(item.m_object)) {
             bundleGuardedEmpty = false;
             continue;
         }
@@ -247,7 +252,7 @@ void ObjectGenerator::makeGroups(const FHRngZone& zoneSettings, ZoneObjectList& 
 
     if (0) {
         for (auto& obj : groupsList)
-            m_logOutput << "grouped: " << obj->getId() << "\n";
+            m_logOutput << "grouped: " << obj.m_object->getId() << "\n";
     }
 
     objectList = std::move(groupsList);

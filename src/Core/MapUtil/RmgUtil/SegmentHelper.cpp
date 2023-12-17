@@ -17,11 +17,13 @@ namespace FreeHeroes {
 SegmentHelper::SegmentHelper(FHMap&                        map,
                              MapTileContainer&             tileContainer,
                              Core::IRandomGenerator* const rng,
-                             std::ostream&                 logOutput)
+                             std::ostream&                 logOutput,
+                             bool                          extraLogging)
     : m_map(map)
     , m_tileContainer(tileContainer)
     , m_rng(rng)
     , m_logOutput(logOutput)
+    , m_extraLogging(extraLogging)
 {
 }
 
@@ -71,10 +73,11 @@ void SegmentHelper::makeInitialZones(std::vector<TileZone>& tileZones)
         const auto  centroid           = zoneArea.makeCentroid(true);
         zoneSettings.m_initialCentroid = centroid;
 
-        m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = centroid->m_pos, .m_brushColor = 330, .m_shapeRadius = 4 });
+        //m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = centroid->m_pos, .m_brushColor = 330, .m_shapeRadius = 4 });
     }
 
-    for (int i = 0; i < 10; i++) {
+    const int attempts = 10;
+    for (int i = 0; i < attempts; i++) {
         bool done = true;
         for (auto& tileZone : tileZones) {
             const auto& zoneArea     = splitRegions[tileZone.m_index];
@@ -106,20 +109,22 @@ void SegmentHelper::makeInitialZones(std::vector<TileZone>& tileZones)
             if (diff > 10 && diffPercent > 5)
                 done = false;
 
-            m_logOutput << m_indent << "refine step # " << i << " [" << tileZone.m_id << "]: "
-                        << "int. S=" << intendedArea
-                        << ", prev S=" << prevArea
-                        << ", placed S=" << placedArea
-                        << ", next S=" << correctionArea
-                        << ", next r=" << correctionRadius
-                        << ", next W=" << zoneSettings.m_outsideWeight
-                        << " diff=" << diff << " (" << diffPercent << " %)\n";
+            if (m_extraLogging)
+                m_logOutput << m_indent << "refine step # " << i << " [" << tileZone.m_id << "]: "
+                            << "int. S=" << intendedArea
+                            << ", prev S=" << prevArea
+                            << ", placed S=" << placedArea
+                            << ", next S=" << correctionArea
+                            << ", next r=" << correctionRadius
+                            << ", next W=" << zoneSettings.m_outsideWeight
+                            << " diff=" << diff << " (" << diffPercent << " %)\n";
         }
         if (done) {
             m_logOutput << m_indent << "Finished area refinement successfully, no deficit in areas! \n";
             break;
         }
-        m_logOutput << "\n";
+        if (m_extraLogging)
+            m_logOutput << "\n";
         splitRegions = m_tileContainer.m_all.splitByKExt(settings);
     }
 
@@ -234,7 +239,8 @@ void SegmentHelper::makeBorders(std::vector<TileZone>& tileZones)
         for (const auto& [connectionId, conPath] : connection.m_paths) {
             MapTilePtr cell = border.findClosestPoint(centroid->m_pos);
 
-            m_logOutput << m_indent << "placing connection '" << connectionId << "' " << connection.m_from << " -> " << connection.m_to << " at " << cell->toPrintableString() << "\n";
+            if (m_extraLogging)
+                m_logOutput << m_indent << "placing connection '" << connectionId << "' " << connection.m_from << " -> " << connection.m_to << " at " << cell->toPrintableString() << "\n";
 
             const bool guarded = conPath.m_guard || !conPath.m_mirrorGuard.empty();
 
@@ -538,7 +544,7 @@ void SegmentHelper::makeHeatMap(TileZone& tileZone)
             dest.add(src[i], heat);
     };
 
-    const int maxHeat = 10; // @todo:
+    const int maxHeat = tileZone.m_rngZoneSettings.m_maxHeat;
     for (int heat = 0; heat < maxHeat; heat++) {
         chop(roadTiles, tileZone.m_roadHeat, heat, maxHeat);
         chop(segmentTiles, tileZone.m_segmentHeat, heat, maxHeat);

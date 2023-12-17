@@ -16,12 +16,15 @@ namespace FreeHeroes {
 RoadHelper::RoadHelper(FHMap&                        map,
                        MapTileContainer&             tileContainer,
                        Core::IRandomGenerator* const rng,
-                       std::ostream&                 logOutput)
+                       std::ostream&                 logOutput,
+                       bool                          extraLogging)
     : m_map(map)
     , m_tileContainer(tileContainer)
     , m_rng(rng)
     , m_logOutput(logOutput)
+    , m_extraLogging(extraLogging)
 {
+    (void) m_extraLogging;
 }
 
 void RoadHelper::placeRoads(TileZone& tileZone)

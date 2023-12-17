@@ -20,7 +20,8 @@ public:
     SegmentHelper(FHMap&                        map,
                   MapTileContainer&             tileContainer,
                   Core::IRandomGenerator* const rng,
-                  std::ostream&                 logOutput);
+                  std::ostream&                 logOutput,
+                  bool                          extraLogging);
 
     void makeInitialZones(std::vector<TileZone>& tileZones);
 
@@ -48,6 +49,7 @@ private:
     MapTileContainer&             m_tileContainer;
     Core::IRandomGenerator* const m_rng;
     std::ostream&                 m_logOutput;
+    const bool                    m_extraLogging;
 };
 
 }

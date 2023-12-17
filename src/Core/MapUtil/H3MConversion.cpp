@@ -5,7 +5,6 @@
  */
 #include "FH2H3M.hpp"
 #include "H3M2FH.hpp"
-#include "FHTemplateProcessor.hpp"
 
 #include "H3MConversion.hpp"
 
@@ -21,17 +20,6 @@ void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* dat
 {
     FH2H3MConverter converter(database);
     converter.convertMap(src, dest);
-}
-
-void generateFromTemplate(FHMap&                     map,
-                          const Core::IGameDatabase* database,
-                          Core::IRandomGenerator*    rng,
-                          std::ostream&              logOutput,
-                          const std::string&         stopAfterStage,
-                          const std::string&         showDebugStage)
-{
-    FHTemplateProcessor converter(map, database, rng, logOutput);
-    converter.run(stopAfterStage, showDebugStage);
 }
 
 }

@@ -29,10 +29,12 @@ int main(int argc, char** argv)
                                    "output-diff-json",
                                    "dump-uncompressed",
                                    "dump-json",
+                                   "logs-extra",
                                    "seed",
                                    "rng-settings-file",
-                                   "stopAfterStage",
-                                   "showDebugStage",
+                                   "stage-stop-after",
+                                   "stage-show-debug",
+                                   "tile-filter",
                                },
                                { "tasks" });
     parser.markRequired({ "tasks" });
@@ -45,10 +47,12 @@ int main(int argc, char** argv)
     const auto        tasks            = parser.getMultiArg("tasks");
     const bool        dumpUncompressed = parser.getArg("dump-uncompressed") == "1";
     const bool        dumpJson         = parser.getArg("dump-json") == "1";
+    const bool        extraLogging     = parser.getArg("logs-extra") == "1";
     const std::string diffJsonFile     = parser.getArg("diff-json-file");
     const std::string seedStr          = parser.getArg("seed");
-    const std::string stopAfterStage   = parser.getArg("stopAfterStage");
-    const std::string showDebugStage   = parser.getArg("showDebugStage");
+    const std::string stopAfterStage   = parser.getArg("stage-stop-after");
+    const std::string showDebugStage   = parser.getArg("stage-show-debug");
+    const std::string tileFilter       = parser.getArg("tile-filter");
     const std::string rngUserSettings  = parser.getArg("rng-settings-file");
     const uint64_t    seed             = std::strtoull(seedStr.c_str(), nullptr, 10);
 
@@ -87,10 +91,12 @@ int main(int argc, char** argv)
                                .m_outputs                 = makePaths("output-"),
                                .m_dumpUncompressedBuffers = dumpUncompressed,
                                .m_dumpBinaryDataJson      = dumpJson,
+                               .m_extraLogging            = extraLogging,
                                .m_seed                    = seed,
                                .m_rngUserSettings         = rngUserSettings,
                                .m_stopAfterStage          = stopAfterStage,
                                .m_showDebugStage          = showDebugStage,
+                               .m_tileFilter              = tileFilter,
                            });
 
     for (const std::string& taskStr : tasks) {

@@ -12,6 +12,7 @@
 #include "MernelPlatform/FileIOUtils.hpp"
 #include "MernelPlatform/FileFormatJson.hpp"
 #include "MernelPlatform/Compression.hpp"
+#include "FHTemplateProcessor.hpp"
 
 #include "H3MConversion.hpp"
 
@@ -552,12 +553,15 @@ void MapConverter::convertFHTPLtoFH()
 
     rng->setSeed(m_mapFH.m_seed);
 
-    generateFromTemplate(m_mapFH,
-                         db,
-                         rng.get(),
-                         m_logOutput,
-                         m_settings.m_stopAfterStage,
-                         m_settings.m_showDebugStage);
+    FHTemplateProcessor converter(m_mapFH,
+                                  db,
+                                  rng.get(),
+                                  m_logOutput,
+                                  m_settings.m_stopAfterStage,
+                                  m_settings.m_showDebugStage,
+                                  m_settings.m_tileFilter,
+                                  m_settings.m_extraLogging);
+    converter.run();
 }
 
 void MapConverter::checkBinaryInputOutputEquality()

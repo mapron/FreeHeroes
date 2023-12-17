@@ -20,7 +20,8 @@ public:
     RoadHelper(FHMap&                        map,
                MapTileContainer&             tileContainer,
                Core::IRandomGenerator* const rng,
-               std::ostream&                 logOutput);
+               std::ostream&                 logOutput,
+               bool                          extraLogging);
 
     void placeRoads(TileZone& tileZone);
     void placeRoad(const MapTileRegion& region, RoadLevel level);
@@ -37,6 +38,7 @@ private:
     MapTileContainer&             m_tileContainer;
     Core::IRandomGenerator* const m_rng;
     std::ostream&                 m_logOutput;
+    const bool                    m_extraLogging;
 };
 
 }

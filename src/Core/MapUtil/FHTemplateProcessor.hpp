@@ -22,7 +22,11 @@ public:
     FHTemplateProcessor(FHMap&                     map,
                         const Core::IGameDatabase* database,
                         Core::IRandomGenerator*    rng,
-                        std::ostream&              logOutput);
+                        std::ostream&              logOutput,
+                        const std::string&         stopAfterStage,
+                        const std::string&         debugStage,
+                        const std::string&         tileZoneFilter,
+                        bool                       extraLogs);
 
     enum class Stage
     {
@@ -42,7 +46,7 @@ public:
         PlayerInfo,
     };
 
-    void run(const std::string& stopAfterStage, const std::string& debugStage);
+    void run();
 
 private:
     void runCurrentStage();
@@ -68,27 +72,9 @@ private:
     Core::LibraryHeroConstPtr              getRandomHero(Core::LibraryFactionConstPtr faction);
     int                                    getPossibleCount(Core::LibraryUnitConstPtr unit, int64_t value) const;
     std::set<Core::LibraryFactionConstPtr> getExcludedFactions(const std::set<std::string>& zoneIds) const;
+    bool                                   isFilteredOut(const TileZone& tileZone) const;
 
 private:
-    MapTileContainer       m_tileContainer;
-    std::vector<TileZone>  m_tileZones;
-    std::vector<TileZone*> m_tileZonesPtrs;
-
-    Stage m_currentStage  = Stage::Invalid;
-    Stage m_stopAfter     = Stage::Invalid;
-    Stage m_showDebug     = Stage::Invalid;
-    bool  m_terrainPlaced = false;
-
-    FHMap&                           m_map;
-    const Core::IGameDatabase* const m_database;
-    Core::IRandomGenerator* const    m_rng;
-    std::string                      m_indent;
-    std::ostream&                    m_logOutput;
-
-    std::vector<Core::LibraryFactionConstPtr> m_playableFactions;
-    std::vector<Core::LibraryFactionConstPtr> m_rewardFactions;
-    std::vector<Core::LibraryUnitConstPtr>    m_guardUnits;
-
     struct Guard {
         int64_t     m_value = 0;
         std::string m_id;
@@ -97,9 +83,6 @@ private:
         TileZone*   m_zone     = nullptr;
         bool        m_joinable = false;
     };
-    std::vector<Guard> m_guards;
-    int64_t            m_userMultiplyGuard = 100;
-
     using HeroGeneration = FHRngUserSettings::HeroGeneration;
     struct PlayerInfo {
         Core::LibraryFactionConstPtr m_faction = nullptr;
@@ -116,6 +99,34 @@ private:
     struct CmpPlayers {
         bool operator()(Core::LibraryPlayerConstPtr a, Core::LibraryPlayerConstPtr b) const;
     };
+
+private:
+    FHMap&                           m_map;
+    const Core::IGameDatabase* const m_database;
+    Core::IRandomGenerator* const    m_rng;
+    std::ostream&                    m_logOutput;
+    const Stage                      m_stopAfter = Stage::Invalid;
+    const Stage                      m_showDebug = Stage::Invalid;
+    const std::string                m_tileZoneFilter;
+    const bool                       m_extraLogging;
+
+private:
+    MapTileContainer       m_tileContainer;
+    std::vector<TileZone>  m_tileZones;
+    std::vector<TileZone*> m_tileZonesPtrs;
+
+    Stage m_currentStage  = Stage::Invalid;
+    bool  m_terrainPlaced = false;
+
+    std::string m_indent;
+
+    std::vector<Core::LibraryFactionConstPtr> m_playableFactions;
+    std::vector<Core::LibraryFactionConstPtr> m_rewardFactions;
+    std::vector<Core::LibraryUnitConstPtr>    m_guardUnits;
+
+    std::vector<Guard> m_guards;
+    int64_t            m_userMultiplyGuard = 100;
+
     std::map<Core::LibraryPlayerConstPtr, PlayerInfo, CmpPlayers> m_playerInfo;
 
     std::set<Core::LibraryHeroConstPtr> m_heroPool;

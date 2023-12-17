@@ -17,10 +17,9 @@ class IRandomGenerator;
 }
 
 struct TileZone;
+struct FHMap;
 class MapTileContainer;
-struct ZoneObjectWrap {
-    IZoneObjectPtr m_zoneObject;
-
+struct ZoneObjectWrap : public ZoneObjectItem {
     enum class GuardPosition
     {
         TL,
@@ -35,23 +34,20 @@ struct ZoneObjectWrap {
 
     MapTilePtr m_absPos      = nullptr;
     MapTilePtr m_guardAbsPos = nullptr;
-    FHPos      m_centerOffset;
+    FHPos      m_centerOffset{};
     bool       m_considerBlock = false;
-    bool       m_isGuarded     = false;
 
-    MapTileRegion m_rewardArea;
-    MapTileRegion m_extraObstacles;
+    MapTileRegion m_rewardArea{};
+    MapTileRegion m_extraObstacles{};
 
-    MapTileRegion m_unpassableArea; // extraObstacles + [rewardArea optional]
-    MapTileRegion m_occupiedArea;   // tiles that physically takes place on map (both removable and permanent). reward+obstacles+guard
+    MapTileRegion m_unpassableArea{}; // extraObstacles + [rewardArea optional]
+    MapTileRegion m_occupiedArea{};   // tiles that physically takes place on map (both removable and permanent). reward+obstacles+guard
 
-    MapTileRegion m_dangerZone;             // tiles that under attack of guard but not occupied
-    MapTileRegion m_occupiedWithDangerZone; // occupied + danger
+    MapTileRegion m_dangerZone{};             // tiles that under attack of guard but not occupied
+    MapTileRegion m_occupiedWithDangerZone{}; // occupied + danger
 
-    MapTileRegion m_passAroundEdge;
-    MapTileRegion m_allArea; // occupied + danger + passAround
-
-    FHPosDirection m_guardPosition = FHPosDirection::B;
+    MapTileRegion m_passAroundEdge{};
+    MapTileRegion m_allArea{}; // occupied + danger + passAround
 
     //MapTileRegion m_lastCellSource;
 
@@ -61,12 +57,11 @@ struct ZoneObjectWrap {
 
     auto getSortTuple() const { return std::tuple{ getEstimatedArea(), m_absPos }; }
 
-    size_t m_segmentIndex  = 0;
-    size_t m_sizeInCells   = 0; // 3x3
-    int    m_preferredHeat = 0;
+    size_t m_segmentIndex         = 0;
+    size_t m_segmentFragmentIndex = 0;
+    size_t m_sizeInCells          = 0; // 3x3
 
-    bool estimateOccupied(MapTilePtr absPos, MapTilePtr centroid);
-    bool estimateShift(MapTilePtr absPos);
+    bool estimateOccupied(MapTilePtr absPos);
 };
 using ZoneObjectWrapList = std::vector<ZoneObjectWrap>;
 
@@ -83,12 +78,18 @@ public:
 
         MapTileRegionList m_originalAreaCells; // 3x3
 
-        std::map<int, size_t> m_freeAreaByHeat;
-        size_t                m_freeAreaByHeatTotal = 0;
+        std::map<MapTilePtr, int> m_heatMapping;
+        std::map<int, MapTilePtr> m_heatCentroids;
+        std::map<int, size_t>     m_freeAreaByHeat;
+        size_t                    m_freeAreaByHeatTotal = 0;
 
-        bool removeHeatSize(size_t size, int startingHeat);
+        size_t m_segmentIndex = 0;
+
+        void removeHeatSize(size_t size, int startingHeat);
 
         int getFreePercent() const { return static_cast<int>(m_freeArea.size() * 100 / m_originalArea.size()); }
+
+        std::string toPrintableString() const;
     };
     using ZoneSegmentList = std::vector<ZoneSegment>;
 
@@ -99,8 +100,11 @@ public:
     using GuardList = std::vector<Guard>;
 
     struct DistributionResult {
+        int m_maxHeat = 0;
+
         ZoneSegmentList    m_segments;
         GuardList          m_guards;
+        MapTileRegion      m_needBlock;
         ZoneObjectWrapList m_candidateObjectsFreePickables;
 
         std::vector<std::string> m_allOriginalIds; // for checking
@@ -109,8 +113,12 @@ public:
         void init(TileZone& tileZone);
     };
 
-    ZoneObjectDistributor(Core::IRandomGenerator* const rng, MapTileContainer& tileContainer, std::ostream& logOutput)
-        : m_rng(rng)
+    ZoneObjectDistributor(FHMap&                        map,
+                          Core::IRandomGenerator* const rng,
+                          MapTileContainer&             tileContainer,
+                          std::ostream&                 logOutput)
+        : m_map(map)
+        , m_rng(rng)
         , m_tileContainer(tileContainer)
         , m_logOutput(logOutput)
     {
@@ -136,13 +144,13 @@ public:
 
 private:
     PlacementResult placeOnMap(ZoneObjectWrap& bundle,
-                               MapTileRegion&  region,
-                               MapTilePtr      centroid,
+                               ZoneSegment&    seg,
                                MapTilePtr      posHint) const;
 
 private:
     const std::string       m_indent = "         ";
-    Core::IRandomGenerator* m_rng    = nullptr;
+    FHMap&                  m_map;
+    Core::IRandomGenerator* m_rng = nullptr;
     MapTileContainer&       m_tileContainer;
     std::ostream&           m_logOutput;
 };

@@ -25,6 +25,20 @@ enum class RoadLevel
     Hidden,
 };
 
+enum class ZoneObjectType
+{
+    Segment,
+    Road,
+
+    MainTown,
+
+    TownMid1,
+    TownMid2,
+    TownMid3,
+
+    ExitMid1,
+};
+
 struct FHRngZoneTown {
     FHTown                m_town;
     bool                  m_playerControlled = false;
@@ -48,10 +62,11 @@ struct FHScoreSettings {
 
     using AttrMap = std::map<Core::ScoreAttr, ScoreScope>;
 
-    AttrMap m_score;
-    bool    m_isEnabled{ false };
-    int     m_guardPercent     = 100;
-    int     m_tolerancePercent = 10;
+    AttrMap        m_score;
+    bool           m_isEnabled     = false;
+    bool           m_useGuards     = true;
+    int            m_preferredHeat = 0;
+    ZoneObjectType m_objectType    = ZoneObjectType::Segment;
 
     bool isValidValue(Core::ScoreAttr attr, int64_t value) const noexcept
     {
@@ -108,6 +123,7 @@ struct FHRngZone {
     int m_relativeSizeDispersion = 0;
     int m_zoneGuardPercent       = 100;
     int m_zoneGuardDispersion    = 5;
+    int m_maxHeat                = 10;
 
     std::set<std::string> m_excludeFactionZones;
 

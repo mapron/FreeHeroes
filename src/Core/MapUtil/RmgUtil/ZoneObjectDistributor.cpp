@@ -7,6 +7,7 @@
 #include "ZoneObjectDistributor.hpp"
 #include "TileZone.hpp"
 #include "MapTileRegionSegmentation.hpp"
+#include "FHMap.hpp"
 
 #include "IRandomGenerator.hpp"
 
@@ -68,18 +69,10 @@ MapTileRegion blurSet(const MapTileRegion& source, bool diag, bool excludeOrigin
 
 }
 
-bool ZoneObjectWrap::estimateOccupied(MapTilePtr absPos, MapTilePtr centroid)
+bool ZoneObjectWrap::estimateOccupied(MapTilePtr absPos)
 {
     if (!absPos)
         return false;
-
-    auto guardPosition = posDirectionTo(centroid->m_pos, absPos->m_pos);
-    if (guardPosition == FHPosDirection::Invalid)
-        guardPosition = FHPosDirection::B;
-
-    if (m_absPosIsValid && m_guardPosition == guardPosition) {
-        return estimateShift(absPos);
-    }
 
     //Mernel::ProfilerScope scope("estimateOccupied");
     m_rewardArea.clear();
@@ -94,11 +87,10 @@ bool ZoneObjectWrap::estimateOccupied(MapTilePtr absPos, MapTilePtr centroid)
 
     m_absPosIsValid = false;
 
-    m_absPos        = absPos;
-    m_guardPosition = guardPosition;
+    m_absPos = absPos;
 
-    const auto visitMask     = m_zoneObject->getVisitableMask();
-    const auto blockNotVisit = m_zoneObject->getBlockedUnvisitableMask();
+    const auto visitMask     = m_object->getVisitableMask();
+    const auto blockNotVisit = m_object->getBlockedUnvisitableMask();
     if (visitMask.empty()) {
         assert(!"Non-visitables not supported");
         return false;
@@ -122,16 +114,15 @@ bool ZoneObjectWrap::estimateOccupied(MapTilePtr absPos, MapTilePtr centroid)
         m_rewardArea = visitMaskRegion.unionWith(blockNotVisitRegion);
         assert((visitMaskRegion.size() + blockNotVisitRegion.size()) > 0);
     }
-    const MapTilePtr lastVisitTile      = visitMaskRegion[visitMaskRegion.size() - 1];
-    const auto       rewardAreaCentroid = m_rewardArea.makeCentroid(true);
-    const auto       rewardAreaOuter    = m_rewardArea.makeOuterEdge(true);
+    const MapTilePtr lastVisitTile   = visitMaskRegion[visitMaskRegion.size() - 1];
+    const auto       rewardAreaOuter = m_rewardArea.makeOuterEdge(true);
 
-    const bool isVisitable = m_zoneObject->getType() == IZoneObject::Type::Visitable;
-    const bool isPickable  = m_zoneObject->getType() == IZoneObject::Type::Pickable;
+    const bool isVisitable = m_object->getType() == IZoneObject::Type::Visitable;
+    const bool isJoinable  = m_object->getType() == IZoneObject::Type::Joinable;
 
-    if (m_isGuarded) {
+    if (m_useGuards) {
         MapTileRegion guardCandidates;
-        if (isPickable) {
+        if (m_pickable) {
             guardCandidates = rewardAreaOuter;
         } else if (isVisitable) {
             for (auto* tile : { lastVisitTile->m_neighborL, lastVisitTile->m_neighborR, lastVisitTile->m_neighborBL, lastVisitTile->m_neighborB, lastVisitTile->m_neighborBR }) {
@@ -143,14 +134,21 @@ bool ZoneObjectWrap::estimateOccupied(MapTilePtr absPos, MapTilePtr centroid)
         if (guardCandidates.empty())
             return false;
 
-        m_guardAbsPos = guardCandidates.findClosestPoint(rewardAreaCentroid->m_pos + radiusVector(guardPosition));
+        auto it = std::min_element(guardCandidates.cbegin(), guardCandidates.cend(), [](MapTilePtr l, MapTilePtr r) {
+            auto lHeat = l->m_zone->m_segmentHeat.getLevel(l);
+            auto rHeat = r->m_zone->m_segmentHeat.getLevel(r);
+            return std::tuple{ lHeat, l } < std::tuple{ rHeat, r };
+        });
+
+        m_guardAbsPos = *it;
 
         m_dangerZone.insert(m_guardAbsPos->m_allNeighboursWithDiag);
         m_dangerZone.insert(m_guardAbsPos);
 
-        if (isPickable) {
+        if (m_pickable) {
             m_extraObstacles = rewardAreaOuter;
-            m_extraObstacles.erase(m_dangerZone);
+            if (!isJoinable)
+                m_extraObstacles.erase(m_dangerZone);
             m_unpassableArea = m_extraObstacles;
         }
     }
@@ -175,7 +173,7 @@ bool ZoneObjectWrap::estimateOccupied(MapTilePtr absPos, MapTilePtr centroid)
     }
 
     // if need 'breathing space' around it.
-    const bool unguardedPickable = (isPickable && !m_isGuarded);
+    const bool unguardedPickable = (m_pickable && !m_useGuards);
     if (!unguardedPickable)
         m_passAroundEdge = m_occupiedWithDangerZone.makeOuterEdge(false);
 
@@ -185,46 +183,6 @@ bool ZoneObjectWrap::estimateOccupied(MapTilePtr absPos, MapTilePtr centroid)
     m_sizeInCells = m_occupiedWithDangerZone.splitByGrid(3, 3, 2).size();
 
     m_centerOffset = m_occupiedWithDangerZone.makeCentroid(true)->m_pos - m_absPos->m_pos;
-
-    m_absPosIsValid = true;
-    return true;
-}
-
-bool ZoneObjectWrap::estimateShift(MapTilePtr absPos)
-{
-    //Mernel::ProfilerScope scope("estimate shift");
-    auto delta      = absPos->m_pos - m_absPos->m_pos;
-    m_absPos        = absPos;
-    m_absPosIsValid = false;
-
-    auto shiftArea = [delta](MapTileRegion& area) {
-        bool result = true;
-        area.updateAllValues([delta, &result](MapTilePtr tile) {
-            tile = tile->neighbourByOffset(delta);
-            if (!tile) {
-                result = false;
-            }
-            return tile;
-        });
-        return result;
-    };
-
-    if (!shiftArea(m_rewardArea)
-        || !shiftArea(m_extraObstacles)
-        || !shiftArea(m_unpassableArea)
-        || !shiftArea(m_occupiedArea)
-
-        || !shiftArea(m_dangerZone)
-        || !shiftArea(m_occupiedWithDangerZone)
-        || !shiftArea(m_passAroundEdge)
-        || !shiftArea(m_allArea))
-        return false;
-
-    if (m_guardAbsPos) {
-        m_guardAbsPos = m_guardAbsPos->neighbourByOffset(delta);
-        if (!m_guardAbsPos)
-            return false;
-    }
 
     m_absPosIsValid = true;
     return true;
@@ -243,39 +201,23 @@ bool ZoneObjectDistributor::makeInitialDistribution(DistributionResult& distribu
     size_t totalSizeObjects = 0;
     //size_t             totalSizeObjectsCells = 0;
     ZoneObjectWrapList segmentsNormal;
-    for (auto& obj : generated.m_segmentsGuarded) {
-        ZoneObjectWrap wrap;
-        wrap.m_isGuarded  = true;
-        wrap.m_zoneObject = obj;
-        wrap.estimateOccupied(m_tileContainer.m_centerTile, m_tileContainer.m_centerTile);
+    for (auto& obj : generated.m_objects) {
+        ZoneObjectWrap wrap{ {
+            .m_object        = obj.m_object,
+            .m_objectType    = obj.m_objectType,
+            .m_preferredHeat = obj.m_preferredHeat,
+            .m_useGuards     = obj.m_useGuards,
+            .m_pickable      = obj.m_pickable,
+        } };
+        wrap.estimateOccupied(m_tileContainer.m_centerTile);
         totalSizeObjects += wrap.getEstimatedArea();
-        //totalSizeObjectsCells += wrap.m_sizeInCells;
         //m_logOutput << "g id=" << obj->getId() << "\n";
-        segmentsNormal.push_back(wrap);
-    }
-    m_logOutput << m_indent << "total tiles= " << totalSizeObjects << " / " << totalSize << " \n";
-
-    for (auto& obj : generated.m_segmentsUnguardedNonPickables) {
-        ZoneObjectWrap wrap;
-        wrap.m_isGuarded  = false;
-        wrap.m_zoneObject = obj;
-        wrap.estimateOccupied(m_tileContainer.m_centerTile, m_tileContainer.m_centerTile);
-        totalSizeObjects += wrap.getEstimatedArea();
-        //totalSizeObjectsCells += wrap.m_sizeInCells;
-        //m_logOutput << "u id=" << obj->getId() << "\n";
-        segmentsNormal.push_back(wrap);
-    }
-    m_logOutput << m_indent << "total tiles= " << totalSizeObjects << " / " << totalSize << " \n";
-
-    // m_segmentsUnguardedPickables is too much rn, split to roads later
-
-    for (auto& obj : generated.m_segmentsUnguardedPickables) {
-        ZoneObjectWrap wrap;
-        wrap.m_isGuarded  = false;
-        wrap.m_zoneObject = obj;
-        wrap.estimateOccupied(m_tileContainer.m_centerTile, m_tileContainer.m_centerTile);
-        totalSizeObjects += wrap.getEstimatedArea();
-        distribution.m_candidateObjectsFreePickables.push_back(wrap);
+        if (wrap.m_objectType == ZoneObjectType::Segment) {
+            if (!wrap.m_useGuards && wrap.m_pickable)
+                distribution.m_candidateObjectsFreePickables.push_back(wrap);
+            else
+                segmentsNormal.push_back(wrap);
+        }
     }
 
     m_logOutput << m_indent << "total tiles= " << totalSizeObjects << " / " << totalSize << " \n";
@@ -285,8 +227,9 @@ bool ZoneObjectDistributor::makeInitialDistribution(DistributionResult& distribu
         return false;
     }
     for (ZoneObjectWrap& wrap : segmentsNormal) {
-        const size_t remainingSizeToFit            = wrap.getEstimatedArea();
-        int          minHeatAvailableInAllSegments = 10;
+        const size_t remainingSizeToFit = wrap.getEstimatedArea();
+
+        int minHeatAvailableInAllSegments = distribution.m_maxHeat;
         for (ZoneSegment& seg : distribution.m_segments) {
             if (seg.m_freeAreaByHeatTotal < remainingSizeToFit)
                 continue;
@@ -297,29 +240,36 @@ bool ZoneObjectDistributor::makeInitialDistribution(DistributionResult& distribu
                 }
             }
         }
-        if (minHeatAvailableInAllSegments == 10)
+        if (minHeatAvailableInAllSegments == distribution.m_maxHeat)
             throw std::runtime_error("sanity check failed: no heat");
 
         const int currentHeat = minHeatAvailableInAllSegments;
-        wrap.m_preferredHeat  = currentHeat;
+        wrap.m_preferredHeat  = std::max(wrap.m_preferredHeat, currentHeat);
+        m_logOutput << m_indent << "wrap id=" << wrap.m_object->getId() << ", heat=" << wrap.m_preferredHeat << ", size=" << remainingSizeToFit << "\n";
 
-        bool fitInSomeSeg = false;
+        std::vector<std::pair<ZoneSegment*, size_t>> segCandidates;
         for (ZoneSegment& seg : distribution.m_segments) {
             auto it = seg.m_freeAreaByHeat.find(wrap.m_preferredHeat);
             if (it == seg.m_freeAreaByHeat.cend() || it->second <= 0)
                 continue;
+            if (seg.m_freeAreaByHeatTotal < remainingSizeToFit)
+                continue;
+            segCandidates.push_back(std::pair{ &seg, it->second });
 
-            if (seg.removeHeatSize(remainingSizeToFit, wrap.m_preferredHeat)) {
-                fitInSomeSeg = true;
-                seg.m_candidateObjectsNormal.push_back(wrap);
-                break;
-            }
+            //m_logOutput << m_indent << "skipped " << seg.toPrintableString() << "\n";
         }
-        if (!fitInSomeSeg) {
+        if (segCandidates.empty()) {
             // can happen if we need to place 10-tile object and we have remaining two segment 5-tile each.
             m_logOutput << m_indent << "Failed to find free segment to fit object\n";
             return false;
         }
+        auto         it     = std::min_element(segCandidates.cbegin(), segCandidates.cend(), [](const auto& l, const auto& r) {
+            return std::tuple{ l.second, l.first->m_segmentIndex } < std::tuple{ r.second, r.first->m_segmentIndex };
+        });
+        ZoneSegment* fitSeg = it->first;
+        fitSeg->removeHeatSize(remainingSizeToFit, wrap.m_preferredHeat);
+        m_logOutput << m_indent << "    fit into " << fitSeg->toPrintableString() << "\n";
+        fitSeg->m_candidateObjectsNormal.push_back(wrap);
     }
 
     return true;
@@ -333,23 +283,54 @@ bool ZoneObjectDistributor::doPlaceDistribution(DistributionResult& distribution
     auto placeOnMapWrap = [this, &failedPlacement, &totalObjects, &distribution](ZoneObjectWrap& object, ZoneSegment& seg, MapTilePtr posHint) {
         totalObjects++;
         PlacementResult lastResult;
-        if ((lastResult = placeOnMap(object, seg.m_freeArea, seg.m_originalAreaCentroid, posHint)) == PlacementResult::Success) {
-            object.m_zoneObject->place(object.m_absPos->m_pos);
+        if ((lastResult = placeOnMap(object, seg, posHint)) == PlacementResult::Success) {
+            object.m_object->place(object.m_absPos->m_pos);
             seg.m_freeArea.erase(object.m_allArea);
 
-            distribution.m_placedIds.push_back(object.m_zoneObject->getId());
+            //m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = seg.m_originalAreaCentroid->m_pos, .m_text = std::to_string(seg.m_segmentIndex) });
 
-            if (object.m_isGuarded) {
+            int paletteSize = distribution.m_maxHeat;
+            int heatLevel   = object.m_preferredHeat;
+            if (0) {
+                m_map.m_debugTiles.push_back(FHDebugTile{
+                    .m_pos         = object.m_absPos->m_pos,
+                    .m_penColor    = heatLevel + 1, // heatLevel is 0-based
+                    .m_penPalette  = paletteSize,
+                    .m_shape       = 1,
+                    .m_shapeRadius = 4,
+                });
+            }
+
+            auto* tz = object.m_absPos->m_zone;
+            tz->m_rewardTilesDanger.insert(object.m_dangerZone);
+            if (0) {
+                tz->m_rewardTilesMain.insert(object.m_rewardArea);
+                tz->m_rewardTilesSpacing.insert(object.m_passAroundEdge);
+                tz->m_rewardTilesPos.insert(object.m_absPos);
+                tz->m_rewardTilesCenters.insert(object.m_absPos->neighbourByOffset(object.m_centerOffset));
+            }
+
+            tz->m_rewardTilesHints.insert(posHint);
+            distribution.m_needBlock.insert(object.m_extraObstacles);
+
+            distribution.m_placedIds.push_back(object.m_object->getId());
+
+            if (object.m_useGuards) {
                 Guard guard;
-                guard.m_value = object.m_zoneObject->getGuard();
+                guard.m_value = object.m_object->getGuard();
                 guard.m_pos   = object.m_guardAbsPos;
                 distribution.m_guards.push_back(guard);
             }
             return;
         }
+        auto* tz = object.m_absPos->m_zone;
+        tz->m_rewardTilesFailure.insert(object.m_occupiedWithDangerZone);
+        //tz->m_rewardTilesPos.insert(object.m_absPos);
+        //tz->m_rewardTilesCenters.insert(object.m_absPos->neighbourByOffset(object.m_centerOffset));
+        //tz->m_rewardTilesHints.insert(posHint);
 
         failedPlacement.push_back(object);
-        m_logOutput << m_indent << " placement failure (" << placementResultToString(lastResult) << "): pos=" << (object.m_absPos ? object.m_absPos->toPrintableString() : "NULL") << " freeArea=" << seg.m_freeArea.size() << " objectSize=" << object.getEstimatedArea() << "; " << object.m_zoneObject->getId() << "\n";
+        m_logOutput << m_indent << " placement failure (" << placementResultToString(lastResult) << "): pos=" << (object.m_absPos ? object.m_absPos->toPrintableString() : "NULL") << " freeArea=" << seg.m_freeArea.size() << " objectSize=" << object.getEstimatedArea() << "; " << object.m_object->getId() << "\n";
 
         /*
         MergedRegion reg;
@@ -375,19 +356,35 @@ bool ZoneObjectDistributor::doPlaceDistribution(DistributionResult& distribution
             continue;
 
         //for (auto& obj : seg.m_candidateObjectsNormal) {
-        //    m_logOutput << m_indent << "placing " << obj.m_zoneObject->getId() << "\n";
+        //    m_logOutput << m_indent << "placing " << obj.m_object->getId() << "\n";
         //}
 
         size_t count    = seg.m_candidateObjectsNormal.size();
         auto   settings = MapTileRegionSegmentation::guessKMeansByGrid(seg.m_originalArea, count);
+
+        std::set<size_t> remainingFragmentIndices;
+        for (size_t i = 0; i < count; ++i)
+            remainingFragmentIndices.insert(i);
         for (size_t i = 0; i < count; ++i) {
-            settings.m_items[i].m_areaHint = seg.m_candidateObjectsNormal[i].getEstimatedArea();
+            auto& obj                   = seg.m_candidateObjectsNormal[i];
+            auto* preferredHeatCentroid = seg.m_heatCentroids.at(obj.m_preferredHeat);
+
+            auto   it        = std::min_element(remainingFragmentIndices.begin(), remainingFragmentIndices.end(), [&settings, preferredHeatCentroid](size_t l, size_t r) {
+                auto lCentroid = settings.m_items[l].m_initialCentroid;
+                auto rCentroid = settings.m_items[r].m_initialCentroid;
+                auto lDistance = posDistance(lCentroid, preferredHeatCentroid, 100);
+                auto rDistance = posDistance(rCentroid, preferredHeatCentroid, 100);
+                return std::tuple{ lDistance, l } < std::tuple{ rDistance, r };
+            });
+            size_t bestIndex = *it;
+            remainingFragmentIndices.erase(it);
+            obj.m_segmentFragmentIndex             = bestIndex;
+            settings.m_items[bestIndex].m_areaHint = obj.getEstimatedArea();
         }
         auto objectRegions = seg.m_originalArea.splitByKExt(settings);
-        for (size_t i = 0; i < count; ++i) {
-            ZoneObjectWrap& object         = seg.m_candidateObjectsNormal[i];
-            MapTilePtr      posHint        = objectRegions[i].makeCentroid(true);
-            MapTilePtr      posHintShifted = posHint->neighbourByOffset(FHPos{} - object.m_centerOffset);
+        for (ZoneObjectWrap& object : seg.m_candidateObjectsNormal) {
+            MapTilePtr posHint        = objectRegions[object.m_segmentFragmentIndex].makeCentroid(true);
+            MapTilePtr posHintShifted = posHint->neighbourByOffset(FHPos{} - object.m_centerOffset);
             if (!posHintShifted) {
                 posHintShifted = m_tileContainer.m_all.findClosestPoint(posHint->m_pos - object.m_centerOffset);
             }
@@ -406,13 +403,12 @@ bool ZoneObjectDistributor::doPlaceDistribution(DistributionResult& distribution
 }
 
 ZoneObjectDistributor::PlacementResult ZoneObjectDistributor::placeOnMap(ZoneObjectWrap& bundle,
-                                                                         MapTileRegion&  region,
-                                                                         MapTilePtr      centroid,
+                                                                         ZoneSegment&    seg,
                                                                          MapTilePtr      posHint) const
 {
     Mernel::ProfilerScope scope("placeOnMap");
 
-    if (region.size() < bundle.getEstimatedArea())
+    if (seg.m_freeArea.size() < bundle.getEstimatedArea())
         return PlacementResult::InsufficientSpaceInSource;
 
     MapTilePtr pos = posHint;
@@ -420,17 +416,17 @@ ZoneObjectDistributor::PlacementResult ZoneObjectDistributor::placeOnMap(ZoneObj
 
     FHPos newPossibleShift = g_invalidPos;
 
-    auto tryPlaceInner = [&pos, &bundle, &region, centroid, &newPossibleShift]() -> PlacementResult {
+    auto tryPlaceInner = [&bundle, &seg, &newPossibleShift](MapTilePtr pos) -> PlacementResult {
         Mernel::ProfilerScope scope("placeInner");
-        if (!bundle.estimateOccupied(pos, centroid))
+        if (!bundle.estimateOccupied(pos))
             return PlacementResult::EstimateOccupiedFailure;
 
-        if (region.size() < bundle.getEstimatedArea())
+        if (seg.m_freeArea.size() < bundle.getEstimatedArea())
             return PlacementResult::InsufficientSpaceInSource;
 
         MapTileRegionWithEdge::CollisionResult collisionResult = MapTileRegionWithEdge::CollisionResult::InvalidInputs;
 
-        std::tie(collisionResult, newPossibleShift) = MapTileRegionWithEdge::getCollisionShiftForObject(bundle.m_occupiedWithDangerZone, region, true);
+        std::tie(collisionResult, newPossibleShift) = MapTileRegionWithEdge::getCollisionShiftForObject(bundle.m_occupiedWithDangerZone, seg.m_freeArea, true);
         if (collisionResult == MapTileRegionWithEdge::CollisionResult::NoCollision)
             return PlacementResult::Success;
 
@@ -445,10 +441,22 @@ ZoneObjectDistributor::PlacementResult ZoneObjectDistributor::placeOnMap(ZoneObj
 
     PlacementResult lastResult;
     // if first attempt is succeed, we'll try to find near place where we don't fit, and then backup to more close fit.
-    if ((lastResult = tryPlaceInner()) == PlacementResult::Success && 0) {
+    if ((lastResult = tryPlaceInner(pos)) == PlacementResult::Success) {
         auto originalPos = pos;
-        for (FHPos delta : g_deltasToTry) {
-            pos = originalPos;
+        if (!seg.m_heatMapping.contains(pos))
+            return lastResult;
+        int        currentHeat = seg.m_heatMapping[pos];
+        MapTilePtr betterHeat  = pos;
+        for (MapTilePtr neigh : pos->m_allNeighboursWithDiag) {
+            auto it = seg.m_heatMapping.find(neigh);
+            if (it != seg.m_heatMapping.cend() && it->second < currentHeat) {
+                currentHeat = it->second;
+                betterHeat  = neigh;
+            }
+        }
+        if (betterHeat != pos) {
+            FHPos delta = betterHeat->m_pos - pos->m_pos;
+            pos         = originalPos;
             for (int i = 0; i < 3; ++i) {
                 Mernel::ProfilerScope scope1("reposition");
                 pos = pos->neighbourByOffset(delta);
@@ -456,17 +464,17 @@ ZoneObjectDistributor::PlacementResult ZoneObjectDistributor::placeOnMap(ZoneObj
                     break;
 
                 // if we found that shifting to neighbor stop make us fail...
-                if (tryPlaceInner() != PlacementResult::Success) {
+                if (tryPlaceInner(pos) != PlacementResult::Success) {
                     // ...backup to previous successful spot
                     pos = pos->neighbourByOffset(FHPos{} - delta);
                     assert(pos);
-                    return tryPlaceInner();
+                    return tryPlaceInner(pos);
                 }
             }
         }
         pos = originalPos;
         assert(pos);
-        return tryPlaceInner();
+        return tryPlaceInner(pos);
     }
     //Mernel::ProfilerScope scope1("failed");
     if (lastResult == PlacementResult::EstimateOccupiedFailure) {
@@ -475,10 +483,19 @@ ZoneObjectDistributor::PlacementResult ZoneObjectDistributor::placeOnMap(ZoneObj
             pos = neigh.findClosestPoint(m_tileContainer.m_centerTile->m_pos);
             assert(pos);
 
-            if ((lastResult = tryPlaceInner()) == PlacementResult::Success) {
+            if ((lastResult = tryPlaceInner(pos)) == PlacementResult::Success) {
                 return lastResult;
             }
             if (lastResult != PlacementResult::EstimateOccupiedFailure)
+                break;
+        }
+    }
+    if (lastResult == PlacementResult::CollisionImpossibleShift) {
+        for (MapTilePtr neigh : pos->m_allNeighboursWithDiag) {
+            if ((lastResult = tryPlaceInner(neigh)) == PlacementResult::Success) {
+                return lastResult;
+            }
+            if (lastResult != PlacementResult::CollisionImpossibleShift)
                 break;
         }
     }
@@ -496,7 +513,7 @@ ZoneObjectDistributor::PlacementResult ZoneObjectDistributor::placeOnMap(ZoneObj
             pos = newPos;
             used.insert(pos);
 
-            if ((lastResult = tryPlaceInner()) == PlacementResult::Success) {
+            if ((lastResult = tryPlaceInner(pos)) == PlacementResult::Success) {
                 //Mernel::ProfilerScope scope3("deltashelp");
                 return lastResult;
             }
@@ -519,8 +536,10 @@ void ZoneObjectDistributor::DistributionResult::init(TileZone& tileZone)
     if (tileZone.m_innerAreaSegments.empty())
         throw std::runtime_error("No segments in tile zone!");
 
+    m_maxHeat = tileZone.m_rngZoneSettings.m_maxHeat;
+
     m_segments.clear();
-    for (auto& seg : tileZone.m_innerAreaSegments) {
+    for (size_t index = 0; auto& seg : tileZone.m_innerAreaSegments) {
         ZoneSegment zs;
         zs.m_originalArea = seg.m_innerArea;
         zs.m_originalArea.erase(safePadding); // @todo: move this to segmentation phase
@@ -528,20 +547,28 @@ void ZoneObjectDistributor::DistributionResult::init(TileZone& tileZone)
         zs.m_originalAreaCells    = zs.m_originalArea.splitByGrid(3, 3, 2);
         zs.m_freeAreaByHeatTotal  = zs.m_originalArea.size();
         zs.m_originalAreaCentroid = zs.m_originalArea.makeCentroid(true);
+        zs.m_segmentIndex         = index++;
+
+        std::map<int, MapTileRegion> heatFragments;
 
         for (auto* tile : zs.m_originalArea) {
             int heat = tileZone.m_segmentHeat.getLevel(tile);
             zs.m_freeAreaByHeat[heat]++;
+            zs.m_heatMapping[tile] = heat;
+            heatFragments[heat].insert(tile);
+        }
+        for (auto& [heat, reg] : heatFragments) {
+            zs.m_heatCentroids[heat] = reg.makeCentroid(false);
         }
 
         m_segments.push_back(std::move(zs));
     }
 }
 
-bool ZoneObjectDistributor::ZoneSegment::removeHeatSize(size_t size, int startingHeat)
+void ZoneObjectDistributor::ZoneSegment::removeHeatSize(size_t size, int startingHeat)
 {
     if (m_freeAreaByHeatTotal < size)
-        return false;
+        throw std::runtime_error("Check total size before using");
     m_freeAreaByHeatTotal -= size;
 
     for (auto& [heat, value] : m_freeAreaByHeat) {
@@ -555,7 +582,21 @@ bool ZoneObjectDistributor::ZoneSegment::removeHeatSize(size_t size, int startin
         size -= value;
         value = 0;
     }
-    return true;
+}
+
+std::string ZoneObjectDistributor::ZoneSegment::toPrintableString() const
+{
+    std::ostringstream os;
+    os << "[" << m_segmentIndex << "] tot: " << m_freeAreaByHeatTotal << ", heats: {";
+    size_t check = 0;
+    for (auto& [heat, value] : m_freeAreaByHeat) {
+        if (!value)
+            continue;
+        os << heat << ": " << value << ", ";
+        check += value;
+    }
+    os << "}, ck:" << check << ", objs:" << m_candidateObjectsNormal.size();
+    return os.str();
 }
 
 }

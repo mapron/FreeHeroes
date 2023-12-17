@@ -7,6 +7,7 @@
 
 #include "MapScore.hpp"
 #include "FHPos.hpp"
+#include "FHTemplate.hpp"
 
 #include <vector>
 #include <string>
@@ -23,7 +24,7 @@ struct IZoneObject {
         Visitable,
         Pickable,
         Joinable,  // monster join
-        Removable, // Prison, lamp
+        Removable, // Prison
     };
 
     using Mask = std::set<FHPos>;
@@ -53,14 +54,18 @@ using IZoneObjectGroupPtr = std::shared_ptr<IZoneObjectGroup>;
 
 IZoneObjectGroupPtr makeNewZoneObjectGroup(int64_t maxGuard, size_t itemLimit, uint8_t rngMask);
 
-using ZoneObjectList = std::vector<IZoneObjectPtr>;
+struct ZoneObjectItem {
+    IZoneObjectPtr m_object;
+    ZoneObjectType m_objectType    = ZoneObjectType::Segment;
+    int            m_preferredHeat = 0;
+    bool           m_useGuards     = true;
+    bool           m_pickable      = false; // pick or join
+};
+
+using ZoneObjectList = std::vector<ZoneObjectItem>;
 
 struct ZoneObjectGeneration {
-    ZoneObjectList m_segmentsGuarded;
-    ZoneObjectList m_segmentsUnguardedNonPickables;
-    ZoneObjectList m_segmentsUnguardedPickables;
-
-    ZoneObjectList m_roadUnguardedPickables;
+    ZoneObjectList m_objects;
 
     std::vector<std::string> m_allIds; // for checking
 };

@@ -14,31 +14,89 @@
                     "town2": {"town":{"hasCustomBuildings":true,"buildings":["townHall1","tavern","t1","t2"], "garisonRmg":[{"levels":[10],"value":2000},{"levels":[20],"value":1000},{"levels":[30],"value":1000}]}}},
                 
                 "scoreTargets": {
-                    "10_High": {
+                
+                    "100_Utopia": {
                         "isEnabled": true,
-                        "tolerancePercent": 15,
+                        "preferredHeat": 8,
+                        "score": {
+                            "ArtStat":        { "target": 30000 , "maxSingle": 15000, "minSingle": 4000 },
+                            "ArtSupport":     { "target": 20000 , "maxSingle": 10000, "minSingle": 4000 },
+                            "Gold":           { "target": 30000 , "maxSingle": 30000, "minSingle": 30000 }
+                        }
+                    },
+                    "110_HighArmy": {
+                        "isEnabled": true,
+                        "preferredHeat": 3,
                         "score": {
                             "Army":           { "target": 50000 , "maxSingle": 20000, "minSingle": 8000 },
                             "ArmyDwelling":   { "target": 20000 , "maxSingle": 20000, "minSingle": 10000},
-                            "ArmyAux":        { "target": 25000 , "maxSingle": 15000, "minSingle": 10000},
-                            "ArtStat":        { "target": 30000 , "maxSingle": 15000, "minSingle": 4000 },
-                            "ArtSupport":     { "target": 20000 , "maxSingle": 10000, "minSingle": 4000 },
-                            "Gold":           { "target": 60000 , "maxSingle": 50000, "minSingle": 3000 },
-                            "Resource":       { "target": 60000 , "maxSingle": 50000, "minSingle": 8000 },
-                            
-                            "SpellOffensive": { "target": 60000 , "minSingle":  5000},
-                            "SpellCommon":    { "target": 20000 , "minSingle":  5000},
-                            "Support":        { "target": 15000 , "minSingle":  5000},
-
-                            "Control":        { "target":  85000, "maxSingle": 30000}
+                            "ArmyAux":        { "target": 25000 , "maxSingle": 15000, "minSingle": 10000}
                         }
                     },
-                    "20_Mid": {
+                    "120_MidArmy": {
                         "isEnabled": true,
+                        "preferredHeat": 0,
                         "score": {
                             "Army":           { "target": 40000, "maxSingle": 12000},
                             "ArmyDwelling":   { "target": 10000, "maxSingle": 9000, "minSingle": 4000},
-                            "ArmyAux":        { "target": 15000, "maxSingle": 9000},
+                            "ArmyAux":        { "target": 15000, "maxSingle": 9000}
+                        }
+                    },
+                    "130_LowArmy": {
+                       "isEnabled": true,
+                       "preferredHeat": 5,
+                       "useGuards": false,
+                       "score": {
+                            "ArmyDwelling":   { "target": 20000 ,"maxSingle": 3900}
+                        }
+                    },
+                    
+                    "210_ControlArts": {
+                        "isEnabled": true,
+                        "preferredHeat": 8,
+                        "score": {
+                            "Control":        { "target":  85000, "maxSingle": 30000}
+                        }
+                    },
+                    
+                    "320_HighSpells": {
+                        "isEnabled": true,
+                        "preferredHeat": 7,
+                        "score": {
+                            "SpellOffensive": { "target": 60000 , "minSingle":  5000},
+                            "SpellCommon":    { "target": 20000 , "minSingle":  5000}
+                        }
+                    },
+                    "330_HighSupportVisit": {
+                        "isEnabled": true,
+                        "preferredHeat": 1,
+                        "score": {
+                            "Support":        { "target": 15000 , "minSingle":  5000}
+                        }
+                    },
+                    "340_HighArtsAndBanks": {
+                        "isEnabled": true,
+                        "preferredHeat": 4,
+                        "score": {
+                            "Resource":       { "target": 60000 , "maxSingle": 50000, "minSingle": 8000 },
+                            "Gold":           { "target": 30000 , "maxSingle": 15000, "minSingle": 3000 },
+                            
+                            "ArtStat":        { "target": 1 , "maxSingle": 15000, "minSingle": 4000 },
+                            "ArtSupport":     { "target": 1 , "maxSingle": 10000, "minSingle": 4000 }
+                            
+
+                        }
+                    },
+                    "401_MidSpells": {
+                        "isEnabled": true,
+                        "score": {
+                            "SpellOffensive": { "target": 10000, "maxSingle": 6000, "minSingle": 2100},
+                            "SpellCommon":    { "target": 10000, "maxSingle": 6000, "minSingle": 500}
+                        }
+                    },
+                    "450_Mid": {
+                        "isEnabled": true,
+                        "score": {
                             "ArtStat":        { "target": 25000, "maxSingle": 7000, "minSingle": 2500},
                             "ArtSupport":     { "target": 15000, "maxSingle": 7000, "minSingle": 2500},
                             "Gold":           { "target": 30000, "maxSingle": 15000, "minSingle": 2500},
@@ -48,32 +106,48 @@
                             "SpellCommon":    { "target": 10000, "maxSingle": 6000, "minSingle": 500},
                             "Support":        { "target": 5000 , "minSingle": 1001, "maxSingle": 4900},
                             "Upgrade"   :     { "target": 10000, "maxSingle": 9000, "minSingle": 2000}
-                        },
-                        "guardPercent": 100
+                        }
                     },
-                    "30_LowGuarded": {
+                    "500_LowRoadPicks": {
+                        "objectType": "Road",
                         "isEnabled": true,
+                        "useGuards": false,
+                        "preferredHeat": 0,
+                        "score":{
+                            "Resource":       { "target": 40000, "maxSingle": 2500},
+                            "Gold"    :       { "target": 40000, "maxSingle": 2500}
+                        }
+                    },
+                    "510_LowGuardedPicks": {
+                        "isEnabled": true,
+                        "preferredHeat": 3,
                         "score":{
                             "Experience":     { "target": 20000, "maxSingle": 2000},
                             "Resource":       { "target": 20000, "maxSingle": 3000}
-                        },
-                        "guardPercent": 100
+                        }
                     },
-                    "40_Low": {
+                    "610_Low": {
                         "isEnabled": true,
+                        "useGuards": false,
+                        "preferredHeat": 7,
                         "score":{
-                            "ArmyDwelling":   { "target": 20000 ,"maxSingle": 3900},
                             "ArtStat":        { "target": 6000 , "maxSingle": 2400},
                             "ArtSupport":     { "target": 4000 , "maxSingle": 2400},
-                            "Gold":           { "target": 80000, "maxSingle": 2000},
-                            "Resource":       { "target": 100000, "maxSingle": 2500},
-                            "Experience":     { "target": 30000, "maxSingle": 2500},
+                            "Gold":           { "target": 30000, "maxSingle": 2000},
                             "Upgrade"   :     { "target": 10000, "maxSingle": 3000},
                             "ResourceGen":    { "target": 50000},
                             "SpellAny":       { "target": 10000, "maxSingle": 1800},
                             "Support":        { "target": 2000 , "maxSingle": 1000}
-                        },
-                        "guardPercent": 0
+                        }
+                    },
+                    "620_LowPicks": {
+                        "isEnabled": true,
+                        "useGuards": false,
+                        "preferredHeat": 0,
+                        "score":{
+                            "Resource":       { "target": 60000, "maxSingle": 2500},
+                            "Experience":     { "target": 30000, "maxSingle": 2500}
+                        }
                     }
                 },
                 "guardMin": 4000,
@@ -300,9 +374,8 @@
                 },
                 
                 "scoreTargets": {
-                    "10_High": {
-                        "isEnabled": true,
-                        "tolerancePercent": 15,
+                    "15_High": {
+                        "isEnabled": false,
                         "score": {
                             "Army":           { "target": 250000  , "minSingle": 10000, "maxSingle" : -1},
                             "ArmyDwelling":   { "target": 40000   , "minSingle":  6000, "maxSingle" : -1},
@@ -322,8 +395,7 @@
                         }
                     },
                     "15_TreasureMid": {
-                        "isEnabled": true,
-                        "tolerancePercent": 15,
+                        "isEnabled": false,
                         "score": {
                             "ArtStat":        { "target": 70000   , "minSingle": 5000, "maxSingle" : 10000},
                             "ArtSupport":     { "target": 70000   , "minSingle": 5000, "maxSingle" : 10000},
@@ -341,8 +413,8 @@
                         "isEnabled": false
                     },
                     "50_TreasureLow": {
-                        "isEnabled": true,
-                        "guardPercent": 0,
+                        "isEnabled": false,
+                        "objectType": "SegmentUnguarded",
                         "score": {
                             "Gold":           { "target": 40000, "maxSingle": 2000},
                             "Experience":     { "target": 20000, "maxSingle": 2000},

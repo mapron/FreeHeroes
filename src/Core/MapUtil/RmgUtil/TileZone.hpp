@@ -113,6 +113,10 @@ struct TileZone {
     MapTileRegion m_rewardTilesMain;
     MapTileRegion m_rewardTilesDanger;
     MapTileRegion m_rewardTilesSpacing;
+    MapTileRegion m_rewardTilesFailure;
+    MapTileRegion m_rewardTilesPos;
+    MapTileRegion m_rewardTilesCenters;
+    MapTileRegion m_rewardTilesHints;
 
     HeatData m_segmentHeat;
     HeatData m_roadHeat;

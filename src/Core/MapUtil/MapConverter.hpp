@@ -43,10 +43,12 @@ public:
         PathsSet         m_outputs;
         bool             m_dumpUncompressedBuffers = false;
         bool             m_dumpBinaryDataJson      = false;
+        bool             m_extraLogging            = false;
         uint64_t         m_seed                    = 0;
         Mernel::std_path m_rngUserSettings;
         std::string      m_stopAfterStage;
         std::string      m_showDebugStage;
+        std::string      m_tileFilter;
     };
 
     enum class RawState
