@@ -120,6 +120,7 @@ struct TileZone {
 
     HeatData m_segmentHeat;
     HeatData m_roadHeat;
+    HeatData m_distances; // 100-based
 
     std::map<std::string, MapTilePtr> m_namedTiles;
 

@@ -62,11 +62,13 @@ struct FHScoreSettings {
 
     using AttrMap = std::map<Core::ScoreAttr, ScoreScope>;
 
-    AttrMap        m_score;
-    bool           m_isEnabled     = false;
-    bool           m_useGuards     = true;
-    int            m_preferredHeat = 0;
-    ZoneObjectType m_objectType    = ZoneObjectType::Segment;
+    AttrMap               m_score;
+    bool                  m_isEnabled = false;
+    bool                  m_useGuards = true;
+    std::vector<int>      m_preferredHeats; // if empty will be 0
+    ZoneObjectType        m_objectType = ZoneObjectType::Segment;
+    std::set<std::string> m_generatorsInclude;
+    std::set<std::string> m_generatorsExclude;
 
     bool isValidValue(Core::ScoreAttr attr, int64_t value) const noexcept
     {

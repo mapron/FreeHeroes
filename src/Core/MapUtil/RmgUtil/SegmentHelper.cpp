@@ -522,8 +522,9 @@ void SegmentHelper::makeHeatMap(TileZone& tileZone)
 
     MapTilePtrList roadTiles;
     MapTilePtrList segmentTiles;
-    for (const auto& [_, area] : resultByDistance) {
+    for (const auto& [distance, area] : resultByDistance) {
         for (auto* tile : area) {
+            tileZone.m_distances.add(tile, distance);
             //m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = tile->m_pos, .m_text = std::to_string(_) });
             if (tileZone.m_roads.m_all.contains(tile))
                 roadTiles.push_back(tile);

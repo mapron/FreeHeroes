@@ -60,8 +60,10 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_score,
     m_isEnabled,
     m_useGuards,
-    m_preferredHeat,
-    m_objectType)
+    m_preferredHeats,
+    m_objectType,
+    m_generatorsInclude,
+    m_generatorsExclude)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone::GeneratorBank::Record,

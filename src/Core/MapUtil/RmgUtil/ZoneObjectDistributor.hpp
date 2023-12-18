@@ -32,9 +32,9 @@ struct ZoneObjectWrap : public ZoneObjectItem {
         BR,
     };
 
-    MapTilePtr m_absPos      = nullptr;
-    MapTilePtr m_guardAbsPos = nullptr;
-    FHPos      m_centerOffset{};
+    MapTilePtr m_absPos        = nullptr;
+    MapTilePtr m_guardAbsPos   = nullptr;
+    FHPos      m_centerOffset  = g_invalidPos;
     bool       m_considerBlock = false;
 
     MapTileRegion m_rewardArea{};
@@ -53,23 +53,47 @@ struct ZoneObjectWrap : public ZoneObjectItem {
 
     bool m_absPosIsValid = false;
 
-    size_t getEstimatedArea() const { return m_occupiedWithDangerZone.size() + m_passAroundEdge.size() / 3; }
+    //size_t getEstimatedArea() const { return m_occupiedWithDangerZone.size() + m_passAroundEdge.size() / 3; }
 
-    auto getSortTuple() const { return std::tuple{ getEstimatedArea(), m_absPos }; }
+    //auto getSortTuple() const { return std::tuple{ getEstimatedArea(), m_absPos }; }
 
+    int    m_placedHeat           = 0;
     size_t m_segmentIndex         = 0;
     size_t m_segmentFragmentIndex = 0;
-    size_t m_sizeInCells          = 0; // 3x3
+    size_t m_estimatedArea        = 0;
+    //size_t m_sizeInCells          = 0; // 3x3
 
-    bool estimateOccupied(MapTilePtr absPos);
+    bool estimateOccupied(MapTilePtr absPosCenter);
+
+    std::string toPrintableString() const;
+
+    void place() const;
 };
-using ZoneObjectWrapList = std::vector<ZoneObjectWrap>;
+using ZoneObjectWrapList    = std::vector<ZoneObjectWrap>;
+using ZoneObjectWrapPtrList = std::vector<ZoneObjectWrap*>;
 
 class ZoneObjectDistributor {
 public:
+    enum class PlacementResult
+    {
+        Success,
+        InsufficientSpaceInSource,
+        EstimateOccupiedFailure,
+        InvalidShiftValue,
+        InvalidCollisionInputs,
+
+        CollisionImpossibleShift,
+        CollisionHasShift,
+        RunOutOfShiftRetries,
+        ShiftLoopDetected,
+
+        Retry,
+    };
+
+    struct DistributionResult;
     struct ZoneSegment {
-        ZoneObjectWrapList m_candidateObjectsNormal;
-        ZoneObjectWrapList m_failedObjectsNormal;
+        ZoneObjectWrapPtrList m_candidateObjectsNormal;
+        ZoneObjectWrapPtrList m_successNormal;
 
         MapTileRegion m_originalArea;
         MapTileRegion m_freeArea;
@@ -78,10 +102,13 @@ public:
 
         MapTileRegionList m_originalAreaCells; // 3x3
 
-        std::map<MapTilePtr, int> m_heatMapping;
         std::map<int, MapTilePtr> m_heatCentroids;
         std::map<int, size_t>     m_freeAreaByHeat;
         size_t                    m_freeAreaByHeatTotal = 0;
+
+        const TileZone* m_tileZone = nullptr;
+
+        bool m_compact = false;
 
         size_t m_segmentIndex = 0;
 
@@ -90,6 +117,17 @@ public:
         int getFreePercent() const { return static_cast<int>(m_freeArea.size() * 100 / m_originalArea.size()); }
 
         std::string toPrintableString() const;
+
+        MapTilePtr findBestHeatCentroid(int heat) const;
+
+        void compactIfNeeded();
+        void commitAll(FHMap& m_map, DistributionResult& distribution);
+        void commitPlacement(FHMap& m_map, DistributionResult& distribution, ZoneObjectWrap* object);
+        void recalcFree(ZoneObjectWrap* exclude = nullptr);
+
+        PlacementResult placeOnMap(ZoneObjectWrap& bundle,
+                                   MapTilePtr      posHint,
+                                   bool            packPlacement);
     };
     using ZoneSegmentList = std::vector<ZoneSegment>;
 
@@ -102,13 +140,19 @@ public:
     struct DistributionResult {
         int m_maxHeat = 0;
 
-        ZoneSegmentList    m_segments;
-        GuardList          m_guards;
-        MapTileRegion      m_needBlock;
-        ZoneObjectWrapList m_candidateObjectsFreePickables;
+        ZoneObjectWrapList m_allObjects;
+
+        ZoneSegmentList m_segments;
+        GuardList       m_guards;
+        MapTileRegion   m_needBlock;
 
         std::vector<std::string> m_allOriginalIds; // for checking
         std::vector<std::string> m_placedIds;      // for checking
+
+        ZoneObjectWrapPtrList m_candidateObjectsFreePickables;
+        ZoneObjectWrapPtrList m_roadPickables;
+
+        const TileZone* m_tileZone = nullptr;
 
         void init(TileZone& tileZone);
     };
@@ -128,25 +172,7 @@ public:
     bool doPlaceDistribution(DistributionResult& distribution) const;
 
 public:
-    enum class PlacementResult
-    {
-        Success,
-        InsufficientSpaceInSource,
-        EstimateOccupiedFailure,
-        InvalidShiftValue,
-        InvalidCollisionInputs,
-
-        CollisionImpossibleShift,
-        CollisionHasShift,
-        RunOutOfShiftRetries,
-        ShiftLoopDetected,
-    };
-
 private:
-    PlacementResult placeOnMap(ZoneObjectWrap& bundle,
-                               ZoneSegment&    seg,
-                               MapTilePtr      posHint) const;
-
 private:
     const std::string       m_indent = "         ";
     FHMap&                  m_map;

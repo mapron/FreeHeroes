@@ -60,6 +60,7 @@ struct ZoneObjectItem {
     int            m_preferredHeat = 0;
     bool           m_useGuards     = true;
     bool           m_pickable      = false; // pick or join
+    FHPos          m_radiusVector  = g_invalidPos;
 };
 
 using ZoneObjectList = std::vector<ZoneObjectItem>;

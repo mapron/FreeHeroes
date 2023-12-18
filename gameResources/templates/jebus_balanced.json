@@ -15,125 +15,143 @@
                 
                 "scoreTargets": {
                 
-                    "100_Utopia": {
+                    "110_Utopia": {
                         "isEnabled": true,
-                        "preferredHeat": 8,
+                        "preferredHeats": [8],
+                        "generatorsInclude": ["banks"],
                         "score": {
                             "ArtStat":        { "target": 30000 , "maxSingle": 15000, "minSingle": 4000 },
                             "ArtSupport":     { "target": 20000 , "maxSingle": 10000, "minSingle": 4000 },
                             "Gold":           { "target": 30000 , "maxSingle": 30000, "minSingle": 30000 }
                         }
                     },
-                    "110_HighArmy": {
+                    "120_HighArmy": {
                         "isEnabled": true,
-                        "preferredHeat": 3,
+                        "preferredHeats": [3, 4],
                         "score": {
                             "Army":           { "target": 50000 , "maxSingle": 20000, "minSingle": 8000 },
                             "ArmyDwelling":   { "target": 20000 , "maxSingle": 20000, "minSingle": 10000},
                             "ArmyAux":        { "target": 25000 , "maxSingle": 15000, "minSingle": 10000}
                         }
                     },
-                    "120_MidArmy": {
+                    "130_MidArmy": {
                         "isEnabled": true,
-                        "preferredHeat": 0,
+                        "preferredHeats": [0],
                         "score": {
                             "Army":           { "target": 40000, "maxSingle": 12000},
                             "ArmyDwelling":   { "target": 10000, "maxSingle": 9000, "minSingle": 4000},
                             "ArmyAux":        { "target": 15000, "maxSingle": 9000}
                         }
                     },
-                    "130_LowArmy": {
+                    "140_LowArmy": {
                        "isEnabled": true,
-                       "preferredHeat": 5,
+                       "preferredHeats": [5, 6, 7],
                        "useGuards": false,
                        "score": {
                             "ArmyDwelling":   { "target": 20000 ,"maxSingle": 3900}
                         }
                     },
-                    
-                    "210_ControlArts": {
+
+                    "210_ControlScrolls": {
                         "isEnabled": true,
-                        "preferredHeat": 8,
+                        "preferredHeats": [7, 8],
                         "score": {
                             "Control":        { "target":  85000, "maxSingle": 30000}
                         }
                     },
-                    
-                    "320_HighSpells": {
+
+                    "330_HighSupportVisitables": {
                         "isEnabled": true,
-                        "preferredHeat": 7,
-                        "score": {
-                            "SpellOffensive": { "target": 60000 , "minSingle":  5000},
-                            "SpellCommon":    { "target": 20000 , "minSingle":  5000}
-                        }
-                    },
-                    "330_HighSupportVisit": {
-                        "isEnabled": true,
-                        "preferredHeat": 1,
+                        "preferredHeats": [1],
                         "score": {
                             "Support":        { "target": 15000 , "minSingle":  5000}
                         }
                     },
                     "340_HighArtsAndBanks": {
                         "isEnabled": true,
-                        "preferredHeat": 4,
+                        "preferredHeats": [5, 6, 7],
                         "score": {
                             "Resource":       { "target": 60000 , "maxSingle": 50000, "minSingle": 8000 },
                             "Gold":           { "target": 30000 , "maxSingle": 15000, "minSingle": 3000 },
                             
                             "ArtStat":        { "target": 1 , "maxSingle": 15000, "minSingle": 4000 },
                             "ArtSupport":     { "target": 1 , "maxSingle": 10000, "minSingle": 4000 }
-                            
-
                         }
                     },
-                    "401_MidSpells": {
+
+                    "410_HighSpells": {
                         "isEnabled": true,
+                        "preferredHeats": [6, 7, 8],
+                        "score": {
+                            "SpellOffensive": { "target": 60000 , "minSingle":  5000},
+                            "SpellCommon":    { "target": 20000 , "minSingle":  5000}
+                        }
+                    },
+                    "420_MidSpells": {
+                        "isEnabled": true,
+                        "preferredHeats": [4, 5, 6],
                         "score": {
                             "SpellOffensive": { "target": 10000, "maxSingle": 6000, "minSingle": 2100},
                             "SpellCommon":    { "target": 10000, "maxSingle": 6000, "minSingle": 500}
                         }
                     },
-                    "450_Mid": {
+
+                    "510_XpPandoras": {
                         "isEnabled": true,
+                        "preferredHeats": [4, 5, 6, 7],
+                        "generatorsInclude": ["pandoras"],
+                        "score": {
+                            "Experience":     { "target": 40000, "maxSingle": 12000, "minSingle": 3000}
+                        }
+                    },
+                    "520_PermanentXp": {
+                        "isEnabled": true,
+                        "preferredHeats": [1, 2, 3, 4, 5],
+                        "generatorsInclude": ["visitables"],
+                        "score": {
+                            "Experience":     { "target": 20000, "maxSingle": 12000, "minSingle": 3000}
+                        }
+                    },
+                    "530_GuardedTreasureChests": {
+                        "isEnabled": true,
+                        "preferredHeats": [1, 2, 3, 4],
+                        "score":{
+                            "Experience":     { "target": 20000, "maxSingle": 2000}
+                        }
+                    },
+
+                    "610_Mid": {
+                        "isEnabled": true,
+                        "preferredHeats": [1, 2, 3, 4, 5, 6],
+                        "generatorsExclude": ["resources"],
                         "score": {
                             "ArtStat":        { "target": 25000, "maxSingle": 7000, "minSingle": 2500},
                             "ArtSupport":     { "target": 15000, "maxSingle": 7000, "minSingle": 2500},
-                            "Gold":           { "target": 30000, "maxSingle": 15000, "minSingle": 2500},
+                            "Gold":           { "target": 30000, "maxSingle": 15000, "minSingle": 5001},
                             "Resource":       { "target": 40000, "maxSingle": 15000, "minSingle": 2500},
-                            "Experience":     { "target": 40000, "maxSingle": 12000, "minSingle": 3000},
                             "SpellOffensive": { "target": 10000, "maxSingle": 6000, "minSingle": 2100},
                             "SpellCommon":    { "target": 10000, "maxSingle": 6000, "minSingle": 500},
                             "Support":        { "target": 5000 , "minSingle": 1001, "maxSingle": 4900},
                             "Upgrade"   :     { "target": 10000, "maxSingle": 9000, "minSingle": 2000}
                         }
                     },
-                    "500_LowRoadPicks": {
-                        "objectType": "Road",
+                    "520_GuardedResources": {
                         "isEnabled": true,
-                        "useGuards": false,
-                        "preferredHeat": 0,
+                        "preferredHeats": [2, 3, 4],
+                        "generatorsInclude": ["resources"],
                         "score":{
-                            "Resource":       { "target": 40000, "maxSingle": 2500},
-                            "Gold"    :       { "target": 40000, "maxSingle": 2500}
-                        }
-                    },
-                    "510_LowGuardedPicks": {
-                        "isEnabled": true,
-                        "preferredHeat": 3,
-                        "score":{
-                            "Experience":     { "target": 20000, "maxSingle": 2000},
                             "Resource":       { "target": 20000, "maxSingle": 3000}
                         }
                     },
-                    "610_Low": {
+                    "610_LowUnguarded": {
                         "isEnabled": true,
                         "useGuards": false,
-                        "preferredHeat": 7,
+                        "preferredHeats": [2, 3, 4, 5, 6, 7],
+                        "generatorsExclude": ["resources"],
                         "score":{
                             "ArtStat":        { "target": 6000 , "maxSingle": 2400},
                             "ArtSupport":     { "target": 4000 , "maxSingle": 2400},
-                            "Gold":           { "target": 30000, "maxSingle": 2000},
+                            "Gold":           { "target": 30000, "maxSingle": 5000},
                             "Upgrade"   :     { "target": 10000, "maxSingle": 3000},
                             "ResourceGen":    { "target": 50000},
                             "SpellAny":       { "target": 10000, "maxSingle": 1800},
@@ -143,10 +161,22 @@
                     "620_LowPicks": {
                         "isEnabled": true,
                         "useGuards": false,
-                        "preferredHeat": 0,
+                        "preferredHeats": [0, 1, 2, 3, 4, 5, 6],
+                        "generatorsExclude": ["banks"],
                         "score":{
-                            "Resource":       { "target": 60000, "maxSingle": 2500},
-                            "Experience":     { "target": 30000, "maxSingle": 2500}
+                            "Gold":           { "target": 30000, "maxSingle": 2000},
+                            "Resource":       { "target": 60000, "maxSingle": 2500}
+                        }
+                    },
+                    "910_LowRoadPicks": {
+                        "objectType": "Road",
+                        "isEnabled": true,
+                        "useGuards": false,
+                        "generatorsExclude": ["banks"],
+                        "preferredHeats": [0, 1, 2, 3, 4, 5, 6, 7, 8],
+                        "score":{
+                            "Resource":       { "target": 40000, "maxSingle": 2500},
+                            "Gold"    :       { "target": 40000, "maxSingle": 2500}
                         }
                     }
                 },
