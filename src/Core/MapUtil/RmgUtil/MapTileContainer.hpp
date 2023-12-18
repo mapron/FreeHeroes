@@ -29,8 +29,6 @@ public:
 
     void init(int width, int height, int depth);
 
-    bool fixExclaves();
-
     MapTilePtr find(FHPos pos) const noexcept
     {
         auto it = m_tileIndex.find(pos);

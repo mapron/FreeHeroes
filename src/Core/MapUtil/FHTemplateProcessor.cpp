@@ -602,7 +602,14 @@ void FHTemplateProcessor::runRoadsPlacement()
         if (isFilteredOut(tileZone))
             continue;
 
+        auto prevPlaced = tileZone.m_roads.m_tileLevels;
         roadHelper.placeRoads(tileZone);
+        for (auto& [tile, level] : prevPlaced)
+            tileZone.m_roads.add(tile, level);
+
+        for (const auto& [level, region] : tileZone.m_roads.m_byLevel) {
+            roadHelper.placeRoad(region, level);
+        }
     }
 }
 
@@ -670,10 +677,33 @@ void FHTemplateProcessor::runRewards()
             auto distributionResult = distributionResultCopy;
 
             if (objectDistributor.makeInitialDistribution(distributionResult, zoneObjectGeneration)) {
-                if (objectDistributor.doPlaceDistribution(distributionResult)) {
-                    distributionResultCopy = distributionResult;
-                    break;
+                objectDistributor.doPlaceDistribution(distributionResult);
+                distributionResultCopy = distributionResult;
+                if (m_showDebug == Stage::Rewards) {
+                    for (auto& seg : distributionResultCopy.m_segments) {
+                        for (auto* object : seg.m_successNormal) {
+                            int paletteSize = distributionResultCopy.m_maxHeat;
+
+                            m_map.m_debugTiles.push_back(FHDebugTile{
+                                .m_pos         = object->m_absPos->m_pos,
+                                .m_penColor    = object->m_preferredHeat + 1, // heatLevel is 0-based
+                                .m_penAlpha    = 120,
+                                .m_penPalette  = paletteSize,
+                                .m_shape       = 1,
+                                .m_shapeRadius = 4,
+                            });
+                            m_map.m_debugTiles.push_back(FHDebugTile{
+                                .m_pos         = object->m_absPos->m_pos,
+                                .m_penColor    = object->m_placedHeat + 1, // heatLevel is 0-based
+                                .m_penAlpha    = 120,
+                                .m_penPalette  = paletteSize,
+                                .m_shape       = 1,
+                                .m_shapeRadius = 1,
+                            });
+                        }
+                    }
                 }
+                break;
             }
 
             if (lastAttempt)
@@ -692,6 +722,7 @@ void FHTemplateProcessor::runRewards()
             guard.m_joinable = true;
             m_guards.push_back(guard);
         }
+
         tileZone.m_needPlaceObstacles.insert(distributionResultCopy.m_needBlock);
 
         //for (auto* cell : bundleSet.m_consumeResult.m_centroidsALL) {

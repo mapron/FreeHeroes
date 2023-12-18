@@ -232,7 +232,8 @@ MapTileRegionList MapTileRegionSegmentation::splitByFloodFill(const MapTileRegio
         addToCurrent(startCell);
 
         while (!currentEdge.empty()) {
-            MapTilePtrList nextEdge = std::move(currentEdge);
+            MapTilePtrList nextEdge = currentEdge;
+            currentEdge.clear();
 
             for (MapTilePtr edgeCell : nextEdge) {
                 const auto& neighbours = edgeCell->neighboursList(useDiag);
@@ -241,7 +242,8 @@ MapTileRegionList MapTileRegionSegmentation::splitByFloodFill(const MapTileRegio
                 }
             }
         }
-        MapTileRegion current = MapTileRegion(std::move(currentBuffer));
+        MapTileRegion current = MapTileRegion(currentBuffer);
+        currentBuffer.clear();
         remain.erase(current);
         result.push_back(std::move(current));
     }

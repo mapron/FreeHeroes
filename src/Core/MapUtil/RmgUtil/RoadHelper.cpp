@@ -112,10 +112,6 @@ void RoadHelper::placeRoads(TileZone& tileZone)
     // redundant road cleanup
     while (redundantCleanup(tileZone)) {
     }
-
-    for (const auto& [level, region] : tileZone.m_roads.m_byLevel) {
-        placeRoad(region, level);
-    }
 }
 
 void RoadHelper::prepareRoad(TileZone& tileZone, const MapTilePtrList& tileList, RoadLevel level)

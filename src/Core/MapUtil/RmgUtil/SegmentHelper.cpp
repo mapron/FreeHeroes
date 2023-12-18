@@ -130,9 +130,26 @@ void SegmentHelper::makeInitialZones(std::vector<TileZone>& tileZones)
 
     for (auto& tileZone : tileZones) {
         tileZone.m_area.m_innerArea = std::move(splitRegions[tileZone.m_index]);
+
+        tileZone.m_area.makeEdgeFromInnerArea();
+        /*
+        for (auto* tile : tileZone.m_area.m_innerEdge) {
+            const bool eT        = tileZone.m_area.m_innerArea.contains(tile->m_neighborT);
+            const bool eL        = tileZone.m_area.m_innerArea.contains(tile->m_neighborL);
+            const bool eR        = tileZone.m_area.m_innerArea.contains(tile->m_neighborR);
+            const bool eB        = tileZone.m_area.m_innerArea.contains(tile->m_neighborB);
+            const int  sameCount = eT + eL + eR + eB;
+            if (sameCount == 2) {
+                if ((eT && eB) || (eR && eL)) {
+                    tileZone.m_area.m_innerArea.erase(tile);
+                }
+            }
+        }
+        tileZone.m_area.m_innerArea.eraseExclaves(false);*/
+        tileZone.m_area.makeEdgeFromInnerArea();
+
         for (auto* tile : tileZone.m_area.m_innerArea)
             tile->m_zone = &tileZone;
-        tileZone.m_area.makeEdgeFromInnerArea();
         tileZone.m_centroid = tileZone.m_area.m_innerArea.makeCentroid(true);
 
         m_logOutput << m_indent << "zone [" << tileZone.m_id << "] areaDeficit=" << tileZone.getAreaDeficit() << "\n";

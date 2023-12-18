@@ -53,15 +53,12 @@ struct ZoneObjectWrap : public ZoneObjectItem {
 
     bool m_absPosIsValid = false;
 
-    //size_t getEstimatedArea() const { return m_occupiedWithDangerZone.size() + m_passAroundEdge.size() / 3; }
-
-    //auto getSortTuple() const { return std::tuple{ getEstimatedArea(), m_absPos }; }
-
     int    m_placedHeat           = 0;
     size_t m_segmentIndex         = 0;
     size_t m_segmentFragmentIndex = 0;
     size_t m_estimatedArea        = 0;
-    //size_t m_sizeInCells          = 0; // 3x3
+
+    FHPos m_radiusVectorAbsPos = g_invalidPos;
 
     bool estimateOccupied(MapTilePtr absPosCenter);
 
@@ -74,25 +71,8 @@ using ZoneObjectWrapPtrList = std::vector<ZoneObjectWrap*>;
 
 class ZoneObjectDistributor {
 public:
-    enum class PlacementResult
-    {
-        Success,
-        InsufficientSpaceInSource,
-        EstimateOccupiedFailure,
-        InvalidShiftValue,
-        InvalidCollisionInputs,
-
-        CollisionImpossibleShift,
-        CollisionHasShift,
-        RunOutOfShiftRetries,
-        ShiftLoopDetected,
-
-        Retry,
-    };
-
     struct DistributionResult;
     struct ZoneSegment {
-        ZoneObjectWrapPtrList m_candidateObjectsNormal;
         ZoneObjectWrapPtrList m_successNormal;
 
         MapTileRegion m_originalArea;
@@ -100,34 +80,29 @@ public:
 
         MapTilePtr m_originalAreaCentroid = nullptr;
 
-        MapTileRegionList m_originalAreaCells; // 3x3
+        struct HeatDataItem {
+            MapTilePtr    m_centroid = nullptr;
+            MapTileRegion m_free;
+            int           m_heat = 0;
+        };
 
-        std::map<int, MapTilePtr> m_heatCentroids;
-        std::map<int, size_t>     m_freeAreaByHeat;
-        size_t                    m_freeAreaByHeatTotal = 0;
+        std::map<int, HeatDataItem> m_heatMap;
+        std::map<MapTilePtr, int>   m_distances;
 
         const TileZone* m_tileZone = nullptr;
 
-        bool m_compact = false;
-
         size_t m_segmentIndex = 0;
-
-        void removeHeatSize(size_t size, int startingHeat);
 
         int getFreePercent() const { return static_cast<int>(m_freeArea.size() * 100 / m_originalArea.size()); }
 
         std::string toPrintableString() const;
 
-        MapTilePtr findBestHeatCentroid(int heat) const;
+        HeatDataItem* findBestHeatData(int heat);
 
         void compactIfNeeded();
-        void commitAll(FHMap& m_map, DistributionResult& distribution);
-        void commitPlacement(FHMap& m_map, DistributionResult& distribution, ZoneObjectWrap* object);
+        void commitPlacement(DistributionResult& distribution, ZoneObjectWrap* object);
         void recalcFree(ZoneObjectWrap* exclude = nullptr);
-
-        PlacementResult placeOnMap(ZoneObjectWrap& bundle,
-                                   MapTilePtr      posHint,
-                                   bool            packPlacement);
+        void recalcHeat();
     };
     using ZoneSegmentList = std::vector<ZoneSegment>;
 
@@ -169,10 +144,12 @@ public:
     }
 
     bool makeInitialDistribution(DistributionResult& distribution, const ZoneObjectGeneration& generated) const;
-    bool doPlaceDistribution(DistributionResult& distribution) const;
+    void doPlaceDistribution(DistributionResult& distribution) const;
 
-public:
 private:
+    bool placeWrapIntoSegments(DistributionResult& distribution, ZoneObjectWrap* object, std::vector<ZoneSegment*>& segCandidates) const;
+    void commitPlacement(DistributionResult& distribution, ZoneObjectWrap* object, ZoneSegment* seg) const;
+
 private:
     const std::string       m_indent = "         ";
     FHMap&                  m_map;

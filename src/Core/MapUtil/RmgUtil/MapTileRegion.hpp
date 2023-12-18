@@ -49,6 +49,8 @@ public:
     MapTileRegion           makeInnerEdge(bool useDiag) const;
     MapTileRegion           makeOuterEdge(bool useDiag) const;
     EdgeSegmentationResults makeInnerAndOuterEdge(EdgeSegmentationParams params) const;
+
+    void eraseExclaves(bool useDiag);
 };
 
 struct EdgeSegmentationResults {

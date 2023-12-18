@@ -93,14 +93,6 @@ MapTileRegion MapTileRegionWithEdge::getBottomEdge() const
     return result;
 }
 
-MapTileRegion MapTileRegionWithEdge::floodFillDiagonalByInnerEdge(MapTilePtr cellStart) const
-{
-    auto segments = m_innerEdge.splitByFloodFill(true, cellStart);
-    if (segments.empty())
-        return {};
-    return segments[0];
-}
-
 MapTileRegionWithEdgeList MapTileRegionWithEdge::makeEdgeList(const MapTileRegionList& regions)
 {
     MapTileRegionWithEdgeList result(regions.size());

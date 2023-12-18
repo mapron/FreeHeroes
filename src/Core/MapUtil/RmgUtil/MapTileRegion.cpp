@@ -159,4 +159,16 @@ EdgeSegmentationResults MapTileRegion::makeInnerAndOuterEdge(EdgeSegmentationPar
     return result;
 }
 
+void MapTileRegion::eraseExclaves(bool useDiag)
+{
+    if (empty())
+        return;
+    auto           parts   = splitByFloodFill(useDiag);
+    auto           it      = std::max_element(parts.begin(), parts.end(), [](const MapTileRegion& l, const MapTileRegion& r) {
+        return std::tuple{ l.size(), &l } < std::tuple{ r.size(), &r };
+    });
+    MapTileRegion& largest = *it;
+    *this                  = std::move(largest);
+}
+
 }

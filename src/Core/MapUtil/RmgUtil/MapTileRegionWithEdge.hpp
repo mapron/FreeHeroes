@@ -56,8 +56,6 @@ public:
         return result;
     }
 
-    MapTileRegion floodFillDiagonalByInnerEdge(MapTilePtr cellStart) const;
-
     enum class CollisionResult
     {
         InvalidInputs,
