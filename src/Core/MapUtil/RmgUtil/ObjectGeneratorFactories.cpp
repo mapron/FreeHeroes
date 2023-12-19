@@ -44,10 +44,16 @@ struct ObjectGenerator::ObjectFactoryBank::ObjectBank : public AbstractObject<FH
     std::string m_repulseId;
 };
 
-ObjectGenerator::ObjectFactoryBank::ObjectFactoryBank(FHMap& map, const FHRngZone::GeneratorBank& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng, ArtifactPool* artifactPool, Core::LibraryTerrainConstPtr terrain)
-    : AbstractFactory<RecordBank>(map, database, rng)
+ObjectGenerator::ObjectFactoryBank::ObjectFactoryBank(FHMap&                          map,
+                                                      const FHRngZone::GeneratorBank& genSettings,
+                                                      const FHScoreSettings&          scoreSettings,
+                                                      const std::string&              scoreId,
+                                                      const Core::IGameDatabase*      database,
+                                                      Core::IRandomGenerator* const   rng,
+                                                      ArtifactPool*                   artifactPool,
+                                                      Core::LibraryTerrainConstPtr    terrain)
+    : AbstractFactory<RecordBank>(map, scoreSettings, scoreId, database, rng)
     , m_artifactPool(artifactPool)
-    , m_scoreSettings(scoreSettings)
 {
     if (!genSettings.m_isEnabled)
         return;
@@ -138,6 +144,7 @@ IZoneObjectPtr ObjectGenerator::ObjectFactoryBank::make(uint64_t rngFreq)
     ObjectBank obj;
 
     std::vector<AcceptableArtifact> accArts;
+    obj.m_obj.m_generationId  = m_scoreId;
     obj.m_obj.m_id            = record.m_id;
     obj.m_obj.m_guardsVariant = record.m_guardsVariant;
     obj.m_repulseId           = record.m_repulseId;
@@ -182,10 +189,15 @@ struct ObjectGenerator::ObjectFactoryArtifact::ObjectArtifact : public AbstractO
     std::string m_repulseId;
 };
 
-ObjectGenerator::ObjectFactoryArtifact::ObjectFactoryArtifact(FHMap& map, const FHRngZone::GeneratorArtifact& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng, ArtifactPool* artifactPool)
-    : AbstractFactory<RecordArtifact>(map, database, rng)
+ObjectGenerator::ObjectFactoryArtifact::ObjectFactoryArtifact(FHMap&                              map,
+                                                              const FHRngZone::GeneratorArtifact& genSettings,
+                                                              const FHScoreSettings&              scoreSettings,
+                                                              const std::string&                  scoreId,
+                                                              const Core::IGameDatabase*          database,
+                                                              Core::IRandomGenerator* const       rng,
+                                                              ArtifactPool*                       artifactPool)
+    : AbstractFactory<RecordArtifact>(map, scoreSettings, scoreId, database, rng)
     , m_artifactPool(artifactPool)
-    , m_scoreSettings(scoreSettings)
 {
     if (!genSettings.m_isEnabled)
         return;
@@ -210,11 +222,11 @@ IZoneObjectPtr ObjectGenerator::ObjectFactoryArtifact::make(uint64_t rngFreq)
     auto&        record = m_records.m_records[index];
 
     ObjectArtifact obj;
-
-    obj.m_map       = &m_map;
-    auto accArt     = m_artifactPool->make(record.m_pool, record.m_filter, true, m_scoreSettings);
-    obj.m_obj.m_id  = accArt.m_art;
-    obj.m_repulseId = record.m_repulseId;
+    obj.m_obj.m_generationId = m_scoreId;
+    obj.m_map                = &m_map;
+    auto accArt              = m_artifactPool->make(record.m_pool, record.m_filter, true, m_scoreSettings);
+    obj.m_obj.m_id           = accArt.m_art;
+    obj.m_repulseId          = record.m_repulseId;
     assert(obj.m_obj.m_id);
     obj.m_onDisable = [this, &record, accArt] {
         m_records.onDisable(record);
@@ -235,8 +247,13 @@ Core::CombinedMask ObjectResourcePile::getMask() const
     return g_oneTileMask;
 }
 
-ObjectGenerator::ObjectFactoryResourcePile::ObjectFactoryResourcePile(FHMap& map, const FHRngZone::GeneratorResourcePile& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng)
-    : AbstractFactory<RecordResourcePile>(map, database, rng)
+ObjectGenerator::ObjectFactoryResourcePile::ObjectFactoryResourcePile(FHMap&                                  map,
+                                                                      const FHRngZone::GeneratorResourcePile& genSettings,
+                                                                      const FHScoreSettings&                  scoreSettings,
+                                                                      const std::string&                      scoreId,
+                                                                      const Core::IGameDatabase*              database,
+                                                                      Core::IRandomGenerator* const           rng)
+    : AbstractFactory<RecordResourcePile>(map, scoreSettings, scoreId, database, rng)
 {
     if (!genSettings.m_isEnabled)
         return;
@@ -266,7 +283,8 @@ IZoneObjectPtr ObjectGenerator::ObjectFactoryResourcePile::make(uint64_t rngFreq
     obj.m_onDisable        = [this, &record] {
         m_records.onDisable(record);
     };
-    obj.m_map = &m_map;
+    obj.m_map                = &m_map;
+    obj.m_obj.m_generationId = m_scoreId;
 
     return std::make_shared<ObjectResourcePile>(std::move(obj));
 }
@@ -278,9 +296,14 @@ Core::CombinedMask ObjectPandora::getMask() const
     return g_oneTileMask;
 }
 
-ObjectGenerator::ObjectFactoryPandora::ObjectFactoryPandora(FHMap& map, const FHRngZone::GeneratorPandora& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng, Core::LibraryFactionConstPtr rewardsFaction)
-    : AbstractFactory<RecordPandora>(map, database, rng)
-    , m_rng(rng)
+ObjectGenerator::ObjectFactoryPandora::ObjectFactoryPandora(FHMap&                             map,
+                                                            const FHRngZone::GeneratorPandora& genSettings,
+                                                            const FHScoreSettings&             scoreSettings,
+                                                            const std::string&                 scoreId,
+                                                            const Core::IGameDatabase*         database,
+                                                            Core::IRandomGenerator* const      rng,
+                                                            Core::LibraryFactionConstPtr       rewardsFaction)
+    : AbstractFactory<RecordPandora>(map, scoreSettings, scoreId, database, rng)
 {
     if (!genSettings.m_isEnabled)
         return;
@@ -302,11 +325,11 @@ ObjectGenerator::ObjectFactoryPandora::ObjectFactoryPandora(FHMap& map, const FH
 
     for (const auto& [id, value] : genSettings.m_records) {
         ObjectPandora obj;
-        obj.m_obj.m_generationId = id;
-        obj.m_obj.m_guard        = value.m_guard;
-        obj.m_obj.m_reward       = value.m_reward;
-        obj.m_obj.m_score        = estimateReward(value.m_reward);
-        obj.m_repulseId          = value.m_repulseId;
+        obj.m_obj.m_key    = id;
+        obj.m_obj.m_guard  = value.m_guard;
+        obj.m_obj.m_reward = value.m_reward;
+        obj.m_obj.m_score  = estimateReward(value.m_reward);
+        obj.m_repulseId    = value.m_repulseId;
         if (!obj.m_obj.m_reward.spells.isDefault()) {
             auto filteredSpells = obj.m_obj.m_reward.spells.filterPossible(allSpells);
             if (filteredSpells.empty())
@@ -355,8 +378,9 @@ IZoneObjectPtr ObjectGenerator::ObjectFactoryPandora::make(uint64_t rngFreq)
     const size_t index  = m_records.getFreqIndex(rngFreq);
     auto&        record = m_records.m_records[index];
 
-    ObjectPandora obj = record.m_obj;
-    obj.m_onDisable   = [this, &record] {
+    ObjectPandora obj        = record.m_obj;
+    obj.m_obj.m_generationId = m_scoreId;
+    obj.m_onDisable          = [this, &record] {
         m_records.onDisable(record);
     };
     obj.m_map      = &m_map;
@@ -375,7 +399,7 @@ IZoneObjectPtr ObjectGenerator::ObjectFactoryPandora::make(uint64_t rngFreq)
             else if (up > 1)
                 suffix = "uu";
             suffix += "-" + std::to_string(count);
-            obj.m_obj.m_generationId += suffix;
+            obj.m_obj.m_key += suffix;
         }
         obj.m_obj.m_reward.units.push_back({ unit, count });
     }
@@ -394,10 +418,15 @@ struct ObjectGenerator::ObjectFactoryShrine::ObjectShrine : public AbstractObjec
     std::string m_repulseId;
 };
 
-ObjectGenerator::ObjectFactoryShrine::ObjectFactoryShrine(FHMap& map, const FHRngZone::GeneratorShrine& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng, SpellPool* spellPool)
-    : AbstractFactory<RecordSpellShrine>(map, database, rng)
+ObjectGenerator::ObjectFactoryShrine::ObjectFactoryShrine(FHMap&                            map,
+                                                          const FHRngZone::GeneratorShrine& genSettings,
+                                                          const FHScoreSettings&            scoreSettings,
+                                                          const std::string&                scoreId,
+                                                          const Core::IGameDatabase*        database,
+                                                          Core::IRandomGenerator* const     rng,
+                                                          SpellPool*                        spellPool)
+    : AbstractFactory<RecordSpellShrine>(map, scoreSettings, scoreId, database, rng)
     , m_spellPool(spellPool)
-    , m_scoreSettings(scoreSettings)
 {
     if (!genSettings.m_isEnabled)
         return;
@@ -447,10 +476,11 @@ IZoneObjectPtr ObjectGenerator::ObjectFactoryShrine::make(uint64_t rngFreq)
     obj.m_onDisable = [this, &record] {
         m_records.onDisable(record);
     };
-    obj.m_map               = &m_map;
-    obj.m_obj.m_visitableId = record.m_visitableId;
-    obj.m_obj.m_spellId     = m_spellPool->make(record.m_filter, record.m_asAnySpell, m_scoreSettings);
-    obj.m_repulseId         = record.m_repulseId;
+    obj.m_map                = &m_map;
+    obj.m_obj.m_generationId = m_scoreId;
+    obj.m_obj.m_visitableId  = record.m_visitableId;
+    obj.m_obj.m_spellId      = m_spellPool->make(record.m_filter, record.m_asAnySpell, m_scoreSettings);
+    obj.m_repulseId          = record.m_repulseId;
 
     assert(obj.m_obj.m_spellId);
 
@@ -474,10 +504,15 @@ struct ObjectGenerator::ObjectFactoryScroll::ObjectScroll : public AbstractObjec
     std::string m_repulseId;
 };
 
-ObjectGenerator::ObjectFactoryScroll::ObjectFactoryScroll(FHMap& map, const FHRngZone::GeneratorScroll& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng, SpellPool* spellPool)
-    : AbstractFactory<RecordSpellScroll>(map, database, rng)
+ObjectGenerator::ObjectFactoryScroll::ObjectFactoryScroll(FHMap&                            map,
+                                                          const FHRngZone::GeneratorScroll& genSettings,
+                                                          const FHScoreSettings&            scoreSettings,
+                                                          const std::string&                scoreId,
+                                                          const Core::IGameDatabase*        database,
+                                                          Core::IRandomGenerator* const     rng,
+                                                          SpellPool*                        spellPool)
+    : AbstractFactory<RecordSpellScroll>(map, scoreSettings, scoreId, database, rng)
     , m_spellPool(spellPool)
-    , m_scoreSettings(scoreSettings)
 {
     if (!genSettings.m_isEnabled)
         return;
@@ -516,7 +551,8 @@ IZoneObjectPtr ObjectGenerator::ObjectFactoryScroll::make(uint64_t rngFreq)
     obj.m_repulseId = record.m_repulseId;
     auto spellId    = m_spellPool->make(record.m_filter, record.m_asAnySpell, m_scoreSettings);
     assert(spellId);
-    obj.m_obj.m_id = m_scrollMapping.at(spellId);
+    obj.m_obj.m_generationId = m_scoreId;
+    obj.m_obj.m_id           = m_scrollMapping.at(spellId);
     assert(obj.m_obj.m_id);
 
     estimateSpellScore(spellId, obj.m_obj.m_score, record.m_asAnySpell);
@@ -535,8 +571,14 @@ Core::LibraryObjectDefConstPtr ObjectGenerator::ObjectFactoryDwelling::ObjectDwe
     return m_obj.m_id->objectDefs.get({});
 }
 
-ObjectGenerator::ObjectFactoryDwelling::ObjectFactoryDwelling(FHMap& map, const FHRngZone::GeneratorDwelling& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng, Core::LibraryFactionConstPtr dwellFaction)
-    : AbstractFactory<RecordDwelling>(map, database, rng)
+ObjectGenerator::ObjectFactoryDwelling::ObjectFactoryDwelling(FHMap&                              map,
+                                                              const FHRngZone::GeneratorDwelling& genSettings,
+                                                              const FHScoreSettings&              scoreSettings,
+                                                              const std::string&                  scoreId,
+                                                              const Core::IGameDatabase*          database,
+                                                              Core::IRandomGenerator* const       rng,
+                                                              Core::LibraryFactionConstPtr        dwellFaction)
+    : AbstractFactory<RecordDwelling>(map, scoreSettings, scoreId, database, rng)
 {
     if (!genSettings.m_isEnabled)
         return;
@@ -599,9 +641,10 @@ IZoneObjectPtr ObjectGenerator::ObjectFactoryDwelling::make(uint64_t rngFreq)
     obj.m_onDisable = [this, &record] {
         m_records.onDisable(record);
     };
-    obj.m_map          = &m_map;
-    obj.m_obj.m_id     = record.m_id;
-    obj.m_obj.m_player = m_none;
+    obj.m_map                = &m_map;
+    obj.m_obj.m_generationId = m_scoreId;
+    obj.m_obj.m_id           = record.m_id;
+    obj.m_obj.m_player       = m_none;
 
     obj.m_obj.m_score[Core::ScoreAttr::ArmyDwelling] = record.m_value;
 
@@ -633,8 +676,14 @@ struct ObjectGenerator::ObjectFactoryVisitable::ObjectVisitable : public Abstrac
     Core::LibraryObjectDefConstPtr getDef() const override { return m_obj.m_visitableId->objectDefs.get({}); }
 };
 
-ObjectGenerator::ObjectFactoryVisitable::ObjectFactoryVisitable(FHMap& map, const FHRngZone::GeneratorVisitable& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng, Core::LibraryTerrainConstPtr terrain)
-    : AbstractFactory<RecordVisitable>(map, database, rng)
+ObjectGenerator::ObjectFactoryVisitable::ObjectFactoryVisitable(FHMap&                               map,
+                                                                const FHRngZone::GeneratorVisitable& genSettings,
+                                                                const FHScoreSettings&               scoreSettings,
+                                                                const std::string&                   scoreId,
+                                                                const Core::IGameDatabase*           database,
+                                                                Core::IRandomGenerator* const        rng,
+                                                                Core::LibraryTerrainConstPtr         terrain)
+    : AbstractFactory<RecordVisitable>(map, scoreSettings, scoreId, database, rng)
 {
     if (!genSettings.m_isEnabled)
         return;
@@ -682,8 +731,9 @@ IZoneObjectPtr ObjectGenerator::ObjectFactoryVisitable::make(uint64_t rngFreq)
     obj.m_onAccept = [this, &record] {
         m_records.onAccept(record);
     };
-    obj.m_map = &m_map;
-    obj.m_obj = record.m_obj;
+    obj.m_map                = &m_map;
+    obj.m_obj                = record.m_obj;
+    obj.m_obj.m_generationId = m_scoreId;
 
     return std::make_shared<ObjectVisitable>(std::move(obj));
 }
@@ -696,8 +746,14 @@ struct ObjectGenerator::ObjectFactoryMine::ObjectMine : public AbstractObject<FH
     Core::LibraryObjectDefConstPtr getDef() const override { return m_obj.m_id->minesDefs.get(m_obj.m_defIndex); }
 };
 
-ObjectGenerator::ObjectFactoryMine::ObjectFactoryMine(FHMap& map, const FHRngZone::GeneratorMine& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng, Core::LibraryTerrainConstPtr terrain)
-    : AbstractFactory<RecordMine>(map, database, rng)
+ObjectGenerator::ObjectFactoryMine::ObjectFactoryMine(FHMap&                          map,
+                                                      const FHRngZone::GeneratorMine& genSettings,
+                                                      const FHScoreSettings&          scoreSettings,
+                                                      const std::string&              scoreId,
+                                                      const Core::IGameDatabase*      database,
+                                                      Core::IRandomGenerator* const   rng,
+                                                      Core::LibraryTerrainConstPtr    terrain)
+    : AbstractFactory<RecordMine>(map, scoreSettings, scoreId, database, rng)
 {
     if (!genSettings.m_isEnabled)
         return;
@@ -736,8 +792,9 @@ IZoneObjectPtr ObjectGenerator::ObjectFactoryMine::make(uint64_t rngFreq)
     obj.m_onAccept = [this, &record] {
         m_records.onAccept(record);
     };
-    obj.m_map = &m_map;
-    obj.m_obj = record.m_obj;
+    obj.m_map                = &m_map;
+    obj.m_obj                = record.m_obj;
+    obj.m_obj.m_generationId = m_scoreId;
 
     return std::make_shared<ObjectMine>(std::move(obj));
 }
@@ -750,8 +807,13 @@ struct ObjectGenerator::ObjectFactorySkillHut::ObjectSkillHut : public AbstractO
     Core::LibraryObjectDefConstPtr getDef() const override { return m_obj.m_visitableId->objectDefs.get({}); }
 };
 
-ObjectGenerator::ObjectFactorySkillHut::ObjectFactorySkillHut(FHMap& map, const FHRngZone::GeneratorSkillHut& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng)
-    : AbstractFactory<RecordSkillHut>(map, database, rng)
+ObjectGenerator::ObjectFactorySkillHut::ObjectFactorySkillHut(FHMap&                              map,
+                                                              const FHRngZone::GeneratorSkillHut& genSettings,
+                                                              const FHScoreSettings&              scoreSettings,
+                                                              const std::string&                  scoreId,
+                                                              const Core::IGameDatabase*          database,
+                                                              Core::IRandomGenerator* const       rng)
+    : AbstractFactory<RecordSkillHut>(map, scoreSettings, scoreId, database, rng)
 {
     if (!genSettings.m_isEnabled)
         return;
@@ -801,8 +863,9 @@ IZoneObjectPtr ObjectGenerator::ObjectFactorySkillHut::make(uint64_t rngFreq)
     obj.m_onAccept = [this, &record] {
         m_records.onAccept(record);
     };
-    obj.m_map = &m_map;
-    obj.m_obj = record.m_obj;
+    obj.m_map                = &m_map;
+    obj.m_obj                = record.m_obj;
+    obj.m_obj.m_generationId = m_scoreId;
 
     return std::make_shared<ObjectSkillHut>(std::move(obj));
 }

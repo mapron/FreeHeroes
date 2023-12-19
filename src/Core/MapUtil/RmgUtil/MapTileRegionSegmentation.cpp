@@ -1,6 +1,5 @@
 #include "MapTileRegionSegmentation.hpp"
 
-#include "MapTile.hpp"
 #include "MapTileContainer.hpp"
 
 #include "BonusRatio.hpp"
@@ -480,6 +479,107 @@ MapTileRegionSegmentation::Rect MapTileRegionSegmentation::getBoundary(const Map
     const size_t boundaryWidth  = 1 + bottomRight.m_x - topLeft.m_x;
     const size_t boundaryHeight = 1 + bottomRight.m_y - topLeft.m_y;
     return { topLeft, bottomRight, boundaryWidth, boundaryHeight };
+}
+
+MapTileRegionSegmentation::Outline MapTileRegionSegmentation::makeOutline(const MapTileRegion& region)
+{
+    if (region.empty())
+        return {};
+
+    std::map<int, std::pair<MapTilePtr, MapTilePtr>> xLight;
+    std::map<int, std::pair<MapTilePtr, MapTilePtr>> yLight;
+    for (auto* tile : region) {
+        auto& yMinMax = xLight[tile->m_pos.m_x];
+        auto& xMinMax = yLight[tile->m_pos.m_y];
+        if (!yMinMax.first) {
+            yMinMax.first = yMinMax.second = tile;
+        }
+        if (!xMinMax.first) {
+            xMinMax.first = xMinMax.second = tile;
+        }
+        if (tile->m_pos.m_y < yMinMax.first->m_pos.m_y)
+            yMinMax.first = tile;
+        if (tile->m_pos.m_y > yMinMax.first->m_pos.m_y)
+            yMinMax.second = tile;
+
+        if (tile->m_pos.m_x < xMinMax.first->m_pos.m_x)
+            xMinMax.first = tile;
+        if (tile->m_pos.m_x > xMinMax.first->m_pos.m_x)
+            xMinMax.second = tile;
+    }
+    Outline result;
+    result.m_top.reserve(xLight.size());
+    result.m_bottom.reserve(xLight.size());
+    result.m_left.reserve(yLight.size());
+    result.m_right.reserve(yLight.size());
+    for (auto& [_, minMax] : xLight) {
+        result.m_top.push_back(minMax.first);
+        result.m_bottom.push_back(minMax.second);
+    }
+    for (auto& [_, minMax] : yLight) {
+        result.m_left.push_back(minMax.first);
+        result.m_right.push_back(minMax.second);
+    }
+
+    std::reverse(result.m_bottom.begin(), result.m_bottom.end());
+    std::reverse(result.m_left.begin(), result.m_left.end());
+
+    return result;
+}
+
+MapTilePtrList MapTileRegionSegmentation::iterateOutline(const Outline& outline)
+{
+    MapTileRegion  used;
+    MapTilePtrList result;
+    MapTilePtr     tilePrev = nullptr;
+    auto           add      = [&used, &result](MapTilePtr tile) {
+        if (used.contains(tile))
+            return;
+
+        used.insert(tile);
+        result.push_back(tile);
+    };
+    auto addWrap = [&add, &tilePrev](MapTilePtr            tile,
+                                     const MapTilePtrList& orthListPrev,
+                                     const MapTilePtrList& orthListNext) {
+        if (tilePrev) {
+            const FHPos diff      = tile->m_pos - tilePrev->m_pos;
+            FHPos       direction = posNormalize(diff);
+            if (direction != diff) { // distance
+                auto isBetween = [](int coord, int coordOne, int coordTwo) -> bool {
+                    return (coord >= coordOne && coord <= coordTwo) || (coord >= coordTwo && coord <= coordOne);
+                };
+                auto isBetweenTile = [&isBetween](MapTilePtr tile, MapTilePtr tileOne, MapTilePtr tileTwo) {
+                    return isBetween(tile->m_pos.m_x, tileOne->m_pos.m_x, tileTwo->m_pos.m_x) && isBetween(tile->m_pos.m_y, tileOne->m_pos.m_y, tileTwo->m_pos.m_y);
+                };
+                for (auto* nTile : orthListPrev) {
+                    if (isBetweenTile(nTile, tile, tilePrev)) {
+                        add(nTile);
+                    }
+                }
+                for (auto* nTile : orthListNext) {
+                    if (isBetweenTile(nTile, tile, tilePrev)) {
+                        add(nTile);
+                    }
+                }
+            }
+        }
+        tilePrev = tile;
+        add(tile);
+    };
+    auto iterList = [&addWrap, &tilePrev](const MapTilePtrList& list,
+                                          const MapTilePtrList& orthListPrev,
+                                          const MapTilePtrList& orthListNext) {
+        tilePrev = nullptr;
+        for (MapTilePtr tile : list)
+            addWrap(tile, orthListPrev, orthListNext);
+    };
+
+    iterList(outline.m_top, outline.m_left, outline.m_right);
+    iterList(outline.m_right, outline.m_top, outline.m_bottom);
+    iterList(outline.m_bottom, outline.m_right, outline.m_left);
+    iterList(outline.m_left, outline.m_bottom, outline.m_top);
+    return result;
 }
 
 int64_t MapTileRegionSegmentation::getRadiusPromille(int64_t area)

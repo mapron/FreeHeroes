@@ -64,8 +64,14 @@ void SpriteMapPainter::paint(QPainter*        painter,
             Gui::ISprite::SpriteSequencePtr seq = sprite->getFramesForGroup(item.m_spriteGroup);
             if (!seq)
                 continue;
-            const bool isFilteredOut = (m_settings->m_filterLayer != SpriteMap::Layer::Invalid && item.m_layer != m_settings->m_filterLayer)
-                                       || (m_settings->m_filterAttr != Core::ScoreAttr::Invalid && !item.m_score.contains(m_settings->m_filterAttr));
+            auto containsAnyScore = [](const std::set<Core::ScoreAttr>& filter, const Core::MapScore& score) {
+                for (auto& [key, val] : score)
+                    if (filter.contains(key))
+                        return true;
+                return false;
+            };
+            const bool isFilteredOut = (!m_settings->m_filterLayer.empty() && !m_settings->m_filterLayer.contains(item.m_layer))
+                                       || (!m_settings->m_filterAttr.empty() && !containsAnyScore(m_settings->m_filterAttr, item.m_score));
             if (isFilteredOut && isOverlayPass) {
                 continue;
             }

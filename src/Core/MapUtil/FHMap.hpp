@@ -113,7 +113,7 @@ struct FHRandomArtifact : public FHCommonObject {
 
 struct FHPandora : public FHCommonObject {
     Core::Reward m_reward;
-    std::string  m_generationId;
+    std::string  m_key;
 
     bool operator==(const FHPandora&) const noexcept = default;
 };

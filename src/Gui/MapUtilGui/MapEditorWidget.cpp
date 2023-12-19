@@ -44,43 +44,79 @@ namespace FreeHeroes {
 namespace {
 const uint32_t g_mapAnimationInterval = 160;
 
-const std::vector<SpriteMap::Layer> g_allLayerTypes{
-    SpriteMap::Layer::Invalid,
-    SpriteMap::Layer::Terrain,
-    SpriteMap::Layer::Town,
-    SpriteMap::Layer::Hero,
-    SpriteMap::Layer::Resource,
-    SpriteMap::Layer::Artifact,
-    SpriteMap::Layer::Monster,
-    SpriteMap::Layer::Dwelling,
-    SpriteMap::Layer::Bank,
-    SpriteMap::Layer::Mine,
-    SpriteMap::Layer::Pandora,
-    SpriteMap::Layer::Shrine,
-    SpriteMap::Layer::SkillHut,
-    SpriteMap::Layer::Scholar,
-    SpriteMap::Layer::QuestHut,
-    SpriteMap::Layer::GeneralVisitable,
-    SpriteMap::Layer::Decoration,
+struct LayerOption {
+    std::set<SpriteMap::Layer> m_options;
+    std::string                m_descr{};
+    QString                    getDescr() const
+    {
+        if (!m_descr.empty())
+            return QString::fromStdString(m_descr);
+        if (m_options.empty())
+            return "";
+        return SpriteMap::layerTypeToString(*m_options.begin());
+    }
 };
 
-const std::vector<Core::ScoreAttr> g_allAttrTypes{
-    Core::ScoreAttr::Invalid,
-    Core::ScoreAttr::Army,
-    Core::ScoreAttr::ArmyDwelling,
-    Core::ScoreAttr::ArmyAux,
-    Core::ScoreAttr::ArtStat,
-    Core::ScoreAttr::ArtSupport,
-    Core::ScoreAttr::Gold,
-    Core::ScoreAttr::Resource,
-    Core::ScoreAttr::ResourceGen,
-    Core::ScoreAttr::Experience,
-    Core::ScoreAttr::Control,
-    Core::ScoreAttr::Upgrade,
-    Core::ScoreAttr::SpellOffensive,
-    Core::ScoreAttr::SpellCommon,
-    Core::ScoreAttr::SpellAny,
-    Core::ScoreAttr::Support,
+const std::vector<LayerOption> g_allLayerTypes{
+    { {} },
+
+    { { SpriteMap::Layer::Terrain } },
+    { { SpriteMap::Layer::Town } },
+    { { SpriteMap::Layer::Hero } },
+    { { SpriteMap::Layer::Resource } },
+    { { SpriteMap::Layer::Artifact } },
+    { { SpriteMap::Layer::Monster } },
+    { { SpriteMap::Layer::Dwelling } },
+    { { SpriteMap::Layer::Bank } },
+    { { SpriteMap::Layer::Mine } },
+    { { SpriteMap::Layer::Pandora } },
+    { { SpriteMap::Layer::Shrine } },
+    { { SpriteMap::Layer::SkillHut } },
+    { { SpriteMap::Layer::Scholar } },
+    { { SpriteMap::Layer::QuestHut } },
+    { { SpriteMap::Layer::GeneralVisitable } },
+    { { SpriteMap::Layer::Decoration } },
+
+    { { SpriteMap::Layer::Dwelling, SpriteMap::Layer::Bank, SpriteMap::Layer::Mine, SpriteMap::Layer::Shrine, SpriteMap::Layer::SkillHut, SpriteMap::Layer::Scholar, SpriteMap::Layer::QuestHut, SpriteMap::Layer::GeneralVisitable }, "Any visitable" },
+    { { SpriteMap::Layer::Resource, SpriteMap::Layer::Artifact, SpriteMap::Layer::Pandora }, "Any pickable" },
+};
+
+struct AttrOption {
+    std::set<Core::ScoreAttr> m_options;
+    std::string               m_descr{};
+    QString                   getDescr() const
+    {
+        if (!m_descr.empty())
+            return QString::fromStdString(m_descr);
+        if (m_options.empty())
+            return "";
+        return QString::fromStdString(FHScoreSettings::attrToString(*m_options.begin()));
+    }
+};
+
+const std::vector<AttrOption> g_allAttrTypes{
+    { {} },
+
+    { { Core::ScoreAttr::Army } },
+    { { Core::ScoreAttr::ArmyDwelling } },
+    { { Core::ScoreAttr::ArmyAux } },
+    { { Core::ScoreAttr::ArtStat } },
+    { { Core::ScoreAttr::ArtSupport } },
+    { { Core::ScoreAttr::Gold } },
+    { { Core::ScoreAttr::Resource } },
+    { { Core::ScoreAttr::ResourceGen } },
+    { { Core::ScoreAttr::Experience } },
+    { { Core::ScoreAttr::Control } },
+    { { Core::ScoreAttr::Upgrade } },
+    { { Core::ScoreAttr::SpellOffensive } },
+    { { Core::ScoreAttr::SpellCommon } },
+    { { Core::ScoreAttr::SpellAny } },
+    { { Core::ScoreAttr::Support } },
+
+    { { Core::ScoreAttr::Army, Core::ScoreAttr::ArmyDwelling, Core::ScoreAttr::ArmyAux }, "Any army" },
+    { { Core::ScoreAttr::ArtStat, Core::ScoreAttr::ArtSupport, Core::ScoreAttr::Control }, "Any art" },
+    { { Core::ScoreAttr::SpellOffensive, Core::ScoreAttr::SpellCommon, Core::ScoreAttr::SpellAny }, "Any spell" },
+    { { Core::ScoreAttr::Gold, Core::ScoreAttr::Resource, Core::ScoreAttr::ResourceGen, Core::ScoreAttr::Experience, Core::ScoreAttr::Upgrade, Core::ScoreAttr::Support }, "Misc" },
 };
 }
 
@@ -140,11 +176,11 @@ MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDataba
 
         filterType->addItem(tr("- select layer filter -"));
         for (int i = 1; i < (int) g_allLayerTypes.size(); i++) {
-            filterType->addItem(SpriteMap::layerTypeToString(g_allLayerTypes[i]));
+            filterType->addItem(g_allLayerTypes[i].getDescr());
         }
         filterValue->addItem(tr("- select attr filter -"));
         for (int i = 1; i < (int) g_allAttrTypes.size(); i++) {
-            filterValue->addItem(QString::fromStdString(FHScoreSettings::attrToString(g_allAttrTypes[i])));
+            filterValue->addItem(g_allAttrTypes[i].getDescr());
         }
 
         connect(viewUnderground, &QCheckBox::clicked, this, [this](bool state) {
@@ -161,13 +197,13 @@ MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDataba
             m_impl->m_inspectorWidget->setVisible(state);
         });
         connect(filterType, qOverload<int>(&QComboBox::currentIndexChanged), this, [this, filterType] {
-            SpriteMap::Layer layer                               = g_allLayerTypes[filterType->currentIndex()];
-            m_impl->m_viewSettings.m_paintSettings.m_filterLayer = layer;
+            auto layer                                           = g_allLayerTypes[filterType->currentIndex()];
+            m_impl->m_viewSettings.m_paintSettings.m_filterLayer = layer.m_options;
             updateAll();
         });
         connect(filterValue, qOverload<int>(&QComboBox::currentIndexChanged), this, [this, filterValue] {
-            Core::ScoreAttr attr                                = g_allAttrTypes[filterValue->currentIndex()];
-            m_impl->m_viewSettings.m_paintSettings.m_filterAttr = attr;
+            auto attr                                           = g_allAttrTypes[filterValue->currentIndex()];
+            m_impl->m_viewSettings.m_paintSettings.m_filterAttr = attr.m_options;
             updateAll();
         });
 

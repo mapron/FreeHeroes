@@ -139,7 +139,7 @@ bool ZoneObjectWrap::estimateOccupied(MapTilePtr absPosCenter)
     if (m_estimatedArea <= 2)
         m_estimatedArea += m_passAroundEdge.size() / 2;
     else
-        m_estimatedArea += m_passAroundEdge.size();
+        m_estimatedArea += m_passAroundEdge.size() * 2 / 3;
     //m_sizeInCells = m_occupiedWithDangerZone.splitByGrid(3, 3, 2).size();
 
     if (m_centerOffset == g_invalidPos)
@@ -168,7 +168,7 @@ bool ZoneObjectDistributor::makeInitialDistribution(DistributionResult& distribu
     size_t totalSize              = 0;
     //size_t                totalSizeCells = 0;
     for (ZoneSegment& seg : distribution.m_segments) {
-        totalSize += seg.m_originalArea.size();
+        totalSize += seg.m_freeArea.size();
         //totalSizeCells += seg.m_originalAreaCells.size();
     }
     if (generated.m_objects.empty())
@@ -178,20 +178,22 @@ bool ZoneObjectDistributor::makeInitialDistribution(DistributionResult& distribu
     ZoneObjectWrapPtrList segmentsNormal;
     for (auto& obj : generated.m_objects) {
         ZoneObjectWrap wrap{ {
-            .m_object        = obj.m_object,
-            .m_objectType    = obj.m_objectType,
-            .m_preferredHeat = obj.m_preferredHeat,
-            .m_useGuards     = obj.m_useGuards,
-            .m_pickable      = obj.m_pickable,
-            .m_radiusVector  = obj.m_radiusVector,
+            .m_object            = obj.m_object,
+            .m_objectType        = obj.m_objectType,
+            .m_preferredHeat     = obj.m_preferredHeat,
+            .m_useGuards         = obj.m_useGuards,
+            .m_pickable          = obj.m_pickable,
+            .m_randomAngleOffset = obj.m_randomAngleOffset,
+            .m_generatedIndex    = obj.m_generatedIndex,
+            .m_generatedCount    = obj.m_generatedCount,
         } };
         wrap.estimateOccupied(m_tileContainer.m_centerTile);
-        if (wrap.m_radiusVector != g_invalidPos)
-            wrap.m_radiusVectorAbsPos = distribution.m_tileZone->m_centroid->m_pos + wrap.m_radiusVector;
 
-        //m_logOutput << "m_radiusVectorAbsPos=" << wrap.m_radiusVectorAbsPos.toPrintableString() << "\n";
+        makePreferredPoint(distribution, &wrap, wrap.m_randomAngleOffset, wrap.m_generatedIndex, wrap.m_generatedCount);
 
-        totalSizeObjects += wrap.m_estimatedArea;
+        //if (obj.m_preferredHeat >= 8 && wrap.m_randomAngleOffset > -1)
+        //    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = wrap.m_preferredPos->m_pos, .m_brushColor = 1, .m_shapeRadius = 4 });
+
         distribution.m_allObjects.push_back(wrap);
     }
 
@@ -200,15 +202,18 @@ bool ZoneObjectDistributor::makeInitialDistribution(DistributionResult& distribu
         if (wrap.m_objectType == ZoneObjectType::Segment) {
             if (!wrap.m_useGuards && wrap.m_pickable)
                 distribution.m_candidateObjectsFreePickables.push_back(&wrap);
-            else
+            else {
                 segmentsNormal.push_back(&wrap);
+
+                totalSizeObjects += wrap.m_estimatedArea;
+            }
         }
         if (wrap.m_objectType == ZoneObjectType::Segment) {
             distribution.m_roadPickables.push_back(&wrap);
         }
     }
 
-    m_logOutput << m_indent << "total tiles= " << totalSizeObjects << " / " << totalSize << " \n";
+    m_logOutput << m_indent << "estimation tiles= " << totalSizeObjects << " / " << totalSize << " \n";
 
     if (totalSizeObjects > totalSize) {
         m_logOutput << m_indent << "too many generated objects to fit in area!\n";
@@ -222,7 +227,7 @@ bool ZoneObjectDistributor::makeInitialDistribution(DistributionResult& distribu
     for (ZoneObjectWrap* object : segmentsNormal) {
         int minHeatAvailableInAllSegments = distribution.m_maxHeat;
 
-        std::set<ZoneSegment*> segCandidates;
+        std::vector<ZoneSegment*> segCandidatesWithEnoughSpace;
         for (ZoneSegment& seg : distribution.m_segments) {
             if (seg.m_freeArea.size() < object->m_estimatedArea)
                 continue;
@@ -232,29 +237,14 @@ bool ZoneObjectDistributor::makeInitialDistribution(DistributionResult& distribu
                     break;
                 }
             }
-            segCandidates.insert(&seg);
+            segCandidatesWithEnoughSpace.push_back(&seg);
         }
         if (minHeatAvailableInAllSegments == distribution.m_maxHeat)
             throw std::runtime_error("sanity check failed: no heat");
 
         object->m_placedHeat = std::max(object->m_preferredHeat, minHeatAvailableInAllSegments);
 
-        std::map<int, std::vector<ZoneSegment*>> segCandidatesByHeat;
-        for (ZoneSegment* seg : segCandidates) {
-            auto* heatData = seg->findBestHeatData(object->m_placedHeat);
-            if (!heatData)
-                throw std::runtime_error("bad logic. we already determined that segCandidates is no empty");
-            segCandidatesByHeat[heatData->m_heat].push_back(seg);
-        }
-        bool placeSucceed = false;
-        for (auto& [heat, segCandidates2] : segCandidatesByHeat) {
-            if (placeWrapIntoSegments(distribution, object, segCandidates2)) {
-                placeSucceed = true;
-                break;
-            }
-        }
-
-        if (!placeSucceed) {
+        if (!placeWrapIntoSegments(distribution, object, segCandidatesWithEnoughSpace)) {
             // can happen if we need to place 10-tile object and we have remaining two segment 5-tile each.
             // totalSizeObjects > totalSize check still pass.
             m_logOutput << m_indent << "Failed to find free segment to fit object= " << object->toPrintableString() << "\n";
@@ -265,6 +255,15 @@ bool ZoneObjectDistributor::makeInitialDistribution(DistributionResult& distribu
             //return false;
         }
     }
+
+    totalSizeObjects = 0;
+    for (ZoneSegment& seg : distribution.m_segments) {
+        if (seg.m_successNormal.empty())
+            continue;
+        totalSizeObjects += seg.m_originalArea.size() - seg.m_freeArea.size();
+    }
+
+    m_logOutput << m_indent << "placed tiles= " << totalSizeObjects << " / " << totalSize << " \n";
 
     return true;
 }
@@ -297,25 +296,31 @@ bool ZoneObjectDistributor::placeWrapIntoSegments(DistributionResult& distributi
         return false;
     }
 
-    //ZoneSegment* fitSeg = *segCandidates.begin();
-    std::vector<std::pair<int64_t, ZoneSegment*>> segCandidatesSorted;
+    std::vector<std::tuple<int, int64_t, ZoneSegment*>> segCandidatesSorted;
+    assert(object->m_preferredPos);
 
-    if (object->m_radiusVectorAbsPos != g_invalidPos) {
-        const FHPos outOfMapRVectorPos = object->m_radiusVectorAbsPos;
+    for (ZoneSegment* seg : segCandidates) {
+        if (seg->m_originalArea.contains(object->m_preferredPos)) {
+            segCandidatesSorted.push_back(std::tuple{ 0, 0, seg });
+            continue;
+        }
 
-        for (ZoneSegment* seg : segCandidates) {
-            const auto distance = posDistance(seg->m_originalAreaCentroid->m_pos, outOfMapRVectorPos);
-            //m_logOutput << "distance " << seg->m_originalAreaCentroid->m_pos.toPrintableString() << "<-> " << outOfMapRVectorPos.toPrintableString() << " = " << distance << "\n";
-            segCandidatesSorted.push_back(std::pair{ distance, seg });
-        }
-    } else {
-        for (ZoneSegment* seg : segCandidates) {
-            segCandidatesSorted.push_back(std::pair{ int64_t(0), seg });
-        }
+        auto* bestHeat = seg->findBestHeatData(object->m_placedHeat);
+        assert(bestHeat);
+        int h = bestHeat->m_heat;
+        if (object->m_strongRepulse)
+            h = 0;
+
+        const auto distance = posDistance(bestHeat->m_centroid, object->m_preferredPos, 100);
+
+        //m_logOutput << "segCandidatesSorted (" << bestHeat->m_heat << ") << " << h << " - " << distance << " - " << seg->m_originalAreaCentroid->toPrintableString() << " / " << bestHeat->m_centroid->toPrintableString() << "\n";
+
+        segCandidatesSorted.push_back(std::tuple{ h, distance, seg });
     }
+
     std::sort(segCandidatesSorted.begin(), segCandidatesSorted.end());
 
-    for (auto& [_, seg] : segCandidatesSorted) {
+    for (auto& [h, _, seg] : segCandidatesSorted) {
         MapTilePtrList placementTileCandidates; // unsorted! important! we do not want address order.
 
         std::vector<std::pair<int, MapTilePtr>> tileCandidatesSorted;
@@ -336,7 +341,7 @@ bool ZoneObjectDistributor::placeWrapIntoSegments(DistributionResult& distributi
                     seg->m_freeArea.eraseExclaves(false);
 
                     seg->m_successNormal.push_back(object);
-                    object->m_placedHeat = seg->m_tileZone->m_segmentHeat.getLevel(object->m_absPos);
+                    object->m_placedHeat = seg->m_tileZone->m_heatForAll.getLevel(object->m_absPos);
                     seg->recalcHeat();
                     return true;
                 }
@@ -354,12 +359,7 @@ void ZoneObjectDistributor::commitPlacement(DistributionResult& distribution, Zo
 
     auto* tz = object->m_absPos->m_zone;
     if (0) {
-        tz->m_rewardTilesDanger.insert(object->m_dangerZone);
-        tz->m_rewardTilesMain.insert(object->m_rewardArea);
         tz->m_rewardTilesSpacing.insert(object->m_passAroundEdge);
-        tz->m_rewardTilesPos.insert(object->m_absPos);
-        tz->m_rewardTilesCenters.insert(object->m_absPos->neighbourByOffset(object->m_centerOffset));
-        //tz->m_rewardTilesHints.insert(posHint);
     }
 
     distribution.m_needBlock.insert(object->m_extraObstacles);
@@ -382,14 +382,25 @@ void ZoneObjectDistributor::DistributionResult::init(TileZone& tileZone)
 
     m_maxHeat  = tileZone.m_rngZoneSettings.m_maxHeat;
     m_tileZone = &tileZone;
+    MapTileRegion wholeRegion;
+    for (auto& [heat, reg] : tileZone.m_heatForSegments.m_byLevel) {
+        auto& rect      = m_heatRegionRects[heat];
+        rect.m_region   = reg;
+        rect.m_centroid = reg.makeCentroid(false);
+        wholeRegion.insert(tileZone.m_heatForAll.m_byLevel[heat]);
+
+        auto outline   = MapTileRegionSegmentation::makeOutline(wholeRegion);
+        rect.m_outline = MapTileRegionSegmentation::iterateOutline(outline);
+    }
 
     m_segments.clear();
     for (size_t index = 0; auto& seg : tileZone.m_innerAreaSegments) {
         ZoneSegment zs;
         zs.m_originalArea = seg.m_innerArea;
-        zs.m_freeArea     = zs.m_originalArea;
-        zs.m_freeArea.erase(safePadding);
-        zs.m_freeArea.eraseExclaves(false);
+        zs.m_originalArea.erase(safePadding);
+        zs.m_originalArea.eraseExclaves(false);
+
+        zs.m_freeArea             = zs.m_originalArea;
         zs.m_originalAreaCentroid = zs.m_originalArea.makeCentroid(true);
         zs.m_segmentIndex         = index++;
         zs.m_tileZone             = &tileZone;
@@ -425,7 +436,13 @@ ZoneObjectDistributor::ZoneSegment::HeatDataItem* ZoneObjectDistributor::ZoneSeg
     if (it != m_heatMap.end() && it->second.m_centroid)
         return &(it->second);
 
-    for (auto it2 = m_heatMap.begin(); it2 != m_heatMap.end(); ++it2) {
+    for (auto it2 = it; it2 != m_heatMap.end(); ++it2) {
+        if (it2->second.m_centroid) {
+            return &(it2->second);
+        }
+    }
+
+    for (auto it2 = m_heatMap.begin(); it2 != it; ++it2) {
         if (it2->second.m_centroid) {
             return &(it2->second);
         }
@@ -461,30 +478,42 @@ void ZoneObjectDistributor::ZoneSegment::commitPlacement(DistributionResult& dis
     this->m_freeArea.erase(object->m_allArea);
 }
 
-void ZoneObjectDistributor::ZoneSegment::recalcFree(ZoneObjectWrap* exclude)
-{
-    m_freeArea = m_originalArea;
-    for (ZoneObjectWrap* nobject : m_successNormal) {
-        if (nobject != exclude)
-            m_freeArea.erase(nobject->m_allArea);
-    }
-}
-
 void ZoneObjectDistributor::ZoneSegment::recalcHeat()
 {
     for (auto& [heat, data] : m_heatMap) {
         data.m_free.clear();
         data.m_centroid = nullptr;
-        data.m_heat     = heat;
     }
     for (auto* tile : m_freeArea) {
-        int   heat = m_tileZone->m_segmentHeat.getLevel(tile);
+        int   heat = m_tileZone->m_heatForAll.getLevel(tile);
         auto& m    = m_heatMap[heat];
         m.m_free.insert(tile);
     }
     for (auto& [heat, data] : m_heatMap) {
         data.m_centroid = data.m_free.makeCentroid(true);
+        data.m_heat     = heat;
     }
+}
+void ZoneObjectDistributor::makePreferredPoint(DistributionResult& distribution, ZoneObjectWrap* object, int angleStartOffset, size_t index, size_t count) const
+{
+    auto&  rect    = distribution.m_heatRegionRects[object->m_preferredHeat];
+    size_t regSize = rect.m_region.size();
+
+    if (angleStartOffset == -1) {
+        object->m_preferredPos = rect.m_region[index * regSize / count];
+        return;
+    }
+    size_t anglePos = index * 360 / count;
+    int    angle    = angleStartOffset + anglePos;
+    if (angle >= 360)
+        angle -= 360;
+    // angle is [0; 360)
+
+    size_t outlineSize  = rect.m_outline.size();
+    size_t outlineIndex = outlineSize * angle / 360;
+
+    object->m_preferredPos = rect.m_outline[outlineIndex];
+    rect.m_region.findClosestPoint(object->m_preferredPos->m_pos);
 }
 
 }

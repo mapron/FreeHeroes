@@ -56,11 +56,14 @@ IZoneObjectGroupPtr makeNewZoneObjectGroup(int64_t maxGuard, size_t itemLimit, u
 
 struct ZoneObjectItem {
     IZoneObjectPtr m_object;
-    ZoneObjectType m_objectType    = ZoneObjectType::Segment;
-    int            m_preferredHeat = 0;
-    bool           m_useGuards     = true;
-    bool           m_pickable      = false; // pick or join
-    FHPos          m_radiusVector  = g_invalidPos;
+    ZoneObjectType m_objectType        = ZoneObjectType::Segment;
+    int            m_preferredHeat     = 0;
+    bool           m_strongRepulse     = false;
+    bool           m_useGuards         = true;
+    bool           m_pickable          = false; // pick or join
+    int            m_randomAngleOffset = -1;
+    size_t         m_generatedIndex    = 0;
+    size_t         m_generatedCount    = 0;
 };
 
 using ZoneObjectList = std::vector<ZoneObjectItem>;

@@ -32,6 +32,7 @@ struct ZoneObjectWrap : public ZoneObjectItem {
         BR,
     };
 
+    MapTilePtr m_preferredPos  = nullptr;
     MapTilePtr m_absPos        = nullptr;
     MapTilePtr m_guardAbsPos   = nullptr;
     FHPos      m_centerOffset  = g_invalidPos;
@@ -57,8 +58,6 @@ struct ZoneObjectWrap : public ZoneObjectItem {
     size_t m_segmentIndex         = 0;
     size_t m_segmentFragmentIndex = 0;
     size_t m_estimatedArea        = 0;
-
-    FHPos m_radiusVectorAbsPos = g_invalidPos;
 
     bool estimateOccupied(MapTilePtr absPosCenter);
 
@@ -101,7 +100,6 @@ public:
 
         void compactIfNeeded();
         void commitPlacement(DistributionResult& distribution, ZoneObjectWrap* object);
-        void recalcFree(ZoneObjectWrap* exclude = nullptr);
         void recalcHeat();
     };
     using ZoneSegmentList = std::vector<ZoneSegment>;
@@ -114,6 +112,18 @@ public:
 
     struct DistributionResult {
         int m_maxHeat = 0;
+
+        struct Rect {
+            MapTileRegion  m_region;
+            MapTilePtrList m_outline;
+            MapTilePtr     m_centroid = nullptr; // IS NOT INSIDE REGION
+            //int            m_width    = 0;
+            //int            m_height   = 0;
+
+            std::map<int, MapTilePtr> m_tilesByAngle;
+        };
+
+        std::map<int, Rect> m_heatRegionRects;
 
         ZoneObjectWrapList m_allObjects;
 
@@ -149,6 +159,7 @@ public:
 private:
     bool placeWrapIntoSegments(DistributionResult& distribution, ZoneObjectWrap* object, std::vector<ZoneSegment*>& segCandidates) const;
     void commitPlacement(DistributionResult& distribution, ZoneObjectWrap* object, ZoneSegment* seg) const;
+    void makePreferredPoint(DistributionResult& distribution, ZoneObjectWrap* object, int angleStartOffset, size_t index, size_t count) const;
 
 private:
     const std::string       m_indent = "         ";

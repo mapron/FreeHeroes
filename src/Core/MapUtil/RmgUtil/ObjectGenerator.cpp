@@ -79,25 +79,25 @@ ZoneObjectGeneration ObjectGenerator::generate(const FHRngZone&             zone
 
         std::vector<IObjectFactoryPtr> objectFactories;
         if (!isFilteredOut("banks"))
-            objectFactories.push_back(std::make_shared<ObjectFactoryBank>(*m_map, zoneSettings.m_generators.m_banks, scoreSettings, m_database, m_rng, &artifactPool, terrain));
+            objectFactories.push_back(std::make_shared<ObjectFactoryBank>(*m_map, zoneSettings.m_generators.m_banks, scoreSettings, scoreId, m_database, m_rng, &artifactPool, terrain));
         if (!isFilteredOut("artifacts"))
-            objectFactories.push_back(std::make_shared<ObjectFactoryArtifact>(*m_map, zoneSettings.m_generators.m_artifacts, scoreSettings, m_database, m_rng, &artifactPool));
+            objectFactories.push_back(std::make_shared<ObjectFactoryArtifact>(*m_map, zoneSettings.m_generators.m_artifacts, scoreSettings, scoreId, m_database, m_rng, &artifactPool));
         if (!isFilteredOut("resources"))
-            objectFactories.push_back(std::make_shared<ObjectFactoryResourcePile>(*m_map, zoneSettings.m_generators.m_resources, scoreSettings, m_database, m_rng));
+            objectFactories.push_back(std::make_shared<ObjectFactoryResourcePile>(*m_map, zoneSettings.m_generators.m_resources, scoreSettings, scoreId, m_database, m_rng));
         if (!isFilteredOut("pandoras"))
-            objectFactories.push_back(std::make_shared<ObjectFactoryPandora>(*m_map, zoneSettings.m_generators.m_pandoras, scoreSettings, m_database, m_rng, rewardsFaction));
+            objectFactories.push_back(std::make_shared<ObjectFactoryPandora>(*m_map, zoneSettings.m_generators.m_pandoras, scoreSettings, scoreId, m_database, m_rng, rewardsFaction));
         if (!isFilteredOut("shrines"))
-            objectFactories.push_back(std::make_shared<ObjectFactoryShrine>(*m_map, zoneSettings.m_generators.m_shrines, scoreSettings, m_database, m_rng, &spellPool));
+            objectFactories.push_back(std::make_shared<ObjectFactoryShrine>(*m_map, zoneSettings.m_generators.m_shrines, scoreSettings, scoreId, m_database, m_rng, &spellPool));
         if (!isFilteredOut("scrolls"))
-            objectFactories.push_back(std::make_shared<ObjectFactoryScroll>(*m_map, zoneSettings.m_generators.m_scrolls, scoreSettings, m_database, m_rng, &spellPool));
+            objectFactories.push_back(std::make_shared<ObjectFactoryScroll>(*m_map, zoneSettings.m_generators.m_scrolls, scoreSettings, scoreId, m_database, m_rng, &spellPool));
         if (!isFilteredOut("dwellings"))
-            objectFactories.push_back(std::make_shared<ObjectFactoryDwelling>(*m_map, zoneSettings.m_generators.m_dwellings, scoreSettings, m_database, m_rng, dwellFaction));
+            objectFactories.push_back(std::make_shared<ObjectFactoryDwelling>(*m_map, zoneSettings.m_generators.m_dwellings, scoreSettings, scoreId, m_database, m_rng, dwellFaction));
         if (!isFilteredOut("visitables"))
-            objectFactories.push_back(std::make_shared<ObjectFactoryVisitable>(*m_map, zoneSettings.m_generators.m_visitables, scoreSettings, m_database, m_rng, terrain));
+            objectFactories.push_back(std::make_shared<ObjectFactoryVisitable>(*m_map, zoneSettings.m_generators.m_visitables, scoreSettings, scoreId, m_database, m_rng, terrain));
         if (!isFilteredOut("mines"))
-            objectFactories.push_back(std::make_shared<ObjectFactoryMine>(*m_map, zoneSettings.m_generators.m_mines, scoreSettings, m_database, m_rng, terrain));
+            objectFactories.push_back(std::make_shared<ObjectFactoryMine>(*m_map, zoneSettings.m_generators.m_mines, scoreSettings, scoreId, m_database, m_rng, terrain));
         if (!isFilteredOut("skillHuts"))
-            objectFactories.push_back(std::make_shared<ObjectFactorySkillHut>(*m_map, zoneSettings.m_generators.m_skillHuts, scoreSettings, m_database, m_rng));
+            objectFactories.push_back(std::make_shared<ObjectFactorySkillHut>(*m_map, zoneSettings.m_generators.m_skillHuts, scoreSettings, scoreId, m_database, m_rng));
 
         const int iterLimit = 100000;
         int       i         = 0;
@@ -141,11 +141,15 @@ ZoneObjectGeneration ObjectGenerator::generate(const FHRngZone&             zone
             objectList = objectListNotPickables;
             objectList.insert(objectList.end(), objectListPickables.cbegin(), objectListPickables.cend());
         }
-        std::vector<ZoneObjectItem*> needDistribute;
-        for (auto& item : objectList) {
-            item.m_objectType    = scoreSettings.m_objectType;
-            item.m_useGuards     = scoreSettings.m_useGuards;
-            item.m_preferredHeat = 0;
+        std::vector<ZoneObjectItem*> needDistributeByRadius;
+        std::vector<ZoneObjectItem*> needDistributeEqual;
+        for (size_t index = 0; auto& item : objectList) {
+            item.m_generatedIndex = index++;
+            item.m_generatedCount = objectList.size();
+            item.m_objectType     = scoreSettings.m_objectType;
+            item.m_useGuards      = scoreSettings.m_useGuards;
+            item.m_strongRepulse  = scoreSettings.m_strongRepulse;
+            item.m_preferredHeat  = 0;
             if (!scoreSettings.m_preferredHeats.empty())
                 item.m_preferredHeat = scoreSettings.m_preferredHeats[m_rng->genMinMax(0, scoreSettings.m_preferredHeats.size() - 1)];
 
@@ -157,26 +161,25 @@ ZoneObjectGeneration ObjectGenerator::generate(const FHRngZone&             zone
                     throw std::runtime_error(scoreId + ": all items must be pickable, " + item.m_object->getId() + " is not.");
             }
             if (!item.m_pickable || item.m_useGuards)
-                needDistribute.push_back(&item);
+                needDistributeByRadius.push_back(&item);
+            else
+                needDistributeEqual.push_back(&item);
             result.m_allIds.push_back(item.m_object->getId());
         }
-        if (!needDistribute.empty()) {
-            int angleStart = m_rng->genMinMax(0, 359);
-            for (size_t d = 0; d < needDistribute.size(); ++d) {
-                size_t angleOffset = d * 360 / needDistribute.size(); // 0..359 may repeat
-                int    angle       = angleStart + angleOffset;
-                if (angle >= 360)
-                    angle -= 360;
-
-                needDistribute[d]->m_radiusVector = radiusVector(angle);
-            }
+        int angleStart = m_rng->genMinMax(0, 359);
+        for (size_t d = 0; d < needDistributeByRadius.size(); ++d) {
+            needDistributeByRadius[d]->m_randomAngleOffset = angleStart;
+            needDistributeByRadius[d]->m_generatedIndex    = d;
+            needDistributeByRadius[d]->m_generatedCount    = needDistributeByRadius.size();
         }
+        for (size_t d = 0; d < needDistributeEqual.size(); ++d) {
+            needDistributeEqual[d]->m_generatedIndex = d;
+            needDistributeEqual[d]->m_generatedCount = needDistributeEqual.size();
+        }
+
         m_logOutput << indentBase << scoreId << " generated:" << objectList.size() << "\n";
 
         result.m_objects.insert(result.m_objects.end(), objectList.cbegin(), objectList.cend());
-
-        if (0)
-            break;
     }
     std::sort(result.m_allIds.begin(), result.m_allIds.end());
     return result;
@@ -234,13 +237,13 @@ bool ObjectGenerator::generateOneObject(const Core::MapScore&           targetSc
 
             Core::MapScore currentScoreTmp = currentScore + obj->getScore();
             if (isScoreOverflow(currentScoreTmp) || isGroupOverflow(obj->getScore())) {
-                // m_logOutput << indent << "overflow '" << obj->getId() << "' score=" << obj->getScore() << ", current=" << currentScore << "\n";
+                //m_logOutput << indent << "overflow '" << obj->getId() << "' score=" << obj->getScore() << ", current=" << currentScore << "\n";
                 obj->setAccepted(false);
                 return true;
             }
             currentScore = currentScoreTmp;
 
-            // m_logOutput << indent << "add '" << obj->getId() << "' score=" << obj->getScore() << " guard=" << obj->getGuard() << "; current factory freq=" << fac->totalFreq() << ", active=" << fac->totalActiveRecords() << "\n";
+            //m_logOutput << indent << "add '" << obj->getId() << "' score=" << obj->getScore() << " guard=" << obj->getGuard() << "; current factory freq=" << fac->totalFreq() << ", active=" << fac->totalActiveRecords() << "\n";
             obj->setAccepted(true);
             objectList.push_back(ZoneObjectItem{ .m_object = obj });
             return true;
@@ -267,7 +270,7 @@ void ObjectGenerator::makeGroups(const FHRngZone& zoneSettings, ZoneObjectList& 
     auto bundleGuarded      = makeNewObjectBundle();
     bool bundleGuardedEmpty = true;
 
-    auto pushIfNeeded = [&bundleGuarded, &groupsList, &makeNewObjectBundle, &bundleGuardedEmpty]() {
+    auto flushBundle = [&bundleGuarded, &groupsList, &makeNewObjectBundle, &bundleGuardedEmpty]() {
         if (bundleGuardedEmpty)
             return;
         bundleGuarded->updateMask();
@@ -277,16 +280,20 @@ void ObjectGenerator::makeGroups(const FHRngZone& zoneSettings, ZoneObjectList& 
     };
 
     for (const auto& item : objectList) {
+        if (!bundleGuardedEmpty) {
+            if (bundleGuarded->tryPush(item.m_object)) {
+                continue;
+            }
+            // can not push more
+            flushBundle();
+        }
         if (bundleGuarded->tryPush(item.m_object)) {
             bundleGuardedEmpty = false;
             continue;
         }
-        if (bundleGuardedEmpty)
-            throw std::runtime_error("sanity check failed: failed push to empty bundle.");
-
-        pushIfNeeded();
+        throw std::runtime_error("sanity check failed: failed push to empty bundle.");
     }
-    pushIfNeeded();
+    flushBundle();
 
     if (0) {
         for (auto& obj : groupsList)

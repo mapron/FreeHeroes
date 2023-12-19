@@ -24,6 +24,7 @@ struct FHCommonObject {
     Core::ObjectDefIndex m_defIndex;
     int64_t              m_guard = 0;
     Core::MapScore       m_score;
+    std::string          m_generationId;
 
     bool operator==(const FHCommonObject&) const noexcept = default;
 };

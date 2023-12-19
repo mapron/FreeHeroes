@@ -19,54 +19,22 @@ struct CommonSegmentationParams {
     std::string m_parts;
 };
 
-struct CollisionTestParams {
-    std::string m_id;
-    int         m_width  = 0;
-    int         m_height = 0;
-    std::string m_object;
-    FHPos       m_shift;
-
-    MapTileRegionWithEdge::CollisionResult m_result = MapTileRegionWithEdge::CollisionResult::HasShift;
-};
-
-struct FloodTestParams : public CommonSegmentationParams {
-};
-
-struct KmeansTestParams : public CommonSegmentationParams {
-    std::string m_startPoints;
-};
-
-struct GridTestParams : public CommonSegmentationParams {
-    int  m_gridWidth  = 0;
-    int  m_gridHeight = 0;
-    int  m_threshold  = 0;
-    bool m_uniteCheck = false;
-};
-
-std::ostream& operator<<(std::ostream& os, const CollisionTestParams& p)
-{
-    return os << p.m_id;
-}
-
-std::ostream& operator<<(std::ostream& os, const FloodTestParams& p)
-{
-    return os << p.m_id;
-}
-
-std::ostream& operator<<(std::ostream& os, const KmeansTestParams& p)
-{
-    return os << p.m_id;
-}
-
-std::ostream& operator<<(std::ostream& os, const GridTestParams& p)
-{
-    return os << p.m_id;
-}
-
 namespace FreeHeroes {
 std::ostream& operator<<(std::ostream& os, const FHPos& p)
 {
     return os << p.toPrintableString();
+}
+std::ostream& operator<<(std::ostream& os, const MapTilePtr& p)
+{
+    return os << p->toPrintableString();
+}
+std::ostream& operator<<(std::ostream& os, const MapTileRegion& r)
+{
+    os << "[" << r.size() << "] {";
+    for (auto& t : r)
+        os << t << ", ";
+    os << "}";
+    return os;
 }
 }
 
@@ -113,23 +81,565 @@ public:
     }
 };
 
-class CollisionTest : public ::testing::Test
-    , public testing::WithParamInterface<CollisionTestParams>
+// -----------------------------------------------------------------------------------------------------------
+// --------------------------------          Outline                      ------------------------------------
+// -----------------------------------------------------------------------------------------------------------
+
+struct OutlineTestParams : public CommonSegmentationParams {
+};
+
+std::ostream& operator<<(std::ostream& os, const OutlineTestParams& p)
+{
+    return os << p.m_id;
+}
+class OutlineTest : public ::testing::Test
+    , public testing::WithParamInterface<OutlineTestParams>
     , public CommonSegmentationTest {
 };
+
+const std::vector<OutlineTestParams> testParamsOutline{
+    OutlineTestParams{ {
+        .m_id     = "simple",
+        .m_width  = 5,
+        .m_height = 5,
+        .m_object = "....."
+                    "..OO."
+                    "..OO."
+                    "....."
+                    ".....",
+        .m_parts  = "....."
+                    "..01."
+                    "..32."
+                    "....."
+                    ".....",
+    } },
+    OutlineTestParams{ {
+        .m_id     = "rounded_rect",
+        .m_width  = 5,
+        .m_height = 5,
+        .m_object = ".OOO."
+                    "OOOOO"
+                    "OOOOO"
+                    "OOOOO"
+                    ".OOO.",
+        .m_parts  = ".123."
+                    "0...4"
+                    "B...5"
+                    "A...6"
+                    ".987.",
+    } },
+    OutlineTestParams{ {
+        .m_id     = "rect",
+        .m_width  = 5,
+        .m_height = 5,
+        .m_object = "OOOOO"
+                    "OOOOO"
+                    "OOOOO"
+                    "OOOOO"
+                    "OOOOO",
+        .m_parts  = "01234"
+                    "F...5"
+                    "E...6"
+                    "D...7"
+                    "CBA98",
+    } },
+
+    OutlineTestParams{ {
+        .m_id     = "large_donut",
+        .m_width  = 10,
+        .m_height = 10,
+        .m_object = "...OOOO..."
+                    "..OOOOOOO."
+                    "..OOOOOOO."
+                    ".OOOO..OOO"
+                    "OOO...OOOO"
+                    "OOOO...OOO"
+                    ".OOOOOOOOO"
+                    "...OOOOOO."
+                    "...OOOOO.."
+                    "....OOO...",
+        .m_parts  = "...4567..."
+                    "..3....89."
+                    "..2.....A."
+                    ".1.......B"
+                    "0........C"
+                    "O........D"
+                    ".NM......E"
+                    "...L....F."
+                    "...K...G.."
+                    "....JIH...",
+    } },
+    OutlineTestParams{ {
+        .m_id     = "four_donuts",
+        .m_width  = 12,
+        .m_height = 12,
+        .m_object = ".OOO....OOO."
+                    "OOOOO..OOOOO"
+                    "OOOOO..OOOOO"
+                    "OOOOO..OOOOO"
+                    ".OOO....OOO."
+                    "............"
+                    "............"
+                    ".OOO....OOO."
+                    "OOOOO..OOOOO"
+                    "OOOOO..OOOOO"
+                    "OOOOO..OOOOO"
+                    ".OOO....OOO.",
+        .m_parts  = ".123....678."
+                    "0...4..5...9"
+                    "V..........A"
+                    "U..........B"
+                    ".T........C."
+                    "............"
+                    "............"
+                    ".S........D."
+                    "R..........E"
+                    "Q..........F"
+                    "P...L..K...G"
+                    ".ONM....JIH.",
+
+    } },
+
+    OutlineTestParams{ {
+        .m_id     = "rocket",
+        .m_width  = 12,
+        .m_height = 12,
+        .m_object = "............"
+                    ".....O......"
+                    ".....O......"
+                    "....OOO....."
+                    "....OOO....."
+                    "....OOO....."
+                    "....OOO....."
+                    "...OOOOO...."
+                    "..OOO.OOO..."
+                    ".OOOO.OOOO.."
+                    "............"
+                    "............",
+        .m_parts  = "............"
+                    ".....8......"
+                    ".....7......"
+                    "....6.9....."
+                    "....5.A....."
+                    "....4.B....."
+                    "....3.C....."
+                    "...2.J.D...."
+                    "..1.....E..."
+                    ".0MLK.IHGF.."
+                    "............"
+                    "............",
+
+    } },
+
+    OutlineTestParams{ {
+        .m_id     = "clover",
+        .m_width  = 12,
+        .m_height = 12,
+        .m_object = ".OOO....OOO."
+                    "OOOOO..OOOOO"
+                    "OOOOO..OOOOO"
+                    "OOOO....OOOO"
+                    ".OOOOOOOOOO."
+                    "...OOOOOO..."
+                    ".....OOOO..."
+                    ".O.OOOOO...."
+                    "OOOOOO..O..."
+                    "OOOO.....O.."
+                    "OOOOO.....O."
+                    ".OOO........",
+        // bottom line is not perfect. but good enough.
+        .m_parts = ".123....89A."
+                   "0...4..7...B"
+                   "Z..........C"
+                   "Y..........D"
+                   ".X...56...E."
+                   "...W....F..."
+                   ".....V..G..."
+                   ".U....NH...."
+                   "T....O..I..."
+                   "S........J.."
+                   "R...L.....K."
+                   ".QPM........",
+
+    } },
+
+};
+
+TEST_P(OutlineTest, BasicSegmentation)
+{
+    const auto& params = GetParam();
+    this->prepare(params);
+
+    auto outline      = MapTileRegionSegmentation::makeOutline(m_objectRegion);
+    auto outlineTiles = MapTileRegionSegmentation::iterateOutline(outline);
+    ASSERT_GT(outlineTiles.size(), 0);
+
+    m_calculatedSegments.resize(outlineTiles.size());
+    for (size_t i = 0; i < outlineTiles.size(); ++i) {
+        ASSERT_NE(outlineTiles[i], nullptr);
+        m_calculatedSegments[i].insert(outlineTiles[i]);
+    }
+
+    makeExpectedStr();
+
+    ASSERT_EQ(m_calculatedSegmentsStr, m_expectedSegmentsStr);
+    ASSERT_EQ(m_calculatedSegments, m_expectedSegments);
+
+    uniteSegemnts();
+    m_objectRegion = m_objectRegion.intersectWith(m_calculatedSegmentsUnited);
+    ASSERT_EQ(m_objectRegion, m_calculatedSegmentsUnited);
+}
+
+INSTANTIATE_TEST_SUITE_P(InstantiationName,
+                         OutlineTest,
+                         testing::ValuesIn(testParamsOutline),
+                         [](const testing::TestParamInfo<OutlineTestParams>& info) {
+                             return info.param.m_id;
+                         });
+
+// -----------------------------------------------------------------------------------------------------------
+// --------------------------------          Flood fill                   ------------------------------------
+// -----------------------------------------------------------------------------------------------------------
+
+struct FloodTestParams : public CommonSegmentationParams {
+};
+
+std::ostream& operator<<(std::ostream& os, const FloodTestParams& p)
+{
+    return os << p.m_id;
+}
 
 class FloodFillTest : public ::testing::Test
     , public testing::WithParamInterface<FloodTestParams>
     , public CommonSegmentationTest {
 };
 
+const std::vector<FloodTestParams> testParamsFloodFill{
+    FloodTestParams{ {
+        .m_id     = "simple",
+        .m_width  = 5,
+        .m_height = 5,
+        .m_object = "....."
+                    "..OO."
+                    "..OO."
+                    "....."
+                    ".....",
+        .m_parts  = "....."
+                    "..00."
+                    "..00."
+                    "....."
+                    ".....",
+    } },
+    FloodTestParams{ {
+        .m_id     = "two",
+        .m_width  = 5,
+        .m_height = 5,
+        .m_object = "O...."
+                    "O.OO."
+                    "O.OO."
+                    "O...."
+                    "O....",
+        .m_parts  = "0...."
+                    "0.11."
+                    "0.11."
+                    "0...."
+                    "0....",
+    } },
+
+};
+
+TEST_P(FloodFillTest, BasicSegmentation)
+{
+    const auto& params = GetParam();
+    this->prepare(params);
+
+    m_calculatedSegments = m_objectRegion.splitByFloodFill(true);
+
+    makeExpectedStr();
+
+    ASSERT_EQ(m_calculatedSegmentsStr, m_expectedSegmentsStr);
+    ASSERT_EQ(m_calculatedSegments, m_expectedSegments);
+
+    uniteSegemnts();
+    ASSERT_EQ(m_objectRegion, m_calculatedSegmentsUnited);
+}
+
+INSTANTIATE_TEST_SUITE_P(InstantiationName,
+                         FloodFillTest,
+                         testing::ValuesIn(testParamsFloodFill),
+                         [](const testing::TestParamInfo<FloodTestParams>& info) {
+                             return info.param.m_id;
+                         });
+
+// -----------------------------------------------------------------------------------------------------------
+// --------------------------------          K-means                      ------------------------------------
+// -----------------------------------------------------------------------------------------------------------
+
+struct KmeansTestParams : public CommonSegmentationParams {
+    std::string m_startPoints;
+};
+std::ostream& operator<<(std::ostream& os, const KmeansTestParams& p)
+{
+    return os << p.m_id;
+}
 class KmeansTest : public ::testing::Test
     , public testing::WithParamInterface<KmeansTestParams>
     , public CommonSegmentationTest {
 };
 
+const std::vector<KmeansTestParams> testParamsKmeans{
+    KmeansTestParams{
+        {
+            .m_id = "seven",
+
+            .m_width  = 18,
+            .m_height = 10,
+            .m_object = "...OOOOOOOOOOOOOO."
+                        "...OOOOOOOOOOOOOO."
+                        "....OOOOOOOOOOOOO."
+                        "....OOOOOOOOOOOOO."
+                        "....OOOOOOOOOOOOO."
+                        "....OOOOOOOOOOOOO."
+                        ".....OOOOOOOOOOOO."
+                        ".....OOOOOOOOOOOO."
+                        ".....OOOOOOOOO...."
+                        ".....OOO..........",
+            .m_parts  = "...00003333111111."
+                        "...00663333111111."
+                        "....6663334411111."
+                        "....6663344441111."
+                        "....7777444422222."
+                        "....7775555222222."
+                        ".....885555522222."
+                        ".....899555522222."
+                        ".....999955522...."
+                        ".....999..........",
+        },
+        {
+            "...0..........1..."
+            "............2....."
+            "..........3......."
+            ".........4........"
+            "........5........."
+            "......6..........."
+            "......7..........."
+            ".....8............"
+            ".....9............"
+            "..................",
+        },
+    },
+};
+
+TEST_P(KmeansTest, BasicSegmentation)
+{
+    const auto& params = GetParam();
+    this->prepare(params);
+
+    m_reg.load(params.m_startPoints);
+    auto startPointRegions = m_reg.getList();
+
+    KMeansSegmentationSettings settings;
+    settings.m_items.resize(startPointRegions.size());
+    for (size_t i = 0; i < startPointRegions.size(); ++i) {
+        settings.m_items[i].m_initialCentroid = startPointRegions[i][0];
+        //std::cout << settings.m_items[i].m_start->toPrintableString() << "\n";
+    }
+    m_calculatedSegments = m_objectRegion.splitByKExt(settings);
+
+    makeExpectedStr();
+
+    ASSERT_EQ(m_calculatedSegmentsStr, m_expectedSegmentsStr);
+    ASSERT_EQ(m_calculatedSegments, m_expectedSegments);
+
+    uniteSegemnts();
+    ASSERT_EQ(m_objectRegion, m_calculatedSegmentsUnited);
+}
+
+INSTANTIATE_TEST_SUITE_P(InstantiationName,
+                         KmeansTest,
+                         testing::ValuesIn(testParamsKmeans),
+                         [](const testing::TestParamInfo<KmeansTestParams>& info) {
+                             return info.param.m_id;
+                         });
+
+// -----------------------------------------------------------------------------------------------------------
+// --------------------------------          creating Grids               ------------------------------------
+// -----------------------------------------------------------------------------------------------------------
+struct GridTestParams : public CommonSegmentationParams {
+    int  m_gridWidth  = 0;
+    int  m_gridHeight = 0;
+    int  m_threshold  = 0;
+    bool m_uniteCheck = false;
+};
+std::ostream& operator<<(std::ostream& os, const GridTestParams& p)
+{
+    return os << p.m_id;
+}
 class GridTest : public ::testing::Test
     , public testing::WithParamInterface<GridTestParams>
+    , public CommonSegmentationTest {
+};
+
+const std::vector<GridTestParams> testParamsGrid{
+    GridTestParams{
+        {
+            .m_id = "3x3_small",
+
+            .m_width  = 5,
+            .m_height = 5,
+            .m_object = ".OOO."
+                        "OOOOO"
+                        "OOOOO"
+                        "OOOOO"
+                        ".OOO.",
+
+            .m_parts = ".001."
+                       "00011"
+                       "00011"
+                       "22233"
+                       ".223.",
+        },
+        3,
+        3,
+        0,
+        true,
+    },
+    GridTestParams{
+        {
+            .m_id = "3x3_thresholded",
+
+            .m_width  = 5,
+            .m_height = 5,
+            .m_object = ".OOO."
+                        "OOOOO"
+                        "OOOOO"
+                        "OOOOO"
+                        ".OOO.",
+
+            .m_parts = ".001."
+                       "00011"
+                       "00011"
+                       "222.."
+                       ".22..",
+        },
+        3,
+        3,
+        5,
+    },
+
+    GridTestParams{
+        {
+            .m_id = "3x3_big",
+
+            .m_width  = 18,
+            .m_height = 10,
+            .m_object = "...OOOOOOOOOO....."
+                        "...OOOOOOOOOOO...."
+                        "....OOOOOOOOOOO..."
+                        "....OOOOOOOOOOOO.."
+                        "....OOOOOOOOOOOOO."
+                        "....OOOOOOOOOOOOO."
+                        ".....OOOOOOOOOOOO."
+                        ".....OOOOOOOOOOOO."
+                        ".....OOOOOOOOO...."
+                        ".....OOO..........",
+
+            .m_parts = "...0001112223....."
+                       "...00011122233...."
+                       "....00111222333..."
+                       "....445556667778.."
+                       "....4455566677788."
+                       "....4455566677788."
+                       ".....9AAABBBCCCDD."
+                       ".....9AAABBBCCCDD."
+                       ".....9AAABBBCC...."
+                       ".....EFF..........",
+
+        },
+        3,
+        3,
+        0,
+        true,
+    },
+    GridTestParams{
+        {
+            .m_id = "4x4_big_thresholded",
+
+            .m_width  = 18,
+            .m_height = 10,
+            .m_object = "...OOOOOOOOOO....."
+                        "...OOOOOOOOOOO...."
+                        "....OOOOOOOOOOO..."
+                        "....OOOOOOOOOOOO.."
+                        "....OOOOOOOOOOOOO."
+                        "....OOOOOOOOOOOOO."
+                        ".....OOOOOOOOOOOO."
+                        ".....OOOOOOOOOOOO."
+                        ".....OOOOOOOOO...."
+                        ".....OOO..........",
+
+            .m_parts = "...0000111122....."
+                       "...00001111222...."
+                       "....00011112222..."
+                       "....00011112222..."
+                       "....3334444555566."
+                       "....3334444555566."
+                       ".....334444555566."
+                       ".....334444555566."
+                       ".................."
+                       "..................",
+        },
+        4,
+        4,
+        8,
+    },
+};
+
+TEST_P(GridTest, BasicSegmentation)
+{
+    const auto& params = GetParam();
+    this->prepare(params);
+
+    m_calculatedSegments = m_objectRegion.splitByGrid(params.m_gridWidth, params.m_gridHeight, params.m_threshold);
+
+    makeExpectedStr();
+
+    ASSERT_EQ(m_calculatedSegmentsStr, m_expectedSegmentsStr);
+    ASSERT_EQ(m_calculatedSegments, m_expectedSegments);
+
+    if (params.m_uniteCheck) {
+        uniteSegemnts();
+        ASSERT_EQ(m_objectRegion, m_calculatedSegmentsUnited);
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(InstantiationName,
+                         GridTest,
+                         testing::ValuesIn(testParamsGrid),
+                         [](const testing::TestParamInfo<GridTestParams>& info) {
+                             return info.param.m_id;
+                         });
+
+// -----------------------------------------------------------------------------------------------------------
+// --------------------------------          Collision                    ------------------------------------
+// -----------------------------------------------------------------------------------------------------------
+
+struct CollisionTestParams {
+    std::string m_id;
+    int         m_width  = 0;
+    int         m_height = 0;
+    std::string m_object;
+    FHPos       m_shift;
+
+    MapTileRegionWithEdge::CollisionResult m_result = MapTileRegionWithEdge::CollisionResult::HasShift;
+};
+std::ostream& operator<<(std::ostream& os, const CollisionTestParams& p)
+{
+    return os << p.m_id;
+}
+
+class CollisionTest : public ::testing::Test
+    , public testing::WithParamInterface<CollisionTestParams>
     , public CommonSegmentationTest {
 };
 
@@ -313,277 +823,9 @@ INSTANTIATE_TEST_SUITE_P(InstantiationName,
                              return info.param.m_id;
                          });
 
-const std::vector<FloodTestParams> testParamsFloodFill{
-    FloodTestParams{ {
-        .m_id     = "simple",
-        .m_width  = 5,
-        .m_height = 5,
-        .m_object = "....."
-                    "..OO."
-                    "..OO."
-                    "....."
-                    ".....",
-        .m_parts  = "....."
-                    "..00."
-                    "..00."
-                    "....."
-                    ".....",
-    } },
-    FloodTestParams{ {
-        .m_id     = "two",
-        .m_width  = 5,
-        .m_height = 5,
-        .m_object = "O...."
-                    "O.OO."
-                    "O.OO."
-                    "O...."
-                    "O....",
-        .m_parts  = "0...."
-                    "0.11."
-                    "0.11."
-                    "0...."
-                    "0....",
-    } },
-
-};
-
-TEST_P(FloodFillTest, BasicSegmentation)
-{
-    const auto& params = GetParam();
-    this->prepare(params);
-
-    m_calculatedSegments = m_objectRegion.splitByFloodFill(true);
-
-    makeExpectedStr();
-
-    ASSERT_EQ(m_calculatedSegmentsStr, m_expectedSegmentsStr);
-    ASSERT_EQ(m_calculatedSegments, m_expectedSegments);
-
-    uniteSegemnts();
-    ASSERT_EQ(m_objectRegion, m_calculatedSegmentsUnited);
-}
-
-INSTANTIATE_TEST_SUITE_P(InstantiationName,
-                         FloodFillTest,
-                         testing::ValuesIn(testParamsFloodFill),
-                         [](const testing::TestParamInfo<FloodTestParams>& info) {
-                             return info.param.m_id;
-                         });
-
-const std::vector<KmeansTestParams> testParamsKmeans{
-    KmeansTestParams{
-        {
-            .m_id = "seven",
-
-            .m_width  = 18,
-            .m_height = 10,
-            .m_object = "...OOOOOOOOOOOOOO."
-                        "...OOOOOOOOOOOOOO."
-                        "....OOOOOOOOOOOOO."
-                        "....OOOOOOOOOOOOO."
-                        "....OOOOOOOOOOOOO."
-                        "....OOOOOOOOOOOOO."
-                        ".....OOOOOOOOOOOO."
-                        ".....OOOOOOOOOOOO."
-                        ".....OOOOOOOOO...."
-                        ".....OOO..........",
-            .m_parts  = "...00003333111111."
-                        "...00663333111111."
-                        "....6663334411111."
-                        "....6663344441111."
-                        "....7777444422222."
-                        "....7775555222222."
-                        ".....885555522222."
-                        ".....899555522222."
-                        ".....999955522...."
-                        ".....999..........",
-        },
-        {
-            "...0..........1..."
-            "............2....."
-            "..........3......."
-            ".........4........"
-            "........5........."
-            "......6..........."
-            "......7..........."
-            ".....8............"
-            ".....9............"
-            "..................",
-        },
-    },
-};
-
-TEST_P(KmeansTest, BasicSegmentation)
-{
-    const auto& params = GetParam();
-    this->prepare(params);
-
-    m_reg.load(params.m_startPoints);
-    auto startPointRegions = m_reg.getList();
-
-    KMeansSegmentationSettings settings;
-    settings.m_items.resize(startPointRegions.size());
-    for (size_t i = 0; i < startPointRegions.size(); ++i) {
-        settings.m_items[i].m_initialCentroid = startPointRegions[i][0];
-        //std::cout << settings.m_items[i].m_start->toPrintableString() << "\n";
-    }
-    m_calculatedSegments = m_objectRegion.splitByKExt(settings);
-
-    makeExpectedStr();
-
-    ASSERT_EQ(m_calculatedSegmentsStr, m_expectedSegmentsStr);
-    ASSERT_EQ(m_calculatedSegments, m_expectedSegments);
-
-    uniteSegemnts();
-    ASSERT_EQ(m_objectRegion, m_calculatedSegmentsUnited);
-}
-
-INSTANTIATE_TEST_SUITE_P(InstantiationName,
-                         KmeansTest,
-                         testing::ValuesIn(testParamsKmeans),
-                         [](const testing::TestParamInfo<KmeansTestParams>& info) {
-                             return info.param.m_id;
-                         });
-
-const std::vector<GridTestParams> testParamsGrid{
-    GridTestParams{
-        {
-            .m_id = "3x3_small",
-
-            .m_width  = 5,
-            .m_height = 5,
-            .m_object = ".OOO."
-                        "OOOOO"
-                        "OOOOO"
-                        "OOOOO"
-                        ".OOO.",
-
-            .m_parts = ".001."
-                       "00011"
-                       "00011"
-                       "22233"
-                       ".223.",
-        },
-        3,
-        3,
-        0,
-        true,
-    },
-    GridTestParams{
-        {
-            .m_id = "3x3_thresholded",
-
-            .m_width  = 5,
-            .m_height = 5,
-            .m_object = ".OOO."
-                        "OOOOO"
-                        "OOOOO"
-                        "OOOOO"
-                        ".OOO.",
-
-            .m_parts = ".001."
-                       "00011"
-                       "00011"
-                       "222.."
-                       ".22..",
-        },
-        3,
-        3,
-        5,
-    },
-
-    GridTestParams{
-        {
-            .m_id = "3x3_big",
-
-            .m_width  = 18,
-            .m_height = 10,
-            .m_object = "...OOOOOOOOOO....."
-                        "...OOOOOOOOOOO...."
-                        "....OOOOOOOOOOO..."
-                        "....OOOOOOOOOOOO.."
-                        "....OOOOOOOOOOOOO."
-                        "....OOOOOOOOOOOOO."
-                        ".....OOOOOOOOOOOO."
-                        ".....OOOOOOOOOOOO."
-                        ".....OOOOOOOOO...."
-                        ".....OOO..........",
-
-            .m_parts = "...0001112223....."
-                       "...00011122233...."
-                       "....00111222333..."
-                       "....445556667778.."
-                       "....4455566677788."
-                       "....4455566677788."
-                       ".....9AAABBBCCCDD."
-                       ".....9AAABBBCCCDD."
-                       ".....9AAABBBCC...."
-                       ".....EFF..........",
-
-        },
-        3,
-        3,
-        0,
-        true,
-    },
-    GridTestParams{
-        {
-            .m_id = "4x4_big_thresholded",
-
-            .m_width  = 18,
-            .m_height = 10,
-            .m_object = "...OOOOOOOOOO....."
-                        "...OOOOOOOOOOO...."
-                        "....OOOOOOOOOOO..."
-                        "....OOOOOOOOOOOO.."
-                        "....OOOOOOOOOOOOO."
-                        "....OOOOOOOOOOOOO."
-                        ".....OOOOOOOOOOOO."
-                        ".....OOOOOOOOOOOO."
-                        ".....OOOOOOOOO...."
-                        ".....OOO..........",
-
-            .m_parts = "...0000111122....."
-                       "...00001111222...."
-                       "....00011112222..."
-                       "....00011112222..."
-                       "....3334444555566."
-                       "....3334444555566."
-                       ".....334444555566."
-                       ".....334444555566."
-                       ".................."
-                       "..................",
-        },
-        4,
-        4,
-        8,
-    },
-};
-
-TEST_P(GridTest, BasicSegmentation)
-{
-    const auto& params = GetParam();
-    this->prepare(params);
-
-    m_calculatedSegments = m_objectRegion.splitByGrid(params.m_gridWidth, params.m_gridHeight, params.m_threshold);
-
-    makeExpectedStr();
-
-    ASSERT_EQ(m_calculatedSegmentsStr, m_expectedSegmentsStr);
-    ASSERT_EQ(m_calculatedSegments, m_expectedSegments);
-
-    if (params.m_uniteCheck) {
-        uniteSegemnts();
-        ASSERT_EQ(m_objectRegion, m_calculatedSegmentsUnited);
-    }
-}
-
-INSTANTIATE_TEST_SUITE_P(InstantiationName,
-                         GridTest,
-                         testing::ValuesIn(testParamsGrid),
-                         [](const testing::TestParamInfo<GridTestParams>& info) {
-                             return info.param.m_id;
-                         });
+// -----------------------------------------------------------------------------------------------------------
+// --------------------------------          Grid detection               ------------------------------------
+// -----------------------------------------------------------------------------------------------------------
 
 GTEST_TEST(GridDetection, Basic)
 {

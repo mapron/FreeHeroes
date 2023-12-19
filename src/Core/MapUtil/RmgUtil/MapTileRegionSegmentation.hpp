@@ -5,6 +5,7 @@
  */
 #pragma once
 
+#include "MapTile.hpp"
 #include "MapTileRegion.hpp"
 #include "FHPos.hpp"
 
@@ -37,6 +38,12 @@ struct MAPUTIL_EXPORT MapTileRegionSegmentation {
         size_t m_width;
         size_t m_height;
     };
+    struct Outline {
+        MapTilePtrList m_top;
+        MapTilePtrList m_bottom;
+        MapTilePtrList m_right;
+        MapTilePtrList m_left;
+    };
 
     static MapTileRegionList splitByFloodFill(const MapTileRegion& region, bool useDiag, MapTilePtr hint = nullptr);
     static MapTileRegionList splitByMaxArea(const MapTileRegion& region, size_t maxArea, size_t iterLimit = 100);
@@ -47,6 +54,9 @@ struct MAPUTIL_EXPORT MapTileRegionSegmentation {
 
     static KMeansSegmentationSettings guessKMeansByGrid(const MapTileRegion& region, size_t k);
     static Rect                       getBoundary(const MapTileRegion& region);
+
+    static Outline        makeOutline(const MapTileRegion& region);
+    static MapTilePtrList iterateOutline(const Outline& outline);
 
     static int64_t getRadiusPromille(int64_t area);
     static int64_t getArea(int64_t radiusPromille);

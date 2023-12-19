@@ -44,6 +44,13 @@ constexpr inline FHPos posMidPoint(FHPos from, FHPos to, int nom, int den)
     return FHPos{ static_cast<int>(from.m_x + dx), static_cast<int>(from.m_y + dy), from.m_z };
 }
 
+constexpr inline FHPos posNormalize(FHPos pos)
+{
+    const int x = std::min(std::max(pos.m_x, -1), 1);
+    const int y = std::min(std::max(pos.m_y, -1), 1);
+    return FHPos{ x, y, pos.m_z };
+}
+
 enum class FHPosDirection
 {
     Invalid,

@@ -25,6 +25,7 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
     ObjectFactoryBank(FHMap&                          map,
                       const FHRngZone::GeneratorBank& genSettings,
                       const FHScoreSettings&          scoreSettings,
+                      const std::string&              scoreId,
                       const Core::IGameDatabase*      database,
                       Core::IRandomGenerator* const   rng,
                       ArtifactPool*                   artifactPool,
@@ -32,8 +33,7 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
 
     IZoneObjectPtr make(uint64_t rngFreq) override;
 
-    ArtifactPool* const   m_artifactPool;
-    const FHScoreSettings m_scoreSettings;
+    ArtifactPool* const m_artifactPool;
 };
 
 // ---------------------------------------------------------------------------------------
@@ -48,12 +48,17 @@ struct RecordArtifact : public CommonRecord<RecordArtifact> {
 struct ObjectGenerator::ObjectFactoryArtifact : public AbstractFactory<RecordArtifact> {
     struct ObjectArtifact;
 
-    ObjectFactoryArtifact(FHMap& map, const FHRngZone::GeneratorArtifact& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng, ArtifactPool* artifactPool);
+    ObjectFactoryArtifact(FHMap&                              map,
+                          const FHRngZone::GeneratorArtifact& genSettings,
+                          const FHScoreSettings&              scoreSettings,
+                          const std::string&                  scoreId,
+                          const Core::IGameDatabase*          database,
+                          Core::IRandomGenerator* const       rng,
+                          ArtifactPool*                       artifactPool);
 
     IZoneObjectPtr make(uint64_t rngFreq) override;
 
-    ArtifactPool* const   m_artifactPool;
-    const FHScoreSettings m_scoreSettings;
+    ArtifactPool* const m_artifactPool;
 };
 
 // ---------------------------------------------------------------------------------------
@@ -68,7 +73,12 @@ struct RecordResourcePile : public CommonRecord<RecordResourcePile> {
 };
 
 struct ObjectGenerator::ObjectFactoryResourcePile : public AbstractFactory<RecordResourcePile> {
-    ObjectFactoryResourcePile(FHMap& map, const FHRngZone::GeneratorResourcePile& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng);
+    ObjectFactoryResourcePile(FHMap&                                  map,
+                              const FHRngZone::GeneratorResourcePile& genSettings,
+                              const FHScoreSettings&                  scoreSettings,
+                              const std::string&                      scoreId,
+                              const Core::IGameDatabase*              database,
+                              Core::IRandomGenerator* const           rng);
 
     IZoneObjectPtr make(uint64_t rngFreq) override;
 };
@@ -76,7 +86,7 @@ struct ObjectGenerator::ObjectFactoryResourcePile : public AbstractFactory<Recor
 // ---------------------------------------------------------------------------------------
 
 struct ObjectPandora : public ObjectGenerator::AbstractObject<FHPandora> {
-    std::string        getId() const override { return m_obj.m_generationId; }
+    std::string        getId() const override { return "pandora_" + m_obj.m_key; }
     Type               getType() const override { return Type::Pickable; }
     bool               preventDuplicates() const override { return true; }
     std::string        getRepulseId() const override { return m_repulseId; }
@@ -100,13 +110,12 @@ struct ObjectGenerator::ObjectFactoryPandora : public AbstractFactory<RecordPand
     ObjectFactoryPandora(FHMap&                             map,
                          const FHRngZone::GeneratorPandora& genSettings,
                          const FHScoreSettings&             scoreSettings,
+                         const std::string&                 scoreId,
                          const Core::IGameDatabase*         database,
                          Core::IRandomGenerator* const      rng,
                          Core::LibraryFactionConstPtr       rewardsFaction);
 
     IZoneObjectPtr make(uint64_t rngFreq) override;
-
-    Core::IRandomGenerator* const m_rng;
 };
 
 // ---------------------------------------------------------------------------------------
@@ -122,12 +131,17 @@ struct RecordSpellShrine : public CommonRecord<RecordSpellShrine> {
 struct ObjectGenerator::ObjectFactoryShrine : public AbstractFactory<RecordSpellShrine> {
     struct ObjectShrine;
 
-    ObjectFactoryShrine(FHMap& map, const FHRngZone::GeneratorShrine& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng, SpellPool* spellPool);
+    ObjectFactoryShrine(FHMap&                            map,
+                        const FHRngZone::GeneratorShrine& genSettings,
+                        const FHScoreSettings&            scoreSettings,
+                        const std::string&                scoreId,
+                        const Core::IGameDatabase*        database,
+                        Core::IRandomGenerator* const     rng,
+                        SpellPool*                        spellPool);
 
     IZoneObjectPtr make(uint64_t rngFreq) override;
 
-    SpellPool* const      m_spellPool;
-    const FHScoreSettings m_scoreSettings;
+    SpellPool* const m_spellPool;
 };
 
 // ---------------------------------------------------------------------------------------
@@ -142,13 +156,18 @@ struct RecordSpellScroll : public CommonRecord<RecordSpellScroll> {
 struct ObjectGenerator::ObjectFactoryScroll : public AbstractFactory<RecordSpellScroll> {
     struct ObjectScroll;
 
-    ObjectFactoryScroll(FHMap& map, const FHRngZone::GeneratorScroll& genSettings, const FHScoreSettings& scoreSettings, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng, SpellPool* spellPool);
+    ObjectFactoryScroll(FHMap&                            map,
+                        const FHRngZone::GeneratorScroll& genSettings,
+                        const FHScoreSettings&            scoreSettings,
+                        const std::string&                scoreId,
+                        const Core::IGameDatabase*        database,
+                        Core::IRandomGenerator* const     rng,
+                        SpellPool*                        spellPool);
 
     IZoneObjectPtr make(uint64_t rngFreq) override;
 
     std::map<Core::LibrarySpellConstPtr, Core::LibraryArtifactConstPtr> m_scrollMapping;
     SpellPool* const                                                    m_spellPool;
-    const FHScoreSettings                                               m_scoreSettings;
 };
 
 // ---------------------------------------------------------------------------------------
@@ -168,6 +187,7 @@ struct ObjectGenerator::ObjectFactoryDwelling : public AbstractFactory<RecordDwe
     ObjectFactoryDwelling(FHMap&                              map,
                           const FHRngZone::GeneratorDwelling& genSettings,
                           const FHScoreSettings&              scoreSettings,
+                          const std::string&                  scoreId,
                           const Core::IGameDatabase*          database,
                           Core::IRandomGenerator* const       rng,
                           Core::LibraryFactionConstPtr        dwellFaction);
@@ -189,6 +209,7 @@ struct ObjectGenerator::ObjectFactoryVisitable : public AbstractFactory<RecordVi
     ObjectFactoryVisitable(FHMap&                               map,
                            const FHRngZone::GeneratorVisitable& genSettings,
                            const FHScoreSettings&               scoreSettings,
+                           const std::string&                   scoreId,
                            const Core::IGameDatabase*           database,
                            Core::IRandomGenerator* const        rng,
                            Core::LibraryTerrainConstPtr         terrain);
@@ -208,6 +229,7 @@ struct ObjectGenerator::ObjectFactoryMine : public AbstractFactory<RecordMine> {
     ObjectFactoryMine(FHMap&                          map,
                       const FHRngZone::GeneratorMine& genSettings,
                       const FHScoreSettings&          scoreSettings,
+                      const std::string&              scoreId,
                       const Core::IGameDatabase*      database,
                       Core::IRandomGenerator* const   rng,
                       Core::LibraryTerrainConstPtr    terrain);
@@ -227,6 +249,7 @@ struct ObjectGenerator::ObjectFactorySkillHut : public AbstractFactory<RecordSki
     ObjectFactorySkillHut(FHMap&                              map,
                           const FHRngZone::GeneratorSkillHut& genSettings,
                           const FHScoreSettings&              scoreSettings,
+                          const std::string&                  scoreId,
                           const Core::IGameDatabase*          database,
                           Core::IRandomGenerator* const       rng);
 

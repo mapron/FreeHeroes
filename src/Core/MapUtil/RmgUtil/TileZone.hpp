@@ -110,16 +110,12 @@ struct TileZone {
     MapTileRegion m_needPlaceObstacles;
     MapTileRegion m_needPlaceObstaclesTentative;
 
-    MapTileRegion m_rewardTilesMain;
-    MapTileRegion m_rewardTilesDanger;
     MapTileRegion m_rewardTilesSpacing;
     MapTileRegion m_rewardTilesFailure;
-    MapTileRegion m_rewardTilesPos;
-    MapTileRegion m_rewardTilesCenters;
-    MapTileRegion m_rewardTilesHints;
 
-    HeatData m_segmentHeat;
-    HeatData m_roadHeat;
+    HeatData m_heatForSegments;
+    HeatData m_heatForRoads;
+    HeatData m_heatForAll;
     HeatData m_distances; // 100-based
 
     std::map<std::string, MapTilePtr> m_namedTiles;

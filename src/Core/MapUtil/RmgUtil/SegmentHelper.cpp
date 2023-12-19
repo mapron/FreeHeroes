@@ -564,8 +564,10 @@ void SegmentHelper::makeHeatMap(TileZone& tileZone)
 
     const int maxHeat = tileZone.m_rngZoneSettings.m_maxHeat;
     for (int heat = 0; heat < maxHeat; heat++) {
-        chop(roadTiles, tileZone.m_roadHeat, heat, maxHeat);
-        chop(segmentTiles, tileZone.m_segmentHeat, heat, maxHeat);
+        chop(roadTiles, tileZone.m_heatForRoads, heat, maxHeat);
+        chop(segmentTiles, tileZone.m_heatForSegments, heat, maxHeat);
+        chop(roadTiles, tileZone.m_heatForAll, heat, maxHeat);
+        chop(segmentTiles, tileZone.m_heatForAll, heat, maxHeat);
     }
 }
 

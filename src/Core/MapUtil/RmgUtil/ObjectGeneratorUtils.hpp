@@ -212,10 +212,16 @@ struct ObjectGenerator::AbstractObjectWithId : public ObjectGenerator::AbstractO
 
 template<class Record>
 struct ObjectGenerator::AbstractFactory : public IObjectFactory {
-    AbstractFactory(FHMap& map, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng)
-        : m_rng(rng)
+    AbstractFactory(FHMap&                        map,
+                    const FHScoreSettings&        scoreSettings,
+                    const std::string&            scoreId,
+                    const Core::IGameDatabase*    database,
+                    Core::IRandomGenerator* const rng)
+        : m_map(map)
+        , m_scoreSettings(scoreSettings)
+        , m_scoreId(scoreId)
         , m_database(database)
-        , m_map(map)
+        , m_rng(rng)
     {}
 
     uint64_t totalFreq() const override
@@ -229,9 +235,11 @@ struct ObjectGenerator::AbstractFactory : public IObjectFactory {
 
     CommonRecordList<Record> m_records;
 
-    Core::IRandomGenerator* const m_rng;
-    const Core::IGameDatabase*    m_database;
     FHMap&                        m_map;
+    const FHScoreSettings         m_scoreSettings;
+    const std::string             m_scoreId;
+    const Core::IGameDatabase*    m_database;
+    Core::IRandomGenerator* const m_rng;
 };
 
 }

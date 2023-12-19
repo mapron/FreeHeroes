@@ -17,7 +17,7 @@
                 
                     "110_Utopia": {
                         "isEnabled": true,
-                        "preferredHeats": [8],
+                        "preferredHeats": [7],
                         "generatorsInclude": ["banks"],
                         "score": {
                             "ArtStat":        { "target": 30000 , "maxSingle": 15000, "minSingle": 4000 },
@@ -38,7 +38,7 @@
                         "isEnabled": true,
                         "preferredHeats": [0],
                         "score": {
-                            "Army":           { "target": 40000, "maxSingle": 12000},
+                            "Army":           { "target": 80000, "maxSingle": 12000},
                             "ArmyDwelling":   { "target": 10000, "maxSingle": 9000, "minSingle": 4000},
                             "ArmyAux":        { "target": 15000, "maxSingle": 9000}
                         }
@@ -46,7 +46,7 @@
                     "140_LowArmy": {
                        "isEnabled": true,
                        "preferredHeats": [5, 6, 7],
-                       "useGuards": false,
+                       "useGuards": true,
                        "score": {
                             "ArmyDwelling":   { "target": 20000 ,"maxSingle": 3900}
                         }
@@ -54,7 +54,8 @@
 
                     "210_ControlScrolls": {
                         "isEnabled": true,
-                        "preferredHeats": [7, 8],
+                        "strongRepulse": true,
+                        "preferredHeats": [9],
                         "score": {
                             "Control":        { "target":  85000, "maxSingle": 30000}
                         }
@@ -81,7 +82,7 @@
 
                     "410_HighSpells": {
                         "isEnabled": true,
-                        "preferredHeats": [6, 7, 8],
+                        "preferredHeats": [6, 7],
                         "score": {
                             "SpellOffensive": { "target": 60000 , "minSingle":  5000},
                             "SpellCommon":    { "target": 20000 , "minSingle":  5000}
@@ -109,7 +110,7 @@
                         "preferredHeats": [1, 2, 3, 4, 5],
                         "generatorsInclude": ["visitables"],
                         "score": {
-                            "Experience":     { "target": 20000, "maxSingle": 12000, "minSingle": 3000}
+                            "Experience":     { "target": 20000, "minSingle": 2000}
                         }
                     },
                     "530_GuardedTreasureChests": {
@@ -173,7 +174,7 @@
                         "isEnabled": true,
                         "useGuards": false,
                         "generatorsExclude": ["banks"],
-                        "preferredHeats": [0, 1, 2, 3, 4, 5, 6, 7, 8],
+                        "preferredHeats": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
                         "score":{
                             "Resource":       { "target": 40000, "maxSingle": 2500},
                             "Gold"    :       { "target": 40000, "maxSingle": 2500}
@@ -342,7 +343,7 @@
             },
             "Treasure": {
                 "base": "Common",
-                "centerDispersion": {"x": 1, "y": 1}, "relativeSizeAvg": 150, "relativeSizeDispersion": 5, "terrain": "sod.terrain.sand",
+                "centerDispersion": {"x": 1, "y": 1}, "relativeSizeAvg": 140, "relativeSizeDispersion": 5, "terrain": "sod.terrain.sand",
                 "zoneGuardPercent": 150,
                 "excludeFactionZones":["P1", "P2", "P3", "P4"],
                 "towns": {

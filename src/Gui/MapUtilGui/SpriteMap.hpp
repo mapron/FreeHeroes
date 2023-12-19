@@ -207,9 +207,9 @@ struct SpritePaintSettings {
         ContourStyle m_contourStyle = ContourStyle::None;
     };
 
-    LayerRules       m_globalRules;
-    SpriteMap::Layer m_filterLayer = SpriteMap::Layer::Invalid;
-    Core::ScoreAttr  m_filterAttr  = Core::ScoreAttr::Invalid;
+    LayerRules                 m_globalRules;
+    std::set<SpriteMap::Layer> m_filterLayer;
+    std::set<Core::ScoreAttr>  m_filterAttr;
 
     std::map<SpriteMap::Layer, LayerRules> m_specificRules;
 

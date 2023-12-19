@@ -72,6 +72,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_defIndex,
     m_guard,
     m_score,
+    m_generationId,
 
     m_isMain,
     m_factionId,
@@ -100,6 +101,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_defIndex,
     m_guard,
     m_score,
+    m_generationId,
 
     m_amount,
     m_id)
@@ -110,6 +112,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_order,
     m_guard,
     m_score,
+    m_generationId,
 
     m_amount)
 
@@ -119,6 +122,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_order,
     m_guard,
     m_score,
+    m_generationId,
 
     m_id)
 
@@ -128,6 +132,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_order,
     m_guard,
     m_score,
+    m_generationId,
 
     m_type)
 
@@ -137,9 +142,10 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_order,
     m_guard,
     m_score,
+    m_generationId,
 
     m_reward,
-    m_generationId)
+    m_key)
 
 ENUM_REFLECTION_STRINGIFY(
     FHMonster::UpgradedStack,
@@ -157,6 +163,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_defIndex,
     m_guard,
     m_score,
+    m_generationId,
 
     m_id,
     m_count,
@@ -176,6 +183,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_defIndex,
     m_guard,
     m_score,
+    m_generationId,
 
     m_id)
 
@@ -186,6 +194,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_defIndex,
     m_guard,
     m_score,
+    m_generationId,
 
     m_player,
 
@@ -207,6 +216,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_defIndex,
     m_guard,
     m_score,
+    m_generationId,
 
     m_id,
     m_upgradedStack,
@@ -220,6 +230,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_defIndex,
     m_guard,
     m_score,
+    m_generationId,
 
     m_id)
 
@@ -230,6 +241,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_defIndex,
     m_guard,
     m_score,
+    m_generationId,
 
     m_visitableId)
 
@@ -240,6 +252,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_defIndex,
     m_guard,
     m_score,
+    m_generationId,
 
     m_visitableId,
 
@@ -253,6 +266,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_defIndex,
     m_guard,
     m_score,
+    m_generationId,
 
     m_visitableId,
 
@@ -289,6 +303,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_defIndex,
     m_guard,
     m_score,
+    m_generationId,
 
     m_visitableId,
 
@@ -310,6 +325,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_defIndex,
     m_guard,
     m_score,
+    m_generationId,
 
     m_visitableId,
 

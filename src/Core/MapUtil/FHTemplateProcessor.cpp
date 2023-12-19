@@ -710,7 +710,8 @@ void FHTemplateProcessor::runRewards()
                 throw std::runtime_error("Failed to fit some objects into zone '" + tileZone.m_id + "'");
             m_logOutput << m_indent << "Failed to fit some objects into zone '" + tileZone.m_id + "', retry"
                         << "\n";
-            m_map.m_objects               = objects; // restore map data and try again.
+            m_map.m_objects = objects; // restore map data and try again.
+            m_map.m_debugTiles.clear();
             tileZone.m_needPlaceObstacles = needBeBlocked;
         }
 
@@ -1037,8 +1038,8 @@ void FHTemplateProcessor::placeDebugInfo()
         }
 
         if (m_showDebug == Stage::HeatMap) {
-            auto* roadHeat = &tileZone.m_roadHeat;
-            auto* segHeat  = &tileZone.m_segmentHeat;
+            auto* roadHeat = &tileZone.m_heatForRoads;
+            auto* segHeat  = &tileZone.m_heatForSegments;
             for (auto* heatData : { roadHeat, segHeat }) {
                 const bool isRoad = roadHeat == heatData;
                 for (const auto& [tile, heatLevel] : heatData->m_tileLevels) {
@@ -1073,7 +1074,7 @@ void FHTemplateProcessor::placeDebugInfo()
             for (auto& seg : tileZone.m_innerAreaSegments) {
                 for (auto* tile : seg.m_innerEdge) {
                     int paletteSize = tileZone.m_rngZoneSettings.m_maxHeat;
-                    int heatLevel   = tileZone.m_segmentHeat.getLevel(tile);
+                    int heatLevel   = tileZone.m_heatForSegments.getLevel(tile);
                     m_map.m_debugTiles.push_back(FHDebugTile{
                         .m_pos         = tile->m_pos,
                         .m_penColor    = heatLevel + 1, // heatLevel is 0-based
@@ -1084,26 +1085,11 @@ void FHTemplateProcessor::placeDebugInfo()
                 }
             }
 
-            for (auto* cell : tileZone.m_rewardTilesMain) {
-                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_brushColor = 120 });
-            }
-            for (auto* cell : tileZone.m_rewardTilesDanger) {
-                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_brushColor = 1 });
-            }
             for (auto* cell : tileZone.m_rewardTilesSpacing) {
                 m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_brushColor = 55, .m_shapeRadius = 1 });
             }
             for (auto* cell : tileZone.m_rewardTilesFailure) {
                 m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_brushColor = 1, .m_brushAlpha = 80, .m_shapeRadius = 4 });
-            }
-            for (auto* cell : tileZone.m_rewardTilesPos) {
-                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_text = "|" });
-            }
-            for (auto* cell : tileZone.m_rewardTilesCenters) {
-                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_text = "X" });
-            }
-            for (auto* cell : tileZone.m_rewardTilesHints) {
-                m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = cell->m_pos, .m_text = "--" });
             }
         }
     }

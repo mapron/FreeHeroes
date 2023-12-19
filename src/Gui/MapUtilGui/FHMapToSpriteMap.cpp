@@ -82,6 +82,8 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     auto addValueInfo = [](SpriteMap::Item* item, const FHCommonObject& obj) {
         if (obj.m_guard)
             item->addInfo("Guard", std::to_string(obj.m_guard));
+        if (!obj.m_generationId.empty())
+            item->addInfo("ScoreId", obj.m_generationId);
         item->m_score = obj.m_score;
         for (const auto& [key, value] : obj.m_score) {
             item->addInfo(FHScoreSettings::attrToString(key) + " Value", std::to_string(value));
@@ -355,7 +357,7 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     for (auto& obj : fhMap.m_objects.m_pandoras) {
         std::string id             = "ava0128";
         auto*       item           = result.addItem(makeItemById(SpriteMap::Layer::Pandora, id, obj.m_pos));
-        item->m_overlayInfo        = obj.m_generationId;
+        item->m_overlayInfo        = obj.m_key;
         item->m_overlayInfoOffsetX = 0;
         addValueInfo(item, obj);
     }
