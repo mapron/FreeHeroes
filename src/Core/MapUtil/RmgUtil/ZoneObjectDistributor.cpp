@@ -367,8 +367,9 @@ void ZoneObjectDistributor::commitPlacement(DistributionResult& distribution, Zo
     distribution.m_placedIds.push_back(object->m_object->getId());
 
     if (object->m_useGuards) {
-        Guard guard;
+        MapGuard guard;
         guard.m_value = object->m_object->getGuard();
+        guard.m_score = object->m_object->getScore();
         guard.m_pos   = object->m_guardAbsPos;
         distribution.m_guards.push_back(guard);
     }

@@ -6,6 +6,7 @@
 #pragma once
 
 #include "TileZone.hpp"
+#include "MapGuard.hpp"
 
 namespace FreeHeroes {
 
@@ -25,23 +26,11 @@ public:
 
     void makeInitialZones(std::vector<TileZone>& tileZones);
 
-    void makeBorders(std::vector<TileZone>& tileZones);
+    MapGuardList makeBorders(std::vector<TileZone>& tileZones);
 
     void makeSegments(TileZone& tileZone);
     void refineSegments(TileZone& tileZone);
     void makeHeatMap(TileZone& tileZone);
-
-public:
-    struct Guard {
-        int64_t     m_value = 0;
-        std::string m_id;
-        std::string m_mirrorFromId;
-        MapTilePtr  m_pos      = nullptr;
-        TileZone*   m_zone     = nullptr;
-        bool        m_joinable = false;
-    };
-
-    std::vector<Guard> m_guards;
 
 private:
     std::string                   m_indent = "        ";

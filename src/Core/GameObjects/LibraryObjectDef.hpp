@@ -48,6 +48,21 @@ struct CombinedMask {
     bool operator==(const CombinedMask&) const noexcept = default;
 };
 
+inline CombinedMask createOneTileCombinedMask()
+{
+    Core::CombinedMask result{
+        .m_blocked{ { 0, 0 } },
+        .m_visitable{ { 0, 0 } },
+        .m_width  = 1,
+        .m_height = 1,
+    };
+    result.m_rows.resize(1);
+    result.m_rows[0].resize(1);
+    result.m_rows[0][0] = Core::CombinedMask::Cell{ .m_blocked = true, .m_visitable = true };
+
+    return result;
+};
+
 struct LibraryObjectDef {
     int                  legacyId = -1;
     std::string          id;

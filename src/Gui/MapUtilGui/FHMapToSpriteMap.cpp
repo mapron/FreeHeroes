@@ -24,6 +24,8 @@ namespace FreeHeroes {
 
 namespace {
 
+const Core::CombinedMask g_oneTileMask = Core::createOneTileCombinedMask();
+
 QColor makeColor(const std::vector<int>& rgb)
 {
     if (rgb.size() == 3)
@@ -322,7 +324,8 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
             auto* artdef  = art->objectDefs.get({});
             auto* artItem = result.addItem(makeItemByDef(SpriteMap::Layer::Artifact, artdef, artPos).setPriority(SpriteMap::s_objectMaxPriority + 2));
             estimateArtScore(art, artItem->m_score);
-            artItem->m_opacity = 0.8;
+            artItem->m_opacity   = 0.8;
+            artItem->m_blockMask = {};
         }
     }
     for (auto& obj : fhMap.m_objects.m_obstacles) {
@@ -355,8 +358,21 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     }
 
     for (auto& obj : fhMap.m_objects.m_pandoras) {
-        std::string id             = "ava0128";
-        auto*       item           = result.addItem(makeItemById(SpriteMap::Layer::Pandora, id, obj.m_pos));
+        std::string id   = "ava0128";
+        auto*       item = result.addItem(makeItemById(SpriteMap::Layer::Pandora, id, obj.m_pos));
+        if (!obj.m_reward.units.empty()) {
+            auto pos = obj.m_pos;
+            pos.m_x += 1;
+            auto& unit  = obj.m_reward.units[0];
+            auto* def   = unit.unit->objectDefs.get({});
+            auto* itemG = result.addItem(makeItemByDef(SpriteMap::Layer::Monster, def, pos)
+                                             .addInfo("id", unit.unit->id)
+                                             .addInfo("count", std::to_string(unit.count)));
+            addValueInfo(itemG, obj);
+            itemG->m_opacity   = 0.7;
+            itemG->m_blockMask = {};
+        }
+        item->m_blockMask          = g_oneTileMask;
         item->m_overlayInfo        = obj.m_key;
         item->m_overlayInfoOffsetX = 0;
         addValueInfo(item, obj);

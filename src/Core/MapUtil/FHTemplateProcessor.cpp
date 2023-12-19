@@ -395,17 +395,10 @@ void FHTemplateProcessor::runZoneTilesInitial()
 void FHTemplateProcessor::runBorderRoads()
 {
     SegmentHelper segmentHelper(m_map, m_tileContainer, m_rng, m_logOutput, m_extraLogging);
-    segmentHelper.makeBorders(m_tileZones);
+    auto          guards = segmentHelper.makeBorders(m_tileZones);
 
-    for (auto& guard : segmentHelper.m_guards) {
-        m_guards.push_back(Guard{
-            .m_value        = guard.m_value,
-            .m_id           = guard.m_id,
-            .m_mirrorFromId = guard.m_mirrorFromId,
-            .m_pos          = guard.m_pos,
-            .m_zone         = guard.m_zone,
-            .m_joinable     = guard.m_joinable,
-        });
+    for (auto& guard : guards) {
+        m_guards.push_back(std::move(guard));
     }
 }
 
@@ -665,9 +658,8 @@ void FHTemplateProcessor::runRewards()
         auto      needBeBlocked = tileZone.m_needPlaceObstacles;
         const int maxAttempts   = 3;
         for (int i = 1; i <= maxAttempts; ++i) {
-            m_logOutput << m_indent << " --- generate : " << tileZone.m_id << " [" << i << " / " << maxAttempts << "] --- \n";
-            const bool lastAttempt          = i == maxAttempts;
-            auto       zoneObjectGeneration = gen.generate(tileZone.m_rngZoneSettings,
+            m_logOutput << m_indent << " --- generate : " << tileZone.m_id << " [attempt " << i << " / " << maxAttempts << "] --- \n";
+            auto zoneObjectGeneration = gen.generate(tileZone.m_rngZoneSettings,
                                                      tileZone.m_rewardsFaction,
                                                      tileZone.m_dwellFaction,
                                                      tileZone.m_terrain,
@@ -680,9 +672,9 @@ void FHTemplateProcessor::runRewards()
                 objectDistributor.doPlaceDistribution(distributionResult);
                 distributionResultCopy = distributionResult;
                 if (m_showDebug == Stage::Rewards) {
-                    for (auto& seg : distributionResultCopy.m_segments) {
+                    for (auto& seg : distributionResult.m_segments) {
                         for (auto* object : seg.m_successNormal) {
-                            int paletteSize = distributionResultCopy.m_maxHeat;
+                            int paletteSize = distributionResult.m_maxHeat;
 
                             m_map.m_debugTiles.push_back(FHDebugTile{
                                 .m_pos         = object->m_absPos->m_pos,
@@ -706,7 +698,7 @@ void FHTemplateProcessor::runRewards()
                 break;
             }
 
-            if (lastAttempt)
+            if (i == maxAttempts)
                 throw std::runtime_error("Failed to fit some objects into zone '" + tileZone.m_id + "'");
             m_logOutput << m_indent << "Failed to fit some objects into zone '" + tileZone.m_id + "', retry"
                         << "\n";
@@ -715,13 +707,10 @@ void FHTemplateProcessor::runRewards()
             tileZone.m_needPlaceObstacles = needBeBlocked;
         }
 
-        for (auto& guardBundle : distributionResultCopy.m_guards) {
-            Guard guard;
-            guard.m_value    = guardBundle.m_value;
-            guard.m_pos      = guardBundle.m_pos;
+        for (auto& guard : distributionResultCopy.m_guards) {
             guard.m_zone     = &tileZone;
             guard.m_joinable = true;
-            m_guards.push_back(guard);
+            m_guards.push_back(std::move(guard));
         }
 
         tileZone.m_needPlaceObstacles.insert(distributionResultCopy.m_needBlock);
@@ -858,6 +847,7 @@ void FHTemplateProcessor::runGuards()
         fhMonster.m_count      = getPossibleCount(unit, value);
         fhMonster.m_id         = unit;
         fhMonster.m_guardValue = value;
+        fhMonster.m_score      = guard.m_score;
 
         //fhMonster.m_score[FHScoreAttr::Support] = guard.m_zone ? guard.m_zone->m_rngZoneSettings.m_zoneGuardPercent : 666;
 

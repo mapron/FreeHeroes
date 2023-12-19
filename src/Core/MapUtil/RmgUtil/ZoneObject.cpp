@@ -5,7 +5,7 @@
  */
 #include "ZoneObject.hpp"
 
-#include "LibraryObjectDef.hpp"
+#include "FHMapObject.hpp"
 
 #include <sstream>
 #include <cassert>
@@ -26,11 +26,12 @@ public:
 
     IZoneObject::Type m_type = IZoneObject::Type::Visitable;
 
-    int64_t     m_maxGuard = 0;
-    int64_t     m_guard    = 0;
-    std::string m_repulseId;
-    size_t      m_itemLimit = 0;
-    uint8_t     m_rngMask   = 0;
+    int64_t        m_maxGuard = 0;
+    int64_t        m_guard    = 0;
+    std::string    m_repulseId;
+    size_t         m_itemLimit = 0;
+    uint8_t        m_rngMask   = 0;
+    Core::MapScore m_score;
 
     Mask        m_mask;
     std::string m_id;
@@ -46,8 +47,7 @@ public:
     void           place(FHPos pos) const override;
     Core::MapScore getScore() const override
     {
-        assert(!"Liskov unhappy but it shouldn't be called");
-        return {};
+        return m_score;
     }
     void setAccepted(bool accepted) override
     {
@@ -65,30 +65,6 @@ public:
 };
 
 }
-/*
-void ZoneObjectList::scale(int64_t armyPercent, int64_t goldPercent)
-{
-    
-    auto applyPercent = [](FHScoreSettings::ScoreScope& scope, int64_t percent) {
-        scope.m_target = scope.m_target * percent / 100;
-        if (percent < 100 && scope.m_minSingle != -1) {
-            scope.m_minSingle = scope.m_minSingle * percent / 100;
-        }
-    };
-
-    if (armyPercent != 100) {
-        if (m_scoreSettings.m_score.contains(Core::ScoreAttr::Army)) {
-            auto& armyScore = m_scoreSettings.m_score[Core::ScoreAttr::Army];
-            applyPercent(armyScore, armyPercent);
-        }
-    }
-    if (goldPercent != 100) {
-        if (m_scoreSettings.m_score.contains(Core::ScoreAttr::Gold)) {
-            auto& goldScore = m_scoreSettings.m_score[Core::ScoreAttr::Gold];
-            applyPercent(goldScore, goldPercent);
-        }
-    }
-}*/
 
 void ZoneObjectGroup::place(FHPos pos) const
 {
@@ -119,6 +95,7 @@ bool ZoneObjectGroup::tryPush(const IZoneObjectPtr& item)
     if (!m_repulseId.empty() && !item->getRepulseId().empty())
         return false;
     m_guard     = newGuard;
+    m_score     = m_score + item->getScore();
     m_repulseId = item->getRepulseId();
     if (!m_id.empty())
         m_id += "+";

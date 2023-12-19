@@ -10,6 +10,7 @@
 
 #include "FHMap.hpp"
 
+#include "RmgUtil/MapGuard.hpp"
 #include "RmgUtil/TileZone.hpp"
 
 #include <stdexcept>
@@ -75,14 +76,6 @@ private:
     bool                                   isFilteredOut(const TileZone& tileZone) const;
 
 private:
-    struct Guard {
-        int64_t     m_value = 0;
-        std::string m_id;
-        std::string m_mirrorFromId;
-        MapTilePtr  m_pos      = nullptr;
-        TileZone*   m_zone     = nullptr;
-        bool        m_joinable = false;
-    };
     using HeroGeneration = FHRngUserSettings::HeroGeneration;
     struct PlayerInfo {
         Core::LibraryFactionConstPtr m_faction = nullptr;
@@ -124,8 +117,8 @@ private:
     std::vector<Core::LibraryFactionConstPtr> m_rewardFactions;
     std::vector<Core::LibraryUnitConstPtr>    m_guardUnits;
 
-    std::vector<Guard> m_guards;
-    int64_t            m_userMultiplyGuard = 100;
+    MapGuardList m_guards;
+    int64_t      m_userMultiplyGuard = 100;
 
     std::map<Core::LibraryPlayerConstPtr, PlayerInfo, CmpPlayers> m_playerInfo;
 

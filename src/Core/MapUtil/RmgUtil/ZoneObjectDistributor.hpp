@@ -8,6 +8,7 @@
 #include "ZoneObject.hpp"
 
 #include "MapTileRegionWithEdge.hpp"
+#include "MapGuard.hpp"
 
 namespace FreeHeroes {
 
@@ -104,12 +105,6 @@ public:
     };
     using ZoneSegmentList = std::vector<ZoneSegment>;
 
-    struct Guard {
-        int64_t    m_value = 0;
-        MapTilePtr m_pos   = nullptr;
-    };
-    using GuardList = std::vector<Guard>;
-
     struct DistributionResult {
         int m_maxHeat = 0;
 
@@ -128,7 +123,7 @@ public:
         ZoneObjectWrapList m_allObjects;
 
         ZoneSegmentList m_segments;
-        GuardList       m_guards;
+        MapGuardList    m_guards;
         MapTileRegion   m_needBlock;
 
         std::vector<std::string> m_allOriginalIds; // for checking

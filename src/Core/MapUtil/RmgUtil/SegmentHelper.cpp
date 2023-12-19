@@ -156,8 +156,9 @@ void SegmentHelper::makeInitialZones(std::vector<TileZone>& tileZones)
     }
 }
 
-void SegmentHelper::makeBorders(std::vector<TileZone>& tileZones)
+MapGuardList SegmentHelper::makeBorders(std::vector<TileZone>& tileZones)
 {
+    MapGuardList guards;
     using ZKey = std::pair<TileZone*, TileZone*>;
     std::map<ZKey, MapTileRegion> borderTiles;
 
@@ -299,13 +300,13 @@ void SegmentHelper::makeBorders(std::vector<TileZone>& tileZones)
             processCell(cellTo);
 
             if (guarded) {
-                Guard guard;
+                MapGuard guard;
                 guard.m_id           = connectionId;
                 guard.m_value        = conPath.m_guard;
                 guard.m_mirrorFromId = conPath.m_mirrorGuard;
                 guard.m_pos          = cellFrom;
                 guard.m_zone         = nullptr;
-                m_guards.push_back(guard);
+                guards.push_back(guard);
             }
 
             MapTileRegion forErase;
@@ -319,6 +320,7 @@ void SegmentHelper::makeBorders(std::vector<TileZone>& tileZones)
             connectionUnblockableCells.insert(cell);
         }
     }
+    return guards;
 }
 
 void SegmentHelper::makeSegments(TileZone& tileZone)
