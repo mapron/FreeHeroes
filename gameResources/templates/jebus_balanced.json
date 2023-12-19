@@ -82,7 +82,8 @@
 
                     "410_HighSpells": {
                         "isEnabled": true,
-                        "preferredHeats": [6, 7],
+                        "strongRepulse": true,
+                        "preferredHeats": [9],
                         "score": {
                             "SpellOffensive": { "target": 60000 , "minSingle":  5000},
                             "SpellCommon":    { "target": 20000 , "minSingle":  5000}
@@ -90,7 +91,8 @@
                     },
                     "420_MidSpells": {
                         "isEnabled": true,
-                        "preferredHeats": [4, 5, 6],
+                        "strongRepulse": true,
+                        "preferredHeats": [8],
                         "score": {
                             "SpellOffensive": { "target": 10000, "maxSingle": 6000, "minSingle": 2100},
                             "SpellCommon":    { "target": 10000, "maxSingle": 6000, "minSingle": 500}
@@ -107,6 +109,7 @@
                     },
                     "520_PermanentXp": {
                         "isEnabled": true,
+                        "guardThreshold": 6000,
                         "preferredHeats": [1, 2, 3, 4, 5],
                         "generatorsInclude": ["visitables"],
                         "score": {
@@ -123,7 +126,7 @@
 
                     "610_Mid": {
                         "isEnabled": true,
-                        "preferredHeats": [1, 2, 3, 4, 5, 6],
+                        "preferredHeats": [3, 4, 5, 6, 7, 8, 9],
                         "generatorsExclude": ["resources"],
                         "score": {
                             "ArtStat":        { "target": 25000, "maxSingle": 7000, "minSingle": 2500},
@@ -138,6 +141,7 @@
                     },
                     "520_GuardedResources": {
                         "isEnabled": true,
+                        "guardThreshold": 10,
                         "preferredHeats": [2, 3, 4],
                         "generatorsInclude": ["resources"],
                         "score":{
@@ -146,7 +150,7 @@
                     },
                     "610_LowUnguarded": {
                         "isEnabled": true,
-                        "useGuards": false,
+                        "guardThreshold": 100000,
                         "preferredHeats": [2, 3, 4, 5, 6, 7],
                         "generatorsExclude": ["resources"],
                         "score":{
@@ -161,7 +165,7 @@
                     },
                     "620_LowPicks": {
                         "isEnabled": true,
-                        "useGuards": false,
+                        "guardThreshold": 100000,
                         "preferredHeats": [0, 1, 2, 3, 4, 5, 6],
                         "generatorsExclude": ["banks"],
                         "score":{
@@ -172,7 +176,9 @@
                     "910_LowRoadPicks": {
                         "objectType": "Road",
                         "isEnabled": true,
-                        "useGuards": false,
+                        
+                        "guardThreshold": 100000,
+                        "guardMinToGroup": 100000,
                         "generatorsExclude": ["banks"],
                         "preferredHeats": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
                         "score":{
@@ -181,9 +187,9 @@
                         }
                     }
                 },
-                "guardMin": 4000,
-                "guardMax": 20000,
-                "guardBlock": 12000,
+                "guardThreshold": 4000,
+                "guardMinToGroup": 0,
+                "guardGroupLimit": 10000,
 
                 "generators": {
                     "banks": {
@@ -353,9 +359,7 @@
                     "P1":{"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}, "useZoneFaction": true, "tilesToTarget": 8, "closeToConnection":"CC_P1_0_main"}, 
                     "P2":{"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}, "useZoneFaction": true, "tilesToTarget": 8, "closeToConnection":"CC_P2_0_main"}},
 
-                "guardMin": 20000,
-                "guardMax": 150000,
-                "guardBlock": 70000,
+                "guardGroupLimit": 150000,
 
                 "generators": {
                     "banks": {
@@ -434,15 +438,6 @@
                             "Resource":       { "target": 10000   , "minSingle": 3000, "maxSingle" : -1}
                         }
                     },
-                    "20_Mid": {
-                        "isEnabled": false
-                    },
-                    "30_LowGuarded": {
-                        "isEnabled": false
-                    },
-                    "40_Low": {
-                        "isEnabled": false
-                    },
                     "50_TreasureLow": {
                         "isEnabled": false,
                         "objectType": "SegmentUnguarded",
@@ -451,7 +446,35 @@
                             "Experience":     { "target": 20000, "maxSingle": 2000},
                             "ResourceGen":    { "target": 30000}
                         }
-                    }
+                    },
+                    
+                    "110_Utopia": {
+                        "isEnabled": false,
+                        "preferredHeats": [7],
+                        "generatorsInclude": ["banks"],
+                        "score": {
+                            "ArtStat":        { "target": 30000 , "maxSingle": 15000, "minSingle": 4000 },
+                            "ArtSupport":     { "target": 20000 , "maxSingle": 10000, "minSingle": 4000 },
+                            "Gold":           { "target": 30000 , "maxSingle": 30000, "minSingle": 30000 }
+                        }
+                    },
+                    "120_HighArmy":{"isEnabled": false},
+                    "130_MidArmy":{"isEnabled": false},
+                    "140_LowArmy": {"isEnabled": false},
+                    "210_ControlScrolls": {"isEnabled": false},
+                    "330_HighSupportVisitables": {"isEnabled": false},
+                    "340_HighArtsAndBanks": {"isEnabled": false},
+                    "410_HighSpells": {"isEnabled": false},
+                    "420_MidSpells": {"isEnabled": false},
+                    "510_XpPandoras":{"isEnabled": false},
+                    "520_PermanentXp": {"isEnabled": false},
+                    "530_GuardedTreasureChests": {"isEnabled": false},
+                    "610_Mid": {"isEnabled": false},
+                    "520_GuardedResources": {"isEnabled": false},
+                    "610_LowUnguarded": {"isEnabled": false},
+                    "620_LowPicks": {"isEnabled": false},
+                    "910_LowRoadPicks": {"isEnabled": false}
+                    
                 }
             },
     

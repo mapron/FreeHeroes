@@ -181,6 +181,7 @@ bool ZoneObjectDistributor::makeInitialDistribution(DistributionResult& distribu
             .m_object            = obj.m_object,
             .m_objectType        = obj.m_objectType,
             .m_preferredHeat     = obj.m_preferredHeat,
+            .m_strongRepulse     = obj.m_strongRepulse,
             .m_useGuards         = obj.m_useGuards,
             .m_pickable          = obj.m_pickable,
             .m_randomAngleOffset = obj.m_randomAngleOffset,
@@ -252,7 +253,7 @@ bool ZoneObjectDistributor::makeInitialDistribution(DistributionResult& distribu
                 auto* tz = object->m_absPos->m_zone;
                 tz->m_rewardTilesFailure.insert(object->m_occupiedWithDangerZone);
             }
-            //return false;
+            return false;
         }
     }
 
@@ -261,6 +262,7 @@ bool ZoneObjectDistributor::makeInitialDistribution(DistributionResult& distribu
         if (seg.m_successNormal.empty())
             continue;
         totalSizeObjects += seg.m_originalArea.size() - seg.m_freeArea.size();
+        //m_logOutput << "getFreePercent=" << seg.getFreePercent() << "\n";
     }
 
     m_logOutput << m_indent << "placed tiles= " << totalSizeObjects << " / " << totalSize << " \n";
@@ -299,21 +301,35 @@ bool ZoneObjectDistributor::placeWrapIntoSegments(DistributionResult& distributi
     std::vector<std::tuple<int, int64_t, ZoneSegment*>> segCandidatesSorted;
     assert(object->m_preferredPos);
 
+    //if (object->m_strongRepulse)
+    //    m_logOutput << object->m_object->getId() << "look:\n";
+
     for (ZoneSegment* seg : segCandidates) {
         if (seg->m_originalArea.contains(object->m_preferredPos)) {
             segCandidatesSorted.push_back(std::tuple{ 0, 0, seg });
             continue;
         }
 
+        auto freeQuarter = (seg->getFreePercent() / 25) + 1;
+
         auto* bestHeat = seg->findBestHeatData(object->m_placedHeat);
         assert(bestHeat);
         int h = bestHeat->m_heat;
+        if (bestHeat->m_heat == object->m_placedHeat)
+            h = 0;
+        if (bestHeat->m_heat > object->m_placedHeat)
+            h = 1;
+        if (bestHeat->m_heat < object->m_placedHeat)
+            h = 2;
         if (object->m_strongRepulse)
             h = 0;
 
+        //h = h * freeQuarter;
+
         const auto distance = posDistance(bestHeat->m_centroid, object->m_preferredPos, 100);
 
-        //m_logOutput << "segCandidatesSorted (" << bestHeat->m_heat << ") << " << h << " - " << distance << " - " << seg->m_originalAreaCentroid->toPrintableString() << " / " << bestHeat->m_centroid->toPrintableString() << "\n";
+        //if (object->m_strongRepulse)
+        //    m_logOutput << "segCandidatesSorted (" << bestHeat->m_heat << ") << " << h << " - " << distance << " - " << seg->m_originalAreaCentroid->toPrintableString() << " / " << bestHeat->m_centroid->toPrintableString() << "\n";
 
         segCandidatesSorted.push_back(std::tuple{ h, distance, seg });
     }
@@ -321,8 +337,6 @@ bool ZoneObjectDistributor::placeWrapIntoSegments(DistributionResult& distributi
     std::sort(segCandidatesSorted.begin(), segCandidatesSorted.end());
 
     for (auto& [h, _, seg] : segCandidatesSorted) {
-        MapTilePtrList placementTileCandidates; // unsorted! important! we do not want address order.
-
         std::vector<std::pair<int, MapTilePtr>> tileCandidatesSorted;
 
         for (auto& [heat, data] : seg->m_heatMap) {

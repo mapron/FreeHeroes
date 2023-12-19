@@ -59,7 +59,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHScoreSettings,
     m_score,
     m_isEnabled,
-    m_useGuards,
+    m_guardThreshold,
+    m_guardMinToGroup,
+    m_guardGroupLimit,
     m_strongRepulse,
     m_preferredHeats,
     m_objectType,
@@ -207,9 +209,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_excludeFactionZones,
     m_scoreTargets,
     m_generators,
-    m_guardMin,
-    m_guardMax,
-    m_guardBlock,
+    m_guardThreshold,
+    m_guardMinToGroup,
+    m_guardGroupLimit,
     m_segmentAreaSize,
     m_isNormal)
 

@@ -125,21 +125,28 @@ ZoneObjectGeneration ObjectGenerator::generate(const FHRngZone&             zone
         //if (deficitSum > allowedDeficit && 0) // @todo: redo deficit
         //    throw std::runtime_error("Deficit score for '" + scoreId + "' exceed tolerance!");
 
+        const int64_t guardGroupLimit = scoreSettings.m_guardGroupLimit >= 0 ? scoreSettings.m_guardGroupLimit : zoneSettings.m_guardGroupLimit;
+        const int64_t guardThreshold  = scoreSettings.m_guardThreshold >= 0 ? scoreSettings.m_guardThreshold : zoneSettings.m_guardThreshold;
+        const int64_t guardMinToGroup = scoreSettings.m_guardMinToGroup >= 0 ? scoreSettings.m_guardMinToGroup : zoneSettings.m_guardMinToGroup;
+
         // group pickables together.
-        if (scoreSettings.m_useGuards) {
-            ZoneObjectList objectListPickables;
-            ZoneObjectList objectListNotPickables;
+        {
+            ZoneObjectList objectListForGrouping;
+            ZoneObjectList objectListRemain;
 
             for (auto& obj : objectList) {
-                if (obj.m_object->getType() == IZoneObject::Type::Pickable || obj.m_object->getType() == IZoneObject::Type::Joinable)
-                    objectListPickables.push_back(obj);
-                else
-                    objectListNotPickables.push_back(obj);
+                if (obj.m_object->getType() == IZoneObject::Type::Pickable || obj.m_object->getType() == IZoneObject::Type::Joinable) {
+                    if (obj.m_object->getGuard() >= guardMinToGroup) {
+                        objectListForGrouping.push_back(obj);
+                        continue;
+                    }
+                }
+                objectListRemain.push_back(obj);
             }
-            makeGroups(zoneSettings, objectListPickables);
+            makeGroups(guardGroupLimit, objectListForGrouping);
 
-            objectList = objectListNotPickables;
-            objectList.insert(objectList.end(), objectListPickables.cbegin(), objectListPickables.cend());
+            objectList = objectListRemain;
+            objectList.insert(objectList.end(), objectListForGrouping.cbegin(), objectListForGrouping.cend());
         }
         std::vector<ZoneObjectItem*> needDistributeByRadius;
         std::vector<ZoneObjectItem*> needDistributeEqual;
@@ -147,7 +154,7 @@ ZoneObjectGeneration ObjectGenerator::generate(const FHRngZone&             zone
             item.m_generatedIndex = index++;
             item.m_generatedCount = objectList.size();
             item.m_objectType     = scoreSettings.m_objectType;
-            item.m_useGuards      = scoreSettings.m_useGuards;
+            item.m_useGuards      = item.m_object->getGuard() >= guardThreshold;
             item.m_strongRepulse  = scoreSettings.m_strongRepulse;
             item.m_preferredHeat  = 0;
             if (!scoreSettings.m_preferredHeats.empty())
@@ -255,14 +262,10 @@ bool ObjectGenerator::generateOneObject(const Core::MapScore&           targetSc
     return false;
 }
 
-void ObjectGenerator::makeGroups(const FHRngZone& zoneSettings, ZoneObjectList& objectList) const
+void ObjectGenerator::makeGroups(int64_t guardGroupLimit, ZoneObjectList& objectList) const
 {
-    auto makeNewObjectBundle = [this, &zoneSettings]() -> IZoneObjectGroupPtr {
-        int64_t min         = zoneSettings.m_guardMin;
-        int64_t max         = zoneSettings.m_guardMax;
-        auto    targetGuard = min + m_rng->gen(max - min);
-
-        auto obj = makeNewZoneObjectGroup(targetGuard, 1 + m_rng->genSmall(3), m_rng->genSmall(101));
+    auto makeNewObjectBundle = [this, guardGroupLimit]() -> IZoneObjectGroupPtr {
+        auto obj = makeNewZoneObjectGroup(guardGroupLimit, m_rng->genMinMax(2, 4), m_rng->genSmall(101));
         return obj;
     };
     ZoneObjectList groupsList;

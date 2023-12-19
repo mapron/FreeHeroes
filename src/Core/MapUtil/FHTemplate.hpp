@@ -62,9 +62,13 @@ struct FHScoreSettings {
 
     using AttrMap = std::map<Core::ScoreAttr, ScoreScope>;
 
-    AttrMap               m_score;
-    bool                  m_isEnabled     = false;
-    bool                  m_useGuards     = true;
+    AttrMap m_score;
+    bool    m_isEnabled = false;
+
+    int64_t m_guardThreshold  = -1;
+    int64_t m_guardMinToGroup = -1;
+    int64_t m_guardGroupLimit = -1;
+
     bool                  m_strongRepulse = false;
     std::vector<int>      m_preferredHeats; // if empty will be 0
     ZoneObjectType        m_objectType = ZoneObjectType::Segment;
@@ -289,9 +293,9 @@ struct FHRngZone {
 
     Generators m_generators;
 
-    int64_t m_guardMin   = 0;
-    int64_t m_guardMax   = 0;
-    int64_t m_guardBlock = 0;
+    int64_t m_guardThreshold  = 0;
+    int64_t m_guardMinToGroup = 0;
+    int64_t m_guardGroupLimit = 0;
 
     size_t m_segmentAreaSize = 250;
 
