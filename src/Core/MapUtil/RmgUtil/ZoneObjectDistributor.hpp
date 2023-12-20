@@ -108,6 +108,7 @@ public:
         void recalcHeat();
 
         MapTilePtrList getTilesByDistance() const;
+        MapTilePtrList getTilesByDistanceFrom(MapTilePtr tile) const;
     };
     using ZoneSegmentList = std::vector<ZoneSegment>;
 

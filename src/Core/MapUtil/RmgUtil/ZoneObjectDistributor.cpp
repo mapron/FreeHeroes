@@ -413,7 +413,7 @@ bool ZoneObjectDistributor::placeWrapIntoSegments(DistributionResult& distributi
         segCandidatesSorted.insert(std::tuple{ distance, seg });
     }
     for (auto& [_, seg] : segCandidatesSorted) {
-        auto tiles = seg->getTilesByDistance();
+        auto tiles = object->m_objectType == ZoneObjectType::Segment ? seg->getTilesByDistance() : seg->getTilesByDistanceFrom(object->m_preferredPos);
         for (auto* tile : tiles) {
             if (object->estimateOccupied(tile)) {
                 if (seg->m_freeArea.intersectWith(object->m_occupiedWithDangerZone) == object->m_occupiedWithDangerZone) {
@@ -595,10 +595,43 @@ MapTilePtrList ZoneObjectDistributor::ZoneSegment::getTilesByDistance() const
     return result;
 }
 
+MapTilePtrList ZoneObjectDistributor::ZoneSegment::getTilesByDistanceFrom(MapTilePtr tile) const
+{
+    std::vector<std::pair<int, MapTilePtr>> tileCandidatesSorted;
+
+    for (auto* freetile : m_freeArea) {
+        int distance = posDistance(freetile, tile);
+        tileCandidatesSorted.push_back(std::pair{ distance, freetile });
+    }
+
+    std::sort(tileCandidatesSorted.begin(), tileCandidatesSorted.end());
+    MapTilePtrList result;
+    result.reserve(tileCandidatesSorted.size());
+    for (auto [_, stile] : tileCandidatesSorted) {
+        result.push_back(stile);
+    }
+    return result;
+}
+
 void ZoneObjectDistributor::makePreferredPoint(DistributionResult& distribution, ZoneObjectWrap* object, int angleStartOffset, size_t index, size_t count) const
 {
     auto&  rect    = distribution.m_heatRegionRects[object->m_preferredHeat];
     size_t regSize = rect.m_region.size();
+
+    auto handleSpecialPoint = [&object](ZoneObjectType type, const MapTileRegion& reg, size_t index) -> bool {
+        if (object->m_objectType == type) {
+            if (index >= reg.size())
+                throw std::runtime_error("Special point is invalid, not enough points in this zone (" + std::to_string(int(type)) + ")");
+            object->m_preferredPos = reg[index];
+            return true;
+        }
+        return false;
+    };
+    if (handleSpecialPoint(ZoneObjectType::TownMid1, distribution.m_tileZone->m_midTownNodes, 0)
+        || handleSpecialPoint(ZoneObjectType::TownMid2, distribution.m_tileZone->m_midTownNodes, 1)
+        || handleSpecialPoint(ZoneObjectType::TownMid3, distribution.m_tileZone->m_midTownNodes, 2)
+        || handleSpecialPoint(ZoneObjectType::ExitMid1, distribution.m_tileZone->m_midExitNodes, 0))
+        return;
 
     if (angleStartOffset == -1) {
         object->m_preferredPos = rect.m_region[index * regSize / count];

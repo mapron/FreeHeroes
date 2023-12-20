@@ -692,6 +692,11 @@ ObjectGenerator::ObjectFactoryVisitable::ObjectFactoryVisitable(FHMap&          
         if (!ObjectGenerator::terrainViable(visitable->objectDefs, terrain))
             continue;
 
+        if (!scoreSettings.m_objectIdExclude.empty() && scoreSettings.m_objectIdExclude.contains(visitable->id))
+            continue;
+        if (!scoreSettings.m_objectIdInclude.empty() && !scoreSettings.m_objectIdInclude.contains(visitable->id))
+            continue;
+
         RecordVisitable record;
         record.m_obj.m_visitableId = visitable;
         record.m_frequency         = visitable->frequency;

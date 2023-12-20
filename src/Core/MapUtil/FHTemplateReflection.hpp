@@ -70,7 +70,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_placementOrder,
     m_objectType,
     m_generatorsInclude,
-    m_generatorsExclude)
+    m_generatorsExclude,
+    m_objectIdInclude,
+    m_objectIdExclude)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone::GeneratorBank::Record,

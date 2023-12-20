@@ -77,6 +77,8 @@ struct FHScoreSettings {
     ZoneObjectType        m_objectType     = ZoneObjectType::Segment;
     std::set<std::string> m_generatorsInclude;
     std::set<std::string> m_generatorsExclude;
+    std::set<std::string> m_objectIdInclude;
+    std::set<std::string> m_objectIdExclude;
 
     Core::MapScore makeTargetScore() const
     {

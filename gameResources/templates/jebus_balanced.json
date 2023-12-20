@@ -151,6 +151,7 @@
                         "guardMinToGroup": 100000,
                         "preferredHeats": [2, 3, 4, 5, 6, 7],
                         "generatorsExclude": ["resources"],
+                        "objectIdExclude": ["sod.visitable.redwoodObservatory", "sod.visitable.magicWell"],
                         "score":{
                             "ArtStat":        { "target": 6000 , "maxSingle": 2400, "maxRemain": 4000, "consumeRemain": true},
                             "ArtSupport":     { "target": 4000 , "maxSingle": 2400, "maxRemain": 4000, "consumeRemain": true},
@@ -178,6 +179,36 @@
                         "score":{
                             "Resource":       { "target": 40000, "maxSingle": 2500, "maxRemain": 3000  , "consumeRemain" : true},
                             "Gold"    :       { "target": 40000, "maxSingle": 2500, "maxRemain": 3000  , "consumeRemain" : true}
+                        }
+                    },
+                    "920_RoadMid1": {
+                        "objectType": "TownMid1",
+                        "guardThreshold": 100000,
+                        "isEnabled": true,
+                        "generatorsInclude": ["visitables"],
+                        "objectIdInclude": ["sod.visitable.redwoodObservatory"],
+                        "score": {
+                            "Support": {"target": 500 }
+                        }
+                    },
+                    "930_RoadMid2": {
+                        "objectType": "TownMid2",
+                        "guardThreshold": 100000,
+                        "isEnabled": true,
+                        "generatorsInclude": ["visitables"],
+                        "objectIdInclude": ["sod.visitable.redwoodObservatory"],
+                        "score": {
+                            "Support": {"target": 500 }
+                        }
+                    },
+                    "940_ExitMid1": {
+                        "objectType": "ExitMid1",
+                        "guardThreshold": 100000,
+                        "isEnabled": true,
+                        "generatorsInclude": ["visitables"],
+                        "objectIdInclude": ["sod.visitable.magicWell" ],
+                        "score": {
+                            "Support": {"target": 1000 }
                         }
                     }
                 },
@@ -454,8 +485,9 @@
                     "620_GuardedResources": {"isEnabled": false},
                     "630_LowUnguarded": {"isEnabled": false},
                     "810_SegmentScatter": {"isEnabled": true},
-                    "910_RoadScatter": {"isEnabled": true}
-                    
+                    "910_RoadScatter": {"isEnabled": true},
+                    "930_RoadMid2": {"isEnabled": false},
+                    "940_ExitMid1": {"isEnabled": false}
                 }
             },
     
