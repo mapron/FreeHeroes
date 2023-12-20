@@ -51,23 +51,27 @@ ZoneObjectGeneration ObjectGenerator::generate(const FHRngZone&             zone
             continue;
         }
         [[maybe_unused]] const bool lastIteration = lastSettings == &scoreSettings;
-        Core::MapScore              targetScore;
+        Core::MapScore              targetScore   = scoreSettings.makeTargetScore();
 
-        ZoneObjectList objectList;
+        {
+            auto targetScoreRemainingPrevCopy = targetScoreRemainingPrev;
+            for (auto& [key, val] : targetScoreRemainingPrevCopy) {
+                if (targetScore.contains(key)) {
+                    targetScore[key] += val;
+                    targetScoreRemainingPrev.erase(key);
+                }
+            }
+        }
 
-        //group.scale(armyPercent, goldPercent);
-
-        for (const auto& [key, val] : scoreSettings.m_score)
-            targetScore[key] = val.m_target;
+        if (0) {
+            m_logOutput << indentBase << scoreId << " prev: " << targetScoreRemainingPrev << ", target=" << targetScore << "\n";
+        }
 
         //auto targetSum = totalScoreValue(targetScore);
 
         if (doLog)
             m_logOutput << indentBase << scoreId << " start\n";
-        Core::MapScore currentScore, groupLimits;
-        for (const auto& [attr, sscope] : scoreSettings.m_score)
-            if (sscope.m_maxGroup != -1)
-                groupLimits[attr] = sscope.m_maxGroup;
+        Core::MapScore currentScore;
 
         auto isFilteredOut = [&scoreSettings](const std::string& key) {
             if (!scoreSettings.m_generatorsExclude.empty() && scoreSettings.m_generatorsExclude.contains(key))
@@ -101,8 +105,10 @@ ZoneObjectGeneration ObjectGenerator::generate(const FHRngZone&             zone
 
         const int iterLimit = 100000;
         int       i         = 0;
+
+        ZoneObjectList objectList;
         for (; i < iterLimit; i++) {
-            if (!generateOneObject(targetScore, groupLimits, currentScore, objectFactories, objectList)) {
+            if (!generateOneObject(targetScore, currentScore, objectFactories, objectList)) {
                 if (doLog)
                     m_logOutput << indentBase << scoreId << " finished on [" << i << "] iteration\n";
                 break;
@@ -111,17 +117,6 @@ ZoneObjectGeneration ObjectGenerator::generate(const FHRngZone&             zone
         if (i >= iterLimit - 1)
             throw std::runtime_error("Iteration limit reached.");
 
-        //auto deficitScore = (targetScore - currentScore);
-        //auto deficitSum   = totalScoreValue(deficitScore);
-        // auto allowedDeficit      = targetSum * scoreSettings.m_tolerancePercent / 100;
-        targetScoreRemainingPrev = currentScore;
-
-        if (doLog) {
-            m_logOutput << indentBase << scoreId << " target score:" << targetScore << "\n";
-            m_logOutput << indentBase << scoreId << " end score:" << currentScore << "\n";
-            //m_logOutput << indentBase << scoreId << " deficit score:" << deficitScore << "\n";
-            //m_logOutput << indentBase << scoreId << " checking deficit tolerance: " << deficitSum << " <= " << allowedDeficit << "...\n";
-        }
         //if (deficitSum > allowedDeficit && 0) // @todo: redo deficit
         //    throw std::runtime_error("Deficit score for '" + scoreId + "' exceed tolerance!");
 
@@ -172,17 +167,34 @@ ZoneObjectGeneration ObjectGenerator::generate(const FHRngZone&             zone
             needDistributeEqual[d]->m_generatedCount = needDistributeEqual.size();
         }
 
-        m_logOutput << indentBase << scoreId << " generated:" << objectList.size() << "\n";
+        Core::MapScore remainScoreNext;
+        auto           remainScore = (targetScore - currentScore);
+        for (const auto& [key, val] : scoreSettings.m_score) {
+            if (!remainScore.contains(key))
+                continue;
+            auto remainValue = remainScore[key];
+            if (remainValue > val.m_maxRemain) {
+                m_logOutput << indentBase << scoreId << " remainScore=" << remainScore << ": for attr " << FHScoreSettings::attrToString(key) << " max remain is " << val.m_maxRemain << ", but " << remainValue << " is generated.\n";
+                throw std::runtime_error("Incorrect target scores. Make sure to create consume chains.");
+            }
+            if (!val.m_consumeRemain)
+                remainScoreNext[key] = remainValue;
+        }
+        targetScoreRemainingPrev = remainScoreNext + targetScoreRemainingPrev;
 
+        m_logOutput << indentBase << scoreId << " generated: " << objectList.size() << ", (score=" << currentScore << ") unconsumed remain for next target: " << remainScoreNext << "\n";
+        //m_logOutput << "targetScoreRemainingPrev=" << targetScoreRemainingPrev << "\n";
         result.m_objects.insert(result.m_objects.end(), objectList.cbegin(), objectList.cend());
     }
+    auto totalScoreRemain = totalScoreValue(targetScoreRemainingPrev);
     std::sort(result.m_allIds.begin(), result.m_allIds.end());
-    m_logOutput << indentBase << "Total generated:" << result.m_allIds.size() << "\n";
+    m_logOutput << indentBase << "Total generated:" << result.m_allIds.size() << ", remainScore=" << targetScoreRemainingPrev << "\n";
+    if (totalScoreRemain > 0)
+        throw std::runtime_error("Total remainder must be 0");
     return result;
 }
 
 bool ObjectGenerator::generateOneObject(const Core::MapScore&           targetScore,
-                                        const Core::MapScore&           groupLimits,
                                         Core::MapScore&                 currentScore,
                                         std::vector<IObjectFactoryPtr>& objectFactories,
                                         ZoneObjectList&                 objectList) const
@@ -198,49 +210,15 @@ bool ObjectGenerator::generateOneObject(const Core::MapScore&           targetSc
 
     const uint64_t rngFreq = m_rng->gen(totalWeight - 1);
 
-    auto isScoreOverflow = [&targetScore](const Core::MapScore& current) {
-        for (const auto& [key, val] : current) {
-            if (!targetScore.contains(key))
-                return true;
-            const auto targetVal = targetScore.at(key);
-            if (val > targetVal)
-                return true;
-        }
-        return false;
-    };
-
-    auto isGroupOverflow = [&groupLimits](const Core::MapScore& current) {
-        for (const auto& [key, val] : current) {
-            if (!groupLimits.contains(key))
-                continue;
-            const auto limitVal = groupLimits.at(key);
-            if (val > limitVal)
-                return true;
-        }
-        return false;
-    };
-
     uint64_t indexWeight = 0, baseWeight = 0;
     for (IObjectFactoryPtr& fac : objectFactories) {
         indexWeight += fac->totalFreq();
         if (indexWeight > rngFreq && fac->totalFreq()) {
             const uint64_t rngFreqForFactory = rngFreq - baseWeight;
-            auto           obj               = fac->make(rngFreqForFactory);
-            if (!obj)
-                throw std::runtime_error("Object factory failed to make an object!");
-            if (obj->getScore().empty())
-                throw std::runtime_error("Object '" + obj->getId() + "' has no score!");
-
-            Core::MapScore currentScoreTmp = currentScore + obj->getScore();
-            if (isScoreOverflow(currentScoreTmp) || isGroupOverflow(obj->getScore())) {
-                //m_logOutput << indent << "overflow '" << obj->getId() << "' score=" << obj->getScore() << ", current=" << currentScore << "\n";
-                obj->setAccepted(false);
+            auto           obj               = fac->makeChecked(rngFreqForFactory, currentScore, targetScore);
+            if (!obj) {
                 return true;
             }
-            currentScore = currentScoreTmp;
-
-            //m_logOutput << indent << "add '" << obj->getId() << "' score=" << obj->getScore() << " guard=" << obj->getGuard() << "; current factory freq=" << fac->totalFreq() << ", active=" << fac->totalActiveRecords() << "\n";
-            obj->setAccepted(true);
             objectList.push_back(ZoneObjectItem{ .m_object = obj });
             return true;
         }

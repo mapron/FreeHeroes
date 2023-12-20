@@ -19,7 +19,7 @@
                         "placementOrder": 0,
                         "preferredHeats": [9],
                         "score": {
-                            "Control":        { "target":  85000, "maxSingle": 30000}
+                            "Control":        { "target":  82000, "maxSingle": 30000}
                         }
                     },
                 
@@ -28,27 +28,27 @@
                         "preferredHeats": [7],
                         "generatorsInclude": ["banks"],
                         "score": {
-                            "ArtStat":        { "target": 30000 , "maxSingle": 15000, "minSingle": 4000 },
-                            "ArtSupport":     { "target": 20000 , "maxSingle": 10000, "minSingle": 4000 },
-                            "Gold":           { "target": 30000 , "maxSingle": 30000, "minSingle": 30000 }
+                            "ArtStat":        { "target": 40000 , "maxSingle": 15000, "minSingle": 4000 , "maxRemain": 40000 },
+                            "ArtSupport":     { "target": 25000 , "maxSingle": 10000, "minSingle": 4000 , "maxRemain": 25000 },
+                            "Gold":           { "target": 30000 , "maxSingle": 30000, "minSingle": 30000, "maxRemain": 0 }
                         }
                     },
                     "120_HighArmy": {
                         "isEnabled": true,
                         "preferredHeats": [3, 4],
                         "score": {
-                            "Army":           { "target": 50000 , "maxSingle": 20000, "minSingle": 8000 },
-                            "ArmyDwelling":   { "target": 20000 , "maxSingle": 20000, "minSingle": 10000},
-                            "ArmyAux":        { "target": 25000 , "maxSingle": 15000, "minSingle": 10000}
+                            "Army":           { "target": 50000 , "maxSingle": 20000, "minSingle": 8000 , "maxRemain": 15000 },
+                            "ArmyDwelling":   { "target": 20000 , "maxSingle": 20000, "minSingle": 10000, "maxRemain": 15000 },
+                            "ArmyAux":        { "target": 30000 , "maxSingle": 15000, "minSingle": 10000, "maxRemain": 15000 }
                         }
                     },
                     "130_MidArmy": {
                         "isEnabled": true,
                         "preferredHeats": [0],
                         "score": {
-                            "Army":           { "target": 80000, "maxSingle": 12000},
-                            "ArmyDwelling":   { "target": 10000, "maxSingle": 9000, "minSingle": 4000},
-                            "ArmyAux":        { "target": 15000, "maxSingle": 9000}
+                            "Army":           { "target": 80000, "maxSingle": 12000  , "maxRemain": 5000, "consumeRemain" : true },
+                            "ArmyDwelling":   { "target": 10000, "maxSingle": 9000, "maxRemain": 5000, "minSingle": 4000},
+                            "ArmyAux":        { "target": 15000, "maxSingle": 9000, "maxRemain": 5000, "consumeRemain" : true}
                         }
                     },
                     "140_LowArmy": {
@@ -56,7 +56,7 @@
                        "preferredHeats": [5, 6, 7],
                        "useGuards": true,
                        "score": {
-                            "ArmyDwelling":   { "target": 20000 ,"maxSingle": 3900}
+                            "ArmyDwelling":   { "target": 20000 ,"maxSingle": 3900, "maxRemain": 2000, "consumeRemain" : true}
                         }
                     },
 
@@ -64,18 +64,18 @@
                         "isEnabled": true,
                         "preferredHeats": [1],
                         "score": {
-                            "Support":        { "target": 15000 , "minSingle":  5000}
+                            "Support":        { "target": 15000 , "minSingle":  5000, "maxRemain": 8000, "consumeRemain" : true}
                         }
                     },
                     "320_HighArtsAndBanks": {
                         "isEnabled": true,
                         "preferredHeats": [5, 6, 7],
                         "score": {
-                            "Resource":       { "target": 60000 , "maxSingle": 50000, "minSingle": 8000 },
-                            "Gold":           { "target": 30000 , "maxSingle": 15000, "minSingle": 3000 },
+                            "Resource":       { "target": 60000 , "maxSingle": 50000, "minSingle": 8000, "maxRemain": 50000, "consumeRemain" : true },
+                            "Gold":           { "target": 30000 , "maxSingle": 15000, "minSingle": 3000, "maxRemain": 5000 },
                             
-                            "ArtStat":        { "target": 1 , "maxSingle": 15000, "minSingle": 4000 },
-                            "ArtSupport":     { "target": 1 , "maxSingle": 10000, "minSingle": 4000 }
+                            "ArtStat":        { "target": 1 , "maxSingle": 15000, "minSingle": 4000, "maxRemain": 7000 },
+                            "ArtSupport":     { "target": 1 , "maxSingle": 10000, "minSingle": 4000, "maxRemain": 7000 }
                         }
                     },
 
@@ -83,16 +83,16 @@
                         "isEnabled": true,
                         "preferredHeats": [9],
                         "score": {
-                            "SpellOffensive": { "target": 60000 , "minSingle":  5000},
-                            "SpellCommon":    { "target": 20000 , "minSingle":  5000}
+                            "SpellOffensive": { "target": 60000 , "minSingle":  5000, "maxRemain": 12000},
+                            "SpellCommon":    { "target": 20000 , "minSingle":  5000, "maxRemain": 10000}
                         }
                     },
                     "420_MidSpells": {
                         "isEnabled": true,
                         "preferredHeats": [8],
                         "score": {
-                            "SpellOffensive": { "target": 10000, "maxSingle": 6000, "minSingle": 2100},
-                            "SpellCommon":    { "target": 10000, "maxSingle": 6000, "minSingle": 500}
+                            "SpellOffensive": { "target": 10000, "maxSingle": 6000, "minSingle": 2100, "maxRemain": 3000},
+                            "SpellCommon":    { "target": 10000, "maxSingle": 6000, "minSingle": 500 , "maxRemain": 3000}
                         }
                     },
 
@@ -101,7 +101,7 @@
                         "preferredHeats": [4, 5, 6, 7],
                         "generatorsInclude": ["pandoras"],
                         "score": {
-                            "Experience":     { "target": 40000, "maxSingle": 12000, "minSingle": 3000}
+                            "Experience":     { "target": 40000, "maxSingle": 12000, "minSingle": 3000, "maxRemain": 5000}
                         }
                     },
                     "520_PermanentXp": {
@@ -110,14 +110,14 @@
                         "preferredHeats": [1, 2, 3, 4, 5],
                         "generatorsInclude": ["visitables"],
                         "score": {
-                            "Experience":     { "target": 20000, "minSingle": 2000}
+                            "Experience":     { "target": 20000, "minSingle": 2000, "maxRemain": 4000}
                         }
                     },
                     "530_GuardedTreasureChests": {
                         "isEnabled": true,
                         "preferredHeats": [1, 2, 3, 4],
                         "score":{
-                            "Experience":     { "target": 20000, "maxSingle": 2000}
+                            "Experience":     { "target": 20000, "maxSingle": 2000, "maxRemain": 4000, "consumeRemain": true}
                         }
                     },
 
@@ -126,39 +126,39 @@
                         "preferredHeats": [3, 4, 5, 6, 7, 8, 9],
                         "generatorsExclude": ["resources"],
                         "score": {
-                            "ArtStat":        { "target": 25000, "maxSingle": 7000, "minSingle": 2500},
-                            "ArtSupport":     { "target": 15000, "maxSingle": 7000, "minSingle": 2500},
-                            "Gold":           { "target": 30000, "maxSingle": 15000, "minSingle": 5001},
-                            "Resource":       { "target": 40000, "maxSingle": 15000, "minSingle": 2500},
-                            "SpellOffensive": { "target": 10000, "maxSingle": 6000, "minSingle": 2100},
-                            "SpellCommon":    { "target": 10000, "maxSingle": 6000, "minSingle": 500},
-                            "Support":        { "target": 5000 , "minSingle": 1001, "maxSingle": 4900},
-                            "Upgrade"   :     { "target": 10000, "maxSingle": 9000, "minSingle": 2000}
+                            "ArtStat":        { "target": 25000, "maxSingle": 7000 , "minSingle": 2500, "maxRemain": 4000 },
+                            "ArtSupport":     { "target": 15000, "maxSingle": 7000 , "minSingle": 2500, "maxRemain": 4000 },
+                            "Gold":           { "target": 30000, "maxSingle": 15000, "minSingle": 5001, "maxRemain": 10000 },
+                            "Resource":       { "target": 40000, "maxSingle": 15000, "minSingle": 2500, "maxRemain": 10000 },
+                            "SpellOffensive": { "target": 10000, "maxSingle": 6000 , "minSingle": 2100, "maxRemain": 4000 , "consumeRemain": true},
+                            "SpellCommon":    { "target": 10000, "maxSingle": 6000 , "minSingle": 500 , "maxRemain": 4000 , "consumeRemain": true},
+                            "Support":        { "target": 5000 , "maxSingle": 4900 , "minSingle": 1001, "maxRemain": 2100, "consumeRemain": true},
+                            "Upgrade"   :     { "target": 10000, "maxSingle": 9000 , "minSingle": 2000, "maxRemain": 4000 }
                         }
                     },
-                    "520_GuardedResources": {
+                    "620_GuardedResources": {
                         "isEnabled": true,
                         "guardThreshold": 10,
                         "preferredHeats": [2, 3, 4],
                         "generatorsInclude": ["resources"],
                         "score":{
-                            "Resource":       { "target": 20000, "maxSingle": 3000}
+                            "Resource":       { "target": 20000, "maxSingle": 3000, "maxRemain": 6000}
                         }
                     },
-                    "610_LowUnguarded": {
+                    "630_LowUnguarded": {
                         "isEnabled": true,
                         "guardThreshold": 100000,
                         "guardMinToGroup": 100000,
                         "preferredHeats": [2, 3, 4, 5, 6, 7],
                         "generatorsExclude": ["resources"],
                         "score":{
-                            "ArtStat":        { "target": 6000 , "maxSingle": 2400},
-                            "ArtSupport":     { "target": 4000 , "maxSingle": 2400},
-                            "Gold":           { "target": 30000, "maxSingle": 5000},
-                            "Upgrade"   :     { "target": 10000, "maxSingle": 3000},
-                            "ResourceGen":    { "target": 50000},
-                            "SpellAny":       { "target": 10000, "maxSingle": 1800},
-                            "Support":        { "target": 2000 , "maxSingle": 1000}
+                            "ArtStat":        { "target": 6000 , "maxSingle": 2400, "maxRemain": 4000, "consumeRemain": true},
+                            "ArtSupport":     { "target": 4000 , "maxSingle": 2400, "maxRemain": 4000, "consumeRemain": true},
+                            "Gold":           { "target": 30000, "maxSingle": 5000, "maxRemain": 2000 },
+                            "Upgrade"   :     { "target": 10000, "maxSingle": 3000, "maxRemain": 5000, "consumeRemain": true},
+                            "ResourceGen":    { "target": 50000,                    "maxRemain": 5000, "consumeRemain": true},
+                            "SpellAny":       { "target": 10000, "maxSingle": 1800, "maxRemain": 4000, "consumeRemain": true},
+                            "Support":        { "target": 2000 , "maxSingle": 1000, "maxRemain": 2000, "consumeRemain": true}
                         }
                     },
                     "810_SegmentScatter": {
@@ -166,8 +166,8 @@
                         "objectType": "SegmentScatter",
                         "generatorsExclude": ["banks"],
                         "score":{
-                            "Gold":           { "target": 30000, "maxSingle": 2000},
-                            "Resource":       { "target": 60000, "maxSingle": 2500}
+                            "Gold":           { "target": 30000, "maxSingle": 2000, "maxRemain": 3000  , "consumeRemain" : true },
+                            "Resource":       { "target": 60000, "maxSingle": 2500, "maxRemain": 3000  , "consumeRemain" : true }
                         }
                     },
                     "910_RoadScatter": {
@@ -176,8 +176,8 @@
                         
                         "generatorsExclude": ["banks"],
                         "score":{
-                            "Resource":       { "target": 40000, "maxSingle": 2500},
-                            "Gold"    :       { "target": 40000, "maxSingle": 2500}
+                            "Resource":       { "target": 40000, "maxSingle": 2500, "maxRemain": 3000  , "consumeRemain" : true},
+                            "Gold"    :       { "target": 40000, "maxSingle": 2500, "maxRemain": 3000  , "consumeRemain" : true}
                         }
                     }
                 },
@@ -335,7 +335,7 @@
             },
             "Treasure": {
                 "base": "Common",
-                "centerDispersion": {"x": 1, "y": 1}, "relativeSizeAvg": 140, "relativeSizeDispersion": 5, "terrain": "sod.terrain.sand",
+                "centerDispersion": {"x": 1, "y": 1}, "relativeSizeAvg": 130, "relativeSizeDispersion": 5, "terrain": "sod.terrain.sand",
                 "zoneGuardPercent": 150,
                 "excludeFactionZones":["P1", "P2", "P3", "P4"],
                 "towns": {
@@ -395,42 +395,17 @@
                 },
                 
                 "scoreTargets": {
-                    "15_High": {
-                        "isEnabled": false,
-                        "score": {
-                            "Resource":       { "target": 90000   , "minSingle":  8000, "maxSingle" : -1},
-                            
-                            "Experience":     { "target": 50000   , "minSingle":  8000, "maxSingle" : -1},
-                            "SpellOffensive": { "target": 120000  , "minSingle":  5000, "maxSingle" : -1},
-                            "SpellCommon":    { "target":  80000  , "minSingle":  5000, "maxSingle" : -1},
-                            "Upgrade"   :     { "target": 25000   , "minSingle":  3000, "maxSingle" : -1},
-                            "Support":        { "target": 20000   , "minSingle":  6000, "maxSingle" : -1}
-                        }
-                    },
-                    "15_TreasureMid": {
-                        "isEnabled": false,
-                        "score": {
-                            "ArtStat":        { "target": 70000   , "minSingle": 5000, "maxSingle" : 10000},
-                            "ArtSupport":     { "target": 70000   , "minSingle": 5000, "maxSingle" : 10000},
-                            "Gold":           { "target": 50000   , "minSingle": 8000, "maxSingle" : 15000},
-                            "Resource":       { "target": 10000   , "minSingle": 3000, "maxSingle" : -1}
-                        }
-                    },
-                    
-
                     "010_ControlScrolls": {"isEnabled": false},
-                    
-                    
                     "110_Utopia": {
-                        "isEnabled": false,
+                        "isEnabled": true,
                         "preferredHeats": [7, 8, 9],
                         "generatorsInclude": ["banks"],
                         "score": {
-                            "ArtStat":        { "target": 350000  , "minSingle":  5000, "maxSingle" : -1},
-                            "ArtSupport":     { "target": 200000  , "minSingle":  8000, "maxSingle" : -1},
-                            "Gold":           { "target": 300000  , "minSingle": 20000, "maxSingle" : -1},
+                            "ArtStat":        { "target": 250000  , "minSingle":  5000, "maxSingle" : -1, "maxRemain": 200000},
+                            "ArtSupport":     { "target": 200000  , "minSingle":  8000, "maxSingle" : -1, "maxRemain": 150000},
+                            "Gold":           { "target": 300000  , "minSingle": 20000, "maxSingle" : -1, "maxRemain": 100000},
                             
-                            "Control":        { "target": 320000  , "minSingle": 40000, "maxSingle" : 40000 }
+                            "Control":        { "target": 200000  , "minSingle": 40000, "maxSingle" : 40000, "maxRemain": 200000 }
                         }
                     },
                     "111_ControlArts": {
@@ -444,27 +419,42 @@
                     },
                     "120_HighArmy": {
                         "isEnabled": true,
-                        "preferredHeats": [0, 1, 2],
+                        "preferredHeats": [0, 1],
                         "score": {
-                            "Army":           { "target": 250000 , "maxSingle": -1},
-                            "ArmyDwelling":   { "target": 40000  , "maxSingle": -1},
-                            "ArmyAux":        { "target": 150000 , "maxSingle": -1}
+                            "Army":           { "target": 250000 , "maxSingle": -1, "consumeRemain" : true },
+                            "ArmyDwelling":   { "target": 40000  , "maxSingle": -1, "maxRemain": 20000 , "consumeRemain" : true },
+                            "ArmyAux":        { "target": 250000 , "maxSingle": -1, "minSingle": 30000, "maxRemain": 60000 , "consumeRemain": true }
                         }
                     },
                     "130_MidArmy":{"isEnabled": false},
                     "140_LowArmy": {"isEnabled": false},
                     "310_HighSupportVisitables": {"isEnabled": false},
-                    "320_HighArtsAndBanks": {"isEnabled": false},
+                    "320_HighArtsAndBanks": {
+                        "isEnabled": true,
+                        "preferredHeats": [3, 4, 5, 6],
+                        "score": {
+                            "Resource":       { "target": 60000 , "maxSingle": 50000, "minSingle": 8000, "maxRemain": 50000, "consumeRemain" : true},
+                            "Gold":           { "target": 150000 , "maxSingle": 15000, "minSingle": 5000, "maxRemain": 10000 },
+                            
+                            "ArtStat":        { "target": 150000 , "maxSingle": -1, "minSingle": 6000, "maxRemain": 12000, "consumeRemain" : true },
+                            "ArtSupport":     { "target": 100000 , "maxSingle": -1, "minSingle": 8000, "maxRemain": 16000, "consumeRemain" : true }
+                        }
+                    },
                     "410_HighSpells": {"isEnabled": false},
                     "420_MidSpells": {"isEnabled": false},
-                    "510_XpPandoras":{"isEnabled": false},
+                    "510_XpPandoras": {
+                        "isEnabled": true,
+                        "score": {
+                            "Experience":     { "target": 100000, "maxSingle": -1, "minSingle": 12000, "maxRemain": 24000, "consumeRemain": true }
+                        }
+                    },
                     "520_PermanentXp": {"isEnabled": false},
                     "530_GuardedTreasureChests": {"isEnabled": false},
                     "610_Mid": {"isEnabled": false},
-                    "520_GuardedResources": {"isEnabled": false},
-                    "610_LowUnguarded": {"isEnabled": false},
+                    "620_GuardedResources": {"isEnabled": false},
+                    "630_LowUnguarded": {"isEnabled": false},
                     "810_SegmentScatter": {"isEnabled": true},
-                    "910_RoadScatter": {"isEnabled": false}
+                    "910_RoadScatter": {"isEnabled": true}
                     
                 }
             },
@@ -477,7 +467,7 @@
                 "towns": {"town1":{"excludeFactionZones":["P3"] }, "town2":{"excludeFactionZones":["P3"]}, "main": {"tilesToTarget": 20, "closeToConnection":"CC_P3_0_main" } } },
             "P4": { "base": "Common"  , "isNormal": true,  "player": "Green", "centerAvg": {"x": 15 , "y": 120}  ,
                 "towns": {"town1":{"excludeFactionZones":["P4"] }, "town2":{"excludeFactionZones":["P4"]}, "main": {"tilesToTarget": 20, "closeToConnection":"CC_P4_0_main" } } },
-            "CC": { "base": "Treasure", "isNormal": true,  "player": "None", "centerAvg": {"x": 72 , "y": 72 }, "centerShiftElasticity": 0  }
+            "CC": { "base": "Treasure", "isNormal": true,  "player": "None", "centerAvg": {"x": 72 , "y": 72 } }
         },
         "connections": {
             "CC_P1": { "from": "CC", "to": "P1", "paths": { "CC_P1_0_main": { "guard": 100000               }, "CC_P1_alt1": { "guard": 100000, "road": "BorderPoints"             }, "CC_P1_alt2": { "guard": 100000, "road": "BorderPoints"             } } },

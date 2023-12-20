@@ -326,8 +326,9 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
             auto* artdef  = art->objectDefs.get({});
             auto* artItem = result.addItem(makeItemByDef(SpriteMap::Layer::Artifact, artdef, artPos).setPriority(SpriteMap::s_objectMaxPriority + 2));
             estimateArtScore(art, artItem->m_score);
-            artItem->m_opacity   = 0.8;
+            artItem->m_opacity   = obj.m_artifacts.size() > 1 ? 0.9 : 0.7;
             artItem->m_blockMask = {};
+            addValueInfo(artItem, obj);
         }
     }
     for (auto& obj : fhMap.m_objects.m_obstacles) {

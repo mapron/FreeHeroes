@@ -53,10 +53,12 @@ struct FHRngZoneTown {
 
 struct FHScoreSettings {
     struct ScoreScope {
-        int64_t m_target    = 0;
-        int64_t m_minSingle = -1;
-        int64_t m_maxSingle = -1;
-        int64_t m_maxGroup  = -1;
+        int64_t m_target        = 0;
+        int64_t m_minSingle     = -1;
+        int64_t m_maxSingle     = -1;
+        int64_t m_maxGroup      = -1;
+        int64_t m_maxRemain     = -1;
+        bool    m_consumeRemain = false;
 
         bool operator==(const ScoreScope&) const noexcept = default;
     };
@@ -75,6 +77,28 @@ struct FHScoreSettings {
     ZoneObjectType        m_objectType     = ZoneObjectType::Segment;
     std::set<std::string> m_generatorsInclude;
     std::set<std::string> m_generatorsExclude;
+
+    Core::MapScore makeTargetScore() const
+    {
+        Core::MapScore targetScore;
+        for (const auto& [key, val] : m_score)
+            targetScore[key] = val.m_target;
+        return targetScore;
+    }
+    Core::MapScore makeMaxScore() const
+    {
+        Core::MapScore targetScore;
+        for (const auto& [key, val] : m_score)
+            targetScore[key] = val.m_maxSingle;
+        return targetScore;
+    }
+    Core::MapScore makeMinScore() const
+    {
+        Core::MapScore targetScore;
+        for (const auto& [key, val] : m_score)
+            targetScore[key] = val.m_minSingle;
+        return targetScore;
+    }
 
     bool isValidValue(Core::ScoreAttr attr, int64_t value) const noexcept
     {

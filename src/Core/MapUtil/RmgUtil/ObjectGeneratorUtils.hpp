@@ -224,6 +224,17 @@ struct ObjectGenerator::AbstractFactory : public IObjectFactory {
         , m_rng(rng)
     {}
 
+    virtual IZoneObjectPtr make(uint64_t rngFreq) = 0;
+    virtual IZoneObjectPtr makeWithScore(uint64_t rngFreq, const FHScoreSettings& updatedScore)
+    {
+        (void) updatedScore;
+        auto result = make(rngFreq);
+
+        if (!result)
+            throw std::runtime_error("Object factory failed to make an object!");
+        return result;
+    }
+
     uint64_t totalFreq() const override
     {
         return m_records.m_frequency;
@@ -231,6 +242,59 @@ struct ObjectGenerator::AbstractFactory : public IObjectFactory {
     size_t totalActiveRecords() const override
     {
         return m_records.m_active;
+    }
+
+    IZoneObjectPtr makeChecked(uint64_t rngFreq, Core::MapScore& currentScore, const Core::MapScore& targetScore) override // return null on fail
+    {
+        auto isScoreOverflow = [&targetScore](const Core::MapScore& current) {
+            for (const auto& [key, val] : current) {
+                if (!targetScore.contains(key))
+                    return true;
+                const auto targetVal = targetScore.at(key);
+                if (val > targetVal)
+                    return true;
+            }
+            return false;
+        };
+        /*
+	  target = 20000
+	  current = 14000
+	  remain = 6000
+	  max = 7000 -> now max is 6000
+*/
+
+        FHScoreSettings scoreSettings = m_scoreSettings; // targetScore can contain MORE than m_scoreSettings, be careful.
+        for (const auto& [key, val] : currentScore) {
+            if (!scoreSettings.m_score.contains(key))
+                continue;
+            auto&      scoreTarget = scoreSettings.m_score[key];
+            const auto targetVal   = targetScore.at(key);
+            const auto remain      = targetVal - val;
+            if (remain <= 0) {
+                scoreSettings.m_score.erase(key);
+                continue;
+            }
+            scoreTarget.m_maxSingle = std::min(scoreTarget.m_maxSingle, remain);
+        }
+
+        auto obj = this->makeWithScore(rngFreq, scoreSettings);
+        if (!obj)
+            return nullptr;
+
+        if (obj->getScore().empty())
+            throw std::runtime_error("Object '" + obj->getId() + "' has no score!");
+
+        Core::MapScore currentScoreTmp = currentScore + obj->getScore();
+        if (isScoreOverflow(currentScoreTmp)) {
+            //m_logOutput << indent << "overflow '" << obj->getId() << "' score=" << obj->getScore() << ", current=" << currentScore << "\n";
+            obj->setAccepted(false);
+            return nullptr;
+        }
+        currentScore = currentScoreTmp;
+
+        //m_logOutput << indent << "add '" << obj->getId() << "' score=" << obj->getScore() << " guard=" << obj->getGuard() << "; current factory freq=" << fac->totalFreq() << ", active=" << fac->totalActiveRecords() << "\n";
+        obj->setAccepted(true);
+        return obj;
     }
 
     CommonRecordList<Record> m_records;

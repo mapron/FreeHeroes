@@ -58,7 +58,7 @@ MapToolWindow::MapToolWindow(
     , m_modelsProvider(modelsProvider)
     , m_userSettings(std::make_unique<FHRngUserSettings>())
 {
-    m_version = "1.0.6";
+    m_version = "1.1.0";
 
     {
         auto buildDate = QLocale("en_US").toDate(QString(__DATE__).simplified(), "MMM d yyyy");
@@ -185,7 +185,9 @@ void MapToolWindow::generateMap()
         m_ui->labelStatus->setText(tr("Failed to save user settings"));
         return;
     }
+    Mernel::ScopeTimer timer;
 
+    auto start = QTime::currentTime();
     m_ui->labelStatus->setText(tr("Generation..."));
     m_ui->pushButtonGenerate->setEnabled(false);
 
@@ -248,9 +250,7 @@ void MapToolWindow::generateMap()
         m_ui->textEditDiagInfo->setPlainText(QString::fromStdString(osDiag.str()));
     }
 
-    QTime t = QTime::currentTime();
-
-    m_ui->labelStatus->setText((result ? tr("Success") : tr("Error!")) + " - " + t.toString("mm:ss.zzz"));
+    m_ui->labelStatus->setText((result ? tr("Success") : tr("Error!")) + " - " + QString("%1 ms.").arg(timer.elapsedUS() / 1000));
 
     m_ui->pushButtonGenerate->setEnabled(true);
 }

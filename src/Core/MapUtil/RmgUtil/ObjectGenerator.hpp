@@ -30,9 +30,10 @@ public:
     struct IObjectFactory {
         virtual ~IObjectFactory() = default;
 
-        virtual IZoneObjectPtr make(uint64_t rngFreq)     = 0;
-        virtual uint64_t       totalFreq() const          = 0;
-        virtual size_t         totalActiveRecords() const = 0;
+        virtual IZoneObjectPtr makeChecked(uint64_t rngFreq, Core::MapScore& currentScore, const Core::MapScore& targetScore) = 0; // return null on fail
+
+        virtual uint64_t totalFreq() const          = 0;
+        virtual size_t   totalActiveRecords() const = 0;
     };
     using IObjectFactoryPtr = std::shared_ptr<IObjectFactory>;
 
@@ -55,7 +56,6 @@ public:
                                   int64_t                      goldPercent) const;
 
     bool generateOneObject(const Core::MapScore&           targetScore,
-                           const Core::MapScore&           groupLimits,
                            Core::MapScore&                 currentScore,
                            std::vector<IObjectFactoryPtr>& objectFactories,
                            ZoneObjectList&                 objectList) const;

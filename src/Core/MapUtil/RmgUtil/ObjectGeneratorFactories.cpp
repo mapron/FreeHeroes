@@ -15,6 +15,8 @@
 
 #include "../ScoreUtil.hpp"
 
+#include <iostream>
+
 namespace FreeHeroes {
 
 namespace {
@@ -116,7 +118,7 @@ ObjectGenerator::ObjectFactoryBank::ObjectFactoryBank(FHMap&                    
     m_records.updateFrequency();
 }
 
-IZoneObjectPtr ObjectGenerator::ObjectFactoryBank::make(uint64_t rngFreq)
+IZoneObjectPtr ObjectGenerator::ObjectFactoryBank::makeWithScore(uint64_t rngFreq, const FHScoreSettings& updatedSettings)
 {
     const size_t index  = m_records.getFreqIndex(rngFreq);
     auto&        record = m_records.m_records[index];
@@ -133,15 +135,26 @@ IZoneObjectPtr ObjectGenerator::ObjectFactoryBank::make(uint64_t rngFreq)
 
     const Core::Reward& reward = record.m_id->rewards[record.m_id->variants[record.m_guardsVariant].rewardIndex];
     Core::MapScore      score  = estimateReward(reward, Core::ScoreAttr::Army);
+    if (!updatedSettings.isValidScore(score)) {
+        record.m_attempts = 1;
+        m_records.onDisable(record);
+        return nullptr;
+    }
 
     {
         const Core::ArtifactFilter firstFilter = reward.artifacts.empty() ? Core::ArtifactFilter{} : reward.artifacts[0];
         for (const auto& filter : reward.artifacts) {
-            auto accArt = m_artifactPool->make(filter, filter, firstFilter == filter, m_scoreSettings);
-
+            auto accArt = m_artifactPool->make(filter, filter, firstFilter == filter, updatedSettings);
+            if (!accArt.m_art) {
+                //accArt.m_onDiscard();
+                m_records.onDisable(record);
+                return nullptr;
+            }
             assert(accArt.m_art);
             obj.m_obj.m_artifacts.push_back(accArt.m_art);
             estimateArtScore(accArt.m_art, score);
+            //if (obj.m_obj.m_id->id.find("utopia") != std::string::npos)
+            //    std::cout << "art = " << accArt.m_art->id << " = " << accArt.m_art->value << "\n";
             accArts.push_back(std::move(accArt));
         }
     }
@@ -151,10 +164,20 @@ IZoneObjectPtr ObjectGenerator::ObjectFactoryBank::make(uint64_t rngFreq)
         m_records.onDisable(record);
         for (const auto& art : accArts)
             art.m_onDiscard();
+
+        //if (id->id.find("utopia") != std::string::npos)
+        //    std::cout << "DISABLE utopia score=" << score << "\n";
     };
     obj.m_onAccept = [this, &record] {
         m_records.onAccept(record);
     };
+
+    /*
+    if (obj.m_obj.m_id->id.find("utopia") != std::string::npos)
+        std::cout << "make utopia score=" << obj.m_obj.m_score
+                  << " updatedSettings max=" << updatedSettings.makeMaxScore()
+                  << " min=" << updatedSettings.makeMinScore()
+                  << " rngFreq=" << rngFreq << " index=" << index << " att=" << record.m_attempts << "\n";*/
 
     return std::make_shared<ObjectBank>(std::move(obj));
 }
@@ -180,8 +203,9 @@ ObjectGenerator::ObjectFactoryArtifact::ObjectFactoryArtifact(FHMap&            
         return;
 
     for (const auto& [_, value] : genSettings.m_records) {
-        if (m_artifactPool->isEmpty(value.m_filter, true, scoreSettings))
+        if (m_artifactPool->isEmpty(value.m_filter, true, scoreSettings)) {
             continue;
+        }
 
         auto rec = RecordArtifact{ .m_filter = value.m_filter, .m_pool = value.m_pool };
 
@@ -193,7 +217,7 @@ ObjectGenerator::ObjectFactoryArtifact::ObjectFactoryArtifact(FHMap&            
     m_records.updateFrequency();
 }
 
-IZoneObjectPtr ObjectGenerator::ObjectFactoryArtifact::make(uint64_t rngFreq)
+IZoneObjectPtr ObjectGenerator::ObjectFactoryArtifact::makeWithScore(uint64_t rngFreq, const FHScoreSettings& updatedSettings)
 {
     const size_t index  = m_records.getFreqIndex(rngFreq);
     auto&        record = m_records.m_records[index];
@@ -201,8 +225,13 @@ IZoneObjectPtr ObjectGenerator::ObjectFactoryArtifact::make(uint64_t rngFreq)
     ObjectArtifact obj;
     obj.m_obj.m_generationId = m_scoreId;
     obj.m_map                = &m_map;
-    auto accArt              = m_artifactPool->make(record.m_pool, record.m_filter, true, m_scoreSettings);
-    obj.m_obj.m_id           = accArt.m_art;
+    auto accArt              = m_artifactPool->make(record.m_pool, record.m_filter, true, updatedSettings);
+    if (!accArt.m_art) {
+        m_records.onDisable(record);
+        return nullptr;
+    }
+
+    obj.m_obj.m_id = accArt.m_art;
     assert(obj.m_obj.m_id);
     obj.m_onDisable = [this, &record, accArt] {
         m_records.onDisable(record);
@@ -210,6 +239,8 @@ IZoneObjectPtr ObjectGenerator::ObjectFactoryArtifact::make(uint64_t rngFreq)
     };
 
     estimateArtScore(obj.m_obj.m_id, obj.m_obj.m_score);
+
+    //std::cout << "make art " << obj.m_obj.m_id->id << " score=" << obj.m_obj.m_score << "\n";
 
     obj.m_obj.m_guard = obj.m_obj.m_id->guard;
 

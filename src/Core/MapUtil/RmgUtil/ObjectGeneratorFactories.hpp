@@ -30,7 +30,8 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
                       ArtifactPool*                   artifactPool,
                       Core::LibraryTerrainConstPtr    terrain);
 
-    IZoneObjectPtr make(uint64_t rngFreq) override;
+    IZoneObjectPtr makeWithScore(uint64_t rngFreq, const FHScoreSettings& updatedSettings) override;
+    IZoneObjectPtr make(uint64_t rngFreq) override { return nullptr; }
 
     ArtifactPool* const m_artifactPool;
 };
@@ -53,7 +54,8 @@ struct ObjectGenerator::ObjectFactoryArtifact : public AbstractFactory<RecordArt
                           Core::IRandomGenerator* const       rng,
                           ArtifactPool*                       artifactPool);
 
-    IZoneObjectPtr make(uint64_t rngFreq) override;
+    IZoneObjectPtr makeWithScore(uint64_t rngFreq, const FHScoreSettings& updatedSettings) override;
+    IZoneObjectPtr make(uint64_t rngFreq) override { return nullptr; }
 
     ArtifactPool* const m_artifactPool;
 };

@@ -55,7 +55,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_target,
     m_minSingle,
     m_maxSingle,
-    m_maxGroup)
+    m_maxGroup,
+    m_maxRemain,
+    m_consumeRemain)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHScoreSettings,
