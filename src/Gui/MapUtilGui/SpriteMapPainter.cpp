@@ -71,6 +71,7 @@ void SpriteMapPainter::paint(QPainter*        painter,
                 return false;
             };
             const bool isFilteredOut = (!m_settings->m_filterLayer.empty() && !m_settings->m_filterLayer.contains(item.m_layer))
+                                       || (!m_settings->m_filterGenerationId.empty() && item.m_generationId != m_settings->m_filterGenerationId)
                                        || (!m_settings->m_filterAttr.empty() && !containsAnyScore(m_settings->m_filterAttr, item.m_score));
             if (isFilteredOut && isOverlayPass) {
                 continue;

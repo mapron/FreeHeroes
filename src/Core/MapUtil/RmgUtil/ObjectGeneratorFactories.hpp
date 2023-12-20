@@ -16,7 +16,6 @@ struct RecordBank : public CommonRecord<RecordBank> {
     Core::LibraryMapBankConstPtr m_id            = nullptr;
     int                          m_guardsVariant = 0;
     int                          m_guardValue    = 0;
-    std::string                  m_repulseId;
 };
 
 struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
@@ -41,8 +40,6 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
 struct RecordArtifact : public CommonRecord<RecordArtifact> {
     Core::ArtifactFilter m_filter;
     Core::ArtifactFilter m_pool;
-
-    std::string m_repulseId;
 };
 
 struct ObjectGenerator::ObjectFactoryArtifact : public AbstractFactory<RecordArtifact> {
@@ -89,10 +86,7 @@ struct ObjectPandora : public ObjectGenerator::AbstractObject<FHPandora> {
     std::string        getId() const override { return "pandora_" + m_obj.m_key; }
     Type               getType() const override { return Type::Pickable; }
     bool               preventDuplicates() const override { return true; }
-    std::string        getRepulseId() const override { return m_repulseId; }
     Core::CombinedMask getMask() const override;
-
-    std::string m_repulseId;
 };
 
 struct RecordPandora : public CommonRecord<RecordPandora> {
@@ -125,7 +119,6 @@ struct RecordSpellShrine : public CommonRecord<RecordSpellShrine> {
     Core::LibraryMapVisitableConstPtr m_visitableId = nullptr;
     int                               m_guard       = -1;
     bool                              m_asAnySpell  = false;
-    std::string                       m_repulseId;
 };
 
 struct ObjectGenerator::ObjectFactoryShrine : public AbstractFactory<RecordSpellShrine> {
@@ -150,7 +143,6 @@ struct RecordSpellScroll : public CommonRecord<RecordSpellScroll> {
     Core::SpellFilter m_filter;
     int               m_guard      = -1;
     bool              m_asAnySpell = false;
-    std::string       m_repulseId;
 };
 
 struct ObjectGenerator::ObjectFactoryScroll : public AbstractFactory<RecordSpellScroll> {

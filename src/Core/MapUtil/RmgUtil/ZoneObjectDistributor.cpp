@@ -35,8 +35,6 @@ bool ZoneObjectWrap::estimateOccupied(MapTilePtr absPosCenter)
     m_passAroundEdge.clear();
     m_allArea.clear();
 
-    m_absPosIsValid = false;
-
     m_absPos = absPosCenter;
     if (m_centerOffset != g_invalidPos)
         m_absPos = m_absPos->neighbourByOffset(FHPos{} - m_centerOffset);
@@ -135,17 +133,18 @@ bool ZoneObjectWrap::estimateOccupied(MapTilePtr absPosCenter)
     m_allArea = m_occupiedWithDangerZone;
     m_allArea.insert(m_passAroundEdge);
 
-    m_estimatedArea = m_occupiedWithDangerZone.size();
-    if (m_estimatedArea <= 2)
-        m_estimatedArea += m_passAroundEdge.size() / 2;
-    else
-        m_estimatedArea += m_passAroundEdge.size() * 2 / 3;
     //m_sizeInCells = m_occupiedWithDangerZone.splitByGrid(3, 3, 2).size();
 
-    if (m_centerOffset == g_invalidPos)
+    if (m_centerOffset == g_invalidPos) {
         m_centerOffset = m_occupiedArea.makeCentroid(true)->m_pos - m_absPos->m_pos;
 
-    m_absPosIsValid = true;
+        m_estimatedArea = m_occupiedWithDangerZone.size();
+        if (m_estimatedArea <= 2)
+            m_estimatedArea += m_passAroundEdge.size() / 2;
+        else
+            m_estimatedArea += m_passAroundEdge.size() * 2 / 3;
+    }
+
     return true;
 }
 
@@ -158,6 +157,7 @@ std::string ZoneObjectWrap::toPrintableString() const
 
 void ZoneObjectWrap::place() const
 {
+    //std::cerr << "place " << m_generationId << " " << m_object->getId() << "\n";
     m_object->place(m_absPos->m_pos);
 }
 
@@ -177,17 +177,7 @@ bool ZoneObjectDistributor::makeInitialDistribution(DistributionResult& distribu
     //size_t             totalSizeObjectsCells = 0;
     ZoneObjectWrapPtrList segmentsNormal;
     for (auto& obj : generated.m_objects) {
-        ZoneObjectWrap wrap{ {
-            .m_object            = obj.m_object,
-            .m_objectType        = obj.m_objectType,
-            .m_preferredHeat     = obj.m_preferredHeat,
-            .m_strongRepulse     = obj.m_strongRepulse,
-            .m_useGuards         = obj.m_useGuards,
-            .m_pickable          = obj.m_pickable,
-            .m_randomAngleOffset = obj.m_randomAngleOffset,
-            .m_generatedIndex    = obj.m_generatedIndex,
-            .m_generatedCount    = obj.m_generatedCount,
-        } };
+        ZoneObjectWrap wrap(obj);
         wrap.estimateOccupied(m_tileContainer.m_centerTile);
 
         makePreferredPoint(distribution, &wrap, wrap.m_randomAngleOffset, wrap.m_generatedIndex, wrap.m_generatedCount);
@@ -199,18 +189,17 @@ bool ZoneObjectDistributor::makeInitialDistribution(DistributionResult& distribu
     }
 
     for (ZoneObjectWrap& wrap : distribution.m_allObjects) {
-        //m_logOutput << "g id=" << obj->getId() << "\n";
-        if (wrap.m_objectType == ZoneObjectType::Segment) {
-            if (!wrap.m_useGuards && wrap.m_pickable)
-                distribution.m_candidateObjectsFreePickables.push_back(&wrap);
-            else {
-                segmentsNormal.push_back(&wrap);
-
-                totalSizeObjects += wrap.m_estimatedArea;
+        if (wrap.m_scatterType) {
+            if (wrap.m_objectType == ZoneObjectType::RoadScatter) {
+                distribution.m_roadPickables.push_back(&wrap);
+                //m_logOutput << "r id=" << wrap.m_object->getId() << "\n";
+            } else if (wrap.m_objectType == ZoneObjectType::SegmentScatter) {
+                distribution.m_segFreePickables.push_back(&wrap);
+                //m_logOutput << "f id=" << wrap.m_object->getId() << "\n";
             }
-        }
-        if (wrap.m_objectType == ZoneObjectType::Segment) {
-            distribution.m_roadPickables.push_back(&wrap);
+        } else {
+            segmentsNormal.push_back(&wrap);
+            totalSizeObjects += wrap.m_estimatedArea;
         }
     }
 
@@ -221,7 +210,7 @@ bool ZoneObjectDistributor::makeInitialDistribution(DistributionResult& distribu
         return false;
     }
     std::sort(segmentsNormal.begin(), segmentsNormal.end(), [](ZoneObjectWrap* r, ZoneObjectWrap* l) {
-        return std::tuple{ r->m_preferredHeat, r } < std::tuple{ l->m_preferredHeat, l };
+        return std::tuple{ r->m_placementOrder, r } < std::tuple{ l->m_placementOrder, l };
     });
 
     ZoneObjectWrapPtrList segmentsNormalUnfit;
@@ -240,15 +229,20 @@ bool ZoneObjectDistributor::makeInitialDistribution(DistributionResult& distribu
             }
             segCandidatesWithEnoughSpace.push_back(&seg);
         }
+        // can happen if we need to place 10-tile object and we have remaining two segment 5-tile each.
+        // totalSizeObjects > totalSize check still pass.
+        if (segCandidatesWithEnoughSpace.empty()) {
+            m_logOutput << m_indent << "Failed to find free segment to fit object= " << object->toPrintableString() << "\n";
+            return false;
+        }
+
         if (minHeatAvailableInAllSegments == distribution.m_maxHeat)
             throw std::runtime_error("sanity check failed: no heat");
 
         object->m_placedHeat = std::max(object->m_preferredHeat, minHeatAvailableInAllSegments);
 
         if (!placeWrapIntoSegments(distribution, object, segCandidatesWithEnoughSpace)) {
-            // can happen if we need to place 10-tile object and we have remaining two segment 5-tile each.
-            // totalSizeObjects > totalSize check still pass.
-            m_logOutput << m_indent << "Failed to find free segment to fit object= " << object->toPrintableString() << "\n";
+            m_logOutput << m_indent << "Failed to actually place the object= " << object->toPrintableString() << "\n";
             if (object->m_absPos) {
                 auto* tz = object->m_absPos->m_zone;
                 tz->m_rewardTilesFailure.insert(object->m_occupiedWithDangerZone);
@@ -267,6 +261,54 @@ bool ZoneObjectDistributor::makeInitialDistribution(DistributionResult& distribu
 
     m_logOutput << m_indent << "placed tiles= " << totalSizeObjects << " / " << totalSize << " \n";
 
+    // place inner mountains
+    {
+        for (auto& seg : distribution.m_segments) {
+            auto free = seg.m_freeArea;
+            free.erase(free.makeInnerEdge(true));
+            auto          parts = free.splitByFloodFill(false);
+            MapTileRegion needBlock;
+            for (auto& part : parts) {
+                if (part.size() < 3)
+                    continue;
+                const size_t maxArea = 20;
+
+                auto segments  = part.splitByMaxArea(maxArea, 30);
+                auto borderNet = MapTileRegionWithEdge::getInnerBorderNet(MapTileRegionWithEdge::makeEdgeList(segments));
+
+                for (const auto& seg2 : segments) {
+                    for (auto* tile : seg2) {
+                        if (borderNet.contains(tile))
+                            continue;
+
+                        needBlock.insert(tile);
+                    }
+                }
+            }
+
+            seg.m_freeArea.erase(needBlock);
+            distribution.m_needBlock.insert(needBlock);
+        }
+    }
+
+    // place roads and free pickables
+    {
+        const auto& roadRegion = distribution.m_tileZone->m_roads.m_all;
+        auto&       freeCells  = distribution.m_allFreeCells;
+        if (roadRegion.size() < distribution.m_roadPickables.size()) {
+            m_logOutput << m_indent << "Roads size " << roadRegion.size() << " < " << distribution.m_roadPickables.size() << "\n";
+            return false;
+        }
+        for (auto& seg : distribution.m_segments) {
+            freeCells.insert(seg.m_spacingArea);
+            freeCells.insert(seg.m_freeArea);
+        }
+        if (freeCells.size() < distribution.m_segFreePickables.size()) {
+            m_logOutput << m_indent << "Segment spacing size " << freeCells.size() << " < " << distribution.m_segFreePickables.size() << "\n";
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -278,11 +320,66 @@ void ZoneObjectDistributor::doPlaceDistribution(DistributionResult& distribution
     MergedRegion totalFreeTiles;
 
     for (ZoneSegment& seg : distribution.m_segments) {
-        if (seg.m_successNormal.empty())
-            continue;
         for (auto* object : seg.m_successNormal)
             commitPlacement(distribution, object, &seg);
     }
+
+    {
+        const auto& roadRegion = distribution.m_tileZone->m_roads.m_all;
+        const auto& freeCells  = distribution.m_allFreeCells;
+        for (size_t i = 0; auto* obj : distribution.m_roadPickables) {
+            obj->m_absPos = roadRegion[i++ * roadRegion.size() / distribution.m_roadPickables.size()];
+            obj->place();
+            distribution.m_placedIds.push_back(obj->m_object->getId());
+        }
+        for (size_t i = 0; auto* obj : distribution.m_segFreePickables) {
+            obj->m_absPos = freeCells[i++ * freeCells.size() / distribution.m_segFreePickables.size()];
+            obj->place();
+            distribution.m_placedIds.push_back(obj->m_object->getId());
+        }
+    }
+
+    {
+        std::sort(distribution.m_placedIds.begin(), distribution.m_placedIds.end());
+
+        size_t                   maxSize = std::max(distribution.m_placedIds.size(), distribution.m_allOriginalIds.size());
+        std::vector<std::string> missingIds(maxSize);
+        std::vector<std::string> extraIds(maxSize);
+        {
+            auto resIt = std::set_difference(distribution.m_placedIds.cbegin(),
+                                             distribution.m_placedIds.cend(),
+                                             distribution.m_allOriginalIds.cbegin(),
+                                             distribution.m_allOriginalIds.cend(),
+                                             extraIds.begin());
+
+            auto newSize = std::distance(extraIds.begin(), resIt);
+            extraIds.resize(newSize);
+        }
+        {
+            auto resIt = std::set_difference(distribution.m_allOriginalIds.cbegin(),
+                                             distribution.m_allOriginalIds.cend(),
+                                             distribution.m_placedIds.cbegin(),
+                                             distribution.m_placedIds.cend(),
+                                             missingIds.begin());
+
+            auto newSize = std::distance(missingIds.begin(), resIt);
+            missingIds.resize(newSize);
+        }
+        m_logOutput << m_indent << "Total generated: " << distribution.m_allOriginalIds.size() << ", placed: " << distribution.m_placedIds.size() << "\n";
+        if (!extraIds.empty()) {
+            m_logOutput << m_indent << "More items were placed than generated:\n";
+            for (auto& id : extraIds)
+                m_logOutput << m_indent << "  " << id << "\n";
+        }
+        if (!missingIds.empty()) {
+            m_logOutput << m_indent << "Some items were generated, but never placed:\n";
+            for (auto& id : missingIds)
+                m_logOutput << m_indent << "  " << id << "\n";
+        }
+        if (!extraIds.empty() || !missingIds.empty())
+            throw std::runtime_error("Placement logic is corrupted!");
+    }
+
     //for (ZoneObjectWrap* object : distribution.m_candidateObjectsFreePickables) {
     //distribution.m_tileZone->m_rewardTilesCenters;
     //}
@@ -298,61 +395,32 @@ bool ZoneObjectDistributor::placeWrapIntoSegments(DistributionResult& distributi
         return false;
     }
 
-    std::vector<std::tuple<int, int64_t, ZoneSegment*>> segCandidatesSorted;
     assert(object->m_preferredPos);
 
-    //if (object->m_strongRepulse)
-    //    m_logOutput << object->m_object->getId() << "look:\n";
-
+    std::set<std::tuple<int64_t, ZoneSegment*>> segCandidatesSorted;
     for (ZoneSegment* seg : segCandidates) {
-        if (seg->m_originalArea.contains(object->m_preferredPos)) {
-            segCandidatesSorted.push_back(std::tuple{ 0, 0, seg });
-            continue;
-        }
+        auto* bestHeat = seg->findBestHeatData(object->m_placedHeat, 1);
+        if (!bestHeat)
+            throw std::runtime_error("WTF");
 
-        auto freeQuarter = (seg->getFreePercent() / 25) + 1;
+        auto distance    = posDistance(bestHeat->m_centroid, object->m_preferredPos, 100);
+        auto freePercent = seg->getFreePercent();
+        if (freePercent < 60)
+            distance = distance * 150 / 100;
+        if (bestHeat->m_heat != object->m_placedHeat)
+            distance = distance * 150 / 100;
 
-        auto* bestHeat = seg->findBestHeatData(object->m_placedHeat);
-        assert(bestHeat);
-        int h = bestHeat->m_heat;
-        if (bestHeat->m_heat == object->m_placedHeat)
-            h = 0;
-        if (bestHeat->m_heat > object->m_placedHeat)
-            h = 1;
-        if (bestHeat->m_heat < object->m_placedHeat)
-            h = 2;
-        if (object->m_strongRepulse)
-            h = 0;
-
-        //h = h * freeQuarter;
-
-        const auto distance = posDistance(bestHeat->m_centroid, object->m_preferredPos, 100);
-
-        //if (object->m_strongRepulse)
-        //    m_logOutput << "segCandidatesSorted (" << bestHeat->m_heat << ") << " << h << " - " << distance << " - " << seg->m_originalAreaCentroid->toPrintableString() << " / " << bestHeat->m_centroid->toPrintableString() << "\n";
-
-        segCandidatesSorted.push_back(std::tuple{ h, distance, seg });
+        segCandidatesSorted.insert(std::tuple{ distance, seg });
     }
-
-    std::sort(segCandidatesSorted.begin(), segCandidatesSorted.end());
-
-    for (auto& [h, _, seg] : segCandidatesSorted) {
-        std::vector<std::pair<int, MapTilePtr>> tileCandidatesSorted;
-
-        for (auto& [heat, data] : seg->m_heatMap) {
-            for (auto* tile : data.m_free) {
-                int distance = seg->m_distances.at(tile);
-                tileCandidatesSorted.push_back(std::pair{ distance, tile });
-            }
-        }
-
-        std::sort(tileCandidatesSorted.begin(), tileCandidatesSorted.end());
-        for (auto& [__, tile] : tileCandidatesSorted) {
+    for (auto& [_, seg] : segCandidatesSorted) {
+        auto tiles = seg->getTilesByDistance();
+        for (auto* tile : tiles) {
             if (object->estimateOccupied(tile)) {
                 if (seg->m_freeArea.intersectWith(object->m_occupiedWithDangerZone) == object->m_occupiedWithDangerZone) {
                     seg->m_freeArea.erase(object->m_allArea);
 
                     seg->m_freeArea.eraseExclaves(false);
+                    seg->m_spacingArea.insert(object->m_passAroundEdge);
 
                     seg->m_successNormal.push_back(object);
                     object->m_placedHeat = seg->m_tileZone->m_heatForAll.getLevel(object->m_absPos);
@@ -442,25 +510,22 @@ std::string ZoneObjectDistributor::ZoneSegment::toPrintableString() const
     return os.str();
 }
 
-ZoneObjectDistributor::ZoneSegment::HeatDataItem* ZoneObjectDistributor::ZoneSegment::findBestHeatData(int heat)
+ZoneObjectDistributor::ZoneSegment::HeatDataItem* ZoneObjectDistributor::ZoneSegment::findBestHeatData(int heat, size_t estimatedArea)
 {
     if (m_heatMap.empty())
         return nullptr;
 
-    auto it = m_heatMap.find(heat);
-    if (it != m_heatMap.end() && it->second.m_centroid)
-        return &(it->second);
-
-    for (auto it2 = it; it2 != m_heatMap.end(); ++it2) {
-        if (it2->second.m_centroid) {
-            return &(it2->second);
-        }
+    for (auto& [key, data] : m_heatMap) {
+        if (key < heat)
+            continue;
+        if (data.m_free.size() >= estimatedArea)
+            return &data;
     }
-
-    for (auto it2 = m_heatMap.begin(); it2 != it; ++it2) {
-        if (it2->second.m_centroid) {
-            return &(it2->second);
-        }
+    for (auto& [key, data] : m_heatMap) {
+        if (key == heat)
+            break;
+        if (data.m_free.size() >= estimatedArea)
+            return &data;
     }
     return nullptr;
 }
@@ -509,6 +574,27 @@ void ZoneObjectDistributor::ZoneSegment::recalcHeat()
         data.m_heat     = heat;
     }
 }
+
+MapTilePtrList ZoneObjectDistributor::ZoneSegment::getTilesByDistance() const
+{
+    std::vector<std::pair<int, MapTilePtr>> tileCandidatesSorted;
+
+    for (auto& [heat, data] : m_heatMap) {
+        for (auto* tile : data.m_free) {
+            int distance = m_distances.at(tile);
+            tileCandidatesSorted.push_back(std::pair{ distance, tile });
+        }
+    }
+
+    std::sort(tileCandidatesSorted.begin(), tileCandidatesSorted.end());
+    MapTilePtrList result;
+    result.reserve(tileCandidatesSorted.size());
+    for (auto [_, tile] : tileCandidatesSorted) {
+        result.push_back(tile);
+    }
+    return result;
+}
+
 void ZoneObjectDistributor::makePreferredPoint(DistributionResult& distribution, ZoneObjectWrap* object, int angleStartOffset, size_t index, size_t count) const
 {
     auto&  rect    = distribution.m_heatRegionRects[object->m_preferredHeat];
@@ -516,6 +602,9 @@ void ZoneObjectDistributor::makePreferredPoint(DistributionResult& distribution,
 
     if (angleStartOffset == -1) {
         object->m_preferredPos = rect.m_region[index * regSize / count];
+        //if (object->m_generationId == "111_ControlArts")
+        //    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = object->m_preferredPos->m_pos, .m_brushColor = 330, .m_shapeRadius = 4 });
+
         return;
     }
     size_t anglePos = index * 360 / count;
@@ -529,6 +618,9 @@ void ZoneObjectDistributor::makePreferredPoint(DistributionResult& distribution,
 
     object->m_preferredPos = rect.m_outline[outlineIndex];
     rect.m_region.findClosestPoint(object->m_preferredPos->m_pos);
+
+    //if (object->m_generationId == "111_ControlArts")
+    //    m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = object->m_preferredPos->m_pos, .m_brushColor = 330, .m_shapeRadius = 4 });
 }
 
 }

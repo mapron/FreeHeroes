@@ -35,7 +35,6 @@ struct IZoneObject {
     virtual std::string    getId() const              = 0;
     virtual int64_t        getGuard() const           = 0;
     virtual Type           getType() const            = 0;
-    virtual std::string    getRepulseId() const { return {}; }
 
     virtual Mask getVisitableMask() const { return { FHPos(0, 0) }; }
     virtual Mask getBlockedUnvisitableMask() const { return {}; }
@@ -56,14 +55,17 @@ IZoneObjectGroupPtr makeNewZoneObjectGroup(int64_t maxGuard, size_t itemLimit, u
 
 struct ZoneObjectItem {
     IZoneObjectPtr m_object;
-    ZoneObjectType m_objectType        = ZoneObjectType::Segment;
-    int            m_preferredHeat     = 0;
-    bool           m_strongRepulse     = false;
-    bool           m_useGuards         = true;
-    bool           m_pickable          = false; // pick or join
-    int            m_randomAngleOffset = -1;
-    size_t         m_generatedIndex    = 0;
-    size_t         m_generatedCount    = 0;
+    ZoneObjectType m_objectType  = ZoneObjectType::Segment;
+    bool           m_scatterType = false; // object type must contain only pickable unguarded objects.
+
+    int         m_preferredHeat     = 0;
+    int         m_placementOrder    = 0;
+    bool        m_useGuards         = true;
+    bool        m_pickable          = false; // pick or join
+    int         m_randomAngleOffset = -1;
+    size_t      m_generatedIndex    = 0;
+    size_t      m_generatedCount    = 0;
+    std::string m_generationId;
 };
 
 using ZoneObjectList = std::vector<ZoneObjectItem>;

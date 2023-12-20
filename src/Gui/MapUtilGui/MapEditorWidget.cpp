@@ -128,6 +128,8 @@ struct MapEditorWidget::Impl {
     ViewSettingsWidget* m_viewSettingsWidget = nullptr;
     InspectorWidget*    m_inspectorWidget    = nullptr;
 
+    QComboBox* m_filterGen = nullptr;
+
     FHMap        m_map;
     SpriteMap    m_spriteMap;
     ViewSettings m_viewSettings;
@@ -170,6 +172,7 @@ MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDataba
         QCheckBox* showInspector   = new QCheckBox(tr("Inspector"), this);
         QComboBox* filterType      = new QComboBox(this);
         QComboBox* filterValue     = new QComboBox(this);
+        m_impl->m_filterGen        = new QComboBox(this);
         showMinimap->setChecked(true);
         showSettings->setChecked(true);
         showInspector->setChecked(true);
@@ -206,6 +209,10 @@ MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDataba
             m_impl->m_viewSettings.m_paintSettings.m_filterAttr = attr.m_options;
             updateAll();
         });
+        connect(m_impl->m_filterGen, qOverload<int>(&QComboBox::currentIndexChanged), this, [this] {
+            m_impl->m_viewSettings.m_paintSettings.m_filterGenerationId = m_impl->m_filterGen->currentData().toString().toStdString();
+            updateAll();
+        });
 
         layoutTop->addWidget(viewUnderground);
         layoutTop->addWidget(scaleWidget);
@@ -215,6 +222,7 @@ MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDataba
         layoutTop->addWidget(showInspector);
         layoutTop->addWidget(filterType);
         layoutTop->addWidget(filterValue);
+        layoutTop->addWidget(m_impl->m_filterGen);
     }
 
     layout->addLayout(layoutTop);
@@ -308,6 +316,17 @@ void MapEditorWidget::load(const std::string& filename)
 
         m_impl->m_map.initTiles(db);
         m_impl->m_map.m_tileMap.rngTiles(rng.get(), m_impl->m_map.m_template.m_roughTilePercentage);
+
+        m_impl->m_filterGen->clear();
+        m_impl->m_filterGen->addItem(tr("-- select gen layer --"));
+        auto              allObjects = m_impl->m_map.m_objects.getAllObjects();
+        std::set<QString> used;
+        for (auto* obj : allObjects) {
+            if (!obj->m_generationId.empty())
+                used.insert(QString::fromStdString(obj->m_generationId));
+        }
+        for (const auto& generationId : used)
+            m_impl->m_filterGen->addItem(generationId, generationId);
 
         updateMap();
     }

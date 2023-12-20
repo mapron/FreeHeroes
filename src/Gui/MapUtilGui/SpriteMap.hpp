@@ -72,9 +72,11 @@ struct SpriteMap {
         Core::MapScore     m_score;
 
         std::vector<std::pair<std::string, std::string>> m_info;
-        std::string                                      m_overlayInfo;
-        int                                              m_overlayInfoOffsetX = -1;
-        int                                              m_overlayInfoFont    = 12;
+
+        std::string m_generationId;
+        std::string m_overlayInfo;
+        int         m_overlayInfoOffsetX = -1;
+        int         m_overlayInfoFont    = 12;
 
         Item& addInfo(std::string a, std::string b)
         {
@@ -210,6 +212,7 @@ struct SpritePaintSettings {
     LayerRules                 m_globalRules;
     std::set<SpriteMap::Layer> m_filterLayer;
     std::set<Core::ScoreAttr>  m_filterAttr;
+    std::string                m_filterGenerationId;
 
     std::map<SpriteMap::Layer, LayerRules> m_specificRules;
 

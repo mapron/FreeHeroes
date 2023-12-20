@@ -28,8 +28,10 @@ ENUM_REFLECTION_STRINGIFY(
 ENUM_REFLECTION_STRINGIFY(
     ZoneObjectType,
     Segment,
+
     Segment,
-    Road,
+    SegmentScatter,
+    RoadScatter,
 
     MainTown,
 
@@ -62,8 +64,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_guardThreshold,
     m_guardMinToGroup,
     m_guardGroupLimit,
-    m_strongRepulse,
     m_preferredHeats,
+    m_placementOrder,
     m_objectType,
     m_generatorsInclude,
     m_generatorsExclude)
@@ -73,7 +75,6 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_frequency,
     m_guard,
     m_enabled,
-    m_repulseId,
     m_bank)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
@@ -85,7 +86,6 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone::GeneratorArtifact::Record,
     m_frequency,
     m_pool,
-    m_repulseId,
     m_filter)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
@@ -108,7 +108,6 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone::GeneratorPandora::Record,
     m_reward,
-    m_repulseId,
     m_frequency,
     m_guard)
 
@@ -121,7 +120,6 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone::GeneratorScroll::Record,
     m_filter,
     m_frequency,
-    m_repulseId,
     m_guard)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
@@ -147,7 +145,6 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_filter,
     m_visualLevel,
     m_frequency,
-    m_repulseId,
     m_guard)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(

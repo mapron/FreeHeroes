@@ -60,7 +60,7 @@ public:
                            std::vector<IObjectFactoryPtr>& objectFactories,
                            ZoneObjectList&                 objectList) const;
 
-    void makeGroups(int64_t guardGroupLimit, ZoneObjectList& objectList) const;
+    void makeGroups(int64_t guardGroupLimit, int64_t guardMinToGroup, ZoneObjectList& objectList) const;
 
     static bool correctObjIndex(Core::ObjectDefIndex& defIndex, const Core::ObjectDefMappings& defMapping, Core::LibraryTerrainConstPtr requiredTerrain);
     static bool terrainViable(const Core::ObjectDefMappings& defMapping, Core::LibraryTerrainConstPtr requiredTerrain);

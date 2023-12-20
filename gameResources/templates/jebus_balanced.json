@@ -14,6 +14,14 @@
                     "town2": {"town":{"hasCustomBuildings":true,"buildings":["townHall1","tavern","t1","t2"], "garisonRmg":[{"levels":[10],"value":2000},{"levels":[20],"value":1000},{"levels":[30],"value":1000}]}}},
                 
                 "scoreTargets": {
+                    "010_ControlScrolls": {
+                        "isEnabled": true,
+                        "placementOrder": 0,
+                        "preferredHeats": [9],
+                        "score": {
+                            "Control":        { "target":  85000, "maxSingle": 30000}
+                        }
+                    },
                 
                     "110_Utopia": {
                         "isEnabled": true,
@@ -52,23 +60,14 @@
                         }
                     },
 
-                    "210_ControlScrolls": {
-                        "isEnabled": true,
-                        "strongRepulse": true,
-                        "preferredHeats": [9],
-                        "score": {
-                            "Control":        { "target":  85000, "maxSingle": 30000}
-                        }
-                    },
-
-                    "330_HighSupportVisitables": {
+                    "310_HighSupportVisitables": {
                         "isEnabled": true,
                         "preferredHeats": [1],
                         "score": {
                             "Support":        { "target": 15000 , "minSingle":  5000}
                         }
                     },
-                    "340_HighArtsAndBanks": {
+                    "320_HighArtsAndBanks": {
                         "isEnabled": true,
                         "preferredHeats": [5, 6, 7],
                         "score": {
@@ -82,7 +81,6 @@
 
                     "410_HighSpells": {
                         "isEnabled": true,
-                        "strongRepulse": true,
                         "preferredHeats": [9],
                         "score": {
                             "SpellOffensive": { "target": 60000 , "minSingle":  5000},
@@ -91,7 +89,6 @@
                     },
                     "420_MidSpells": {
                         "isEnabled": true,
-                        "strongRepulse": true,
                         "preferredHeats": [8],
                         "score": {
                             "SpellOffensive": { "target": 10000, "maxSingle": 6000, "minSingle": 2100},
@@ -151,6 +148,7 @@
                     "610_LowUnguarded": {
                         "isEnabled": true,
                         "guardThreshold": 100000,
+                        "guardMinToGroup": 100000,
                         "preferredHeats": [2, 3, 4, 5, 6, 7],
                         "generatorsExclude": ["resources"],
                         "score":{
@@ -163,24 +161,20 @@
                             "Support":        { "target": 2000 , "maxSingle": 1000}
                         }
                     },
-                    "620_LowPicks": {
+                    "810_SegmentScatter": {
                         "isEnabled": true,
-                        "guardThreshold": 100000,
-                        "preferredHeats": [0, 1, 2, 3, 4, 5, 6],
+                        "objectType": "SegmentScatter",
                         "generatorsExclude": ["banks"],
                         "score":{
                             "Gold":           { "target": 30000, "maxSingle": 2000},
                             "Resource":       { "target": 60000, "maxSingle": 2500}
                         }
                     },
-                    "910_LowRoadPicks": {
-                        "objectType": "Road",
+                    "910_RoadScatter": {
+                        "objectType": "RoadScatter",
                         "isEnabled": true,
                         
-                        "guardThreshold": 100000,
-                        "guardMinToGroup": 100000,
                         "generatorsExclude": ["banks"],
-                        "preferredHeats": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
                         "score":{
                             "Resource":       { "target": 40000, "maxSingle": 2500},
                             "Gold"    :       { "target": 40000, "maxSingle": 2500}
@@ -193,15 +187,7 @@
 
                 "generators": {
                     "banks": {
-                        "isEnabled": true,
-                        "records": {
-                        
-                            "utopia": {"bank": "sod.map.utopia"           , "repulseId": "utopia"   },
-                            "consa" : {"bank": "sod.map.conservatory"     , "repulseId": "armyBank" },
-                            "hive"  : {"bank": "sod.map.hive"             , "repulseId": "armyBank" },
-                            "shop"  : {"bank": "hota.map.experimentalShop", "repulseId": "armyBank" },
-                            "picket": {"bank": "hota.map.wolfRaiderPicket", "repulseId": "armyBank" }
-                        }
+                        "isEnabled": true
                     },
                     "artifacts": {
                         "isEnabled": true,
@@ -214,7 +200,7 @@
                             "minorStat"    : { "frequency":  300, "pool": {"classes": ["minor"   ]}, "filter": {"classes": ["minor"   ], "tags"   : ["stats"]               } },
                             "majorStat"    : { "frequency":  500, "pool": {"classes": ["major"   ]}, "filter": {"classes": ["major"   ], "tags"   : ["stats"]               } },
                             "relicStat"    : { "frequency": 1000, "pool": {"classes": ["relic"   ]}, "filter": {"classes": ["relic"   ], "tags"   : ["stats"], "notTags": ["control"]    } },
-                            "control"      : { "frequency": 4000, "pool": {"classes": ["relic"   ]}, "filter": {"classes": ["relic"   ], "tags"   : ["control"]             }, "repulseId": "controlArt" }
+                            "control"      : { "frequency": 4000, "pool": {"classes": ["relic"   ]}, "filter": {"classes": ["relic"   ], "tags"   : ["control"]             } }
                         }
                     },
                     "resources": {
@@ -306,7 +292,7 @@
                             "lvl3off"  : { "frequency":  400,                   "filter": {"levels": [3], "notTags"   : ["control"], "tags": ["offensive"]   } },
                             "lvl4off"  : { "frequency":  300,                   "filter": {"levels": [4], "notTags"   : ["control"], "tags": ["offensive"]   } },
                             "lvl5off"  : { "frequency":  300,                   "filter": {"levels": [5], "notTags"   : ["control"], "tags": ["offensive"]   } },
-                            "control"  : { "frequency":  10000,                 "filter": {                 "tags"    : ["control"]    }, "repulseId": "controlScroll" }
+                            "control"  : { "frequency":  10000,                 "filter": {                 "tags"    : ["control"]    } }
                         }
                     },
                     "dwellings": {
@@ -412,21 +398,13 @@
                     "15_High": {
                         "isEnabled": false,
                         "score": {
-                            "Army":           { "target": 250000  , "minSingle": 10000, "maxSingle" : -1},
-                            "ArmyDwelling":   { "target": 40000   , "minSingle":  6000, "maxSingle" : -1},
-                            "ArmyAux":        { "target": 150000  , "minSingle": 10000, "maxSingle" : -1},
-                            "ArtStat":        { "target": 350000  , "minSingle":  5000, "maxSingle" : -1},
-                            "ArtSupport":     { "target": 200000  , "minSingle":  8000, "maxSingle" : -1},
-                            "Gold":           { "target": 300000  , "minSingle":  8000, "maxSingle" : -1},
                             "Resource":       { "target": 90000   , "minSingle":  8000, "maxSingle" : -1},
                             
                             "Experience":     { "target": 50000   , "minSingle":  8000, "maxSingle" : -1},
                             "SpellOffensive": { "target": 120000  , "minSingle":  5000, "maxSingle" : -1},
                             "SpellCommon":    { "target":  80000  , "minSingle":  5000, "maxSingle" : -1},
                             "Upgrade"   :     { "target": 25000   , "minSingle":  3000, "maxSingle" : -1},
-                            "Support":        { "target": 20000   , "minSingle":  6000, "maxSingle" : -1},
-                
-                            "Control":        { "target": 320000  , "minSingle": 40000, "maxSingle" : 40000, "maxGroup": 40000 }
+                            "Support":        { "target": 20000   , "minSingle":  6000, "maxSingle" : -1}
                         }
                     },
                     "15_TreasureMid": {
@@ -438,32 +416,45 @@
                             "Resource":       { "target": 10000   , "minSingle": 3000, "maxSingle" : -1}
                         }
                     },
-                    "50_TreasureLow": {
-                        "isEnabled": false,
-                        "objectType": "SegmentUnguarded",
-                        "score": {
-                            "Gold":           { "target": 40000, "maxSingle": 2000},
-                            "Experience":     { "target": 20000, "maxSingle": 2000},
-                            "ResourceGen":    { "target": 30000}
-                        }
-                    },
+                    
+
+                    "010_ControlScrolls": {"isEnabled": false},
+                    
                     
                     "110_Utopia": {
                         "isEnabled": false,
-                        "preferredHeats": [7],
+                        "preferredHeats": [7, 8, 9],
                         "generatorsInclude": ["banks"],
                         "score": {
-                            "ArtStat":        { "target": 30000 , "maxSingle": 15000, "minSingle": 4000 },
-                            "ArtSupport":     { "target": 20000 , "maxSingle": 10000, "minSingle": 4000 },
-                            "Gold":           { "target": 30000 , "maxSingle": 30000, "minSingle": 30000 }
+                            "ArtStat":        { "target": 350000  , "minSingle":  5000, "maxSingle" : -1},
+                            "ArtSupport":     { "target": 200000  , "minSingle":  8000, "maxSingle" : -1},
+                            "Gold":           { "target": 300000  , "minSingle": 20000, "maxSingle" : -1},
+                            
+                            "Control":        { "target": 320000  , "minSingle": 40000, "maxSingle" : 40000 }
                         }
                     },
-                    "120_HighArmy":{"isEnabled": false},
+                    "111_ControlArts": {
+                        "isEnabled": true,
+                        "placementOrder": 0,
+                        "preferredHeats": [9],
+                        "guardGroupLimit": 0,
+                        "score": {
+                             "Control":        { "target": 320000  , "minSingle": 40000, "maxSingle" : 40000 }                        
+                        }
+                    },
+                    "120_HighArmy": {
+                        "isEnabled": true,
+                        "preferredHeats": [0, 1, 2],
+                        "score": {
+                            "Army":           { "target": 250000 , "maxSingle": -1},
+                            "ArmyDwelling":   { "target": 40000  , "maxSingle": -1},
+                            "ArmyAux":        { "target": 150000 , "maxSingle": -1}
+                        }
+                    },
                     "130_MidArmy":{"isEnabled": false},
                     "140_LowArmy": {"isEnabled": false},
-                    "210_ControlScrolls": {"isEnabled": false},
-                    "330_HighSupportVisitables": {"isEnabled": false},
-                    "340_HighArtsAndBanks": {"isEnabled": false},
+                    "310_HighSupportVisitables": {"isEnabled": false},
+                    "320_HighArtsAndBanks": {"isEnabled": false},
                     "410_HighSpells": {"isEnabled": false},
                     "420_MidSpells": {"isEnabled": false},
                     "510_XpPandoras":{"isEnabled": false},
@@ -472,8 +463,8 @@
                     "610_Mid": {"isEnabled": false},
                     "520_GuardedResources": {"isEnabled": false},
                     "610_LowUnguarded": {"isEnabled": false},
-                    "620_LowPicks": {"isEnabled": false},
-                    "910_LowRoadPicks": {"isEnabled": false}
+                    "810_SegmentScatter": {"isEnabled": true},
+                    "910_RoadScatter": {"isEnabled": false}
                     
                 }
             },

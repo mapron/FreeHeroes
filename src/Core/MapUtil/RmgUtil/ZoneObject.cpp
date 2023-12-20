@@ -26,9 +26,8 @@ public:
 
     IZoneObject::Type m_type = IZoneObject::Type::Visitable;
 
-    int64_t        m_maxGuard = 0;
-    int64_t        m_guard    = 0;
-    std::string    m_repulseId;
+    int64_t        m_maxGuard  = 0;
+    int64_t        m_guard     = 0;
     size_t         m_itemLimit = 0;
     uint8_t        m_rngMask   = 0;
     Core::MapScore m_score;
@@ -56,7 +55,6 @@ public:
     std::string getId() const override { return m_id; }
     int64_t     getGuard() const override { return m_guard; }
     Type        getType() const override { return Type::Pickable; }
-    std::string getRepulseId() const override { return m_repulseId; }
 
     Mask getVisitableMask() const override { return m_mask; }
 
@@ -92,11 +90,8 @@ bool ZoneObjectGroup::tryPush(const IZoneObjectPtr& item)
                 return false;
         }
     }
-    if (!m_repulseId.empty() && !item->getRepulseId().empty())
-        return false;
-    m_guard     = newGuard;
-    m_score     = m_score + item->getScore();
-    m_repulseId = item->getRepulseId();
+    m_guard = newGuard;
+    m_score = m_score + item->getScore();
     if (!m_id.empty())
         m_id += "+";
     m_id += item->getId();

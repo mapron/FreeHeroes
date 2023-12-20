@@ -302,6 +302,56 @@ struct MAPUTIL_EXPORT FHMap {
             static_assert(sizeof(T) == 3);
             return T();
         }
+        std::vector<const FHCommonObject*> getAllObjects() const
+        {
+            std::vector<const FHCommonObject*> result;
+            result.reserve(m_resources.size()
+                           + m_resourcesRandom.size()
+                           + m_artifacts.size()
+                           + m_artifactsRandom.size()
+                           + m_monsters.size()
+                           + m_dwellings.size()
+                           + m_banks.size()
+                           + m_obstacles.size()
+                           + m_visitables.size()
+                           + m_mines.size()
+                           + m_pandoras.size()
+                           + m_shrines.size()
+                           + m_skillHuts.size()
+                           + m_scholars.size()
+                           + m_questHuts.size());
+            for (auto& obj : m_resources)
+                result.push_back(&obj);
+            for (auto& obj : m_resourcesRandom)
+                result.push_back(&obj);
+            for (auto& obj : m_artifacts)
+                result.push_back(&obj);
+            for (auto& obj : m_artifactsRandom)
+                result.push_back(&obj);
+            for (auto& obj : m_monsters)
+                result.push_back(&obj);
+            for (auto& obj : m_dwellings)
+                result.push_back(&obj);
+            for (auto& obj : m_banks)
+                result.push_back(&obj);
+            for (auto& obj : m_obstacles)
+                result.push_back(&obj);
+            for (auto& obj : m_visitables)
+                result.push_back(&obj);
+            for (auto& obj : m_mines)
+                result.push_back(&obj);
+            for (auto& obj : m_pandoras)
+                result.push_back(&obj);
+            for (auto& obj : m_shrines)
+                result.push_back(&obj);
+            for (auto& obj : m_skillHuts)
+                result.push_back(&obj);
+            for (auto& obj : m_scholars)
+                result.push_back(&obj);
+            for (auto& obj : m_questHuts)
+                result.push_back(&obj);
+            return result;
+        }
     } m_objects;
 
     struct Config {

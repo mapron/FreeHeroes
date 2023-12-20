@@ -21,6 +21,11 @@ struct TileZone;
 struct FHMap;
 class MapTileContainer;
 struct ZoneObjectWrap : public ZoneObjectItem {
+    ZoneObjectWrap() = default;
+    ZoneObjectWrap(const ZoneObjectItem& item)
+        : ZoneObjectItem(item)
+    {}
+
     enum class GuardPosition
     {
         TL,
@@ -53,8 +58,6 @@ struct ZoneObjectWrap : public ZoneObjectItem {
 
     //MapTileRegion m_lastCellSource;
 
-    bool m_absPosIsValid = false;
-
     int    m_placedHeat           = 0;
     size_t m_segmentIndex         = 0;
     size_t m_segmentFragmentIndex = 0;
@@ -77,6 +80,7 @@ public:
 
         MapTileRegion m_originalArea;
         MapTileRegion m_freeArea;
+        MapTileRegion m_spacingArea;
 
         MapTilePtr m_originalAreaCentroid = nullptr;
 
@@ -97,11 +101,13 @@ public:
 
         std::string toPrintableString() const;
 
-        HeatDataItem* findBestHeatData(int heat);
+        HeatDataItem* findBestHeatData(int heat, size_t estimatedArea);
 
         void compactIfNeeded();
         void commitPlacement(DistributionResult& distribution, ZoneObjectWrap* object);
         void recalcHeat();
+
+        MapTilePtrList getTilesByDistance() const;
     };
     using ZoneSegmentList = std::vector<ZoneSegment>;
 
@@ -125,11 +131,12 @@ public:
         ZoneSegmentList m_segments;
         MapGuardList    m_guards;
         MapTileRegion   m_needBlock;
+        MapTileRegion   m_allFreeCells;
 
         std::vector<std::string> m_allOriginalIds; // for checking
         std::vector<std::string> m_placedIds;      // for checking
 
-        ZoneObjectWrapPtrList m_candidateObjectsFreePickables;
+        ZoneObjectWrapPtrList m_segFreePickables;
         ZoneObjectWrapPtrList m_roadPickables;
 
         const TileZone* m_tileZone = nullptr;
