@@ -332,10 +332,11 @@ ObjectGenerator::ObjectFactoryPandora::ObjectFactoryPandora(FHMap&              
 
     for (const auto& [id, value] : genSettings.m_records) {
         ObjectPandora obj;
-        obj.m_obj.m_key    = id;
-        obj.m_obj.m_guard  = value.m_guard;
-        obj.m_obj.m_reward = value.m_reward;
-        obj.m_obj.m_score  = estimateReward(value.m_reward);
+        obj.m_obj.m_key         = id;
+        obj.m_obj.m_guard       = value.m_guard;
+        obj.m_obj.m_reward      = value.m_reward;
+        obj.m_obj.m_openPandora = scoreSettings.m_openPandoras && (value.m_reward.units.size() > 0 || obj.m_obj.m_reward.randomUnits.size() > 0);
+        obj.m_obj.m_score       = estimateReward(value.m_reward);
         if (!obj.m_obj.m_reward.spells.isDefault()) {
             auto filteredSpells = obj.m_obj.m_reward.spells.filterPossible(allSpells);
             if (filteredSpells.empty())

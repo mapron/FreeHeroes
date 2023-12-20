@@ -114,6 +114,7 @@ struct FHRandomArtifact : public FHCommonObject {
 struct FHPandora : public FHCommonObject {
     Core::Reward m_reward;
     std::string  m_key;
+    bool         m_openPandora = false; // turn creature to joinable guard
 
     bool operator==(const FHPandora&) const noexcept = default;
 };

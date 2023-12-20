@@ -72,7 +72,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_generatorsInclude,
     m_generatorsExclude,
     m_objectIdInclude,
-    m_objectIdExclude)
+    m_objectIdExclude,
+    m_openPandoras)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone::GeneratorBank::Record,

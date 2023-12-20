@@ -79,6 +79,7 @@ struct FHScoreSettings {
     std::set<std::string> m_generatorsExclude;
     std::set<std::string> m_objectIdInclude;
     std::set<std::string> m_objectIdExclude;
+    bool                  m_openPandoras = false;
 
     Core::MapScore makeTargetScore() const
     {

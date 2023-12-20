@@ -102,6 +102,9 @@ bool ZoneObjectWrap::estimateOccupied(MapTilePtr absPosCenter)
             m_extraObstacles = rewardAreaOuter;
             if (!isJoinable)
                 m_extraObstacles.erase(m_dangerZone);
+            if (isJoinable)
+                m_extraObstacles.erase(m_guardAbsPos);
+
             m_unpassableArea = m_extraObstacles;
         }
     }

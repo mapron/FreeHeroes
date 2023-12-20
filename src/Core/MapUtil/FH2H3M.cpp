@@ -536,6 +536,17 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
     }
 
     for (auto& fhPandora : src.m_objects.m_pandoras) {
+        if (fhPandora.m_openPandora && fhPandora.m_reward.units.size()) {
+            const Core::UnitWithCount& u       = fhPandora.m_reward.units[0];
+            auto                       monster = std::make_unique<MapMonster>(dest.m_features);
+            monster->m_count                   = static_cast<uint16_t>(u.count);
+            monster->m_joinAppeal              = 0;
+            monster->m_upgradedStack           = 0;
+
+            auto* def = u.unit->objectDefs.get({});
+            dest.m_objects.push_back(Object{ .m_order = fhPandora.m_order, .m_pos = int3fromPos(fhPandora.m_pos, dest.m_features->m_monstersMapXOffset), .m_defnum = tmplCache.add(def), .m_impl = std::move(monster) });
+            continue;
+        }
         auto obj = std::make_unique<MapPandora>(dest.m_features);
         convertReward(fhPandora.m_reward, obj->m_reward);
 

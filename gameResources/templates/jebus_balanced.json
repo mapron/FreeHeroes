@@ -36,6 +36,7 @@
                     "120_HighArmy": {
                         "isEnabled": true,
                         "preferredHeats": [3, 4],
+                        "openPandoras": true,
                         "score": {
                             "Army":           { "target": 50000 , "maxSingle": 20000, "minSingle": 8000 , "maxRemain": 15000 },
                             "ArmyDwelling":   { "target": 20000 , "maxSingle": 20000, "minSingle": 10000, "maxRemain": 15000 },
@@ -45,6 +46,7 @@
                     "130_MidArmy": {
                         "isEnabled": true,
                         "preferredHeats": [0],
+                        "openPandoras": true,
                         "score": {
                             "Army":           { "target": 80000, "maxSingle": 12000  , "maxRemain": 5000, "consumeRemain" : true },
                             "ArmyDwelling":   { "target": 10000, "maxSingle": 9000, "maxRemain": 5000, "minSingle": 4000},
@@ -451,6 +453,7 @@
                     "120_HighArmy": {
                         "isEnabled": true,
                         "preferredHeats": [0, 1],
+                        "openPandoras": false,
                         "score": {
                             "Army":           { "target": 250000 , "maxSingle": -1, "consumeRemain" : true },
                             "ArmyDwelling":   { "target": 40000  , "maxSingle": -1, "maxRemain": 20000 , "consumeRemain" : true },
