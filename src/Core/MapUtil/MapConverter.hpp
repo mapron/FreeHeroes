@@ -49,6 +49,7 @@ public:
         std::string      m_stopAfterStage;
         std::string      m_showDebugStage;
         std::string      m_tileFilter;
+        int              m_stopAfterHeat = 1000;
     };
 
     enum class RawState

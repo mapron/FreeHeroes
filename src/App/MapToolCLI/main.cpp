@@ -34,6 +34,7 @@ int main(int argc, char** argv)
                                    "rng-settings-file",
                                    "stage-stop-after",
                                    "stage-show-debug",
+                                   "heat-stop-after",
                                    "tile-filter",
                                },
                                { "tasks" });
@@ -50,11 +51,14 @@ int main(int argc, char** argv)
     const bool        extraLogging     = parser.getArg("logs-extra") == "1";
     const std::string diffJsonFile     = parser.getArg("diff-json-file");
     const std::string seedStr          = parser.getArg("seed");
+    const std::string stopAfterHeatStr = parser.getArg("heat-stop-after");
     const std::string stopAfterStage   = parser.getArg("stage-stop-after");
     const std::string showDebugStage   = parser.getArg("stage-show-debug");
     const std::string tileFilter       = parser.getArg("tile-filter");
     const std::string rngUserSettings  = parser.getArg("rng-settings-file");
-    const uint64_t    seed             = std::strtoull(seedStr.c_str(), nullptr, 10);
+
+    const int      stopAfterHeat = stopAfterHeatStr.empty() ? 1000 : std::strtol(stopAfterHeatStr.c_str(), nullptr, 10);
+    const uint64_t seed          = std::strtoull(seedStr.c_str(), nullptr, 10);
 
     Core::CoreApplication fhCoreApp;
     fhCoreApp.initLogger();
@@ -97,6 +101,7 @@ int main(int argc, char** argv)
                                .m_stopAfterStage          = stopAfterStage,
                                .m_showDebugStage          = showDebugStage,
                                .m_tileFilter              = tileFilter,
+                               .m_stopAfterHeat           = stopAfterHeat,
                            });
 
     for (const std::string& taskStr : tasks) {

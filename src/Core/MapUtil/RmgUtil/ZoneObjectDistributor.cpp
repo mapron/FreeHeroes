@@ -213,6 +213,8 @@ bool ZoneObjectDistributor::makeInitialDistribution(DistributionResult& distribu
 
     ZoneObjectWrapPtrList segmentsNormalUnfit;
     for (ZoneObjectWrap* object : segmentsNormal) {
+        if (object->m_preferredHeat > distribution.m_stopAfterHeat)
+            continue;
         int minHeatAvailableInAllSegments = distribution.m_maxHeat;
 
         std::vector<ZoneSegment*> segCandidatesWithEnoughSpace;
@@ -287,7 +289,7 @@ bool ZoneObjectDistributor::makeInitialDistribution(DistributionResult& distribu
     }
 
     // place roads and free pickables
-    {
+    if (distribution.m_stopAfterHeat == 1000) {
         const auto& roadRegion = distribution.m_tileZone->m_roads.m_all;
         auto&       freeRoads  = distribution.m_allFreeRoads;
         auto&       freeCells  = distribution.m_allFreeCells;
@@ -322,7 +324,7 @@ void ZoneObjectDistributor::doPlaceDistribution(DistributionResult& distribution
             commitPlacement(distribution, object, &seg);
     }
 
-    {
+    if (distribution.m_stopAfterHeat == 1000) {
         const auto& roadRegion = distribution.m_allFreeRoads;
         const auto& freeCells  = distribution.m_allFreeCells;
         for (size_t i = 0; auto* obj : distribution.m_roadPickables) {
@@ -337,7 +339,7 @@ void ZoneObjectDistributor::doPlaceDistribution(DistributionResult& distribution
         }
     }
 
-    {
+    if (distribution.m_stopAfterHeat == 1000) {
         std::sort(distribution.m_placedIds.begin(), distribution.m_placedIds.end());
 
         size_t                   maxSize = std::max(distribution.m_placedIds.size(), distribution.m_allOriginalIds.size());
@@ -377,14 +379,6 @@ void ZoneObjectDistributor::doPlaceDistribution(DistributionResult& distribution
         if (!extraIds.empty() || !missingIds.empty())
             throw std::runtime_error("Placement logic is corrupted!");
     }
-
-    //for (ZoneObjectWrap* object : distribution.m_candidateObjectsFreePickables) {
-    //distribution.m_tileZone->m_rewardTilesCenters;
-    //}
-    //std::map<int, MapTileRegion> roadsByRegion = distribution.m_tileZone->m_roadHeat.m_byLevel;
-    //for (ZoneObjectWrap* object : distribution.m_roadPickables) {
-    //    roadsByRegion
-    //}
 }
 
 bool ZoneObjectDistributor::placeWrapIntoSegments(DistributionResult& distribution, ZoneObjectWrap* object, std::vector<ZoneSegment*>& segCandidates) const

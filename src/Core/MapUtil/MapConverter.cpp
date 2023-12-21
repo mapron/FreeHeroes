@@ -560,6 +560,7 @@ void MapConverter::convertFHTPLtoFH()
                                   m_settings.m_stopAfterStage,
                                   m_settings.m_showDebugStage,
                                   m_settings.m_tileFilter,
+                                  m_settings.m_stopAfterHeat,
                                   m_settings.m_extraLogging);
     converter.run();
 }

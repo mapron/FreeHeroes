@@ -52,11 +52,6 @@ namespace FreeHeroes {
 
 namespace {
 
-std::string stageToString(FHTemplateProcessor::Stage stage)
-{
-    auto str = Mernel::Reflection::EnumTraits::enumToString(stage);
-    return std::string(str.begin(), str.end());
-}
 FHTemplateProcessor::Stage stringToStage(const std::string& str)
 {
     if (str.empty())
@@ -89,6 +84,7 @@ FHTemplateProcessor::FHTemplateProcessor(FHMap&                     map,
                                          const std::string&         stopAfterStage,
                                          const std::string&         debugStage,
                                          const std::string&         tileZoneFilter,
+                                         int                        stopAfterHeat,
                                          bool                       extraLogs)
     : m_map(map)
     , m_database(database)
@@ -97,6 +93,7 @@ FHTemplateProcessor::FHTemplateProcessor(FHMap&                     map,
     , m_stopAfter(stringToStage(stopAfterStage))
     , m_showDebug(stringToStage(debugStage))
     , m_tileZoneFilter(tileZoneFilter)
+    , m_stopAfterHeat(stopAfterHeat)
     , m_extraLogging(extraLogs)
 {
     auto& factions = m_database->factions()->records();
@@ -119,6 +116,12 @@ FHTemplateProcessor::FHTemplateProcessor(FHMap&                     map,
             continue;
         m_guardUnits.push_back(unit);
     }
+}
+
+std::string FHTemplateProcessor::stageToString(Stage stage)
+{
+    auto str = Mernel::Reflection::EnumTraits::enumToString(stage);
+    return std::string(str.begin(), str.end());
 }
 
 void FHTemplateProcessor::run()
@@ -653,6 +656,7 @@ void FHTemplateProcessor::runRewards()
 
         ZoneObjectDistributor::DistributionResult distributionResultCopy;
         distributionResultCopy.init(tileZone);
+        distributionResultCopy.m_stopAfterHeat = m_stopAfterHeat;
 
         auto      objects       = m_map.m_objects;
         auto      needBeBlocked = tileZone.m_needPlaceObstacles;

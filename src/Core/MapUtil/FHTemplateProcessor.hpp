@@ -13,12 +13,14 @@
 #include "RmgUtil/MapGuard.hpp"
 #include "RmgUtil/TileZone.hpp"
 
+#include "MapUtilExport.hpp"
+
 #include <stdexcept>
 #include <functional>
 
 namespace FreeHeroes {
 
-class FHTemplateProcessor {
+class MAPUTIL_EXPORT FHTemplateProcessor {
 public:
     FHTemplateProcessor(FHMap&                     map,
                         const Core::IGameDatabase* database,
@@ -27,6 +29,7 @@ public:
                         const std::string&         stopAfterStage,
                         const std::string&         debugStage,
                         const std::string&         tileZoneFilter,
+                        int                        stopAfterHeat,
                         bool                       extraLogs);
 
     enum class Stage
@@ -46,6 +49,7 @@ public:
         Guards,
         PlayerInfo,
     };
+    static std::string stageToString(Stage stage);
 
     void run();
 
@@ -101,6 +105,7 @@ private:
     const Stage                      m_stopAfter = Stage::Invalid;
     const Stage                      m_showDebug = Stage::Invalid;
     const std::string                m_tileZoneFilter;
+    const int                        m_stopAfterHeat;
     const bool                       m_extraLogging;
 
 private:

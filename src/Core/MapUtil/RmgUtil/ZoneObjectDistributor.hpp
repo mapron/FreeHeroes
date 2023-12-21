@@ -143,6 +143,8 @@ public:
 
         const TileZone* m_tileZone = nullptr;
 
+        int m_stopAfterHeat = 1000;
+
         void init(TileZone& tileZone);
     };
 

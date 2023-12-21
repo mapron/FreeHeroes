@@ -10,6 +10,7 @@
 #include "MapEditorWidget.hpp"
 #include "MapConverter.hpp"
 #include "FHMapReflection.hpp"
+#include "FHTemplateProcessor.hpp"
 
 #include "EnvDetect.hpp"
 #include "IRandomGenerator.hpp"
@@ -155,6 +156,10 @@ MapToolWindow::MapToolWindow(
 
     m_ui->mapFilename->setValidator(new QRegularExpressionValidator(QRegularExpression("[a-zA-Z0-9_ -]+"), this));
     m_ui->mapGamename->setValidator(new QRegularExpressionValidator(QRegularExpression("[a-zA-Z0-9_ -]+"), this));
+    m_ui->comboBoxStageDebug->addItem(tr("--show debug--"));
+    for (int i = 1; i <= int(FHTemplateProcessor::Stage::PlayerInfo); i++) {
+        m_ui->comboBoxStageDebug->addItem(QString::fromStdString(FHTemplateProcessor::stageToString(FHTemplateProcessor::Stage(i))));
+    }
 
     updatePaths();
 
@@ -187,7 +192,6 @@ void MapToolWindow::generateMap()
     }
     Mernel::ScopeTimer timer;
 
-    auto start = QTime::currentTime();
     m_ui->labelStatus->setText(tr("Generation..."));
     m_ui->pushButtonGenerate->setEnabled(false);
 
@@ -201,8 +205,12 @@ void MapToolWindow::generateMap()
     bool               result = true;
     std::ostringstream os;
 
-    uint64_t   seed     = m_ui->lineEditSeed->text().toULongLong();
-    const auto gamename = m_ui->mapGamename->text().toStdString();
+    uint64_t    seed     = m_ui->lineEditSeed->text().toULongLong();
+    const auto  gamename = m_ui->mapGamename->text().toStdString();
+    std::string debugStage;
+    if (m_ui->comboBoxStageDebug->currentIndex() > 0) {
+        debugStage = m_ui->comboBoxStageDebug->currentText().toStdString();
+    }
 
     MapConverter::Settings sett{
         .m_inputs                  = { .m_fhTemplate = Mernel::string2path(fhTpl) },
@@ -211,6 +219,7 @@ void MapToolWindow::generateMap()
         .m_dumpBinaryDataJson      = false,
         .m_seed                    = seed,
         .m_rngUserSettings         = getUserSettingsPath(),
+        .m_showDebugStage          = debugStage,
     };
 
     try {
