@@ -207,6 +207,7 @@
     "untranslatedName": "Experimental Shop",
     "guardValue": 7000,
     "frequency": 800,
+    "excludeTerrains": ["sod.terrain.swamp"],
 
     "rewards": [
         {"units":["sod.unit.giant=1"]},
@@ -262,6 +263,8 @@
     "untranslatedName": "Pirate Cave",
     "guardValue": 7000,
     "frequency": 1000,
+    
+    "allowedTerrainsOverride": ["sod.terrain.swamp"],
     
     "rewards": [
         {"units":["hota.unit.seaSerpent=1"]},
@@ -488,7 +491,7 @@
 "hota.map.experimentalShop"          : [ false, true ],
 "hota.map.wolfRaiderPicket"          : [ false, true ],
 "hota.map.vermilionTower"            : [ false, true ],
-"hota.map.pirateCave"                : [ false, false ],
+"hota.map.pirateCave"                : [ false, true ],
 "hota.map.ivoryTower"                : [ false, false ],
 "sod.map.impCache"                   : [ false, true ],
 "sod.map.dwarvenTreasury"            : [ false, true ],

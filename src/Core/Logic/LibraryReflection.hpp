@@ -928,6 +928,8 @@ STRUCT_REFLECTION_STRINGIFY(
     fieldLayout,
     isWaterContent,
     isEnabledByDefault,
+    allowedTerrainsOverride,
+    excludeTerrains,
     guardValue,
     frequency
     )

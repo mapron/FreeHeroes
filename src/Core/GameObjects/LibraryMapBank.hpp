@@ -50,6 +50,9 @@ struct LibraryMapBank {
     bool              isWaterContent     = false;
     bool              isEnabledByDefault = true;
 
+    std::set<LibraryTerrainConstPtr> allowedTerrainsOverride;
+    std::set<LibraryTerrainConstPtr> excludeTerrains;
+
     int guardValue = -1;
     int frequency  = 1000;
 };

@@ -742,7 +742,8 @@ void FHTemplateProcessor::runCorrectObjectTerrains()
     };
 
     for (auto& obj : m_map.m_objects.m_banks)
-        correctObjIndexPos(obj.m_id->id, obj.m_defIndex, obj.m_id->objectDefs, obj.m_pos);
+        if (obj.m_id->allowedTerrainsOverride.empty())
+            correctObjIndexPos(obj.m_id->id, obj.m_defIndex, obj.m_id->objectDefs, obj.m_pos);
     for (auto& obj : m_map.m_objects.m_dwellings)
         correctObjIndexPos(obj.m_id->id, obj.m_defIndex, obj.m_id->objectDefs, obj.m_pos);
     for (auto& obj : m_map.m_objects.m_visitables)

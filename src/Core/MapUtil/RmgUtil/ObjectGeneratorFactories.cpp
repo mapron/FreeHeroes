@@ -55,8 +55,16 @@ ObjectGenerator::ObjectFactoryBank::ObjectFactoryBank(FHMap&                    
         if (m_map.m_disabledBanks.isDisabled(m_map.m_isWaterMap, bank))
             continue;
 
-        if (!ObjectGenerator::terrainViable(bank->objectDefs, terrain))
+        if (bank->excludeTerrains.contains(terrain))
             continue;
+
+        if (!bank->allowedTerrainsOverride.empty()) {
+            if (!bank->allowedTerrainsOverride.contains(terrain))
+                continue;
+        } else {
+            if (!ObjectGenerator::terrainViable(bank->objectDefs, terrain))
+                continue;
+        }
 
         int totalFreq = 0;
         for (auto& var : bank->variants)
