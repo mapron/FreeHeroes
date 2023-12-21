@@ -169,15 +169,12 @@ bool ZoneObjectDistributor::makeInitialDistribution(DistributionResult& distribu
     Mernel::ProfilerScope scope("InitialDistribution");
     distribution.m_allOriginalIds = generated.m_allIds;
     size_t totalSize              = 0;
-    //size_t                totalSizeCells = 0;
     for (ZoneSegment& seg : distribution.m_segments) {
         totalSize += seg.m_freeArea.size();
-        //totalSizeCells += seg.m_originalAreaCells.size();
     }
     if (generated.m_objects.empty())
         return true;
-    size_t totalSizeObjects = 0;
-    //size_t             totalSizeObjectsCells = 0;
+    size_t                totalSizeObjects = 0;
     ZoneObjectWrapPtrList segmentsNormal;
     for (auto& obj : generated.m_objects) {
         ZoneObjectWrap wrap(obj);
@@ -201,6 +198,7 @@ bool ZoneObjectDistributor::makeInitialDistribution(DistributionResult& distribu
                 //m_logOutput << "f id=" << wrap.m_object->getId() << "\n";
             }
         } else {
+            //m_logOutput << "n id=" << wrap.m_object->getId() << " - " << wrap.m_generatedIndex << "\n";
             segmentsNormal.push_back(&wrap);
             totalSizeObjects += wrap.m_estimatedArea;
         }
@@ -212,9 +210,6 @@ bool ZoneObjectDistributor::makeInitialDistribution(DistributionResult& distribu
         m_logOutput << m_indent << "too many generated objects to fit in area!\n";
         return false;
     }
-    std::sort(segmentsNormal.begin(), segmentsNormal.end(), [](ZoneObjectWrap* r, ZoneObjectWrap* l) {
-        return std::tuple{ r->m_placementOrder, r } < std::tuple{ l->m_placementOrder, l };
-    });
 
     ZoneObjectWrapPtrList segmentsNormalUnfit;
     for (ZoneObjectWrap* object : segmentsNormal) {
@@ -256,10 +251,7 @@ bool ZoneObjectDistributor::makeInitialDistribution(DistributionResult& distribu
 
     totalSizeObjects = 0;
     for (ZoneSegment& seg : distribution.m_segments) {
-        if (seg.m_successNormal.empty())
-            continue;
         totalSizeObjects += seg.m_originalArea.size() - seg.m_freeArea.size();
-        //m_logOutput << "getFreePercent=" << seg.getFreePercent() << "\n";
     }
 
     m_logOutput << m_indent << "placed tiles= " << totalSizeObjects << " / " << totalSize << " \n";
@@ -297,13 +289,16 @@ bool ZoneObjectDistributor::makeInitialDistribution(DistributionResult& distribu
     // place roads and free pickables
     {
         const auto& roadRegion = distribution.m_tileZone->m_roads.m_all;
+        auto&       freeRoads  = distribution.m_allFreeRoads;
         auto&       freeCells  = distribution.m_allFreeCells;
-        if (roadRegion.size() < distribution.m_roadPickables.size()) {
-            m_logOutput << m_indent << "Roads size " << roadRegion.size() << " < " << distribution.m_roadPickables.size() << "\n";
+        freeRoads              = roadRegion.intersectWith(distribution.m_tileZone->m_innerAreaUsable.m_innerArea);
+        freeRoads.erase(distribution.m_tileZone->m_nodes.getRegion(RoadLevel::Towns));
+        if (freeRoads.size() < distribution.m_roadPickables.size()) {
+            m_logOutput << m_indent << "Roads size " << freeRoads.size() << " < " << distribution.m_roadPickables.size() << "\n";
             return false;
         }
         for (auto& seg : distribution.m_segments) {
-            freeCells.insert(seg.m_spacingArea);
+            freeCells.insert(seg.m_spacingArea.intersectWith(seg.m_originalArea));
             freeCells.insert(seg.m_freeArea);
         }
         if (freeCells.size() < distribution.m_segFreePickables.size()) {
@@ -328,7 +323,7 @@ void ZoneObjectDistributor::doPlaceDistribution(DistributionResult& distribution
     }
 
     {
-        const auto& roadRegion = distribution.m_tileZone->m_roads.m_all;
+        const auto& roadRegion = distribution.m_allFreeRoads;
         const auto& freeCells  = distribution.m_allFreeCells;
         for (size_t i = 0; auto* obj : distribution.m_roadPickables) {
             obj->m_absPos = roadRegion[i++ * roadRegion.size() / distribution.m_roadPickables.size()];
@@ -453,9 +448,10 @@ void ZoneObjectDistributor::commitPlacement(DistributionResult& distribution, Zo
 
     if (object->m_useGuards) {
         MapGuard guard;
-        guard.m_value = object->m_object->getGuard();
-        guard.m_score = object->m_object->getScore();
-        guard.m_pos   = object->m_guardAbsPos;
+        guard.m_value        = object->m_object->getGuard();
+        guard.m_score        = object->m_object->getScore();
+        guard.m_pos          = object->m_guardAbsPos;
+        guard.m_generationId = object->m_generationId;
         distribution.m_guards.push_back(guard);
     }
 }
@@ -618,6 +614,8 @@ MapTilePtrList ZoneObjectDistributor::ZoneSegment::getTilesByDistanceFrom(MapTil
 
 void ZoneObjectDistributor::makePreferredPoint(DistributionResult& distribution, ZoneObjectWrap* object, int angleStartOffset, size_t index, size_t count) const
 {
+    if (object->m_scatterType)
+        return;
     auto&  rect    = distribution.m_heatRegionRects[object->m_preferredHeat];
     size_t regSize = rect.m_region.size();
 

@@ -134,8 +134,9 @@ ZoneObjectGeneration ObjectGenerator::generate(const FHRngZone&             zone
             if (!scoreSettings.m_preferredHeats.empty())
                 item.m_preferredHeat = scoreSettings.m_preferredHeats[m_rng->genMinMax(0, scoreSettings.m_preferredHeats.size() - 1)];
             item.m_placementOrder = item.m_preferredHeat;
-            if (scoreSettings.m_placementOrder >= 0)
+            if (scoreSettings.m_placementOrder >= -1)
                 item.m_placementOrder = scoreSettings.m_placementOrder;
+            //m_logOutput << "item " << item.m_object->getId() << " item.m_preferredHeat= " << item.m_preferredHeat << " item.m_placementOrder=" << item.m_placementOrder << "\n";
 
             item.m_pickable = item.m_object->getType() == IZoneObject::Type::Pickable || item.m_object->getType() == IZoneObject::Type::Joinable;
 
@@ -156,6 +157,9 @@ ZoneObjectGeneration ObjectGenerator::generate(const FHRngZone&             zone
 
             result.m_allIds.push_back(item.m_object->getId());
         }
+        shuffle(needDistributeByRadius);
+        shuffle(needDistributeEqual);
+
         int angleStart = m_rng->genMinMax(0, 359);
         for (size_t d = 0; d < needDistributeByRadius.size(); ++d) {
             needDistributeByRadius[d]->m_randomAngleOffset = angleStart;
@@ -186,6 +190,9 @@ ZoneObjectGeneration ObjectGenerator::generate(const FHRngZone&             zone
         //m_logOutput << "targetScoreRemainingPrev=" << targetScoreRemainingPrev << "\n";
         result.m_objects.insert(result.m_objects.end(), objectList.cbegin(), objectList.cend());
     }
+    std::sort(result.m_objects.begin(), result.m_objects.end(), [](const auto& r, const auto& l) {
+        return std::tuple{ r.m_placementOrder, r.m_generatedIndex, &r } < std::tuple{ l.m_placementOrder, l.m_generatedIndex, &l };
+    });
     auto totalScoreRemain = totalScoreValue(targetScoreRemainingPrev);
     std::sort(result.m_allIds.begin(), result.m_allIds.end());
     m_logOutput << indentBase << "Total generated:" << result.m_allIds.size() << ", remainScore=" << targetScoreRemainingPrev << "\n";
@@ -256,21 +263,25 @@ void ObjectGenerator::makeGroups(int64_t guardGroupLimit, int64_t guardMinToGrou
         return obj;
     };
 
-    auto bundleGuarded      = makeNewObjectBundle();
-    bool bundleGuardedEmpty = true;
+    auto           bundleGuarded      = makeNewObjectBundle();
+    bool           bundleGuardedEmpty = true;
+    ZoneObjectItem lastItem;
 
-    auto flushBundle = [&bundleGuarded, &objectListGrouped, &makeNewObjectBundle, &bundleGuardedEmpty]() {
+    auto flushBundle = [&bundleGuarded, &objectListGrouped, &makeNewObjectBundle, &bundleGuardedEmpty, &lastItem]() {
         if (bundleGuardedEmpty)
             return;
         bundleGuarded->updateMask();
-        objectListGrouped.push_back(ZoneObjectItem{ .m_object = bundleGuarded });
+        auto item     = lastItem;
+        item.m_object = bundleGuarded;
+        objectListGrouped.push_back(item);
         bundleGuarded      = makeNewObjectBundle();
         bundleGuardedEmpty = true;
     };
 
-    for (const auto& item : objectList) {
+    for (const auto& item : objectListForGrouping) {
         if (!bundleGuardedEmpty) {
             if (bundleGuarded->tryPush(item.m_object)) {
+                lastItem = item;
                 continue;
             }
             // can not push more
@@ -278,6 +289,7 @@ void ObjectGenerator::makeGroups(int64_t guardGroupLimit, int64_t guardMinToGrou
         }
         if (bundleGuarded->tryPush(item.m_object)) {
             bundleGuardedEmpty = false;
+            lastItem           = item;
             continue;
         }
         throw std::runtime_error("sanity check failed: failed push to empty bundle.");
@@ -291,6 +303,23 @@ void ObjectGenerator::makeGroups(int64_t guardGroupLimit, int64_t guardMinToGrou
 
     objectList = std::move(objectListRemain);
     objectList.insert(objectList.end(), objectListGrouped.cbegin(), objectListGrouped.cend());
+}
+
+void ObjectGenerator::shuffle(std::vector<ZoneObjectItem*>& list) const
+{
+    std::vector<ZoneObjectItem*> copy;
+    while (!list.empty()) {
+        size_t remain = list.size();
+        if (remain == 1) {
+            copy.push_back(list[0]);
+            break;
+        }
+        auto i   = m_rng->genMinMax(0, list.size() - 1);
+        auto obj = list[i];
+        copy.push_back(obj);
+        list.erase(list.begin() + i);
+    }
+    std::swap(copy, list);
 }
 
 bool ObjectGenerator::correctObjIndex(Core::ObjectDefIndex& defIndex, const Core::ObjectDefMappings& defMapping, Core::LibraryTerrainConstPtr requiredTerrain)

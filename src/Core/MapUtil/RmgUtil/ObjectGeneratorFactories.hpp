@@ -86,7 +86,7 @@ struct ObjectGenerator::ObjectFactoryResourcePile : public AbstractFactory<Recor
 
 struct ObjectPandora : public ObjectGenerator::AbstractObject<FHPandora> {
     std::string        getId() const override { return "pandora_" + m_obj.m_key; }
-    Type               getType() const override { return  m_obj.m_openPandora ? Type::Joinable : Type::Pickable; }
+    Type               getType() const override { return m_obj.m_openPandora ? Type::Joinable : Type::Pickable; }
     bool               preventDuplicates() const override { return true; }
     Core::CombinedMask getMask() const override;
 };

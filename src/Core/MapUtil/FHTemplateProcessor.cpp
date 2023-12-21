@@ -843,13 +843,12 @@ void FHTemplateProcessor::runGuards()
         const bool upgraded = unit->upgrades.empty() ? false : m_rng->genSmall(3) == 0;
 
         FHMonster fhMonster;
-        fhMonster.m_pos        = guard.m_pos->m_pos;
-        fhMonster.m_count      = getPossibleCount(unit, value);
-        fhMonster.m_id         = unit;
-        fhMonster.m_guardValue = value;
-        fhMonster.m_score      = guard.m_score;
-
-        //fhMonster.m_score[FHScoreAttr::Support] = guard.m_zone ? guard.m_zone->m_rngZoneSettings.m_zoneGuardPercent : 666;
+        fhMonster.m_pos          = guard.m_pos->m_pos;
+        fhMonster.m_count        = getPossibleCount(unit, value);
+        fhMonster.m_id           = unit;
+        fhMonster.m_guardValue   = value;
+        fhMonster.m_score        = guard.m_score;
+        fhMonster.m_generationId = guard.m_generationId;
 
         if (upgraded) {
             auto upCount = getPossibleCount(unit->upgrades[0], value);

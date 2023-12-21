@@ -61,6 +61,7 @@ public:
                            ZoneObjectList&                 objectList) const;
 
     void makeGroups(int64_t guardGroupLimit, int64_t guardMinToGroup, ZoneObjectList& objectList) const;
+    void shuffle(std::vector<ZoneObjectItem*>& list) const;
 
     static bool correctObjIndex(Core::ObjectDefIndex& defIndex, const Core::ObjectDefMappings& defMapping, Core::LibraryTerrainConstPtr requiredTerrain);
     static bool terrainViable(const Core::ObjectDefMappings& defMapping, Core::LibraryTerrainConstPtr requiredTerrain);

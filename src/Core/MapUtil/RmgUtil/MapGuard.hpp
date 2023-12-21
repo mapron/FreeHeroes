@@ -17,6 +17,7 @@ struct MapGuard {
     MapTilePtr     m_pos  = nullptr;
     TileZone*      m_zone = nullptr;
     Core::MapScore m_score;
+    std::string    m_generationId;
     bool           m_joinable = false;
 };
 using MapGuardList = std::vector<MapGuard>;

@@ -72,8 +72,8 @@ struct FHScoreSettings {
     int64_t m_guardMinToGroup = -1;
     int64_t m_guardGroupLimit = -1;
 
-    std::vector<int>      m_preferredHeats; // if empty will be 0
-    int                   m_placementOrder = -1;
+    std::vector<int>      m_preferredHeats;      // if empty will be 0
+    int                   m_placementOrder = -2; // ugly! need to decide good default for value both neg and positive.
     ZoneObjectType        m_objectType     = ZoneObjectType::Segment;
     std::set<std::string> m_generatorsInclude;
     std::set<std::string> m_generatorsExclude;

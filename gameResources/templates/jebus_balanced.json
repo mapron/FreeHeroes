@@ -16,7 +16,7 @@
                 "scoreTargets": {
                     "010_ControlScrolls": {
                         "isEnabled": true,
-                        "placementOrder": 0,
+                        "placementOrder": -1,
                         "preferredHeats": [9],
                         "score": {
                             "Control":        { "target":  82000, "maxSingle": 30000}
@@ -92,6 +92,8 @@
                     "420_MidSpells": {
                         "isEnabled": true,
                         "preferredHeats": [8],
+                        "guardThreshold": 10,
+                        "guardMinToGroup": 10,
                         "score": {
                             "SpellOffensive": { "target": 10000, "maxSingle": 6000, "minSingle": 2100, "maxRemain": 3000},
                             "SpellCommon":    { "target": 10000, "maxSingle": 6000, "minSingle": 500 , "maxRemain": 3000}
@@ -118,6 +120,8 @@
                     "530_GuardedTreasureChests": {
                         "isEnabled": true,
                         "preferredHeats": [1, 2, 3, 4],
+                        "guardThreshold": 10,
+                        "guardMinToGroup": 10,
                         "score":{
                             "Experience":     { "target": 20000, "maxSingle": 2000, "maxRemain": 4000, "consumeRemain": true}
                         }
@@ -141,6 +145,7 @@
                     "620_GuardedResources": {
                         "isEnabled": true,
                         "guardThreshold": 10,
+                        "guardMinToGroup": 10,
                         "preferredHeats": [2, 3, 4],
                         "generatorsInclude": ["resources"],
                         "score":{
@@ -150,7 +155,6 @@
                     "630_LowUnguarded": {
                         "isEnabled": true,
                         "guardThreshold": 100000,
-                        "guardMinToGroup": 100000,
                         "preferredHeats": [2, 3, 4, 5, 6, 7],
                         "generatorsExclude": ["resources"],
                         "objectIdExclude": ["sod.visitable.redwoodObservatory", "sod.visitable.magicWell"],
@@ -160,13 +164,15 @@
                             "Gold":           { "target": 30000, "maxSingle": 5000, "maxRemain": 2000 },
                             "Upgrade"   :     { "target": 10000, "maxSingle": 3000, "maxRemain": 5000, "consumeRemain": true},
                             "ResourceGen":    { "target": 50000,                    "maxRemain": 5000, "consumeRemain": true},
-                            "SpellAny":       { "target": 10000, "maxSingle": 1800, "maxRemain": 4000, "consumeRemain": true},
+                            "SpellOffensive": { "target": 1    , "maxSingle": 1800, "maxRemain": 4000, "consumeRemain": true},
+                            "SpellCommon":    { "target": 5000 , "maxSingle": 1800, "maxRemain": 4000, "consumeRemain": true},
                             "Support":        { "target": 2000 , "maxSingle": 1000, "maxRemain": 2000, "consumeRemain": true}
                         }
                     },
                     "810_SegmentScatter": {
                         "isEnabled": true,
                         "objectType": "SegmentScatter",
+                        "placementOrder": 100,
                         "generatorsExclude": ["banks"],
                         "score":{
                             "Gold":           { "target": 30000, "maxSingle": 2000, "maxRemain": 3000  , "consumeRemain" : true },
@@ -176,6 +182,7 @@
                     "910_RoadScatter": {
                         "objectType": "RoadScatter",
                         "isEnabled": true,
+                        "placementOrder": 100,
                         
                         "generatorsExclude": ["banks"],
                         "score":{
@@ -186,6 +193,7 @@
                     "920_RoadMid1": {
                         "objectType": "TownMid1",
                         "guardThreshold": 100000,
+                        "placementOrder": -1,
                         "isEnabled": true,
                         "generatorsInclude": ["visitables"],
                         "objectIdInclude": ["sod.visitable.redwoodObservatory"],
@@ -196,6 +204,7 @@
                     "930_RoadMid2": {
                         "objectType": "TownMid2",
                         "guardThreshold": 100000,
+                        "placementOrder": -1,
                         "isEnabled": true,
                         "generatorsInclude": ["visitables"],
                         "objectIdInclude": ["sod.visitable.redwoodObservatory"],
@@ -206,6 +215,7 @@
                     "940_ExitMid1": {
                         "objectType": "ExitMid1",
                         "guardThreshold": 100000,
+                        "placementOrder": -1,
                         "isEnabled": true,
                         "generatorsInclude": ["visitables"],
                         "objectIdInclude": ["sod.visitable.magicWell" ],
@@ -216,7 +226,7 @@
                 },
                 "guardThreshold": 4000,
                 "guardMinToGroup": 0,
-                "guardGroupLimit": 10000,
+                "guardGroupLimit": 14000,
 
                 "generators": {
                     "banks": {
@@ -318,13 +328,13 @@
                             "lvl1"     : { "frequency":  500,                   "filter": {"levels": [1], "notTags"   : ["offensive", "control"]             } },
                             "lvl2"     : { "frequency":  400,                   "filter": {"levels": [2], "notTags"   : ["offensive", "control"]             } },
                             "lvl3"     : { "frequency":  400,                   "filter": {"levels": [3], "notTags"   : ["offensive", "control"]             } },
-                            "lvl4"     : { "frequency":  300,                   "filter": {"levels": [4], "notTags"   : ["offensive", "control"]             } },
-                            "lvl5"     : { "frequency":  300,                   "filter": {"levels": [5], "notTags"   : ["offensive", "control"]             } },
+                            "lvl4"     : { "frequency":  500,                   "filter": {"levels": [4], "notTags"   : ["offensive", "control"]             } },
+                            "lvl5"     : { "frequency":  500,                   "filter": {"levels": [5], "notTags"   : ["offensive", "control"]             } },
                             "lvl1off"  : { "frequency":  100,                   "filter": {"levels": [1], "notTags"   : ["control"], "tags": ["offensive"]   } },
                             "lvl2off"  : { "frequency":  200,                   "filter": {"levels": [2], "notTags"   : ["control"], "tags": ["offensive"]   } },
-                            "lvl3off"  : { "frequency":  400,                   "filter": {"levels": [3], "notTags"   : ["control"], "tags": ["offensive"]   } },
-                            "lvl4off"  : { "frequency":  300,                   "filter": {"levels": [4], "notTags"   : ["control"], "tags": ["offensive"]   } },
-                            "lvl5off"  : { "frequency":  300,                   "filter": {"levels": [5], "notTags"   : ["control"], "tags": ["offensive"]   } },
+                            "lvl3off"  : { "frequency":  600,                   "filter": {"levels": [3], "notTags"   : ["control"], "tags": ["offensive"]   } },
+                            "lvl4off"  : { "frequency":  500,                   "filter": {"levels": [4], "notTags"   : ["control"], "tags": ["offensive"]   } },
+                            "lvl5off"  : { "frequency":  500,                   "filter": {"levels": [5], "notTags"   : ["control"], "tags": ["offensive"]   } },
                             "control"  : { "frequency":  10000,                 "filter": {                 "tags"    : ["control"]    } }
                         }
                     },
@@ -443,7 +453,7 @@
                     },
                     "111_ControlArts": {
                         "isEnabled": true,
-                        "placementOrder": 0,
+                        "placementOrder": -1,
                         "preferredHeats": [9],
                         "guardGroupLimit": 0,
                         "score": {

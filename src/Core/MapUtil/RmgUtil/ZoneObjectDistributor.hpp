@@ -133,6 +133,7 @@ public:
         MapGuardList    m_guards;
         MapTileRegion   m_needBlock;
         MapTileRegion   m_allFreeCells;
+        MapTileRegion   m_allFreeRoads;
 
         std::vector<std::string> m_allOriginalIds; // for checking
         std::vector<std::string> m_placedIds;      // for checking
