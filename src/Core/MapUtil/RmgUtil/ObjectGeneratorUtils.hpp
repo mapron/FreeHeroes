@@ -151,6 +151,38 @@ private:
     SpellList m_spells;
 };
 
+class FactionPool {
+public:
+    std::set<Core::LibraryFactionConstPtr> m_factions;
+    size_t                                 m_limit = 0;
+
+    void addUnit(Core::LibraryUnitConstPtr unit)
+    {
+        m_factions.insert(unit->faction);
+    }
+    void addUnits(const Core::Reward& reward)
+    {
+        for (auto& unit : reward.units) {
+            m_factions.insert(unit.unit->faction);
+        }
+    }
+    bool isAllowed(Core::LibraryUnitConstPtr unit) const
+    {
+        if (m_factions.contains(unit->faction))
+            return true;
+        return m_factions.size() < m_limit;
+    }
+    bool isAllowed(const Core::Reward& reward) const
+    {
+        size_t nonExistent = 0;
+        for (auto& unit : reward.units) {
+            if (!m_factions.contains(unit.unit->faction))
+                nonExistent++;
+        }
+        return m_factions.size() + nonExistent <= m_limit;
+    }
+};
+
 template<class T>
 struct ObjectGenerator::AbstractObject : public IZoneObject {
     virtual Core::LibraryObjectDefConstPtr getDef() const { return nullptr; }

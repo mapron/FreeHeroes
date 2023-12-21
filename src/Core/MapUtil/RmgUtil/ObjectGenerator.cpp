@@ -35,6 +35,8 @@ ZoneObjectGeneration ObjectGenerator::generate(const FHRngZone&             zone
 
     ArtifactPool artifactPool(*m_map, m_database, m_rng);
     SpellPool    spellPool(*m_map, m_database, m_rng);
+    FactionPool  factionRewardsPool;
+    factionRewardsPool.m_limit = zoneSettings.m_generators.m_banks.m_maxUniqueFactions;
 
     const bool           doLog = false;
     ZoneObjectGeneration result;
@@ -83,7 +85,7 @@ ZoneObjectGeneration ObjectGenerator::generate(const FHRngZone&             zone
 
         std::vector<IObjectFactoryPtr> objectFactories;
         if (!isFilteredOut("banks"))
-            objectFactories.push_back(std::make_shared<ObjectFactoryBank>(*m_map, zoneSettings.m_generators.m_banks, scoreSettings, scoreId, m_database, m_rng, &artifactPool, terrain));
+            objectFactories.push_back(std::make_shared<ObjectFactoryBank>(*m_map, zoneSettings.m_generators.m_banks, scoreSettings, scoreId, m_database, m_rng, &artifactPool, &factionRewardsPool, terrain));
         if (!isFilteredOut("artifacts"))
             objectFactories.push_back(std::make_shared<ObjectFactoryArtifact>(*m_map, zoneSettings.m_generators.m_artifacts, scoreSettings, scoreId, m_database, m_rng, &artifactPool));
         if (!isFilteredOut("resources"))

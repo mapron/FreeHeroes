@@ -85,7 +85,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone::GeneratorBank,
     m_isEnabled,
-    m_records)
+    m_records,
+    m_maxUniqueFactions)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone::GeneratorArtifact::Record,

@@ -28,12 +28,14 @@ struct ObjectGenerator::ObjectFactoryBank : public AbstractFactory<RecordBank> {
                       const Core::IGameDatabase*      database,
                       Core::IRandomGenerator* const   rng,
                       ArtifactPool*                   artifactPool,
+                      FactionPool*                    factionRewardPool,
                       Core::LibraryTerrainConstPtr    terrain);
 
     IZoneObjectPtr makeWithScore(uint64_t rngFreq, const FHScoreSettings& updatedSettings) override;
     IZoneObjectPtr make(uint64_t rngFreq) override { return nullptr; }
 
     ArtifactPool* const m_artifactPool;
+    FactionPool* const  m_factionRewardPool;
 };
 
 // ---------------------------------------------------------------------------------------

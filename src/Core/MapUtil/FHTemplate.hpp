@@ -181,7 +181,8 @@ struct FHRngZone {
             bool operator==(const Record&) const noexcept = default;
         };
         using Map = std::map<std::string, Record>;
-        Map m_records;
+        Map    m_records;
+        size_t m_maxUniqueFactions = 100;
 
         bool operator==(const GeneratorBank&) const noexcept = default;
     };

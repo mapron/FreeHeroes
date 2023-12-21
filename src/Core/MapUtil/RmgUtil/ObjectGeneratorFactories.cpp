@@ -38,9 +38,11 @@ ObjectGenerator::ObjectFactoryBank::ObjectFactoryBank(FHMap&                    
                                                       const Core::IGameDatabase*      database,
                                                       Core::IRandomGenerator* const   rng,
                                                       ArtifactPool*                   artifactPool,
+                                                      FactionPool*                    factionRewardPool,
                                                       Core::LibraryTerrainConstPtr    terrain)
     : AbstractFactory<RecordBank>(map, scoreSettings, scoreId, database, rng)
     , m_artifactPool(artifactPool)
+    , m_factionRewardPool(factionRewardPool)
 {
     if (!genSettings.m_isEnabled)
         return;
@@ -91,9 +93,11 @@ ObjectGenerator::ObjectFactoryBank::ObjectFactoryBank(FHMap&                    
                     if (m_artifactPool->isEmpty(filter, firstFilter == filter, scoreSettings))
                         artifactRewardIsValid = false;
                 }
-                if (!artifactRewardIsValid) {
+                if (!artifactRewardIsValid)
                     continue;
-                }
+
+                if (!m_factionRewardPool->isAllowed(reward))
+                    continue;
 
                 {
                     const Core::MapScore score = estimateReward(reward, Core::ScoreAttr::Army);
@@ -135,7 +139,7 @@ IZoneObjectPtr ObjectGenerator::ObjectFactoryBank::makeWithScore(uint64_t rngFre
 
     const Core::Reward& reward = record.m_id->rewards[record.m_id->variants[record.m_guardsVariant].rewardIndex];
     Core::MapScore      score  = estimateReward(reward, Core::ScoreAttr::Army);
-    if (!updatedSettings.isValidScore(score)) {
+    if (!updatedSettings.isValidScore(score) || !m_factionRewardPool->isAllowed(reward)) {
         record.m_attempts = 1;
         m_records.onDisable(record);
         return nullptr;
@@ -171,6 +175,7 @@ IZoneObjectPtr ObjectGenerator::ObjectFactoryBank::makeWithScore(uint64_t rngFre
     obj.m_onAccept = [this, &record] {
         m_records.onAccept(record);
     };
+    m_factionRewardPool->addUnits(reward);
 
     /*
     if (obj.m_obj.m_id->id.find("utopia") != std::string::npos)

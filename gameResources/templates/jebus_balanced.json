@@ -38,9 +38,9 @@
                         "preferredHeats": [3, 4],
                         "openPandoras": true,
                         "score": {
-                            "Army":           { "target": 50000 , "maxSingle": 20000, "minSingle": 8000 , "maxRemain": 15000 },
-                            "ArmyDwelling":   { "target": 20000 , "maxSingle": 20000, "minSingle": 10000, "maxRemain": 15000 },
-                            "ArmyAux":        { "target": 30000 , "maxSingle": 15000, "minSingle": 10000, "maxRemain": 15000 }
+                            "Army":           { "target": 30000 , "maxSingle": 20000, "minSingle": 10000 , "maxRemain": 15000 },
+                            "ArmyDwelling":   { "target": 20000 , "maxSingle": 20000, "minSingle": 6660  , "maxRemain": 10 },
+                            "ArmyAux":        { "target": 30000 , "maxSingle": 15000, "minSingle": 10000 , "maxRemain": 15000 }
                         }
                     },
                     "130_MidArmy": {
@@ -48,7 +48,7 @@
                         "preferredHeats": [0],
                         "openPandoras": true,
                         "score": {
-                            "Army":           { "target": 80000, "maxSingle": 12000  , "maxRemain": 5000, "consumeRemain" : true },
+                            "Army":           { "target": 40000, "maxSingle": 12000  , "maxRemain": 5000, "consumeRemain" : true },
                             "ArmyDwelling":   { "target": 10000, "maxSingle": 9000, "maxRemain": 5000, "minSingle": 4000},
                             "ArmyAux":        { "target": 15000, "maxSingle": 9000, "maxRemain": 5000, "consumeRemain" : true}
                         }
@@ -58,7 +58,7 @@
                        "preferredHeats": [5, 6, 7],
                        "useGuards": true,
                        "score": {
-                            "ArmyDwelling":   { "target": 20000 ,"maxSingle": 3900, "maxRemain": 2000, "consumeRemain" : true}
+                            "ArmyDwelling":   { "target": 20000 ,"maxSingle": 3900, "maxRemain": 2500, "consumeRemain" : true}
                         }
                     },
 
@@ -119,7 +119,7 @@
                     },
                     "530_GuardedTreasureChests": {
                         "isEnabled": true,
-                        "preferredHeats": [1, 2, 3, 4],
+                        "preferredHeats": [0, 1, 2],
                         "guardThreshold": 10,
                         "guardMinToGroup": 10,
                         "score":{
@@ -230,7 +230,8 @@
 
                 "generators": {
                     "banks": {
-                        "isEnabled": true
+                        "isEnabled": true,
+                        "maxUniqueFactions": 3
                     },
                     "artifacts": {
                         "isEnabled": true,
@@ -348,7 +349,7 @@
                             "T5"          : { "frequency":  400, "level": 50, "value": 5000 , "guard": 5000  },
                             "T6"          : { "frequency":  400, "level": 60, "value": 6000 , "guard": 8000  },
                             "T7"          : { "frequency":  400, "level": 70, "value": 10000, "guard": 12000 ,
-                                              "factionValues": {"sod.faction.castle": 20000}  },
+                                              "factionValues": {"sod.faction.castle": 20000, "sod.faction.necropolis": 6666, "sod.faction.fortress": 6666 }  },
                             "T8"          : { "frequency":  200, "level": 80, "value": -1   , "guard": 20000 },
                             "warMachine"  : { "frequency":  100, "level": 90, "value": 3000 , "guard": 4000  }
                         }
@@ -393,6 +394,7 @@
                 "generators": {
                     "banks": {
                         "isEnabled": true,
+                        "maxUniqueFactions": 10,
                         "records": {
                             "utopia": {"bank": "sod.map.utopia"           , "frequency": 20000, "guard": 30000 },
                             "consa" : {"bank": "sod.map.conservatory"     , "frequency": 2000, "guard": -1  },
