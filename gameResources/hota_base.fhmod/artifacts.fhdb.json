@@ -37,7 +37,7 @@
 "sod.artifact.helm.int10"             : {"class":"relic"   , "value": 12000 , "untranslatedName": "Helm +10"  ,"slot":"helm", "statBonus": {"magic":{"int": 10, "sp": -2  } } },
 
 "sod.artifact.torso.spl1"             : {"class":"treasure", "value":    -1 , "untranslatedName": "Torso +1"  ,"slot":"torso", "statBonus": {"magic":{"sp": 1 } } },
-"sod.artifact.torso.spl2"             : {"class":"minor"   , "value":    -1 , "untranslatedName": "Torso +2"  ,"slot":"torso", "statBonus": {"magic":{"sp": 2 } } },
+"sod.artifact.torso.spl2"             : {"class":"minor"   , "value": 2600  , "untranslatedName": "Torso +2"  ,"slot":"torso", "statBonus": {"magic":{"sp": 2 } } },
 "sod.artifact.torso.spl3"             : {"class":"minor"   , "value":    -1 , "untranslatedName": "Torso +3"  ,"slot":"torso", "statBonus": {"magic":{"sp": 3 } } },
 "sod.artifact.torso.spl4"             : {"class":"major"   , "value":    -1 , "untranslatedName": "Torso +4"  ,"slot":"torso", "statBonus": {"magic":{"sp": 4 } } },
 "sod.artifact.torso.spl5"             : {"class":"major"   , "value":    -1 , "untranslatedName": "Torso +5"  ,"slot":"torso", "statBonus": {"magic":{"sp": 5 } } },
