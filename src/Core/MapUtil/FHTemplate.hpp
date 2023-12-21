@@ -173,10 +173,11 @@ struct FHRngZone {
     };
     struct GeneratorBank : public GeneratorCommon {
         struct Record {
-            Core::LibraryMapBankConstPtr m_bank      = nullptr;
-            int                          m_frequency = -1;
-            int                          m_guard     = -1;
-            bool                         m_enabled   = true;
+            int  m_frequency = -1;
+            int  m_guard     = -1;
+            bool m_enabled   = true;
+
+            Core::LibraryMapBankConstPtr m_id = nullptr;
 
             bool operator==(const Record&) const noexcept = default;
         };
@@ -273,6 +274,19 @@ struct FHRngZone {
     };
 
     struct GeneratorVisitable : public GeneratorCommon {
+        struct Record {
+            int  m_frequency = 1000;
+            int  m_guard     = 0;
+            bool m_enabled   = true;
+
+            Core::LibraryMapVisitableConstPtr m_id = nullptr;
+
+            bool operator==(const Record&) const noexcept = default;
+        };
+
+        using Map = std::map<std::string, Record>;
+        Map m_records;
+
         bool operator==(const GeneratorVisitable&) const noexcept = default;
     };
 

@@ -65,7 +65,7 @@
 "hota.visitable.junkman"                   : [ "Support"       ,      500 ,     300  , "avxjnkmn"  ],
 "hota.visitable.townGate"                  : [ "Support"       ,    10000 ,     400  , "avxtwngt"  ],
 
-"sod.visitable.refugeeCamp"                : [ "ArmyAux"       ,     4000 ,    1000  , "avgrefg0"  ],
+"sod.visitable.refugeeCamp"                : [ "ArmyAux"       ,     6000 ,     500  , "avgrefg0"  ],
 
 "sod.visitable.swanPond"                   : [ ""              ,        0 ,    1000  , { "m": { "": "avsclvd0", "A": "avsclvg0", "B": "avsclvs0"}}  ],
 "sod.visitable.corpse"                     : [ ""              ,        0 ,    1000  , { "m": { "": "avxskds0", "A": "avxskds1", "B": "avxskds2"}}  ],

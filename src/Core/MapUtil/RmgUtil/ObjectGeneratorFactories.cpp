@@ -49,7 +49,7 @@ ObjectGenerator::ObjectFactoryBank::ObjectFactoryBank(FHMap&                    
 
     std::map<Core::LibraryMapBankConstPtr, const FHRngZone::GeneratorBank::Record*> recordMap;
     for (auto&& [_, rec] : genSettings.m_records)
-        recordMap[rec.m_bank] = &rec;
+        recordMap[rec.m_id] = &rec;
 
     for (auto* bank : database->mapBanks()->records()) {
         if (m_map.m_disabledBanks.isDisabled(m_map.m_isWaterMap, bank))
@@ -699,6 +699,10 @@ ObjectGenerator::ObjectFactoryVisitable::ObjectFactoryVisitable(FHMap&          
     if (!genSettings.m_isEnabled)
         return;
 
+    std::map<Core::LibraryMapVisitableConstPtr, const FHRngZone::GeneratorVisitable::Record*> recordMap;
+    for (auto&& [_, rec] : genSettings.m_records)
+        recordMap[rec.m_id] = &rec;
+
     for (auto* visitable : database->mapVisitables()->records()) {
         if (visitable->attr == Core::ScoreAttr::Invalid)
             continue;
@@ -717,6 +721,21 @@ ObjectGenerator::ObjectFactoryVisitable::ObjectFactoryVisitable(FHMap&          
         record.m_maxLimit          = visitable->maxZone;
         record.m_minLimit          = visitable->minZone;
 
+        int guardValue = -1;
+
+        {
+            auto it = recordMap.find(visitable);
+            if (it != recordMap.cend()) {
+                const FHRngZone::GeneratorVisitable::Record& rec = *(it->second);
+                if (rec.m_frequency != -1)
+                    record.m_frequency = rec.m_frequency;
+                if (rec.m_guard != -1)
+                    guardValue = rec.m_guard;
+                if (!rec.m_enabled)
+                    continue;
+            }
+        }
+
         const int scoreValue = visitable->value;
         if (!scoreValue)
             throw std::runtime_error("'" + visitable->id + "' has no valid score!");
@@ -725,7 +744,7 @@ ObjectGenerator::ObjectFactoryVisitable::ObjectFactoryVisitable(FHMap&          
 
         record.m_obj.m_score[attr] = scoreValue;
 
-        record.m_obj.m_guard = scoreValue * 2;
+        record.m_obj.m_guard = guardValue == -1 ? scoreValue * 2 : guardValue;
 
         if (scoreSettings.isValidValue(attr, scoreValue)) {
             m_records.m_records.push_back(record);

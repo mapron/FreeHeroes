@@ -80,7 +80,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_frequency,
     m_guard,
     m_enabled,
-    m_bank)
+    m_id)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone::GeneratorBank,
@@ -159,8 +159,16 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_records)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRngZone::GeneratorVisitable::Record,
+    m_frequency,
+    m_guard,
+    m_enabled,
+    m_id)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone::GeneratorVisitable,
-    m_isEnabled)
+    m_isEnabled,
+    m_records)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRngZone::GeneratorMine::Record,
@@ -295,6 +303,8 @@ template<>
 inline constexpr const bool s_isStringMap<FHRngZone::GeneratorShrine::Map>{ true };
 template<>
 inline constexpr const bool s_isStringMap<FHRngZone::GeneratorDwelling::Map>{ true };
+template<>
+inline constexpr const bool s_isStringMap<FHRngZone::GeneratorVisitable::Map>{ true };
 template<>
 inline constexpr const bool s_isStringMap<FHRngZone::GeneratorMine::Map>{ true };
 template<>

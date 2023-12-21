@@ -355,7 +355,10 @@
                         }
                     },
                     "visitables": {
-                        "isEnabled": true
+                        "isEnabled": true,
+                        "records": {
+                            "refugeeCamp": {"id": "sod.visitable.refugeeCamp", "guard":  5000 }
+                        }
                     },
                     "mines": {
                         "isEnabled": true,
@@ -396,11 +399,11 @@
                         "isEnabled": true,
                         "maxUniqueFactions": 10,
                         "records": {
-                            "utopia": {"bank": "sod.map.utopia"           , "frequency": 20000, "guard": 30000 },
-                            "consa" : {"bank": "sod.map.conservatory"     , "frequency": 2000, "guard": -1  },
-                            "hive"  : {"bank": "sod.map.hive"             , "frequency": 4000, "guard": -1  },
-                            "shop"  : {"bank": "hota.map.experimentalShop", "frequency": 2000, "guard":  -1 },
-                            "picket": {"bank": "hota.map.wolfRaiderPicket", "frequency": 4000, "guard":  -1 }
+                            "utopia": {"id": "sod.map.utopia"           , "frequency": 20000, "guard": 30000 },
+                            "consa" : {"id": "sod.map.conservatory"     , "frequency": 2000, "guard": -1  },
+                            "hive"  : {"id": "sod.map.hive"             , "frequency": 4000, "guard": -1  },
+                            "shop"  : {"id": "hota.map.experimentalShop", "frequency": 2000, "guard":  -1 },
+                            "picket": {"id": "hota.map.wolfRaiderPicket", "frequency": 4000, "guard":  -1 }
                         }
                     },
                     "mines": {
