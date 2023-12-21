@@ -532,7 +532,22 @@
 		"hasRoundLimit":true,
 		"roundLimit": 100
 	},
-	"disabledArtifacts":{},
+	"disabledArtifacts": {
+        "sod.artifact.cape.resourceCrystal"      : true ,
+        "sod.artifact.ring.resourceGems"         : true ,
+        "sod.artifact.misc.resourceCrystal"      : true ,
+        "sod.artifact.misc.resourceOre"          : true ,
+        "sod.artifact.ring.resourceSulfur"       : true ,
+        "sod.artifact.misc.resourceWood"         : true ,
+        "sod.artifact.misc.gold1"                : true ,
+        "sod.artifact.misc.gold2"                : true ,
+        "sod.artifact.misc.gold3"                : true ,
+        "sod.artifact.misc.growth2"              : true ,
+        "sod.artifact.misc.growth3"              : true ,
+        "sod.artifact.misc.growth4"              : true ,
+        "sod.artifact.misc.growth5"              : true ,
+        "sod.artifact.misc.growth6"              : true 
+    },
 	"disabledHeroes":{},
 	"disabledSkills":{}
 }

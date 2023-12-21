@@ -100,7 +100,7 @@
 "hota.map.mansion"             : {
     "untranslatedName": "Mansion",
     "guardValue": 10000,
-    "frequency": 5000,
+    "frequency": 1000,
     
     "rewards": [
         {"resources": "2500,mercury=2,sulfur=2,crystal=2,gems=2","artifacts":[{"classes": ["major"]}]},
@@ -320,7 +320,7 @@
 "sod.map.dwarvenTreasury"             : {
     "untranslatedName": "Dwarven Treasury",
     "guardValue": 4000,
-    "frequency": 1000,
+    "frequency": 2000,
     
     "rewards": [
         {"resources":"2500,crystal=2"},
