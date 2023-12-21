@@ -18,6 +18,12 @@
                         "isEnabled": true,
                         "placementOrder": -1,
                         "preferredHeats": [9],
+                        "generatorsExclude": ["shrines", "pandoras"],
+                        "objectIdInclude": [
+                            "sod.spell.fly"           ,
+                            "sod.spell.dimensionDoor" ,
+                            "sod.spell.townPortal"    
+                        ],
                         "score": {
                             "Control":        { "target":  82000, "maxSingle": 30000}
                         }
@@ -81,22 +87,85 @@
                         }
                     },
 
-                    "410_HighSpells": {
+                    "410_HighOffensiveSpells": {
                         "isEnabled": true,
-                        "preferredHeats": [9],
+                        "preferredHeats": [8, 9],
+                        "generatorsExclude": ["shrines", "pandoras"],
+                        "objectIdInclude": [
+                           "sod.spell.earthElemental"      ,
+                           "sod.spell.airElemental"        ,
+                           "sod.spell.armageddon"          ,
+                           "sod.spell.implosion"           
+                        ],
                         "score": {
-                            "SpellOffensive": { "target": 60000 , "minSingle":  5000, "maxRemain": 12000},
-                            "SpellCommon":    { "target": 20000 , "minSingle":  5000, "maxRemain": 10000}
+                            "SpellOffensive": { "target": 32000 , "minSingle":   -1 , "maxRemain": 0}
                         }
                     },
-                    "420_MidSpells": {
+                    "420_HighCommonSpells": {
                         "isEnabled": true,
-                        "preferredHeats": [8],
-                        "guardThreshold": 10,
-                        "guardMinToGroup": 10,
+                        "preferredHeats": [8, 9],
+                        "generatorsExclude": ["shrines", "pandoras"],
+                        "objectIdInclude": [
+                            "sod.spell.berserk"      ,
+                            "sod.spell.resurrection" ,
+                            "sod.spell.animateDead"  ,
+                            "sod.spell.antiMagic"    
+                        ],
                         "score": {
-                            "SpellOffensive": { "target": 10000, "maxSingle": 6000, "minSingle": 2100, "maxRemain": 3000},
-                            "SpellCommon":    { "target": 10000, "maxSingle": 6000, "minSingle": 500 , "maxRemain": 3000}
+                            "SpellCommon": { "target": 25000 , "minSingle":   -1 , "maxRemain": 12000, "consumeRemain": true}
+                        }
+                    },
+                    "430_MidOffensiveSpells": {
+                        "isEnabled": true,
+                        "preferredHeats": [6, 7, 8],
+                        "generatorsExclude": ["shrines", "pandoras"],
+                        "objectIdInclude": [
+                           "sod.spell.waterElemental"      ,
+                           "sod.spell.chainLightning"      ,
+                           "sod.spell.meteorShower"        ,
+                           "sod.spell.fireElemental"       
+                        ],
+                        "score": {
+                            "SpellOffensive": { "target": 22000 , "minSingle":   -1 , "maxRemain": 10000, "consumeRemain": true}
+                        }
+                    },
+                    "440_MidCommonSpells": {
+                        "isEnabled": true,
+                        "preferredHeats": [6, 7, 8],
+                        "generatorsExclude": ["shrines", "pandoras"],
+                        "objectIdInclude": [
+                            "sod.spell.frenzy"        ,
+                            "sod.spell.counterstrike" ,
+                            "sod.spell.fireShield"    ,
+                            "sod.spell.sacrifice"     ,
+                            "sod.spell.forceField"    ,
+                            "sod.spell.fireWall"      ,
+                            "sod.spell.earthquake"    ,
+                            "sod.spell.teleport"      ,
+                            "sod.spell.clone"         ,
+                            "sod.spell.blind"         ,
+                            "sod.spell.hypnotize"     ,
+                            "sod.spell.forgetfulness" 
+                        ],
+                        "score": {
+                            "SpellCommon":    { "target": 20000, "minSingle":   -1 , "maxRemain": 10000, "consumeRemain": true}
+                        }
+                    },
+                    "450_LowOffensiveSpells": {
+                        "isEnabled": true,
+                        "preferredHeats": [2, 3, 4, 5],
+                        "generatorsExclude": ["shrines", "pandoras"],
+                        "objectIdInclude": [
+                            "sod.spell.iceBolt"        ,
+                            "sod.spell.lightningBolt"  ,
+                            "sod.spell.frostRing"      ,
+                            "sod.spell.fireball"       ,
+                            "sod.spell.inferno"        ,
+                            "sod.spell.deathRipple"    ,
+                            "sod.spell.destroyUndead"  
+                        ],
+                        "score": {
+                            "SpellOffensive":    { "target": 20000, "minSingle":   -1 , "maxRemain": 5000, "consumeRemain": true}
                         }
                     },
 
@@ -136,8 +205,6 @@
                             "ArtSupport":     { "target": 15000, "maxSingle": 7000 , "minSingle": 2500, "maxRemain": 4000 },
                             "Gold":           { "target": 30000, "maxSingle": 15000, "minSingle": 5001, "maxRemain": 10000 },
                             "Resource":       { "target": 40000, "maxSingle": 15000, "minSingle": 2500, "maxRemain": 10000 },
-                            "SpellOffensive": { "target": 10000, "maxSingle": 6000 , "minSingle": 2100, "maxRemain": 4000 , "consumeRemain": true},
-                            "SpellCommon":    { "target": 10000, "maxSingle": 6000 , "minSingle": 500 , "maxRemain": 4000 , "consumeRemain": true},
                             "Support":        { "target": 5000 , "maxSingle": 4900 , "minSingle": 1001, "maxRemain": 2100, "consumeRemain": true},
                             "Upgrade"   :     { "target": 10000, "maxSingle": 9000 , "minSingle": 2000, "maxRemain": 4000 }
                         }
@@ -156,7 +223,7 @@
                         "isEnabled": true,
                         "guardThreshold": 100000,
                         "preferredHeats": [2, 3, 4, 5, 6, 7],
-                        "generatorsExclude": ["resources"],
+                        "generatorsExclude": ["resources", "shrines"],
                         "objectIdExclude": ["sod.visitable.redwoodObservatory", "sod.visitable.magicWell"],
                         "score":{
                             "ArtStat":        { "target": 6000 , "maxSingle": 2400, "maxRemain": 4000, "consumeRemain": true},
@@ -164,8 +231,6 @@
                             "Gold":           { "target": 30000, "maxSingle": 5000, "maxRemain": 2000 },
                             "Upgrade"   :     { "target": 10000, "maxSingle": 3000, "maxRemain": 5000, "consumeRemain": true},
                             "ResourceGen":    { "target": 50000,                    "maxRemain": 5000, "consumeRemain": true},
-                            "SpellOffensive": { "target": 1    , "maxSingle": 1800, "maxRemain": 4000, "consumeRemain": true},
-                            "SpellCommon":    { "target": 5000 , "maxSingle": 1800, "maxRemain": 4000, "consumeRemain": true},
                             "Support":        { "target": 2000 , "maxSingle": 1000, "maxRemain": 2000, "consumeRemain": true}
                         }
                     },
@@ -173,10 +238,31 @@
                         "isEnabled": true,
                         "objectType": "SegmentScatter",
                         "placementOrder": 100,
-                        "generatorsExclude": ["banks"],
+                        "generatorsExclude": ["banks", "shrines"],
+                        "objectIdInclude": [
+                            "sod.spell.slow"                ,
+                            "sod.spell.haste"               ,
+                            "sod.spell.viewEarth"           ,
+                            "sod.spell.viewAir"             ,
+                            "sod.spell.visions"             ,
+                            "sod.spell.dispel"              ,
+                            "sod.spell.cure"                ,
+                            "sod.spell.shield"              ,
+                            "sod.spell.airShield"           ,
+                            "sod.spell.protectFromAir"      ,
+                            "sod.spell.protectFromFire"     ,
+                            "sod.spell.protectFromWater"    ,
+                            "sod.spell.protectFromEarth"    ,
+                            "sod.spell.bless"               ,
+                            "sod.spell.curse"               ,
+                            "sod.spell.bloodLust"           ,
+                            "sod.spell.stoneSkin"           
+                        ],
                         "score":{
                             "Gold":           { "target": 30000, "maxSingle": 2000, "maxRemain": 3000  , "consumeRemain" : true },
-                            "Resource":       { "target": 60000, "maxSingle": 2500, "maxRemain": 3000  , "consumeRemain" : true }
+                            "Resource":       { "target": 60000, "maxSingle": 2500, "maxRemain": 3000  , "consumeRemain" : true },
+                            
+                            "SpellCommon":    { "target": 15000, "minSingle":   -1 , "maxRemain": 2000, "consumeRemain": true}
                         }
                     },
                     "910_RoadScatter": {
@@ -327,8 +413,8 @@
                         "isEnabled": true,
                         "records": {
                             "lvl1"     : { "frequency":  500,                   "filter": {"levels": [1], "notTags"   : ["offensive", "control"]             } },
-                            "lvl2"     : { "frequency":  400,                   "filter": {"levels": [2], "notTags"   : ["offensive", "control"]             } },
-                            "lvl3"     : { "frequency":  400,                   "filter": {"levels": [3], "notTags"   : ["offensive", "control"]             } },
+                            "lvl2"     : { "frequency":  200,                   "filter": {"levels": [2], "notTags"   : ["offensive", "control"]             } },
+                            "lvl3"     : { "frequency":  50 ,                   "filter": {"levels": [3], "notTags"   : ["offensive", "control"]             } },
                             "lvl4"     : { "frequency":  500,                   "filter": {"levels": [4], "notTags"   : ["offensive", "control"]             } },
                             "lvl5"     : { "frequency":  500,                   "filter": {"levels": [5], "notTags"   : ["offensive", "control"]             } },
                             "lvl1off"  : { "frequency":  100,                   "filter": {"levels": [1], "notTags"   : ["control"], "tags": ["offensive"]   } },
@@ -489,8 +575,11 @@
                             "ArtSupport":     { "target": 100000 , "maxSingle": -1, "minSingle": 8000, "maxRemain": 16000, "consumeRemain" : true }
                         }
                     },
-                    "410_HighSpells": {"isEnabled": false},
-                    "420_MidSpells": {"isEnabled": false},
+                    "410_HighOffensiveSpells": {"isEnabled": false},
+                    "420_HighCommonSpells": {"isEnabled": false},
+                    "430_MidOffensiveSpells": {"isEnabled": false},
+                    "440_MidCommonSpells": {"isEnabled": false},
+                    "450_LowOffensiveSpells": {"isEnabled": false},
                     "510_XpPandoras": {
                         "isEnabled": true,
                         "score": {

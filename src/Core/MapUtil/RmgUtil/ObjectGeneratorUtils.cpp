@@ -138,6 +138,19 @@ SpellPool::SpellPool(FHMap& map, const Core::IGameDatabase* database, Core::IRan
     }
 }
 
+SpellPool::SpellPool(const std::set<std::string>& ids, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng)
+    : m_rng(rng)
+{
+    for (auto* spell : database->spells()->records()) {
+        if (!ids.contains(spell->id))
+            continue;
+        if (!spell->isTeachable)
+            continue;
+
+        m_spells.push_back(spell);
+    }
+}
+
 Core::LibrarySpellConstPtr SpellPool::make(const Core::SpellFilter& filter, bool asAnySpell, const FHScoreSettings& scoreSettings)
 {
     SpellList spellList = filter.filterPossible(m_spells);

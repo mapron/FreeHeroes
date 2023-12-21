@@ -45,15 +45,13 @@ ZoneObjectGeneration ObjectGenerator::generate(const FHRngZone&             zone
     if (zoneSettings.m_scoreTargets.empty())
         return {};
 
-    const FHScoreSettings* lastSettings = &(zoneSettings.m_scoreTargets.rbegin()->second);
-
     for (const auto& [scoreId, scoreSettings] : zoneSettings.m_scoreTargets) {
         if (!scoreSettings.m_isEnabled) {
             m_logOutput << indentBase << scoreId << " is disabled;\n";
             continue;
         }
-        [[maybe_unused]] const bool lastIteration = lastSettings == &scoreSettings;
-        Core::MapScore              targetScore   = scoreSettings.makeTargetScore();
+
+        Core::MapScore targetScore = scoreSettings.makeTargetScore();
 
         {
             auto targetScoreRemainingPrevCopy = targetScoreRemainingPrev;

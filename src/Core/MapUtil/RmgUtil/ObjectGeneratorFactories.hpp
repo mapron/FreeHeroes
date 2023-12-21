@@ -163,7 +163,8 @@ struct ObjectGenerator::ObjectFactoryScroll : public AbstractFactory<RecordSpell
     IZoneObjectPtr make(uint64_t rngFreq) override;
 
     std::map<Core::LibrarySpellConstPtr, Core::LibraryArtifactConstPtr> m_scrollMapping;
-    SpellPool* const                                                    m_spellPool;
+    //SpellPool* const                                                    m_spellPool;
+    SpellPool m_spellPool;
 };
 
 // ---------------------------------------------------------------------------------------

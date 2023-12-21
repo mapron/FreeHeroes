@@ -10,6 +10,7 @@
 #include "../FHMap.hpp"
 
 #include <functional>
+#include <iostream>
 
 namespace FreeHeroes {
 
@@ -132,6 +133,7 @@ public:
     static bool okFilter(Core::LibrarySpellConstPtr spell, bool asAnySpell, const FHScoreSettings& scoreSettings);
 
     SpellPool(FHMap& map, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng);
+    SpellPool(const std::set<std::string>& ids, const Core::IGameDatabase* database, Core::IRandomGenerator* const rng);
 
     Core::LibrarySpellConstPtr make(const Core::SpellFilter& filter, bool asAnySpell, const FHScoreSettings& scoreSettings);
     bool                       isEmpty(const Core::SpellFilter& filter, bool asAnySpell, const FHScoreSettings& scoreSettings) const;
@@ -318,13 +320,13 @@ struct ObjectGenerator::AbstractFactory : public IObjectFactory {
 
         Core::MapScore currentScoreTmp = currentScore + obj->getScore();
         if (isScoreOverflow(currentScoreTmp)) {
-            //m_logOutput << indent << "overflow '" << obj->getId() << "' score=" << obj->getScore() << ", current=" << currentScore << "\n";
+            //std::cout << "overflow '" << obj->getId() << "' score=" << obj->getScore() << ", current=" << currentScore << "\n";
             obj->setAccepted(false);
             return nullptr;
         }
         currentScore = currentScoreTmp;
 
-        //m_logOutput << indent << "add '" << obj->getId() << "' score=" << obj->getScore() << " guard=" << obj->getGuard() << "; current factory freq=" << fac->totalFreq() << ", active=" << fac->totalActiveRecords() << "\n";
+        //std::cout << "add '" << obj->getId() << "' score=" << obj->getScore() << " guard=" << obj->getGuard() << "\n";
         obj->setAccepted(true);
         return obj;
     }

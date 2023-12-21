@@ -522,30 +522,22 @@ ObjectGenerator::ObjectFactoryScroll::ObjectFactoryScroll(FHMap&                
                                                           const std::string&                scoreId,
                                                           const Core::IGameDatabase*        database,
                                                           Core::IRandomGenerator* const     rng,
-                                                          SpellPool*                        spellPool)
+                                                          SpellPool*)
     : AbstractFactory<RecordSpellScroll>(map, scoreSettings, scoreId, database, rng)
-    , m_spellPool(spellPool)
+    , m_spellPool(scoreSettings.m_objectIdInclude, database, rng)
 {
-    if (!genSettings.m_isEnabled)
+    if (!genSettings.m_isEnabled || scoreSettings.m_objectIdInclude.empty())
         return;
 
     for (auto* art : database->artifacts()->records()) {
         if (!art->scrollSpell)
             continue;
+
         m_scrollMapping[art->scrollSpell] = art;
     }
 
-    for (const auto& [_, value] : genSettings.m_records) {
-        for (bool asAnySpell : { false, true }) {
-            if (m_spellPool->isEmpty(value.m_filter, asAnySpell, scoreSettings)) {
-                continue;
-            }
-
-            auto rec = RecordSpellScroll{ .m_filter = value.m_filter, .m_guard = value.m_guard, .m_asAnySpell = asAnySpell };
-
-            m_records.m_records.push_back(rec.setFreq(value.m_frequency));
-        }
-    }
+    auto rec = RecordSpellScroll{ .m_filter = Core::SpellFilter{ .all = true } };
+    m_records.m_records.push_back(rec.setFreq(1000));
 
     m_records.updateFrequency();
 }
@@ -560,7 +552,7 @@ IZoneObjectPtr ObjectGenerator::ObjectFactoryScroll::make(uint64_t rngFreq)
         m_records.onDisable(record);
     };
     obj.m_map    = &m_map;
-    auto spellId = m_spellPool->make(record.m_filter, record.m_asAnySpell, m_scoreSettings);
+    auto spellId = m_spellPool.make(record.m_filter, record.m_asAnySpell, m_scoreSettings);
     assert(spellId);
     obj.m_obj.m_generationId = m_scoreId;
     obj.m_obj.m_id           = m_scrollMapping.at(spellId);
