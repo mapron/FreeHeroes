@@ -29,7 +29,7 @@ foreach(plugin ${QtPluginsList})
     if (EXISTS "${imploc_DEBUG}")
         install(FILES ${imploc_DEBUG}   DESTINATION bin/${pluginDir} CONFIGURATIONS Debug )
     endif()
-    install(FILES ${imploc_RELEASE} DESTINATION bin/${pluginDir} CONFIGURATIONS Release )
+    install(FILES ${imploc_RELEASE} DESTINATION bin/${pluginDir} CONFIGURATIONS Release RelWithDebInfo )
 endforeach()
 
 # Qt install - shared libs
@@ -39,7 +39,7 @@ foreach(Qt6Module ${QT_MODULE_LIST})
     if (EXISTS "${imploc_DEBUG}")
         install(FILES ${imploc_DEBUG}   DESTINATION bin CONFIGURATIONS Debug    )
     endif()
-    install(FILES ${imploc_RELEASE} DESTINATION bin CONFIGURATIONS Release  )
+    install(FILES ${imploc_RELEASE} DESTINATION bin CONFIGURATIONS Release RelWithDebInfo )
 endforeach()
 
 # Compiler runtime
