@@ -76,6 +76,12 @@ struct FHMine : public FHPlayerControlledObject {
     bool operator==(const FHMine&) const noexcept = default;
 };
 
+struct FHAbandonedMine : public FHCommonObject {
+    std::vector<Core::LibraryResourceConstPtr> m_resources;
+
+    bool operator==(const FHAbandonedMine&) const noexcept = default;
+};
+
 struct FHResource : public FHCommonObject {
     uint32_t                      m_amount = 0;
     Core::LibraryResourceConstPtr m_id     = nullptr;

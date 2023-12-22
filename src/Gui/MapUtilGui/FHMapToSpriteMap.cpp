@@ -240,7 +240,7 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
             item->addInfo("amount", strCount);
             if (obj.m_amount >= 5000)
                 strCount = std::to_string(obj.m_amount / 1000) + " K";
-            item->m_overlayInfo        = strCount;
+            item->m_overlayInfo        = strCount == "0" ? "?" : strCount;
             item->m_overlayInfoOffsetX = 0;
         }
     }
@@ -296,6 +296,7 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
                                         .addInfo("count", strCount)
                                         .addInfo("value", std::to_string(obj.m_guardValue)));
         addValueInfo(item, obj);
+        strCount            = strCount == "0" ? "?" : strCount;
         item->m_overlayInfo = strCount + (obj.m_upgradedStack == FHMonster::UpgradedStack::Yes ? " u" : "");
     }
 
@@ -343,8 +344,10 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         auto* def  = obj.m_visitableId->objectDefs.get(obj.m_defIndex);
         auto* item = result.addItem(makeItemByDef(SpriteMap::Layer::Shrine, def, obj.m_pos).addInfo("id", obj.m_visitableId->id));
         addValueInfo(item, obj);
-        item->m_overlayInfo        = obj.m_spellId->presentationParams.shortName.ts.at("en_US");
-        item->m_overlayInfoOffsetX = 0;
+        if (obj.m_spellId) {
+            item->m_overlayInfo        = obj.m_spellId->presentationParams.shortName.ts.at("en_US");
+            item->m_overlayInfoOffsetX = 0;
+        }
     }
     for (auto& obj : fhMap.m_objects.m_skillHuts) {
         auto* def = obj.m_visitableId->objectDefs.get(obj.m_defIndex);

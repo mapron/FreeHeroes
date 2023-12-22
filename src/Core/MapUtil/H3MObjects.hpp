@@ -998,4 +998,31 @@ struct MapGrail : public MapObjectAbstract {
     void fromJson(const PropertyTree& data) override;
 };
 
+struct MapHeroPlaceholder : public MapObjectWithOwner {
+    uint8_t m_hero      = 0;
+    uint8_t m_powerRank = 0;
+
+    using MapObjectWithOwner::MapObjectWithOwner;
+
+    void readBinary(ByteOrderDataStreamReader& stream) override;
+    void writeBinary(ByteOrderDataStreamWriter& stream) const override;
+    void toJson(PropertyTree& data) const override;
+    void fromJson(const PropertyTree& data) override;
+};
+
+struct MapAbandonedMine : public MapObjectAbstract {
+    MapAbandonedMine(MapFormatFeaturesPtr features)
+        : MapObjectAbstract(features)
+    {
+        m_resourceBits.resize(32);
+    }
+
+    std::vector<uint8_t> m_resourceBits;
+
+    void readBinary(ByteOrderDataStreamReader& stream) override { stream.readBits(m_resourceBits); }
+    void writeBinary(ByteOrderDataStreamWriter& stream) const override { stream.writeBits(m_resourceBits); }
+    void toJson(PropertyTree& data) const override;
+    void fromJson(const PropertyTree& data) override;
+};
+
 }

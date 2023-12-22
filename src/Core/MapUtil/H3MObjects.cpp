@@ -13,6 +13,14 @@
 namespace FreeHeroes {
 using namespace Mernel;
 
+namespace {
+#ifdef NDEBUG
+constexpr const bool g_enablePaddingCheck = false;
+#else
+constexpr const bool g_enablePaddingCheck = true;
+#endif
+}
+
 MapFormatFeatures::MapFormatFeatures(MapFormat format, int hotaVer1)
 {
     m_factions = 8; //ROE
@@ -188,6 +196,11 @@ std::unique_ptr<IMapObject> IMapObject::Create(MapObjectType type, uint32_t subi
         }
         case MapObjectType::MINE:
         case MapObjectType::ABANDONED_MINE:
+        {
+            if (subid >= 7)
+                return std::make_unique<MapAbandonedMine>(features);
+            return std::make_unique<MapObjectWithOwner>(features);
+        }
         case MapObjectType::CREATURE_GENERATOR1:
         case MapObjectType::CREATURE_GENERATOR2:
         case MapObjectType::CREATURE_GENERATOR3:
@@ -224,8 +237,7 @@ std::unique_ptr<IMapObject> IMapObject::Create(MapObjectType type, uint32_t subi
 
         case MapObjectType::HERO_PLACEHOLDER:
         {
-            assert(!"Unsupported");
-            return nullptr;
+            return std::make_unique<MapHeroPlaceholder>(features);
         }
         case MapObjectType::CREATURE_BANK:
         case MapObjectType::DERELICT_SHIP:
@@ -304,7 +316,7 @@ void MapHero::readBinary(ByteOrderDataStreamReader& stream)
     stream >> m_spellSet;
     stream >> m_primSkillSet;
 
-    stream.zeroPadding(16);
+    stream.zeroPaddingChecked(16, g_enablePaddingCheck);
 }
 
 void MapHero::writeBinary(ByteOrderDataStreamWriter& stream) const
@@ -390,14 +402,14 @@ void MapTownEvent::readBinary(ByteOrderDataStreamReader& stream)
 
     stream >> m_computerAffected >> m_firstOccurence >> m_nextOccurence;
 
-    stream.zeroPadding(17);
+    stream.zeroPaddingChecked(17, g_enablePaddingCheck);
 
     stream.readBits(m_buildings);
 
     for (auto& amount : m_creaturesAmounts)
         stream >> amount;
 
-    stream.zeroPadding(4);
+    stream.zeroPaddingChecked(4, g_enablePaddingCheck);
 }
 
 void MapTownEvent::writeBinary(ByteOrderDataStreamWriter& stream) const
@@ -479,7 +491,7 @@ void MapTown::readBinary(ByteOrderDataStreamReader& stream)
     if (m_features->m_townHasAlignment)
         stream >> m_alignment;
 
-    stream.zeroPadding(3);
+    stream.zeroPaddingChecked(3, g_enablePaddingCheck);
 }
 
 void MapTown::writeBinary(ByteOrderDataStreamWriter& stream) const
@@ -571,7 +583,7 @@ void MapMonster::readBinary(ByteOrderDataStreamReader& stream)
     }
 
     stream >> m_neverFlees >> m_notGrowingTeam;
-    stream.zeroPadding(2);
+    stream.zeroPaddingChecked(2, g_enablePaddingCheck);
 
     if (m_features->m_monsterJoinPercent) {
         stream >> m_aggressionExact >> m_joinOnlyForMoney;
@@ -624,7 +636,7 @@ void MapMonster::fromJson(const PropertyTree& data)
 void MapObjectWithOwner::readBinary(ByteOrderDataStreamReader& stream)
 {
     stream >> m_owner;
-    stream.zeroPadding(3);
+    stream.zeroPaddingChecked(3, g_enablePaddingCheck);
 }
 
 void MapObjectWithOwner::writeBinary(ByteOrderDataStreamWriter& stream) const
@@ -674,7 +686,7 @@ void MapResource::readBinary(ByteOrderDataStreamReader& stream)
 {
     m_message.readBinary(stream);
     stream >> m_amount;
-    stream.zeroPadding(4);
+    stream.zeroPaddingChecked(4, g_enablePaddingCheck);
 }
 
 void MapResource::writeBinary(ByteOrderDataStreamWriter& stream) const
@@ -724,7 +736,7 @@ void MapMessage::readBinary(ByteOrderDataStreamReader& stream)
 
     stream >> m_message;
     stream >> m_guards;
-    stream.zeroPadding(4);
+    stream.zeroPaddingChecked(4, g_enablePaddingCheck);
 }
 
 void MapMessage::writeBinary(ByteOrderDataStreamWriter& stream) const
@@ -968,12 +980,12 @@ void MapSeerHut::readBinary(ByteOrderDataStreamReader& stream)
                 break;
             }
         }
-        stream.zeroPadding(2);
+        stream.zeroPaddingChecked(2, g_enablePaddingCheck);
     } else {
-        stream.zeroPadding(3);
+        stream.zeroPaddingChecked(3, g_enablePaddingCheck);
     }
     if (m_features->m_seerHutMultiQuest)
-        stream.zeroPadding(4);
+        stream.zeroPaddingChecked(4, g_enablePaddingCheck);
 }
 
 void MapSeerHut::writeBinary(ByteOrderDataStreamWriter& stream) const
@@ -1169,7 +1181,7 @@ void MapPandora::readBinary(ByteOrderDataStreamReader& stream)
     stream >> m_message;
     stream >> m_reward;
 
-    stream.zeroPadding(8);
+    stream.zeroPaddingChecked(8, g_enablePaddingCheck);
 }
 
 void MapPandora::writeBinary(ByteOrderDataStreamWriter& stream) const
@@ -1196,13 +1208,13 @@ void MapPandora::fromJson(const PropertyTree& data)
 void MapGarison::readBinary(ByteOrderDataStreamReader& stream)
 {
     stream >> m_owner;
-    stream.zeroPadding(3);
+    stream.zeroPaddingChecked(3, g_enablePaddingCheck);
 
     stream >> m_garison;
 
     if (m_features->m_garisonRemovableUnits)
         stream >> m_removableUnits;
-    stream.zeroPadding(8);
+    stream.zeroPaddingChecked(8, g_enablePaddingCheck);
 }
 
 void MapGarison::writeBinary(ByteOrderDataStreamWriter& stream) const
@@ -1233,7 +1245,7 @@ void MapGarison::fromJson(const PropertyTree& data)
 void MapSignBottle::readBinary(ByteOrderDataStreamReader& stream)
 {
     stream >> m_message;
-    stream.zeroPadding(4);
+    stream.zeroPaddingChecked(4, g_enablePaddingCheck);
 }
 
 void MapSignBottle::writeBinary(ByteOrderDataStreamWriter& stream) const
@@ -1374,9 +1386,9 @@ void MapEvent::readBinary(ByteOrderDataStreamReader& stream)
 {
     stream >> m_message;
     stream >> m_reward;
-    stream.zeroPadding(8);
+    stream.zeroPaddingChecked(8, g_enablePaddingCheck);
     stream >> m_availableFor >> m_computerActivate >> m_removeAfterVisit;
-    stream.zeroPadding(4);
+    stream.zeroPaddingChecked(4, g_enablePaddingCheck);
     if (m_features->m_eventHasHumanActivate)
         stream >> m_humanActivate;
 }
@@ -1409,7 +1421,7 @@ void MapEvent::fromJson(const PropertyTree& data)
 void MapDwelling::readBinary(ByteOrderDataStreamReader& stream)
 {
     stream >> m_owner;
-    stream.zeroPadding(3);
+    stream.zeroPaddingChecked(3, g_enablePaddingCheck);
 
     //216 and 217
     if (m_objectType == MapObjectType::RANDOM_DWELLING || m_objectType == MapObjectType::RANDOM_DWELLING_LVL) {
@@ -1484,6 +1496,46 @@ void MapGrail::toJson(PropertyTree& data) const
 void MapGrail::fromJson(const PropertyTree& data)
 {
     data["radius"].getScalar().convertTo(m_radius);
+}
+
+void MapHeroPlaceholder::readBinary(ByteOrderDataStreamReader& stream)
+{
+    stream >> m_owner >> m_hero;
+    if (m_hero == uint8_t(-1))
+        stream >> m_powerRank;
+}
+
+void MapHeroPlaceholder::writeBinary(ByteOrderDataStreamWriter& stream) const
+{
+    stream << m_owner << m_hero;
+    if (m_hero == uint8_t(-1))
+        stream << m_powerRank;
+}
+
+void MapHeroPlaceholder::toJson(PropertyTree& data) const
+{
+    Mernel::Reflection::PropertyTreeWriter writer;
+    writer.valueToJson(*this, data);
+}
+
+void MapHeroPlaceholder::fromJson(const PropertyTree& data)
+{
+    Mernel::Reflection::PropertyTreeReader reader;
+    *this = { m_features };
+    reader.jsonToValue(data, *this);
+}
+
+void MapAbandonedMine::toJson(PropertyTree& data) const
+{
+    Mernel::Reflection::PropertyTreeWriter writer;
+    writer.valueToJson(*this, data);
+}
+
+void MapAbandonedMine::fromJson(const PropertyTree& data)
+{
+    Mernel::Reflection::PropertyTreeReader reader;
+    *this = { m_features };
+    reader.jsonToValue(data, *this);
 }
 
 }

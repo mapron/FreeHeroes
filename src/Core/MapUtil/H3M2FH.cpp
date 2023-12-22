@@ -225,9 +225,8 @@ H3M2FHConverter::H3M2FHConverter(const Core::IGameDatabase* database)
 
     auto players = database->players()->legacyOrderedRecords();
     for (int i = 0; i < (int) players.size(); i++)
-        m_playerIds[i] = players[i];
-    m_playerIds[-1]  = database->players()->find(std::string(Core::LibraryPlayer::s_none));
-    m_playerIds[255] = database->players()->find(std::string(Core::LibraryPlayer::s_none));
+        m_playerIds[static_cast<uint8_t>(i)] = players[i];
+    m_playerIds[uint8_t(-1)] = database->players()->find(std::string(Core::LibraryPlayer::s_none));
 }
 
 void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
@@ -602,19 +601,23 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 dest.m_towns.push_back(std::move(fhtown));
             } break;
             case MapObjectType::ABANDONED_MINE:
-            {
-                const auto* objOwner = static_cast<const MapObjectWithOwner*>(impl);
-                (void) objOwner;
-                // @todo: change ABANDONED_MINE to separate object. uint8_t must be resource mask for available resources.
-            } break;
             case MapObjectType::MINE:
             {
-                const auto* objOwner = static_cast<const MapObjectWithOwner*>(impl);
-                FHMine      mine;
-                initCommon(mine);
-                mine.m_player = m_playerIds.at(objOwner->m_owner);
-                mine.m_id     = mappings.resourceMine;
-                dest.m_objects.m_mines.push_back(std::move(mine));
+                if (objTempl.m_subid < 7) {
+                    const auto* objOwner = static_cast<const MapObjectWithOwner*>(impl);
+                    FHMine      mine;
+                    initCommon(mine);
+                    mine.m_player = m_playerIds.at(objOwner->m_owner);
+                    mine.m_id     = mappings.resourceMine;
+                    dest.m_objects.m_mines.push_back(std::move(mine));
+                } else {
+                    const auto*     objOwner = static_cast<const MapAbandonedMine*>(impl);
+                    FHAbandonedMine mine;
+                    initCommon(mine);
+                    (void) objOwner; // @todo:
+                                     //mine.m_id     = mappings.resourceMine;
+                                     //dest.m_objects.m_mines.push_back(std::move(mine));
+                }
             } break;
             case MapObjectType::CREATURE_GENERATOR1:
             case MapObjectType::CREATURE_GENERATOR2:
@@ -705,7 +708,9 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
 
             case MapObjectType::HERO_PLACEHOLDER:
             {
-                assert(!"Unsupported");
+                const auto* mapPlaceholder = static_cast<const MapHeroPlaceholder*>(impl);
+                (void) mapPlaceholder;
+                assert(1 && mapPlaceholder);
             } break;
             case MapObjectType::CREATURE_BANK:
             case MapObjectType::DERELICT_SHIP:
@@ -759,7 +764,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 }
                 if (!skipped.contains(objDef)) {
                     skipped.insert(objDef);
-                    Logger(Logger::Warning) << "Skipping unsupported object def: " << objDef->id;
+                    Logger(Logger::Warning) << "Skipping unsupported object def: " << objDef->id << " of type " << int(type);
                 }
             } break;
         }

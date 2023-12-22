@@ -72,7 +72,7 @@
 "sod.visitable.hillFortStone"              : [ ""              ,        0 ,    1000  , { "m": { "": "avxhild0", "A": "avxhilg0", "S": "avxhils0" }}  ],
 "sod.visitable.pyramid"                    : [ ""              ,        0 ,    1000  , "avxprmd0"  ],
 "sod.visitable.warriorsTomb"               : [ ""              ,        0 ,    1000  , "avxtomb0"  ],
-"sod.visitable.cartographer"               : [ ""              ,        0 ,    1000  , {"m": {"": "avxmaps0", "U": "avxmapu0"}}  ],
+"sod.visitable.cartographer"               : [ ""              ,        0 ,    1000  , {"m": {"": "avxmaps0", "U": "avxmapu0", "W": "avxmapw0"}}  ],
 "sod.visitable.byou"                       : [ ""              ,        0 ,    1000  , "avsbuoy0"  ],
 "sod.visitable.survivor"                   : [ ""              ,        0 ,    1000  , "avasurv0"  ],
 "sod.visitable.mermaid"                    : [ ""              ,        0 ,    1000  , "avxmerm0"  ],
@@ -120,8 +120,11 @@
 
 
 "sod.visitable.boardGate"                  : [ ""              ,        0 ,    1000  , "avxbgt10"  ],
-"sod.visitable.borderGate"                 : [ ""              ,        0 ,    1000  , { "m" : {"": "avxbgt10", "A": "avxbgt20", "B": "avxbgt30", "C": "avxbgt40", "D": "avxbgt50", "E": "avxbgt60", "F": "avxbgt70"}} ],
-"sod.visitable.keyTent"                    : [ ""              ,        0 ,    1000  , { "m" : {"": "avxkey00", "A": "avxkey10", "B": "avxkey20", "C": "avxkey30", "D": "avxkey40", "E": "avxkey50", "F": "avxkey60", "G": "avxkey70"}} ]
+"sod.visitable.borderGate"                 : [ ""              ,        0 ,    1000  , { "m" : {"": "avxbgt00", "A": "avxbgt10", "B": "avxbgt20", "C": "avxbgt30", "D": "avxbgt40", "E": "avxbgt50", "F": "avxbgt60", "G": "avxbgt70"}} ],
+"sod.visitable.borderGuard"                : [ ""              ,        0 ,    1000  , { "m" : {"": "avxbor00", "A": "avxbor10", "B": "avxbor20", "C": "avxbor30", "D": "avxbor40", "E": "avxbor50", "F": "avxbor60", "G": "avxbor70", "H": "avxbor80"}} ],
+"sod.visitable.keyTent"                    : [ ""              ,        0 ,    1000  , { "m" : {"": "avxkey00", "A": "avxkey10", "B": "avxkey20", "C": "avxkey30", "D": "avxkey40", "E": "avxkey50", "F": "avxkey60", "G": "avxkey70"}} ],
+"sod.visitable.whirlpool"                  : [ ""              ,        0 ,    1000  , "avxwhrl0" ]
+
 
 }
 

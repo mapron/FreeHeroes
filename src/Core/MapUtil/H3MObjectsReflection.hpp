@@ -266,6 +266,16 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_quest)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    MapHeroPlaceholder,
+    m_owner,
+    m_hero,
+    m_powerRank)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    MapAbandonedMine,
+    m_resourceBits)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     ResourceSet,
     m_resourceAmount)
 

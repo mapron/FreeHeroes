@@ -14,8 +14,16 @@
 #include "MernelPlatform/Logger.hpp"
 
 #include <set>
+#include <iostream>
 
 namespace FreeHeroes {
+namespace {
+#ifdef NDEBUG
+constexpr const bool g_enablePaddingCheck = false;
+#else
+constexpr const bool g_enablePaddingCheck = true;
+#endif
+}
 
 void H3Map::VictoryCondition::readBinary(ByteOrderDataStreamReader& stream)
 {
@@ -362,7 +370,6 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
 
     if (m_features->m_mapPlaceholderHeroes) {
         stream >> m_placeholderHeroes;
-        stream.zeroPadding(m_placeholderHeroes);
     }
 
     if (m_features->m_mapDisposedHeroes) {
@@ -372,7 +379,7 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
             stream >> hero;
     }
 
-    stream.zeroPadding(31);
+    stream.zeroPaddingChecked(31, g_enablePaddingCheck);
 
     if (m_features->m_mapHotaUnknown1) {
         uint16_t unknown1; // == 16;
@@ -433,7 +440,7 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
 
             const ObjectTemplate& objTempl = m_objectDefs.at(obj.m_defnum);
             MapObjectType         type     = static_cast<MapObjectType>(objTempl.m_id);
-            stream.zeroPadding(5);
+            stream.zeroPaddingChecked(5, g_enablePaddingCheck);
             obj.m_impl = IMapObject::Create(type, objTempl.m_subid, m_features);
             if (!obj.m_impl)
                 throw std::runtime_error("Unsupported map object type:" + std::to_string(objTempl.m_id));
@@ -458,7 +465,7 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
         stream >> event;
     }
 
-    stream.zeroPadding(124);
+    stream.zeroPaddingChecked(124, g_enablePaddingCheck);
 }
 
 void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
@@ -529,7 +536,6 @@ void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
 
     if (m_features->m_mapPlaceholderHeroes) {
         stream << m_placeholderHeroes;
-        stream.zeroPadding(m_placeholderHeroes);
     }
 
     if (m_features->m_mapDisposedHeroes) {
@@ -713,7 +719,7 @@ void ObjectTemplate::readBinary(ByteOrderDataStreamReader& stream)
     m_type = static_cast<Type>(stream.readScalar<uint8_t>());
     stream >> m_drawPriority;
 
-    stream.zeroPadding(16);
+    stream.zeroPaddingChecked(16, g_enablePaddingCheck);
 }
 
 void ObjectTemplate::writeBinary(ByteOrderDataStreamWriter& stream) const
@@ -745,7 +751,7 @@ void GlobalMapEvent::readBinary(ByteOrderDataStreamReader& stream)
         >> m_firstOccurence
         >> m_nextOccurence;
 
-    stream.zeroPadding(17);
+    stream.zeroPaddingChecked(17, g_enablePaddingCheck);
 }
 
 void GlobalMapEvent::writeBinary(ByteOrderDataStreamWriter& stream) const

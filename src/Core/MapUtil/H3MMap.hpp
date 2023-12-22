@@ -305,7 +305,7 @@ struct H3Map {
 
     uint8_t                   m_teamCount = 0;
     std::vector<uint8_t>      m_allowedHeroes;
-    uint32_t                  m_placeholderHeroes = 0;
+    std::vector<uint8_t>      m_placeholderHeroes;
     std::vector<DisposedHero> m_disposedHeroes;
     std::vector<uint8_t>      m_allowedArtifacts; // inversion from default value.
     std::vector<uint8_t>      m_allowedSpells;

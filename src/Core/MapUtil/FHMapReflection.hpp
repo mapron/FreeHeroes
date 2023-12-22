@@ -200,6 +200,17 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 
     m_id)
 
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHAbandonedMine,
+    m_pos,
+    m_order,
+    m_defIndex,
+    m_guard,
+    m_score,
+    m_generationId,
+
+    m_resources)
+
 ENUM_REFLECTION_STRINGIFY(
     FHBank::UpgradedStack,
     Invalid,
