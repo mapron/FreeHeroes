@@ -30,6 +30,8 @@
 #include <QBoxLayout>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QMenuBar>
+#include <QFileDialog>
 
 #include <QGraphicsView>
 #include <QGraphicsItem>
@@ -261,6 +263,19 @@ MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDataba
         m_impl->m_view->centerOn(absPos);
     });
 
+    QMenu* fileMenu = menuBar()->addMenu(tr("File"));
+    {
+        QAction* load           = fileMenu->addAction(tr("Load H3M/FH..."));
+        QAction* saveH3         = fileMenu->addAction(tr("Save H3M..."));
+        QAction* saveFH         = fileMenu->addAction(tr("Save FH..."));
+        QAction* saveScreenshot = fileMenu->addAction(tr("Screenshot as png..."));
+
+        connect(load, &QAction::triggered, this, &MapEditorWidget::loadDialog);
+        connect(saveH3, &QAction::triggered, this, &MapEditorWidget::saveH3MDialog);
+        connect(saveFH, &QAction::triggered, this, &MapEditorWidget::saveFHDialog);
+        connect(saveScreenshot, &QAction::triggered, this, &MapEditorWidget::saveScreenshot);
+    }
+
     resize(1000, 800);
 
     auto* timer = new Gui::TickTimer(this);
@@ -291,13 +306,19 @@ void MapEditorWidget::saveConfig()
 void MapEditorWidget::load(const std::string& filename)
 {
     std::ostringstream os;
+    auto               fullpath = Mernel::string2path(filename);
+    auto               ext      = fullpath.extension();
+    const bool         isH3M    = Mernel::path2string(ext) == ".h3m";
 
     MapConverter::Settings sett{
-        .m_inputs                  = { .m_fhMap = Mernel::string2path(filename) },
         .m_outputs                 = {},
         .m_dumpUncompressedBuffers = false,
         .m_dumpBinaryDataJson      = false,
     };
+    if (isH3M)
+        sett.m_inputs = { .m_h3m = { .m_binary = fullpath } };
+    else
+        sett.m_inputs = { .m_fhMap = fullpath };
 
     try {
         MapConverter converter(os,
@@ -305,7 +326,10 @@ void MapEditorWidget::load(const std::string& filename)
                                m_rngFactory,
                                sett);
 
-        converter.run(MapConverter::Task::LoadFH);
+        if (isH3M)
+            converter.run(MapConverter::Task::LoadH3M);
+        else
+            converter.run(MapConverter::Task::LoadFH);
 
         m_impl->m_map = std::move(converter.m_mapFH);
 
@@ -333,6 +357,48 @@ void MapEditorWidget::load(const std::string& filename)
     catch (std::exception& ex) {
         QMessageBox::warning(this, tr("Error occured"), QString::fromStdString(ex.what()));
     }
+}
+
+void MapEditorWidget::save(const std::string& filename, bool isH3M)
+{
+}
+
+void MapEditorWidget::loadDialog()
+{
+    QString filename = QFileDialog::getOpenFileName(this, "", "", "FH or H3 map (*.json *.h3m)");
+    if (filename.isEmpty())
+        return;
+    load(filename.toStdString());
+}
+
+void MapEditorWidget::saveH3MDialog()
+{
+    QString filename = QFileDialog::getSaveFileName(this, "", "", "H3 map (*.h3m)");
+    if (filename.isEmpty())
+        return;
+    save(filename.toStdString(), true);
+}
+
+void MapEditorWidget::saveFHDialog()
+{
+    QString filename = QFileDialog::getSaveFileName(this, "", "", "FH (*.json)");
+    if (filename.isEmpty())
+        return;
+    save(filename.toStdString(), false);
+}
+
+void MapEditorWidget::saveScreenshot()
+{
+    QString filename = QFileDialog::getSaveFileName(this, "", "", "Images (*.png)");
+    if (filename.isEmpty())
+        return;
+    int      width  = m_impl->m_scene->width();
+    int      height = m_impl->m_scene->height();
+    QImage   image(width, height, QImage::Format_ARGB32);
+    QPainter painter(&image);
+    painter.setRenderHint(QPainter::Antialiasing);
+    m_impl->m_scene->render(&painter);
+    image.save(filename);
 }
 
 void MapEditorWidget::updateMap()

@@ -38,6 +38,11 @@ public:
     void saveConfig();
 
     void load(const std::string& filename);
+    void save(const std::string& filename, bool isH3M);
+    void loadDialog();
+    void saveH3MDialog();
+    void saveFHDialog();
+    void saveScreenshot();
 
     void updateMap();
 

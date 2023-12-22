@@ -19,17 +19,16 @@ int main(int argc, char* argv[])
     using namespace Mernel;
 
     AbstractCommandLine parser({
-                                   "input-fhMap",
+                                   "input",
                                },
                                {});
-    parser.markRequired({ "input-fhMap" });
     if (!parser.parseArgs(std::cerr, argc, argv)) {
         std::cerr << "Map utils invocation failed, correct usage is:\n";
         std::cerr << parser.getHelp();
         return 1;
     }
 
-    const std::string input = parser.getArg("input-fhMap");
+    const std::string input = parser.getArg("input");
 
     Core::CoreApplication fhCoreApp;
     fhCoreApp.setLoadUserMods(true);
@@ -45,7 +44,8 @@ int main(int argc, char* argv[])
         fhApp.getGraphicsLibrary(),
         fhApp.getModelsProvider());
 
-    dlg.load(input);
+    if (!input.empty())
+        dlg.load(input);
     dlg.show();
 
     return app.exec();
