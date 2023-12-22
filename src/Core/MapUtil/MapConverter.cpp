@@ -7,11 +7,11 @@
 
 #include "MernelReflection/EnumTraitsMacro.hpp"
 
-#include "IGameDatabase.hpp"
-#include "IRandomGenerator.hpp"
 #include "MernelPlatform/FileIOUtils.hpp"
 #include "MernelPlatform/FileFormatJson.hpp"
-#include "MernelPlatform/Compression.hpp"
+
+#include "IGameDatabase.hpp"
+#include "IRandomGenerator.hpp"
 #include "FHTemplateProcessor.hpp"
 
 #include "H3MConversion.hpp"
@@ -34,11 +34,16 @@ ENUM_REFLECTION_STRINGIFY(
     ConvertJsonToH3M,
     ConvertH3SVGToJson,
     ConvertJsonToH3SVG,
+    ConvertH3CToFolderList,
     LoadFHTpl,
     LoadFH,
     SaveFH,
     LoadH3M,
     SaveH3M,
+    LoadH3C,
+    SaveH3C,
+    LoadFolder,
+    SaveFolder,
     FHMapToH3M,
     H3MToFHMap,
     FHTplToFHMap,
@@ -124,7 +129,7 @@ void MapConverter::run(Task task, int recurse) noexcept(false)
                     runMember(writeBinaryBufferDataAsUncompressed);
                 }
 
-                m_compressionMethod = CompressionMethod::Gzip;
+                m_mainFile.m_compressionMethod = CompressionMethod::Gzip;
                 runMember(compressRaw);
                 setOutput(m_outputs.m_h3m.m_binary);
                 runMember(writeBinaryBufferData);
@@ -158,10 +163,21 @@ void MapConverter::run(Task task, int recurse) noexcept(false)
                     runMember(writeBinaryBufferDataAsUncompressed);
                 }
 
-                m_compressionMethod = CompressionMethod::Gzip;
+                m_mainFile.m_compressionMethod = CompressionMethod::Gzip;
                 runMember(compressRaw);
                 setOutput(m_outputs.m_h3svg.m_binary);
                 runMember(writeBinaryBufferData);
+            } break;
+            case Task::ConvertH3CToFolderList:
+            {
+                m_folder.m_files.clear();
+                for (auto& sc : m_mapH3C.m_scenarios)
+                    m_folder.m_files.push_back(MapConverterFile{
+                        .m_binaryBuffer = sc.m_data,
+                        .m_rawState     = RawState::Uncompressed,
+                        .m_filename     = sc.m_filename,
+                    });
+
             } break;
             case Task::LoadFHTpl:
             {
@@ -218,10 +234,62 @@ void MapConverter::run(Task task, int recurse) noexcept(false)
                     runMember(writeBinaryBufferDataAsUncompressed);
                 }
 
-                m_compressionMethod = CompressionMethod::Gzip;
+                m_mainFile.m_compressionMethod = CompressionMethod::Gzip;
                 runMember(compressRaw);
                 setOutput(m_outputs.m_h3m.m_binary);
                 runMember(writeBinaryBufferData);
+            } break;
+            case Task::LoadH3C:
+            {
+                setInput(m_inputs.m_h3c.m_binary);
+                runMember(readBinaryBufferData);
+
+                runMember(detectCompression);
+                runMember(uncompressRaw);
+                if (m_settings.m_dumpUncompressedBuffers) {
+                    setOutput(m_inputs.m_h3c.m_uncompressedBinary);
+                    runMember(writeBinaryBufferDataAsUncompressed);
+                }
+
+                runMember(binaryDeserializeH3C);
+                if (m_settings.m_dumpBinaryDataJson) {
+                    runMember(propertySerializeH3C);
+                    setOutput(m_inputs.m_h3c.m_json);
+                    runMember(writeJsonFromProperty);
+                }
+                //runMember(convertH3CtoFH);
+            } break;
+            case Task::SaveH3C:
+            {
+                //runMember(convertFHtoH3C);
+                if (m_settings.m_dumpBinaryDataJson) {
+                    runMember(propertySerializeH3C);
+                    setOutput(m_outputs.m_h3c.m_json);
+                    runMember(writeJsonFromProperty);
+                }
+
+                runMember(binarySerializeH3C);
+                if (m_settings.m_dumpUncompressedBuffers) {
+                    setOutput(m_outputs.m_h3c.m_uncompressedBinary);
+                    runMember(writeBinaryBufferDataAsUncompressed);
+                }
+
+                m_mainFile.m_compressionMethod = CompressionMethod::Gzip;
+                runMember(compressRaw);
+                setOutput(m_outputs.m_h3c.m_binary);
+                runMember(writeBinaryBufferData);
+            } break;
+            case Task::LoadFolder:
+            {
+                setInput(m_inputs.m_folder);
+                m_folder.m_root = m_inputFilename;
+                m_folder.read();
+            } break;
+            case Task::SaveFolder:
+            {
+                setOutput(m_outputs.m_folder);
+                m_folder.m_root = m_outputFilename;
+                m_folder.write();
             } break;
             case Task::FHMapToH3M:
             {
@@ -325,110 +393,60 @@ void MapConverter::setOutputFilename(const Mernel::std_path& path, std::string_v
 
 void MapConverter::readBinaryBufferData()
 {
-    m_rawState = RawState::Undefined;
-
-    m_binaryBuffer = Mernel::readFileIntoHolder(m_inputFilename);
-    m_logOutput << m_currentIndent << "Read " << m_binaryBuffer.size() << " bytes from: " << Mernel::path2string(m_inputFilename) << '\n';
-
-    m_rawState = RawState::Compressed;
+    m_mainFile.m_filename = m_inputFilename;
+    m_mainFile.readBinaryBufferData();
+    m_logOutput << m_currentIndent << "Read " << m_mainFile.m_binaryBuffer.size() << " bytes from: " << Mernel::path2string(m_inputFilename) << '\n';
 }
 
 void MapConverter::writeBinaryBufferData()
 {
-    if (m_rawState != RawState::Compressed)
-        throw std::runtime_error("Buffer needs to be in Compressed state.");
-
-    m_logOutput << m_currentIndent << "Write " << m_binaryBuffer.size() << " bytes to: " << Mernel::path2string(m_outputFilename) << '\n';
-    Mernel::writeFileFromHolder(m_outputFilename, m_binaryBuffer);
+    m_logOutput << m_currentIndent << "Write " << m_mainFile.m_binaryBuffer.size() << " bytes to: " << Mernel::path2string(m_outputFilename) << '\n';
+    m_mainFile.m_filename = m_outputFilename;
+    m_mainFile.writeBinaryBufferData();
 }
 
 void MapConverter::writeBinaryBufferDataAsUncompressed()
 {
-    if (m_rawState != RawState::Uncompressed)
-        throw std::runtime_error("Buffer needs to be in Uncompressed state.");
-
-    m_logOutput << m_currentIndent << "Write " << m_binaryBuffer.size() << " bytes to: " << Mernel::path2string(m_outputFilename) << '\n';
-    Mernel::writeFileFromHolder(m_outputFilename, m_binaryBuffer);
+    m_logOutput << m_currentIndent << "Write " << m_mainFile.m_binaryBuffer.size() << " bytes to: " << Mernel::path2string(m_outputFilename) << '\n';
+    m_mainFile.m_filename = m_outputFilename;
+    m_mainFile.writeBinaryBufferDataAsUncompressed();
 }
 
 void MapConverter::readJsonToProperty()
 {
     m_logOutput << m_currentIndent << "Read: " << Mernel::path2string(m_inputFilename) << '\n';
-    std::string buffer = Mernel::readFileIntoBuffer(m_inputFilename);
-    m_json             = Mernel::readJsonFromBuffer(buffer);
+    m_mainFile.m_filename = m_inputFilename;
+    m_mainFile.readJsonToProperty();
 }
 
 void MapConverter::writeJsonFromProperty()
 {
     m_logOutput << m_currentIndent << "Write: " << Mernel::path2string(m_outputFilename) << '\n';
-    std::string buffer = Mernel::writeJsonToBuffer(m_json);
-    Mernel::writeFileFromBuffer(m_outputFilename, buffer);
+    m_mainFile.m_filename = m_outputFilename;
+    m_mainFile.writeJsonFromProperty();
 }
 
 void MapConverter::detectCompression()
 {
-    m_compressionMethod = CompressionMethod::Undefined;
-    if (m_rawState != RawState::Compressed)
-        throw std::runtime_error("Buffer needs to be in Compressed state.");
-
-    /// @todo: real detection of different methods!
-    m_compressionMethod = CompressionMethod::Gzip;
+    m_mainFile.detectCompression();
 }
 
 void MapConverter::uncompressRaw()
 {
-    if (m_rawState != RawState::Compressed)
-        throw std::runtime_error("Buffer needs to be in Compressed state.");
-
-    if (m_compressionMethod == CompressionMethod::Undefined)
-        throw std::runtime_error("CompressionMethod need to be defined (or detected).");
-
-    if (m_compressionMethod == CompressionMethod::NoCompression) {
-        m_rawState = RawState::Uncompressed;
-        return;
-    }
-    if (m_compressionMethod != CompressionMethod::Gzip) {
-        assert("Invalid compression method");
-        return;
-    }
-
-    ByteArrayHolder out;
-    Mernel::uncompressDataBuffer(m_binaryBuffer, out, { .m_type = Mernel::CompressionType::Gzip, .m_skipCRC = true }); // throws;
-    m_binaryBuffer = std::move(out);
-
-    m_rawState = RawState::Uncompressed;
+    m_mainFile.uncompressRaw();
 }
 
 void MapConverter::compressRaw()
 {
-    if (m_rawState != RawState::Uncompressed)
-        throw std::runtime_error("Buffer needs to be in Uncompressed state.");
-
-    if (m_compressionMethod == CompressionMethod::Undefined)
-        throw std::runtime_error("CompressionMethod need to be defined (or detected).");
-
-    if (m_compressionMethod == CompressionMethod::NoCompression) {
-        m_rawState = RawState::Compressed;
-        return;
-    }
-    if (m_compressionMethod != CompressionMethod::Gzip) {
-        assert("Invalid compression method");
-        return;
-    }
-
-    ByteArrayHolder out;
-    Mernel::compressDataBuffer(m_binaryBuffer, out, { .m_type = Mernel::CompressionType::Gzip }); // throws;
-    m_binaryBuffer = std::move(out);
-
-    m_rawState = RawState::Compressed;
+    m_mainFile.compressRaw();
 }
 
 void MapConverter::binaryDeserializeH3M()
 {
-    if (m_rawState != RawState::Uncompressed)
+    if (m_mainFile.m_rawState != RawState::Uncompressed)
         throw std::runtime_error("Buffer needs to be in Uncompressed state.");
 
-    ByteOrderBuffer           bobuffer(m_binaryBuffer);
+    ByteOrderBuffer           bobuffer(m_mainFile.m_binaryBuffer);
     ByteOrderDataStreamReader reader(bobuffer, ByteOrderDataStream::s_littleEndian);
 
     try {
@@ -442,31 +460,31 @@ void MapConverter::binaryDeserializeH3M()
 
 void MapConverter::binarySerializeH3M()
 {
-    m_binaryBuffer = {};
-    ByteOrderBuffer           bobuffer(m_binaryBuffer);
+    m_mainFile.m_binaryBuffer = {};
+    ByteOrderBuffer           bobuffer(m_mainFile.m_binaryBuffer);
     ByteOrderDataStreamWriter writer(bobuffer, ByteOrderDataStream::s_littleEndian);
 
     writer << m_mapH3M;
 
-    m_rawState = RawState::Uncompressed;
+    m_mainFile.m_rawState = RawState::Uncompressed;
 }
 
 void MapConverter::propertySerializeH3M()
 {
-    m_mapH3M.toJson(m_json);
+    m_mapH3M.toJson(m_mainFile.m_json);
 }
 
 void MapConverter::propertyDeserializeH3M()
 {
-    m_mapH3M.fromJson(m_json);
+    m_mapH3M.fromJson(m_mainFile.m_json);
 }
 
 void MapConverter::binaryDeserializeH3SVG()
 {
-    if (m_rawState != RawState::Uncompressed)
+    if (m_mainFile.m_rawState != RawState::Uncompressed)
         throw std::runtime_error("Buffer needs to be in Uncompressed state.");
 
-    ByteOrderBuffer           bobuffer(m_binaryBuffer);
+    ByteOrderBuffer           bobuffer(m_mainFile.m_binaryBuffer);
     ByteOrderDataStreamReader reader(bobuffer, ByteOrderDataStream::s_littleEndian);
 
     try {
@@ -479,37 +497,74 @@ void MapConverter::binaryDeserializeH3SVG()
 
 void MapConverter::binarySerializeH3SVG()
 {
-    m_binaryBuffer = {};
-    ByteOrderBuffer           bobuffer(m_binaryBuffer);
+    m_mainFile.m_binaryBuffer = {};
+    ByteOrderBuffer           bobuffer(m_mainFile.m_binaryBuffer);
     ByteOrderDataStreamWriter writer(bobuffer, ByteOrderDataStream::s_littleEndian);
 
     writer << m_mapH3SVG;
 
-    m_rawState = RawState::Uncompressed;
+    m_mainFile.m_rawState = RawState::Uncompressed;
 }
 
 void MapConverter::propertySerializeH3SVG()
 {
-    m_mapH3SVG.toJson(m_json);
+    m_mapH3SVG.toJson(m_mainFile.m_json);
 }
 
 void MapConverter::propertyDeserializeH3SVG()
 {
-    m_mapH3SVG.fromJson(m_json);
+    m_mapH3SVG.fromJson(m_mainFile.m_json);
+}
+
+void MapConverter::binaryDeserializeH3C()
+{
+    if (m_mainFile.m_rawState != RawState::Uncompressed)
+        throw std::runtime_error("Buffer needs to be in Uncompressed state.");
+
+    ByteOrderBuffer           bobuffer(m_mainFile.m_binaryBuffer);
+    ByteOrderDataStreamReader reader(bobuffer, ByteOrderDataStream::s_littleEndian);
+
+    try {
+        reader >> m_mapH3C;
+    }
+    catch (std::exception& ex) {
+        throw std::runtime_error(ex.what() + std::string(", offset=") + std::to_string(bobuffer.getOffsetRead()));
+    }
+}
+
+void MapConverter::binarySerializeH3C()
+{
+    m_mainFile.m_binaryBuffer = {};
+    ByteOrderBuffer           bobuffer(m_mainFile.m_binaryBuffer);
+    ByteOrderDataStreamWriter writer(bobuffer, ByteOrderDataStream::s_littleEndian);
+
+    writer << m_mapH3C;
+
+    m_mainFile.m_rawState = RawState::Uncompressed;
+}
+
+void MapConverter::propertySerializeH3C()
+{
+    m_mapH3C.toJson(m_mainFile.m_json);
+}
+
+void MapConverter::propertyDeserializeH3C()
+{
+    m_mapH3C.fromJson(m_mainFile.m_json);
 }
 
 void MapConverter::propertySerializeFH()
 {
-    m_mapFH.toJson(m_json);
+    m_mapFH.toJson(m_mainFile.m_json);
 }
 
 void MapConverter::propertyDeserializeFH()
 {
-    if (m_json["version"].getScalar().toString() == "HOTA")
+    if (m_mainFile.m_json["version"].getScalar().toString() == "HOTA")
         m_mapFH.m_version = Core::GameVersion::HOTA;
     else
         m_mapFH.m_version = Core::GameVersion::SOD;
-    m_mapFH.fromJson(m_json, m_databaseContainer->getDatabase(m_mapFH.m_version));
+    m_mapFH.fromJson(m_mainFile.m_json, m_databaseContainer->getDatabase(m_mapFH.m_version));
 }
 
 void MapConverter::convertFHtoH3M()

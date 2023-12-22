@@ -20,13 +20,17 @@ int main(int argc, char** argv)
                                    "input-fhMap",
                                    "input-fhTpl",
                                    "input-h3m",
+                                   "input-h3c",
                                    "input-h3svg",
                                    "input-diff-json",
+                                   "input-folder",
                                    "output-fhMap",
                                    "output-fhTpl",
                                    "output-h3m",
+                                   "output-h3c",
                                    "output-h3svg",
                                    "output-diff-json",
+                                   "output-folder",
                                    "dump-uncompressed",
                                    "dump-json",
                                    "logs-extra",
@@ -68,12 +72,17 @@ int main(int argc, char** argv)
     auto makePaths = [&parser](const std::string& prefix) -> MapConverter::PathsSet {
         const std::string fhMap      = parser.getArg(prefix + "fhMap");
         const std::string fhTemplate = parser.getArg(prefix + "fhTpl");
+        const std::string folder     = parser.getArg(prefix + "folder");
         const std::string h3m        = parser.getArg(prefix + "h3m");
+        const std::string h3c        = parser.getArg(prefix + "h3c");
         const std::string h3sav      = parser.getArg(prefix + "h3svg");
         const std::string diffjson   = parser.getArg(prefix + "diff-json");
 
         const std::string h3mUncompressed = h3m.empty() ? "" : h3m + ".uncompressed";
         const std::string h3mJson         = h3m.empty() ? "" : h3m + ".json";
+
+        const std::string h3cUncompressed = h3c.empty() ? "" : h3c + ".uncompressed";
+        const std::string h3cJson         = h3c.empty() ? "" : h3c + ".json";
 
         const std::string h3savUncompressed = h3sav.empty() ? "" : h3sav + ".uncompressed";
         const std::string h3savJson         = h3sav.empty() ? "" : h3sav + ".json";
@@ -82,8 +91,10 @@ int main(int argc, char** argv)
         result.m_fhMap      = fhMap;
         result.m_fhTemplate = fhTemplate;
         result.m_h3m        = { .m_binary = h3m, .m_uncompressedBinary = h3mUncompressed, .m_json = h3mJson };
+        result.m_h3c        = { .m_binary = h3c, .m_uncompressedBinary = h3cUncompressed, .m_json = h3cJson };
         result.m_h3svg      = { .m_binary = h3sav, .m_uncompressedBinary = h3savUncompressed, .m_json = h3savJson };
         result.m_jsonDiff   = diffjson;
+        result.m_folder     = folder;
         return result;
     };
 

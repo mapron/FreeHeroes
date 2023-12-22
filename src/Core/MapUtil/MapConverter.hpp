@@ -10,7 +10,10 @@
 
 #include "H3SVGMap.hpp"
 #include "H3MMap.hpp"
+#include "H3CCampaign.hpp"
 #include "FHMap.hpp"
+
+#include "MapConverterFile.hpp"
 
 #include "MapUtilExport.hpp"
 
@@ -24,6 +27,9 @@ class IRandomGeneratorFactory;
 
 class MAPUTIL_EXPORT MapConverter {
 public:
+    using RawState          = MapConverterFile::RawState;
+    using CompressionMethod = MapConverterFile::CompressionMethod;
+
     struct BinaryPathsSet {
         Mernel::std_path m_binary;
         Mernel::std_path m_uncompressedBinary;
@@ -33,9 +39,11 @@ public:
     struct PathsSet {
         Mernel::std_path m_fhTemplate;
         Mernel::std_path m_fhMap;
+        BinaryPathsSet   m_h3c;
         BinaryPathsSet   m_h3m;
         BinaryPathsSet   m_h3svg;
         Mernel::std_path m_jsonDiff;
+        Mernel::std_path m_folder;
     };
 
     struct Settings {
@@ -52,20 +60,6 @@ public:
         int              m_stopAfterHeat = 1000;
     };
 
-    enum class RawState
-    {
-        Undefined,
-        Compressed,
-        Uncompressed
-    };
-
-    enum class CompressionMethod
-    {
-        Undefined,
-        NoCompression,
-        Gzip,
-    };
-
     enum class Task
     {
         Invalid,
@@ -76,11 +70,17 @@ public:
         ConvertJsonToH3M,
         ConvertH3SVGToJson,
         ConvertJsonToH3SVG,
+        ConvertH3CToFolderList,
         LoadFHTpl,
         LoadFH,
         SaveFH,
         LoadH3M,
         SaveH3M,
+        LoadH3C,
+        SaveH3C,
+        LoadFolder,
+        SaveFolder,
+
         FHMapToH3M,
         H3MToFHMap,
         FHTplToFHMap,
@@ -98,13 +98,12 @@ public:
     void run(Task command, int recurse = 0) noexcept(false);
 
 public: // todo:
-    H3Map                   m_mapH3M;
-    H3SVGMap                m_mapH3SVG;
-    FHMap                   m_mapFH;
-    PropertyTree            m_json;
-    Mernel::ByteArrayHolder m_binaryBuffer;
-    RawState                m_rawState          = RawState::Undefined;
-    CompressionMethod       m_compressionMethod = CompressionMethod::Undefined;
+    H3Map              m_mapH3M;
+    H3SVGMap           m_mapH3SVG;
+    H3CCampaign        m_mapH3C;
+    FHMap              m_mapFH;
+    MapConverterFile   m_mainFile;
+    MapConverterFolder m_folder;
 
 private:
     using MemberProc = void (MapConverter::*)(void);
@@ -138,6 +137,11 @@ private:
     void binarySerializeH3SVG();
     void propertySerializeH3SVG();
     void propertyDeserializeH3SVG();
+
+    void binaryDeserializeH3C();
+    void binarySerializeH3C();
+    void propertySerializeH3C();
+    void propertyDeserializeH3C();
 
     void propertySerializeFH();
     void propertyDeserializeFH();
