@@ -22,4 +22,22 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_musicId,
     m_difficultyChoosenByPlayer)
 
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    H3CCampaign::PrologEpilog,
+    m_enabled,
+    m_video,
+    m_music,
+    m_text)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    H3CCampaign::Scenario,
+    m_filename,
+    m_packedMapSize,
+    m_preconditions,
+    m_regionColor,
+    m_difficulty,
+    m_regionText,
+    m_prolog,
+    m_epilog)
+
 }

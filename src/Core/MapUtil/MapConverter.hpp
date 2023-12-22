@@ -126,6 +126,8 @@ private:
     void detectCompression();
     void uncompressRaw();
     void compressRaw();
+    void uncompressRawParts();
+    void compressRawParts();
 
     // Primitive tasks
     void binaryDeserializeH3M();

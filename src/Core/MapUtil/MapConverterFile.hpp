@@ -28,11 +28,13 @@ struct MapConverterFile {
         Gzip,
     };
 
-    Mernel::PropertyTree    m_json;
-    Mernel::ByteArrayHolder m_binaryBuffer;
-    RawState                m_rawState          = RawState::Undefined;
-    CompressionMethod       m_compressionMethod = CompressionMethod::Undefined;
-    Mernel::std_path        m_filename;
+    Mernel::PropertyTree                 m_json;
+    Mernel::ByteArrayHolder              m_binaryBuffer;
+    RawState                             m_rawState          = RawState::Undefined;
+    CompressionMethod                    m_compressionMethod = CompressionMethod::Undefined;
+    Mernel::std_path                     m_filename;
+    std::vector<Mernel::ByteArrayHolder> m_binaryParts;
+    std::vector<size_t>                  m_compressionOffsets;
 
     // raw I/O
     void readBinaryBufferData();
@@ -43,10 +45,17 @@ struct MapConverterFile {
     void readJsonToProperty();
     void writeJsonFromProperty();
 
+    void readJsonToPropertyFromBuffer();
+    void writeJsonFromPropertyToBuffer();
+
     // Compression tasks
     void detectCompression();
     void uncompressRaw();
     void compressRaw();
+    void splitCompressedDataByOffsets();
+
+    void uncompressRawParts();
+    void compressRawParts();
 };
 
 struct MapConverterFolder {

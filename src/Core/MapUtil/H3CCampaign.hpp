@@ -17,8 +17,32 @@ struct H3CCampaign {
     uint8_t     m_musicId                   = 0;
     uint8_t     m_difficultyChoosenByPlayer = 0;
 
+    struct PrologEpilog {
+        uint8_t     m_enabled = 0;
+        uint8_t     m_video   = 0;
+        uint8_t     m_music   = 0;
+        std::string m_text;
+
+        void readBinary(ByteOrderDataStreamReader& stream);
+        void writeBinary(ByteOrderDataStreamWriter& stream) const;
+    };
+
     struct Scenario {
-        std::string             m_filename;
+        uint32_t m_version        = 0;
+        uint32_t m_totalScenarios = 0; // need to be filled before reading.
+
+        std::string          m_filename;
+        std::uint32_t        m_packedMapSize = 0;
+        std::vector<uint8_t> m_preconditions;
+        uint8_t              m_regionColor = 0;
+        uint8_t              m_difficulty  = 0;
+        std::string          m_regionText;
+        PrologEpilog         m_prolog;
+        PrologEpilog         m_epilog;
+
+        void readBinary(ByteOrderDataStreamReader& stream);
+        void writeBinary(ByteOrderDataStreamWriter& stream) const;
+
         Mernel::ByteArrayHolder m_data;
     };
     std::vector<Scenario> m_scenarios;

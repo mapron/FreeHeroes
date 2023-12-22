@@ -177,6 +177,12 @@ void MapConverter::run(Task task, int recurse) noexcept(false)
                         .m_rawState     = RawState::Uncompressed,
                         .m_filename     = sc.m_filename,
                     });
+                MapConverterFile meta;
+                m_mapH3C.toJson(meta.m_json);
+                meta.m_filename = "meta.json";
+                meta.writeJsonFromPropertyToBuffer();
+                meta.m_rawState = RawState::Uncompressed;
+                m_folder.m_files.push_back(std::move(meta));
 
             } break;
             case Task::LoadFHTpl:
@@ -245,10 +251,10 @@ void MapConverter::run(Task task, int recurse) noexcept(false)
                 runMember(readBinaryBufferData);
 
                 runMember(detectCompression);
-                runMember(uncompressRaw);
+                runMember(uncompressRawParts);
                 if (m_settings.m_dumpUncompressedBuffers) {
-                    setOutput(m_inputs.m_h3c.m_uncompressedBinary);
-                    runMember(writeBinaryBufferDataAsUncompressed);
+                    //setOutput(m_inputs.m_h3c.m_uncompressedBinary);
+                    //runMember(writeBinaryBufferDataAsUncompressed);
                 }
 
                 runMember(binaryDeserializeH3C);
@@ -441,6 +447,17 @@ void MapConverter::compressRaw()
     m_mainFile.compressRaw();
 }
 
+void MapConverter::uncompressRawParts()
+{
+    m_mainFile.splitCompressedDataByOffsets();
+    m_mainFile.uncompressRawParts();
+}
+
+void MapConverter::compressRawParts()
+{
+    m_mainFile.compressRawParts();
+}
+
 void MapConverter::binaryDeserializeH3M()
 {
     if (m_mainFile.m_rawState != RawState::Uncompressed)
@@ -521,8 +538,12 @@ void MapConverter::binaryDeserializeH3C()
     if (m_mainFile.m_rawState != RawState::Uncompressed)
         throw std::runtime_error("Buffer needs to be in Uncompressed state.");
 
-    ByteOrderBuffer           bobuffer(m_mainFile.m_binaryBuffer);
+    ByteOrderBuffer           bobuffer(m_mainFile.m_binaryParts[0]);
     ByteOrderDataStreamReader reader(bobuffer, ByteOrderDataStream::s_littleEndian);
+
+    m_mapH3C.m_scenarios.clear();
+    for (size_t i = 1; i < m_mainFile.m_binaryParts.size(); i++)
+        m_mapH3C.m_scenarios.push_back({ .m_data = m_mainFile.m_binaryParts[i] });
 
     try {
         reader >> m_mapH3C;
