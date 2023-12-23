@@ -34,8 +34,10 @@ struct SpriteMap {
         SkillHut,
         Scholar,
         QuestHut,
+        QuestGuard,
         GeneralVisitable,
         Decoration,
+        Event,
     };
 
     struct BlockMask {

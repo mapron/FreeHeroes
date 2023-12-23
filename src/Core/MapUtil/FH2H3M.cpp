@@ -435,10 +435,17 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         }
         monster->m_joinOnlyForMoney = fhMon.m_joinOnlyForMoney;
         monster->m_joinPercent      = fhMon.m_joinPercent;
+        monster->m_neverFlees       = fhMon.m_neverFlees;
+        monster->m_notGrowingTeam   = fhMon.m_notGrowingTeam;
         if (fhMon.m_upgradedStack == FHMonster::UpgradedStack::No)
             monster->m_upgradedStack = 0;
         if (fhMon.m_upgradedStack == FHMonster::UpgradedStack::Yes)
             monster->m_upgradedStack = 1;
+
+        monster->m_artID = uint16_t(-1);
+        if (!fhMon.m_reward.artifacts.empty()) {
+            monster->m_artID = uint16_t(fhMon.m_reward.artifacts[0].onlyArtifacts.at(0)->legacyId);
+        }
 
         auto* def = fhMon.m_id->objectDefs.get({});
         dest.m_objects.push_back(Object{ .m_order = fhMon.m_order, .m_pos = int3fromPos(fhMon.m_pos, dest.m_features->m_monstersMapXOffset), .m_defnum = tmplCache.add(def), .m_impl = std::move(monster) });
@@ -541,7 +548,12 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         auto* def = fhQuestHut.m_visitableId->objectDefs.get(fhQuestHut.m_defIndex);
         dest.m_objects.push_back(Object{ .m_order = fhQuestHut.m_order, .m_pos = int3fromPos(fhQuestHut.m_pos), .m_defnum = tmplCache.add(def), .m_impl = std::move(obj) });
     }
-
+    for (auto& fhQuestGuard : src.m_objects.m_questGuards) {
+        auto obj = std::make_unique<MapQuestGuard>();
+        convertQuest(fhQuestGuard.m_quest, obj->m_quest);
+        auto* def = fhQuestGuard.m_visitableId->objectDefs.get(fhQuestGuard.m_defIndex);
+        dest.m_objects.push_back(Object{ .m_order = fhQuestGuard.m_order, .m_pos = int3fromPos(fhQuestGuard.m_pos), .m_defnum = tmplCache.add(def), .m_impl = std::move(obj) });
+    }
     for (auto& fhPandora : src.m_objects.m_pandoras) {
         if (fhPandora.m_openPandora && fhPandora.m_reward.units.size()) {
             const Core::UnitWithCount& u       = fhPandora.m_reward.units[0];
@@ -729,6 +741,16 @@ void FH2H3MConverter::convertQuest(const FHQuest& fhQuest, MapQuest& quest) cons
         {
             quest.m_missionType = MapQuest::Mission::KILL_HERO;
             quest.m_134val      = fhQuest.m_targetQuestId;
+        } break;
+        case FHQuest::Type::BeHero:
+        {
+            quest.m_missionType = MapQuest::Mission::HERO;
+            quest.m_89val       = fhQuest.m_targetQuestId;
+        } break;
+        case FHQuest::Type::BePlayer:
+        {
+            quest.m_missionType = MapQuest::Mission::PLAYER;
+            quest.m_89val       = fhQuest.m_targetQuestId;
         } break;
         default:
             assert(!"Unsupported");

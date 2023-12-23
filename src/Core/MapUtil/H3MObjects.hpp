@@ -316,7 +316,7 @@ struct IMapObject {
 };
 
 struct StackBasicDescriptor {
-    uint16_t m_id    = 0;
+    uint16_t m_id    = uint16_t(-1);
     uint16_t m_count = 0;
 
     constexpr auto operator<=>(const StackBasicDescriptor&) const = default;
@@ -358,7 +358,10 @@ struct StackSetFixed {
 
     auto operator<=>(const StackSetFixed&) const = default;
 
-    void prepareArrays(const MapFormatFeatures* m_features) { m_stacks.resize(m_features->m_stackSize); }
+    void prepareArrays(const MapFormatFeatures* m_features)
+    {
+        m_stacks.resize(m_features->m_stackSize);
+    }
 
     void readBinary(ByteOrderDataStreamReader& stream)
     {
@@ -628,7 +631,7 @@ struct MapMonster : public MapObjectAbstract {
     bool        m_hasMessage = false;
     std::string m_message;
     ResourceSet m_resourceSet;
-    uint16_t    m_artID          = 0;
+    uint16_t    m_artID          = uint16_t(-1);
     bool        m_neverFlees     = false;
     bool        m_notGrowingTeam = false;
 

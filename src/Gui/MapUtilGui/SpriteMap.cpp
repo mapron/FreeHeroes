@@ -54,13 +54,18 @@ QString SpriteMap::layerTypeToString(Layer layer)
         case Layer::QuestHut:
             return QObject::tr("QuestHut");
             break;
+        case Layer::QuestGuard:
+            return QObject::tr("QuestGuard");
+            break;
         case Layer::GeneralVisitable:
             return QObject::tr("GeneralVisitable");
             break;
         case Layer::Decoration:
             return QObject::tr("Decoration");
             break;
-
+        case Layer::Event:
+            return QObject::tr("Event");
+            break;
         case Layer::Invalid:
         default:
 

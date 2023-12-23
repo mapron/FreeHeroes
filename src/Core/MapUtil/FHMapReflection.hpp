@@ -182,8 +182,11 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_aggressionMax,
     m_joinOnlyForMoney,
     m_joinPercent,
+    m_neverFlees,
+    m_notGrowingTeam,
     m_questIdentifier,
     m_guardValue,
+    m_reward,
     m_upgradedStack)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
@@ -338,6 +341,19 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_questsOneTime,
     m_questsRecurring)
 
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHQuestGuard,
+    m_pos,
+    m_order,
+    m_defIndex,
+    m_guard,
+    m_score,
+    m_generationId,
+
+    m_visitableId,
+
+    m_quest)
+
 ENUM_REFLECTION_STRINGIFY(
     FHScholar::Type,
     Random,
@@ -413,6 +429,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_skillHuts,
     m_scholars,
     m_questHuts,
+    m_questGuards,
     m_localEvents)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(

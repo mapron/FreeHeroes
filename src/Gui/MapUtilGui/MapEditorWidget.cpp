@@ -76,10 +76,12 @@ const std::vector<LayerOption> g_allLayerTypes{
     { { SpriteMap::Layer::SkillHut } },
     { { SpriteMap::Layer::Scholar } },
     { { SpriteMap::Layer::QuestHut } },
+    { { SpriteMap::Layer::QuestGuard } },
     { { SpriteMap::Layer::GeneralVisitable } },
     { { SpriteMap::Layer::Decoration } },
+    { { SpriteMap::Layer::Event } },
 
-    { { SpriteMap::Layer::Dwelling, SpriteMap::Layer::Bank, SpriteMap::Layer::Mine, SpriteMap::Layer::Shrine, SpriteMap::Layer::SkillHut, SpriteMap::Layer::Scholar, SpriteMap::Layer::QuestHut, SpriteMap::Layer::GeneralVisitable }, "Any visitable" },
+    { { SpriteMap::Layer::Dwelling, SpriteMap::Layer::Bank, SpriteMap::Layer::Mine, SpriteMap::Layer::Shrine, SpriteMap::Layer::SkillHut, SpriteMap::Layer::Scholar, SpriteMap::Layer::QuestHut, SpriteMap::Layer::QuestGuard, SpriteMap::Layer::GeneralVisitable }, "Any visitable" },
     { { SpriteMap::Layer::Resource, SpriteMap::Layer::Artifact, SpriteMap::Layer::Pandora }, "Any pickable" },
 };
 

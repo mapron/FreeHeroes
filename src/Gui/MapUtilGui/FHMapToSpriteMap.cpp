@@ -362,6 +362,16 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         auto* def = obj.m_visitableId->objectDefs.get(obj.m_defIndex);
         addValueInfo(result.addItem(makeItemByDef(SpriteMap::Layer::QuestHut, def, obj.m_pos).addInfo("id", obj.m_visitableId->id)), obj);
     }
+    for (auto& obj : fhMap.m_objects.m_questGuards) {
+        auto* def = obj.m_visitableId->objectDefs.get(obj.m_defIndex);
+        addValueInfo(result.addItem(makeItemByDef(SpriteMap::Layer::QuestGuard, def, obj.m_pos).addInfo("id", obj.m_visitableId->id)), obj);
+    }
+    for (auto& obj : fhMap.m_objects.m_localEvents) {
+        std::string id    = "avzevnt0";
+        auto*       item  = result.addItem(makeItemById(SpriteMap::Layer::Event, id, obj.m_pos));
+        item->m_blockMask = g_oneTileMask;
+        addValueInfo(item, obj);
+    }
 
     for (auto& obj : fhMap.m_objects.m_pandoras) {
         std::string id   = "ava0128";

@@ -77,6 +77,11 @@ struct LibraryObjectDef {
     int type     = -1;
     int priority = -1;
 
+    using SortingTuple = std::tuple<int, int, int>;
+    using SortingMap   = std::map<SortingTuple, LibraryObjectDefConstPtr>;
+
+    constexpr SortingTuple asUniqueTuple() const noexcept { return std::tie(objId, subId, type); }
+
     constexpr auto asTuple() const noexcept { return std::tie(defFile, blockMap, visitMap, terrainsHard, terrainsSoft, objId, subId, type, priority); }
     bool           operator==(const LibraryObjectDef& rh) const noexcept { return asTuple() == rh.asTuple(); }
     bool           operator!=(const LibraryObjectDef& rh) const noexcept { return asTuple() != rh.asTuple(); }

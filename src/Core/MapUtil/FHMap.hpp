@@ -149,9 +149,13 @@ struct FHMonster : public FHCommonObject {
 
     bool m_joinOnlyForMoney = false;
     int  m_joinPercent      = 100;
+    bool m_neverFlees       = false;
+    bool m_notGrowingTeam   = false;
 
     uint32_t m_questIdentifier = 0;
     int64_t  m_guardValue      = 0;
+
+    Core::Reward m_reward;
 
     enum class UpgradedStack
     {
@@ -244,6 +248,12 @@ struct FHQuestHut : public FHCommonVisitable {
     std::vector<FHQuestWithReward> m_questsRecurring;
 
     bool operator==(const FHQuestHut&) const noexcept = default;
+};
+
+struct FHQuestGuard : public FHCommonVisitable {
+    FHQuest m_quest;
+
+    bool operator==(const FHQuestGuard&) const noexcept = default;
 };
 
 struct FHScholar : public FHCommonVisitable {
@@ -350,6 +360,7 @@ struct MAPUTIL_EXPORT FHMap {
         std::vector<FHSkillHut>       m_skillHuts;
         std::vector<FHScholar>        m_scholars;
         std::vector<FHQuestHut>       m_questHuts;
+        std::vector<FHQuestGuard>     m_questGuards;
         std::vector<FHLocalEvent>     m_localEvents;
 
         template<typename T>
@@ -382,6 +393,7 @@ struct MAPUTIL_EXPORT FHMap {
                            + m_skillHuts.size()
                            + m_scholars.size()
                            + m_questHuts.size()
+                           + m_questGuards.size()
                            + m_localEvents.size());
             for (auto& obj : m_resources)
                 result.push_back(&obj);
@@ -412,6 +424,8 @@ struct MAPUTIL_EXPORT FHMap {
             for (auto& obj : m_scholars)
                 result.push_back(&obj);
             for (auto& obj : m_questHuts)
+                result.push_back(&obj);
+            for (auto& obj : m_questGuards)
                 result.push_back(&obj);
             for (auto& obj : m_localEvents)
                 result.push_back(&obj);
@@ -511,6 +525,7 @@ template <> inline const std::vector<FHShrine>         &       FHMap::Objects::c
 template <> inline const std::vector<FHSkillHut>       &       FHMap::Objects::container() const noexcept { return m_skillHuts;}
 template <> inline const std::vector<FHScholar>        &       FHMap::Objects::container() const noexcept { return m_scholars;}
 template <> inline const std::vector<FHQuestHut>       &       FHMap::Objects::container() const noexcept { return m_questHuts;}
+template <> inline const std::vector<FHQuestGuard>     &       FHMap::Objects::container() const noexcept { return m_questGuards;}
 template <> inline const std::vector<FHLocalEvent>     &       FHMap::Objects::container() const noexcept { return m_localEvents;}
 
 template <> inline       std::vector<FHResource>       &       FHMap::Objects::container()       noexcept { return m_resources;}
@@ -528,6 +543,7 @@ template <> inline       std::vector<FHShrine>         &       FHMap::Objects::c
 template <> inline       std::vector<FHSkillHut>       &       FHMap::Objects::container()       noexcept { return m_skillHuts;}
 template <> inline       std::vector<FHScholar>        &       FHMap::Objects::container()       noexcept { return m_scholars;}
 template <> inline       std::vector<FHQuestHut>       &       FHMap::Objects::container()       noexcept { return m_questHuts;}
+template <> inline       std::vector<FHQuestGuard>     &       FHMap::Objects::container()       noexcept { return m_questGuards;}
 template <> inline       std::vector<FHLocalEvent>     &       FHMap::Objects::container()       noexcept { return m_localEvents;}
 // clang-format on
 

@@ -281,16 +281,56 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
 
     ObjTemplateDiagContainer diag;
 
+    using SortingMap = std::map<Core::LibraryObjectDef::SortingTuple, std::vector<Core::LibraryObjectDefConstPtr>>;
+    SortingMap allDbDefs;
+    for (auto* rec : m_database->objectDefs()->records()) {
+        allDbDefs[rec->asUniqueTuple()].push_back(rec);
+    }
+
     for (const ObjectTemplate& objTempl : src.m_objectDefs) {
         Core::LibraryObjectDef fhDef      = convertDef(objTempl);
         auto&                  diagRecord = diag.add();
         diagRecord.m_fhDefFromFile        = fhDef;
+        diagRecord.m_originalRecord       = nullptr;
 
-        auto* record                = m_database->objectDefs()->find(fhDef.id);
-        diagRecord.m_originalRecord = record;
+        Core::LibraryObjectDefConstPtr record = m_database->objectDefs()->find(fhDef.id);
+
+        if (record && record->type == fhDef.type) {
+            // good
+        } else {
+            auto it = allDbDefs.find(fhDef.asUniqueTuple());
+            //auto* record                =
+            if (it == allDbDefs.cend()) {
+                continue;
+            }
+            record = nullptr;
+            for (auto* rec : it->second) {
+                if (rec->id == fhDef.id) {
+                    record = rec;
+                    break;
+                }
+            }
+
+            if (!record) {
+                record = it->second[0];
+                Logger(Logger::Warning) << "no record found for type=" << fhDef.type << ", id=" << fhDef.objId << ", subId=" << fhDef.subId << ", taking " << record->id << " from DB";
+            }
+        }
         if (!record) {
             continue;
         }
+        diagRecord.m_originalRecord = record;
+        /*
+        Logger(Logger::Warning) << "[" << dest.m_initialObjectDefs.size() << "] "
+
+                                << "objTempl.id=" << objTempl.m_id
+                                << ", objTempl.ani=" << objTempl.m_animationFile
+                                << ", fhDef.id=" << fhDef.id
+                                << ", fhDef.defFile=" << fhDef.defFile
+                                << ", fhDef.objId=" << fhDef.objId
+                                << ", dbDecord.id=" << record->id
+                                << ", dbDecord.defFile=" << record->defFile
+                                << ", dbDecord.objId=" << record->objId;*/
 
         // couple objdefs like sulfur/mercury mines have several def with same unique def name but different bitmask for terrain.
         for (const auto& [subId, altRec] : record->substitutions) {
@@ -333,6 +373,19 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             fhCommon.m_order    = index;
             fhCommon.m_defIndex = defIndex;
         };
+
+        /*Logger(Logger::Warning) << "[" << obj.m_defnum << "] pos=" << posFromH3M(obj.m_pos).toPrintableString()
+
+                                << " objTempl.id=" << objTempl.m_id
+                                << ", objTempl.ani=" << objTempl.m_animationFile
+                                //<< ", fhDef.id=" << fhDef.id
+                                //<< ", fhDef.defFile=" << fhDef.defFile
+                                //<< ", fhDef.objId=" << fhDef.objId
+                                << ", dbDecord.id=" << objDef->id
+                                << ", dbDecord.defFile=" << objDef->defFile
+                                << ", dbDecord.objId=" << objDef->objId;*/
+
+        //Logger(Logger::Warning) << "objTempl.m_id=" << objTempl.m_id << ", objDef.id=" << objDef->id << ", objDef.objId=" << objDef->objId;
 
         MapObjectType type = static_cast<MapObjectType>(objTempl.m_id);
         switch (type) {
@@ -440,6 +493,14 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 }
                 fhMonster.m_joinOnlyForMoney = monster->m_joinOnlyForMoney;
                 fhMonster.m_joinPercent      = monster->m_joinPercent;
+
+                fhMonster.m_neverFlees     = monster->m_neverFlees;
+                fhMonster.m_notGrowingTeam = monster->m_notGrowingTeam;
+
+                if (monster->m_artID != uint16_t(-1)) {
+                    fhMonster.m_reward.artifacts.resize(1);
+                    fhMonster.m_reward.artifacts[0].onlyArtifacts.push_back(m_artifactIds.at(monster->m_artID));
+                }
 
                 if (monster->m_upgradedStack == 0xffffffffU) {
                     fhMonster.m_upgradedStack = FHMonster::UpgradedStack::Random;
@@ -705,9 +766,17 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             } break;
             case MapObjectType::QUEST_GUARD:
             {
-                const auto* questGuard = static_cast<const MapQuestGuard*>(impl);
-                (void) questGuard;
-                assert(1 && questGuard);
+                const auto*  questGuard = static_cast<const MapQuestGuard*>(impl);
+                FHQuestGuard fhQuestGuard;
+                initCommon(fhQuestGuard);
+                auto* visitableId = mappings.mapVisitable;
+                if (!visitableId)
+                    throw std::runtime_error("Unknown def for quest guard:" + objDef->id);
+
+                fhQuestGuard.m_visitableId = visitableId;
+
+                fhQuestGuard.m_quest = convertQuest(questGuard->m_quest);
+                dest.m_objects.m_questGuards.push_back(std::move(fhQuestGuard));
             } break;
             case MapObjectType::RANDOM_DWELLING:         //same as castle + level range  216
             case MapObjectType::RANDOM_DWELLING_LVL:     //same as castle, fixed level   217
@@ -1021,6 +1090,16 @@ FHQuest H3M2FHConverter::convertQuest(const MapQuest& quest) const
         {
             fhQuest.m_type          = FHQuest::Type::KillHero;
             fhQuest.m_targetQuestId = quest.m_134val;
+        } break;
+        case MapQuest::Mission::HERO:
+        {
+            fhQuest.m_type          = FHQuest::Type::BeHero;
+            fhQuest.m_targetQuestId = quest.m_89val;
+        } break;
+        case MapQuest::Mission::PLAYER:
+        {
+            fhQuest.m_type          = FHQuest::Type::BePlayer;
+            fhQuest.m_targetQuestId = quest.m_89val;
         } break;
         default:
             Logger(Logger::Warning) << "Unsupported mission type:" << int(quest.m_missionType);
