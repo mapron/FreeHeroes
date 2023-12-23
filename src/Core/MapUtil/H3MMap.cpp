@@ -303,6 +303,7 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
             MapFormat::ROE,
             MapFormat::AB,
             MapFormat::SOD,
+            MapFormat::HC,
             MapFormat::HOTA1,
             MapFormat::HOTA2,
             MapFormat::HOTA3,

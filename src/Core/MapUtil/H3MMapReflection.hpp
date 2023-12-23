@@ -69,6 +69,7 @@ ENUM_REFLECTION_STRINGIFY(
     ROE,
     AB,
     SOD,
+    HC,
     HOTA1,
     HOTA2,
     HOTA3,

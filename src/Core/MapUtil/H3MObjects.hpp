@@ -19,6 +19,7 @@ enum class MapFormat
     ROE     = 0x0e,
     AB      = 0x15,
     SOD     = 0x1c,
+    HC      = 0x1d,
     HOTA1   = 0x1e,
     HOTA2   = 0x1f,
     HOTA3   = 0x20,
