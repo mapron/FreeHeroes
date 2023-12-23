@@ -55,8 +55,7 @@ void Archive::detectFormat(const std_path& path, ByteOrderDataStreamReader& stre
         m_format = BinaryFormat::LOD;
         return;
     }
-    std::string ext = path2string(path.extension());
-    std::transform(ext.begin(), ext.end(), ext.begin(), [](unsigned char c) { return std::tolower(c); });
+    std::string ext = pathToLower(path.extension());
     if (ext == ".lod") {
         m_format = BinaryFormat::LOD;
     } else if (ext == ".snd") {
@@ -345,21 +344,19 @@ void Archive::createFromFolder(const Mernel::std_path& path, const std::vector<s
     m_lodHeader.resize(80);
     m_isBinary = false;
 
-    for (auto&& it : Mernel::std_fs::directory_iterator(path)) {
+    for (auto&& it : std_fs::directory_iterator(path)) {
         if (!it.is_regular_file())
             continue;
         auto   filename = it.path().filename();
         Record rec;
-        rec.m_originalExtWithDot = Mernel::path2string(filename.extension());
-        rec.m_extWithDot         = rec.m_originalExtWithDot;
+        rec.m_originalExtWithDot = path2string(filename.extension());
+        rec.m_extWithDot         = strToLower(rec.m_originalExtWithDot);
 
-        std::transform(rec.m_extWithDot.begin(), rec.m_extWithDot.end(), rec.m_extWithDot.begin(), [](unsigned char c) { return std::tolower(c); });
         if (std::find(extensions.cbegin(), extensions.cend(), rec.m_extWithDot) == extensions.cend())
             continue;
 
-        rec.m_originalBasename = Mernel::path2string(filename.stem());
-        rec.m_basename         = rec.m_originalBasename;
-        std::transform(rec.m_basename.begin(), rec.m_basename.end(), rec.m_basename.begin(), [](unsigned char c) { return std::tolower(c); });
+        rec.m_originalBasename = path2string(filename.stem());
+        rec.m_basename         = strToLower(rec.m_originalBasename);
 
         rec.m_bufferWithFile.m_buffer   = readFileIntoHolder(it.path());
         rec.m_bufferWithFile.m_inMemory = true;
@@ -469,13 +466,11 @@ void Archive::convertFromBinary(bool uncompress)
         rec.m_bufferWithFile.m_inMemory = true;
 
         rec.m_originalBasename   = brec.m_basename;
-        rec.m_basename           = rec.m_originalBasename;
+        rec.m_basename           = strToLower(rec.m_originalBasename);
         rec.m_originalExtWithDot = brec.m_extNoDot;
         if (!rec.m_originalExtWithDot.empty())
             rec.m_originalExtWithDot.insert(0, ".");
-        rec.m_extWithDot = rec.m_originalExtWithDot;
-        std::transform(rec.m_basename.begin(), rec.m_basename.end(), rec.m_basename.begin(), [](unsigned char c) { return std::tolower(c); });
-        std::transform(rec.m_extWithDot.begin(), rec.m_extWithDot.end(), rec.m_extWithDot.begin(), [](unsigned char c) { return std::tolower(c); });
+        rec.m_extWithDot = strToLower(rec.m_originalExtWithDot);
 
         rec.m_unknown1        = brec.m_unknown1;
         rec.m_filenameGarbage = brec.m_filenameGarbage;

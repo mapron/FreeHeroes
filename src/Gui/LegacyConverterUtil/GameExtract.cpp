@@ -21,8 +21,9 @@
 #include "MernelExecution/TaskQueue.hpp"
 
 #include "MernelPlatform/AppLocations.hpp"
-#include "MernelPlatform/Profiler.hpp"
 #include "MernelPlatform/Logger.hpp"
+#include "MernelPlatform/Profiler.hpp"
+#include "MernelPlatform/StringUtils.hpp"
 
 #include <sstream>
 
@@ -89,8 +90,7 @@ Mernel::std_path findPathChild(const Mernel::std_path& parent, const std::string
         return {};
     for (auto&& it : Mernel::std_fs::directory_iterator(parent)) {
         if (it.is_regular_file() || it.is_directory()) {
-            auto name = Mernel::path2string(it.path().filename());
-            std::transform(name.begin(), name.end(), name.begin(), [](unsigned char c) { return std::tolower(c); });
+            auto name = Mernel::pathToLower(it.path().filename());
             if (name == lowerCaseName) {
                 std::error_code ec;
                 if (it.is_regular_file()) {
@@ -289,8 +289,7 @@ void GameExtract::run(const DetectedSources& sources) const
         auto& wrapper         = archiveWrappers[i];
         wrapper.m_dat         = archives[i].m_path;
         wrapper.m_datFilename = Mernel::path2string(wrapper.m_dat.filename());
-        wrapper.m_folderName  = wrapper.m_datFilename;
-        std::transform(wrapper.m_folderName.begin(), wrapper.m_folderName.end(), wrapper.m_folderName.begin(), [](unsigned char c) { return std::tolower(c); });
+        wrapper.m_folderName  = Mernel::strToLower(wrapper.m_datFilename);
         wrapper.m_folderName.replace(wrapper.m_folderName.find('.'), 1, "_");
         wrapper.m_folder = m_settings.m_archiveExtractRoot / wrapper.m_folderName;
 
@@ -384,11 +383,9 @@ void GameExtract::run(const DetectedSources& sources) const
         for (auto&& it : std_fs::directory_iterator(srcFolderPath)) {
             if (!it.is_regular_file())
                 continue;
-            const auto srcPath = it.path();
-            auto       ext     = path2string(srcPath.extension());
-            std::transform(ext.begin(), ext.end(), ext.begin(), [](unsigned char c) { return std::tolower(c); });
-            auto basename = path2string(srcPath.stem());
-            std::transform(basename.begin(), basename.end(), basename.begin(), [](unsigned char c) { return std::tolower(c); });
+            const auto srcPath  = it.path();
+            auto       ext      = pathToLower(srcPath.extension());
+            auto       basename = pathToLower(srcPath.stem());
 
             processFile(taskQueue,
                         knownResources,
@@ -411,11 +408,9 @@ void GameExtract::run(const DetectedSources& sources) const
         for (auto&& it : std_fs::directory_iterator(src.m_path)) {
             if (!it.is_regular_file())
                 continue;
-            const auto srcPath = it.path();
-            auto       ext     = path2string(srcPath.extension());
-            std::transform(ext.begin(), ext.end(), ext.begin(), [](unsigned char c) { return std::tolower(c); });
-            auto basename = path2string(srcPath.stem());
-            std::transform(basename.begin(), basename.end(), basename.begin(), [](unsigned char c) { return std::tolower(c); });
+            const auto srcPath  = it.path();
+            auto       ext      = pathToLower(srcPath.extension());
+            auto       basename = pathToLower(srcPath.stem());
 
             auto            destPath = extractArchiveRoot / (basename + ".mp3");
             std::error_code ec;

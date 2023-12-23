@@ -16,6 +16,7 @@
 #include "LibraryTerrain.hpp"
 
 #include "MernelPlatform/Logger.hpp"
+#include "MernelPlatform/StringUtils.hpp"
 
 #include <functional>
 
@@ -1105,7 +1106,8 @@ Core::LibraryObjectDef H3M2FHConverter::convertDef(const ObjectTemplate& objTemp
     fhDef.type     = static_cast<int>(objTempl.m_type);
     fhDef.priority = objTempl.m_drawPriority;
 
-    std::transform(fhDef.id.begin(), fhDef.id.end(), fhDef.id.begin(), [](unsigned char c) { return std::tolower(c); });
+    fhDef.id = Mernel::strToLower(fhDef.id);
+
     if (fhDef.id.ends_with(".def"))
         fhDef.id = fhDef.id.substr(0, fhDef.id.size() - 4);
     if (fhDef.defFile.ends_with(".def"))

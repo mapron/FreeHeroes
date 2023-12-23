@@ -19,6 +19,7 @@
 #include "LibraryTerrain.hpp"
 
 #include "MernelPlatform/Logger.hpp"
+#include "MernelPlatform/StringUtils.hpp"
 
 #define assume(cond) \
     if (!(cond)) \
@@ -67,7 +68,7 @@ public:
         auto* defsContainer = m_database->objectDefs();
         if (defId.ends_with(".def"))
             defId = defId.substr(0, defId.size() - 4);
-        std::transform(defId.begin(), defId.end(), defId.begin(), [](unsigned char c) { return std::tolower(c); });
+        defId = Mernel::strToLower(defId);
         return add(defsContainer->find(defId));
     }
 

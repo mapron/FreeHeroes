@@ -414,8 +414,7 @@ void SpriteFile::detectFormat(const Mernel::std_path& path, ByteOrderDataStreamR
     std::array<uint8_t, 4> signature;
     stream >> signature;
 
-    std::string ext = path2string(path.extension());
-    std::transform(ext.begin(), ext.end(), ext.begin(), [](unsigned char c) { return std::tolower(c); });
+    std::string ext = pathToLower(path.extension());
     if (ext == ".pcx") {
         m_format = BinaryFormat::PCX;
     } else if (ext == ".bmp") {
