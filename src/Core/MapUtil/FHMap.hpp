@@ -55,6 +55,21 @@ struct FHHeroData {
     bool operator==(const FHHeroData&) const noexcept = default;
 };
 
+struct FHGuard {
+    bool                 m_hasGuards = false;
+    Core::AdventureSquad m_creatures;
+
+    bool operator==(const FHGuard&) const noexcept = default;
+};
+
+struct FHMessageWithBattle {
+    bool        m_hasMessage = false;
+    std::string m_message;
+    FHGuard     m_guards;
+
+    bool operator==(const FHMessageWithBattle&) const noexcept = default;
+};
+
 struct FHHero : public FHPlayerControlledObject {
     bool       m_isMain{ false };
     FHHeroData m_data;
@@ -218,8 +233,17 @@ struct FHQuest {
 };
 
 struct FHQuestHut : public FHCommonVisitable {
-    Core::Reward m_reward;
-    FHQuest      m_quest;
+    struct FHQuestWithReward {
+        Core::Reward m_reward;
+        FHQuest      m_quest;
+
+        bool operator==(const FHQuestWithReward&) const noexcept = default;
+    };
+
+    std::vector<FHQuestWithReward> m_questsOneTime;
+    std::vector<FHQuestWithReward> m_questsRecurring;
+
+    bool operator==(const FHQuestHut&) const noexcept = default;
 };
 
 struct FHScholar : public FHCommonVisitable {
@@ -235,6 +259,36 @@ struct FHScholar : public FHCommonVisitable {
     Core::HeroPrimaryParamType          m_primaryType = Core::HeroPrimaryParamType::Attack;
     Core::LibrarySecondarySkillConstPtr m_skillId     = nullptr;
     Core::LibrarySpellConstPtr          m_spellId     = nullptr;
+
+    bool operator==(const FHScholar&) const noexcept = default;
+};
+
+struct FHLocalEvent : public FHCommonVisitable {
+    FHMessageWithBattle m_message;
+    Core::Reward        m_reward;
+
+    std::vector<Core::LibraryPlayerConstPtr> m_players;
+
+    bool m_computerActivate = false;
+    bool m_removeAfterVisit = false;
+    bool m_humanActivate    = true;
+
+    bool operator==(const FHLocalEvent&) const noexcept = default;
+};
+
+struct FHGlobalMapEvent {
+    std::string m_name;
+    std::string m_message;
+
+    Core::ResourceAmount                     m_resources;
+    std::vector<Core::LibraryPlayerConstPtr> m_players;
+    bool                                     m_humanAffected = true;
+
+    bool     m_computerAffected = false;
+    uint16_t m_firstOccurence   = 0;
+    uint8_t  m_nextOccurence    = 0;
+
+    bool operator==(const FHGlobalMapEvent&) const noexcept = default;
 };
 
 struct FHDebugTile {
@@ -296,6 +350,7 @@ struct MAPUTIL_EXPORT FHMap {
         std::vector<FHSkillHut>       m_skillHuts;
         std::vector<FHScholar>        m_scholars;
         std::vector<FHQuestHut>       m_questHuts;
+        std::vector<FHLocalEvent>     m_localEvents;
 
         template<typename T>
         inline const std::vector<T>& container() const noexcept
@@ -326,7 +381,8 @@ struct MAPUTIL_EXPORT FHMap {
                            + m_shrines.size()
                            + m_skillHuts.size()
                            + m_scholars.size()
-                           + m_questHuts.size());
+                           + m_questHuts.size()
+                           + m_localEvents.size());
             for (auto& obj : m_resources)
                 result.push_back(&obj);
             for (auto& obj : m_resourcesRandom)
@@ -356,6 +412,8 @@ struct MAPUTIL_EXPORT FHMap {
             for (auto& obj : m_scholars)
                 result.push_back(&obj);
             for (auto& obj : m_questHuts)
+                result.push_back(&obj);
+            for (auto& obj : m_localEvents)
                 result.push_back(&obj);
             return result;
         }
@@ -422,6 +480,8 @@ struct MAPUTIL_EXPORT FHMap {
 
     std::vector<FHHeroData> m_customHeroes;
 
+    std::vector<FHGlobalMapEvent> m_globalEvents;
+
     std::vector<Core::LibraryObjectDefConstPtr> m_initialObjectDefs; // mostly for round-trip.
     DefMap                                      m_defReplacements;   // mostly for round-trip.
 
@@ -451,6 +511,7 @@ template <> inline const std::vector<FHShrine>         &       FHMap::Objects::c
 template <> inline const std::vector<FHSkillHut>       &       FHMap::Objects::container() const noexcept { return m_skillHuts;}
 template <> inline const std::vector<FHScholar>        &       FHMap::Objects::container() const noexcept { return m_scholars;}
 template <> inline const std::vector<FHQuestHut>       &       FHMap::Objects::container() const noexcept { return m_questHuts;}
+template <> inline const std::vector<FHLocalEvent>     &       FHMap::Objects::container() const noexcept { return m_localEvents;}
 
 template <> inline       std::vector<FHResource>       &       FHMap::Objects::container()       noexcept { return m_resources;}
 template <> inline       std::vector<FHRandomResource> &       FHMap::Objects::container()       noexcept { return m_resourcesRandom;}
@@ -467,6 +528,7 @@ template <> inline       std::vector<FHShrine>         &       FHMap::Objects::c
 template <> inline       std::vector<FHSkillHut>       &       FHMap::Objects::container()       noexcept { return m_skillHuts;}
 template <> inline       std::vector<FHScholar>        &       FHMap::Objects::container()       noexcept { return m_scholars;}
 template <> inline       std::vector<FHQuestHut>       &       FHMap::Objects::container()       noexcept { return m_questHuts;}
+template <> inline       std::vector<FHLocalEvent>     &       FHMap::Objects::container()       noexcept { return m_localEvents;}
 // clang-format on
 
 }

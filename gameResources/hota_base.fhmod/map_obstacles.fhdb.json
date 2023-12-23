@@ -1064,7 +1064,13 @@
 "fvwnd06"      : [ "fvwnd06"      ,   "DECORATION"                  ],
 "fvwnd07"      : [ "fvwnd07"      ,   "DECORATION"                  ],
 
-"udrock06"     : [ "udrock06"     ,   "ROCK"                        ]
+
+"udrock02"     : [ "udrock02"     ,   "ROCK"                        ],
+"udrock03"     : [ "udrock03"     ,   "ROCK"                        ],
+"udrock05"     : [ "udrock05"     ,   "ROCK"                        ],
+
+"avchrnal"     : [ "avchrnal"     ,   "DECORATION"                  ]
+
 
 }
 

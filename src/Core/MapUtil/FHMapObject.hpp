@@ -8,7 +8,7 @@
 #include "FHPos.hpp"
 
 #include "LibraryObjectDef.hpp"
-#include "AdventureStack.hpp"
+#include "AdventureSquad.hpp"
 #include "Reward.hpp"
 #include "MapScore.hpp"
 
@@ -52,7 +52,7 @@ struct FHTown : public FHPlayerControlledObject {
 
     std::vector<Core::LibraryBuildingConstPtr> m_buildings;
 
-    std::vector<Core::AdventureStack> m_garison;
+    Core::AdventureSquad m_garison;
 
     Core::UnitByValueList m_garisonRmg;
 

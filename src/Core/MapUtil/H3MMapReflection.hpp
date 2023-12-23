@@ -227,5 +227,5 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_tiles,
     m_objectDefs,
 
-    m_events);
+    m_globalEvents);
 }

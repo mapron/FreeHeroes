@@ -43,6 +43,17 @@ STRUCT_REFLECTION_PAIRED(
 // clang-format on
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHGuard,
+    m_hasGuards,
+    m_creatures)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHMessageWithBattle,
+    m_hasMessage,
+    m_message,
+    m_guards)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHHeroData,
     m_hasExp,
     m_hasSecSkills,
@@ -308,6 +319,12 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_targetQuestId);
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHQuestHut::FHQuestWithReward,
+
+    m_reward,
+    m_quest)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHQuestHut,
     m_pos,
     m_order,
@@ -318,8 +335,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 
     m_visitableId,
 
-    m_reward,
-    m_quest)
+    m_questsOneTime,
+    m_questsRecurring)
 
 ENUM_REFLECTION_STRINGIFY(
     FHScholar::Type,
@@ -344,6 +361,24 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_primaryType,
     m_skillId,
     m_spellId)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHLocalEvent,
+    m_pos,
+    m_order,
+    m_defIndex,
+    m_guard,
+    m_score,
+    m_generationId,
+
+    m_visitableId,
+
+    m_message,
+    m_reward,
+    m_players,
+    m_computerActivate,
+    m_removeAfterVisit,
+    m_humanActivate)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHDebugTile,
@@ -377,7 +412,19 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_shrines,
     m_skillHuts,
     m_scholars,
-    m_questHuts)
+    m_questHuts,
+    m_localEvents)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHGlobalMapEvent,
+    m_name,
+    m_message,
+    m_resources,
+    m_players,
+    m_humanAffected,
+    m_computerAffected,
+    m_firstOccurence,
+    m_nextOccurence)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHMap::Config,
@@ -410,6 +457,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_disabledSpells,
     m_disabledSkills,
     m_customHeroes,
+    m_globalEvents,
     m_initialObjectDefs,
     m_defReplacements)
 

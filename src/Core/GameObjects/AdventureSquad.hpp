@@ -71,6 +71,11 @@ struct AdventureSquad {
         stacksHidden.push_back(AdventureStack(unit, count));
         return &stacksHidden.back();
     }
+
+    bool operator==(const AdventureSquad& another) const noexcept
+    {
+        return this->isEqualTo(another);
+    }
 };
 
 }

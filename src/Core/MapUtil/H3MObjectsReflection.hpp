@@ -193,7 +193,6 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     MapSeerHut,
-    m_questWithReward,
     m_questsOneTime,
     m_questsRecurring)
 
@@ -254,7 +253,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_message,
     m_reward,
 
-    m_availableFor,
+    m_players,
     m_computerActivate,
     m_removeAfterVisit,
     m_humanActivate)

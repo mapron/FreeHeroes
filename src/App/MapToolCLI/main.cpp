@@ -33,6 +33,7 @@ int main(int argc, char** argv)
                                    "output-folder",
                                    "dump-uncompressed",
                                    "dump-json",
+                                   "logging-level",
                                    "logs-extra",
                                    "seed",
                                    "rng-settings-file",
@@ -53,6 +54,7 @@ int main(int argc, char** argv)
     const bool        dumpUncompressed = parser.getArg("dump-uncompressed") == "1";
     const bool        dumpJson         = parser.getArg("dump-json") == "1";
     const bool        extraLogging     = parser.getArg("logs-extra") == "1";
+    const std::string loggingLevelStr  = parser.getArg("logging-level");
     const std::string diffJsonFile     = parser.getArg("diff-json-file");
     const std::string seedStr          = parser.getArg("seed");
     const std::string stopAfterHeatStr = parser.getArg("heat-stop-after");
@@ -63,9 +65,10 @@ int main(int argc, char** argv)
 
     const int      stopAfterHeat = stopAfterHeatStr.empty() ? 1000 : std::strtol(stopAfterHeatStr.c_str(), nullptr, 10);
     const uint64_t seed          = std::strtoull(seedStr.c_str(), nullptr, 10);
+    const int      loggingLevel  = loggingLevelStr.empty() ? 4 : std::strtoull(loggingLevelStr.c_str(), nullptr, 10);
 
     Core::CoreApplication fhCoreApp;
-    fhCoreApp.initLogger();
+    fhCoreApp.initLogger(loggingLevel);
     if (!fhCoreApp.load())
         return 1;
 

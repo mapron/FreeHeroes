@@ -754,7 +754,6 @@ struct MapSeerHut : public MapObjectAbstract {
 
         MapQuest m_quest;
     };
-    MapQuestWithReward m_questWithReward;
 
     std::vector<MapQuestWithReward> m_questsOneTime;
     std::vector<MapQuestWithReward> m_questsRecurring;
@@ -802,6 +801,11 @@ struct MapScholar : public MapObjectAbstract {
 
 struct MapWitchHut : public MapObjectAbstract {
     std::vector<uint8_t> m_allowedSkills;
+
+    void prepareArrays(const MapFormatFeatures* m_features)
+    {
+        m_allowedSkills.resize(m_features->m_secondarySkillCount);
+    }
 
     void readBinary(ByteOrderDataStreamReader& stream) override;
     void writeBinary(ByteOrderDataStreamWriter& stream) const override;
@@ -854,8 +858,6 @@ struct MapGarison : public MapObjectAbstract {
 struct MapSignBottle : public MapObjectAbstract {
     std::string m_message;
 
-    using MapObjectAbstract::MapObjectAbstract;
-
     void readBinary(ByteOrderDataStreamReader& stream) override;
     void writeBinary(ByteOrderDataStreamWriter& stream) const override;
     void toJson(PropertyTree& data) const override;
@@ -866,10 +868,12 @@ struct MapEvent : public MapObjectAbstract {
     MapMessage m_message;
     MapReward  m_reward;
 
-    uint8_t m_availableFor     = 0;
-    uint8_t m_computerActivate = 0;
-    uint8_t m_removeAfterVisit = 0;
-    uint8_t m_humanActivate    = 1;
+    std::vector<uint8_t> m_players;
+    uint8_t              m_computerActivate = 0;
+    uint8_t              m_removeAfterVisit = 0;
+    uint8_t              m_humanActivate    = 1;
+
+    void prepareArrays(const MapFormatFeatures* m_features);
 
     void readBinary(ByteOrderDataStreamReader& stream) override;
     void writeBinary(ByteOrderDataStreamWriter& stream) const override;

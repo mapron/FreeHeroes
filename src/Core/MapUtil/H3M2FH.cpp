@@ -100,8 +100,8 @@ struct ObjTemplateDiagContainer {
                 }
             }
             if (!substitutions.empty())
-                Logger(Logger::Warning) << "Some def files have different properties, but they were substitute with alternative ids:\n"
-                                        << substitutions;
+                Logger(Logger::Notice) << "Some def files have different properties, but they were substitute with alternative ids:\n"
+                                       << substitutions;
         }
         {
             std::ostringstream replacements;
@@ -138,8 +138,8 @@ struct ObjTemplateDiagContainer {
             }
             std::string replacementsStr = replacements.str();
             if (!replacementsStr.empty())
-                Logger(Logger::Warning) << "Some def files differ from the database, cannot be substituted, replacements will be created:\n"
-                                        << replacementsStr;
+                Logger(Logger::Notice) << "Some def files differ from the database, cannot be substituted, replacements will be created:\n"
+                                       << replacementsStr;
         }
     }
 };
@@ -304,7 +304,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
         {
             if (*record != fhDef) {
                 if (dest.m_defReplacements.contains(record))
-                    Logger(Logger::Err) << "DUPLICATE REPLACEMENT for:" << record->id;
+                    Logger(Logger::Err) << "MAPPING ERROR, same def file used several times with different properties:" << record->id;
 
                 dest.m_defReplacements[record] = std::move(fhDef);
             }
@@ -338,9 +338,18 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
         switch (type) {
             case MapObjectType::EVENT:
             {
-                const auto* event = static_cast<const MapEvent*>(impl);
-                (void) event;
-                assert(1 && event);
+                const auto*  event = static_cast<const MapEvent*>(impl);
+                FHLocalEvent fhEvent;
+                fhEvent.m_order   = index;
+                fhEvent.m_pos     = posFromH3M(obj.m_pos);
+                fhEvent.m_players = convertPlayerList(event->m_players);
+                fhEvent.m_message = convertMessage(event->m_message);
+                fhEvent.m_reward  = convertReward(event->m_reward);
+
+                fhEvent.m_computerActivate = event->m_computerActivate;
+                fhEvent.m_removeAfterVisit = event->m_removeAfterVisit;
+                fhEvent.m_humanActivate    = event->m_humanActivate;
+                dest.m_objects.m_localEvents.push_back(std::move(fhEvent));
             } break;
             case MapObjectType::HERO:
             case MapObjectType::PRISON:
@@ -457,13 +466,18 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 if (!visitableId)
                     throw std::runtime_error("Unknown def for seer hut:" + objDef->id);
 
-                FHQuestHut fhHut;
-                initCommon(fhHut);
-                fhHut.m_visitableId = visitableId;
-                fhHut.m_reward      = convertRewardHut(hut->m_questWithReward);
-                fhHut.m_quest       = convertQuest(hut->m_questWithReward.m_quest);
+                FHQuestHut fhQuestHut;
+                initCommon(fhQuestHut);
+                fhQuestHut.m_visitableId = visitableId;
+                fhQuestHut.m_questsOneTime.resize(hut->m_questsOneTime.size());
+                fhQuestHut.m_questsRecurring.resize(hut->m_questsRecurring.size());
 
-                dest.m_objects.m_questHuts.push_back(std::move(fhHut));
+                for (size_t i = 0; i < hut->m_questsOneTime.size(); ++i) {
+                    fhQuestHut.m_questsOneTime[i].m_reward = convertRewardHut(hut->m_questsOneTime[i]);
+                    fhQuestHut.m_questsOneTime[i].m_quest  = convertQuest(hut->m_questsOneTime[i].m_quest);
+                }
+
+                dest.m_objects.m_questHuts.push_back(std::move(fhQuestHut));
             } break;
             case MapObjectType::WITCH_HUT:
             {
@@ -594,10 +608,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                     }
                 }
                 if (fhtown.m_hasGarison) {
-                    for (const auto& stack : town->m_garison.m_stacks) {
-                        if (stack.m_count)
-                            fhtown.m_garison.push_back(Core::AdventureStack(m_unitIds[stack.m_id], stack.m_count));
-                    }
+                    fhtown.m_garison = convertSquad(town->m_garison);
                 }
                 dest.m_towns.push_back(std::move(fhtown));
             } break;
@@ -825,6 +836,9 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
         }
         dest.m_customHeroes.push_back(std::move(destHero));
     }
+    for (auto& event : src.m_globalEvents) {
+        dest.m_globalEvents.push_back(convertEvent(event));
+    }
 
     convertTileMap(src, dest);
     assert(dest.m_tileMap.m_width > 0);
@@ -859,6 +873,18 @@ std::vector<Core::UnitWithCount> H3M2FHConverter::convertStacks(const std::vecto
     for (auto& stack : stacks)
         result.push_back({ m_unitIds[stack.m_id], stack.m_count });
     return result;
+}
+
+Core::AdventureSquad H3M2FHConverter::convertSquad(const StackSetFixed& fixedStacks) const
+{
+    Core::AdventureSquad squad;
+    for (const auto& stack : fixedStacks.m_stacks) {
+        if (stack.m_count && stack.m_id != uint16_t(-1))
+            squad.stacks.push_back(Core::AdventureStack(m_unitIds[stack.m_id], stack.m_count));
+        else
+            squad.stacks.push_back(Core::AdventureStack());
+    }
+    return squad;
 }
 
 Core::Reward H3M2FHConverter::convertRewardHut(const MapSeerHut::MapQuestWithReward& questWithReward) const
@@ -1002,6 +1028,44 @@ FHQuest H3M2FHConverter::convertQuest(const MapQuest& quest) const
             break;
     }
     return fhQuest;
+}
+
+FHGlobalMapEvent H3M2FHConverter::convertEvent(const GlobalMapEvent& event) const
+{
+    FHGlobalMapEvent fhEvent;
+
+    fhEvent.m_name      = event.m_name;
+    fhEvent.m_message   = event.m_message;
+    fhEvent.m_resources = convertResources(event.m_resourceSet.m_resourceAmount);
+    fhEvent.m_players   = convertPlayerList(event.m_players);
+
+    fhEvent.m_humanAffected    = event.m_humanAffected;
+    fhEvent.m_computerAffected = event.m_computerAffected;
+    fhEvent.m_firstOccurence   = event.m_firstOccurence;
+    fhEvent.m_nextOccurence    = event.m_nextOccurence;
+    return fhEvent;
+}
+
+FHMessageWithBattle H3M2FHConverter::convertMessage(const MapMessage& message) const
+{
+    FHMessageWithBattle fhMessage;
+    fhMessage.m_hasMessage = message.m_hasMessage;
+    if (fhMessage.m_hasMessage) {
+        fhMessage.m_message            = message.m_message;
+        fhMessage.m_guards.m_hasGuards = message.m_guards.m_hasGuards;
+        fhMessage.m_guards.m_creatures = convertSquad(message.m_guards.m_creatures);
+    }
+    return fhMessage;
+}
+
+std::vector<Core::LibraryPlayerConstPtr> H3M2FHConverter::convertPlayerList(const std::vector<uint8_t>& players) const
+{
+    std::vector<Core::LibraryPlayerConstPtr> result;
+    for (size_t i = 0; i < players.size(); ++i) {
+        if (players[i])
+            result.push_back(m_playerIds.at(static_cast<uint8_t>(i)));
+    }
+    return result;
 }
 
 void H3M2FHConverter::convertTileMap(const H3Map& src, FHMap& dest) const

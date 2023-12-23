@@ -221,11 +221,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
                 cas1->m_builtBuildings[building->legacyId] = 1;
         }
         if (cas1->m_hasGarison) {
-            size_t i = 0;
-            for (i = 0; const auto& stack : fhTown.m_garison)
-                cas1->m_garison.m_stacks[i++] = { (uint16_t) stack.library->legacyId, (uint16_t) stack.count };
-            for (; i < cas1->m_garison.m_stacks.size(); ++i)
-                cas1->m_garison.m_stacks[i] = { (uint16_t) -1, 0 };
+            convertSquad(fhTown.m_garison, cas1->m_garison);
         }
 
         auto* libraryFaction = fhTown.m_factionId;
@@ -279,6 +275,9 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
             if (hero->m_spellSet.m_hasCustomSpells) {
                 for (auto* spell : fhHero.m_data.m_army.hero.spellbook)
                     hero->m_spellSet.m_spells[spell->legacyId] = 1;
+            }
+            if (hero->m_hasGarison) {
+                convertSquad(fhHero.m_data.m_army.squad, hero->m_garison);
             }
         }
         dest.m_allowedHeroes[heroId] = 0;
@@ -509,6 +508,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
     }
     for (auto& fhSkillHut : src.m_objects.m_skillHuts) {
         auto obj = std::make_unique<MapWitchHut>();
+        obj->prepareArrays(dest.m_features.get());
         for (auto* allowedSkill : fhSkillHut.m_skillIds)
             obj->m_allowedSkills[allowedSkill->legacyId] = 1;
 
@@ -531,8 +531,12 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
 
     for (auto& fhQuestHut : src.m_objects.m_questHuts) {
         auto obj = std::make_unique<MapSeerHut>();
-        convertRewardHut(fhQuestHut.m_reward, obj->m_questWithReward);
-        convertQuest(fhQuestHut.m_quest, obj->m_questWithReward.m_quest);
+        obj->m_questsOneTime.resize(fhQuestHut.m_questsOneTime.size());
+        obj->m_questsRecurring.resize(fhQuestHut.m_questsRecurring.size());
+        for (size_t i = 0; i < obj->m_questsOneTime.size(); ++i) {
+            convertRewardHut(fhQuestHut.m_questsOneTime[i].m_reward, obj->m_questsOneTime[i]);
+            convertQuest(fhQuestHut.m_questsOneTime[i].m_quest, obj->m_questsOneTime[i].m_quest);
+        }
 
         auto* def = fhQuestHut.m_visitableId->objectDefs.get(fhQuestHut.m_defIndex);
         dest.m_objects.push_back(Object{ .m_order = fhQuestHut.m_order, .m_pos = int3fromPos(fhQuestHut.m_pos), .m_defnum = tmplCache.add(def), .m_impl = std::move(obj) });
@@ -554,6 +558,29 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         convertReward(fhPandora.m_reward, obj->m_reward);
 
         dest.m_objects.push_back(Object{ .m_order = fhPandora.m_order, .m_pos = int3fromPos(fhPandora.m_pos), .m_defnum = tmplCache.addId("ava0128"), .m_impl = std::move(obj) });
+    }
+
+    for (auto& fhEvent : src.m_objects.m_localEvents) {
+        auto obj = std::make_unique<MapEvent>();
+
+        obj->prepareArrays(dest.m_features.get());
+        convertMessage(fhEvent.m_message, obj->m_message);
+        convertReward(fhEvent.m_reward, obj->m_reward);
+        for (auto* player : fhEvent.m_players)
+            obj->m_players[player->legacyId] = 1;
+
+        obj->m_computerActivate = fhEvent.m_computerActivate;
+        obj->m_removeAfterVisit = fhEvent.m_removeAfterVisit;
+        obj->m_humanActivate    = fhEvent.m_humanActivate;
+
+        dest.m_objects.push_back(Object{ .m_order = fhEvent.m_order, .m_pos = int3fromPos(fhEvent.m_pos), .m_defnum = tmplCache.addId("avzevnt0"), .m_impl = std::move(obj) });
+    }
+
+    for (auto& fhEvent : src.m_globalEvents) {
+        GlobalMapEvent event;
+        event.prepareArrays(dest.m_features.get());
+        convertEvent(fhEvent, event);
+        dest.m_globalEvents.push_back(std::move(event));
     }
 
     dest.m_objectDefs = std::move(tmplCache.m_objectDefs);
@@ -706,6 +733,41 @@ void FH2H3MConverter::convertQuest(const FHQuest& fhQuest, MapQuest& quest) cons
         default:
             assert(!"Unsupported");
             break;
+    }
+}
+
+void FH2H3MConverter::convertEvent(const FHGlobalMapEvent& fhEvent, GlobalMapEvent& event) const
+{
+    event.m_name                         = fhEvent.m_name;
+    event.m_message                      = fhEvent.m_message;
+    event.m_resourceSet.m_resourceAmount = convertResource(fhEvent.m_resources);
+    for (auto* player : fhEvent.m_players)
+        event.m_players[player->legacyId] = 1;
+
+    event.m_humanAffected    = fhEvent.m_humanAffected;
+    event.m_computerAffected = fhEvent.m_computerAffected;
+    event.m_firstOccurence   = fhEvent.m_firstOccurence;
+    event.m_nextOccurence    = fhEvent.m_nextOccurence;
+}
+
+void FH2H3MConverter::convertMessage(const FHMessageWithBattle& fhMessage, MapMessage& message) const
+{
+    message.m_hasMessage = fhMessage.m_hasMessage;
+    if (message.m_hasMessage) {
+        message.m_message            = fhMessage.m_message;
+        message.m_guards.m_hasGuards = fhMessage.m_guards.m_hasGuards;
+        convertSquad(fhMessage.m_guards.m_creatures, message.m_guards.m_creatures);
+    }
+}
+
+void FH2H3MConverter::convertSquad(const Core::AdventureSquad& squad, StackSetFixed& fixedStacks) const
+{
+    fixedStacks.m_stacks.clear();
+    for (const auto& stack : squad.stacks) {
+        if (stack.count)
+            fixedStacks.m_stacks.push_back(StackBasicDescriptor{ .m_id = static_cast<uint16_t>(stack.library->legacyId), .m_count = static_cast<uint16_t>(stack.count) });
+        else
+            fixedStacks.m_stacks.push_back(StackBasicDescriptor{ .m_id = (uint16_t) -1 });
     }
 }
 

@@ -511,8 +511,8 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
         }
     }
 
-    m_events.resize(stream.readSize());
-    for (auto& event : m_events) {
+    m_globalEvents.resize(stream.readSize());
+    for (auto& event : m_globalEvents) {
         stream >> event;
     }
 
@@ -651,7 +651,7 @@ void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
         }
     }
 
-    stream << m_events;
+    stream << m_globalEvents;
 
     stream.zeroPadding(124);
 }
@@ -791,6 +791,7 @@ void ObjectTemplate::writeBinary(ByteOrderDataStreamWriter& stream) const
 void GlobalMapEvent::prepareArrays(const MapFormatFeatures* m_features)
 {
     m_resourceSet.prepareArrays(m_features);
+    m_players.resize(m_features->m_players);
 }
 
 void GlobalMapEvent::readBinary(ByteOrderDataStreamReader& stream)
@@ -800,7 +801,8 @@ void GlobalMapEvent::readBinary(ByteOrderDataStreamReader& stream)
 
     stream >> m_name >> m_message;
     stream >> m_resourceSet;
-    stream >> m_players;
+
+    stream.readBits(m_players);
 
     if (m_features->m_mapEventHuman)
         stream >> m_humanAffected;
@@ -817,7 +819,8 @@ void GlobalMapEvent::writeBinary(ByteOrderDataStreamWriter& stream) const
     auto* m_features = getFeaturesFromStream(stream);
     stream << m_name << m_message;
     stream << m_resourceSet;
-    stream << m_players;
+
+    stream.writeBits(m_players);
 
     if (m_features->m_mapEventHuman)
         stream << m_humanAffected;

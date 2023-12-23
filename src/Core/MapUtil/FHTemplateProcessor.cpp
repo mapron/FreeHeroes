@@ -437,7 +437,7 @@ void FHTemplateProcessor::runTownsPlacement()
                 } else {
                     count = getPossibleCount(unit, value);
                 }
-                town.m_garison.push_back({ unit, count });
+                town.m_garison.stacks.push_back({ unit, count });
             }
         }
         m_map.m_towns.push_back(town);

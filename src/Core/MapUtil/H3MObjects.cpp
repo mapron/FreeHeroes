@@ -1090,7 +1090,8 @@ void MapSeerHut::readBinary(ByteOrderDataStreamReader& stream)
     if (m_features->m_seerHutMultiQuest) {
         stream >> m_questsOneTime >> m_questsRecurring;
     } else {
-        stream >> m_questWithReward;
+        m_questsOneTime.resize(1);
+        stream >> m_questsOneTime[0];
     }
 }
 
@@ -1100,7 +1101,7 @@ void MapSeerHut::writeBinary(ByteOrderDataStreamWriter& stream) const
     if (m_features->m_seerHutMultiQuest) {
         stream << m_questsOneTime << m_questsRecurring;
     } else {
-        stream << m_questWithReward;
+        stream << m_questsOneTime.at(0);
     }
 }
 
@@ -1143,7 +1144,7 @@ void MapWitchHut::readBinary(ByteOrderDataStreamReader& stream)
 {
     auto* m_features = getFeaturesFromStream(stream);
     if (m_features->m_witchHutAllowedSkills) {
-        m_allowedSkills.resize(m_features->m_secondarySkillCount);
+        prepareArrays(m_features);
         stream.readBits(m_allowedSkills);
     }
 }
@@ -1447,13 +1448,22 @@ void HeroPrimSkillSet::writeBinary(ByteOrderDataStreamWriter& stream) const
     }
 }
 
+void MapEvent::prepareArrays(const MapFormatFeatures* m_features)
+{
+    m_players.resize(m_features->m_players);
+    m_message.prepareArrays(m_features);
+    m_reward.prepareArrays(m_features);
+}
+
 void MapEvent::readBinary(ByteOrderDataStreamReader& stream)
 {
     auto* m_features = getFeaturesFromStream(stream);
+    prepareArrays(m_features);
     stream >> m_message;
     stream >> m_reward;
     stream.zeroPaddingChecked(8, g_enablePaddingCheck);
-    stream >> m_availableFor >> m_computerActivate >> m_removeAfterVisit;
+    stream.readBits(m_players);
+    stream >> m_computerActivate >> m_removeAfterVisit;
     stream.zeroPaddingChecked(4, g_enablePaddingCheck);
     if (m_features->m_eventHasHumanActivate)
         stream >> m_humanActivate;
@@ -1466,7 +1476,8 @@ void MapEvent::writeBinary(ByteOrderDataStreamWriter& stream) const
     stream << m_reward;
 
     stream.zeroPadding(8);
-    stream << m_availableFor << m_computerActivate << m_removeAfterVisit;
+    stream.writeBits(m_players);
+    stream << m_computerActivate << m_removeAfterVisit;
     stream.zeroPadding(4);
     if (m_features->m_eventHasHumanActivate)
         stream << m_humanActivate;

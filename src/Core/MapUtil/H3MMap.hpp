@@ -169,11 +169,11 @@ struct Object {
 };
 
 struct GlobalMapEvent {
-    std::string m_name;
-    std::string m_message;
-    ResourceSet m_resourceSet;
-    uint8_t     m_players       = 0;
-    bool        m_humanAffected = true;
+    std::string          m_name;
+    std::string          m_message;
+    ResourceSet          m_resourceSet;
+    std::vector<uint8_t> m_players;
+    bool                 m_humanAffected = true;
 
     uint8_t  m_computerAffected = 0;
     uint16_t m_firstOccurence   = 0;
@@ -325,7 +325,7 @@ struct H3Map {
     std::vector<ObjectTemplate> m_objectDefs;
     std::vector<Object>         m_objects;
 
-    std::vector<GlobalMapEvent> m_events;
+    std::vector<GlobalMapEvent> m_globalEvents;
 
     // when saving from SoD editor, some bytes contains random garbage data.
     // we will save offsets in file for that, to perform byte equality check as close as possible.

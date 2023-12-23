@@ -22,10 +22,15 @@ private:
     Core::ResourceAmount             convertResources(const std::vector<uint32_t>& resourceAmount) const;
     Core::HeroPrimaryParams          convertPrim(const std::vector<uint8_t>& arr) const;
     std::vector<Core::UnitWithCount> convertStacks(const std::vector<StackBasicDescriptor>& stacks) const;
+    Core::AdventureSquad             convertSquad(const StackSetFixed& fixedStacks) const;
 
-    Core::Reward convertRewardHut(const MapSeerHut::MapQuestWithReward& questWithReward) const;
-    Core::Reward convertReward(const MapReward& reward) const;
-    FHQuest      convertQuest(const MapQuest& quest) const;
+    Core::Reward        convertRewardHut(const MapSeerHut::MapQuestWithReward& questWithReward) const;
+    Core::Reward        convertReward(const MapReward& reward) const;
+    FHQuest             convertQuest(const MapQuest& quest) const;
+    FHGlobalMapEvent    convertEvent(const GlobalMapEvent& event) const;
+    FHMessageWithBattle convertMessage(const MapMessage& message) const;
+
+    std::vector<Core::LibraryPlayerConstPtr> convertPlayerList(const std::vector<uint8_t>& players) const;
 
     void convertTileMap(const H3Map& src, FHMap& dest) const;
 
