@@ -97,36 +97,61 @@ int main(int argc, char** argv)
         result.m_folder     = folder;
         return result;
     };
+    MapConverter::Settings settings{
+        .m_inputs                  = makePaths("input-"),
+        .m_outputs                 = makePaths("output-"),
+        .m_dumpUncompressedBuffers = dumpUncompressed,
+        .m_dumpBinaryDataJson      = dumpJson,
+        .m_extraLogging            = extraLogging,
+        .m_seed                    = seed,
+        .m_rngUserSettings         = rngUserSettings,
+        .m_stopAfterStage          = stopAfterStage,
+        .m_showDebugStage          = showDebugStage,
+        .m_tileFilter              = tileFilter,
+        .m_stopAfterHeat           = stopAfterHeat,
+    };
+    const bool                          batchModeEnabled = tasks.size() == 1 && !settings.m_inputs.m_folder.empty() && settings.m_inputs.m_h3m.m_binary.empty();
+    std::vector<MapConverter::Settings> batch;
+    if (batchModeEnabled) {
+        for (const auto& it : std_fs::recursive_directory_iterator(settings.m_inputs.m_folder)) {
+            if (!it.is_regular_file())
+                continue;
+
+            const auto path = it.path();
+            const auto ext  = pathToLower(path.extension());
+            if (ext != ".h3m")
+                continue;
+            settings.m_inputs.m_h3m.m_binary             = path;
+            settings.m_inputs.m_h3m.m_uncompressedBinary = settings.m_inputs.m_h3m.m_binary;
+            settings.m_inputs.m_h3m.m_uncompressedBinary.concat(".uncomressed");
+            settings.m_inputs.m_h3m.m_json = settings.m_inputs.m_h3m.m_binary;
+            settings.m_inputs.m_h3m.m_json.concat(".json");
+            batch.push_back(settings);
+        }
+    } else {
+        batch.push_back(settings);
+    }
 
     MapConverter converter(std::cerr,
                            fhCoreApp.getDatabaseContainer(),
                            fhCoreApp.getRandomGeneratorFactory(),
-                           MapConverter::Settings{
-                               .m_inputs                  = makePaths("input-"),
-                               .m_outputs                 = makePaths("output-"),
-                               .m_dumpUncompressedBuffers = dumpUncompressed,
-                               .m_dumpBinaryDataJson      = dumpJson,
-                               .m_extraLogging            = extraLogging,
-                               .m_seed                    = seed,
-                               .m_rngUserSettings         = rngUserSettings,
-                               .m_stopAfterStage          = stopAfterStage,
-                               .m_showDebugStage          = showDebugStage,
-                               .m_tileFilter              = tileFilter,
-                               .m_stopAfterHeat           = stopAfterHeat,
-                           });
+                           settings);
 
-    for (const std::string& taskStr : tasks) {
-        const MapConverter::Task task = stringToTask(taskStr);
-        if (task == MapConverter::Task::Invalid) {
-            std::cerr << "Unknown task: " << taskStr << "\n";
-            return 1;
-        }
-        try {
-            converter.run(task);
-        }
-        catch (std::exception& ex) {
-            std::cerr << ex.what() << "\n";
-            return 1;
+    for (const auto& setting : batch) {
+        converter.setSettings(setting);
+        for (const std::string& taskStr : tasks) {
+            const MapConverter::Task task = stringToTask(taskStr);
+            if (task == MapConverter::Task::Invalid) {
+                std::cerr << "Unknown task: " << taskStr << "\n";
+                return 1;
+            }
+            try {
+                converter.run(task);
+            }
+            catch (std::exception& ex) {
+                std::cerr << ex.what() << "\n";
+                return 1;
+            }
         }
     }
 

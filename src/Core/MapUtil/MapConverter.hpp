@@ -95,6 +95,8 @@ public:
                  const Core::IRandomGeneratorFactory* rngFactory,
                  Settings                             settings);
 
+    void setSettings(Settings settings) { m_settings = std::move(settings); }
+
     void run(Task command, int recurse = 0) noexcept(false);
 
 public: // todo:

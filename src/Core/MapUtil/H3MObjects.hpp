@@ -296,6 +296,11 @@ enum class MapObjectType
     //    ROCKLANDS                   = 231,
 };
 
+inline const MapFormatFeatures* getFeaturesFromStream(Mernel::ByteOrderDataStream& stream)
+{
+    return stream.getUserData<const MapFormatFeatures>();
+}
+
 using MapFormatFeaturesPtr = std::shared_ptr<const MapFormatFeatures>;
 
 struct IMapObject {
@@ -306,7 +311,7 @@ struct IMapObject {
     virtual void toJson(PropertyTree& data) const                     = 0;
     virtual void fromJson(const PropertyTree& data)                   = 0;
 
-    static std::unique_ptr<IMapObject> Create(MapObjectType type, uint32_t subid, MapFormatFeaturesPtr features);
+    static std::unique_ptr<IMapObject> Create(MapObjectType type, uint32_t subid);
 };
 
 struct StackBasicDescriptor {
@@ -317,17 +322,11 @@ struct StackBasicDescriptor {
 };
 
 struct StackSet {
-    MapFormatFeaturesPtr m_features;
-
     std::vector<StackBasicDescriptor> m_stacks;
-
-    StackSet(MapFormatFeaturesPtr features)
-        : m_features(features)
-    {}
 
     void readBinary(ByteOrderDataStreamReader& stream)
     {
-        auto lock = stream.setContainerSizeBytesGuarded(1);
+        auto* m_features = getFeaturesFromStream(stream);
         m_stacks.resize(stream.readSize());
 
         for (auto& stack : m_stacks) {
@@ -340,7 +339,8 @@ struct StackSet {
     }
     void writeBinary(ByteOrderDataStreamWriter& stream) const
     {
-        auto lock = stream.setContainerSizeBytesGuarded(1);
+        auto* m_features = getFeaturesFromStream(stream);
+        auto  lock       = stream.setContainerSizeBytesGuarded(1);
         stream.writeSize(m_stacks.size());
         for (auto& stack : m_stacks) {
             if (m_features->m_stackId16Bit)
@@ -353,21 +353,16 @@ struct StackSet {
 };
 
 struct StackSetFixed {
-    MapFormatFeaturesPtr m_features;
-
     std::vector<StackBasicDescriptor> m_stacks;
-
-    StackSetFixed(MapFormatFeaturesPtr features = nullptr)
-        : m_features(features)
-    {}
 
     auto operator<=>(const StackSetFixed&) const = default;
 
-    void prepareArrays() { m_stacks.resize(m_features->m_stackSize); }
+    void prepareArrays(const MapFormatFeatures* m_features) { m_stacks.resize(m_features->m_stackSize); }
 
     void readBinary(ByteOrderDataStreamReader& stream)
     {
-        prepareArrays();
+        auto* m_features = getFeaturesFromStream(stream);
+        prepareArrays(m_features);
         for (auto& stack : m_stacks) {
             if (m_features->m_stackId16Bit)
                 stream >> stack.m_id;
@@ -378,6 +373,7 @@ struct StackSetFixed {
     }
     void writeBinary(ByteOrderDataStreamWriter& stream) const
     {
+        auto* m_features = getFeaturesFromStream(stream);
         for (auto& stack : m_stacks) {
             if (m_features->m_stackId16Bit)
                 stream << stack.m_id;
@@ -389,13 +385,11 @@ struct StackSetFixed {
 };
 
 struct ResourceSet {
-    ResourceSet()
-        : m_resourceAmount(7)
-    {}
-
     std::vector<uint32_t> m_resourceAmount;
 
     auto operator<=>(const ResourceSet&) const = default;
+
+    void prepareArrays(const MapFormatFeatures* m_features) { m_resourceAmount.resize(m_features->m_resourceCount); }
 
     void readBinary(ByteOrderDataStreamReader& stream)
     {
@@ -410,16 +404,16 @@ struct ResourceSet {
 };
 
 struct PrimarySkillSet {
-    PrimarySkillSet()
-        : m_prim(4)
-    {}
-
     std::vector<uint8_t> m_prim;
 
     auto operator<=>(const PrimarySkillSet&) const = default;
 
+    void prepareArrays(const MapFormatFeatures* m_features) { m_prim.resize(m_features->m_primarySkillsCount); }
+
     void readBinary(ByteOrderDataStreamReader& stream)
     {
+        auto* m_features = getFeaturesFromStream(stream);
+        prepareArrays(m_features);
         for (auto& res : m_prim)
             stream >> res;
     }
@@ -431,8 +425,7 @@ struct PrimarySkillSet {
 };
 
 struct HeroArtSet {
-    MapFormatFeaturesPtr m_features;
-    bool                 m_hasArts = false;
+    bool m_hasArts = false;
 
     std::vector<uint16_t> m_mainSlots;
     uint16_t              m_cata  = 0;
@@ -440,10 +433,10 @@ struct HeroArtSet {
     uint16_t              m_misc5 = 0;
     std::vector<uint16_t> m_bagSlots;
 
-    HeroArtSet() = default;
-    HeroArtSet(MapFormatFeaturesPtr features)
-        : m_features(features)
-    {}
+    void prepareArrays(const MapFormatFeatures* m_features)
+    {
+        m_mainSlots.resize(16);
+    }
 
     void readBinary(ByteOrderDataStreamReader& stream);
     void writeBinary(ByteOrderDataStreamWriter& stream) const;
@@ -452,36 +445,24 @@ struct HeroArtSet {
 };
 
 struct HeroSpellSet {
-    MapFormatFeaturesPtr m_features;
     bool                 m_hasCustomSpells = false;
-    std::vector<uint8_t> m_spells          = std::vector<uint8_t>(70);
-
-    HeroSpellSet() = default;
-    HeroSpellSet(MapFormatFeaturesPtr features)
-        : m_features(features)
-    {}
+    std::vector<uint8_t> m_spells;
 
     auto operator<=>(const HeroSpellSet&) const = default;
 
-    void prepareArrays() { m_spells.resize(m_features->m_spellsRegularCount); }
+    void prepareArrays(const MapFormatFeatures* m_features) { m_spells.resize(m_features->m_spellsRegularCount); }
 
     void readBinary(ByteOrderDataStreamReader& stream);
     void writeBinary(ByteOrderDataStreamWriter& stream) const;
 };
 
 struct HeroPrimSkillSet {
-    MapFormatFeaturesPtr m_features;
     bool                 m_hasCustomPrimSkills = false;
-    std::vector<uint8_t> m_primSkills          = std::vector<uint8_t>(4);
-
-    HeroPrimSkillSet() = default;
-    HeroPrimSkillSet(MapFormatFeaturesPtr features)
-        : m_features(features)
-    {}
+    std::vector<uint8_t> m_primSkills;
 
     auto operator<=>(const HeroPrimSkillSet&) const = default;
 
-    void prepareArrays() { m_primSkills.resize(m_features->m_primarySkillsCount); }
+    void prepareArrays(const MapFormatFeatures* m_features) { m_primSkills.resize(m_features->m_primarySkillsCount); }
 
     void readBinary(ByteOrderDataStreamReader& stream);
     void writeBinary(ByteOrderDataStreamWriter& stream) const;
@@ -491,9 +472,7 @@ struct MapGuards {
     bool          m_hasGuards = false;
     StackSetFixed m_creatures;
 
-    MapGuards(MapFormatFeaturesPtr features)
-        : m_creatures(features)
-    {}
+    void prepareArrays(const MapFormatFeatures* m_features) { m_creatures.prepareArrays(m_features); }
 
     void readBinary(ByteOrderDataStreamReader& stream);
     void writeBinary(ByteOrderDataStreamWriter& stream) const;
@@ -504,25 +483,16 @@ struct MapMessage {
     std::string m_message;
     MapGuards   m_guards;
 
-    MapMessage(MapFormatFeaturesPtr features)
-        : m_guards(features)
-    {}
+    void prepareArrays(const MapFormatFeatures* m_features) { m_guards.prepareArrays(m_features); }
 
     void readBinary(ByteOrderDataStreamReader& stream);
     void writeBinary(ByteOrderDataStreamWriter& stream) const;
 };
 
 struct MapObjectAbstract : public IMapObject {
-    MapFormatFeaturesPtr m_features;
-
-    MapObjectAbstract(MapFormatFeaturesPtr features)
-        : m_features(features)
-    {}
 };
 
 struct MapObjectSimple : public MapObjectAbstract {
-    using MapObjectAbstract::MapObjectAbstract;
-
     void readBinary(ByteOrderDataStreamReader& stream) override {}
     void writeBinary(ByteOrderDataStreamWriter& stream) const override {}
     void toJson(PropertyTree& data) const override {}
@@ -530,8 +500,6 @@ struct MapObjectSimple : public MapObjectAbstract {
 };
 
 struct MapObjectWithOwner : public MapObjectAbstract {
-    using MapObjectAbstract::MapObjectAbstract;
-
     uint8_t m_owner = 0;
 
     void readBinary(ByteOrderDataStreamReader& stream) override;
@@ -541,8 +509,6 @@ struct MapObjectWithOwner : public MapObjectAbstract {
 };
 
 struct MapObjectCreatureBank : public MapObjectAbstract {
-    using MapObjectAbstract::MapObjectAbstract;
-
     uint32_t              m_content  = 0xffffffffU;
     uint8_t               m_upgraded = 0xffU;
     std::vector<uint32_t> m_artifacts;
@@ -589,15 +555,7 @@ struct MapHero : public MapObjectAbstract {
     HeroSpellSet     m_spellSet;
     HeroPrimSkillSet m_primSkillSet;
 
-    MapHero(MapFormatFeaturesPtr features = nullptr)
-        : MapObjectAbstract(features)
-        , m_garison(features)
-        , m_artSet(features)
-        , m_spellSet(features)
-        , m_primSkillSet(features)
-    {}
-
-    void prepareArrays();
+    void prepareArrays(const MapFormatFeatures* m_features);
 
     void readBinary(ByteOrderDataStreamReader& stream) override;
     void writeBinary(ByteOrderDataStreamWriter& stream) const override;
@@ -606,8 +564,6 @@ struct MapHero : public MapObjectAbstract {
 };
 
 struct MapTownEvent {
-    MapFormatFeaturesPtr m_features;
-
     std::string m_name;
     std::string m_message;
     ResourceSet m_resourceSet;
@@ -620,14 +576,9 @@ struct MapTownEvent {
     std::vector<uint8_t>  m_buildings;
     std::vector<uint16_t> m_creaturesAmounts;
 
-    MapTownEvent() = default;
-    MapTownEvent(MapFormatFeaturesPtr features)
-        : m_features(features)
-    {}
-
     auto operator<=>(const MapTownEvent&) const = default;
 
-    void prepareArrays();
+    void prepareArrays(const MapFormatFeatures* m_features);
 
     void readBinary(ByteOrderDataStreamReader& stream);
     void writeBinary(ByteOrderDataStreamWriter& stream) const;
@@ -659,12 +610,7 @@ struct MapTown : public MapObjectAbstract {
 
     uint8_t m_alignment = 0xff;
 
-    MapTown(MapFormatFeaturesPtr features = nullptr)
-        : MapObjectAbstract(features)
-        , m_garison(features)
-    {}
-
-    void prepareArrays();
+    void prepareArrays(const MapFormatFeatures* m_features);
 
     void readBinary(ByteOrderDataStreamReader& stream) override;
     void writeBinary(ByteOrderDataStreamWriter& stream) const override;
@@ -691,7 +637,7 @@ struct MapMonster : public MapObjectAbstract {
     uint32_t m_upgradedStack    = 0xffffffffU;
     uint32_t m_splitStack       = 0xffffffffU;
 
-    using MapObjectAbstract::MapObjectAbstract;
+    void prepareArrays(const MapFormatFeatures* m_features);
 
     void readBinary(ByteOrderDataStreamReader& stream) override;
     void writeBinary(ByteOrderDataStreamWriter& stream) const override;
@@ -703,10 +649,7 @@ struct MapResource : public MapObjectAbstract {
     MapMessage m_message;
     uint32_t   m_amount = 0;
 
-    MapResource(MapFormatFeaturesPtr features)
-        : MapObjectAbstract(features)
-        , m_message(features)
-    {}
+    void prepareArrays(const MapFormatFeatures* m_features) { m_message.prepareArrays(m_features); }
 
     void readBinary(ByteOrderDataStreamReader& stream) override;
     void writeBinary(ByteOrderDataStreamWriter& stream) const override;
@@ -719,11 +662,11 @@ struct MapArtifact : public MapObjectAbstract {
     uint32_t   m_spellId = 0;
     bool       m_isSpell = false;
 
-    MapArtifact(MapFormatFeaturesPtr features, bool isSpell)
-        : MapObjectAbstract(features)
-        , m_message(features)
-        , m_isSpell(isSpell)
+    MapArtifact(bool isSpell)
+        : m_isSpell(isSpell)
     {}
+
+    void prepareArrays(const MapFormatFeatures* m_features) { m_message.prepareArrays(m_features); }
 
     void readBinary(ByteOrderDataStreamReader& stream) override;
     void writeBinary(ByteOrderDataStreamWriter& stream) const override;
@@ -767,10 +710,11 @@ struct MapQuest : public MapObjectAbstract {
     std::string m_nextVisitText;
     std::string m_completedText;
 
-    MapQuest(MapFormatFeaturesPtr features)
-        : MapObjectAbstract(features)
-        , m_6creatures(features)
-    {}
+    void prepareArrays(const MapFormatFeatures* m_features)
+    {
+        m_2stats.resize(m_features->m_primarySkillsCount);
+        m_7resources.resize(m_features->m_resourceCount);
+    }
 
     void readBinary(ByteOrderDataStreamReader& stream) override;
     void writeBinary(ByteOrderDataStreamWriter& stream) const override;
@@ -779,34 +723,40 @@ struct MapQuest : public MapObjectAbstract {
 };
 
 struct MapSeerHut : public MapObjectAbstract {
-    MapQuest m_quest;
+    struct MapQuestWithReward {
+        void readBinary(ByteOrderDataStreamReader& stream);
+        void writeBinary(ByteOrderDataStreamWriter& stream) const;
+        void toJson(PropertyTree& data) const;
+        void fromJson(const PropertyTree& data);
 
-    enum class RewardType
-    {
-        NOTHING,
-        EXPERIENCE,
-        MANA_POINTS,
-        MORALE_BONUS,
-        LUCK_BONUS,
-        RESOURCES,
-        PRIMARY_SKILL,
-        SECONDARY_SKILL,
-        ARTIFACT,
-        SPELL,
-        CREATURE
+        enum class RewardType
+        {
+            NOTHING,
+            EXPERIENCE,
+            MANA_POINTS,
+            MORALE_BONUS,
+            LUCK_BONUS,
+            RESOURCES,
+            PRIMARY_SKILL,
+            SECONDARY_SKILL,
+            ARTIFACT,
+            SPELL,
+            CREATURE
+        };
+
+        RewardType m_reward = RewardType::NOTHING;
+        uint32_t   m_rID    = 0; //reward ID
+        uint32_t   m_rVal   = 0; //reward value
+
+        using Mission  = MapQuest::Mission;
+        using Progress = MapQuest::Progress;
+
+        MapQuest m_quest;
     };
+    MapQuestWithReward m_questWithReward;
 
-    RewardType m_reward = RewardType::NOTHING;
-    uint32_t   m_rID    = 0; //reward ID
-    uint32_t   m_rVal   = 0; //reward value
-
-    using Mission  = MapQuest::Mission;
-    using Progress = MapQuest::Progress;
-
-    MapSeerHut(MapFormatFeaturesPtr features)
-        : MapObjectAbstract(features)
-        , m_quest(features)
-    {}
+    std::vector<MapQuestWithReward> m_questsOneTime;
+    std::vector<MapQuestWithReward> m_questsRecurring;
 
     void readBinary(ByteOrderDataStreamReader& stream) override;
     void writeBinary(ByteOrderDataStreamWriter& stream) const override;
@@ -816,8 +766,6 @@ struct MapSeerHut : public MapObjectAbstract {
 
 struct MapShrine : public MapObjectAbstract {
     uint8_t m_spell = 0;
-
-    using MapObjectAbstract::MapObjectAbstract;
 
     void readBinary(ByteOrderDataStreamReader& stream) override
     {
@@ -837,8 +785,6 @@ struct MapScholar : public MapObjectAbstract {
     uint8_t m_bonusType = 0xFFU;
     uint8_t m_bonusId   = 0;
 
-    using MapObjectAbstract::MapObjectAbstract;
-
     void readBinary(ByteOrderDataStreamReader& stream) override
     {
         stream >> m_bonusType >> m_bonusId;
@@ -856,8 +802,6 @@ struct MapScholar : public MapObjectAbstract {
 struct MapWitchHut : public MapObjectAbstract {
     std::vector<uint8_t> m_allowedSkills;
 
-    MapWitchHut(MapFormatFeaturesPtr features);
-
     void readBinary(ByteOrderDataStreamReader& stream) override;
     void writeBinary(ByteOrderDataStreamWriter& stream) const override;
     void toJson(PropertyTree& data) const override;
@@ -865,8 +809,6 @@ struct MapWitchHut : public MapObjectAbstract {
 };
 
 struct MapReward {
-    MapFormatFeaturesPtr m_features;
-
     uint32_t m_gainedExp  = 0;
     uint32_t m_manaDiff   = 0;
     int8_t   m_moraleDiff = 0;
@@ -879,10 +821,7 @@ struct MapReward {
     std::vector<uint8_t>      m_spells;
     StackSet                  m_creatures;
 
-    MapReward(MapFormatFeaturesPtr features)
-        : m_features(features)
-        , m_creatures(features)
-    {}
+    void prepareArrays(const MapFormatFeatures* m_features);
 
     void readBinary(ByteOrderDataStreamReader& stream);
     void writeBinary(ByteOrderDataStreamWriter& stream) const;
@@ -892,11 +831,7 @@ struct MapPandora : public MapObjectAbstract {
     MapMessage m_message;
     MapReward  m_reward;
 
-    MapPandora(MapFormatFeaturesPtr features)
-        : MapObjectAbstract(features)
-        , m_message(features)
-        , m_reward(features)
-    {}
+    void prepareArrays(const MapFormatFeatures* m_features);
 
     void readBinary(ByteOrderDataStreamReader& stream) override;
     void writeBinary(ByteOrderDataStreamWriter& stream) const override;
@@ -908,11 +843,6 @@ struct MapGarison : public MapObjectAbstract {
     uint8_t       m_owner = 0;
     StackSetFixed m_garison;
     bool          m_removableUnits = true;
-
-    MapGarison(MapFormatFeaturesPtr features)
-        : MapObjectAbstract(features)
-        , m_garison(features)
-    {}
 
     void readBinary(ByteOrderDataStreamReader& stream) override;
     void writeBinary(ByteOrderDataStreamWriter& stream) const override;
@@ -940,12 +870,6 @@ struct MapEvent : public MapObjectAbstract {
     uint8_t m_removeAfterVisit = 0;
     uint8_t m_humanActivate    = 1;
 
-    MapEvent(MapFormatFeaturesPtr features)
-        : MapObjectAbstract(features)
-        , m_message(features)
-        , m_reward(features)
-    {}
-
     void readBinary(ByteOrderDataStreamReader& stream) override;
     void writeBinary(ByteOrderDataStreamWriter& stream) const override;
     void toJson(PropertyTree& data) const override;
@@ -961,9 +885,8 @@ struct MapDwelling : public MapObjectAbstract {
     uint8_t  m_minLevel    = 0;
     uint8_t  m_maxLevel    = 0;
 
-    MapDwelling(MapFormatFeaturesPtr features, MapObjectType objectType)
-        : MapObjectAbstract(features)
-        , m_objectType(objectType)
+    MapDwelling(MapObjectType objectType)
+        : m_objectType(objectType)
     {
     }
 
@@ -976,11 +899,6 @@ struct MapDwelling : public MapObjectAbstract {
 struct MapQuestGuard : public MapObjectAbstract {
     MapQuest m_quest;
 
-    MapQuestGuard(MapFormatFeaturesPtr features)
-        : MapObjectAbstract(features)
-        , m_quest(features)
-    {}
-
     void readBinary(ByteOrderDataStreamReader& stream) override;
     void writeBinary(ByteOrderDataStreamWriter& stream) const override;
     void toJson(PropertyTree& data) const override;
@@ -989,8 +907,6 @@ struct MapQuestGuard : public MapObjectAbstract {
 
 struct MapGrail : public MapObjectAbstract {
     uint32_t m_radius = 0;
-
-    using MapObjectAbstract::MapObjectAbstract;
 
     void readBinary(ByteOrderDataStreamReader& stream) override { stream >> m_radius; }
     void writeBinary(ByteOrderDataStreamWriter& stream) const override { stream << m_radius; }
@@ -1002,8 +918,6 @@ struct MapHeroPlaceholder : public MapObjectWithOwner {
     uint8_t m_hero      = 0;
     uint8_t m_powerRank = 0;
 
-    using MapObjectWithOwner::MapObjectWithOwner;
-
     void readBinary(ByteOrderDataStreamReader& stream) override;
     void writeBinary(ByteOrderDataStreamWriter& stream) const override;
     void toJson(PropertyTree& data) const override;
@@ -1011,15 +925,15 @@ struct MapHeroPlaceholder : public MapObjectWithOwner {
 };
 
 struct MapAbandonedMine : public MapObjectAbstract {
-    MapAbandonedMine(MapFormatFeaturesPtr features)
-        : MapObjectAbstract(features)
-    {
-        m_resourceBits.resize(32);
-    }
-
     std::vector<uint8_t> m_resourceBits;
 
-    void readBinary(ByteOrderDataStreamReader& stream) override { stream.readBits(m_resourceBits); }
+    void prepareArrays() { m_resourceBits.resize(32); }
+
+    void readBinary(ByteOrderDataStreamReader& stream) override
+    {
+        prepareArrays();
+        stream.readBits(m_resourceBits);
+    }
     void writeBinary(ByteOrderDataStreamWriter& stream) const override { stream.writeBits(m_resourceBits); }
     void toJson(PropertyTree& data) const override;
     void fromJson(const PropertyTree& data) override;

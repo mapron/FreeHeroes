@@ -460,8 +460,8 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 FHQuestHut fhHut;
                 initCommon(fhHut);
                 fhHut.m_visitableId = visitableId;
-                fhHut.m_reward      = convertRewardHut(*hut);
-                fhHut.m_quest       = convertQuest(hut->m_quest);
+                fhHut.m_reward      = convertRewardHut(hut->m_questWithReward);
+                fhHut.m_quest       = convertQuest(hut->m_questWithReward.m_quest);
 
                 dest.m_objects.m_questHuts.push_back(std::move(fhHut));
             } break;
@@ -861,66 +861,67 @@ std::vector<Core::UnitWithCount> H3M2FHConverter::convertStacks(const std::vecto
     return result;
 }
 
-Core::Reward H3M2FHConverter::convertRewardHut(const MapSeerHut& hut) const
+Core::Reward H3M2FHConverter::convertRewardHut(const MapSeerHut::MapQuestWithReward& questWithReward) const
 {
+    using RewardType = MapSeerHut::MapQuestWithReward::RewardType;
     Core::Reward fhReward;
-    switch (hut.m_reward) {
-        case MapSeerHut::RewardType::EXPERIENCE:
-            fhReward.gainedExp = hut.m_rVal;
+    switch (questWithReward.m_reward) {
+        case RewardType::EXPERIENCE:
+            fhReward.gainedExp = questWithReward.m_rVal;
             break;
-        case MapSeerHut::RewardType::MANA_POINTS:
-            fhReward.manaDiff = hut.m_rVal;
+        case RewardType::MANA_POINTS:
+            fhReward.manaDiff = questWithReward.m_rVal;
             break;
-        case MapSeerHut::RewardType::MORALE_BONUS:
-            fhReward.rngBonus.morale = hut.m_rVal;
+        case RewardType::MORALE_BONUS:
+            fhReward.rngBonus.morale = questWithReward.m_rVal;
             break;
-        case MapSeerHut::RewardType::LUCK_BONUS:
+        case RewardType::LUCK_BONUS:
 
-            fhReward.rngBonus.luck = hut.m_rVal;
+            fhReward.rngBonus.luck = questWithReward.m_rVal;
             break;
 
-        case MapSeerHut::RewardType::RESOURCES:
+        case RewardType::RESOURCES:
         {
             std::vector<uint32_t> res(7);
-            res[hut.m_rID]     = hut.m_rVal;
-            fhReward.resources = convertResources(res);
+            res[questWithReward.m_rID] = questWithReward.m_rVal;
+            fhReward.resources         = convertResources(res);
 
             break;
         }
-        case MapSeerHut::RewardType::PRIMARY_SKILL:
+        case RewardType::PRIMARY_SKILL:
         {
             // clang-format off
-        switch (hut.m_rID)  {
-            case 0: fhReward.statBonus.ad.attack          = hut.m_rVal; break;
-            case 1: fhReward.statBonus.ad.defense         = hut.m_rVal; break;
-            case 2: fhReward.statBonus.magic.spellPower   = hut.m_rVal; break;
-            case 3: fhReward.statBonus.magic.intelligence = hut.m_rVal; break;
+        switch (questWithReward.m_rID)  {
+            case 0: fhReward.statBonus.ad.attack          = questWithReward.m_rVal; break;
+            case 1: fhReward.statBonus.ad.defense         = questWithReward.m_rVal; break;
+            case 2: fhReward.statBonus.magic.spellPower   = questWithReward.m_rVal; break;
+            case 3: fhReward.statBonus.magic.intelligence = questWithReward.m_rVal; break;
         }
         break;
             // clang-format on
         }
 
-        case MapSeerHut::RewardType::SECONDARY_SKILL:
+        case RewardType::SECONDARY_SKILL:
         {
-            fhReward.secSkills.push_back({ m_secSkillIds[hut.m_rID], (int) hut.m_rVal - 1 });
+            fhReward.secSkills.push_back({ m_secSkillIds[questWithReward.m_rID], (int) questWithReward.m_rVal - 1 });
             break;
         }
-        case MapSeerHut::RewardType::ARTIFACT:
+        case RewardType::ARTIFACT:
         {
-            fhReward.artifacts.push_back(Core::ArtifactFilter{ .onlyArtifacts = { m_artifactIds[hut.m_rID] } });
+            fhReward.artifacts.push_back(Core::ArtifactFilter{ .onlyArtifacts = { m_artifactIds[questWithReward.m_rID] } });
             break;
         }
-        case MapSeerHut::RewardType::SPELL:
+        case RewardType::SPELL:
         {
-            fhReward.spells.onlySpells.push_back({ m_spellIds[hut.m_rID] });
+            fhReward.spells.onlySpells.push_back({ m_spellIds[questWithReward.m_rID] });
             break;
         }
-        case MapSeerHut::RewardType::CREATURE:
+        case RewardType::CREATURE:
         {
-            fhReward.units.push_back({ m_unitIds[hut.m_rID], (int) hut.m_rVal });
+            fhReward.units.push_back({ m_unitIds[questWithReward.m_rID], (int) questWithReward.m_rVal });
             break;
         }
-        case MapSeerHut::RewardType::NOTHING:
+        case RewardType::NOTHING:
         {
             break;
         }

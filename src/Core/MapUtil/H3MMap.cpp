@@ -23,10 +23,13 @@ constexpr const bool g_enablePaddingCheck = false;
 #else
 constexpr const bool g_enablePaddingCheck = true;
 #endif
+
+constexpr const bool g_enableOffsetTrace = false;
 }
 
 void H3Map::VictoryCondition::readBinary(ByteOrderDataStreamReader& stream)
 {
+    auto*   features     = getFeaturesFromStream(stream);
     uint8_t winCondition = 0;
     stream >> winCondition;
     m_type = static_cast<VictoryConditionType>(winCondition);
@@ -41,7 +44,7 @@ void H3Map::VictoryCondition::readBinary(ByteOrderDataStreamReader& stream)
             break;
         case VictoryConditionType::ARTIFACT:
         {
-            if (m_features->m_artId16Bit)
+            if (features->m_artId16Bit)
                 stream >> m_artID;
             else
                 m_artID = stream.readScalar<uint8_t>();
@@ -49,7 +52,7 @@ void H3Map::VictoryCondition::readBinary(ByteOrderDataStreamReader& stream)
         }
         case VictoryConditionType::GATHERTROOP:
         {
-            if (m_features->m_stackId16Bit)
+            if (features->m_stackId16Bit)
                 stream >> m_creatureID;
             else
                 m_creatureID = stream.readScalar<uint8_t>();
@@ -100,11 +103,24 @@ void H3Map::VictoryCondition::readBinary(ByteOrderDataStreamReader& stream)
             stream >> m_pos;
             break;
         }
+        case VictoryConditionType::DEFEATALL:
+        {
+            break;
+        }
+        case VictoryConditionType::SURVIVETIME:
+        {
+            stream >> m_days;
+            break;
+        }
+        default:
+            assert(!"Unknown");
+            break;
     }
 }
 
 void H3Map::VictoryCondition::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
+    auto* features = getFeaturesFromStream(stream);
     stream << static_cast<uint8_t>(m_type);
     if (m_type == VictoryConditionType::WINSTANDARD)
         return;
@@ -117,7 +133,7 @@ void H3Map::VictoryCondition::writeBinary(ByteOrderDataStreamWriter& stream) con
             break;
         case VictoryConditionType::ARTIFACT:
         {
-            if (m_features->m_artId16Bit)
+            if (features->m_artId16Bit)
                 stream << m_artID;
             else
                 stream << static_cast<uint8_t>(m_artID);
@@ -125,7 +141,7 @@ void H3Map::VictoryCondition::writeBinary(ByteOrderDataStreamWriter& stream) con
         }
         case VictoryConditionType::GATHERTROOP:
         {
-            if (m_features->m_stackId16Bit)
+            if (features->m_stackId16Bit)
                 stream << m_creatureID;
             else
                 stream << static_cast<uint8_t>(m_creatureID);
@@ -176,6 +192,18 @@ void H3Map::VictoryCondition::writeBinary(ByteOrderDataStreamWriter& stream) con
             stream << m_pos;
             break;
         }
+        case VictoryConditionType::DEFEATALL:
+        {
+            break;
+        }
+        case VictoryConditionType::SURVIVETIME:
+        {
+            stream << m_days;
+            break;
+        }
+        default:
+            assert(!"Unknown");
+            break;
     }
 }
 
@@ -206,6 +234,9 @@ void H3Map::LossCondition::readBinary(ByteOrderDataStreamReader& stream)
             stream >> m_daysPassed;
             break;
         }
+        default:
+            assert(!"Unknown");
+            break;
     }
 }
 
@@ -239,15 +270,16 @@ void H3Map::LossCondition::writeBinary(ByteOrderDataStreamWriter& stream) const
 
 H3Map::H3Map()
 {
-    m_features                    = std::make_shared<MapFormatFeatures>();
-    m_victoryCondition.m_features = m_features;
-    m_lossCondition.m_features    = m_features;
+    m_features = std::make_shared<MapFormatFeatures>();
+}
+
+void H3Map::updateFeatures()
+{
+    *m_features = MapFormatFeatures(m_format, m_hotaVer.m_ver1);
 }
 
 void H3Map::prepareArrays()
 {
-    *m_features = MapFormatFeatures(m_format, m_hotaVer.m_ver1);
-
     m_players.resize(m_features->m_players);
     m_allowedHeroes.resize(m_features->m_heroesCount);
     m_allowedArtifacts.resize(m_features->m_artifactsCount);
@@ -256,11 +288,7 @@ void H3Map::prepareArrays()
     m_customHeroData.resize(m_features->m_heroesCount);
 
     for (auto& heroData : m_customHeroData) {
-        heroData.m_features                = m_features;
-        heroData.m_artSet.m_features       = m_features;
-        heroData.m_spellSet.m_features     = m_features;
-        heroData.m_primSkillSet.m_features = m_features;
-        heroData.prepareArrays();
+        heroData.prepareArrays(m_features.get());
     }
 }
 
@@ -289,15 +317,21 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
     }
     if (m_format >= MapFormat::HOTA1) {
         stream >> m_hotaVer.m_ver1 >> m_hotaVer.m_ver2;
-        if (m_hotaVer.m_ver1 == 3)
+        if (m_hotaVer.m_ver1 == 2 || m_hotaVer.m_ver1 == 3)
             stream >> m_hotaVer.m_ver3;
     }
+    updateFeatures();
     prepareArrays();
+    stream.setUserData(m_features.get());
+    if (g_enableOffsetTrace)
+        Mernel::Logger(Mernel::Logger::Warning) << "After format offset =" << stream.getBuffer().getOffsetRead();
 
     stream >> m_anyPlayers >> m_tiles.m_size >> m_tiles.m_hasUnderground;
     stream >> m_mapName;
     stream >> m_mapDescr;
     stream >> m_difficulty;
+
+    m_tiles.updateSize();
     m_levelLimit = 0;
     if (m_features->m_mapLevelLimit)
         stream >> m_levelLimit;
@@ -347,8 +381,16 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
         if (m_features->m_playerPlaceholders)
             stream >> playerInfo.m_placeholder >> playerInfo.m_heroesNames;
     }
+    if (g_enableOffsetTrace)
+        Mernel::Logger(Mernel::Logger::Warning) << "After players offset =" << stream.getBuffer().getOffsetRead();
 
     stream >> m_victoryCondition >> m_lossCondition;
+
+    if (g_enableOffsetTrace)
+        Mernel::Logger(Mernel::Logger::Warning) << "After win/lose offset =" << stream.getBuffer().getOffsetRead();
+
+    //if (1)
+    //    return;
 
     stream >> m_teamCount;
     if (m_teamCount > 0) {
@@ -367,6 +409,8 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
     };
 
     readBitsSized(m_allowedHeroes, m_features->m_mapAllowedHeroesSized, false);
+    if (g_enableOffsetTrace)
+        Mernel::Logger(Mernel::Logger::Warning) << "After allowed heroes offset =" << stream.getBuffer().getOffsetRead();
 
     if (m_features->m_mapPlaceholderHeroes) {
         stream >> m_placeholderHeroes;
@@ -378,6 +422,9 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
         for (auto& hero : m_disposedHeroes)
             stream >> hero;
     }
+
+    if (g_enableOffsetTrace)
+        Mernel::Logger(Mernel::Logger::Warning) << "After disposed offset =" << stream.getBuffer().getOffsetRead();
 
     stream.zeroPaddingChecked(31, g_enablePaddingCheck);
 
@@ -391,8 +438,10 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
             stream >> m_hotaVer.m_roundLimit;
     }
 
-    if (m_features->m_mapAllowedArtifacts)
+    if (m_features->m_mapAllowedArtifacts) {
         readBitsSized(m_allowedArtifacts, m_features->m_mapAllowedArtifactsSized, true);
+        m_ignoredOffsets.insert(stream.getBuffer().getOffsetRead() - 1);
+    }
 
     if (m_features->m_mapAllowedSpells)
         stream.readBits(m_allowedSpells, true);
@@ -410,8 +459,9 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
         for (auto& hero : m_customHeroData)
             stream >> hero;
     }
+    if (g_enableOffsetTrace)
+        Mernel::Logger(Mernel::Logger::Warning) << "Before tiles offset =" << stream.getBuffer().getOffsetRead();
 
-    m_tiles.updateSize();
     for (int ground = 0; ground < (1 + m_tiles.m_hasUnderground); ++ground) {
         for (int y = 0; y < m_tiles.m_size; y++) {
             for (int x = 0; x < m_tiles.m_size; x++) {
@@ -419,13 +469,14 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
             }
         }
     }
+    if (g_enableOffsetTrace)
+        Mernel::Logger(Mernel::Logger::Warning) << "After tiles offset =" << stream.getBuffer().getOffsetRead();
 
     {
         uint32_t count = 0;
         stream >> count;
         m_objectDefs.resize(count);
         for (auto& objDef : m_objectDefs) {
-            objDef.m_features = m_features;
             stream >> objDef;
         }
     }
@@ -441,19 +492,19 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
             const ObjectTemplate& objTempl = m_objectDefs.at(obj.m_defnum);
             MapObjectType         type     = static_cast<MapObjectType>(objTempl.m_id);
             stream.zeroPaddingChecked(5, g_enablePaddingCheck);
-            obj.m_impl = IMapObject::Create(type, objTempl.m_subid, m_features);
+            obj.m_impl = IMapObject::Create(type, objTempl.m_subid);
             if (!obj.m_impl)
                 throw std::runtime_error("Unsupported map object type:" + std::to_string(objTempl.m_id));
 
-            if (0)
+            if (g_enableOffsetTrace)
                 Mernel::Logger(Mernel::Logger::Warning) << "staring  readBinary [" << index << "]: (" << (int) obj.m_pos.m_x << "," << (int) obj.m_pos.m_y << "," << (int) obj.m_pos.m_z << ")  "
-                                                        << objTempl.m_animationFile << ", type:" << objTempl.m_id << ", current offset =" << stream.getBuffer().getOffsetRead();
+                                                        << objTempl.m_animationFile << ", type:" << objTempl.m_id << ", sub: " << objTempl.m_subid << " current offset =" << stream.getBuffer().getOffsetRead();
 
             obj.m_impl->readBinary(stream);
 
-            if (0)
+            if (g_enableOffsetTrace)
                 Mernel::Logger(Mernel::Logger::Warning) << "finished readBinary [" << index << "]: (" << (int) obj.m_pos.m_x << "," << (int) obj.m_pos.m_y << "," << (int) obj.m_pos.m_z << ")  "
-                                                        << objTempl.m_animationFile << ", type:" << objTempl.m_id << ", current offset =" << stream.getBuffer().getOffsetRead();
+                                                        << objTempl.m_animationFile << ", type:" << objTempl.m_id << ", sub: " << objTempl.m_subid << ", current offset =" << stream.getBuffer().getOffsetRead();
 
             index++;
         }
@@ -461,7 +512,6 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
 
     m_events.resize(stream.readSize());
     for (auto& event : m_events) {
-        event.m_features = m_features;
         stream >> event;
     }
 
@@ -470,11 +520,13 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
 
 void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
+    stream.setUserData(m_features.get());
+
     stream << static_cast<int32_t>(m_format);
 
     if (m_format >= MapFormat::HOTA1) {
         stream << m_hotaVer.m_ver1 << m_hotaVer.m_ver2;
-        if (m_hotaVer.m_ver1 == 3)
+        if (m_hotaVer.m_ver1 == 2 || m_hotaVer.m_ver1 == 3)
             stream << m_hotaVer.m_ver3;
     }
 
@@ -518,6 +570,9 @@ void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
     }
 
     stream << m_victoryCondition << m_lossCondition;
+
+    //if (1)
+    //    return;
 
     stream << m_teamCount;
 
@@ -632,20 +687,13 @@ void H3Map::fromJson(const PropertyTree& data)
 
         const ObjectTemplate& objTempl = m_objectDefs.at(obj.m_defnum);
         MapObjectType         type     = static_cast<MapObjectType>(objTempl.m_id);
-        obj.m_impl                     = IMapObject::Create(type, objTempl.m_subid, m_features);
+        obj.m_impl                     = IMapObject::Create(type, objTempl.m_subid);
         if (!obj.m_impl)
             throw std::runtime_error("Unsupported map object type:" + std::to_string(objTempl.m_id));
 
         obj.m_impl->fromJson(objJson["impl"]);
 
         m_objects.push_back(std::move(obj));
-    }
-    for (auto& event : m_events)
-        event.m_features = m_features;
-    for (auto& heroData : m_customHeroData) {
-        heroData.m_artSet.m_features       = m_features;
-        heroData.m_spellSet.m_features     = m_features;
-        heroData.m_primSkillSet.m_features = m_features;
     }
 }
 
@@ -695,7 +743,7 @@ void MapTileH3M::writeBinary(ByteOrderDataStreamWriter& stream) const
     stream << m_terType << m_terView << m_riverType << m_riverDir << m_roadType << m_roadDir << m_extTileFlags;
 }
 
-void ObjectTemplate::prepareArrays()
+void ObjectTemplate::prepareArrays(const MapFormatFeatures* m_features)
 {
     m_visitMask.resize(6 * 8);
     m_blockMask.resize(6 * 8);
@@ -706,9 +754,10 @@ void ObjectTemplate::prepareArrays()
 
 void ObjectTemplate::readBinary(ByteOrderDataStreamReader& stream)
 {
+    auto* m_features = getFeaturesFromStream(stream);
+    prepareArrays(m_features);
     stream >> m_animationFile;
 
-    prepareArrays();
     stream.readBits(m_blockMask, false, true);
     stream.readBits(m_visitMask, false, true);
 
@@ -738,8 +787,16 @@ void ObjectTemplate::writeBinary(ByteOrderDataStreamWriter& stream) const
     stream.zeroPadding(16);
 }
 
+void GlobalMapEvent::prepareArrays(const MapFormatFeatures* m_features)
+{
+    m_resourceSet.prepareArrays(m_features);
+}
+
 void GlobalMapEvent::readBinary(ByteOrderDataStreamReader& stream)
 {
+    auto* m_features = getFeaturesFromStream(stream);
+    prepareArrays(m_features);
+
     stream >> m_name >> m_message;
     stream >> m_resourceSet;
     stream >> m_players;
@@ -756,6 +813,7 @@ void GlobalMapEvent::readBinary(ByteOrderDataStreamReader& stream)
 
 void GlobalMapEvent::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
+    auto* m_features = getFeaturesFromStream(stream);
     stream << m_name << m_message;
     stream << m_resourceSet;
     stream << m_players;
@@ -770,10 +828,10 @@ void GlobalMapEvent::writeBinary(ByteOrderDataStreamWriter& stream) const
     stream.zeroPadding(17);
 }
 
-void CustomHeroData::prepareArrays()
+void CustomHeroData::prepareArrays(const MapFormatFeatures* m_features)
 {
-    m_spellSet.prepareArrays();
-    m_primSkillSet.prepareArrays();
+    m_spellSet.prepareArrays(m_features);
+    m_primSkillSet.prepareArrays(m_features);
 }
 
 void CustomHeroData::readBinary(ByteOrderDataStreamReader& stream)
@@ -781,8 +839,9 @@ void CustomHeroData::readBinary(ByteOrderDataStreamReader& stream)
     stream >> m_enabled;
     if (!m_enabled)
         return;
+    auto* m_features = getFeaturesFromStream(stream);
 
-    prepareArrays();
+    prepareArrays(m_features);
 
     assert(m_enabled == 1U);
     stream >> m_hasExp;

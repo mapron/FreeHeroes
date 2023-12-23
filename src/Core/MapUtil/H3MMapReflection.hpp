@@ -89,6 +89,8 @@ ENUM_REFLECTION_STRINGIFY(
     TAKEDWELLINGS,
     TAKEMINES,
     TRANSPORTITEM,
+    DEFEATALL,
+    SURVIVETIME,
     WINSTANDARD)
 
 ENUM_REFLECTION_STRINGIFY(
@@ -189,7 +191,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_resourceAmount,
     m_pos,
     m_hallLevel,
-    m_castleLevel)
+    m_castleLevel,
+    m_days)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     H3Map::LossCondition,

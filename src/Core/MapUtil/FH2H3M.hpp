@@ -26,7 +26,7 @@ private:
     }
     std::vector<uint32_t> convertResource(const Core::ResourceAmount& amount) const;
     void                  convertReward(const Core::Reward& fhReward, MapReward& reward) const;
-    void                  convertRewardHut(const Core::Reward& fhReward, MapSeerHut* hut) const;
+    void                  convertRewardHut(const Core::Reward& fhReward, MapSeerHut::MapQuestWithReward& questWithReward) const;
     void                  convertQuest(const FHQuest& fhQuest, MapQuest& quest) const;
 
     std::vector<StackBasicDescriptor> convertStacks(const std::vector<Core::UnitWithCount>& stacks) const;

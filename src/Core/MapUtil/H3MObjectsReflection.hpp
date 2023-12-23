@@ -35,7 +35,7 @@ ENUM_REFLECTION_STRINGIFY(
     COMPLETE)
 
 ENUM_REFLECTION_STRINGIFY(
-    MapSeerHut::RewardType,
+    MapSeerHut::MapQuestWithReward::RewardType,
     NOTHING,
     NOTHING,
     EXPERIENCE,
@@ -185,11 +185,17 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 )
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
-    MapSeerHut,
+    MapSeerHut::MapQuestWithReward,
     m_quest,
     m_reward,
     m_rID,
     m_rVal)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    MapSeerHut,
+    m_questWithReward,
+    m_questsOneTime,
+    m_questsRecurring)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     MapReward,

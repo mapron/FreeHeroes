@@ -23,7 +23,7 @@ private:
     Core::HeroPrimaryParams          convertPrim(const std::vector<uint8_t>& arr) const;
     std::vector<Core::UnitWithCount> convertStacks(const std::vector<StackBasicDescriptor>& stacks) const;
 
-    Core::Reward convertRewardHut(const MapSeerHut& hut) const;
+    Core::Reward convertRewardHut(const MapSeerHut::MapQuestWithReward& questWithReward) const;
     Core::Reward convertReward(const MapReward& reward) const;
     FHQuest      convertQuest(const MapQuest& quest) const;
 

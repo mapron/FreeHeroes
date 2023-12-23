@@ -133,8 +133,6 @@ struct MapTileSet {
 };
 
 struct ObjectTemplate {
-    MapFormatFeaturesPtr m_features;
-
     std::string          m_animationFile;
     std::vector<uint8_t> m_blockMask;
     std::vector<uint8_t> m_visitMask;
@@ -156,7 +154,7 @@ struct ObjectTemplate {
     Type     m_type         = Type::INVALID;
     uint8_t  m_drawPriority = 0;
 
-    void prepareArrays();
+    void prepareArrays(const MapFormatFeatures* m_features);
 
     void readBinary(ByteOrderDataStreamReader& stream);
     void writeBinary(ByteOrderDataStreamWriter& stream) const;
@@ -171,8 +169,6 @@ struct Object {
 };
 
 struct GlobalMapEvent {
-    MapFormatFeaturesPtr m_features;
-
     std::string m_name;
     std::string m_message;
     ResourceSet m_resourceSet;
@@ -182,6 +178,8 @@ struct GlobalMapEvent {
     uint8_t  m_computerAffected = 0;
     uint16_t m_firstOccurence   = 0;
     uint8_t  m_nextOccurence    = 0;
+
+    void prepareArrays(const MapFormatFeatures* m_features);
 
     void readBinary(ByteOrderDataStreamReader& stream);
     void writeBinary(ByteOrderDataStreamWriter& stream) const;
@@ -193,7 +191,6 @@ struct CustomHeroData {
 
         constexpr auto operator<=>(const SecSkill&) const = default;
     };
-    MapFormatFeaturesPtr m_features;
 
     uint8_t m_enabled = 0;
 
@@ -210,7 +207,7 @@ struct CustomHeroData {
     HeroSpellSet     m_spellSet;
     HeroPrimSkillSet m_primSkillSet;
 
-    void prepareArrays();
+    void prepareArrays(const MapFormatFeatures* m_features);
 
     void readBinary(ByteOrderDataStreamReader& stream);
     void writeBinary(ByteOrderDataStreamWriter& stream) const;
@@ -254,6 +251,8 @@ struct H3Map {
         TAKEDWELLINGS,
         TAKEMINES,
         TRANSPORTITEM,
+        DEFEATALL = 11,
+        SURVIVETIME,
         WINSTANDARD = 255
     };
     enum class LossConditionType
@@ -265,7 +264,6 @@ struct H3Map {
     };
 
     struct VictoryCondition {
-        MapFormatFeaturesPtr m_features;
         VictoryConditionType m_type = VictoryConditionType::WINSTANDARD;
 
         bool m_allowNormalVictory = false;
@@ -274,7 +272,7 @@ struct H3Map {
         uint16_t m_artID = 0;
 
         uint16_t m_creatureID    = 0;
-        uint16_t m_creatureCount = 0;
+        uint32_t m_creatureCount = 0;
 
         uint8_t  m_resourceID     = 0;
         uint32_t m_resourceAmount = 0;
@@ -283,16 +281,17 @@ struct H3Map {
         uint8_t m_hallLevel   = 0;
         uint8_t m_castleLevel = 0;
 
+        uint32_t m_days = 0;
+
         auto operator<=>(const VictoryCondition&) const = default;
 
         void readBinary(ByteOrderDataStreamReader& stream);
         void writeBinary(ByteOrderDataStreamWriter& stream) const;
     };
     struct LossCondition {
-        MapFormatFeaturesPtr m_features;
-        LossConditionType    m_type       = LossConditionType::LOSSSTANDARD;
-        uint16_t             m_daysPassed = 0;
-        H3Pos                m_pos;
+        LossConditionType m_type       = LossConditionType::LOSSSTANDARD;
+        uint16_t          m_daysPassed = 0;
+        H3Pos             m_pos;
 
         auto operator<=>(const LossCondition&) const = default;
 
@@ -334,6 +333,7 @@ struct H3Map {
 
     H3Map();
 
+    void updateFeatures();
     void prepareArrays();
 
     void readBinary(ByteOrderDataStreamReader& stream);
