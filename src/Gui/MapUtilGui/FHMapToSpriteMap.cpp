@@ -320,6 +320,13 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         item->m_keyColor = makePlayerColor(obj.m_player);
         addValueInfo(item, obj);
     }
+    for (auto& obj : fhMap.m_objects.m_abandonedMines) {
+        rendered.insert(&obj);
+        auto* def  = obj.m_visitableId->objectDefs.get(obj.m_defIndex);
+        auto* item = result.addItem(makeItemByDef(SpriteMap::Layer::Mine, def, obj.m_pos).addInfo("id", obj.m_visitableId->id));
+
+        addValueInfo(item, obj);
+    }
 
     for (auto& obj : fhMap.m_objects.m_banks) {
         rendered.insert(&obj);
@@ -400,6 +407,18 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         item->m_blockMask = g_oneTileMask;
         addValueInfo(item, obj);
     }
+    for (auto& obj : fhMap.m_objects.m_signs) {
+        rendered.insert(&obj);
+
+        auto* def = obj.m_visitableId->objectDefs.get(obj.m_defIndex);
+        addValueInfo(result.addItem(makeItemByDef(SpriteMap::Layer::Decoration, def, obj.m_pos).addInfo("id", obj.m_visitableId->id)), obj);
+    }
+    for (auto& obj : fhMap.m_objects.m_garisons) {
+        rendered.insert(&obj);
+
+        auto* def = obj.m_visitableId->objectDefs.get(obj.m_defIndex);
+        addValueInfo(result.addItem(makeItemByDef(SpriteMap::Layer::Decoration, def, obj.m_pos).addInfo("id", obj.m_visitableId->id)), obj);
+    }
     for (auto& obj : fhMap.m_objects.m_heroPlaceholders) {
         rendered.insert(&obj);
         auto pos = obj.m_pos;
@@ -438,7 +457,7 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         item->m_overlayInfoOffsetX = 0;
         addValueInfo(item, obj);
     }
-    if (0) {
+    if (m_settings.m_strict) {
         auto                            allObj = fhMap.m_objects.getAllObjects();
         std::set<const FHCommonObject*> allSet(allObj.cbegin(), allObj.cend());
 

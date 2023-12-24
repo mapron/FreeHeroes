@@ -751,6 +751,10 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 } else {
                     const auto*     objOwner = static_cast<const MapAbandonedMine*>(impl);
                     FHAbandonedMine mine;
+                    if (!mappings.mapVisitable)
+                        throw std::runtime_error("Unknown def for visitable:" + objDefEmbedded.id);
+
+                    mine.m_visitableId = mappings.mapVisitable;
                     initCommon(mine);
                     for (size_t i = 0; i < m_resourceIds.size(); ++i) {
                         if (objOwner->m_resourceBits[i])

@@ -23,6 +23,7 @@ int main(int argc, char* argv[])
                                    "input-batch-test",
                                    "output-png-surface",
                                    "output-png-underground",
+                                   "strict", // if save have errors it's over
                                },
                                {});
     if (!parser.parseArgs(std::cerr, argc, argv)) {
@@ -35,6 +36,7 @@ int main(int argc, char* argv[])
     const std::string inputBatch        = parser.getArg("input-batch-test");
     const std::string outputSurface     = parser.getArg("output-png-surface");
     const std::string outputUnderground = parser.getArg("output-png-underground");
+    const bool        strict            = parser.getArg("strict") == "1";
 
     Core::CoreApplication fhCoreApp;
     fhCoreApp.setLoadUserMods(true);
@@ -52,6 +54,7 @@ int main(int argc, char* argv[])
         fhApp.getAppSettings());
 
     if (!inputBatch.empty()) {
+        bool hasError = false;
         for (const auto& it : std_fs::recursive_directory_iterator(Mernel::string2path(inputBatch))) {
             if (!it.is_regular_file())
                 continue;
@@ -62,20 +65,21 @@ int main(int argc, char* argv[])
                 continue;
 
             std::cerr << "\nLoading: " << path << "\n";
-            dlg.load(Mernel::path2string(path));
-            std::cerr << "\nSaving: " << path << "\n";
-            try {
-                dlg.saveScreenshots("DRYRUN", "DRYRUN");
-            }
-            catch (std::exception& e) {
-                std::cerr << "error:" << e.what() << "\n";
-            }
-        }
-    } else {
-        if (!input.empty())
-            dlg.load(input);
+            if (!dlg.load(Mernel::path2string(path), strict, true))
+                return 1;
 
-        if (dlg.saveScreenshots(outputSurface, outputUnderground))
+            std::cerr << "\nSaving: " << path << "\n";
+            if (!hasError)
+                dlg.saveScreenshots("DRYRUN", "DRYRUN");
+        }
+        return hasError;
+    } else {
+        if (!input.empty()) {
+            if (!dlg.load(input, strict, true))
+                return 1;
+        }
+
+        if (dlg.saveScreenshots(outputSurface, outputUnderground)) // true - saved in silent mode
             return 0;
     }
 

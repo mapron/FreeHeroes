@@ -88,7 +88,7 @@ MapToolWindow::MapToolWindow(
 
     connect(m_ui->pushButtonEditMap, &QAbstractButton::clicked, this, [this] {
         QString fhMap = m_ui->fhMapPath->text();
-        m_editor->load(fhMap.toStdString());
+        m_editor->load(fhMap.toStdString(), false);
         m_editor->show();
     });
 

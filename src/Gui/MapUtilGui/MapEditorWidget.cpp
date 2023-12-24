@@ -318,7 +318,9 @@ void MapEditorWidget::saveUserSettings()
     m_appSettings->saveCustomJson(jdata, g_customSettingsName);
 }
 
-void MapEditorWidget::load(const std::string& filename)
+bool MapEditorWidget::load(const std::string& filename,
+                           bool               strict,
+                           bool               silent)
 {
     std::ostringstream os;
     auto               fullpath = Mernel::string2path(filename);
@@ -332,6 +334,7 @@ void MapEditorWidget::load(const std::string& filename)
         sett.m_inputs = { .m_fhMap = fullpath };
 
     try {
+        m_impl->m_viewSettings.m_renderSettings.m_strict = strict;
         MapConverter converter(os,
                                m_gameDatabaseContainer,
                                m_rngFactory,
@@ -364,9 +367,14 @@ void MapEditorWidget::load(const std::string& filename)
             m_impl->m_filterGen->addItem(generationId, generationId);
 
         updateMap();
+        return true;
     }
     catch (std::exception& ex) {
-        QMessageBox::warning(this, tr("Error occured"), QString::fromStdString(ex.what()));
+        if (!silent)
+            QMessageBox::warning(this, tr("Error occured"), QString::fromStdString(ex.what()));
+        else
+            Mernel::Logger(Mernel::Logger::Err) << ex.what();
+        return false;
     }
 }
 
@@ -401,7 +409,7 @@ void MapEditorWidget::loadDialog()
     QString filename = QFileDialog::getOpenFileName(this, "", "", "FH or H3 map (*.json *.h3m)");
     if (filename.isEmpty())
         return;
-    load(filename.toStdString());
+    load(filename.toStdString(), false);
 }
 
 void MapEditorWidget::saveH3MDialog()
@@ -436,7 +444,8 @@ void MapEditorWidget::saveScreenshot()
     image.save(filename);
 }
 
-bool MapEditorWidget::saveScreenshots(const std::string& outputSurface, const std::string& outputUnderground)
+bool MapEditorWidget::saveScreenshots(const std::string& outputSurface,
+                                      const std::string& outputUnderground)
 {
     if (m_impl->m_spriteMap.m_depth == 0)
         return false;

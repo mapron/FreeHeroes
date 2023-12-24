@@ -39,7 +39,9 @@ public:
     void loadUserSettings();
     void saveUserSettings();
 
-    void load(const std::string& filename);
+    bool load(const std::string& filename,
+              bool               strict,
+              bool               silent = false);
     void save(const std::string& filename, bool isH3M);
     void loadDialog();
     void saveH3MDialog();

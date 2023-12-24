@@ -133,7 +133,9 @@
 "sod.visitable.garisonVert"                : [ ""              ,        0 ,    1000  , { "m" : {"": "avcvgr", "WT" : "avcvgrw"} }  ],
 "sod.visitable.garisonHor"                 : [ ""              ,        0 ,    1000  , { "m" : {"": "avcgar10", "WT" : "avcgarw1", "E": "avcgare"} }  ],
 "sod.visitable.garisonVertMagic"           : [ ""              ,        0 ,    1000  , { "m" : {"": "avcvgarm"} }  ],
-"sod.visitable.garisonHorMagic"            : [ ""              ,        0 ,    1000  , { "m" : {"": "avcgar20"} }  ]
+"sod.visitable.garisonHorMagic"            : [ ""              ,        0 ,    1000  , { "m" : {"": "avcgar20"} }  ],
+
+"sod.visitable.abandonedMine"              : [ ""              ,        0 ,    1000  , { "m" : {"": "mntswpab" , "A": "avxamsw","B": "avxamds","C": "avxamgr","D": "avxamlv","E": "avxamro","F": "avxamsn","G": "avxamsu","H": "avxabnd0" } }  ]
 
 }
 
