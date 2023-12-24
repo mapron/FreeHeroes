@@ -300,8 +300,8 @@ void MapHero::readBinary(ByteOrderDataStreamReader& stream)
     if (m_hasSecSkills)
         stream >> m_secSkills;
 
-    stream >> m_hasGarison;
-    if (m_hasGarison)
+    stream >> m_hasArmy;
+    if (m_hasArmy)
         stream >> m_garison;
 
     stream >> m_formation;
@@ -353,8 +353,8 @@ void MapHero::writeBinary(ByteOrderDataStreamWriter& stream) const
     if (m_hasSecSkills)
         stream << m_secSkills;
 
-    stream << m_hasGarison;
-    if (m_hasGarison)
+    stream << m_hasArmy;
+    if (m_hasArmy)
         stream << m_garison;
 
     stream << m_formation;

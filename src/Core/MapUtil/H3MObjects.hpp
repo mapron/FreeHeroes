@@ -545,7 +545,7 @@ struct MapHero : public MapObjectAbstract {
 
     std::vector<MapHeroSkill> m_secSkills;
 
-    bool          m_hasGarison = false;
+    bool          m_hasArmy = false;
     StackSetFixed m_garison;
 
     uint8_t    m_formation = 0;

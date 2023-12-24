@@ -104,7 +104,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_portrait,
     m_hasSecSkills,
     m_secSkills,
-    m_hasGarison,
+    m_hasArmy,
     m_garison,
     m_formation,
     m_artSet,

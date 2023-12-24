@@ -30,6 +30,8 @@ private:
     FHGlobalMapEvent    convertEvent(const GlobalMapEvent& event) const;
     FHMessageWithBattle convertMessage(const MapMessage& message) const;
 
+    void convertHeroArtifacts(const HeroArtSet& artSet, Core::AdventureHero& hero) const;
+
     std::vector<Core::LibraryPlayerConstPtr> convertPlayerList(const std::vector<uint8_t>& players) const;
 
     void convertTileMap(const H3Map& src, FHMap& dest) const;

@@ -60,20 +60,21 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_hasPrimSkills,
     m_hasCustomBio,
     m_hasSpells,
+    m_hasArmy,
+    m_hasArts,
     m_army)
 
-// clang-format off
-STRUCT_REFLECTION_PAIRED(
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHHero,
-    "pos",                 m_pos,
-    "order",               m_order,
-    "player",              m_player,
+    m_pos,
+    m_order,
+    m_defIndex,
+    m_player,
 
-    "main",                m_isMain,
-    "data",                m_data,
-    "questId",             m_questIdentifier
-)
-// clang-format on
+    m_isMain,
+    m_data,
+    m_questIdentifier,
+    m_patrolRadius)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHTownEvent,

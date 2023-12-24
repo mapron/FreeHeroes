@@ -32,6 +32,8 @@ private:
     void                  convertMessage(const FHMessageWithBattle& fhMessage, MapMessage& message) const;
     void                  convertSquad(const Core::AdventureSquad& squad, StackSetFixed& fixedStacks) const;
 
+    void convertHeroArtifacts(const Core::AdventureHero& hero, HeroArtSet& artSet) const;
+
     std::vector<StackBasicDescriptor> convertStacks(const std::vector<Core::UnitWithCount>& stacks) const;
     std::vector<uint8_t>              convertPrimaryStats(const Core::HeroPrimaryParams& stats) const;
 

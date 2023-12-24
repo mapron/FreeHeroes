@@ -323,12 +323,16 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         hero->m_playerOwner     = playerIndex;
         hero->m_subID           = heroId;
         hero->m_questIdentifier = fhHero.m_questIdentifier;
+        hero->m_patrolRadius    = static_cast<uint8_t>(fhHero.m_patrolRadius);
+
         hero->prepareArrays(dest.m_features.get());
         {
             hero->m_hasExp                             = fhHero.m_data.m_hasExp;
             hero->m_hasSecSkills                       = fhHero.m_data.m_hasSecSkills;
             hero->m_primSkillSet.m_hasCustomPrimSkills = fhHero.m_data.m_hasPrimSkills;
             hero->m_spellSet.m_hasCustomSpells         = fhHero.m_data.m_hasSpells;
+            hero->m_hasArmy                            = fhHero.m_data.m_hasArmy;
+            hero->m_artSet.m_hasArts                   = fhHero.m_data.m_hasArts;
             if (hero->m_hasExp)
                 hero->m_exp = static_cast<int32_t>(fhHero.m_data.m_army.hero.experience);
 
@@ -347,8 +351,11 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
                 for (auto* spell : fhHero.m_data.m_army.hero.spellbook)
                     hero->m_spellSet.m_spells[spell->legacyId] = 1;
             }
-            if (hero->m_hasGarison) {
+            if (hero->m_hasArmy) {
                 convertSquad(fhHero.m_data.m_army.squad, hero->m_garison);
+            }
+            if (hero->m_artSet.m_hasArts) {
+                convertHeroArtifacts(fhHero.m_data.m_army.hero, hero->m_artSet);
             }
         }
         dest.m_allowedHeroes[heroId] = 0;
@@ -893,6 +900,34 @@ void FH2H3MConverter::convertSquad(const Core::AdventureSquad& squad, StackSetFi
             fixedStacks.m_stacks.push_back(StackBasicDescriptor{ .m_id = static_cast<uint16_t>(stack.library->legacyId), .m_count = static_cast<uint16_t>(stack.count) });
         else
             fixedStacks.m_stacks.push_back(StackBasicDescriptor{ .m_id = (uint16_t) -1 });
+    }
+}
+
+void FH2H3MConverter::convertHeroArtifacts(const Core::AdventureHero& hero, HeroArtSet& artSet) const
+{
+    for (size_t i = 0; i < artSet.m_mainSlots.size(); ++i) {
+        Core::ArtifactSlotType slot  = static_cast<Core::ArtifactSlotType>(i);
+        uint16_t&              artId = artSet.m_mainSlots[i];
+        auto                   art   = hero.getArtifact(slot);
+        if (!art)
+            artId = uint16_t(-1);
+        else
+            artId = uint16_t(art->legacyId);
+    }
+    auto art5 = hero.getArtifact(Core::ArtifactSlotType::Misc4);
+    if (!art5)
+        artSet.m_misc5 = uint16_t(-1);
+    else
+        artSet.m_misc5 = uint16_t(art5->legacyId);
+
+    artSet.m_cata = uint16_t(-1);
+
+    for (auto const& [art, cnt] : hero.artifactsBag) {
+        for (int i = 0; i < cnt; ++i)
+            artSet.m_bagSlots.push_back(uint16_t(art->legacyId));
+    }
+    if (artSet.m_bagSlots.size() > 64) {
+        artSet.m_bagSlots.resize(64);
     }
 }
 

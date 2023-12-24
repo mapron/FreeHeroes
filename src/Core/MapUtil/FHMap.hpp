@@ -49,6 +49,8 @@ struct FHHeroData {
     bool m_hasPrimSkills = false;
     bool m_hasCustomBio  = false;
     bool m_hasSpells     = false;
+    bool m_hasArmy       = false;
+    bool m_hasArts       = false;
 
     Core::AdventureArmy m_army;
 
@@ -73,6 +75,8 @@ struct FHMessageWithBattle {
 struct FHHero : public FHPlayerControlledObject {
     bool       m_isMain{ false };
     FHHeroData m_data;
+
+    int m_patrolRadius = -1;
 
     uint32_t m_questIdentifier = 0;
 

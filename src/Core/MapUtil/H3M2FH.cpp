@@ -366,8 +366,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             {
                 const auto*  event = static_cast<const MapEvent*>(impl);
                 FHLocalEvent fhEvent;
-                fhEvent.m_order   = index;
-                fhEvent.m_pos     = posFromH3M(obj.m_pos);
+                initCommon(fhEvent);
                 fhEvent.m_players = convertPlayerList(event->m_players);
                 fhEvent.m_message = convertMessage(event->m_message);
                 fhEvent.m_reward  = convertReward(event->m_reward);
@@ -384,11 +383,12 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
 
                 const auto playerId = m_playerIds.at(hero->m_playerOwner);
                 FHHero     fhhero;
-                fhhero.m_player          = playerId;
-                fhhero.m_order           = index;
+                fhhero.m_player = playerId;
+                initCommon(fhhero);
                 fhhero.m_pos             = posFromH3M(obj.m_pos, type == MapObjectType::PRISON ? 0 : -1);
                 fhhero.m_isMain          = mainHeroes.contains(playerId) && mainHeroes[playerId] == hero->m_subID;
                 fhhero.m_questIdentifier = hero->m_questIdentifier;
+                fhhero.m_patrolRadius    = hero->m_patrolRadius == 0xff ? -1 : hero->m_patrolRadius;
 
                 FHHeroData& destHero = fhhero.m_data;
                 destHero.m_army.hero = Core::AdventureHero(m_heroIds[hero->m_subID]);
@@ -399,6 +399,9 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 destHero.m_hasPrimSkills = hero->m_primSkillSet.m_hasCustomPrimSkills;
                 destHero.m_hasSpells     = hero->m_spellSet.m_hasCustomSpells;
                 destHero.m_hasSecSkills  = hero->m_hasSecSkills;
+                destHero.m_hasArmy       = hero->m_hasArmy;
+                destHero.m_hasArts       = hero->m_artSet.m_hasArts;
+
                 if (destHero.m_hasSecSkills) {
                     auto& skillList = destHero.m_army.hero.secondarySkills;
                     skillList.clear();
@@ -412,6 +415,21 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                     destHero.m_army.hero.currentBasePrimary.ad.asTuple()    = std::tie(prim[0], prim[1]);
                     destHero.m_army.hero.currentBasePrimary.magic.asTuple() = std::tie(prim[2], prim[3]);
                 }
+                if (destHero.m_hasArmy) {
+                    destHero.m_army.squad = convertSquad(hero->m_garison);
+                }
+                if (destHero.m_hasSpells) {
+                    destHero.m_army.hero.spellbook.clear();
+                    for (size_t spellId = 0; spellId < hero->m_spellSet.m_spells.size(); ++spellId) {
+                        if (hero->m_spellSet.m_spells[spellId])
+                            destHero.m_army.hero.spellbook.insert(m_spellIds[spellId]);
+                    }
+                }
+                if (destHero.m_hasArts) {
+                    convertHeroArtifacts(hero->m_artSet, destHero.m_army.hero);
+                }
+                //Mernel::Logger(Mernel::Logger::Warning) << "parsed hero/prison " << fhhero.m_pos.toPrintableString() << " def " << fhhero.m_defIndex.forcedIndex;
+
                 dest.m_wanderingHeroes.push_back(std::move(fhhero));
             } break;
 
@@ -431,7 +449,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             {
                 const auto* monster = static_cast<const MapMonster*>(impl);
                 FHMonster   fhMonster;
-                fhMonster.m_order           = index;
+                initCommon(fhMonster);
                 fhMonster.m_pos             = posFromH3M(obj.m_pos, -src.m_features->m_monstersMapXOffset);
                 fhMonster.m_count           = monster->m_count;
                 fhMonster.m_id              = m_unitIds[objTempl.m_subid];
@@ -1173,6 +1191,22 @@ FHMessageWithBattle H3M2FHConverter::convertMessage(const MapMessage& message) c
         fhMessage.m_guards.m_creatures = convertSquad(message.m_guards.m_creatures);
     }
     return fhMessage;
+}
+
+void H3M2FHConverter::convertHeroArtifacts(const HeroArtSet& artSet, Core::AdventureHero& hero) const
+{
+    for (size_t i = 0; i < artSet.m_mainSlots.size(); ++i) {
+        Core::ArtifactSlotType slot  = static_cast<Core::ArtifactSlotType>(i);
+        uint16_t               artId = artSet.m_mainSlots[i];
+        if (artId == uint16_t(-1))
+            continue;
+        hero.artifactsOn[slot] = m_artifactIds.at(artId);
+    }
+    if (artSet.m_misc5 != uint16_t(-1))
+        hero.artifactsOn[Core::ArtifactSlotType::Misc4] = m_artifactIds.at(artSet.m_misc5);
+
+    for (uint16_t artId : artSet.m_bagSlots)
+        hero.artifactsBag[m_artifactIds.at(artId)]++;
 }
 
 std::vector<Core::LibraryPlayerConstPtr> H3M2FHConverter::convertPlayerList(const std::vector<uint8_t>& players) const
