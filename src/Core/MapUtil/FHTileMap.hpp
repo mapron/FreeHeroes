@@ -48,6 +48,10 @@ struct MAPUTIL_EXPORT FHTileMap {
         uint8_t m_viewMid = 0; // for center tiles - margin between 'clear' and 'rough' style.
         uint8_t m_viewMax = 0;
 
+        bool m_origFlipInit = false;
+        bool m_origFlipHor  = false;
+        bool m_origFlipVert = false;
+
         bool m_flipHor  = false;
         bool m_flipVert = false;
         bool m_coastal  = false;
@@ -81,6 +85,15 @@ struct MAPUTIL_EXPORT FHTileMap {
     int32_t m_depth  = 0; // no underground => depth==1; has underground => depth==2
 
     std::vector<Tile> m_tiles;
+
+    struct ChangedTile {
+        FHPos   m_pos;
+        uint8_t m_orig = 0;
+    };
+
+    std::vector<ChangedTile> m_changedViews;
+    std::vector<FHPos>       m_inverseFlipHor;
+    std::vector<FHPos>       m_inverseFlipVert;
 
     Tile& get(int x, int y, int z)
     {
@@ -188,6 +201,8 @@ struct FHZone {
     Core::LibraryTerrainConstPtr m_terrainId = nullptr;
     std::vector<FHPos>           m_tiles;
     std::vector<uint8_t>         m_tilesVariants;
+    std::vector<uint8_t>         m_tilesFlippedHor;
+    std::vector<uint8_t>         m_tilesFlippedVert;
     struct Rect {
         FHPos m_pos{ g_invalidPos };
         int   m_width{ 0 };

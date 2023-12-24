@@ -374,25 +374,27 @@ const std::vector<PatternMatcher> g_matchers{
     },
     // clang-format on
     PatternMatcher{
-        .m_type      = BorderType::Special_DDDD,
-        .m_class     = BorderClass::Special,
-        .m_useOnDirt = false,
-        .m_f         = [](const TileNeightbours& t, bool) {
+        .m_type       = BorderType::Special_DDDD,
+        .m_class      = BorderClass::Special,
+        .m_doFlipHor  = false,
+        .m_doFlipVert = false,
+        .m_useOnDirt  = false,
+        .m_f          = [](const TileNeightbours& t, bool) {
             return true
                    && t.TL.D && t.TR.D
-                   && t.BL.D && t.BR.D
-                   && t.CR.EQ && t.BC.EQ;
+                   && t.BL.D && t.BR.D;
         },
     },
     PatternMatcher{
-        .m_type      = BorderType::Special_SSSS,
-        .m_class     = BorderClass::Special,
-        .m_useOnDirt = true,
-        .m_f         = [](const TileNeightbours& t, bool) {
+        .m_type       = BorderType::Special_SSSS,
+        .m_class      = BorderClass::Special,
+        .m_doFlipHor  = false,
+        .m_doFlipVert = false,
+        .m_useOnDirt  = true,
+        .m_f          = [](const TileNeightbours& t, bool) {
             return true
                    && t.TL.S && t.TR.S
-                   && t.BL.S && t.BR.S
-                   && t.CR.EQ && t.BC.EQ;
+                   && t.BL.S && t.BR.S;
         },
     },
     PatternMatcher{
@@ -621,6 +623,8 @@ void FHTileMap::correctTerrainTypes(Core::LibraryTerrainConstPtr dirtTerrain,
     eachPos([this,
              dirtTerrain,
              sandTerrain,
+             //&ofs,
+             //&row,
              waterTerrain](const FHPos& pos) {
         auto& XX = get(pos);
 
@@ -633,7 +637,8 @@ void FHTileMap::correctTerrainTypes(Core::LibraryTerrainConstPtr dirtTerrain,
                    pos);
         XX.m_coastal = tilen.m_coastal;
 
-        /*if (1) {
+        /*
+        if (1) {
             if (row != pos.m_y)
                 ofs << '\n';
 
@@ -687,6 +692,14 @@ void FHTileMap::correctTerrainTypes(Core::LibraryTerrainConstPtr dirtTerrain,
 
             return true;
         }();
+    });
+
+    eachPos([this](const FHPos& pos) {
+        auto& XX = get(pos);
+        if (XX.m_origFlipInit) {
+            XX.m_flipHor  = XX.m_origFlipHor;
+            XX.m_flipVert = XX.m_origFlipVert;
+        }
     });
 }
 
@@ -884,13 +897,17 @@ void FHTileMap::rngTiles(Core::IRandomGenerator* rng, int roughTileChancePercent
         return min + result;
     };
 
+    m_changedViews.clear();
+
     for (int z = 0; z < m_depth; ++z) {
         for (int y = 0; y < m_height; ++y) {
             for (int x = 0; x < m_width; ++x) {
                 auto& X = get(x, y, z);
                 if (!(X.m_view >= X.m_viewMin && X.m_view <= X.m_viewMax)) {
-                    if (X.m_view != 0xffU)
-                        Logger(Logger::Warning) << "Change view at (" << x << "," << y << "," << int(z) << ") " << int(X.m_view) << " -> [" << int(X.m_viewMin) << " .. " << int(X.m_viewMax) << "]";
+                    if (X.m_view != 0xffU) {
+                        Logger(Logger::Warning) << "Change view at (" << x << "," << y << "," << z << ") " << int(X.m_view) << " -> [" << int(X.m_viewMin) << " .. " << int(X.m_viewMax) << "]";
+                        m_changedViews.push_back({ FHPos{ x, y, z }, X.m_view });
+                    }
                     if (rng->genSmall(100) < roughTileChancePercent)
                         X.m_view = rngView(X.m_viewMin, X.m_viewMax);
                     else
@@ -922,9 +939,12 @@ void FHZone::placeOnMap(FHTileMap& map) const
     }
     if (!m_tiles.empty() && m_tilesVariants.size() == m_tiles.size()) {
         for (size_t i = 0; i < m_tiles.size(); ++i) {
-            auto& tile     = map.get(m_tiles[i]);
-            tile.m_terrain = m_terrainId;
-            tile.m_view    = m_tilesVariants[i];
+            auto& tile          = map.get(m_tiles[i]);
+            tile.m_terrain      = m_terrainId;
+            tile.m_view         = m_tilesVariants[i];
+            tile.m_origFlipInit = true;
+            tile.m_origFlipHor  = m_tilesFlippedHor[i];
+            tile.m_origFlipVert = m_tilesFlippedVert[i];
         }
         return;
     }

@@ -184,6 +184,18 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         if (tile.m_coastal)
             destTile.m_extTileFlags |= MapTileH3M::Coastal;
     });
+    for (const auto& change : src.m_tileMap.m_changedViews) {
+        auto& destTile     = dest.m_tiles.get(change.m_pos.m_x, change.m_pos.m_y, change.m_pos.m_z);
+        destTile.m_terView = change.m_orig;
+    }
+    for (const auto& change : src.m_tileMap.m_inverseFlipHor) {
+        auto& destTile          = dest.m_tiles.get(change.m_x, change.m_y, change.m_z);
+        destTile.m_extTileFlags = destTile.m_extTileFlags ^ MapTileH3M::TerrainFlipHor;
+    }
+    for (const auto& change : src.m_tileMap.m_inverseFlipVert) {
+        auto& destTile          = dest.m_tiles.get(change.m_x, change.m_y, change.m_z);
+        destTile.m_extTileFlags = destTile.m_extTileFlags ^ MapTileH3M::TerrainFlipVert;
+    }
     bool    hasTeams    = false;
     uint8_t currentTeam = 0;
     for (auto& [playerId, fhPlayer] : src.m_players) {
@@ -688,6 +700,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
 
         addObjectVisitable(fhGarison, std::move(obj));
     }
+
     for (auto& fhObj : src.m_objects.m_heroPlaceholders) {
         auto obj         = std::make_unique<MapHeroPlaceholder>();
         obj->m_owner     = static_cast<uint8_t>(fhObj.m_player->legacyId);

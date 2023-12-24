@@ -1240,8 +1240,10 @@ void H3M2FHConverter::convertTileMap(const H3Map& src, FHMap& dest) const
         FHZone fhZone;
         fhZone.m_tiles = std::move(tiles);
         for (auto& pos : fhZone.m_tiles) {
-            auto terVariant = tileSet.get(pos.m_x, pos.m_y, pos.m_z).m_terView;
-            fhZone.m_tilesVariants.push_back(terVariant);
+            auto& ter = tileSet.get(pos.m_x, pos.m_y, pos.m_z);
+            fhZone.m_tilesVariants.push_back(ter.m_terView);
+            fhZone.m_tilesFlippedHor.push_back(ter.m_extTileFlags & MapTileH3M::ExtFlags::TerrainFlipHor);
+            fhZone.m_tilesFlippedVert.push_back(ter.m_extTileFlags & MapTileH3M::ExtFlags::TerrainFlipVert);
         }
         fhZone.m_terrainId = m_terrainIds[tile.m_terType];
         assert(fhZone.m_terrainId);
