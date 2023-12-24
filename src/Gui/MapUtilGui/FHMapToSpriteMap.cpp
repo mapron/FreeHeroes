@@ -390,10 +390,16 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         auto*       item = result.addItem(makeItemById(SpriteMap::Layer::Hero, id, pos));
         addValueInfo(item, obj);
     }
+    for (auto& obj : fhMap.m_objects.m_grails) {
+        std::string id   = "avzgrail";
+        auto*       item = result.addItem(makeItemById(SpriteMap::Layer::Artifact, id, obj.m_pos));
+        addValueInfo(item, obj);
+    }
 
     for (auto& obj : fhMap.m_objects.m_pandoras) {
-        std::string id   = "ava0128";
-        auto*       item = result.addItem(makeItemById(SpriteMap::Layer::Pandora, id, obj.m_pos));
+        bool        water = fhMap.m_tileMap.get(obj.m_pos).m_terrain->id == Core::LibraryTerrain::s_terrainWater;
+        std::string id    = water ? "ava0128w" : "ava0128";
+        auto*       item  = result.addItem(makeItemById(SpriteMap::Layer::Pandora, id, obj.m_pos));
         if (!obj.m_reward.units.empty()) {
             auto pos = obj.m_pos;
             pos.m_x += 1;

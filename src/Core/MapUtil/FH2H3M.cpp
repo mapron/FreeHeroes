@@ -125,10 +125,15 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
     assume(src.m_tileMap.m_width == src.m_tileMap.m_height && src.m_tileMap.m_width > 0);
 
     dest.m_format                 = src.m_version == Core::GameVersion::SOD ? MapFormat::SOD : MapFormat::HOTA3;
-    dest.m_anyPlayers             = true;
+    dest.m_anyPlayers             = src.m_anyPlayers;
     dest.m_tiles.m_size           = src.m_tileMap.m_width;
     dest.m_tiles.m_hasUnderground = src.m_tileMap.m_depth > 1;
     dest.m_tiles.updateSize();
+
+    dest.m_hotaVer.m_ver1 = src.m_config.m_hotaVersion.m_ver1;
+    dest.m_hotaVer.m_ver2 = src.m_config.m_hotaVersion.m_ver2;
+    dest.m_hotaVer.m_ver3 = src.m_config.m_hotaVersion.m_ver3;
+
     dest.updateFeatures();
     dest.prepareArrays();
 
@@ -159,6 +164,9 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         destCond.m_pos  = int3fromPos(srcCond.m_pos);
         destCond.m_days = srcCond.m_days;
     }
+
+    for (auto& rumor : src.m_rumors)
+        dest.m_rumors.push_back({ rumor.m_name, rumor.m_text });
 
     src.m_tileMap.eachPosTile([&dest](const FHPos& pos, const FHTileMap::Tile& tile) {
         auto& destTile          = dest.m_tiles.get(pos.m_x, pos.m_y, pos.m_z);
@@ -348,8 +356,13 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
             hero->m_spellSet.m_hasCustomSpells         = fhHero.m_data.m_hasSpells;
             hero->m_hasArmy                            = fhHero.m_data.m_hasArmy;
             hero->m_artSet.m_hasArts                   = fhHero.m_data.m_hasArts;
+            hero->m_hasName                            = fhHero.m_data.m_hasName;
             if (hero->m_hasExp)
-                hero->m_exp = static_cast<int32_t>(fhHero.m_data.m_army.hero.experience);
+                hero->m_exp = static_cast<uint32_t>(fhHero.m_data.m_army.hero.experience);
+
+            if (hero->m_hasName) {
+                hero->m_name = fhHero.m_data.m_name;
+            }
 
             if (hero->m_primSkillSet.m_hasCustomPrimSkills) {
                 auto& prim = hero->m_primSkillSet.m_primSkills;
@@ -444,6 +457,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         destHero.m_hasSkills                          = customHero.m_hasSecSkills;
         destHero.m_primSkillSet.m_hasCustomPrimSkills = customHero.m_hasPrimSkills;
         destHero.m_spellSet.m_hasCustomSpells         = customHero.m_hasSpells;
+        destHero.m_artSet.m_hasArts                   = customHero.m_hasArts;
         if (customHero.m_hasPrimSkills) {
             auto& prim = destHero.m_primSkillSet.m_primSkills;
             prim.resize(4);
@@ -458,6 +472,12 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         if (destHero.m_spellSet.m_hasCustomSpells) {
             for (auto* spell : customHero.m_army.hero.spellbook)
                 destHero.m_spellSet.m_spells[spell->legacyId] = 1;
+        }
+
+        if (customHero.m_hasExp)
+            destHero.m_exp = static_cast<uint32_t>(customHero.m_army.hero.experience);
+        if (customHero.m_hasArts) {
+            convertHeroArtifacts(customHero.m_army.hero, destHero.m_artSet);
         }
     }
 
@@ -575,6 +595,14 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
 
         addObjectCommon(fhMine, std::move(mine));
     }
+    for (auto& fhMine : src.m_objects.m_abandonedMines) {
+        auto mine = std::make_unique<MapAbandonedMine>();
+        mine->prepareArrays();
+        for (auto* res : fhMine.m_resources)
+            mine->m_resourceBits[res->legacyId] = 1;
+
+        addObjectVisitable(fhMine, std::move(mine));
+    }
 
     for (auto& fhBank : src.m_objects.m_banks) {
         auto bank = std::make_unique<MapObjectCreatureBank>();
@@ -672,10 +700,12 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
             continue;
         }
         auto obj = std::make_unique<MapPandora>();
+        obj->prepareArrays(dest.m_features.get());
         convertReward(fhPandora.m_reward, obj->m_reward);
         convertMessage(fhPandora.m_messageWithBattle, obj->m_message);
 
-        addObject(fhPandora, std::move(obj), [&tmplCache] { return tmplCache.addId("ava0128"); });
+        bool water = src.m_tileMap.get(fhPandora.m_pos).m_terrain->id == Core::LibraryTerrain::s_terrainWater;
+        addObject(fhPandora, std::move(obj), [&tmplCache, water] { return tmplCache.addId(water ? "ava0128w" : "ava0128"); });
     }
 
     for (auto& fhEvent : src.m_objects.m_localEvents) {
@@ -715,6 +745,12 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         obj->m_powerRank = fhObj.m_powerRank;
         addObject(fhObj, std::move(obj), [&tmplCache] { return tmplCache.addId("ahplace"); });
     }
+    for (auto& fhObj : src.m_objects.m_grails) {
+        auto obj      = std::make_unique<MapGrail>();
+        obj->m_radius = fhObj.m_radius;
+        addObject(fhObj, std::move(obj), [&tmplCache] { return tmplCache.addId("avzgrail"); });
+    }
+
     for (auto& fhEvent : src.m_globalEvents) {
         GlobalMapEvent event;
         event.prepareArrays(dest.m_features.get());
@@ -750,7 +786,7 @@ void FH2H3MConverter::convertReward(const Core::Reward& fhReward, MapReward& rew
         }
     }
     for (const Core::SkillHeroItem& skill : fhReward.secSkills)
-        reward.m_secSkills.push_back(MapHeroSkill{ .m_id = static_cast<uint8_t>(skill.skill->legacyId), .m_level = static_cast<uint8_t>(skill.level) });
+        reward.m_secSkills.push_back(MapHeroSkill{ .m_id = static_cast<uint8_t>(skill.skill->legacyId), .m_level = static_cast<uint8_t>(skill.level + 1) });
 
     for (auto* spell : fhReward.spells.onlySpells)
         reward.m_spells.push_back(static_cast<uint8_t>(spell->legacyId));

@@ -834,6 +834,7 @@ void GlobalMapEvent::writeBinary(ByteOrderDataStreamWriter& stream) const
 
 void CustomHeroData::prepareArrays(const MapFormatFeatures* m_features)
 {
+    m_artSet.prepareArrays(m_features);
     m_spellSet.prepareArrays(m_features);
     m_primSkillSet.prepareArrays(m_features);
 }

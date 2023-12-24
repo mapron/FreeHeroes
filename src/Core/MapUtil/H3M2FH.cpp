@@ -187,12 +187,17 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
     else
         dest.m_version = Core::GameVersion::SOD;
 
+    dest.m_config.m_hotaVersion.m_ver1 = src.m_hotaVer.m_ver1;
+    dest.m_config.m_hotaVersion.m_ver2 = src.m_hotaVer.m_ver2;
+    dest.m_config.m_hotaVersion.m_ver3 = src.m_hotaVer.m_ver3;
+
     dest.m_tileMap.m_height = dest.m_tileMap.m_width = src.m_tiles.m_size;
     dest.m_tileMap.m_depth                           = 1U + src.m_tiles.m_hasUnderground;
 
     dest.m_name       = src.m_mapName;
     dest.m_descr      = src.m_mapDescr;
     dest.m_difficulty = src.m_difficulty;
+    dest.m_anyPlayers = src.m_anyPlayers;
 
     dest.m_config.m_allowSpecialWeeks = src.m_hotaVer.m_allowSpecialWeeks;
     dest.m_config.m_hasRoundLimit     = src.m_hotaVer.m_roundLimit != 0xffffffffU;
@@ -225,6 +230,9 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
         destCond.m_pos  = posFromH3M(srcCond.m_pos);
         destCond.m_days = srcCond.m_days;
     }
+
+    for (auto& rumor : src.m_rumors)
+        dest.m_rumors.push_back({ rumor.m_name, rumor.m_text });
 
     std::map<Core::LibraryPlayerConstPtr, FHPos>   mainTowns;
     std::map<Core::LibraryPlayerConstPtr, uint8_t> mainHeroes;
@@ -267,34 +275,43 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
         allDbDefs[rec->asUniqueTuple()].push_back(rec);
     }
 
+    std::vector<Core::LibraryObjectDef> objectDefsCorrected;
+
     for (const ObjectTemplate& objTempl : src.m_objectDefs) {
-        Core::LibraryObjectDef fhDef      = convertDef(objTempl);
-        auto&                  diagRecord = diag.add();
-        diagRecord.m_fhDefFromFile        = fhDef;
-        diagRecord.m_originalRecord       = nullptr;
+        Core::LibraryObjectDef fhDef          = convertDef(objTempl);
+        Core::LibraryObjectDef fhDefCorrected = fhDef;
+        auto&                  diagRecord     = diag.add();
+        diagRecord.m_fhDefFromFile            = fhDef;
+        diagRecord.m_originalRecord           = nullptr;
 
         Core::LibraryObjectDefConstPtr record = m_database->objectDefs()->find(fhDef.id);
 
         if (record && record->type == fhDef.type) {
             // good
         } else {
-            Logger(Logger::Warning) << "not good id:" << fhDef.id;
-            auto it = allDbDefs.find(fhDef.asUniqueTuple());
-            //auto* record                =
-            if (it == allDbDefs.cend()) {
-                continue;
-            }
-            record = nullptr;
-            for (auto* rec : it->second) {
-                if (rec->id == fhDef.id) {
-                    record = rec;
-                    break;
-                }
-            }
+            Logger(Logger::Warning) << "not good id: " << fhDef.id;
+            auto it                  = allDbDefs.find(fhDef.asUniqueTuple());
+            bool foundKeyReplacement = it != allDbDefs.cend();
 
-            if (!record) {
-                record = it->second[0];
-                Logger(Logger::Warning) << "no record found for type=" << fhDef.type << ", id=" << fhDef.objId << ", subId=" << fhDef.subId << ", taking " << record->id << " from DB";
+            if (!foundKeyReplacement) {
+                if (!record)
+                    continue;
+                Logger(Logger::Warning) << "Def is corrupted, replacing with database def, embedded type=" << fhDef.type << " -> db type=" << record->type;
+                fhDefCorrected = *record;
+
+            } else {
+                record = nullptr;
+                for (auto* rec : it->second) {
+                    if (rec->id == fhDef.id) {
+                        record = rec;
+                        break;
+                    }
+                }
+
+                if (!record) {
+                    record = it->second[0];
+                    Logger(Logger::Warning) << "no record found for type=" << fhDef.type << ", id=" << fhDef.objId << ", subId=" << fhDef.subId << ", taking " << record->id << " from DB";
+                }
             }
         }
         if (!record) {
@@ -326,6 +343,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
         }*/
 
         dest.m_objectDefs.push_back(fhDef);
+        objectDefsCorrected.push_back(fhDefCorrected);
     }
     diag.sort();
     diag.check();
@@ -333,16 +351,18 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
     std::set<uint32_t> skipped;
 
     for (int index = 0; const Object& obj : src.m_objects) {
-        const IMapObject*              impl           = obj.m_impl.get();
-        const ObjectTemplate&          objTempl       = src.m_objectDefs[obj.m_defnum];
-        const Core::LibraryObjectDef&  objDefEmbedded = dest.m_objectDefs[obj.m_defnum];
+        const IMapObject* impl = obj.m_impl.get();
+        //const ObjectTemplate&          objTempl       = objectDefsCorrected[obj.m_defnum];
+        const Core::LibraryObjectDef& objDefEmbedded  = dest.m_objectDefs[obj.m_defnum];
+        const Core::LibraryObjectDef& objDefCorrected = objectDefsCorrected[obj.m_defnum];
+
         Core::LibraryObjectDefConstPtr objDefDatabase = objDefEmbedded.substituteFor;
-        Core::ObjectDefIndex           defIndex;
+
+        Core::ObjectDefIndex defIndex;
         defIndex.forcedIndex = obj.m_defnum;
-        //defIndex.substitution = objDef->substituteKey;
         if (objDefDatabase->substituteFor)
             objDefDatabase = objDefDatabase->substituteFor;
-        //defIndex.variant = objDef->mappings.key;
+
         auto& mappings = objDefDatabase->mappings;
 
         auto initCommon = [&obj, index, &defIndex](FHCommonObject& fhCommon) {
@@ -364,7 +384,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
 
         //Logger(Logger::Warning) << "objTempl.m_id=" << objTempl.m_id << ", objDef.id=" << objDef->id << ", objDef.objId=" << objDef->objId;
 
-        MapObjectType type = static_cast<MapObjectType>(objTempl.m_id);
+        MapObjectType type = static_cast<MapObjectType>(objDefCorrected.objId);
         switch (type) {
             case MapObjectType::EVENT:
             {
@@ -399,6 +419,10 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 destHero.m_hasExp    = hero->m_hasExp;
                 if (destHero.m_hasExp) {
                     destHero.m_army.hero.experience = hero->m_exp;
+                }
+                destHero.m_hasName = hero->m_hasName;
+                if (destHero.m_hasName) {
+                    destHero.m_name = hero->m_name;
                 }
                 destHero.m_hasPrimSkills = hero->m_primSkillSet.m_hasCustomPrimSkills;
                 destHero.m_hasSpells     = hero->m_spellSet.m_hasCustomSpells;
@@ -456,7 +480,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 initCommon(fhMonster);
                 fhMonster.m_pos             = posFromH3M(obj.m_pos, -src.m_features->m_monstersMapXOffset);
                 fhMonster.m_count           = monster->m_count;
-                fhMonster.m_id              = m_unitIds[objTempl.m_subid];
+                fhMonster.m_id              = m_unitIds[objDefCorrected.subId];
                 fhMonster.m_questIdentifier = monster->m_questIdentifier;
                 switch (monster->m_joinAppeal) {
                     case 0:
@@ -615,8 +639,8 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                     art.m_id = m_database->artifacts()->find("sod.artifact." + spell->id); // @todo: constaint for prefix?
                     assert(art.m_id);
                 } else {
-                    assert(objTempl.m_subid != 0);
-                    art.m_id = m_artifactIds[objTempl.m_subid];
+                    assert(objDefCorrected.subId != 0);
+                    art.m_id = m_artifactIds[objDefCorrected.subId];
                 }
                 dest.m_objects.m_artifacts.push_back(std::move(art));
             } break;
@@ -655,7 +679,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 FHResource  fhres;
                 initCommon(fhres);
                 fhres.m_amount = resource->m_amount;
-                fhres.m_id     = m_resourceIds[objTempl.m_subid];
+                fhres.m_id     = m_resourceIds[objDefCorrected.subId];
                 fhres.m_amount *= fhres.m_id->pileSize;
                 assert(fhres.m_id);
                 dest.m_objects.m_resources.push_back(std::move(fhres));
@@ -668,7 +692,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 FHTown      fhtown;
                 initCommon(fhtown);
                 fhtown.m_player    = playerId;
-                fhtown.m_factionId = m_factionIds[objTempl.m_subid];
+                fhtown.m_factionId = m_factionIds[objDefCorrected.subId];
                 assert(fhtown.m_factionId == mappings.factionTown);
                 fhtown.m_questIdentifier    = town->m_questIdentifier;
                 fhtown.m_hasFort            = town->m_hasFort;
@@ -717,7 +741,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             case MapObjectType::ABANDONED_MINE:
             case MapObjectType::MINE:
             {
-                if (objTempl.m_subid < 7) {
+                if (objDefCorrected.subId < 7) {
                     const auto* objOwner = static_cast<const MapObjectWithOwner*>(impl);
                     FHMine      mine;
                     initCommon(mine);
@@ -728,8 +752,12 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                     const auto*     objOwner = static_cast<const MapAbandonedMine*>(impl);
                     FHAbandonedMine mine;
                     initCommon(mine);
-                    assert(!"Unsupported");
-                    (void) objOwner;
+                    for (size_t i = 0; i < m_resourceIds.size(); ++i) {
+                        if (objOwner->m_resourceBits[i])
+                            mine.m_resources.push_back(m_resourceIds[i]);
+                    }
+
+                    dest.m_objects.m_abandonedMines.push_back(std::move(mine));
                 }
             } break;
             case MapObjectType::CREATURE_GENERATOR1:
@@ -782,7 +810,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 if (shrine->m_spell == 0xffU) {
                     switch (type) {
                         case MapObjectType::SHRINE_OF_MAGIC_INCANTATION:
-                            fhShrine.m_randomLevel = objTempl.m_subid == 3 ? 4 : 1;
+                            fhShrine.m_randomLevel = objDefCorrected.subId == 3 ? 4 : 1;
                             break;
                         case MapObjectType::SHRINE_OF_MAGIC_GESTURE:
                             fhShrine.m_randomLevel = 2;
@@ -810,8 +838,11 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             case MapObjectType::GRAIL:
             {
                 const auto* grail = static_cast<const MapGrail*>(impl);
-                (void) grail;
-                assert(!"unsupported");
+
+                FHGrail fhObj;
+                initCommon(fhObj);
+                fhObj.m_radius = grail->m_radius;
+                dest.m_objects.m_grails.push_back(std::move(fhObj));
             } break;
             case MapObjectType::QUEST_GUARD:
             {
@@ -898,10 +929,10 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                     dest.m_objects.m_visitables.push_back(std::move(fhVisitable));
                     break;
                 }
-                if (!skipped.contains(objTempl.m_id)) {
-                    skipped.insert(objTempl.m_id);
-                    Logger(Logger::Warning) << "Skipping unsupported object def: " << objDefEmbedded.id << " of type " << objTempl.m_id;
-                    assert(!"unsupported");
+                if (!skipped.contains(objDefCorrected.objId)) {
+                    skipped.insert(objDefCorrected.objId);
+                    Logger(Logger::Warning) << "Skipping unsupported object def: " << objDefCorrected.id << " of type " << objDefCorrected.objId;
+                    //assert(!"unsupported");
                 }
             } break;
         }
@@ -942,6 +973,8 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
         destHero.m_hasSecSkills  = customHero.m_hasSkills;
         destHero.m_hasPrimSkills = customHero.m_primSkillSet.m_hasCustomPrimSkills;
         destHero.m_hasSpells     = customHero.m_spellSet.m_hasCustomSpells;
+        destHero.m_hasArts       = customHero.m_artSet.m_hasArts;
+
         if (destHero.m_hasSecSkills) {
             auto& skillList = destHero.m_army.hero.secondarySkills;
             skillList.clear();
@@ -962,6 +995,12 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                     destHero.m_army.hero.spellbook.insert(m_spellIds[spellId]);
             }
         }
+        if (destHero.m_hasArts) {
+            convertHeroArtifacts(customHero.m_artSet, destHero.m_army.hero);
+        }
+
+        if (destHero.m_hasExp)
+            destHero.m_army.hero.experience = customHero.m_exp;
         dest.m_customHeroes.push_back(std::move(destHero));
     }
     for (auto& event : src.m_globalEvents) {

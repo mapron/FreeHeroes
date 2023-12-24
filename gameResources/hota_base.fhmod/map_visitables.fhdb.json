@@ -116,9 +116,7 @@
 "sod.visitable.monolithTwoSide"            : [ ""              ,        0 ,    1000  , { "m": { "": "avxmn2g0", "O": "avxmn2o0", "P": "avxmn2p0", "B": "avxmn4b0", "PI": "avxmn2pink0", "T": "avxmn2t0", 
                                                 "Y": "avxmn2y0", "B2": "avxmn2b0", "BL": "avxmn2bl", "R": "avxmn2rd", "B5": "avxmn5b0", "B6": "avxmn6b0", 
                                                 "B7": "avxmn7b0", "B8": "avxmn8b0", "B9": "avxmn9b0", "B10": "avxmn10b", "B11": "avxmn11b", "B12": "avxmn12b", "B19": "avxmn19p", "B20": "avxmn20b"}} ],
-                                                "sod.visitable.monolithWater"              : [ ""          ,        0 ,    1000  , "avxmn9bw" ],
-
-
+"sod.visitable.monolithWater"              : [ ""          ,        0 ,    1000  , {"m": { "": "avxmn9bw", "A": "avxptw_0" , "B": "avxptw_1", "C": "avxptw_2", "D": "avxptw_3"}}],
 
 "sod.visitable.borderGate"                 : [ ""              ,        0 ,    1000  , { "m" : {"": "avxbgt00", "A": "avxbgt10", "B": "avxbgt20", "C": "avxbgt30", "D": "avxbgt40", "E": "avxbgt50", "F": "avxbgt60", "G": "avxbgt70",
     "W": "avxwgtwh", "WA": "avxwgtbk", "WB": "avxwgtbl", "WC": "avxwgtbr", "WD": "avxwgtgr", "WE": "avxwgtlb", "WF": "avxwgtqu", "WG": "avxwgtrd", "WH": "avxwgtvl"}} ],
@@ -133,7 +131,7 @@
 "sod.visitable.sign"                       : [ ""              ,        0 ,    1000  , { "m" : {"": "avxsndg0", "SD": "avxsnds0", "LV": "avxsnlv0", "SN": "avxsnsn0", "SW": "avxsnsw0", "WA": "avxsnwst", "HI": "avxsnhl", "WT": "avxbttl0" } }  ],
 
 "sod.visitable.garisonVert"                : [ ""              ,        0 ,    1000  , { "m" : {"": "avcvgr", "WT" : "avcvgrw"} }  ],
-"sod.visitable.garisonHor"                 : [ ""              ,        0 ,    1000  , { "m" : {"": "avcgar10", "WT" : "avcgarw1"} }  ],
+"sod.visitable.garisonHor"                 : [ ""              ,        0 ,    1000  , { "m" : {"": "avcgar10", "WT" : "avcgarw1", "E": "avcgare"} }  ],
 "sod.visitable.garisonVertMagic"           : [ ""              ,        0 ,    1000  , { "m" : {"": "avcvgarm"} }  ],
 "sod.visitable.garisonHorMagic"            : [ ""              ,        0 ,    1000  , { "m" : {"": "avcgar20"} }  ]
 

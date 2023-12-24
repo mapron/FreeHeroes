@@ -179,7 +179,7 @@
 "sod.artifact.misc.growth5"                 : [ "ava0121" ],
 "sod.artifact.misc.growth6"                 : [ "ava0122" ],
 
-"sod.artifact.sword.armag"                  : [ "ava0128" ],
+"sod.artifact.sword.armag"                  : [ "ava0129" ],
 
 "sod.artifact.cape.spellFly"                : [ "ava0072" ],
 "hota.artifact.misc.summon"                 : [ "ava0161" ],
@@ -189,22 +189,22 @@
 "sod.artifact.misc.noSurrender"             : [ "ava0125" ],
 "sod.artifact.helm.boat"                    : [ "ava0123" ],
 
-"sod.artifact.complex.allStat"              : [ "ava0129" ],
-"sod.artifact.complex.necro"                : [ "ava0130" ],
-"sod.artifact.complex.life"                 : [ "ava0131" ],
-"sod.artifact.complex.debuff"               : [ "ava0132" ],
-"sod.artifact.complex.growth"               : [ "ava0133" ],
-"sod.artifact.complex.immune"               : [ "ava0134" ],
-"sod.artifact.complex.freeBolt"             : [ "ava0135" ],
-"sod.artifact.complex.fastOnboard"          : [ "ava0136" ],
-"sod.artifact.complex.noBowPenalty"         : [ "ava0137" ],
-"sod.artifact.complex.manaRegen"            : [ "ava0138" ],
-"sod.artifact.complex.spellRounds"          : [ "ava0139" ],
-"sod.artifact.complex.resources"            : [ "ava0140" ],
+"sod.artifact.complex.allStat"              : [ "ava0130" ],
+"sod.artifact.complex.necro"                : [ "ava0131" ],
+"sod.artifact.complex.life"                 : [ "ava0132" ],
+"sod.artifact.complex.debuff"               : [ "ava0133" ],
+"sod.artifact.complex.growth"               : [ "ava0134" ],
+"sod.artifact.complex.immune"               : [ "ava0135" ],
+"sod.artifact.complex.freeBolt"             : [ "ava0136" ],
+"sod.artifact.complex.fastOnboard"          : [ "ava0137" ],
+"sod.artifact.complex.noBowPenalty"         : [ "ava0138" ],
+"sod.artifact.complex.manaRegen"            : [ "ava0139" ],
+"sod.artifact.complex.spellRounds"          : [ "ava0140" ],
+"sod.artifact.complex.resources"            : [ "ava0141" ],
 
-"hota.artifact.complex.diplomacy"           : [ "ava0141" ],
-"hota.artifact.complex.resist"              : [ "ava0142" ],
-"hota.artifact.complex.buff"                : [ "ava0143" ],
+"hota.artifact.complex.diplomacy"           : [ "ava0142" ],
+"hota.artifact.complex.resist"              : [ "ava0143" ],
+"hota.artifact.complex.buff"                : [ "ava0144" ],
 "hota.artifact.complex.gold"                : [ "ava0160" ]
 
 }

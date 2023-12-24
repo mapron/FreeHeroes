@@ -135,13 +135,18 @@ int main(int argc, char** argv)
         batch.push_back(settings);
     }
 
-    MapConverter converter(std::cerr,
+    MapConverter                        converter(std::cerr,
                            fhCoreApp.getDatabaseContainer(),
                            fhCoreApp.getRandomGeneratorFactory(),
                            settings);
+    std::vector<MapConverter::Settings> batchFailedTrip;
+    std::vector<MapConverter::Settings> batchFatalError;
+    std::vector<MapConverter::Settings> batchSucceeded;
 
     for (const auto& setting : batch) {
         converter.setSettings(setting);
+        bool isFailed = false;
+        bool isFatal  = false;
         for (const std::string& taskStr : tasks) {
             const MapConverter::Task task = stringToTask(taskStr);
             if (task == MapConverter::Task::Invalid) {
@@ -151,12 +156,34 @@ int main(int argc, char** argv)
             try {
                 converter.run(task);
             }
+            catch (MapConverter::RoundTripException&) {
+                isFailed = true;
+                continue;
+            }
             catch (std::exception& ex) {
                 std::cerr << ex.what() << "\n";
-                return 1;
+                isFatal = true;
+                continue;
             }
         }
+        if (isFatal)
+            batchFatalError.push_back(setting);
+        else if (isFailed)
+            batchFailedTrip.push_back(setting);
+        else
+            batchSucceeded.push_back(settings);
+    }
+    if (batchModeEnabled) {
+        std::cerr << "Successful runs:\n";
+        for (auto& sett : batchSucceeded)
+            std::cerr << sett.m_inputs.m_h3m.m_binary << "\n";
+        std::cerr << "\nFailed round-trip runs:\n";
+        for (auto& sett : batchFailedTrip)
+            std::cerr << sett.m_inputs.m_h3m.m_binary << "\n";
+        std::cerr << "\nFatal error runs:\n";
+        for (auto& sett : batchFatalError)
+            std::cerr << sett.m_inputs.m_h3m.m_binary << "\n";
     }
 
-    return 0;
+    return batchFailedTrip.size() + batchFatalError.size() == 0;
 }

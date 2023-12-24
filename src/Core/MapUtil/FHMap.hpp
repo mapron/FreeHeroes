@@ -61,6 +61,9 @@ struct FHHeroData {
     bool m_hasSpells     = false;
     bool m_hasArmy       = false;
     bool m_hasArts       = false;
+    bool m_hasName       = false;
+
+    std::string m_name;
 
     Core::AdventureArmy m_army;
 
@@ -105,7 +108,7 @@ struct FHMine : public FHPlayerControlledObject {
     bool operator==(const FHMine&) const noexcept = default;
 };
 
-struct FHAbandonedMine : public FHCommonObject {
+struct FHAbandonedMine : public FHCommonVisitable {
     std::vector<Core::LibraryResourceConstPtr> m_resources;
 
     bool operator==(const FHAbandonedMine&) const noexcept = default;
@@ -330,6 +333,11 @@ struct FHHeroPlaceholder : public FHPlayerControlledObject {
 
     bool operator==(const FHHeroPlaceholder&) const noexcept = default;
 };
+struct FHGrail : public FHCommonObject {
+    uint32_t m_radius = 0;
+
+    bool operator==(const FHGrail&) const noexcept = default;
+};
 
 struct FHGlobalMapEvent {
     std::string m_name;
@@ -435,6 +443,7 @@ struct MAPUTIL_EXPORT FHMap {
     std::string m_descr;
     uint8_t     m_difficulty = 0;
     bool        m_isWaterMap = false;
+    bool        m_anyPlayers = true;
 
     PlayersMap               m_players;
     std::vector<FHHero>      m_wanderingHeroes;
@@ -455,6 +464,7 @@ struct MAPUTIL_EXPORT FHMap {
         std::vector<FHVisitable>           m_visitables;
         std::vector<FHVisitableControlled> m_controlledVisitables;
         std::vector<FHMine>                m_mines;
+        std::vector<FHAbandonedMine>       m_abandonedMines;
         std::vector<FHPandora>             m_pandoras;
         std::vector<FHShrine>              m_shrines;
         std::vector<FHSkillHut>            m_skillHuts;
@@ -465,6 +475,7 @@ struct MAPUTIL_EXPORT FHMap {
         std::vector<FHSign>                m_signs;
         std::vector<FHGarison>             m_garisons;
         std::vector<FHHeroPlaceholder>     m_heroPlaceholders;
+        std::vector<FHGrail>               m_grails;
 
         // only needed for RMG objects.
         template<typename T>
@@ -473,72 +484,63 @@ struct MAPUTIL_EXPORT FHMap {
             static_assert(sizeof(T) == 3);
             return T();
         }
-        std::vector<const FHCommonObject*> getAllObjects() const
+
+        template<typename Visitor, typename... Args>
+        static void visit(std::tuple<Args...> const& t, Visitor&& vis)
+        {
+            (..., vis(std::get<Args>(t)));
+        }
+
+        template<typename Visitor, typename... Args>
+        static void visit(std::tuple<Args...>& t, Visitor&& vis)
+        {
+            (..., vis(std::get<Args>(t)));
+        }
+
+        auto getAllContainers() const noexcept
+        {
+            return std::tie(
+                m_resources,
+                m_resourcesRandom,
+                m_artifacts,
+                m_artifactsRandom,
+                m_monsters,
+                m_dwellings,
+                m_banks,
+                m_obstacles,
+                m_visitables,
+                m_controlledVisitables,
+                m_mines,
+                m_abandonedMines,
+                m_pandoras,
+                m_shrines,
+                m_skillHuts,
+                m_scholars,
+                m_questHuts,
+                m_questGuards,
+                m_localEvents,
+                m_signs,
+                m_garisons,
+                m_heroPlaceholders,
+                m_grails);
+        }
+
+        std::vector<const FHCommonObject*> getAllObjects() const noexcept
         {
             std::vector<const FHCommonObject*> result;
-            result.reserve(m_resources.size()
-                           + m_resourcesRandom.size()
-                           + m_artifacts.size()
-                           + m_artifactsRandom.size()
-                           + m_monsters.size()
-                           + m_dwellings.size()
-                           + m_banks.size()
-                           + m_obstacles.size()
-                           + m_visitables.size()
-                           + m_controlledVisitables.size()
-                           + m_mines.size()
-                           + m_pandoras.size()
-                           + m_shrines.size()
-                           + m_skillHuts.size()
-                           + m_scholars.size()
-                           + m_questHuts.size()
-                           + m_questGuards.size()
-                           + m_localEvents.size()
-                           + m_signs.size()
-                           + m_garisons.size()
-                           + m_heroPlaceholders.size());
-            for (auto& obj : m_resources)
-                result.push_back(&obj);
-            for (auto& obj : m_resourcesRandom)
-                result.push_back(&obj);
-            for (auto& obj : m_artifacts)
-                result.push_back(&obj);
-            for (auto& obj : m_artifactsRandom)
-                result.push_back(&obj);
-            for (auto& obj : m_monsters)
-                result.push_back(&obj);
-            for (auto& obj : m_dwellings)
-                result.push_back(&obj);
-            for (auto& obj : m_banks)
-                result.push_back(&obj);
-            for (auto& obj : m_obstacles)
-                result.push_back(&obj);
-            for (auto& obj : m_visitables)
-                result.push_back(&obj);
-            for (auto& obj : m_controlledVisitables)
-                result.push_back(&obj);
-            for (auto& obj : m_mines)
-                result.push_back(&obj);
-            for (auto& obj : m_pandoras)
-                result.push_back(&obj);
-            for (auto& obj : m_shrines)
-                result.push_back(&obj);
-            for (auto& obj : m_skillHuts)
-                result.push_back(&obj);
-            for (auto& obj : m_scholars)
-                result.push_back(&obj);
-            for (auto& obj : m_questHuts)
-                result.push_back(&obj);
-            for (auto& obj : m_questGuards)
-                result.push_back(&obj);
-            for (auto& obj : m_localEvents)
-                result.push_back(&obj);
-            for (auto& obj : m_signs)
-                result.push_back(&obj);
-            for (auto& obj : m_garisons)
-                result.push_back(&obj);
-            for (auto& obj : m_heroPlaceholders)
-                result.push_back(&obj);
+
+            auto   allContainers = getAllContainers();
+            size_t estimateSize  = 0;
+            visit(allContainers, [&estimateSize](auto&& x) {
+                estimateSize += x.size();
+            });
+            result.reserve(estimateSize);
+
+            visit(allContainers, [&result](auto&& x) {
+                for (auto& obj : x)
+                    result.push_back(&obj);
+            });
+
             return result;
         }
     } m_objects;
@@ -548,6 +550,16 @@ struct MAPUTIL_EXPORT FHMap {
         bool m_hasRoundLimit     = false;
         int  m_roundLimit        = 100;
         int  m_levelLimit        = 0;
+
+        struct HotaVersion {
+            uint32_t m_ver1 = 3;
+            uint16_t m_ver2 = 0;
+            uint32_t m_ver3 = 12;
+
+            bool operator==(const HotaVersion&) const noexcept = default;
+        } m_hotaVersion;
+
+        bool operator==(const Config&) const noexcept = default;
     } m_config;
 
     std::vector<FHRiver> m_rivers;
@@ -613,6 +625,15 @@ struct MAPUTIL_EXPORT FHMap {
 
     FHVictoryCondition m_victoryCondition;
     FHLossCondition    m_lossCondition;
+
+    struct Rumor {
+        std::string m_name;
+        std::string m_text;
+
+        bool operator==(const Rumor&) const noexcept = default;
+    };
+
+    std::vector<Rumor> m_rumors;
 
     void toJson(Mernel::PropertyTree& data) const;
     void fromJson(Mernel::PropertyTree data, const Core::IGameDatabase* database);

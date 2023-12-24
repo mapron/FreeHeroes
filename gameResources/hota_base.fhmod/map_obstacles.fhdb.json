@@ -1068,8 +1068,11 @@
 "udrock02"     : [ "udrock02"     ,   "ROCK"                        ],
 "udrock03"     : [ "udrock03"     ,   "ROCK"                        ],
 "udrock05"     : [ "udrock05"     ,   "ROCK"                        ],
+"udrock06"     : [ "udrock06"     ,   "ROCK"                        ],
 
-"avchrnal"     : [ "avchrnal"     ,   "DECORATION"                  ]
+"avchrnal"     : [ "avchrnal"     ,   "DECORATION"                  ],
+
+"avtcvrui"     : [ "avtcvrui"     ,   "DECORATION"                  ]
 
 
 }

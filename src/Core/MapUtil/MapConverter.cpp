@@ -360,6 +360,9 @@ void MapConverter::run(Task task, int recurse) noexcept(false)
             } break;
         }
     }
+    catch (RoundTripException&) {
+        throw;
+    }
     catch (ConverterExpection&) {
         throw;
     }
@@ -654,7 +657,7 @@ void MapConverter::checkBinaryInputOutputEquality()
             return;
         }
         m_logOutput << "Round-trip binary result: FAILED\n";
-        throw std::runtime_error("Failed input == output");
+        throw RoundTripException("Failed input == output");
     };
     if (bufferIn == bufferOut)
         return ret(true);
@@ -720,7 +723,7 @@ void MapConverter::checkJsonInputOutputEquality()
         Mernel::writeFileFromBuffer(jsonDiffOut, Mernel::writeJsonToBuffer(jsonOut, true));
     }
 
-    throw std::runtime_error("Failed input == output");
+    throw RoundTripException("Failed input == output");
 }
 
 void MapConverter::safeCopy(const Mernel::std_path& src, const Mernel::std_path& dest)

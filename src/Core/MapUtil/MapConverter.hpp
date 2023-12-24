@@ -30,6 +30,10 @@ public:
     using RawState          = MapConverterFile::RawState;
     using CompressionMethod = MapConverterFile::CompressionMethod;
 
+    class MAPUTIL_EXPORT RoundTripException : public ::std::runtime_error {
+        using ::std::runtime_error::runtime_error;
+    };
+
     struct BinaryPathsSet {
         Mernel::std_path m_binary;
         Mernel::std_path m_uncompressedBinary;

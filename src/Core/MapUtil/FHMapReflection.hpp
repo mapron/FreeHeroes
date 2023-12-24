@@ -66,6 +66,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_hasSpells,
     m_hasArmy,
     m_hasArts,
+    m_hasName,
+    m_name,
     m_army)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
@@ -250,6 +252,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_guard,
     m_score,
     m_generationId,
+
+    m_visitableId,
 
     m_resources)
 
@@ -483,6 +487,17 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_powerRank)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHGrail,
+    m_pos,
+    m_order,
+    m_defIndex,
+    m_guard,
+    m_score,
+    m_generationId,
+
+    m_radius)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHDebugTile,
     m_pos,
     m_brushColor,
@@ -511,6 +526,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_visitables,
     m_controlledVisitables,
     m_mines,
+    m_abandonedMines,
     m_pandoras,
     m_shrines,
     m_skillHuts,
@@ -520,7 +536,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_localEvents,
     m_signs,
     m_garisons,
-    m_heroPlaceholders)
+    m_heroPlaceholders,
+    m_grails)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHGlobalMapEvent,
@@ -580,12 +597,22 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_days)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHMap::Config::HotaVersion,
+    m_ver1,
+    m_ver2,
+    m_ver3)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHMap::Config,
     m_allowSpecialWeeks,
     m_hasRoundLimit,
     m_roundLimit,
-    m_levelLimit)
-
+    m_levelLimit,
+    m_hotaVersion)
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHMap::Rumor,
+    m_name,
+    m_text)
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHMap,
     m_version,
@@ -596,6 +623,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_descr,
     m_difficulty,
     m_isWaterMap,
+    m_anyPlayers,
     m_players,
     m_wanderingHeroes,
     m_towns,
@@ -616,7 +644,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_globalEvents,
     m_objectDefs,
     m_victoryCondition,
-    m_lossCondition)
+    m_lossCondition,
+    m_rumors)
 
 template<>
 inline constexpr const bool s_isStringMap<FHMap::PlayersMap>{ true };
