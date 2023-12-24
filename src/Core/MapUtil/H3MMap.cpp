@@ -231,7 +231,7 @@ void H3Map::LossCondition::readBinary(ByteOrderDataStreamReader& stream)
         }
         case LossConditionType::TIMEEXPIRES:
         {
-            stream >> m_daysPassed;
+            stream >> m_days;
             break;
         }
         default:
@@ -262,7 +262,7 @@ void H3Map::LossCondition::writeBinary(ByteOrderDataStreamWriter& stream) const
         }
         case LossConditionType::TIMEEXPIRES:
         {
-            stream << m_daysPassed;
+            stream << m_days;
             break;
         }
     }

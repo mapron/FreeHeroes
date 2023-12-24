@@ -502,11 +502,58 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_firstOccurence,
     m_nextOccurence)
 
+ENUM_REFLECTION_STRINGIFY(
+    FHVictoryCondition::Type,
+    WINSTANDARD,
+    ARTIFACT,
+    GATHERTROOP,
+    GATHERRESOURCE,
+    BUILDCITY,
+    BUILDGRAIL,
+    BEATHERO,
+    CAPTURECITY,
+    BEATMONSTER,
+    TAKEDWELLINGS,
+    TAKEMINES,
+    TRANSPORTITEM,
+    DEFEATALL,
+    SURVIVETIME,
+    WINSTANDARD)
+
+ENUM_REFLECTION_STRINGIFY(
+    FHLossCondition::Type,
+    LOSSSTANDARD,
+    LOSSCASTLE,
+    LOSSHERO,
+    TIMEEXPIRES,
+    LOSSSTANDARD)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHVictoryCondition,
+    m_type,
+    m_allowNormalVictory,
+    m_appliesToAI,
+    m_artID,
+    m_creature,
+    m_resourceID,
+    m_resourceAmount,
+    m_pos,
+    m_hallLevel,
+    m_castleLevel,
+    m_days)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHLossCondition,
+    m_type,
+    m_pos,
+    m_days)
+
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHMap::Config,
     m_allowSpecialWeeks,
     m_hasRoundLimit,
-    m_roundLimit)
+    m_roundLimit,
+    m_levelLimit)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHMap,
@@ -534,7 +581,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_disabledSkills,
     m_customHeroes,
     m_globalEvents,
-    m_objectDefs)
+    m_objectDefs,
+    m_victoryCondition,
+    m_lossCondition)
 
 template<>
 inline constexpr const bool s_isStringMap<FHMap::PlayersMap>{ true };

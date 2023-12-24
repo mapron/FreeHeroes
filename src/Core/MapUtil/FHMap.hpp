@@ -345,6 +345,60 @@ struct FHDebugTile {
     std::string m_text;
 };
 
+struct FHVictoryCondition {
+    enum class Type
+    {
+        ARTIFACT,
+        GATHERTROOP,
+        GATHERRESOURCE,
+        BUILDCITY,
+        BUILDGRAIL,
+        BEATHERO,
+        CAPTURECITY,
+        BEATMONSTER,
+        TAKEDWELLINGS,
+        TAKEMINES,
+        TRANSPORTITEM,
+        DEFEATALL = 11,
+        SURVIVETIME,
+        WINSTANDARD = 255
+    };
+
+    Type m_type = Type::WINSTANDARD;
+
+    bool m_allowNormalVictory = false;
+    bool m_appliesToAI        = false;
+
+    Core::LibraryArtifactConstPtr m_artID = nullptr;
+
+    Core::UnitWithCount m_creature;
+
+    Core::LibraryResourceConstPtr m_resourceID     = nullptr;
+    uint32_t                      m_resourceAmount = 0;
+
+    FHPos   m_pos;
+    uint8_t m_hallLevel   = 0;
+    uint8_t m_castleLevel = 0;
+
+    uint32_t m_days = 0;
+
+    bool operator==(const FHVictoryCondition&) const noexcept = default;
+};
+struct FHLossCondition {
+    enum class Type
+    {
+        LOSSCASTLE,
+        LOSSHERO,
+        TIMEEXPIRES,
+        LOSSSTANDARD = 255
+    };
+    Type     m_type = Type::LOSSSTANDARD;
+    uint16_t m_days = 0;
+    FHPos    m_pos;
+
+    bool operator==(const FHLossCondition&) const noexcept = default;
+};
+
 struct MAPUTIL_EXPORT FHMap {
     using PlayersMap = std::map<Core::LibraryPlayerConstPtr, FHPlayer>;
     using DefMap     = std::map<Core::LibraryObjectDefConstPtr, Core::LibraryObjectDef>;
@@ -471,6 +525,7 @@ struct MAPUTIL_EXPORT FHMap {
         bool m_allowSpecialWeeks = true;
         bool m_hasRoundLimit     = false;
         int  m_roundLimit        = 100;
+        int  m_levelLimit        = 0;
     } m_config;
 
     std::vector<FHRiver> m_rivers;
@@ -531,6 +586,9 @@ struct MAPUTIL_EXPORT FHMap {
     std::vector<FHGlobalMapEvent> m_globalEvents;
 
     std::vector<Core::LibraryObjectDef> m_objectDefs;
+
+    FHVictoryCondition m_victoryCondition;
+    FHLossCondition    m_lossCondition;
 
     void toJson(Mernel::PropertyTree& data) const;
     void fromJson(Mernel::PropertyTree data, const Core::IGameDatabase* database);

@@ -199,7 +199,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     H3Map::LossCondition,
     m_type,
     m_pos,
-    m_daysPassed)
+    m_days)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     H3Map,

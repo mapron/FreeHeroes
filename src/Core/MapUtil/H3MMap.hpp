@@ -289,8 +289,8 @@ struct H3Map {
         void writeBinary(ByteOrderDataStreamWriter& stream) const;
     };
     struct LossCondition {
-        LossConditionType m_type       = LossConditionType::LOSSSTANDARD;
-        uint16_t          m_daysPassed = 0;
+        LossConditionType m_type = LossConditionType::LOSSSTANDARD;
+        uint16_t          m_days = 0;
         H3Pos             m_pos;
 
         auto operator<=>(const LossCondition&) const = default;

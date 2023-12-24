@@ -198,6 +198,33 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
     dest.m_config.m_hasRoundLimit     = src.m_hotaVer.m_roundLimit != 0xffffffffU;
     if (dest.m_config.m_hasRoundLimit)
         dest.m_config.m_roundLimit = src.m_hotaVer.m_roundLimit;
+    dest.m_config.m_levelLimit = src.m_levelLimit;
+    {
+        auto& srcCond                 = src.m_victoryCondition;
+        auto& destCond                = dest.m_victoryCondition;
+        bool  hasArt                  = srcCond.m_type == H3Map::VictoryConditionType::ARTIFACT || srcCond.m_type == H3Map::VictoryConditionType::TRANSPORTITEM;
+        bool  hasUnit                 = srcCond.m_type == H3Map::VictoryConditionType::GATHERTROOP;
+        bool  hasRes                  = srcCond.m_type == H3Map::VictoryConditionType::GATHERRESOURCE;
+        destCond.m_type               = static_cast<decltype(destCond.m_type)>(srcCond.m_type);
+        destCond.m_allowNormalVictory = srcCond.m_allowNormalVictory;
+        destCond.m_appliesToAI        = srcCond.m_appliesToAI;
+        destCond.m_artID              = hasArt ? m_artifactIds.at(srcCond.m_artID) : 0;
+        destCond.m_creature.unit      = hasUnit ? m_unitIds.at(srcCond.m_creatureID) : 0;
+        destCond.m_creature.count     = hasUnit ? static_cast<uint32_t>(srcCond.m_creatureCount) : 0;
+        destCond.m_resourceID         = hasRes ? m_resourceIds.at(srcCond.m_resourceID) : 0;
+        destCond.m_resourceAmount     = srcCond.m_resourceAmount;
+        destCond.m_pos                = posFromH3M(srcCond.m_pos);
+        destCond.m_hallLevel          = srcCond.m_hallLevel;
+        destCond.m_castleLevel        = srcCond.m_castleLevel;
+        destCond.m_days               = srcCond.m_days;
+    }
+    {
+        auto& srcCond   = src.m_lossCondition;
+        auto& destCond  = dest.m_lossCondition;
+        destCond.m_type = static_cast<decltype(destCond.m_type)>(srcCond.m_type);
+        destCond.m_pos  = posFromH3M(srcCond.m_pos);
+        destCond.m_days = srcCond.m_days;
+    }
 
     std::map<Core::LibraryPlayerConstPtr, FHPos>   mainTowns;
     std::map<Core::LibraryPlayerConstPtr, uint8_t> mainHeroes;

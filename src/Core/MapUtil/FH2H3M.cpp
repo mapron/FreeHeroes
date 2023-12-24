@@ -134,6 +134,31 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
 
     dest.m_hotaVer.m_allowSpecialWeeks = src.m_config.m_allowSpecialWeeks;
     dest.m_hotaVer.m_roundLimit        = src.m_config.m_hasRoundLimit ? src.m_config.m_roundLimit : 0xffffffffU;
+    dest.m_levelLimit                  = static_cast<uint8_t>(src.m_config.m_levelLimit);
+
+    {
+        auto& srcCond                 = src.m_victoryCondition;
+        auto& destCond                = dest.m_victoryCondition;
+        destCond.m_type               = static_cast<decltype(destCond.m_type)>(srcCond.m_type);
+        destCond.m_allowNormalVictory = srcCond.m_allowNormalVictory;
+        destCond.m_appliesToAI        = srcCond.m_appliesToAI;
+        destCond.m_artID              = srcCond.m_artID ? static_cast<uint16_t>(srcCond.m_artID->legacyId) : 0;
+        destCond.m_creatureID         = srcCond.m_creature.unit ? static_cast<uint16_t>(srcCond.m_creature.unit->legacyId) : 0;
+        destCond.m_creatureCount      = static_cast<uint32_t>(srcCond.m_creature.count);
+        destCond.m_resourceID         = srcCond.m_resourceID ? static_cast<uint8_t>(srcCond.m_resourceID->legacyId) : 0;
+        destCond.m_resourceAmount     = srcCond.m_resourceAmount;
+        destCond.m_pos                = int3fromPos(srcCond.m_pos);
+        destCond.m_hallLevel          = srcCond.m_hallLevel;
+        destCond.m_castleLevel        = srcCond.m_castleLevel;
+        destCond.m_days               = srcCond.m_days;
+    }
+    {
+        auto& srcCond   = src.m_lossCondition;
+        auto& destCond  = dest.m_lossCondition;
+        destCond.m_type = static_cast<decltype(destCond.m_type)>(srcCond.m_type);
+        destCond.m_pos  = int3fromPos(srcCond.m_pos);
+        destCond.m_days = srcCond.m_days;
+    }
 
     src.m_tileMap.eachPosTile([&dest](const FHPos& pos, const FHTileMap::Tile& tile) {
         auto& destTile          = dest.m_tiles.get(pos.m_x, pos.m_y, pos.m_z);
