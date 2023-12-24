@@ -654,6 +654,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         }
         auto obj = std::make_unique<MapPandora>();
         convertReward(fhPandora.m_reward, obj->m_reward);
+        convertMessage(fhPandora.m_messageWithBattle, obj->m_message);
 
         addObject(fhPandora, std::move(obj), [&tmplCache] { return tmplCache.addId("ava0128"); });
     }
@@ -723,8 +724,14 @@ void FH2H3MConverter::convertReward(const Core::Reward& fhReward, MapReward& rew
     reward.m_resourceSet.m_resourceAmount = convertResources(fhReward.resources);
     reward.m_primSkillSet.m_prim          = convertPrimaryStats(fhReward.statBonus);
 
-    // @todo: m_secSkills
-    // @todo: m_artifacts
+    for (const auto& artSet : fhReward.artifacts) {
+        for (auto* art : artSet.onlyArtifacts) {
+            reward.m_artifacts.push_back(static_cast<uint16_t>(art->legacyId));
+        }
+    }
+    for (const Core::SkillHeroItem& skill : fhReward.secSkills)
+        reward.m_secSkills.push_back(MapHeroSkill{ .m_id = static_cast<uint8_t>(skill.skill->legacyId), .m_level = static_cast<uint8_t>(skill.level) });
+
     for (auto* spell : fhReward.spells.onlySpells)
         reward.m_spells.push_back(static_cast<uint8_t>(spell->legacyId));
 

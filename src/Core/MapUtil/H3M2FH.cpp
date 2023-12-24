@@ -799,7 +799,8 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 const auto* pandora = static_cast<const MapPandora*>(impl);
                 FHPandora   fhPandora;
                 initCommon(fhPandora);
-                fhPandora.m_reward = convertReward(pandora->m_reward);
+                fhPandora.m_reward            = convertReward(pandora->m_reward);
+                fhPandora.m_messageWithBattle = convertMessage(pandora->m_message);
                 dest.m_objects.m_pandoras.push_back(std::move(fhPandora));
             } break;
             case MapObjectType::GRAIL:

@@ -176,7 +176,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_generationId,
 
     m_reward,
-    m_key)
+    m_key,
+    m_openPandora,
+    m_messageWithBattle)
 
 ENUM_REFLECTION_STRINGIFY(
     FHMonster::UpgradedStack,

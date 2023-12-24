@@ -141,6 +141,8 @@ struct FHPandora : public FHCommonObject {
     std::string  m_key;
     bool         m_openPandora = false; // turn creature to joinable guard
 
+    FHMessageWithBattle m_messageWithBattle;
+
     bool operator==(const FHPandora&) const noexcept = default;
 };
 
