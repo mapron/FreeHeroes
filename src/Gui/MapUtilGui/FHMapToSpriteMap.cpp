@@ -51,6 +51,7 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
 {
     SpriteMap result;
     result.m_planes.resize(fhMap.m_tileMap.m_depth);
+    std::set<const FHCommonObject*> rendered;
 
     auto makeItem = [](const FHPos& pos, int priority = 0) -> SpriteMap::Item {
         SpriteMap::Item item;
@@ -230,6 +231,7 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
                            .setPriority(SpriteMap::s_objectMaxPriority + 1));
     }
     for (auto& obj : fhMap.m_objects.m_resources) {
+        rendered.insert(&obj);
         Core::LibraryObjectDefConstPtr def;
         def = obj.m_id->objectDefs.get({});
 
@@ -246,11 +248,13 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     }
 
     for (auto& obj : fhMap.m_objects.m_resourcesRandom) {
+        rendered.insert(&obj);
         std::string id = "avtrndm0";
         result.addItem(makeItemById(SpriteMap::Layer::Resource, id, obj.m_pos));
     }
 
     for (auto& obj : fhMap.m_objects.m_artifacts) {
+        rendered.insert(&obj);
         auto* def = obj.m_id->objectDefs.get({});
 
         auto* item = result.addItem(makeItemByDef(SpriteMap::Layer::Artifact, def, obj.m_pos).addInfo("id", obj.m_id->id));
@@ -261,6 +265,7 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         }
     }
     for (auto& obj : fhMap.m_objects.m_artifactsRandom) {
+        rendered.insert(&obj);
         std::string id = "";
         switch (obj.m_type) {
             case FHRandomArtifact::Type::Any:
@@ -285,6 +290,7 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     }
 
     for (auto& obj : fhMap.m_objects.m_monsters) {
+        rendered.insert(&obj);
         auto pos = obj.m_pos;
         pos.m_x += 1;
 
@@ -301,12 +307,14 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     }
 
     for (auto& obj : fhMap.m_objects.m_dwellings) {
+        rendered.insert(&obj);
         auto* def        = obj.m_id->objectDefs.get(obj.m_defIndex);
         auto* item       = result.addItem(makeItemByDef(SpriteMap::Layer::Dwelling, def, obj.m_pos).addInfo("id", obj.m_id->id));
         item->m_keyColor = makePlayerColor(obj.m_player);
         addValueInfo(item, obj);
     }
     for (auto& obj : fhMap.m_objects.m_mines) {
+        rendered.insert(&obj);
         auto* def        = obj.m_id->minesDefs.get(obj.m_defIndex);
         auto* item       = result.addItem(makeItemByDef(SpriteMap::Layer::Mine, def, obj.m_pos).addInfo("id", obj.m_id->id));
         item->m_keyColor = makePlayerColor(obj.m_player);
@@ -314,6 +322,7 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     }
 
     for (auto& obj : fhMap.m_objects.m_banks) {
+        rendered.insert(&obj);
         auto* def               = obj.m_id->objectDefs.get(obj.m_defIndex);
         auto  strCount          = obj.m_guardsVariant < 0 ? "R" : std::to_string(obj.m_guardsVariant + 1);
         auto* item              = result.addItem(makeItemByDef(SpriteMap::Layer::Bank, def, obj.m_pos).addInfo("id", obj.m_id->id).addInfo("size", strCount));
@@ -337,20 +346,24 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         }
     }
     for (auto& obj : fhMap.m_objects.m_obstacles) {
+        rendered.insert(&obj);
         auto* def = obj.m_id->objectDefs.get(obj.m_defIndex);
         addValueInfo(result.addItem(makeItemByDef(SpriteMap::Layer::Decoration, def, obj.m_pos).addInfo("id", obj.m_id->id)), obj);
     }
     for (auto& obj : fhMap.m_objects.m_visitables) {
+        rendered.insert(&obj);
         auto* def = obj.m_visitableId->objectDefs.get(obj.m_defIndex);
         addValueInfo(result.addItem(makeItemByDef(SpriteMap::Layer::GeneralVisitable, def, obj.m_pos).addInfo("id", obj.m_visitableId->id)), obj);
     }
     for (auto& obj : fhMap.m_objects.m_controlledVisitables) {
+        rendered.insert(&obj);
         auto* def        = obj.m_visitableId->objectDefs.get(obj.m_defIndex);
         auto* item       = result.addItem(makeItemByDef(SpriteMap::Layer::GeneralVisitable, def, obj.m_pos).addInfo("id", obj.m_visitableId->id));
         item->m_keyColor = makePlayerColor(obj.m_player);
         addValueInfo(item, obj);
     }
     for (auto& obj : fhMap.m_objects.m_shrines) {
+        rendered.insert(&obj);
         auto* def  = obj.m_visitableId->objectDefs.get(obj.m_defIndex);
         auto* item = result.addItem(makeItemByDef(SpriteMap::Layer::Shrine, def, obj.m_pos).addInfo("id", obj.m_visitableId->id));
         addValueInfo(item, obj);
@@ -360,29 +373,35 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         }
     }
     for (auto& obj : fhMap.m_objects.m_skillHuts) {
+        rendered.insert(&obj);
         auto* def = obj.m_visitableId->objectDefs.get(obj.m_defIndex);
         addValueInfo(result.addItem(makeItemByDef(SpriteMap::Layer::SkillHut, def, obj.m_pos).addInfo("id", obj.m_visitableId->id)), obj);
     }
     for (auto& obj : fhMap.m_objects.m_scholars) {
+        rendered.insert(&obj);
         auto* def = obj.m_visitableId->objectDefs.get(obj.m_defIndex);
         addValueInfo(result.addItem(makeItemByDef(SpriteMap::Layer::Scholar, def, obj.m_pos).addInfo("id", obj.m_visitableId->id)), obj);
     }
 
     for (auto& obj : fhMap.m_objects.m_questHuts) {
+        rendered.insert(&obj);
         auto* def = obj.m_visitableId->objectDefs.get(obj.m_defIndex);
         addValueInfo(result.addItem(makeItemByDef(SpriteMap::Layer::QuestHut, def, obj.m_pos).addInfo("id", obj.m_visitableId->id)), obj);
     }
     for (auto& obj : fhMap.m_objects.m_questGuards) {
+        rendered.insert(&obj);
         auto* def = obj.m_visitableId->objectDefs.get(obj.m_defIndex);
         addValueInfo(result.addItem(makeItemByDef(SpriteMap::Layer::QuestGuard, def, obj.m_pos).addInfo("id", obj.m_visitableId->id)), obj);
     }
     for (auto& obj : fhMap.m_objects.m_localEvents) {
+        rendered.insert(&obj);
         std::string id    = "avzevnt0";
         auto*       item  = result.addItem(makeItemById(SpriteMap::Layer::Event, id, obj.m_pos));
         item->m_blockMask = g_oneTileMask;
         addValueInfo(item, obj);
     }
     for (auto& obj : fhMap.m_objects.m_heroPlaceholders) {
+        rendered.insert(&obj);
         auto pos = obj.m_pos;
         pos.m_x += 1;
 
@@ -391,12 +410,14 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         addValueInfo(item, obj);
     }
     for (auto& obj : fhMap.m_objects.m_grails) {
+        rendered.insert(&obj);
         std::string id   = "avzgrail";
         auto*       item = result.addItem(makeItemById(SpriteMap::Layer::Artifact, id, obj.m_pos));
         addValueInfo(item, obj);
     }
 
     for (auto& obj : fhMap.m_objects.m_pandoras) {
+        rendered.insert(&obj);
         bool        water = fhMap.m_tileMap.get(obj.m_pos).m_terrain->id == Core::LibraryTerrain::s_terrainWater;
         std::string id    = water ? "ava0128w" : "ava0128";
         auto*       item  = result.addItem(makeItemById(SpriteMap::Layer::Pandora, id, obj.m_pos));
@@ -416,6 +437,17 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         item->m_overlayInfo        = obj.m_key;
         item->m_overlayInfoOffsetX = 0;
         addValueInfo(item, obj);
+    }
+    if (0) {
+        auto                            allObj = fhMap.m_objects.getAllObjects();
+        std::set<const FHCommonObject*> allSet(allObj.cbegin(), allObj.cend());
+
+        std::vector<const FHCommonObject*> diff;
+
+        std::set_difference(allSet.begin(), allSet.end(), rendered.begin(), rendered.end(), std::inserter(diff, diff.begin()));
+
+        if (diff.size() != 0)
+            throw std::runtime_error("Not all objects are rendered: " + std::to_string(diff.size()));
     }
 
     result.m_width  = fhMap.m_tileMap.m_width;

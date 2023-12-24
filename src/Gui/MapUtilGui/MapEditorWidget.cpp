@@ -306,12 +306,8 @@ MapEditorWidget::~MapEditorWidget()
 void MapEditorWidget::loadUserSettings()
 {
     Mernel::PropertyTree jdata = m_appSettings->loadCustomJson(g_customSettingsName);
-    m_impl->m_viewSettings.fromJson(jdata);
-    //m_impl->m_viewSettingsWidget->updateUI();
-    /*connect(this, &IEditor::needUpdateUI, this, [this]() {
-        for (auto* ed : m_editors)
-            ed->updateUI();
-    });*/
+    if (jdata.isMap())
+        m_impl->m_viewSettings.fromJson(jdata);
 }
 
 void MapEditorWidget::saveUserSettings()
