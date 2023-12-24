@@ -523,6 +523,11 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         auto obj = std::make_unique<MapObjectSimple>();
         addObjectVisitable(fhVisitable, std::move(obj));
     }
+    for (auto& fhVisitable : src.m_objects.m_controlledVisitables) {
+        auto obj     = std::make_unique<MapObjectWithOwner>();
+        obj->m_owner = static_cast<uint8_t>(fhVisitable.m_player->legacyId);
+        addObjectVisitable(fhVisitable, std::move(obj));
+    }
     for (auto& fhShrine : src.m_objects.m_shrines) {
         auto obj = std::make_unique<MapShrine>();
         if (fhShrine.m_spellId)
@@ -603,7 +608,27 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
 
         addObject(fhEvent, std::move(obj), [&tmplCache] { return tmplCache.addId("avzevnt0"); });
     }
+    for (auto& fhSign : src.m_objects.m_signs) {
+        auto obj       = std::make_unique<MapSignBottle>();
+        obj->m_message = fhSign.m_text;
 
+        addObjectVisitable(fhSign, std::move(obj));
+    }
+    for (auto& fhGarison : src.m_objects.m_garisons) {
+        auto obj = std::make_unique<MapGarison>();
+        convertSquad(fhGarison.m_garison, obj->m_garison);
+        obj->m_owner          = static_cast<uint8_t>(fhGarison.m_player->legacyId);
+        obj->m_removableUnits = fhGarison.m_removableUnits;
+
+        addObjectVisitable(fhGarison, std::move(obj));
+    }
+    for (auto& fhObj : src.m_objects.m_heroPlaceholders) {
+        auto obj         = std::make_unique<MapHeroPlaceholder>();
+        obj->m_owner     = static_cast<uint8_t>(fhObj.m_player->legacyId);
+        obj->m_hero      = fhObj.m_hero;
+        obj->m_powerRank = fhObj.m_powerRank;
+        addObject(fhObj, std::move(obj), [&tmplCache] { return tmplCache.addId("ahplace"); });
+    }
     for (auto& fhEvent : src.m_globalEvents) {
         GlobalMapEvent event;
         event.prepareArrays(dest.m_features.get());

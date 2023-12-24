@@ -390,7 +390,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
 
             case MapObjectType::RANDOM_HERO:
             {
-                // @todo:
+                assert(!"unsupported");
             } break;
             case MapObjectType::MONSTER:
             case MapObjectType::RANDOM_MONSTER:
@@ -462,8 +462,15 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             case MapObjectType::SIGN:
             {
                 const auto* bottle = static_cast<const MapSignBottle*>(impl);
-                (void) bottle;
-                assert(1 && bottle);
+
+                if (!mappings.mapVisitable)
+                    throw std::runtime_error("Unknown def for visitable:" + objDefEmbedded.id);
+
+                FHSign fhVisitable;
+                initCommon(fhVisitable);
+                fhVisitable.m_text        = bottle->m_message;
+                fhVisitable.m_visitableId = mappings.mapVisitable;
+                dest.m_objects.m_signs.push_back(std::move(fhVisitable));
             } break;
             case MapObjectType::SEER_HUT:
             {
@@ -531,8 +538,17 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             case MapObjectType::GARRISON2:
             {
                 const auto* garison = static_cast<const MapGarison*>(impl);
-                (void) garison;
-                assert(1 && garison);
+                if (!mappings.mapVisitable)
+                    throw std::runtime_error("Unknown def for visitable:" + objDefEmbedded.id);
+
+                FHGarison fhVisitable;
+                initCommon(fhVisitable);
+                fhVisitable.m_player         = m_playerIds.at(garison->m_owner);
+                fhVisitable.m_removableUnits = garison->m_removableUnits;
+                fhVisitable.m_visitableId    = mappings.mapVisitable;
+                fhVisitable.m_garison        = convertSquad(garison->m_garison);
+                dest.m_objects.m_garisons.push_back(std::move(fhVisitable));
+
             } break;
             case MapObjectType::ARTIFACT:
             case MapObjectType::SPELL_SCROLL:
@@ -633,9 +649,8 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                     const auto*     objOwner = static_cast<const MapAbandonedMine*>(impl);
                     FHAbandonedMine mine;
                     initCommon(mine);
-                    (void) objOwner; // @todo:
-                                     //mine.m_id     = mappings.resourceMine;
-                                     //dest.m_objects.m_mines.push_back(std::move(mine));
+                    assert(!"Unsupported");
+                    (void) objOwner;
                 }
             } break;
             case MapObjectType::CREATURE_GENERATOR1:
@@ -663,8 +678,16 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             case MapObjectType::LIGHTHOUSE:
             {
                 const auto* objOwner = static_cast<const MapObjectWithOwner*>(impl);
-                (void) objOwner;
-                //assert(!"unsupported");
+
+                if (!mappings.mapVisitable)
+                    throw std::runtime_error("Unknown def for visitable:" + objDefEmbedded.id);
+
+                FHVisitableControlled fhVisitable;
+                initCommon(fhVisitable);
+                fhVisitable.m_player      = m_playerIds.at(objOwner->m_owner);
+                fhVisitable.m_visitableId = mappings.mapVisitable;
+                dest.m_objects.m_controlledVisitables.push_back(std::move(fhVisitable));
+
             } break;
             case MapObjectType::SHRINE_OF_MAGIC_INCANTATION:
             case MapObjectType::SHRINE_OF_MAGIC_GESTURE:
@@ -708,7 +731,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             {
                 const auto* grail = static_cast<const MapGrail*>(impl);
                 (void) grail;
-                assert(0 && grail);
+                assert(!"unsupported");
             } break;
             case MapObjectType::QUEST_GUARD:
             {
@@ -730,14 +753,20 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             {
                 const auto* mapDwelling = static_cast<const MapDwelling*>(impl);
                 (void) mapDwelling;
-                assert(0 && mapDwelling);
+                assert(!"unsupported");
             } break;
 
             case MapObjectType::HERO_PLACEHOLDER:
             {
                 const auto* mapPlaceholder = static_cast<const MapHeroPlaceholder*>(impl);
-                (void) mapPlaceholder;
-                assert(1 && mapPlaceholder);
+
+                FHHeroPlaceholder fhObj;
+                initCommon(fhObj);
+                fhObj.m_player    = m_playerIds.at(mapPlaceholder->m_owner);
+                fhObj.m_hero      = mapPlaceholder->m_hero;
+                fhObj.m_powerRank = mapPlaceholder->m_powerRank;
+                dest.m_objects.m_heroPlaceholders.push_back(std::move(fhObj));
+
             } break;
             case MapObjectType::CREATURE_BANK:
             case MapObjectType::DERELICT_SHIP:
@@ -792,6 +821,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 if (!skipped.contains(objTempl.m_id)) {
                     skipped.insert(objTempl.m_id);
                     Logger(Logger::Warning) << "Skipping unsupported object def: " << objDefEmbedded.id << " of type " << objTempl.m_id;
+                    assert(!"unsupported");
                 }
             } break;
         }

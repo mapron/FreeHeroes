@@ -271,6 +271,32 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_visitableId)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHVisitableControlled,
+    m_pos,
+    m_order,
+    m_defIndex,
+    m_guard,
+    m_score,
+    m_generationId,
+
+    m_visitableId,
+
+    m_player)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHSign,
+    m_pos,
+    m_order,
+    m_defIndex,
+    m_guard,
+    m_score,
+    m_generationId,
+
+    m_visitableId,
+
+    m_text)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHShrine,
     m_pos,
     m_order,
@@ -397,6 +423,35 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_humanActivate)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHGarison,
+    m_pos,
+    m_order,
+    m_defIndex,
+    m_guard,
+    m_score,
+    m_generationId,
+
+    m_visitableId,
+    m_player,
+
+    m_garison,
+    m_removableUnits)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHHeroPlaceholder,
+    m_pos,
+    m_order,
+    m_defIndex,
+    m_guard,
+    m_score,
+    m_generationId,
+
+    m_player,
+
+    m_hero,
+    m_powerRank)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHDebugTile,
     m_pos,
     m_brushColor,
@@ -423,6 +478,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_banks,
     m_obstacles,
     m_visitables,
+    m_controlledVisitables,
     m_mines,
     m_pandoras,
     m_shrines,
@@ -430,7 +486,10 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_scholars,
     m_questHuts,
     m_questGuards,
-    m_localEvents)
+    m_localEvents,
+    m_signs,
+    m_garisons,
+    m_heroPlaceholders)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHGlobalMapEvent,

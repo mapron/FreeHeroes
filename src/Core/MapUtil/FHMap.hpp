@@ -196,6 +196,16 @@ struct FHObstacle : public FHCommonObject {
 struct FHVisitable : public FHCommonVisitable {
     bool operator==(const FHVisitable&) const noexcept = default;
 };
+struct FHVisitableControlled : public FHCommonVisitable {
+    Core::LibraryPlayerConstPtr m_player = nullptr;
+
+    bool operator==(const FHVisitableControlled&) const noexcept = default;
+};
+struct FHSign : public FHCommonVisitable {
+    bool operator==(const FHSign&) const noexcept = default;
+
+    std::string m_text;
+};
 
 struct FHShrine : public FHCommonVisitable {
     Core::LibrarySpellConstPtr m_spellId     = nullptr;
@@ -286,6 +296,19 @@ struct FHLocalEvent : public FHCommonVisitable {
     bool operator==(const FHLocalEvent&) const noexcept = default;
 };
 
+struct FHGarison : public FHVisitableControlled {
+    Core::AdventureSquad m_garison;
+    bool                 m_removableUnits = true;
+
+    bool operator==(const FHGarison&) const noexcept = default;
+};
+struct FHHeroPlaceholder : public FHPlayerControlledObject {
+    uint8_t m_hero      = 0;
+    uint8_t m_powerRank = 0;
+
+    bool operator==(const FHHeroPlaceholder&) const noexcept = default;
+};
+
 struct FHGlobalMapEvent {
     std::string m_name;
     std::string m_message;
@@ -345,30 +368,29 @@ struct MAPUTIL_EXPORT FHMap {
     FHTemplate               m_template;
 
     struct Objects {
-        std::vector<FHResource>       m_resources;
-        std::vector<FHRandomResource> m_resourcesRandom;
-        std::vector<FHArtifact>       m_artifacts;
-        std::vector<FHRandomArtifact> m_artifactsRandom;
-        std::vector<FHMonster>        m_monsters;
-        std::vector<FHDwelling>       m_dwellings;
-        std::vector<FHBank>           m_banks;
-        std::vector<FHObstacle>       m_obstacles;
-        std::vector<FHVisitable>      m_visitables;
-        std::vector<FHMine>           m_mines;
-        std::vector<FHPandora>        m_pandoras;
-        std::vector<FHShrine>         m_shrines;
-        std::vector<FHSkillHut>       m_skillHuts;
-        std::vector<FHScholar>        m_scholars;
-        std::vector<FHQuestHut>       m_questHuts;
-        std::vector<FHQuestGuard>     m_questGuards;
-        std::vector<FHLocalEvent>     m_localEvents;
+        std::vector<FHResource>            m_resources;
+        std::vector<FHRandomResource>      m_resourcesRandom;
+        std::vector<FHArtifact>            m_artifacts;
+        std::vector<FHRandomArtifact>      m_artifactsRandom;
+        std::vector<FHMonster>             m_monsters;
+        std::vector<FHDwelling>            m_dwellings;
+        std::vector<FHBank>                m_banks;
+        std::vector<FHObstacle>            m_obstacles;
+        std::vector<FHVisitable>           m_visitables;
+        std::vector<FHVisitableControlled> m_controlledVisitables;
+        std::vector<FHMine>                m_mines;
+        std::vector<FHPandora>             m_pandoras;
+        std::vector<FHShrine>              m_shrines;
+        std::vector<FHSkillHut>            m_skillHuts;
+        std::vector<FHScholar>             m_scholars;
+        std::vector<FHQuestHut>            m_questHuts;
+        std::vector<FHQuestGuard>          m_questGuards;
+        std::vector<FHLocalEvent>          m_localEvents;
+        std::vector<FHSign>                m_signs;
+        std::vector<FHGarison>             m_garisons;
+        std::vector<FHHeroPlaceholder>     m_heroPlaceholders;
 
-        template<typename T>
-        inline const std::vector<T>& container() const noexcept
-        {
-            static_assert(sizeof(T) == 3);
-            return T();
-        }
+        // only needed for RMG objects.
         template<typename T>
         inline std::vector<T>& container() noexcept
         {
@@ -387,6 +409,7 @@ struct MAPUTIL_EXPORT FHMap {
                            + m_banks.size()
                            + m_obstacles.size()
                            + m_visitables.size()
+                           + m_controlledVisitables.size()
                            + m_mines.size()
                            + m_pandoras.size()
                            + m_shrines.size()
@@ -394,7 +417,10 @@ struct MAPUTIL_EXPORT FHMap {
                            + m_scholars.size()
                            + m_questHuts.size()
                            + m_questGuards.size()
-                           + m_localEvents.size());
+                           + m_localEvents.size()
+                           + m_signs.size()
+                           + m_garisons.size()
+                           + m_heroPlaceholders.size());
             for (auto& obj : m_resources)
                 result.push_back(&obj);
             for (auto& obj : m_resourcesRandom)
@@ -413,6 +439,8 @@ struct MAPUTIL_EXPORT FHMap {
                 result.push_back(&obj);
             for (auto& obj : m_visitables)
                 result.push_back(&obj);
+            for (auto& obj : m_controlledVisitables)
+                result.push_back(&obj);
             for (auto& obj : m_mines)
                 result.push_back(&obj);
             for (auto& obj : m_pandoras)
@@ -428,6 +456,12 @@ struct MAPUTIL_EXPORT FHMap {
             for (auto& obj : m_questGuards)
                 result.push_back(&obj);
             for (auto& obj : m_localEvents)
+                result.push_back(&obj);
+            for (auto& obj : m_signs)
+                result.push_back(&obj);
+            for (auto& obj : m_garisons)
+                result.push_back(&obj);
+            for (auto& obj : m_heroPlaceholders)
                 result.push_back(&obj);
             return result;
         }
@@ -509,41 +543,22 @@ struct MAPUTIL_EXPORT FHMap {
 };
 
 // clang-format off
-template <> inline const std::vector<FHResource>       &       FHMap::Objects::container() const noexcept { return m_resources;}
-template <> inline const std::vector<FHRandomResource> &       FHMap::Objects::container() const noexcept { return m_resourcesRandom;}
-template <> inline const std::vector<FHArtifact>       &       FHMap::Objects::container() const noexcept { return m_artifacts;}
-template <> inline const std::vector<FHRandomArtifact> &       FHMap::Objects::container() const noexcept { return m_artifactsRandom;}
-template <> inline const std::vector<FHMonster>        &       FHMap::Objects::container() const noexcept { return m_monsters;}
-template <> inline const std::vector<FHDwelling>       &       FHMap::Objects::container() const noexcept { return m_dwellings;}
-template <> inline const std::vector<FHBank>           &       FHMap::Objects::container() const noexcept { return m_banks;}
-template <> inline const std::vector<FHObstacle>       &       FHMap::Objects::container() const noexcept { return m_obstacles;}
-template <> inline const std::vector<FHVisitable>      &       FHMap::Objects::container() const noexcept { return m_visitables;}
-template <> inline const std::vector<FHMine>           &       FHMap::Objects::container() const noexcept { return m_mines;}
-template <> inline const std::vector<FHPandora>        &       FHMap::Objects::container() const noexcept { return m_pandoras;}
-template <> inline const std::vector<FHShrine>         &       FHMap::Objects::container() const noexcept { return m_shrines;}
-template <> inline const std::vector<FHSkillHut>       &       FHMap::Objects::container() const noexcept { return m_skillHuts;}
-template <> inline const std::vector<FHScholar>        &       FHMap::Objects::container() const noexcept { return m_scholars;}
-template <> inline const std::vector<FHQuestHut>       &       FHMap::Objects::container() const noexcept { return m_questHuts;}
-template <> inline const std::vector<FHQuestGuard>     &       FHMap::Objects::container() const noexcept { return m_questGuards;}
-template <> inline const std::vector<FHLocalEvent>     &       FHMap::Objects::container() const noexcept { return m_localEvents;}
-
-template <> inline       std::vector<FHResource>       &       FHMap::Objects::container()       noexcept { return m_resources;}
-template <> inline       std::vector<FHRandomResource> &       FHMap::Objects::container()       noexcept { return m_resourcesRandom;}
-template <> inline       std::vector<FHArtifact>       &       FHMap::Objects::container()       noexcept { return m_artifacts;}
-template <> inline       std::vector<FHRandomArtifact> &       FHMap::Objects::container()       noexcept { return m_artifactsRandom;}
-template <> inline       std::vector<FHMonster>        &       FHMap::Objects::container()       noexcept { return m_monsters;}
-template <> inline       std::vector<FHDwelling>       &       FHMap::Objects::container()       noexcept { return m_dwellings;}
-template <> inline       std::vector<FHBank>           &       FHMap::Objects::container()       noexcept { return m_banks;}
-template <> inline       std::vector<FHObstacle>       &       FHMap::Objects::container()       noexcept { return m_obstacles;}
-template <> inline       std::vector<FHVisitable>      &       FHMap::Objects::container()       noexcept { return m_visitables;}
-template <> inline       std::vector<FHMine>           &       FHMap::Objects::container()       noexcept { return m_mines;}
-template <> inline       std::vector<FHPandora>        &       FHMap::Objects::container()       noexcept { return m_pandoras;}
-template <> inline       std::vector<FHShrine>         &       FHMap::Objects::container()       noexcept { return m_shrines;}
-template <> inline       std::vector<FHSkillHut>       &       FHMap::Objects::container()       noexcept { return m_skillHuts;}
-template <> inline       std::vector<FHScholar>        &       FHMap::Objects::container()       noexcept { return m_scholars;}
-template <> inline       std::vector<FHQuestHut>       &       FHMap::Objects::container()       noexcept { return m_questHuts;}
-template <> inline       std::vector<FHQuestGuard>     &       FHMap::Objects::container()       noexcept { return m_questGuards;}
-template <> inline       std::vector<FHLocalEvent>     &       FHMap::Objects::container()       noexcept { return m_localEvents;}
+template <> inline       std::vector<FHResource>                  &       FHMap::Objects::container()       noexcept { return m_resources;}
+template <> inline       std::vector<FHRandomResource>            &       FHMap::Objects::container()       noexcept { return m_resourcesRandom;}
+template <> inline       std::vector<FHArtifact>                  &       FHMap::Objects::container()       noexcept { return m_artifacts;}
+template <> inline       std::vector<FHRandomArtifact>            &       FHMap::Objects::container()       noexcept { return m_artifactsRandom;}
+template <> inline       std::vector<FHMonster>                   &       FHMap::Objects::container()       noexcept { return m_monsters;}
+template <> inline       std::vector<FHDwelling>                  &       FHMap::Objects::container()       noexcept { return m_dwellings;}
+template <> inline       std::vector<FHBank>                      &       FHMap::Objects::container()       noexcept { return m_banks;}
+template <> inline       std::vector<FHObstacle>                  &       FHMap::Objects::container()       noexcept { return m_obstacles;}
+template <> inline       std::vector<FHVisitable>                 &       FHMap::Objects::container()       noexcept { return m_visitables;}
+template <> inline       std::vector<FHVisitableControlled>       &       FHMap::Objects::container()       noexcept { return m_controlledVisitables;}
+template <> inline       std::vector<FHMine>                      &       FHMap::Objects::container()       noexcept { return m_mines;}
+template <> inline       std::vector<FHPandora>                   &       FHMap::Objects::container()       noexcept { return m_pandoras;}
+template <> inline       std::vector<FHShrine>                    &       FHMap::Objects::container()       noexcept { return m_shrines;}
+template <> inline       std::vector<FHSkillHut>                  &       FHMap::Objects::container()       noexcept { return m_skillHuts;}
+template <> inline       std::vector<FHScholar>                   &       FHMap::Objects::container()       noexcept { return m_scholars;}
+template <> inline       std::vector<FHGarison>                   &       FHMap::Objects::container()       noexcept { return m_garisons;}
 // clang-format on
 
 }

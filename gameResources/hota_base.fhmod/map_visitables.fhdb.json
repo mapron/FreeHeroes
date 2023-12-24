@@ -119,14 +119,23 @@
                                                 "sod.visitable.monolithWater"              : [ ""          ,        0 ,    1000  , "avxmn9bw" ],
 
 
-"sod.visitable.boardGate"                  : [ ""              ,        0 ,    1000  , "avxbgt10"  ],
+
 "sod.visitable.borderGate"                 : [ ""              ,        0 ,    1000  , { "m" : {"": "avxbgt00", "A": "avxbgt10", "B": "avxbgt20", "C": "avxbgt30", "D": "avxbgt40", "E": "avxbgt50", "F": "avxbgt60", "G": "avxbgt70",
     "W": "avxwgtwh", "WA": "avxwgtbk", "WB": "avxwgtbl", "WC": "avxwgtbr", "WD": "avxwgtgr", "WE": "avxwgtlb", "WF": "avxwgtqu", "WG": "avxwgtrd", "WH": "avxwgtvl"}} ],
 "sod.visitable.borderGuard"                : [ ""              ,        0 ,    1000  , { "m" : {"": "avxbor00", "A": "avxbor10", "B": "avxbor20", "C": "avxbor30", "D": "avxbor40", "E": "avxbor50", "F": "avxbor60", "G": "avxbor70", "H": "avxbor80",
     "W": "avxwbor0", "WA": "avxwbor1", "WB": "avxwbor2", "WC": "avxwbor3", "WD": "avxwbor4", "WE": "avxwbor5", "WF": "avxwbor6", "WG": "avxwbor7", "WH": "avxwbor8"}} ],
 "sod.visitable.keyTent"                    : [ ""              ,        0 ,    1000  , { "m" : {"": "avxkey00", "A": "avxkey10", "B": "avxkey20", "C": "avxkey30", "D": "avxkey40", "E": "avxkey50", "F": "avxkey60", "G": "avxkey70"}} ],
 "sod.visitable.whirlpool"                  : [ ""              ,        0 ,    1000  , "avxwhrl0" ],
-"sod.visitable.boat"                       : [ ""              ,        0 ,    1000  , { "m" : {"": "avxboat0", "A": "avxboat1", "B": "avxboat2", "C": "avxboat4", "D": "avxboat5", "E": "avxboat6"} } ]
+"sod.visitable.boat"                       : [ ""              ,        0 ,    1000  , { "m" : {"": "avxboat0", "A": "avxboat1", "B": "avxboat2", "C": "avxboat4", "D": "avxboat5", "E": "avxboat6"} } ],
+
+"sod.visitable.shipyard"                   : [ ""              ,        0 ,    1000  , "avxshyd0"  ],
+"sod.visitable.lighthouse"                 : [ ""              ,        0 ,    1000  , "avxlths0"  ],
+"sod.visitable.sign"                       : [ ""              ,        0 ,    1000  , { "m" : {"": "avxsndg0", "SD": "avxsnds0", "LV": "avxsnlv0", "SN": "avxsnsn0", "SW": "avxsnsw0", "WA": "avxsnwst", "HI": "avxsnhl", "WT": "avxbttl0" } }  ],
+
+"sod.visitable.garisonVert"                : [ ""              ,        0 ,    1000  , { "m" : {"": "avcvgr", "WT" : "avcvgrw"} }  ],
+"sod.visitable.garisonHor"                 : [ ""              ,        0 ,    1000  , { "m" : {"": "avcgar10", "WT" : "avcgarw1"} }  ],
+"sod.visitable.garisonVertMagic"           : [ ""              ,        0 ,    1000  , { "m" : {"": "avcvgarm"} }  ],
+"sod.visitable.garisonHorMagic"            : [ ""              ,        0 ,    1000  , { "m" : {"": "avcgar20"} }  ]
 
 }
 
