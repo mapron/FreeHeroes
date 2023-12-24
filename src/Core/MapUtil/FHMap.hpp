@@ -496,8 +496,7 @@ struct MAPUTIL_EXPORT FHMap {
 
     std::vector<FHGlobalMapEvent> m_globalEvents;
 
-    std::vector<Core::LibraryObjectDefConstPtr> m_initialObjectDefs; // mostly for round-trip.
-    DefMap                                      m_defReplacements;   // mostly for round-trip.
+    std::vector<Core::LibraryObjectDef> m_objectDefs;
 
     void toJson(Mernel::PropertyTree& data) const;
     void fromJson(Mernel::PropertyTree data, const Core::IGameDatabase* database);

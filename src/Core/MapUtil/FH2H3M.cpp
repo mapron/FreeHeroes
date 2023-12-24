@@ -40,17 +40,13 @@ public:
         return index;
     }
 
-    uint32_t add(Core::LibraryObjectDefConstPtr record, bool skipIndexCheck = false)
+    uint32_t add(Core::LibraryObjectDefConstPtr record)
     {
         assert(record);
-        if (!skipIndexCheck && m_index.contains(record))
+        if (m_index.contains(record))
             return m_index.at(record);
 
         ObjectTemplate res = makeTemplateFromRecord(record);
-        if (m_replacements.contains(record)) {
-            Core::LibraryObjectDef& replacement = m_replacements[record];
-            res                                 = makeTemplateFromRecord(&replacement);
-        }
 
         if (res.m_animationFile.find('.') == std::string::npos)
             res.m_animationFile += ".def";
@@ -92,10 +88,22 @@ public:
             .m_type         = static_cast<ObjectTemplate::Type>(record->type),
             .m_drawPriority = static_cast<uint8_t>(record->priority),
         };
+        if (!Mernel::strToLower(res.m_animationFile).ends_with(".def"))
+            res.m_animationFile += ".def";
         return res;
     }
 
-    std::map<Core::LibraryObjectDefConstPtr, Core::LibraryObjectDef> m_replacements;
+    void init(const std::vector<Core::LibraryObjectDef>& fhDefs)
+    {
+        m_objectDefs.resize(fhDefs.size());
+        for (size_t i = 0; i < fhDefs.size(); ++i) {
+            Core::LibraryObjectDefConstPtr embedded = &fhDefs[i];
+            m_objectDefs[i]                         = makeTemplateFromRecord(embedded);
+            if (embedded->substituteFor) {
+                m_index[embedded->substituteFor] = static_cast<uint32_t>(i);
+            }
+        }
+    }
 
     std::map<Core::LibraryObjectDefConstPtr, uint32_t> m_index;
     std::vector<ObjectTemplate>                        m_objectDefs;
@@ -187,13 +195,28 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         bit = 1;
 
     ObjectTemplateCache tmplCache(m_database);
-    tmplCache.m_replacements = src.m_defReplacements;
-
-    for (auto* def : src.m_initialObjectDefs)
-        tmplCache.add(def, true);
+    tmplCache.init(src.m_objectDefs);
 
     tmplCache.addId("avwmrnd0");
     tmplCache.addId("avlholg0");
+
+    auto addObject = [&dest](const FHCommonObject& obj, std::shared_ptr<IMapObject> impl, auto defNumMaker, int posOffsetX = 0) {
+        Object o;
+        o.m_pos   = int3fromPos(obj.m_pos, posOffsetX);
+        o.m_order = obj.m_order;
+        if (obj.m_defIndex.forcedIndex >= 0)
+            o.m_defnum = static_cast<uint32_t>(obj.m_defIndex.forcedIndex);
+        else
+            o.m_defnum = defNumMaker();
+        o.m_impl = std::move(impl);
+        dest.m_objects.push_back(std::move(o));
+    };
+    auto addObjectCommon = [&addObject, &tmplCache](const auto& obj, std::shared_ptr<IMapObject> impl) {
+        addObject(obj, std::move(impl), [&obj, &tmplCache] { return tmplCache.add(obj.m_id->objectDefs.get(obj.m_defIndex)); });
+    };
+    auto addObjectVisitable = [&addObject, &tmplCache](const auto& obj, std::shared_ptr<IMapObject> impl) {
+        addObject(obj, std::move(impl), [&obj, &tmplCache] { return tmplCache.add(obj.m_visitableId->objectDefs.get(obj.m_defIndex)); });
+    };
 
     for (auto& fhTown : src.m_towns) {
         auto playerIndex = fhTown.m_player->legacyId;
@@ -229,7 +252,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
 
         auto* def = libraryFaction->objectDefs.get(fhTown.m_defIndex);
 
-        dest.m_objects.push_back(Object{ .m_order = fhTown.m_order, .m_pos = int3fromPos(fhTown.m_pos), .m_defnum = tmplCache.add(def), .m_impl = std::move(cas1) });
+        addObject(fhTown, std::move(cas1), [&tmplCache, def] { return tmplCache.add(def); });
     }
 
     for (auto& fhHero : src.m_wanderingHeroes) {
@@ -282,9 +305,10 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         }
         dest.m_allowedHeroes[heroId] = 0;
         if (playerIndex < 0) {
-            dest.m_objects.push_back(Object{ .m_order = fhHero.m_order, .m_pos = int3fromPos(fhHero.m_pos), .m_defnum = tmplCache.addId("avxprsn0"), .m_impl = std::move(hero) });
+            addObject(fhHero, std::move(hero), [&tmplCache] { return tmplCache.addId("avxprsn0"); });
         } else {
-            dest.m_objects.push_back(Object{ .m_order = fhHero.m_order, .m_pos = int3fromPos(fhHero.m_pos, +1), .m_defnum = tmplCache.addHero(libraryHero), .m_impl = std::move(hero) });
+            addObject(
+                fhHero, std::move(hero), [&tmplCache, libraryHero] { return tmplCache.addHero(libraryHero); }, 1);
         }
     }
 
@@ -367,13 +391,13 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         auto res      = std::make_unique<MapResource>();
         res->m_amount = fhRes.m_amount / fhRes.m_id->pileSize;
 
-        dest.m_objects.push_back(Object{ .m_order = fhRes.m_order, .m_pos = int3fromPos(fhRes.m_pos), .m_defnum = tmplCache.add(fhRes.m_id->objectDefs.get({})), .m_impl = std::move(res) });
+        addObjectCommon(fhRes, std::move(res));
     }
 
     for (auto& fhRes : src.m_objects.m_resourcesRandom) {
         auto res      = std::make_unique<MapResource>();
         res->m_amount = fhRes.m_amount;
-        dest.m_objects.push_back(Object{ .m_order = fhRes.m_order, .m_pos = int3fromPos(fhRes.m_pos), .m_defnum = tmplCache.addId("avtrndm0"), .m_impl = std::move(res) });
+        addObject(fhRes, std::move(res), [&tmplCache]() { return tmplCache.addId("avtrndm0"); });
     }
 
     for (auto& fhArt : src.m_objects.m_artifacts) {
@@ -382,7 +406,8 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
             art->m_spellId = fhArt.m_id->scrollSpell->legacyId;
             art->m_isSpell = true;
         }
-        dest.m_objects.push_back(Object{ .m_order = fhArt.m_order, .m_pos = int3fromPos(fhArt.m_pos), .m_defnum = tmplCache.add(fhArt.m_id->objectDefs.get({})), .m_impl = std::move(art) });
+
+        addObjectCommon(fhArt, std::move(art));
     }
     for (auto& fhArt : src.m_objects.m_artifactsRandom) {
         auto        art = std::make_unique<MapArtifact>(false);
@@ -407,7 +432,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
                 break;
         }
 
-        dest.m_objects.push_back(Object{ .m_order = fhArt.m_order, .m_pos = int3fromPos(fhArt.m_pos), .m_defnum = tmplCache.addId(id), .m_impl = std::move(art) });
+        addObject(fhArt, std::move(art), [&tmplCache, id]() { return tmplCache.addId(id); });
     }
 
     for (auto& fhMon : src.m_objects.m_monsters) {
@@ -448,7 +473,8 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         }
 
         auto* def = fhMon.m_id->objectDefs.get({});
-        dest.m_objects.push_back(Object{ .m_order = fhMon.m_order, .m_pos = int3fromPos(fhMon.m_pos, dest.m_features->m_monstersMapXOffset), .m_defnum = tmplCache.add(def), .m_impl = std::move(monster) });
+        addObject(
+            fhMon, std::move(monster), [&tmplCache, def]() { return tmplCache.add(def); }, dest.m_features->m_monstersMapXOffset);
     }
 
     for (auto& fhDwelling : src.m_objects.m_dwellings) {
@@ -461,15 +487,13 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
             impl = std::make_unique<MapObjectSimple>();
         }
 
-        auto* def = fhDwelling.m_id->objectDefs.get(fhDwelling.m_defIndex);
-        dest.m_objects.push_back(Object{ .m_order = fhDwelling.m_order, .m_pos = int3fromPos(fhDwelling.m_pos), .m_defnum = tmplCache.add(def), .m_impl = std::move(impl) });
+        addObjectCommon(fhDwelling, std::move(impl));
     }
     for (auto& fhMine : src.m_objects.m_mines) {
         auto mine     = std::make_unique<MapObjectWithOwner>();
         mine->m_owner = static_cast<uint8_t>(fhMine.m_player->legacyId);
 
-        auto* def = fhMine.m_id->minesDefs.get(fhMine.m_defIndex);
-        dest.m_objects.push_back(Object{ .m_order = fhMine.m_order, .m_pos = int3fromPos(fhMine.m_pos), .m_defnum = tmplCache.add(def), .m_impl = std::move(mine) });
+        addObjectCommon(fhMine, std::move(mine));
     }
 
     for (auto& fhBank : src.m_objects.m_banks) {
@@ -488,20 +512,16 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         for (auto* art : fhBank.m_artifacts)
             bank->m_artifacts.push_back(art ? (uint32_t) art->legacyId : uint32_t(-1));
 
-        auto* def = fhBank.m_id->objectDefs.get(fhBank.m_defIndex);
-        dest.m_objects.push_back(Object{ .m_order = fhBank.m_order, .m_pos = int3fromPos(fhBank.m_pos), .m_defnum = tmplCache.add(def), .m_impl = std::move(bank) });
+        addObjectCommon(fhBank, std::move(bank));
     }
     for (auto& fhObstacle : src.m_objects.m_obstacles) {
         auto obj = std::make_unique<MapObjectSimple>();
 
-        auto* def = fhObstacle.m_id->objectDefs.get(fhObstacle.m_defIndex);
-        dest.m_objects.push_back(Object{ .m_order = fhObstacle.m_order, .m_pos = int3fromPos(fhObstacle.m_pos), .m_defnum = tmplCache.add(def), .m_impl = std::move(obj) });
+        addObjectCommon(fhObstacle, std::move(obj));
     }
     for (auto& fhVisitable : src.m_objects.m_visitables) {
         auto obj = std::make_unique<MapObjectSimple>();
-
-        auto* def = fhVisitable.m_visitableId->objectDefs.get(fhVisitable.m_defIndex);
-        dest.m_objects.push_back(Object{ .m_order = fhVisitable.m_order, .m_pos = int3fromPos(fhVisitable.m_pos), .m_defnum = tmplCache.add(def), .m_impl = std::move(obj) });
+        addObjectVisitable(fhVisitable, std::move(obj));
     }
     for (auto& fhShrine : src.m_objects.m_shrines) {
         auto obj = std::make_unique<MapShrine>();
@@ -510,8 +530,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         else
             obj->m_spell = 0xffU;
 
-        auto* def = fhShrine.m_visitableId->objectDefs.get(fhShrine.m_defIndex);
-        dest.m_objects.push_back(Object{ .m_order = fhShrine.m_order, .m_pos = int3fromPos(fhShrine.m_pos), .m_defnum = tmplCache.add(def), .m_impl = std::move(obj) });
+        addObjectVisitable(fhShrine, std::move(obj));
     }
     for (auto& fhSkillHut : src.m_objects.m_skillHuts) {
         auto obj = std::make_unique<MapWitchHut>();
@@ -519,8 +538,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         for (auto* allowedSkill : fhSkillHut.m_skillIds)
             obj->m_allowedSkills[allowedSkill->legacyId] = 1;
 
-        auto* def = fhSkillHut.m_visitableId->objectDefs.get(fhSkillHut.m_defIndex);
-        dest.m_objects.push_back(Object{ .m_order = fhSkillHut.m_order, .m_pos = int3fromPos(fhSkillHut.m_pos), .m_defnum = tmplCache.add(def), .m_impl = std::move(obj) });
+        addObjectVisitable(fhSkillHut, std::move(obj));
     }
     for (auto& fhScholar : src.m_objects.m_scholars) {
         auto obj         = std::make_unique<MapScholar>();
@@ -532,8 +550,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         else if (fhScholar.m_type == FHScholar::Type::Spell)
             obj->m_bonusId = static_cast<uint8_t>(fhScholar.m_spellId->legacyId);
 
-        auto* def = fhScholar.m_visitableId->objectDefs.get(fhScholar.m_defIndex);
-        dest.m_objects.push_back(Object{ .m_order = fhScholar.m_order, .m_pos = int3fromPos(fhScholar.m_pos), .m_defnum = tmplCache.add(def), .m_impl = std::move(obj) });
+        addObjectVisitable(fhScholar, std::move(obj));
     }
 
     for (auto& fhQuestHut : src.m_objects.m_questHuts) {
@@ -545,14 +562,13 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
             convertQuest(fhQuestHut.m_questsOneTime[i].m_quest, obj->m_questsOneTime[i].m_quest);
         }
 
-        auto* def = fhQuestHut.m_visitableId->objectDefs.get(fhQuestHut.m_defIndex);
-        dest.m_objects.push_back(Object{ .m_order = fhQuestHut.m_order, .m_pos = int3fromPos(fhQuestHut.m_pos), .m_defnum = tmplCache.add(def), .m_impl = std::move(obj) });
+        addObjectVisitable(fhQuestHut, std::move(obj));
     }
     for (auto& fhQuestGuard : src.m_objects.m_questGuards) {
         auto obj = std::make_unique<MapQuestGuard>();
         convertQuest(fhQuestGuard.m_quest, obj->m_quest);
-        auto* def = fhQuestGuard.m_visitableId->objectDefs.get(fhQuestGuard.m_defIndex);
-        dest.m_objects.push_back(Object{ .m_order = fhQuestGuard.m_order, .m_pos = int3fromPos(fhQuestGuard.m_pos), .m_defnum = tmplCache.add(def), .m_impl = std::move(obj) });
+
+        addObjectVisitable(fhQuestGuard, std::move(obj));
     }
     for (auto& fhPandora : src.m_objects.m_pandoras) {
         if (fhPandora.m_openPandora && fhPandora.m_reward.units.size()) {
@@ -569,7 +585,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         auto obj = std::make_unique<MapPandora>();
         convertReward(fhPandora.m_reward, obj->m_reward);
 
-        dest.m_objects.push_back(Object{ .m_order = fhPandora.m_order, .m_pos = int3fromPos(fhPandora.m_pos), .m_defnum = tmplCache.addId("ava0128"), .m_impl = std::move(obj) });
+        addObject(fhPandora, std::move(obj), [&tmplCache] { return tmplCache.addId("ava0128"); });
     }
 
     for (auto& fhEvent : src.m_objects.m_localEvents) {
@@ -585,7 +601,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         obj->m_removeAfterVisit = fhEvent.m_removeAfterVisit;
         obj->m_humanActivate    = fhEvent.m_humanActivate;
 
-        dest.m_objects.push_back(Object{ .m_order = fhEvent.m_order, .m_pos = int3fromPos(fhEvent.m_pos), .m_defnum = tmplCache.addId("avzevnt0"), .m_impl = std::move(obj) });
+        addObject(fhEvent, std::move(obj), [&tmplCache] { return tmplCache.addId("avzevnt0"); });
     }
 
     for (auto& fhEvent : src.m_globalEvents) {

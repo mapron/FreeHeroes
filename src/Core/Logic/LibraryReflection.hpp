@@ -1127,7 +1127,8 @@ STRUCT_REFLECTION_PAIRED(
 STRUCT_REFLECTION_PAIRED(
     ObjectDefIndex,
     "v",                           variant,
-    "s",                           substitution
+    "s",                           substitution,
+    "f",                           forcedIndex
 )
 
 ENUM_REFLECTION_PAIRED(FieldLayout,

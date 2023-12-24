@@ -122,6 +122,7 @@ struct LibraryObjectDef {
 struct ObjectDefIndex {
     std::string variant;
     std::string substitution;
+    int         forcedIndex = -1;
 
     bool isEmpty() const noexcept { return variant.empty() && substitution.empty(); }
 

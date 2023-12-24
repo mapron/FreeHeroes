@@ -475,8 +475,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_disabledSkills,
     m_customHeroes,
     m_globalEvents,
-    m_initialObjectDefs,
-    m_defReplacements)
+    m_objectDefs)
 
 template<>
 inline constexpr const bool s_isStringMap<FHMap::PlayersMap>{ true };

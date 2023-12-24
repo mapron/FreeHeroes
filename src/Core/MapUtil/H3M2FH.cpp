@@ -79,67 +79,16 @@ struct ObjTemplateDiagContainer {
 
     void check() const
     {
-        {
-            std::string missingDefs;
-            for (const auto& diag : m_records) {
-                if (!diag.m_originalRecord) {
-                    missingDefs += printObjDef(diag.m_fhDefFromFile) + "\n";
-                }
-            }
-            if (!missingDefs.empty()) {
-                Logger(Logger::Err) << "missing defs:\n"
-                                    << missingDefs;
-                throw std::runtime_error("Some defs are missing, map cannot be loaded. Add them to the database.");
+        std::string missingDefs;
+        for (const auto& diag : m_records) {
+            if (!diag.m_originalRecord) {
+                missingDefs += printObjDef(diag.m_fhDefFromFile) + "\n";
             }
         }
-        {
-            std::string substitutions;
-            for (const auto& diag : m_records) {
-                if (diag.m_substituteAlt) {
-                    substitutions += diag.m_originalRecord->id + " -> " + diag.m_substituteAlt->id + " [" + diag.m_substitutionId + "]" + "\n";
-                }
-            }
-            if (!substitutions.empty())
-                Logger(Logger::Notice) << "Some def files have different properties, but they were substitute with alternative ids:\n"
-                                       << substitutions;
-        }
-        {
-            std::ostringstream replacements;
-            for (const auto& diag : m_records) {
-                if (diag.m_fhDefFromFile == *diag.m_originalRecord || diag.m_substituteAlt)
-                    continue;
-                const auto& org = diag.m_fhDefFromFile;
-                const auto& rec = *diag.m_originalRecord;
-
-                std::string diff;
-                {
-                    const bool block = org.blockMap != rec.blockMap;
-                    const bool visit = org.visitMap != rec.visitMap;
-                    const bool hard  = org.terrainsHard != rec.terrainsHard;
-                    const bool soft  = org.terrainsSoft != rec.terrainsSoft;
-                    const bool name  = org.defFile != rec.defFile;
-                    const bool misc  = (org.objId != rec.objId) || (org.subId != rec.subId) || (org.type != rec.type) || (org.priority != rec.priority);
-                    if (name)
-                        diff += "defFile, ";
-                    if (block)
-                        diff += "blockMap, ";
-                    if (visit)
-                        diff += "visitMap, ";
-                    if (hard)
-                        diff += "terrainsHard, ";
-                    if (soft)
-                        diff += "terrainsSoft, ";
-                    if (misc)
-                        diff += "misc info, ";
-                }
-                replacements << diag.m_originalRecord->id << ": DIFF = " << diff << "\n";
-                replacements << "database: " << printObjDef(*diag.m_originalRecord) << "\n";
-                replacements << "file    : " << printObjDef(diag.m_fhDefFromFile) << "\n";
-            }
-            std::string replacementsStr = replacements.str();
-            if (!replacementsStr.empty())
-                Logger(Logger::Notice) << "Some def files differ from the database, cannot be substituted, replacements will be created:\n"
-                                       << replacementsStr;
+        if (!missingDefs.empty()) {
+            Logger(Logger::Err) << "missing defs:\n"
+                                << missingDefs;
+            throw std::runtime_error("Some defs are missing, map cannot be loaded. Add them to the database.");
         }
     }
 };
@@ -298,6 +247,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
         if (record && record->type == fhDef.type) {
             // good
         } else {
+            Logger(Logger::Warning) << "not good id:" << fhDef.id;
             auto it = allDbDefs.find(fhDef.asUniqueTuple());
             //auto* record                =
             if (it == allDbDefs.cend()) {
@@ -318,8 +268,10 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
         }
         if (!record) {
             continue;
+            // will throw after loop
         }
         diagRecord.m_originalRecord = record;
+        fhDef.substituteFor         = record;
         /*
         Logger(Logger::Warning) << "[" << dest.m_initialObjectDefs.size() << "] "
 
@@ -333,40 +285,34 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                                 << ", dbDecord.objId=" << record->objId;*/
 
         // couple objdefs like sulfur/mercury mines have several def with same unique def name but different bitmask for terrain.
-        for (const auto& [subId, altRec] : record->substitutions) {
+        /*for (const auto& [subId, altRec] : record->substitutions) {
             if (*altRec == fhDef) {
                 diagRecord.m_substitutionId = subId;
                 diagRecord.m_substituteAlt  = altRec;
                 record                      = altRec;
                 break;
             }
-        }
-        {
-            if (*record != fhDef) {
-                if (dest.m_defReplacements.contains(record))
-                    Logger(Logger::Err) << "MAPPING ERROR, same def file used several times with different properties:" << record->id;
+        }*/
 
-                dest.m_defReplacements[record] = std::move(fhDef);
-            }
-        }
-
-        dest.m_initialObjectDefs.push_back(record);
+        dest.m_objectDefs.push_back(fhDef);
     }
     diag.sort();
     diag.check();
 
-    std::set<Core::LibraryObjectDefConstPtr> skipped;
+    std::set<uint32_t> skipped;
 
     for (int index = 0; const Object& obj : src.m_objects) {
-        const IMapObject*              impl     = obj.m_impl.get();
-        const ObjectTemplate&          objTempl = src.m_objectDefs[obj.m_defnum];
-        Core::LibraryObjectDefConstPtr objDef   = dest.m_initialObjectDefs[obj.m_defnum];
+        const IMapObject*              impl           = obj.m_impl.get();
+        const ObjectTemplate&          objTempl       = src.m_objectDefs[obj.m_defnum];
+        const Core::LibraryObjectDef&  objDefEmbedded = dest.m_objectDefs[obj.m_defnum];
+        Core::LibraryObjectDefConstPtr objDefDatabase = objDefEmbedded.substituteFor;
         Core::ObjectDefIndex           defIndex;
-        defIndex.substitution = objDef->substituteKey;
-        if (objDef->substituteFor)
-            objDef = objDef->substituteFor;
-        defIndex.variant = objDef->mappings.key;
-        auto& mappings   = objDef->mappings;
+        defIndex.forcedIndex = obj.m_defnum;
+        //defIndex.substitution = objDef->substituteKey;
+        if (objDefDatabase->substituteFor)
+            objDefDatabase = objDefDatabase->substituteFor;
+        //defIndex.variant = objDef->mappings.key;
+        auto& mappings = objDefDatabase->mappings;
 
         auto initCommon = [&obj, index, &defIndex](FHCommonObject& fhCommon) {
             fhCommon.m_pos      = posFromH3M(obj.m_pos);
@@ -525,7 +471,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
 
                 auto* visitableId = mappings.mapVisitable;
                 if (!visitableId)
-                    throw std::runtime_error("Unknown def for seer hut:" + objDef->id);
+                    throw std::runtime_error("Unknown def for seer hut:" + objDefEmbedded.id);
 
                 FHQuestHut fhQuestHut;
                 initCommon(fhQuestHut);
@@ -545,7 +491,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 const auto* hut         = static_cast<const MapWitchHut*>(impl);
                 auto*       visitableId = mappings.mapVisitable;
                 if (!visitableId)
-                    throw std::runtime_error("Unknown def for witch hut:" + objDef->id);
+                    throw std::runtime_error("Unknown def for witch hut:" + objDefEmbedded.id);
 
                 FHSkillHut fhHut;
                 initCommon(fhHut);
@@ -771,7 +717,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 initCommon(fhQuestGuard);
                 auto* visitableId = mappings.mapVisitable;
                 if (!visitableId)
-                    throw std::runtime_error("Unknown def for quest guard:" + objDef->id);
+                    throw std::runtime_error("Unknown def for quest guard:" + objDefEmbedded.id);
 
                 fhQuestGuard.m_visitableId = visitableId;
 
@@ -803,7 +749,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 auto*       id   = mappings.mapBank;
                 FHBank      fhBank;
                 if (!id)
-                    throw std::runtime_error("Missing bank def mapping:" + objDef->id);
+                    throw std::runtime_error("Missing bank def mapping:" + objDefEmbedded.id);
                 initCommon(fhBank);
                 fhBank.m_id = id;
                 if (bank->m_content != 0xffffffffu) {
@@ -843,9 +789,9 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                     dest.m_objects.m_visitables.push_back(std::move(fhVisitable));
                     break;
                 }
-                if (!skipped.contains(objDef)) {
-                    skipped.insert(objDef);
-                    Logger(Logger::Warning) << "Skipping unsupported object def: " << objDef->id << " of type " << int(type);
+                if (!skipped.contains(objTempl.m_id)) {
+                    skipped.insert(objTempl.m_id);
+                    Logger(Logger::Warning) << "Skipping unsupported object def: " << objDefEmbedded.id << " of type " << objTempl.m_id;
                 }
             } break;
         }
