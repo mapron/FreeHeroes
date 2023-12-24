@@ -171,7 +171,7 @@ int main(int argc, char** argv)
         else if (isFailed)
             batchFailedTrip.push_back(setting);
         else
-            batchSucceeded.push_back(settings);
+            batchSucceeded.push_back(setting);
     }
     if (batchModeEnabled) {
         std::cerr << "Successful runs:\n";

@@ -6,6 +6,8 @@
 
 #include "MapEditorWidget.hpp"
 
+#include "MernelPlatform/Logger.hpp"
+
 #include "FHMap.hpp"
 #include "MapConverter.hpp"
 
@@ -449,13 +451,18 @@ bool MapEditorWidget::saveScreenshots(const std::string& outputSurface, const st
         if (outFilename.empty())
             continue;
 
+        if (d >= m_impl->m_spriteMap.m_depth)
+            continue;
+
         m_impl->m_depth = d;
         showCurrentItem();
 
         QImage   image(m_impl->m_scene->width(), m_impl->m_scene->height(), QImage::Format_ARGB32);
         QPainter painter(&image);
         m_impl->m_scene->render(&painter);
-        image.save(QString::fromStdString(outFilename));
+        Mernel::Logger(Mernel::Logger::Warning) << "Saving image to: " << outFilename;
+        if (outFilename != "DRYRUN")
+            image.save(QString::fromStdString(outFilename));
     }
     return true;
 }

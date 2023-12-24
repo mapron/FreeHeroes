@@ -20,6 +20,7 @@ int main(int argc, char* argv[])
 
     AbstractCommandLine parser({
                                    "input",
+                                   "input-batch-test",
                                    "output-png-surface",
                                    "output-png-underground",
                                },
@@ -31,6 +32,7 @@ int main(int argc, char* argv[])
     }
 
     const std::string input             = parser.getArg("input");
+    const std::string inputBatch        = parser.getArg("input-batch-test");
     const std::string outputSurface     = parser.getArg("output-png-surface");
     const std::string outputUnderground = parser.getArg("output-png-underground");
 
@@ -49,11 +51,33 @@ int main(int argc, char* argv[])
         fhApp.getModelsProvider(),
         fhApp.getAppSettings());
 
-    if (!input.empty())
-        dlg.load(input);
+    if (!inputBatch.empty()) {
+        for (const auto& it : std_fs::recursive_directory_iterator(Mernel::string2path(inputBatch))) {
+            if (!it.is_regular_file())
+                continue;
 
-    if (dlg.saveScreenshots(outputSurface, outputUnderground))
-        return 0;
+            const auto path = it.path();
+            const auto ext  = pathToLower(path.extension());
+            if (ext != ".h3m")
+                continue;
+
+            std::cerr << "\nLoading: " << path << "\n";
+            dlg.load(Mernel::path2string(path));
+            std::cerr << "\nSaving: " << path << "\n";
+            try {
+                dlg.saveScreenshots("DRYRUN", "DRYRUN");
+            }
+            catch (std::exception& e) {
+                std::cerr << "error:" << e.what() << "\n";
+            }
+        }
+    } else {
+        if (!input.empty())
+            dlg.load(input);
+
+        if (dlg.saveScreenshots(outputSurface, outputUnderground))
+            return 0;
+    }
 
     dlg.show();
 
