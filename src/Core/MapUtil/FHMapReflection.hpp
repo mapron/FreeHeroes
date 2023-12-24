@@ -110,6 +110,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_obligatorySpells,
     m_possibleSpells,
     m_hasGarison,
+    m_hasName,
+    m_name,
     m_garison,
     m_garisonRmg)
 
@@ -364,7 +366,10 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_resources,
     m_primary,
     m_level,
-    m_targetQuestId);
+    m_targetQuestId,
+    m_firstVisitText,
+    m_nextVisitText,
+    m_completedText);
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHQuestHut::FHQuestWithReward,

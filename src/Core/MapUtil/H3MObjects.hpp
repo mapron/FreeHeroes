@@ -907,6 +907,8 @@ struct MapDwelling : public MapObjectAbstract {
 struct MapQuestGuard : public MapObjectAbstract {
     MapQuest m_quest;
 
+    void prepareArrays(const MapFormatFeatures* m_features) { m_quest.prepareArrays(m_features); }
+
     void readBinary(ByteOrderDataStreamReader& stream) override;
     void writeBinary(ByteOrderDataStreamWriter& stream) const override;
     void toJson(PropertyTree& data) const override;

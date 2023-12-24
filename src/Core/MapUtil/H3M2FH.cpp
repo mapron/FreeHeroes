@@ -653,6 +653,8 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 fhtown.m_spellResearch      = town->m_spellResearch;
                 fhtown.m_hasCustomBuildings = town->m_hasCustomBuildings;
                 fhtown.m_hasGarison         = town->m_hasGarison;
+                fhtown.m_hasName            = town->m_hasName;
+                fhtown.m_name               = town->m_name;
 
                 fhtown.m_obligatorySpells = town->m_obligatorySpells;
                 fhtown.m_possibleSpells   = town->m_possibleSpells;
@@ -1137,6 +1139,11 @@ FHQuest H3M2FHConverter::convertQuest(const MapQuest& quest) const
             assert(!"Unsupported");
             break;
     }
+
+    fhQuest.m_firstVisitText = quest.m_firstVisitText;
+    fhQuest.m_nextVisitText  = quest.m_nextVisitText;
+    fhQuest.m_completedText  = quest.m_completedText;
+
     return fhQuest;
 }
 

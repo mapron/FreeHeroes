@@ -243,6 +243,10 @@ struct FHQuest {
     Core::HeroPrimaryParams                    m_primary;
     int                                        m_level = 0;
 
+    std::string m_firstVisitText;
+    std::string m_nextVisitText;
+    std::string m_completedText;
+
     uint32_t m_targetQuestId = 0;
 
     bool operator==(const FHQuest&) const noexcept = default;

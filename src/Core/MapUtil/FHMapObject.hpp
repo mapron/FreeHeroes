@@ -66,6 +66,8 @@ struct FHTown : public FHPlayerControlledObject {
     bool                         m_spellResearch{ true };
     bool                         m_hasCustomBuildings{ false };
     bool                         m_hasGarison{ false };
+    bool                         m_hasName = false;
+    std::string                  m_name;
 
     std::vector<Core::LibraryBuildingConstPtr> m_buildings;
     std::vector<Core::LibraryBuildingConstPtr> m_forbiddenBuildings;

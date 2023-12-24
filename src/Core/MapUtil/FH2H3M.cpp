@@ -261,6 +261,8 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         cas1->m_spellResearch      = fhTown.m_spellResearch;
         cas1->m_hasCustomBuildings = fhTown.m_hasCustomBuildings;
         cas1->m_hasGarison         = fhTown.m_hasGarison;
+        cas1->m_hasName            = fhTown.m_hasName;
+        cas1->m_name               = fhTown.m_name;
 
         cas1->m_obligatorySpells = fhTown.m_obligatorySpells;
         cas1->m_possibleSpells   = fhTown.m_possibleSpells;
@@ -615,6 +617,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         obj->m_questsOneTime.resize(fhQuestHut.m_questsOneTime.size());
         obj->m_questsRecurring.resize(fhQuestHut.m_questsRecurring.size());
         for (size_t i = 0; i < obj->m_questsOneTime.size(); ++i) {
+            obj->m_questsOneTime[i].m_quest.prepareArrays(dest.m_features.get());
             convertRewardHut(fhQuestHut.m_questsOneTime[i].m_reward, obj->m_questsOneTime[i]);
             convertQuest(fhQuestHut.m_questsOneTime[i].m_quest, obj->m_questsOneTime[i].m_quest);
         }
@@ -623,6 +626,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
     }
     for (auto& fhQuestGuard : src.m_objects.m_questGuards) {
         auto obj = std::make_unique<MapQuestGuard>();
+        obj->prepareArrays(dest.m_features.get());
         convertQuest(fhQuestGuard.m_quest, obj->m_quest);
 
         addObjectVisitable(fhQuestGuard, std::move(obj));
@@ -851,6 +855,10 @@ void FH2H3MConverter::convertQuest(const FHQuest& fhQuest, MapQuest& quest) cons
             assert(!"Unsupported");
             break;
     }
+
+    quest.m_firstVisitText = fhQuest.m_firstVisitText;
+    quest.m_nextVisitText  = fhQuest.m_nextVisitText;
+    quest.m_completedText  = fhQuest.m_completedText;
 }
 
 void FH2H3MConverter::convertEvent(const FHGlobalMapEvent& fhEvent, GlobalMapEvent& event) const
