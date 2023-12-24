@@ -155,7 +155,9 @@ struct FHMonster : public FHCommonObject {
     uint32_t m_questIdentifier = 0;
     int64_t  m_guardValue      = 0;
 
+    bool         m_hasMessage = false;
     Core::Reward m_reward;
+    std::string  m_message;
 
     enum class UpgradedStack
     {

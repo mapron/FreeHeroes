@@ -186,7 +186,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_notGrowingTeam,
     m_questIdentifier,
     m_guardValue,
+    m_hasMessage,
     m_reward,
+    m_message,
     m_upgradedStack)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(

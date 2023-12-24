@@ -493,8 +493,14 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
             monster->m_upgradedStack = 1;
 
         monster->m_artID = uint16_t(-1);
-        if (!fhMon.m_reward.artifacts.empty()) {
-            monster->m_artID = uint16_t(fhMon.m_reward.artifacts[0].onlyArtifacts.at(0)->legacyId);
+
+        monster->m_hasMessage = fhMon.m_hasMessage;
+        if (monster->m_hasMessage) {
+            monster->m_message                      = fhMon.m_message;
+            monster->m_resourceSet.m_resourceAmount = convertResource(fhMon.m_reward.resources);
+            if (!fhMon.m_reward.artifacts.empty()) {
+                monster->m_artID = uint16_t(fhMon.m_reward.artifacts[0].onlyArtifacts.at(0)->legacyId);
+            }
         }
 
         auto* def = fhMon.m_id->objectDefs.get({});
@@ -609,7 +615,9 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
             monster->m_upgradedStack           = 0;
 
             auto* def = u.unit->objectDefs.get({});
-            dest.m_objects.push_back(Object{ .m_order = fhPandora.m_order, .m_pos = int3fromPos(fhPandora.m_pos, dest.m_features->m_monstersMapXOffset), .m_defnum = tmplCache.add(def), .m_impl = std::move(monster) });
+
+            addObject(
+                fhPandora, std::move(monster), [&tmplCache, def] { return tmplCache.add(def); }, dest.m_features->m_monstersMapXOffset);
             continue;
         }
         auto obj = std::make_unique<MapPandora>();

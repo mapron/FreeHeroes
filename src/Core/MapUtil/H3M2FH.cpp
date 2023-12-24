@@ -470,17 +470,21 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 fhMonster.m_neverFlees     = monster->m_neverFlees;
                 fhMonster.m_notGrowingTeam = monster->m_notGrowingTeam;
 
-                if (monster->m_artID != uint16_t(-1)) {
-                    fhMonster.m_reward.artifacts.resize(1);
-                    fhMonster.m_reward.artifacts[0].onlyArtifacts.push_back(m_artifactIds.at(monster->m_artID));
-                }
-
                 if (monster->m_upgradedStack == 0xffffffffU) {
                     fhMonster.m_upgradedStack = FHMonster::UpgradedStack::Random;
                 } else if (monster->m_upgradedStack == 1) {
                     fhMonster.m_upgradedStack = FHMonster::UpgradedStack::Yes;
                 } else {
                     fhMonster.m_upgradedStack = FHMonster::UpgradedStack::No;
+                }
+                fhMonster.m_hasMessage = monster->m_hasMessage;
+                if (monster->m_hasMessage) {
+                    fhMonster.m_message = monster->m_message;
+                    if (monster->m_artID != uint16_t(-1)) {
+                        fhMonster.m_reward.artifacts.resize(1);
+                        fhMonster.m_reward.artifacts[0].onlyArtifacts.push_back(m_artifactIds.at(monster->m_artID));
+                    }
+                    fhMonster.m_reward.resources = convertResources(monster->m_resourceSet.m_resourceAmount);
                 }
 
                 dest.m_objects.m_monsters.push_back(std::move(fhMonster));
