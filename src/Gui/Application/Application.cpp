@@ -71,7 +71,6 @@ struct Application::Impl {
     CoreApplication*                          coreApp;
     std::vector<std::unique_ptr<QTranslator>> translators;
 
-    QString                      appConfigIniPath;
     std::unique_ptr<AppSettings> appConfig;
     QString                      extraTs;
 
@@ -95,8 +94,7 @@ Application::Application(CoreApplication*   coreApp,
     m_impl->extraTs = QString::fromStdString(tsExtraModule);
     QApplication::setApplicationName(QString::fromUtf8(CoreApplication::getAppFolder()));
 
-    m_impl->appConfigIniPath = QString::fromStdString(path2string(coreApp->getLocations().getAppdataDir() / "AppConfig.ini"));
-    m_impl->appConfig        = std::make_unique<Gui::AppSettings>(m_impl->appConfigIniPath);
+    m_impl->appConfig = std::make_unique<Gui::AppSettings>(coreApp->getLocations().getAppdataDir(), "AppConfig.ini");
 
     m_impl->appConfig->load();
     QString currentLocale = m_impl->appConfig->global().localeId;

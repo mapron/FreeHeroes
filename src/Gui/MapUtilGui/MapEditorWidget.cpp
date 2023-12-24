@@ -16,6 +16,7 @@
 #include "IRandomGenerator.hpp"
 #include "IGameDatabase.hpp"
 
+#include "IAppSettings.hpp"
 #include "TickTimer.hpp"
 
 #include "ViewSettingsWidget.hpp"
@@ -44,7 +45,8 @@
 namespace FreeHeroes {
 
 namespace {
-const uint32_t g_mapAnimationInterval = 160;
+const uint32_t    g_mapAnimationInterval = 160;
+const std::string g_customSettingsName   = "mapEditor";
 
 struct LayerOption {
     std::set<SpriteMap::Layer> m_options;
@@ -147,6 +149,7 @@ MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDataba
                                  const Core::IRandomGeneratorFactory* rngFactory,
                                  const Gui::IGraphicsLibrary*         graphicsLibrary,
                                  const Gui::LibraryModelsProvider*    modelsProvider,
+                                 Gui::IAppSettings*                   appSettings,
 
                                  QWidget* parent)
     : QMainWindow(parent)
@@ -155,9 +158,12 @@ MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDataba
     , m_rngFactory(rngFactory)
     , m_graphicsLibrary(graphicsLibrary)
     , m_modelsProvider(modelsProvider)
+    , m_appSettings(appSettings)
 {
     QWidget* w = new QWidget(this);
     setCentralWidget(w);
+
+    loadUserSettings();
 
     QVBoxLayout* layout       = new QVBoxLayout(w);
     QHBoxLayout* layoutTop    = new QHBoxLayout();
@@ -265,6 +271,8 @@ MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDataba
         m_impl->m_view->centerOn(absPos);
     });
 
+    m_impl->m_view->refreshScale();
+
     QMenu* fileMenu = menuBar()->addMenu(tr("File"));
     {
         QAction* load           = fileMenu->addAction(tr("Load H3M/FH..."));
@@ -290,19 +298,26 @@ MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDataba
 }
 MapEditorWidget::~MapEditorWidget()
 {
+    saveUserSettings();
 }
 
-void MapEditorWidget::loadConfig()
+void MapEditorWidget::loadUserSettings()
 {
-    m_impl->m_viewSettingsWidget->updateUI();
+    Mernel::PropertyTree jdata = m_appSettings->loadCustomJson(g_customSettingsName);
+    m_impl->m_viewSettings.fromJson(jdata);
+    //m_impl->m_viewSettingsWidget->updateUI();
     /*connect(this, &IEditor::needUpdateUI, this, [this]() {
         for (auto* ed : m_editors)
             ed->updateUI();
     });*/
 }
 
-void MapEditorWidget::saveConfig()
+void MapEditorWidget::saveUserSettings()
 {
+    Mernel::PropertyTree jdata;
+    m_impl->m_viewSettings.toJson(jdata);
+
+    m_appSettings->saveCustomJson(jdata, g_customSettingsName);
 }
 
 void MapEditorWidget::load(const std::string& filename)
@@ -312,11 +327,7 @@ void MapEditorWidget::load(const std::string& filename)
     auto               ext      = fullpath.extension();
     const bool         isH3M    = Mernel::path2string(ext) == ".h3m";
 
-    MapConverter::Settings sett{
-        .m_outputs                 = {},
-        .m_dumpUncompressedBuffers = false,
-        .m_dumpBinaryDataJson      = false,
-    };
+    MapConverter::Settings sett;
     if (isH3M)
         sett.m_inputs = { .m_h3m = { .m_binary = fullpath } };
     else
@@ -363,6 +374,28 @@ void MapEditorWidget::load(const std::string& filename)
 
 void MapEditorWidget::save(const std::string& filename, bool isH3M)
 {
+    std::ostringstream     os;
+    auto                   fullpath = Mernel::string2path(filename);
+    MapConverter::Settings sett;
+    if (isH3M)
+        sett.m_outputs = { .m_h3m = { .m_binary = fullpath } };
+    else
+        sett.m_outputs = { .m_fhMap = fullpath };
+
+    try {
+        MapConverter converter(os,
+                               m_gameDatabaseContainer,
+                               m_rngFactory,
+                               sett);
+
+        if (isH3M)
+            converter.run(MapConverter::Task::SaveH3M);
+        else
+            converter.run(MapConverter::Task::SaveFH);
+    }
+    catch (std::exception& ex) {
+        QMessageBox::warning(this, tr("Error occured"), QString::fromStdString(ex.what()));
+    }
 }
 
 void MapEditorWidget::loadDialog()
@@ -378,6 +411,8 @@ void MapEditorWidget::saveH3MDialog()
     QString filename = QFileDialog::getSaveFileName(this, "", "", "H3 map (*.h3m)");
     if (filename.isEmpty())
         return;
+    if (!filename.endsWith(".h3m"))
+        filename += ".h3m";
     save(filename.toStdString(), true);
 }
 
@@ -386,6 +421,8 @@ void MapEditorWidget::saveFHDialog()
     QString filename = QFileDialog::getSaveFileName(this, "", "", "FH (*.json)");
     if (filename.isEmpty())
         return;
+    if (!filename.endsWith(".json"))
+        filename += ".fh.json";
     save(filename.toStdString(), false);
 }
 
@@ -394,13 +431,33 @@ void MapEditorWidget::saveScreenshot()
     QString filename = QFileDialog::getSaveFileName(this, "", "", "Images (*.png)");
     if (filename.isEmpty())
         return;
-    int      width  = m_impl->m_scene->width();
-    int      height = m_impl->m_scene->height();
-    QImage   image(width, height, QImage::Format_ARGB32);
+
+    QImage   image(m_impl->m_scene->width(), m_impl->m_scene->height(), QImage::Format_ARGB32);
     QPainter painter(&image);
-    painter.setRenderHint(QPainter::Antialiasing);
     m_impl->m_scene->render(&painter);
     image.save(filename);
+}
+
+bool MapEditorWidget::saveScreenshots(const std::string& outputSurface, const std::string& outputUnderground)
+{
+    if (m_impl->m_spriteMap.m_depth == 0)
+        return false;
+    if (outputSurface.empty() && outputUnderground.empty())
+        return false;
+    for (int d : { 0, 1 }) {
+        const std::string& outFilename = d == 0 ? outputSurface : outputUnderground;
+        if (outFilename.empty())
+            continue;
+
+        m_impl->m_depth = d;
+        showCurrentItem();
+
+        QImage   image(m_impl->m_scene->width(), m_impl->m_scene->height(), QImage::Format_ARGB32);
+        QPainter painter(&image);
+        m_impl->m_scene->render(&painter);
+        image.save(QString::fromStdString(outFilename));
+    }
+    return true;
 }
 
 void MapEditorWidget::updateMap()

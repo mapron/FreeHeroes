@@ -20,6 +20,7 @@ class IRandomGeneratorFactory;
 namespace Gui {
 class IGraphicsLibrary;
 class LibraryModelsProvider;
+class IAppSettings;
 }
 
 class MAPUTILGUI_EXPORT MapEditorWidget : public QMainWindow {
@@ -29,13 +30,14 @@ public:
         const Core::IRandomGeneratorFactory* rngFactory,
         const Gui::IGraphicsLibrary*         graphicsLibrary,
         const Gui::LibraryModelsProvider*    modelsProvider,
+        Gui::IAppSettings*                   appSettings,
 
         QWidget* parent = nullptr);
 
     ~MapEditorWidget();
 
-    void loadConfig();
-    void saveConfig();
+    void loadUserSettings();
+    void saveUserSettings();
 
     void load(const std::string& filename);
     void save(const std::string& filename, bool isH3M);
@@ -43,6 +45,9 @@ public:
     void saveH3MDialog();
     void saveFHDialog();
     void saveScreenshot();
+
+    bool saveScreenshots(const std::string& outputSurface,
+                         const std::string& outputUnderground);
 
     void updateMap();
 
@@ -59,6 +64,8 @@ private:
 
     const Gui::IGraphicsLibrary* const      m_graphicsLibrary;
     const Gui::LibraryModelsProvider* const m_modelsProvider;
+
+    Gui::IAppSettings* const m_appSettings;
 };
 
 }

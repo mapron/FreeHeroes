@@ -36,7 +36,8 @@ int main(int argc, char* argv[])
         fhCoreApp.getDatabaseContainer(),
         fhCoreApp.getRandomGeneratorFactory(),
         fhApp.getGraphicsLibrary(),
-        fhApp.getModelsProvider());
+        fhApp.getModelsProvider(),
+        fhApp.getAppSettings());
 
     dlg.show();
 

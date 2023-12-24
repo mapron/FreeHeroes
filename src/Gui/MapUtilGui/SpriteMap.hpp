@@ -230,6 +230,7 @@ struct SpritePaintSettings {
 };
 
 struct SpriteRenderSettings {
+    bool m_reserved = true;
 };
 
 }

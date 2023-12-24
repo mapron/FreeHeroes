@@ -8,6 +8,8 @@
 #include "SettingsWidget.hpp"
 
 #include "MernelPlatform/AppLocations.hpp"
+#include "MernelPlatform/FileFormatJson.hpp"
+#include "MernelPlatform/FileIOUtils.hpp"
 
 #include <QSettings>
 
@@ -94,9 +96,10 @@ public:
     }
 };
 
-AppSettings::AppSettings(QString filename)
+AppSettings::AppSettings(Mernel::std_path root, const std::string& filename)
     : QObject(nullptr)
-    , m_settings(filename, QSettings::IniFormat)
+    , m_settings(QString::fromStdString(Mernel::path2string(root / filename)), QSettings::IniFormat)
+    , m_root(std::move(root))
 {
     // clang-format off
     m_allWrappers.push_back({
@@ -158,6 +161,29 @@ void AppSettings::showSettingsEditor(QWidget* parent)
 
     emit setMusicVolume(m_all.sound.musicVolumePercent);
     emit setEffectsVolume(m_all.sound.effectsVolumePercent);
+}
+
+Mernel::PropertyTree AppSettings::loadCustomJson(const std::string& basename) const noexcept
+{
+    Mernel::PropertyTree data;
+    std::string          buffer;
+    if (!Mernel::readFileIntoBufferNoexcept(getCustomJsonPath(basename), buffer))
+        return {};
+
+    if (!Mernel::readJsonFromBufferNoexcept(buffer, data))
+        return {};
+
+    return data;
+}
+
+void AppSettings::saveCustomJson(const Mernel::PropertyTree& data, const std::string& basename) const noexcept
+{
+    std::string buffer;
+    if (!Mernel::writeJsonToBufferNoexcept(buffer, data, true))
+        return;
+
+    if (!Mernel::writeFileFromBufferNoexcept(getCustomJsonPath(basename), buffer))
+        return;
 }
 
 std::unique_ptr<QSettings> getUiDefaultSettings()

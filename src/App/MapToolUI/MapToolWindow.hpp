@@ -22,6 +22,7 @@ class IRandomGeneratorFactory;
 namespace Gui {
 class IGraphicsLibrary;
 class LibraryModelsProvider;
+class IAppSettings;
 }
 
 struct FHRngUserSettings;
@@ -34,6 +35,7 @@ public:
         const Core::IRandomGeneratorFactory* rngFactory,
         const Gui::IGraphicsLibrary*         graphicsLibrary,
         const Gui::LibraryModelsProvider*    modelsProvider,
+        Gui::IAppSettings*                   appSettings,
 
         QWidget* parent = nullptr);
 
@@ -53,6 +55,8 @@ private:
 
     const Gui::IGraphicsLibrary* const      m_graphicsLibrary;
     const Gui::LibraryModelsProvider* const m_modelsProvider;
+
+    Gui::IAppSettings* const m_appSettings;
 
     std::unique_ptr<FHRngUserSettings> m_userSettings;
     std::string                        m_userSettingsData;

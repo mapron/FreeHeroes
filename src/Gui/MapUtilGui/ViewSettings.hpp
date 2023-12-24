@@ -7,6 +7,10 @@
 
 #include "SpriteMap.hpp"
 
+namespace Mernel {
+class PropertyTree;
+}
+
 namespace FreeHeroes {
 
 struct ViewSettings {
@@ -14,6 +18,9 @@ struct ViewSettings {
     SpritePaintSettings  m_paintSettings;
 
     bool m_inspectByHover;
+
+    void toJson(Mernel::PropertyTree& data) const;
+    void fromJson(const Mernel::PropertyTree& data);
 };
 
 }

@@ -16,6 +16,7 @@
 #include "IRandomGenerator.hpp"
 #include "LibraryModels.hpp"
 #include "LibraryPlayer.hpp"
+#include "IAppSettings.hpp"
 
 #include "GameDatabasePropertyReader.hpp"
 #include "GameDatabasePropertyWriter.hpp"
@@ -36,12 +37,7 @@ namespace FreeHeroes {
 
 namespace {
 const QLatin1String g_reg{ "HKEY_CURRENT_USER\\SOFTWARE\\FreeHeroes" };
-
-Mernel::std_path getUserSettingsPath()
-{
-    Mernel::AppLocations loc("FreeHeroes");
-    return loc.getAppdataDir() / "rngUserSettings.json";
-}
+const std::string   g_rngUserSettingsName = "rngUserSettings";
 
 }
 MapToolWindow::MapToolWindow(
@@ -49,6 +45,7 @@ MapToolWindow::MapToolWindow(
     const Core::IRandomGeneratorFactory* rngFactory,
     const Gui::IGraphicsLibrary*         graphicsLibrary,
     const Gui::LibraryModelsProvider*    modelsProvider,
+    Gui::IAppSettings*                   appSettings,
 
     QWidget* parent)
     : QFrame(parent)
@@ -57,6 +54,7 @@ MapToolWindow::MapToolWindow(
     , m_rngFactory(rngFactory)
     , m_graphicsLibrary(graphicsLibrary)
     , m_modelsProvider(modelsProvider)
+    , m_appSettings(appSettings)
     , m_userSettings(std::make_unique<FHRngUserSettings>())
 {
     m_version = "1.1.0";
@@ -80,6 +78,7 @@ MapToolWindow::MapToolWindow(
         m_rngFactory,
         m_graphicsLibrary,
         m_modelsProvider,
+        m_appSettings,
         this);
 
     for (int i = 0; i <= 6; i++)
@@ -218,7 +217,7 @@ void MapToolWindow::generateMap()
         .m_dumpUncompressedBuffers = false,
         .m_dumpBinaryDataJson      = false,
         .m_seed                    = seed,
-        .m_rngUserSettings         = getUserSettingsPath(),
+        .m_rngUserSettings         = m_appSettings->getCustomJsonPath(g_rngUserSettingsName),
         .m_showDebugStage          = debugStage,
     };
 
@@ -277,12 +276,7 @@ void MapToolWindow::updatePaths()
 
 void MapToolWindow::loadUserSettings()
 {
-    const Mernel::std_path path = getUserSettingsPath();
-    Mernel::PropertyTree   jsonData;
-    if (Mernel::std_fs::exists(path)) {
-        std::string buffer = Mernel::readFileIntoBuffer(path);
-        jsonData           = Mernel::readJsonFromBuffer(buffer);
-    }
+    Mernel::PropertyTree jsonData = m_appSettings->loadCustomJson(g_rngUserSettingsName);
 
     Core::PropertyTreeReaderDatabase reader(m_modelsProvider->database());
     if (jsonData.isMap())
@@ -309,8 +303,6 @@ void MapToolWindow::loadUserSettings()
 
 bool MapToolWindow::saveUserSettings()
 {
-    const Mernel::std_path path = getUserSettingsPath();
-
     try {
         Mernel::PropertyTree jsonData;
         m_ui->templateSettingsWidget->save();
@@ -326,7 +318,7 @@ bool MapToolWindow::saveUserSettings()
 
         m_userSettingsData = Mernel::writeJsonToBuffer(jsonData, true);
 
-        Mernel::writeFileFromBuffer(path, m_userSettingsData);
+        m_appSettings->saveCustomJson(jsonData, g_rngUserSettingsName);
     }
     catch (...) {
         return false;

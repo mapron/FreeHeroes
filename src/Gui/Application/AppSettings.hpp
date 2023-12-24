@@ -7,6 +7,8 @@
 
 #include "IAppSettings.hpp"
 
+#include "MernelPlatform/FsUtils.hpp"
+
 #include <QString>
 #include <QObject>
 #include <QSettings>
@@ -20,7 +22,7 @@ class AppSettings : public QObject
     , public IAppSettings {
     Q_OBJECT
 public:
-    AppSettings(QString filename);
+    AppSettings(Mernel::std_path root, const std::string& filename);
     ~AppSettings();
 
 signals:
@@ -44,14 +46,19 @@ public:
 
     AppGlobal& globalMutable() { return m_all.global; }
 
+    Mernel::std_path     getCustomJsonPath(const std::string& basename) const noexcept override { return m_root / (basename + ".json"); }
+    Mernel::PropertyTree loadCustomJson(const std::string& basename) const noexcept override;
+    void                 saveCustomJson(const Mernel::PropertyTree& data, const std::string& basename) const noexcept override;
+
 private:
     class QVariantRef;
     class QVariantRefList;
     std::vector<QVariantRefList> m_allWrappers;
 
-    AllSettings m_all;
-    QString     m_filename;
-    QSettings   m_settings;
+    AllSettings            m_all;
+    QString                m_filename;
+    QSettings              m_settings;
+    const Mernel::std_path m_root;
 };
 
 }

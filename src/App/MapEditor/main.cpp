@@ -20,6 +20,8 @@ int main(int argc, char* argv[])
 
     AbstractCommandLine parser({
                                    "input",
+                                   "output-png-surface",
+                                   "output-png-underground",
                                },
                                {});
     if (!parser.parseArgs(std::cerr, argc, argv)) {
@@ -28,7 +30,9 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    const std::string input = parser.getArg("input");
+    const std::string input             = parser.getArg("input");
+    const std::string outputSurface     = parser.getArg("output-png-surface");
+    const std::string outputUnderground = parser.getArg("output-png-underground");
 
     Core::CoreApplication fhCoreApp;
     fhCoreApp.setLoadUserMods(true);
@@ -42,10 +46,15 @@ int main(int argc, char* argv[])
         fhCoreApp.getDatabaseContainer(),
         fhCoreApp.getRandomGeneratorFactory(),
         fhApp.getGraphicsLibrary(),
-        fhApp.getModelsProvider());
+        fhApp.getModelsProvider(),
+        fhApp.getAppSettings());
 
     if (!input.empty())
         dlg.load(input);
+
+    if (dlg.saveScreenshots(outputSurface, outputUnderground))
+        return 0;
+
     dlg.show();
 
     return app.exec();

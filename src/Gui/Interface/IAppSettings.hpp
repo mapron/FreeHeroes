@@ -8,9 +8,15 @@
 #include <QString>
 #include <QSettings>
 
+#include "MernelPlatform/FsUtils.hpp"
+
 #include "GameConstants.hpp"
 
 class QWidget;
+
+namespace Mernel {
+class PropertyTree;
+}
 
 namespace FreeHeroes::Gui {
 
@@ -87,6 +93,11 @@ public:
     virtual QSettings& uiSettings() = 0;
 
     virtual void showSettingsEditor(QWidget* parent) = 0;
+
+    virtual Mernel::std_path getCustomJsonPath(const std::string& basename) const noexcept = 0;
+
+    virtual Mernel::PropertyTree loadCustomJson(const std::string& basename) const noexcept                                   = 0;
+    virtual void                 saveCustomJson(const Mernel::PropertyTree& data, const std::string& basename) const noexcept = 0;
 };
 
 }
