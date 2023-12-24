@@ -38,7 +38,17 @@ struct FHPlayer {
 
     std::vector<Core::LibraryFactionConstPtr> m_startingFactions;
 
-    int m_team{ -1 };
+    int     m_team{ -1 };
+    uint8_t m_unused1{ 0 };
+
+    struct HeroName {
+        std::string               m_name;
+        Core::LibraryHeroConstPtr m_hero;
+
+        bool operator==(const HeroName&) const noexcept = default;
+    };
+
+    std::vector<HeroName> m_heroesNames;
 
     bool operator==(const FHPlayer&) const noexcept = default;
 };
@@ -592,6 +602,8 @@ struct MAPUTIL_EXPORT FHMap {
     DisableConfigSpells          m_disabledSpells;
     DisableConfigSecondarySkills m_disabledSkills;
     DisableConfigBanks           m_disabledBanks;
+
+    std::vector<Core::LibraryHeroConstPtr> m_placeholderHeroes;
 
     std::vector<FHHeroData> m_customHeroes;
 

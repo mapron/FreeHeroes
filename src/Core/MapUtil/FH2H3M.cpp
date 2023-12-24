@@ -210,12 +210,16 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         h3player.m_canHumanPlay           = fhPlayer.m_humanPossible;
         h3player.m_canComputerPlay        = fhPlayer.m_aiPossible;
         h3player.m_generateHeroAtMainTown = fhPlayer.m_generateHeroAtMainTown;
+        h3player.m_unused1                = fhPlayer.m_unused1;
         if (hasTeams) {
             if (fhPlayer.m_team < 0) {
                 h3player.m_team = currentTeam++;
             } else {
                 h3player.m_team = static_cast<uint8_t>(fhPlayer.m_team);
             }
+        }
+        for (const auto& fhHeroName : fhPlayer.m_heroesNames) {
+            h3player.m_heroesNames.push_back({ .m_heroId = (uint8_t) fhHeroName.m_hero->legacyId, .m_heroName = fhHeroName.m_name });
         }
 
         uint16_t factionsBitmask = 0;
@@ -328,7 +332,6 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
                 h3player.m_mainCustomHeroId         = heroId;
                 h3player.m_generatedHeroTownFaction = 0; // @todo:
             }
-            h3player.m_heroesNames.push_back(SHeroName{ .m_heroId = heroId, .m_heroName = "" });
         }
 
         auto hero               = std::make_unique<MapHero>();
@@ -387,6 +390,10 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         allowed = 1;
     for (auto& allowed : dest.m_allowedSecSkills)
         allowed = 1;
+
+    for (auto* hero : src.m_placeholderHeroes) {
+        dest.m_placeholderHeroes.push_back(static_cast<uint8_t>(hero->legacyId));
+    }
 
     for (const auto heroId : m_database->heroes()->records()) {
         if (heroId->legacyId < 0)

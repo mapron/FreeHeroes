@@ -237,6 +237,10 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
         fhPlayer.m_humanPossible          = playerInfo.m_canHumanPlay;
         fhPlayer.m_generateHeroAtMainTown = playerInfo.m_generateHeroAtMainTown;
         fhPlayer.m_team                   = playerInfo.m_team == 0xff ? -1 : playerInfo.m_team;
+        fhPlayer.m_unused1                = playerInfo.m_unused1;
+        for (const auto& fhHeroName : playerInfo.m_heroesNames) {
+            fhPlayer.m_heroesNames.push_back({ .m_name = fhHeroName.m_heroName, .m_hero = m_heroIds.at(fhHeroName.m_heroId) });
+        }
 
         if (playerInfo.m_hasMainTown) {
             mainTowns[playerId] = posFromH3M(playerInfo.m_posOfMainTown, +2);
@@ -922,6 +926,9 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
     for (int index = 0; auto& allowedFlag : src.m_allowedSecSkills) {
         const auto& secSkillId = m_secSkillIds[index++];
         dest.m_disabledSkills.setDisabled(dest.m_isWaterMap, secSkillId, !allowedFlag);
+    }
+    for (uint8_t heroId : src.m_placeholderHeroes) {
+        dest.m_placeholderHeroes.push_back(m_heroIds[heroId]);
     }
 
     for (int index = 0; auto& customHero : src.m_customHeroData) {

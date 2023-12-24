@@ -31,16 +31,20 @@ ENUM_REFLECTION_STRINGIFY(
     Major,
     Relic)
 
-// clang-format off
-STRUCT_REFLECTION_PAIRED(
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHPlayer::HeroName,
+    m_name,
+    m_hero)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHPlayer,
-    "ai",                  m_aiPossible,
-    "human",               m_humanPossible,
-    "factions",            m_startingFactions,
-    "team",                m_team,
-    "generateHero",        m_generateHeroAtMainTown
-)
-// clang-format on
+    m_aiPossible,
+    m_humanPossible,
+    m_generateHeroAtMainTown,
+    m_startingFactions,
+    m_team,
+    m_unused1,
+    m_heroesNames)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHGuard,
@@ -606,6 +610,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_disabledArtifacts,
     m_disabledSpells,
     m_disabledSkills,
+    m_disabledBanks,
+    m_placeholderHeroes,
     m_customHeroes,
     m_globalEvents,
     m_objectDefs,
