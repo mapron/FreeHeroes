@@ -24,7 +24,7 @@ private:
     {
         return { (uint8_t) (pos.m_x + xoffset), (uint8_t) pos.m_y, (uint8_t) pos.m_z };
     }
-    std::vector<uint32_t> convertResource(const Core::ResourceAmount& amount) const;
+    std::vector<uint32_t> convertResources(const Core::ResourceAmount& amount) const;
     void                  convertReward(const Core::Reward& fhReward, MapReward& reward) const;
     void                  convertRewardHut(const Core::Reward& fhReward, MapSeerHut::MapQuestWithReward& questWithReward) const;
     void                  convertQuest(const FHQuest& fhQuest, MapQuest& quest) const;

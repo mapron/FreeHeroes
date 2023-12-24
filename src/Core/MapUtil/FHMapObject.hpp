@@ -41,6 +41,23 @@ struct FHPlayerControlledObject : public FHCommonObject {
     bool operator==(const FHPlayerControlledObject&) const noexcept = default;
 };
 
+struct FHTownEvent {
+    std::string          m_name;
+    std::string          m_message;
+    Core::ResourceAmount m_resources;
+
+    uint8_t  m_players          = 0;
+    bool     m_humanAffected    = true;
+    bool     m_computerAffected = false;
+    uint16_t m_firstOccurence   = 0;
+    uint8_t  m_nextOccurence    = 0;
+
+    std::vector<uint8_t>  m_buildings;
+    std::vector<uint16_t> m_creaturesAmounts;
+
+    bool operator==(const FHTownEvent&) const noexcept = default;
+};
+
 struct FHTown : public FHPlayerControlledObject {
     bool                         m_isMain{ false };
     Core::LibraryFactionConstPtr m_factionId = nullptr;
@@ -51,6 +68,12 @@ struct FHTown : public FHPlayerControlledObject {
     bool                         m_hasGarison{ false };
 
     std::vector<Core::LibraryBuildingConstPtr> m_buildings;
+    std::vector<Core::LibraryBuildingConstPtr> m_forbiddenBuildings;
+    std::vector<FHTownEvent>                   m_events;
+
+    // @todo: investigate what stored there
+    std::vector<uint8_t> m_obligatorySpells;
+    std::vector<uint8_t> m_possibleSpells;
 
     Core::AdventureSquad m_garison;
 

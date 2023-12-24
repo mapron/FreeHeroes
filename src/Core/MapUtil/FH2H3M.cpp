@@ -262,11 +262,32 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         cas1->m_hasCustomBuildings = fhTown.m_hasCustomBuildings;
         cas1->m_hasGarison         = fhTown.m_hasGarison;
 
+        cas1->m_obligatorySpells = fhTown.m_obligatorySpells;
+        cas1->m_possibleSpells   = fhTown.m_possibleSpells;
+
         //cas1->m_formation       = 0xCC;
         cas1->prepareArrays(dest.m_features.get());
         if (cas1->m_hasCustomBuildings) {
             for (auto* building : fhTown.m_buildings)
                 cas1->m_builtBuildings[building->legacyId] = 1;
+            for (auto* building : fhTown.m_forbiddenBuildings)
+                cas1->m_forbiddenBuildings[building->legacyId] = 1;
+        }
+        for (auto& srcEvent : fhTown.m_events) {
+            MapTownEvent destEvent;
+
+            destEvent.m_name                         = srcEvent.m_name;
+            destEvent.m_message                      = srcEvent.m_message;
+            destEvent.m_resourceSet.m_resourceAmount = convertResources(srcEvent.m_resources);
+            destEvent.m_players                      = srcEvent.m_players;
+            destEvent.m_humanAffected                = srcEvent.m_humanAffected;
+            destEvent.m_computerAffected             = srcEvent.m_computerAffected;
+            destEvent.m_firstOccurence               = srcEvent.m_firstOccurence;
+            destEvent.m_nextOccurence                = srcEvent.m_nextOccurence;
+            destEvent.m_buildings                    = srcEvent.m_buildings;
+            destEvent.m_creaturesAmounts             = srcEvent.m_creaturesAmounts;
+
+            cas1->m_events.push_back(std::move(destEvent));
         }
         if (cas1->m_hasGarison) {
             convertSquad(fhTown.m_garison, cas1->m_garison);
@@ -497,7 +518,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         monster->m_hasMessage = fhMon.m_hasMessage;
         if (monster->m_hasMessage) {
             monster->m_message                      = fhMon.m_message;
-            monster->m_resourceSet.m_resourceAmount = convertResource(fhMon.m_reward.resources);
+            monster->m_resourceSet.m_resourceAmount = convertResources(fhMon.m_reward.resources);
             if (!fhMon.m_reward.artifacts.empty()) {
                 monster->m_artID = uint16_t(fhMon.m_reward.artifacts[0].onlyArtifacts.at(0)->legacyId);
             }
@@ -674,7 +695,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
     std::sort(dest.m_objects.begin(), dest.m_objects.end(), [](const auto& lh, const auto& rh) { return lh.m_order < rh.m_order; });
 }
 
-std::vector<uint32_t> FH2H3MConverter::convertResource(const Core::ResourceAmount& amount) const
+std::vector<uint32_t> FH2H3MConverter::convertResources(const Core::ResourceAmount& amount) const
 {
     std::vector<uint32_t> res(7);
     for (const auto& [id, count] : amount.data)
@@ -688,7 +709,7 @@ void FH2H3MConverter::convertReward(const Core::Reward& fhReward, MapReward& rew
     reward.m_luckDiff   = fhReward.rngBonus.luck;
     reward.m_moraleDiff = fhReward.rngBonus.morale;
 
-    reward.m_resourceSet.m_resourceAmount = convertResource(fhReward.resources);
+    reward.m_resourceSet.m_resourceAmount = convertResources(fhReward.resources);
     reward.m_primSkillSet.m_prim          = convertPrimaryStats(fhReward.statBonus);
 
     // @todo: m_secSkills
@@ -804,7 +825,7 @@ void FH2H3MConverter::convertQuest(const FHQuest& fhQuest, MapQuest& quest) cons
         case FHQuest::Type::BringResource:
         {
             quest.m_missionType = MapQuest::Mission::RESOURCES;
-            quest.m_7resources  = convertResource(fhQuest.m_resources);
+            quest.m_7resources  = convertResources(fhQuest.m_resources);
         } break;
         case FHQuest::Type::KillCreature:
         {
@@ -836,7 +857,7 @@ void FH2H3MConverter::convertEvent(const FHGlobalMapEvent& fhEvent, GlobalMapEve
 {
     event.m_name                         = fhEvent.m_name;
     event.m_message                      = fhEvent.m_message;
-    event.m_resourceSet.m_resourceAmount = convertResource(fhEvent.m_resources);
+    event.m_resourceSet.m_resourceAmount = convertResources(fhEvent.m_resources);
     for (auto* player : fhEvent.m_players)
         event.m_players[player->legacyId] = 1;
 

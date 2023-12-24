@@ -76,6 +76,19 @@ STRUCT_REFLECTION_PAIRED(
 // clang-format on
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHTownEvent,
+    m_name,
+    m_message,
+    m_resources,
+    m_players,
+    m_humanAffected,
+    m_computerAffected,
+    m_firstOccurence,
+    m_nextOccurence,
+    m_buildings,
+    m_creaturesAmounts)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHTown,
     m_pos,
     m_order,
@@ -92,6 +105,10 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_spellResearch,
     m_hasCustomBuildings,
     m_buildings,
+    m_forbiddenBuildings,
+    m_events,
+    m_obligatorySpells,
+    m_possibleSpells,
     m_hasGarison,
     m_garison,
     m_garisonRmg)

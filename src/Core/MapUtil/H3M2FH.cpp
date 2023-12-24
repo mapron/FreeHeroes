@@ -653,6 +653,10 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 fhtown.m_spellResearch      = town->m_spellResearch;
                 fhtown.m_hasCustomBuildings = town->m_hasCustomBuildings;
                 fhtown.m_hasGarison         = town->m_hasGarison;
+
+                fhtown.m_obligatorySpells = town->m_obligatorySpells;
+                fhtown.m_possibleSpells   = town->m_possibleSpells;
+
                 if (mainTowns.contains(playerId) && mainTowns.at(playerId) == fhtown.m_pos)
                     fhtown.m_isMain = true;
                 if (fhtown.m_hasCustomBuildings) {
@@ -660,6 +664,26 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                         if (town->m_builtBuildings[i])
                             fhtown.m_buildings.push_back(m_buildingIds[i]);
                     }
+                    for (size_t i = 0; i < town->m_forbiddenBuildings.size(); ++i) {
+                        if (town->m_forbiddenBuildings[i])
+                            fhtown.m_forbiddenBuildings.push_back(m_buildingIds[i]);
+                    }
+                }
+                for (auto& srcEvent : town->m_events) {
+                    FHTownEvent destEvent;
+
+                    destEvent.m_name             = srcEvent.m_name;
+                    destEvent.m_message          = srcEvent.m_message;
+                    destEvent.m_resources        = convertResources(srcEvent.m_resourceSet.m_resourceAmount);
+                    destEvent.m_players          = srcEvent.m_players;
+                    destEvent.m_humanAffected    = srcEvent.m_humanAffected;
+                    destEvent.m_computerAffected = srcEvent.m_computerAffected;
+                    destEvent.m_firstOccurence   = srcEvent.m_firstOccurence;
+                    destEvent.m_nextOccurence    = srcEvent.m_nextOccurence;
+                    destEvent.m_buildings        = srcEvent.m_buildings;
+                    destEvent.m_creaturesAmounts = srcEvent.m_creaturesAmounts;
+
+                    fhtown.m_events.push_back(std::move(destEvent));
                 }
                 if (fhtown.m_hasGarison) {
                     fhtown.m_garison = convertSquad(town->m_garison);
