@@ -360,10 +360,13 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
 
         Core::ObjectDefIndex defIndex;
         defIndex.forcedIndex = obj.m_defnum;
-        if (objDefDatabase->substituteFor)
-            objDefDatabase = objDefDatabase->substituteFor;
+        if (objDefDatabase->substituteFor) {
+            defIndex.substitution = objDefDatabase->substituteKey;
+            objDefDatabase        = objDefDatabase->substituteFor;
+        }
 
-        auto& mappings = objDefDatabase->mappings;
+        defIndex.variant = objDefDatabase->mappings.key;
+        auto& mappings   = objDefDatabase->mappings;
 
         auto initCommon = [&obj, index, &defIndex](FHCommonObject& fhCommon) {
             fhCommon.m_pos      = posFromH3M(obj.m_pos);
