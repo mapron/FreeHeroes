@@ -28,17 +28,18 @@
 namespace FreeHeroes {
 
 class FH2H3MConverter::ObjectTemplateCache {
+    uint32_t add(ObjectTemplate def, Core::LibraryObjectDefConstPtr record)
+    {
+        auto index = static_cast<uint32_t>(m_objectDefs.size());
+        m_objectDefs.push_back(std::move(def));
+        m_objectDefsLibrary.push_back(*record);
+        return index;
+    }
+
 public:
     ObjectTemplateCache(const Core::IGameDatabase* database)
         : m_database(database)
     {}
-
-    uint32_t add(ObjectTemplate def)
-    {
-        auto index = static_cast<uint32_t>(m_objectDefs.size());
-        m_objectDefs.push_back(std::move(def));
-        return index;
-    }
 
     uint32_t add(Core::LibraryObjectDefConstPtr record)
     {
@@ -54,7 +55,7 @@ public:
         res.m_terrainsHard.resize(terrainsCount);
         res.m_terrainsSoft.resize(terrainsCount);
 
-        const auto index = add(res);
+        const auto index = add(res, record);
         m_index[record]  = index;
         return index;
     }
@@ -95,6 +96,7 @@ public:
 
     void init(const std::vector<Core::LibraryObjectDef>& fhDefs)
     {
+        m_objectDefsLibrary = fhDefs;
         m_objectDefs.resize(fhDefs.size());
         for (size_t i = 0; i < fhDefs.size(); ++i) {
             Core::LibraryObjectDefConstPtr embedded = &fhDefs[i];
@@ -107,6 +109,7 @@ public:
 
     std::map<Core::LibraryObjectDefConstPtr, uint32_t> m_index;
     std::vector<ObjectTemplate>                        m_objectDefs;
+    std::vector<Core::LibraryObjectDef>                m_objectDefsLibrary;
     const Core::IGameDatabase* const                   m_database;
 };
 
@@ -238,14 +241,22 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
     tmplCache.addId("avwmrnd0");
     tmplCache.addId("avlholg0");
 
-    auto addObject = [&dest](const FHCommonObject& obj, std::shared_ptr<IMapObject> impl, auto defNumMaker, int posOffsetX = 0) {
+    auto addObject = [&dest, &tmplCache](const FHCommonObject& obj, std::shared_ptr<IMapObject> impl, auto defNumMaker, bool calcXoffset = false) {
         Object o;
-        o.m_pos   = int3fromPos(obj.m_pos, posOffsetX);
+        o.m_pos   = int3fromPos(obj.m_pos);
         o.m_order = obj.m_order;
         if (obj.m_defIndex.forcedIndex >= 0)
             o.m_defnum = static_cast<uint32_t>(obj.m_defIndex.forcedIndex);
         else
             o.m_defnum = defNumMaker();
+        if (calcXoffset) {
+            auto& def = tmplCache.m_objectDefsLibrary[o.m_defnum];
+
+            auto blockMapPlanar = Core::LibraryObjectDef::makePlanarMask(def.blockMap, true);
+            auto visitMapPlanar = Core::LibraryObjectDef::makePlanarMask(def.visitMap, false);
+            auto combinedMask   = Core::LibraryObjectDef::makeCombinedMask(blockMapPlanar, visitMapPlanar);
+            o.m_pos.m_x         = o.m_pos.m_x - combinedMask.m_visitable.begin()->m_x;
+        }
         o.m_impl = std::move(impl);
         dest.m_objects.push_back(std::move(o));
     };
@@ -383,7 +394,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
             addObject(fhHero, std::move(hero), [&tmplCache] { return tmplCache.addId("avxprsn0"); });
         } else {
             addObject(
-                fhHero, std::move(hero), [&tmplCache, libraryHero] { return tmplCache.addHero(libraryHero); }, 1);
+                fhHero, std::move(hero), [&tmplCache, libraryHero] { return tmplCache.addHero(libraryHero); }, true);
         }
     }
 
@@ -585,7 +596,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
 
         auto* def = fhMon.m_id->objectDefs.get({});
         addObject(
-            fhMon, std::move(monster), [&tmplCache, def]() { return tmplCache.add(def); }, dest.m_features->m_monstersMapXOffset);
+            fhMon, std::move(monster), [&tmplCache, def]() { return tmplCache.add(def); }, true);
     }
 
     for (auto& fhDwelling : src.m_objects.m_dwellings) {
@@ -707,7 +718,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
             auto* def = u.unit->objectDefs.get({});
 
             addObject(
-                fhPandora, std::move(monster), [&tmplCache, def] { return tmplCache.add(def); }, dest.m_features->m_monstersMapXOffset);
+                fhPandora, std::move(monster), [&tmplCache, def] { return tmplCache.add(def); }, true);
             continue;
         }
         auto obj = std::make_unique<MapPandora>();

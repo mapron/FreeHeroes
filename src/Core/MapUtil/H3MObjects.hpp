@@ -43,8 +43,6 @@ struct MapFormatFeatures {
     int m_stackSize           = 0;
     int m_secondarySkillCount = 0;
 
-    int m_monstersMapXOffset = 0;
-
     bool m_hasQuestIdentifier = false;
     bool m_stackId16Bit       = false;
     bool m_artId16Bit         = false;

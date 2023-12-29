@@ -124,9 +124,6 @@ MapFormatFeatures::MapFormatFeatures(MapFormat format, int hotaVer1)
     m_mapEventHuman = format > MapFormat::AB;
 
     m_mapHotaUnknown1 = format >= MapFormat::HOTA1;
-
-    // hota reworked monster adventure sprites so they shifted from bottom right corner.
-    m_monstersMapXOffset = format >= MapFormat::HOTA1 && format <= MapFormat::HOTA3 ? 1 : 0;
 }
 
 std::unique_ptr<IMapObject> IMapObject::Create(MapObjectType type, uint32_t subid)

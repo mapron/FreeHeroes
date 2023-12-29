@@ -117,6 +117,68 @@ struct LibraryObjectDef {
         auto it = substitutions.find(substitutionId);
         return it == substitutions.cend() ? this : it->second;
     }
+
+    static PlanarMask makePlanarMask(const std::vector<uint8_t>& data, bool invert)
+    {
+        PlanarMask res;
+        for (size_t y = 0; y < 6; ++y) {
+            for (size_t x = 0; x < 8; ++x) {
+                uint8_t bit = data[y * 8 + x] ^ uint8_t(invert);
+                if (bit) {
+                    res.m_width  = std::max(res.m_width, x + 1);
+                    res.m_height = std::max(res.m_height, y + 1);
+                }
+            }
+        }
+        res.m_rows.resize(res.m_height);
+        for (auto& row : res.m_rows)
+            row.resize(res.m_width);
+        for (size_t x = 0; x < 8; ++x) {
+            for (size_t y = 0; y < 6; ++y) {
+                uint8_t bit = data[y * 8 + x] ^ uint8_t(invert);
+                if (bit) {
+                    res.m_rows[res.m_height - y - 1][res.m_width - x - 1] = 1;
+                }
+            }
+        }
+        return res;
+    };
+
+    static CombinedMask makeCombinedMask(const PlanarMask& blockMask, const PlanarMask& visitMask)
+    {
+        CombinedMask res;
+        res.m_width  = std::max(blockMask.m_width, visitMask.m_width);
+        res.m_height = std::max(blockMask.m_height, visitMask.m_height);
+        res.m_rows.resize(res.m_height);
+        for (auto& row : res.m_rows)
+            row.resize(res.m_width);
+        const size_t blockMaskOffsetY = res.m_height - blockMask.m_height;
+        const size_t blockMaskOffsetX = res.m_width - blockMask.m_width;
+        const size_t visitMaskOffsetY = res.m_height - visitMask.m_height;
+        const size_t visitMaskOffsetX = res.m_width - visitMask.m_width;
+
+        for (size_t y = 0; y < blockMask.m_height; ++y) {
+            size_t y1 = y + blockMaskOffsetY;
+            for (size_t x = 0; x < blockMask.m_width; ++x) {
+                size_t x1                    = x + blockMaskOffsetX;
+                auto   b                     = blockMask.m_rows[y][x];
+                res.m_rows[y1][x1].m_blocked = b;
+                if (b)
+                    res.m_blocked.insert(CombinedMask::Point{ int(x) - int(blockMask.m_width) + 1, int(y) - int(blockMask.m_height) + 1 });
+            }
+        }
+        for (size_t y = 0; y < visitMask.m_height; ++y) {
+            size_t y1 = y + visitMaskOffsetY;
+            for (size_t x = 0; x < visitMask.m_width; ++x) {
+                size_t x1                      = x + visitMaskOffsetX;
+                auto   b                       = visitMask.m_rows[y][x];
+                res.m_rows[y1][x1].m_visitable = b;
+                if (b)
+                    res.m_visitable.insert(CombinedMask::Point{ int(x) - int(visitMask.m_width) + 1, int(y) - int(visitMask.m_height) + 1 });
+            }
+        }
+        return res;
+    };
 };
 
 struct ObjectDefIndex {

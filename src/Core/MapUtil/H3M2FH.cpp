@@ -377,7 +377,13 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 const auto* monster = static_cast<const MapMonster*>(impl);
                 FHMonster   fhMonster;
                 initCommon(fhMonster);
-                fhMonster.m_pos             = posFromH3M(obj.m_pos, -src.m_features->m_monstersMapXOffset);
+                fhMonster.m_pos = posFromH3M(obj.m_pos);
+                {
+                    auto blockMapPlanar = Core::LibraryObjectDef::makePlanarMask(objDefCorrected.blockMap, true);
+                    auto visitMapPlanar = Core::LibraryObjectDef::makePlanarMask(objDefCorrected.visitMap, false);
+                    auto combinedMask   = Core::LibraryObjectDef::makeCombinedMask(blockMapPlanar, visitMapPlanar);
+                    fhMonster.m_pos.m_x = fhMonster.m_pos.m_x + combinedMask.m_visitable.begin()->m_x;
+                }
                 fhMonster.m_count           = monster->m_count;
                 fhMonster.m_id              = m_unitIds[objDefCorrected.subId];
                 fhMonster.m_questIdentifier = monster->m_questIdentifier;
