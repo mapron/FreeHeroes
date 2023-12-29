@@ -20,7 +20,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_z)
 
 ENUM_REFLECTION_STRINGIFY(
-    AiTactic,
+    PlayerInfo::AiTactic,
     NONE,
     NONE,
     RANDOM,

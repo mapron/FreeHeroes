@@ -36,15 +36,35 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_name,
     m_hero)
 
+ENUM_REFLECTION_STRINGIFY(
+    FHPlayer::AiTactic,
+    NONE,
+    NONE,
+    RANDOM,
+    WARRIOR,
+    BUILDER,
+    EXPLORER)
+
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHPlayer,
     m_aiPossible,
     m_humanPossible,
     m_generateHeroAtMainTown,
+    m_aiTactic,
     m_startingFactions,
     m_team,
     m_unused1,
+    m_generatedHeroTownFaction,
+    m_mainCustomHeroPortrait,
+    m_mainCustomHeroName,
     m_heroesNames)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHDisposedHero,
+    m_heroId,
+    m_portrait,
+    m_name,
+    m_players)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHGuard,
@@ -67,6 +87,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_hasArmy,
     m_hasArts,
     m_hasName,
+    m_hasPortrait,
+    m_portrait,
     m_name,
     m_army)
 
@@ -75,6 +97,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_pos,
     m_order,
     m_defIndex,
+
     m_player,
 
     m_isMain,
@@ -132,7 +155,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_generationId,
 
     m_amount,
-    m_id)
+    m_id,
+    m_messageWithBattle)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRandomResource,
@@ -142,7 +166,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_score,
     m_generationId,
 
-    m_amount)
+    m_amount,
+    m_messageWithBattle)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHArtifact,
@@ -152,7 +177,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_score,
     m_generationId,
 
-    m_id)
+    m_id,
+    m_messageWithBattle)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRandomArtifact,
@@ -489,6 +515,17 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_radius)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHUnknownObject,
+    m_pos,
+    m_order,
+    m_defIndex,
+    m_guard,
+    m_score,
+    m_generationId,
+
+    m_defId)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHDebugTile,
     m_pos,
     m_brushColor,
@@ -528,7 +565,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_signs,
     m_garisons,
     m_heroPlaceholders,
-    m_grails)
+    m_grails,
+    m_unknownObjects)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHGlobalMapEvent,
@@ -627,6 +665,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_disabledSkills,
     m_disabledBanks,
     m_placeholderHeroes,
+    m_disposedHeroes,
     m_customHeroes,
     m_globalEvents,
     m_objectDefs,

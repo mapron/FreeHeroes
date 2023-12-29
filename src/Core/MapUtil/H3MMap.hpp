@@ -25,10 +25,15 @@ public:
 
 /// The disposed hero struct describes which hero can be hired from which player.
 struct DisposedHero {
-    uint8_t     m_heroId   = 0;
-    uint8_t     m_portrait = 0xFF; /// The portrait id of the hero, 0xFF is default.
-    std::string m_name;
-    uint8_t     m_players = 0; /// Who can hire this hero (bitfield).
+    uint8_t              m_heroId   = 0;
+    uint8_t              m_portrait = 0xFF;
+    std::string          m_name;
+    std::vector<uint8_t> m_players; /// Who can hire this hero, 0|1 for each player as offset
+
+    void prepareArrays(const MapFormatFeatures* m_features)
+    {
+        m_players.resize(m_features->m_players);
+    }
 
     void readBinary(ByteOrderDataStreamReader& stream);
     void writeBinary(ByteOrderDataStreamWriter& stream) const;
@@ -42,16 +47,16 @@ struct SHeroName {
     void writeBinary(ByteOrderDataStreamWriter& stream) const;
 };
 
-enum class AiTactic
-{
-    NONE = -1,
-    RANDOM,
-    WARRIOR,
-    BUILDER,
-    EXPLORER
-};
-
 struct PlayerInfo {
+    enum class AiTactic
+    {
+        NONE = -1,
+        RANDOM,
+        WARRIOR,
+        BUILDER,
+        EXPLORER,
+    };
+
     bool     m_canHumanPlay    = false;
     bool     m_canComputerPlay = false;
     AiTactic m_aiTactic        = AiTactic::RANDOM;

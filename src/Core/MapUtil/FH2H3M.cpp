@@ -189,27 +189,31 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         destTile.m_coastal = tile.m_coastal;
     });
 
-    bool    hasTeams    = false;
-    uint8_t currentTeam = 0;
+    bool    hasTeams = false;
+    uint8_t maxTeam  = 0;
     for (auto& [playerId, fhPlayer] : src.m_players) {
         hasTeams = hasTeams || fhPlayer.m_team >= 0;
-        if (fhPlayer.m_team >= 0)
-            currentTeam = static_cast<uint8_t>(fhPlayer.m_team + 1);
     }
     for (auto& [playerId, fhPlayer] : src.m_players) {
         auto  index    = playerId->legacyId;
         auto& h3player = dest.m_players[index];
 
-        h3player.m_canHumanPlay           = fhPlayer.m_humanPossible;
-        h3player.m_canComputerPlay        = fhPlayer.m_aiPossible;
-        h3player.m_generateHeroAtMainTown = fhPlayer.m_generateHeroAtMainTown;
-        h3player.m_unused1                = fhPlayer.m_unused1;
+        h3player.m_canHumanPlay             = fhPlayer.m_humanPossible;
+        h3player.m_canComputerPlay          = fhPlayer.m_aiPossible;
+        h3player.m_generateHeroAtMainTown   = fhPlayer.m_generateHeroAtMainTown;
+        h3player.m_unused1                  = fhPlayer.m_unused1;
+        h3player.m_generatedHeroTownFaction = fhPlayer.m_generatedHeroTownFaction;
+        h3player.m_mainCustomHeroPortrait   = fhPlayer.m_mainCustomHeroPortrait;
+        h3player.m_mainCustomHeroName       = fhPlayer.m_mainCustomHeroName;
+        h3player.m_aiTactic                 = static_cast<PlayerInfo::AiTactic>(fhPlayer.m_aiTactic);
+
         if (hasTeams) {
             if (fhPlayer.m_team < 0) {
-                h3player.m_team = currentTeam++;
+                h3player.m_team = 0;
             } else {
                 h3player.m_team = static_cast<uint8_t>(fhPlayer.m_team);
             }
+            maxTeam = std::max(maxTeam, h3player.m_team);
         }
         for (const auto& fhHeroName : fhPlayer.m_heroesNames) {
             h3player.m_heroesNames.push_back({ .m_heroId = (uint8_t) fhHeroName.m_hero->legacyId, .m_heroName = fhHeroName.m_name });
@@ -223,7 +227,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         h3player.m_allowedFactionsBitmask = factionsBitmask;
     }
     if (hasTeams)
-        dest.m_teamCount = currentTeam;
+        dest.m_teamCount = maxTeam + 1;
 
     for (auto& bit : dest.m_allowedHeroes)
         bit = 1;
@@ -322,8 +326,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         if (playerIndex >= 0) {
             auto& h3player = dest.m_players[playerIndex];
             if (fhHero.m_isMain) {
-                h3player.m_mainCustomHeroId         = heroId;
-                h3player.m_generatedHeroTownFaction = 0; // @todo:
+                h3player.m_mainCustomHeroId = heroId;
             }
         }
 
@@ -342,11 +345,15 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
             hero->m_hasArmy                            = fhHero.m_data.m_hasArmy;
             hero->m_artSet.m_hasArts                   = fhHero.m_data.m_hasArts;
             hero->m_hasName                            = fhHero.m_data.m_hasName;
+            hero->m_hasPortrait                        = fhHero.m_data.m_hasPortrait;
             if (hero->m_hasExp)
                 hero->m_exp = static_cast<uint32_t>(fhHero.m_data.m_army.hero.experience);
 
             if (hero->m_hasName) {
                 hero->m_name = fhHero.m_data.m_name;
+            }
+            if (hero->m_hasPortrait) {
+                hero->m_portrait = static_cast<uint8_t>(fhHero.m_data.m_portrait);
             }
 
             if (hero->m_primSkillSet.m_hasCustomPrimSkills) {
@@ -391,6 +398,17 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
 
     for (auto* hero : src.m_placeholderHeroes) {
         dest.m_placeholderHeroes.push_back(static_cast<uint8_t>(hero->legacyId));
+    }
+    for (auto& srcHero : src.m_disposedHeroes) {
+        DisposedHero destHero;
+        destHero.prepareArrays(dest.m_features.get());
+        for (auto* player : srcHero.m_players)
+            destHero.m_players[player->legacyId] = 1;
+        destHero.m_heroId   = static_cast<uint8_t>(srcHero.m_heroId->legacyId);
+        destHero.m_portrait = static_cast<uint8_t>(srcHero.m_portrait);
+        destHero.m_name     = srcHero.m_name;
+
+        dest.m_disposedHeroes.push_back(std::move(destHero));
     }
 
     for (const auto heroId : m_database->heroes()->records()) {
@@ -469,6 +487,8 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
     for (auto& fhRes : src.m_objects.m_resources) {
         auto res      = std::make_unique<MapResource>();
         res->m_amount = fhRes.m_amount / fhRes.m_id->pileSize;
+        res->prepareArrays(dest.m_features.get());
+        convertMessage(fhRes.m_messageWithBattle, res->m_message);
 
         addObjectCommon(fhRes, std::move(res));
     }
@@ -476,6 +496,9 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
     for (auto& fhRes : src.m_objects.m_resourcesRandom) {
         auto res      = std::make_unique<MapResource>();
         res->m_amount = fhRes.m_amount;
+        res->prepareArrays(dest.m_features.get());
+
+        convertMessage(fhRes.m_messageWithBattle, res->m_message);
         addObject(fhRes, std::move(res), [&tmplCache]() { return tmplCache.addId("avtrndm0"); });
     }
 
@@ -485,12 +508,15 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
             art->m_spellId = fhArt.m_id->scrollSpell->legacyId;
             art->m_isSpell = true;
         }
+        art->prepareArrays(dest.m_features.get());
+        convertMessage(fhArt.m_messageWithBattle, art->m_message);
 
         addObjectCommon(fhArt, std::move(art));
     }
     for (auto& fhArt : src.m_objects.m_artifactsRandom) {
-        auto        art = std::make_unique<MapArtifact>(false);
-        std::string id  = "";
+        auto art = std::make_unique<MapArtifact>(false);
+        art->prepareArrays(dest.m_features.get());
+        std::string id = "";
         switch (fhArt.m_type) {
             case FHRandomArtifact::Type::Any:
                 id = "avarand";
@@ -716,6 +742,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
     }
     for (auto& fhGarison : src.m_objects.m_garisons) {
         auto obj = std::make_unique<MapGarison>();
+        obj->prepareArrays(dest.m_features.get());
         convertSquad(fhGarison.m_garison, obj->m_garison);
         obj->m_owner          = static_cast<uint8_t>(fhGarison.m_player->legacyId);
         obj->m_removableUnits = fhGarison.m_removableUnits;
@@ -734,6 +761,11 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         auto obj      = std::make_unique<MapGrail>();
         obj->m_radius = fhObj.m_radius;
         addObject(fhObj, std::move(obj), [&tmplCache] { return tmplCache.addId("avzgrail"); });
+    }
+    for (auto& fhObj : src.m_objects.m_unknownObjects) {
+        auto obj = std::make_unique<MapObjectSimple>();
+
+        addObject(fhObj, std::move(obj), [&tmplCache, &fhObj] { return tmplCache.addId(fhObj.m_defId); });
     }
 
     for (auto& fhEvent : src.m_globalEvents) {
@@ -800,7 +832,7 @@ void FH2H3MConverter::convertRewardHut(const Core::Reward& fhReward, MapSeerHut:
     if (fhReward.resources.nonEmptyAmount()) {
         questWithReward.m_reward = MapSeerHut::MapQuestWithReward::RewardType::RESOURCES;
         for (const auto& [res, count] : fhReward.resources.data) {
-            questWithReward.m_rVal = static_cast<uint32_t>(count / res->pileSize);
+            questWithReward.m_rVal = static_cast<uint32_t>(count);
             questWithReward.m_rID  = static_cast<uint32_t>(res->legacyId);
         }
     }
@@ -969,6 +1001,7 @@ void FH2H3MConverter::convertHeroArtifacts(const Core::AdventureHero& hero, Hero
         artSet.m_misc5 = uint16_t(art5->legacyId);
 
     artSet.m_cata = uint16_t(-1);
+    artSet.m_book = hero.hasSpellBook ? uint16_t(0) : uint16_t(-1);
 
     for (auto const& [art, cnt] : hero.artifactsBag) {
         for (int i = 0; i < cnt; ++i)

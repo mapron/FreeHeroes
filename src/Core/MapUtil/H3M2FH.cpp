@@ -61,38 +61,6 @@ struct ObjTemplateDiag {
     std::string                    m_substitutionId;
 };
 
-struct ObjTemplateDiagContainer {
-    std::vector<ObjTemplateDiag> m_records;
-
-    ObjTemplateDiag& add()
-    {
-        m_records.push_back({});
-        return *m_records.rbegin();
-    }
-
-    void sort()
-    {
-        std::sort(m_records.begin(), m_records.end(), [](const ObjTemplateDiag& rh, const ObjTemplateDiag& lh) {
-            return rh.m_fhDefFromFile.id < lh.m_fhDefFromFile.id;
-        });
-    }
-
-    void check() const
-    {
-        std::string missingDefs;
-        for (const auto& diag : m_records) {
-            if (!diag.m_originalRecord) {
-                missingDefs += printObjDef(diag.m_fhDefFromFile) + "\n";
-            }
-        }
-        if (!missingDefs.empty()) {
-            Logger(Logger::Err) << "missing defs:\n"
-                                << missingDefs;
-            throw std::runtime_error("Some defs are missing, map cannot be loaded. Add them to the database.");
-        }
-    }
-};
-
 FHPos posFromH3M(H3Pos pos, int xoffset = 0)
 {
     return { (pos.m_x + xoffset), pos.m_y, pos.m_z };
@@ -181,13 +149,19 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
 
     for (int index = 0; const PlayerInfo& playerInfo : src.m_players) {
         const auto playerId = m_playerIds.at(index++);
-        auto&      fhPlayer = dest.m_players[playerId];
 
-        fhPlayer.m_aiPossible             = playerInfo.m_canComputerPlay;
-        fhPlayer.m_humanPossible          = playerInfo.m_canHumanPlay;
-        fhPlayer.m_generateHeroAtMainTown = playerInfo.m_generateHeroAtMainTown;
-        fhPlayer.m_team                   = playerInfo.m_team == 0xff ? -1 : playerInfo.m_team;
-        fhPlayer.m_unused1                = playerInfo.m_unused1;
+        auto& fhPlayer = dest.m_players[playerId];
+
+        fhPlayer.m_aiPossible               = playerInfo.m_canComputerPlay;
+        fhPlayer.m_humanPossible            = playerInfo.m_canHumanPlay;
+        fhPlayer.m_generateHeroAtMainTown   = playerInfo.m_generateHeroAtMainTown;
+        fhPlayer.m_team                     = playerInfo.m_team == 0xff ? -1 : playerInfo.m_team;
+        fhPlayer.m_unused1                  = playerInfo.m_unused1;
+        fhPlayer.m_generatedHeroTownFaction = playerInfo.m_generatedHeroTownFaction;
+        fhPlayer.m_mainCustomHeroPortrait   = playerInfo.m_mainCustomHeroPortrait;
+        fhPlayer.m_mainCustomHeroName       = playerInfo.m_mainCustomHeroName;
+        fhPlayer.m_aiTactic                 = static_cast<FHPlayer::AiTactic>(playerInfo.m_aiTactic);
+
         for (const auto& fhHeroName : playerInfo.m_heroesNames) {
             fhPlayer.m_heroesNames.push_back({ .m_name = fhHeroName.m_heroName, .m_hero = m_heroIds.at(fhHeroName.m_heroId) });
         }
@@ -209,8 +183,6 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
         }
     }
 
-    ObjTemplateDiagContainer diag;
-
     using SortingMap = std::map<Core::LibraryObjectDef::SortingTuple, std::vector<Core::LibraryObjectDefConstPtr>>;
     SortingMap allDbDefs;
     for (auto* rec : m_database->objectDefs()->records()) {
@@ -222,9 +194,6 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
     for (const ObjectTemplate& objTempl : src.m_objectDefs) {
         Core::LibraryObjectDef fhDef          = convertDef(objTempl);
         Core::LibraryObjectDef fhDefCorrected = fhDef;
-        auto&                  diagRecord     = diag.add();
-        diagRecord.m_fhDefFromFile            = fhDef;
-        diagRecord.m_originalRecord           = nullptr;
 
         Core::LibraryObjectDefConstPtr record = m_database->objectDefs()->find(fhDef.id);
 
@@ -236,10 +205,10 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             bool foundKeyReplacement = it != allDbDefs.cend();
 
             if (!foundKeyReplacement) {
-                if (!record)
-                    continue;
-                Logger(Logger::Warning) << "Def is corrupted, replacing with database def, embedded type=" << fhDef.type << " -> db type=" << record->type;
-                fhDefCorrected = *record;
+                if (record) {
+                    Logger(Logger::Warning) << "Def is corrupted/used for decration, making database reference null:" << fhDef.type << " sub:" << fhDef.subId;
+                    record = nullptr;
+                }
 
             } else {
                 record = nullptr;
@@ -256,41 +225,11 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 }
             }
         }
-        if (!record) {
-            continue;
-            // will throw after loop
-        }
-        diagRecord.m_originalRecord = record;
-        fhDef.substituteFor         = record;
-        /*
-        Logger(Logger::Warning) << "[" << dest.m_initialObjectDefs.size() << "] "
-
-                                << "objTempl.id=" << objTempl.m_id
-                                << ", objTempl.ani=" << objTempl.m_animationFile
-                                << ", fhDef.id=" << fhDef.id
-                                << ", fhDef.defFile=" << fhDef.defFile
-                                << ", fhDef.objId=" << fhDef.objId
-                                << ", dbDecord.id=" << record->id
-                                << ", dbDecord.defFile=" << record->defFile
-                                << ", dbDecord.objId=" << record->objId;*/
-
-        // couple objdefs like sulfur/mercury mines have several def with same unique def name but different bitmask for terrain.
-        /*for (const auto& [subId, altRec] : record->substitutions) {
-            if (*altRec == fhDef) {
-                diagRecord.m_substitutionId = subId;
-                diagRecord.m_substituteAlt  = altRec;
-                record                      = altRec;
-                break;
-            }
-        }*/
+        fhDef.substituteFor = record;
 
         dest.m_objectDefs.push_back(fhDef);
         objectDefsCorrected.push_back(fhDefCorrected);
     }
-    diag.sort();
-    diag.check();
-
-    std::set<uint32_t> skipped;
 
     for (int index = 0; const Object& obj : src.m_objects) {
         const IMapObject* impl = obj.m_impl.get();
@@ -302,6 +241,20 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
 
         Core::ObjectDefIndex defIndex;
         defIndex.forcedIndex = obj.m_defnum;
+        auto initCommon      = [&obj, index, &defIndex](FHCommonObject& fhCommon) {
+            fhCommon.m_pos      = posFromH3M(obj.m_pos);
+            fhCommon.m_order    = index;
+            fhCommon.m_defIndex = defIndex;
+        };
+
+        if (!objDefDatabase) {
+            FHUnknownObject fhUnknown;
+            initCommon(fhUnknown);
+            fhUnknown.m_defId = objDefCorrected.id;
+            dest.m_objects.m_unknownObjects.push_back(std::move(fhUnknown));
+            continue;
+        }
+
         if (objDefDatabase->substituteFor) {
             defIndex.substitution = objDefDatabase->substituteKey;
             objDefDatabase        = objDefDatabase->substituteFor;
@@ -309,12 +262,6 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
 
         defIndex.variant = objDefDatabase->mappings.key;
         auto& mappings   = objDefDatabase->mappings;
-
-        auto initCommon = [&obj, index, &defIndex](FHCommonObject& fhCommon) {
-            fhCommon.m_pos      = posFromH3M(obj.m_pos);
-            fhCommon.m_order    = index;
-            fhCommon.m_defIndex = defIndex;
-        };
 
         /*Logger(Logger::Warning) << "[" << obj.m_defnum << "] pos=" << posFromH3M(obj.m_pos).toPrintableString()
 
@@ -333,6 +280,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
         switch (type) {
             case MapObjectType::EVENT:
             {
+                assert(dynamic_cast<const MapEvent*>(impl) != nullptr);
                 const auto*  event = static_cast<const MapEvent*>(impl);
                 FHLocalEvent fhEvent;
                 initCommon(fhEvent);
@@ -348,6 +296,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             case MapObjectType::HERO:
             case MapObjectType::PRISON:
             {
+                assert(dynamic_cast<const MapHero*>(impl) != nullptr);
                 const auto* hero = static_cast<const MapHero*>(impl);
 
                 const auto playerId = m_playerIds.at(hero->m_playerOwner);
@@ -368,6 +317,10 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 destHero.m_hasName = hero->m_hasName;
                 if (destHero.m_hasName) {
                     destHero.m_name = hero->m_name;
+                }
+                destHero.m_hasPortrait = hero->m_hasPortrait;
+                if (destHero.m_hasPortrait) {
+                    destHero.m_portrait = hero->m_portrait;
                 }
                 destHero.m_hasPrimSkills = hero->m_primSkillSet.m_hasCustomPrimSkills;
                 destHero.m_hasSpells     = hero->m_spellSet.m_hasCustomSpells;
@@ -420,6 +373,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             case MapObjectType::RANDOM_MONSTER_L6:
             case MapObjectType::RANDOM_MONSTER_L7:
             {
+                assert(dynamic_cast<const MapMonster*>(impl) != nullptr);
                 const auto* monster = static_cast<const MapMonster*>(impl);
                 FHMonster   fhMonster;
                 initCommon(fhMonster);
@@ -483,6 +437,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             case MapObjectType::OCEAN_BOTTLE:
             case MapObjectType::SIGN:
             {
+                assert(dynamic_cast<const MapSignBottle*>(impl) != nullptr);
                 const auto* bottle = static_cast<const MapSignBottle*>(impl);
 
                 if (!mappings.mapVisitable)
@@ -496,6 +451,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             } break;
             case MapObjectType::SEER_HUT:
             {
+                assert(dynamic_cast<const MapSeerHut*>(impl) != nullptr);
                 const auto* hut = static_cast<const MapSeerHut*>(impl);
 
                 auto* visitableId = mappings.mapVisitable;
@@ -517,6 +473,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             } break;
             case MapObjectType::WITCH_HUT:
             {
+                assert(dynamic_cast<const MapWitchHut*>(impl) != nullptr);
                 const auto* hut         = static_cast<const MapWitchHut*>(impl);
                 auto*       visitableId = mappings.mapVisitable;
                 if (!visitableId)
@@ -535,6 +492,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             } break;
             case MapObjectType::SCHOLAR:
             {
+                assert(dynamic_cast<const MapScholar*>(impl) != nullptr);
                 const auto* scholar = static_cast<const MapScholar*>(impl);
 
                 auto* visitableId = mappings.mapVisitable;
@@ -559,6 +517,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             case MapObjectType::GARRISON:
             case MapObjectType::GARRISON2:
             {
+                assert(dynamic_cast<const MapGarison*>(impl) != nullptr);
                 const auto* garison = static_cast<const MapGarison*>(impl);
                 if (!mappings.mapVisitable)
                     throw std::runtime_error("Unknown def for visitable:" + objDefEmbedded.id);
@@ -577,9 +536,12 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             {
                 FHArtifact art;
                 initCommon(art);
+                assert(dynamic_cast<const MapArtifact*>(impl) != nullptr);
+                const auto* artifact = static_cast<const MapArtifact*>(impl);
+
+                art.m_messageWithBattle = convertMessage(artifact->m_message);
                 if (type == MapObjectType::SPELL_SCROLL) {
-                    const auto* artifact = static_cast<const MapArtifact*>(impl);
-                    const auto* spell    = m_spellIds.at(artifact->m_spellId);
+                    const auto* spell = m_spellIds.at(artifact->m_spellId);
                     assert(spell);
                     art.m_id = m_database->artifacts()->find("sod.artifact." + spell->id); // @todo: constaint for prefix?
                     assert(art.m_id);
@@ -612,19 +574,24 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             } break;
             case MapObjectType::RANDOM_RESOURCE:
             {
+                assert(dynamic_cast<const MapResource*>(impl) != nullptr);
                 const auto*      resource = static_cast<const MapResource*>(impl);
                 FHRandomResource fhres;
                 initCommon(fhres);
-                fhres.m_amount = resource->m_amount;
+                fhres.m_amount            = resource->m_amount;
+                fhres.m_messageWithBattle = convertMessage(resource->m_message);
                 dest.m_objects.m_resourcesRandom.push_back(std::move(fhres));
             } break;
             case MapObjectType::RESOURCE:
             {
+                assert(dynamic_cast<const MapResource*>(impl) != nullptr);
                 const auto* resource = static_cast<const MapResource*>(impl);
                 FHResource  fhres;
                 initCommon(fhres);
                 fhres.m_amount = resource->m_amount;
                 fhres.m_id     = m_resourceIds[objDefCorrected.subId];
+
+                fhres.m_messageWithBattle = convertMessage(resource->m_message);
                 fhres.m_amount *= fhres.m_id->pileSize;
                 assert(fhres.m_id);
                 dest.m_objects.m_resources.push_back(std::move(fhres));
@@ -632,6 +599,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             case MapObjectType::RANDOM_TOWN:
             case MapObjectType::TOWN:
             {
+                assert(dynamic_cast<const MapTown*>(impl) != nullptr);
                 const auto* town     = static_cast<const MapTown*>(impl);
                 const auto  playerId = m_playerIds.at(town->m_playerOwner);
                 FHTown      fhtown;
@@ -687,6 +655,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             case MapObjectType::MINE:
             {
                 if (objDefCorrected.subId < 7) {
+                    assert(dynamic_cast<const MapObjectWithOwner*>(impl) != nullptr);
                     const auto* objOwner = static_cast<const MapObjectWithOwner*>(impl);
                     FHMine      mine;
                     initCommon(mine);
@@ -694,6 +663,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                     mine.m_id     = mappings.resourceMine;
                     dest.m_objects.m_mines.push_back(std::move(mine));
                 } else {
+                    assert(dynamic_cast<const MapAbandonedMine*>(impl) != nullptr);
                     const auto*     objOwner = static_cast<const MapAbandonedMine*>(impl);
                     FHAbandonedMine mine;
                     if (!mappings.mapVisitable)
@@ -714,6 +684,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             case MapObjectType::CREATURE_GENERATOR3:
             case MapObjectType::CREATURE_GENERATOR4:
             {
+                assert(dynamic_cast<const MapObjectWithOwner*>(impl) != nullptr);
                 const auto* objOwner = static_cast<const MapObjectWithOwner*>(impl);
                 FHDwelling  dwelling;
                 initCommon(dwelling);
@@ -733,6 +704,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             case MapObjectType::SHIPYARD:
             case MapObjectType::LIGHTHOUSE:
             {
+                assert(dynamic_cast<const MapObjectWithOwner*>(impl) != nullptr);
                 const auto* objOwner = static_cast<const MapObjectWithOwner*>(impl);
 
                 if (!mappings.mapVisitable)
@@ -749,6 +721,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             case MapObjectType::SHRINE_OF_MAGIC_GESTURE:
             case MapObjectType::SHRINE_OF_MAGIC_THOUGHT:
             {
+                assert(dynamic_cast<const MapShrine*>(impl) != nullptr);
                 const auto* shrine      = static_cast<const MapShrine*>(impl);
                 auto*       visitableId = mappings.mapVisitable;
                 assert(visitableId);
@@ -777,6 +750,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             } break;
             case MapObjectType::PANDORAS_BOX:
             {
+                assert(dynamic_cast<const MapPandora*>(impl) != nullptr);
                 const auto* pandora = static_cast<const MapPandora*>(impl);
                 FHPandora   fhPandora;
                 initCommon(fhPandora);
@@ -786,6 +760,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             } break;
             case MapObjectType::GRAIL:
             {
+                assert(dynamic_cast<const MapGrail*>(impl) != nullptr);
                 const auto* grail = static_cast<const MapGrail*>(impl);
 
                 FHGrail fhObj;
@@ -795,6 +770,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             } break;
             case MapObjectType::QUEST_GUARD:
             {
+                assert(dynamic_cast<const MapQuestGuard*>(impl) != nullptr);
                 const auto*  questGuard = static_cast<const MapQuestGuard*>(impl);
                 FHQuestGuard fhQuestGuard;
                 initCommon(fhQuestGuard);
@@ -811,6 +787,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             case MapObjectType::RANDOM_DWELLING_LVL:     //same as castle, fixed level   217
             case MapObjectType::RANDOM_DWELLING_FACTION: //level range, fixed faction    218
             {
+                assert(dynamic_cast<const MapDwelling*>(impl) != nullptr);
                 const auto* mapDwelling = static_cast<const MapDwelling*>(impl);
                 (void) mapDwelling;
                 assert(!"unsupported");
@@ -818,6 +795,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
 
             case MapObjectType::HERO_PLACEHOLDER:
             {
+                assert(dynamic_cast<const MapHeroPlaceholder*>(impl) != nullptr);
                 const auto* mapPlaceholder = static_cast<const MapHeroPlaceholder*>(impl);
 
                 FHHeroPlaceholder fhObj;
@@ -834,6 +812,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             case MapObjectType::CRYPT:
             case MapObjectType::SHIPWRECK:
             {
+                assert(dynamic_cast<const MapObjectCreatureBank*>(impl) != nullptr);
                 const auto* bank = static_cast<const MapObjectCreatureBank*>(impl);
                 auto*       id   = mappings.mapBank;
                 FHBank      fhBank;
@@ -878,10 +857,12 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                     dest.m_objects.m_visitables.push_back(std::move(fhVisitable));
                     break;
                 }
-                if (!skipped.contains(objDefCorrected.objId)) {
-                    skipped.insert(objDefCorrected.objId);
-                    Logger(Logger::Warning) << "Skipping unsupported object def: " << objDefCorrected.id << " of type " << objDefCorrected.objId;
-                    //assert(!"unsupported");
+
+                {
+                    FHUnknownObject fhUnknown;
+                    initCommon(fhUnknown);
+                    fhUnknown.m_defId = objDefCorrected.id;
+                    dest.m_objects.m_unknownObjects.push_back(std::move(fhUnknown));
                 }
             } break;
         }
@@ -909,6 +890,15 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
     }
     for (uint8_t heroId : src.m_placeholderHeroes) {
         dest.m_placeholderHeroes.push_back(m_heroIds[heroId]);
+    }
+    for (auto& srcHero : src.m_disposedHeroes) {
+        FHDisposedHero destHero;
+        destHero.m_players  = convertPlayerList(srcHero.m_players);
+        destHero.m_heroId   = m_heroIds.at(srcHero.m_heroId);
+        destHero.m_portrait = srcHero.m_portrait == 0xffU ? -1 : srcHero.m_portrait;
+        destHero.m_name     = srcHero.m_name;
+
+        dest.m_disposedHeroes.push_back(std::move(destHero));
     }
 
     for (int index = 0; auto& customHero : src.m_customHeroData) {
@@ -1203,6 +1193,8 @@ void H3M2FHConverter::convertHeroArtifacts(const HeroArtSet& artSet, Core::Adven
 
     for (uint16_t artId : artSet.m_bagSlots)
         hero.artifactsBag[m_artifactIds.at(artId)]++;
+
+    hero.hasSpellBook = artSet.m_book != uint16_t(-1);
 }
 
 std::vector<Core::LibraryPlayerConstPtr> H3M2FHConverter::convertPlayerList(const std::vector<uint8_t>& players) const

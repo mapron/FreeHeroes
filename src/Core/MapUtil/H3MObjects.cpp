@@ -267,6 +267,7 @@ void MapHero::prepareArrays(const MapFormatFeatures* m_features)
     m_spellSet.prepareArrays(m_features);
     m_primSkillSet.prepareArrays(m_features);
     m_artSet.prepareArrays(m_features);
+    m_garison.prepareArrays(m_features);
 }
 
 void MapHero::readBinary(ByteOrderDataStreamReader& stream)
@@ -699,6 +700,9 @@ void MapObjectCreatureBank::fromJson(const PropertyTree& data)
 
 void MapResource::readBinary(ByteOrderDataStreamReader& stream)
 {
+    auto* m_features = getFeaturesFromStream(stream);
+    prepareArrays(m_features);
+
     m_message.readBinary(stream);
     stream >> m_amount;
     stream.zeroPaddingChecked(4, g_enablePaddingCheck);
@@ -773,6 +777,8 @@ void MapMessage::writeBinary(ByteOrderDataStreamWriter& stream) const
 
 void MapArtifact::readBinary(ByteOrderDataStreamReader& stream)
 {
+    auto* m_features = getFeaturesFromStream(stream);
+    prepareArrays(m_features);
     m_message.readBinary(stream);
 
     if (m_isSpell)

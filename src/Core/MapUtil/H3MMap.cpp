@@ -340,7 +340,7 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
     for (PlayerInfo& playerInfo : m_players) {
         stream >> playerInfo.m_canHumanPlay >> playerInfo.m_canComputerPlay;
         const bool isValid    = playerInfo.m_canHumanPlay || playerInfo.m_canComputerPlay;
-        playerInfo.m_aiTactic = static_cast<AiTactic>(stream.readScalar<uint8_t>());
+        playerInfo.m_aiTactic = static_cast<PlayerInfo::AiTactic>(stream.readScalar<uint8_t>());
 
         if (m_features->m_playerP7) {
             if (!isValid)
@@ -751,16 +751,18 @@ void SHeroName::writeBinary(ByteOrderDataStreamWriter& stream) const
 
 void DisposedHero::readBinary(ByteOrderDataStreamReader& stream)
 {
+    auto* m_features = getFeaturesFromStream(stream);
+    prepareArrays(m_features);
     stream >> m_heroId >> m_portrait;
     stream >> m_name;
-    stream >> m_players;
+    stream.readBits(m_players);
 }
 
 void DisposedHero::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
     stream << m_heroId << m_portrait;
     stream << m_name;
-    stream << m_players;
+    stream.writeBits(m_players);
 }
 
 void MapTileH3M::readBinary(ByteOrderDataStreamReader& stream)

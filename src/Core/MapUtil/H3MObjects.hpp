@@ -853,6 +853,11 @@ struct MapGarison : public MapObjectAbstract {
     StackSetFixed m_garison;
     bool          m_removableUnits = true;
 
+    void prepareArrays(const MapFormatFeatures* m_features)
+    {
+        m_garison.prepareArrays(m_features);
+    }
+
     void readBinary(ByteOrderDataStreamReader& stream) override;
     void writeBinary(ByteOrderDataStreamWriter& stream) const override;
     void toJson(PropertyTree& data) const override;

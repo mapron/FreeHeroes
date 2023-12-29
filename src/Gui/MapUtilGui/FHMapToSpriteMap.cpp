@@ -434,6 +434,13 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         auto*       item = result.addItem(makeItemById(SpriteMap::Layer::Artifact, id, obj.m_pos));
         addValueInfo(item, obj);
     }
+    for (auto& obj : fhMap.m_objects.m_unknownObjects) {
+        rendered.insert(&obj);
+
+        std::string id   = obj.m_defId;
+        auto*       item = result.addItem(makeItemById(SpriteMap::Layer::Decoration, id, obj.m_pos));
+        addValueInfo(item, obj);
+    }
 
     for (auto& obj : fhMap.m_objects.m_pandoras) {
         rendered.insert(&obj);

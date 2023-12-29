@@ -31,15 +31,29 @@ class IRandomGenerator;
 }
 
 struct FHPlayer {
+    enum class AiTactic
+    {
+        NONE = -1,
+        RANDOM,
+        WARRIOR,
+        BUILDER,
+        EXPLORER,
+    };
+
     bool m_humanPossible{ false };
     bool m_aiPossible{ false };
 
     bool m_generateHeroAtMainTown{ false };
 
+    AiTactic m_aiTactic = AiTactic::RANDOM;
+
     std::vector<Core::LibraryFactionConstPtr> m_startingFactions;
 
-    int     m_team{ -1 };
-    uint8_t m_unused1{ 0 };
+    int         m_team{ -1 };
+    uint8_t     m_unused1{ 0 };
+    uint8_t     m_generatedHeroTownFaction{ 0 };
+    uint8_t     m_mainCustomHeroPortrait = 0xFFU;
+    std::string m_mainCustomHeroName;
 
     struct HeroName {
         std::string               m_name;
@@ -62,12 +76,24 @@ struct FHHeroData {
     bool m_hasArmy       = false;
     bool m_hasArts       = false;
     bool m_hasName       = false;
+    bool m_hasPortrait   = false;
 
     std::string m_name;
+    int         m_portrait = -1;
 
     Core::AdventureArmy m_army;
 
     bool operator==(const FHHeroData&) const noexcept = default;
+};
+
+struct FHDisposedHero {
+    Core::LibraryHeroConstPtr m_heroId   = nullptr;
+    int                       m_portrait = -1;
+    std::string               m_name;
+
+    std::vector<Core::LibraryPlayerConstPtr> m_players;
+
+    bool operator==(const FHDisposedHero&) const noexcept = default;
 };
 
 struct FHGuard {
@@ -118,17 +144,22 @@ struct FHResource : public FHCommonObject {
     uint32_t                      m_amount = 0;
     Core::LibraryResourceConstPtr m_id     = nullptr;
 
+    FHMessageWithBattle m_messageWithBattle;
+
     bool operator==(const FHResource&) const noexcept = default;
 };
 
 struct FHRandomResource : public FHCommonObject {
-    uint32_t m_amount = 0;
+    uint32_t            m_amount = 0;
+    FHMessageWithBattle m_messageWithBattle;
 
     bool operator==(const FHRandomResource&) const noexcept = default;
 };
 
 struct FHArtifact : public FHCommonObject {
     Core::LibraryArtifactConstPtr m_id = nullptr;
+
+    FHMessageWithBattle m_messageWithBattle;
 
     bool operator==(const FHArtifact&) const noexcept = default;
 };
@@ -339,6 +370,12 @@ struct FHGrail : public FHCommonObject {
     bool operator==(const FHGrail&) const noexcept = default;
 };
 
+struct FHUnknownObject : public FHCommonObject {
+    std::string m_defId;
+
+    bool operator==(const FHUnknownObject&) const noexcept = default;
+};
+
 struct FHGlobalMapEvent {
     std::string m_name;
     std::string m_message;
@@ -476,6 +513,7 @@ struct MAPUTIL_EXPORT FHMap {
         std::vector<FHGarison>             m_garisons;
         std::vector<FHHeroPlaceholder>     m_heroPlaceholders;
         std::vector<FHGrail>               m_grails;
+        std::vector<FHUnknownObject>       m_unknownObjects;
 
         // only needed for RMG objects.
         template<typename T>
@@ -522,7 +560,8 @@ struct MAPUTIL_EXPORT FHMap {
                 m_signs,
                 m_garisons,
                 m_heroPlaceholders,
-                m_grails);
+                m_grails,
+                m_unknownObjects);
         }
 
         std::vector<const FHCommonObject*> getAllObjects() const noexcept
@@ -616,6 +655,7 @@ struct MAPUTIL_EXPORT FHMap {
     DisableConfigBanks           m_disabledBanks;
 
     std::vector<Core::LibraryHeroConstPtr> m_placeholderHeroes;
+    std::vector<FHDisposedHero>            m_disposedHeroes; // hero available in tavern for hire
 
     std::vector<FHHeroData> m_customHeroes;
 
