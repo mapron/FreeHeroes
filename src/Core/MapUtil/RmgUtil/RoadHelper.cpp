@@ -142,28 +142,27 @@ void RoadHelper::placeRoadPath(std::vector<FHPos> path, RoadLevel level)
     if (path.empty() || level == RoadLevel::NoRoad)
         return;
 
-    FHRoad road;
-    auto&  settings = m_map.m_template.m_userSettings;
-    road.m_type     = settings.m_defaultRoad;
+    auto&      settings = m_map.m_template.m_userSettings;
+    FHRoadType type     = settings.m_defaultRoad;
     if (level == RoadLevel::InnerPoints)
-        road.m_type = settings.m_innerRoad;
+        type = settings.m_innerRoad;
     if (level == RoadLevel::BorderPoints)
-        road.m_type = settings.m_borderRoad;
+        type = settings.m_borderRoad;
     if (level == RoadLevel::Hidden)
-        road.m_type = FHRoadType::Invalid;
+        type = FHRoadType::Invalid;
 
     // protection from short pieces of inner road
     if (path.size() <= 2 && level == RoadLevel::InnerPoints) {
         if (settings.m_defaultRoad != settings.m_innerRoad && settings.m_innerRoad != FHRoadType::Invalid) {
-            road.m_type = settings.m_defaultRoad;
+            type = settings.m_defaultRoad;
         }
     }
 
-    if (road.m_type == FHRoadType::Invalid)
+    if (type == FHRoadType::Invalid)
         return;
 
-    road.m_tiles = std::move(path);
-    m_map.m_roads.push_back(std::move(road));
+    for (auto& pos : path)
+        m_map.m_tileMap.get(pos).m_roadType = type;
 }
 
 bool RoadHelper::redundantCleanup(TileZone& tileZone)

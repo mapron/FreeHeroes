@@ -168,42 +168,27 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
     for (auto& rumor : src.m_rumors)
         dest.m_rumors.push_back({ rumor.m_name, rumor.m_text });
 
-    src.m_tileMap.eachPosTile([&dest](const FHPos& pos, const FHTileMap::Tile& tile) {
-        auto& destTile          = dest.m_tiles.get(pos.m_x, pos.m_y, pos.m_z);
-        destTile.m_terType      = static_cast<uint8_t>(tile.m_terrain->legacyId);
-        destTile.m_terView      = tile.m_view;
-        destTile.m_riverType    = static_cast<uint8_t>(tile.m_riverType);
-        destTile.m_riverDir     = tile.m_riverView;
-        destTile.m_roadType     = static_cast<uint8_t>(tile.m_roadType);
-        destTile.m_roadDir      = tile.m_roadView;
-        destTile.m_extTileFlags = 0;
-        if (tile.m_flipHor)
-            destTile.m_extTileFlags |= MapTileH3M::TerrainFlipHor;
-        if (tile.m_flipVert)
-            destTile.m_extTileFlags |= MapTileH3M::TerrainFlipVert;
-        if (tile.m_roadFlipHor)
-            destTile.m_extTileFlags |= MapTileH3M::RoadFlipHor;
-        if (tile.m_roadFlipVert)
-            destTile.m_extTileFlags |= MapTileH3M::RoadFlipVert;
-        if (tile.m_riverFlipHor)
-            destTile.m_extTileFlags |= MapTileH3M::RiverFlipHor;
-        if (tile.m_riverFlipVert)
-            destTile.m_extTileFlags |= MapTileH3M::RiverFlipVert;
-        if (tile.m_coastal)
-            destTile.m_extTileFlags |= MapTileH3M::Coastal;
+    src.m_tileMap.eachPosTile([&dest](const FHPos& pos, const FHTileMap::Tile& tile, size_t) {
+        auto& destTile       = dest.m_tiles.get(pos.m_x, pos.m_y, pos.m_z);
+        destTile.m_terType   = static_cast<uint8_t>(tile.m_terrainId->legacyId);
+        destTile.m_terView   = tile.m_terrainView.m_view;
+        destTile.m_riverType = static_cast<uint8_t>(tile.m_riverType);
+        destTile.m_riverDir  = tile.m_riverView.m_view;
+        destTile.m_roadType  = static_cast<uint8_t>(tile.m_roadType);
+        destTile.m_roadDir   = tile.m_roadView.m_view;
+
+        destTile.m_flipHor  = tile.m_terrainView.m_flipHor;
+        destTile.m_flipVert = tile.m_terrainView.m_flipVert;
+
+        destTile.m_riverFlipHor  = tile.m_riverView.m_flipHor;
+        destTile.m_riverFlipVert = tile.m_riverView.m_flipVert;
+
+        destTile.m_roadFlipHor  = tile.m_roadView.m_flipHor;
+        destTile.m_roadFlipVert = tile.m_roadView.m_flipVert;
+
+        destTile.m_coastal = tile.m_coastal;
     });
-    for (const auto& change : src.m_tileMap.m_changedViews) {
-        auto& destTile     = dest.m_tiles.get(change.m_pos.m_x, change.m_pos.m_y, change.m_pos.m_z);
-        destTile.m_terView = change.m_orig;
-    }
-    for (const auto& change : src.m_tileMap.m_inverseFlipHor) {
-        auto& destTile          = dest.m_tiles.get(change.m_x, change.m_y, change.m_z);
-        destTile.m_extTileFlags = destTile.m_extTileFlags ^ MapTileH3M::TerrainFlipHor;
-    }
-    for (const auto& change : src.m_tileMap.m_inverseFlipVert) {
-        auto& destTile          = dest.m_tiles.get(change.m_x, change.m_y, change.m_z);
-        destTile.m_extTileFlags = destTile.m_extTileFlags ^ MapTileH3M::TerrainFlipVert;
-    }
+
     bool    hasTeams    = false;
     uint8_t currentTeam = 0;
     for (auto& [playerId, fhPlayer] : src.m_players) {
@@ -593,7 +578,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         auto mine     = std::make_unique<MapObjectWithOwner>();
         mine->m_owner = static_cast<uint8_t>(fhMine.m_player->legacyId);
 
-        addObjectCommon(fhMine, std::move(mine));
+        addObject(fhMine, std::move(mine), [&fhMine, &tmplCache] { return tmplCache.add(fhMine.m_id->minesDefs.get(fhMine.m_defIndex)); });
     }
     for (auto& fhMine : src.m_objects.m_abandonedMines) {
         auto mine = std::make_unique<MapAbandonedMine>();
@@ -704,7 +689,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         convertReward(fhPandora.m_reward, obj->m_reward);
         convertMessage(fhPandora.m_messageWithBattle, obj->m_message);
 
-        bool water = src.m_tileMap.get(fhPandora.m_pos).m_terrain->id == Core::LibraryTerrain::s_terrainWater;
+        bool water = src.m_tileMap.get(fhPandora.m_pos).m_terrainId->id == Core::LibraryTerrain::s_terrainWater;
         addObject(fhPandora, std::move(obj), [&tmplCache, water] { return tmplCache.addId(water ? "ava0128w" : "ava0128"); });
     }
 
@@ -957,12 +942,12 @@ void FH2H3MConverter::convertMessage(const FHMessageWithBattle& fhMessage, MapMe
 
 void FH2H3MConverter::convertSquad(const Core::AdventureSquad& squad, StackSetFixed& fixedStacks) const
 {
-    fixedStacks.m_stacks.clear();
-    for (const auto& stack : squad.stacks) {
+    for (size_t i = 0; const auto& stack : squad.stacks) {
         if (stack.count)
-            fixedStacks.m_stacks.push_back(StackBasicDescriptor{ .m_id = static_cast<uint16_t>(stack.library->legacyId), .m_count = static_cast<uint16_t>(stack.count) });
+            fixedStacks.m_stacks.at(i) = StackBasicDescriptor{ .m_id = static_cast<uint16_t>(stack.library->legacyId), .m_count = static_cast<uint16_t>(stack.count) };
         else
-            fixedStacks.m_stacks.push_back(StackBasicDescriptor{ .m_id = (uint16_t) -1 });
+            fixedStacks.m_stacks.at(i) = StackBasicDescriptor{ .m_id = (uint16_t) -1 };
+        i++;
     }
 }
 

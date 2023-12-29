@@ -126,9 +126,8 @@ std::string FHTemplateProcessor::stageToString(Stage stage)
 
 void FHTemplateProcessor::run()
 {
-    std::string baseIndent        = "      ";
-    m_indent                      = baseIndent + "  ";
-    m_map.m_tileMapUpdateRequired = false;
+    std::string baseIndent = "      ";
+    m_indent               = baseIndent + "  ";
 
     const int regionCount = m_map.m_template.m_zones.size();
     if (regionCount <= 1)
@@ -390,9 +389,6 @@ void FHTemplateProcessor::runZoneTilesInitial()
     for (auto& tileZone : m_tileZones) {
         tileZone.m_centroid = tileZone.m_area.m_innerArea.makeCentroid(true);
     }
-
-    m_map.m_tileMapUpdateRequired = true;
-    placeTerrainZones();
 }
 
 void FHTemplateProcessor::runBorderRoads()
@@ -944,14 +940,14 @@ void FHTemplateProcessor::placeTerrainZones()
     m_terrainPlaced = true;
 
     for (auto& tileZone : m_tileZones) {
-        FHZone fhZone;
-        fhZone.m_tiles.reserve(tileZone.m_area.m_innerArea.size());
-        for (auto* cell : tileZone.m_area.m_innerArea)
-            fhZone.m_tiles.push_back(cell->m_pos);
-        fhZone.m_terrainId = tileZone.m_terrain;
-        assert(fhZone.m_terrainId);
-        m_map.m_zones.push_back(std::move(fhZone));
+        for (auto* cell : tileZone.m_area.m_innerArea) {
+            auto& tile       = m_map.m_tileMap.get(cell->m_pos);
+            tile.m_terrainId = tileZone.m_terrain;
+        }
     }
+    m_map.m_tileMap.determineViewRotation(m_database);
+    m_map.m_tileMap.makeRecommendedRotation();
+    m_map.m_tileMap.makeRngView(m_rng, m_map.m_template.m_roughTilePercentage);
 }
 
 void FHTemplateProcessor::placeDebugInfo()

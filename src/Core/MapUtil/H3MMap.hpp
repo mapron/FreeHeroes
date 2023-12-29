@@ -80,14 +80,29 @@ struct PlayerInfo {
 };
 
 struct MapTileH3M {
-    uint8_t m_terType      = 0xff;
-    uint8_t m_terView      = 0;
-    uint8_t m_riverType    = 0;
-    uint8_t m_riverDir     = 0;
-    uint8_t m_roadType     = 0;
-    uint8_t m_roadDir      = 0;
-    uint8_t m_extTileFlags = 0;
+    uint8_t m_terType   = 0xff;
+    uint8_t m_terView   = 0;
+    uint8_t m_riverType = 0;
+    uint8_t m_riverDir  = 0;
+    uint8_t m_roadType  = 0;
+    uint8_t m_roadDir   = 0;
 
+    bool m_flipHor  = false;
+    bool m_flipVert = false;
+
+    bool m_riverFlipHor  = false;
+    bool m_riverFlipVert = false;
+
+    bool m_roadFlipHor  = false;
+    bool m_roadFlipVert = false;
+
+    bool m_coastal = false;
+    bool m_unused  = false; //  FavorableWinds = 0x80 ?
+
+    void readBinary(ByteOrderDataStreamReader& stream);
+    void writeBinary(ByteOrderDataStreamWriter& stream) const;
+
+private:
     enum ExtFlags
     {
         TerrainFlipHor  = 0x01,
@@ -99,12 +114,9 @@ struct MapTileH3M {
         RoadFlipHor  = 0x10,
         RoadFlipVert = 0x20,
 
-        Coastal        = 0x40,
-        FavorableWinds = 0x80,
+        Coastal = 0x40,
+        Unused  = 0x80,
     };
-
-    void readBinary(ByteOrderDataStreamReader& stream);
-    void writeBinary(ByteOrderDataStreamWriter& stream) const;
 };
 
 struct MapTileSet {

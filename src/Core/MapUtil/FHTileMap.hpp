@@ -18,6 +18,7 @@ namespace FreeHeroes {
 
 namespace Core {
 class IRandomGenerator;
+class IGameDatabase;
 }
 
 struct MAPUTIL_EXPORT FHTileMap {
@@ -29,44 +30,41 @@ struct MAPUTIL_EXPORT FHTileMap {
         Native,
     };
 
+    struct TileView {
+        uint8_t m_view     = 0;
+        uint8_t m_viewMin  = 0;
+        uint8_t m_viewMid  = 0; // for center tiles - margin between 'clear' and 'rough' style.
+        uint8_t m_viewMax  = 0;
+        bool    m_flipHor  = false;
+        bool    m_flipVert = false;
+
+        bool m_recommendedFlipHor  = false;
+        bool m_recommendedFlipVert = false;
+
+        void makeRecommendedRotation()
+        {
+            m_flipHor  = m_recommendedFlipHor;
+            m_flipVert = m_recommendedFlipVert;
+        }
+
+        void makeRngView(Core::IRandomGenerator* rng, int roughTileChancePercent, bool useMid = false);
+    };
+
     struct Tile {
-        Core::LibraryTerrainConstPtr m_terrain   = nullptr;
+        Core::LibraryTerrainConstPtr m_terrainId = nullptr;
         FHRiverType                  m_riverType = FHRiverType::Invalid;
         FHRoadType                   m_roadType  = FHRoadType::Invalid;
-
-        bool m_baseSand = false;
-        bool m_baseDirt = false;
-        bool m_baseNorm = false;
 
         SubtileType TL = SubtileType::Invalid;
         SubtileType TR = SubtileType::Invalid;
         SubtileType BL = SubtileType::Invalid;
         SubtileType BR = SubtileType::Invalid;
 
-        uint8_t m_view    = 0xffU;
-        uint8_t m_viewMin = 0;
-        uint8_t m_viewMid = 0; // for center tiles - margin between 'clear' and 'rough' style.
-        uint8_t m_viewMax = 0;
+        TileView m_terrainView;
+        TileView m_roadView;
+        TileView m_riverView;
 
-        bool m_origFlipInit = false;
-        bool m_origFlipHor  = false;
-        bool m_origFlipVert = false;
-
-        bool m_flipHor  = false;
-        bool m_flipVert = false;
-        bool m_coastal  = false;
-
-        uint8_t m_roadView     = 0xffU;
-        uint8_t m_roadViewMin  = 0;
-        uint8_t m_roadViewMax  = 0;
-        bool    m_roadFlipHor  = false;
-        bool    m_roadFlipVert = false;
-
-        uint8_t m_riverView     = 0xffU;
-        uint8_t m_riverViewMin  = 0;
-        uint8_t m_riverViewMax  = 0;
-        bool    m_riverFlipHor  = false;
-        bool    m_riverFlipVert = false;
+        bool m_coastal = false;
 
         int m_tileOffset     = 0;
         int m_tileCount      = 0;
@@ -85,15 +83,6 @@ struct MAPUTIL_EXPORT FHTileMap {
     int32_t m_depth  = 0; // no underground => depth==1; has underground => depth==2
 
     std::vector<Tile> m_tiles;
-
-    struct ChangedTile {
-        FHPos   m_pos;
-        uint8_t m_orig = 0;
-    };
-
-    std::vector<ChangedTile> m_changedViews;
-    std::vector<FHPos>       m_inverseFlipHor;
-    std::vector<FHPos>       m_inverseFlipVert;
 
     Tile& get(int x, int y, int z)
     {
@@ -160,73 +149,84 @@ struct MAPUTIL_EXPORT FHTileMap {
         m_tiles.resize(totalSize());
     }
 
-    void correctTerrainTypes(Core::LibraryTerrainConstPtr dirtTerrain,
-                             Core::LibraryTerrainConstPtr sandTerrain,
-                             Core::LibraryTerrainConstPtr waterTerrain);
+    void determineTerrainViewRotation(Core::LibraryTerrainConstPtr dirtTerrain,
+                                      Core::LibraryTerrainConstPtr sandTerrain,
+                                      Core::LibraryTerrainConstPtr waterTerrain);
 
-    void correctRoads();
-    void correctRivers();
+    void determineRoadViewRotation();
+    void determineRiverViewRotation();
 
-    void rngTiles(Core::IRandomGenerator* rng, int roughTileChancePercent);
+    void determineViewRotation(const Core::IGameDatabase* database);
 
-    template<class F>
-    void eachPos(F&& f) const
+    void makeRecommendedRotation();
+    void makeRngView(Core::IRandomGenerator* rng, int roughTileChancePercent);
+
+    void eachPosTile(auto&& f) const
     {
+        size_t offset = 0;
         for (int z = 0; z < m_depth; ++z) {
             for (int y = 0; y < m_height; ++y) {
                 for (int x = 0; x < m_width; ++x) {
                     const FHPos pos{ x, y, z };
-                    f(pos);
+                    f(pos, get(x, y, z), offset);
+                    offset++;
                 }
             }
         }
     }
-    template<class F>
-    void eachPosTile(F&& f) const
+
+    void eachPosTile(auto&& f)
     {
+        size_t offset = 0;
         for (int z = 0; z < m_depth; ++z) {
             for (int y = 0; y < m_height; ++y) {
                 for (int x = 0; x < m_width; ++x) {
                     const FHPos pos{ x, y, z };
-                    f(pos, get(x, y, z));
+                    f(pos, get(x, y, z), offset);
+                    offset++;
                 }
             }
         }
     }
 };
 
-struct FHZone {
-    int m_id = 0;
+struct MAPUTIL_EXPORT FHPackedTileMap {
+    struct River {
+        FHRiverType          m_type = FHRiverType::Invalid;
+        std::vector<FHPos>   m_tiles;
+        std::vector<uint8_t> m_views;
+        std::vector<uint8_t> m_flipHor;
+        std::vector<uint8_t> m_flipVert;
 
-    Core::LibraryTerrainConstPtr m_terrainId = nullptr;
-    std::vector<FHPos>           m_tiles;
-    std::vector<uint8_t>         m_tilesVariants;
-    std::vector<uint8_t>         m_tilesFlippedHor;
-    std::vector<uint8_t>         m_tilesFlippedVert;
-    struct Rect {
-        FHPos m_pos{ g_invalidPos };
-        int   m_width{ 0 };
-        int   m_height{ 0 };
+        constexpr bool operator==(const River&) const = default;
     };
-    std::optional<Rect> m_rect;
 
-    void placeOnMap(FHTileMap& map) const;
-};
+    struct Road {
+        FHRoadType           m_type = FHRoadType::Invalid;
+        std::vector<FHPos>   m_tiles;
+        std::vector<uint8_t> m_views;
+        std::vector<uint8_t> m_flipHor;
+        std::vector<uint8_t> m_flipVert;
 
-struct FHRiver {
-    FHRiverType          m_type = FHRiverType::Invalid;
-    std::vector<FHPos>   m_tiles;
-    std::vector<uint8_t> m_tilesVariants;
+        constexpr bool operator==(const Road&) const = default;
+    };
 
-    void placeOnMap(FHTileMap& map) const;
-};
+    std::vector<Core::LibraryTerrainConstPtr> m_terrains;
 
-struct FHRoad {
-    FHRoadType           m_type = FHRoadType::Invalid;
-    std::vector<FHPos>   m_tiles;
-    std::vector<uint8_t> m_tilesVariants;
+    std::vector<uint8_t> m_tileTerrianIndexes;
+    std::vector<uint8_t> m_tileViews;
 
-    void placeOnMap(FHTileMap& map) const;
+    std::vector<uint8_t> m_terrainFlipHor;
+    std::vector<uint8_t> m_terrainFlipVert;
+    std::vector<uint8_t> m_coastal;
+
+    std::vector<River> m_rivers;
+    std::vector<Road>  m_roads;
+
+    constexpr bool operator==(const FHPackedTileMap&) const = default;
+
+    void unpackToMap(FHTileMap& map) const;
+    void packFromMap(const FHTileMap& map);
 };
 
 }

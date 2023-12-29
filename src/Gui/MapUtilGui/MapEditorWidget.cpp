@@ -350,11 +350,6 @@ bool MapEditorWidget::load(const std::string& filename,
         auto rng = m_rngFactory->create();
         rng->setSeed(m_impl->m_map.m_seed);
 
-        auto* db = m_gameDatabaseContainer->getDatabase(m_impl->m_map.m_version);
-
-        m_impl->m_map.initTiles(db);
-        m_impl->m_map.m_tileMap.rngTiles(rng.get(), m_impl->m_map.m_template.m_roughTilePercentage);
-
         m_impl->m_filterGen->clear();
         m_impl->m_filterGen->addItem(tr("-- select gen layer --"));
         auto              allObjects = m_impl->m_map.m_objects.getAllObjects();

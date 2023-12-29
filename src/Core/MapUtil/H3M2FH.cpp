@@ -98,64 +98,6 @@ FHPos posFromH3M(H3Pos pos, int xoffset = 0)
     return { (pos.m_x + xoffset), pos.m_y, pos.m_z };
 }
 
-class FloodFiller {
-public:
-    void fillAdjucent(const FHPos& current, const std::set<FHPos>& exclude, std::set<FHPos>& result, const std::function<bool(const MapTileH3M&)>& pred)
-    {
-        auto addToResult = [this, &result, &exclude, &current, &pred](int dx, int dy) {
-            const FHPos neighbour{ current.m_x + dx, current.m_y + dy, current.m_z };
-            auto&       neighbourTile = m_srcTileSet->get(neighbour.m_x, neighbour.m_y, neighbour.m_z);
-            if (pred(neighbourTile))
-                return;
-            if (m_zoned.contains(neighbour))
-                return;
-            if (exclude.contains(neighbour))
-                return;
-            result.insert(neighbour);
-        };
-        if (current.m_x < m_destTileMap->m_width - 1)
-            addToResult(+1, 0);
-        if (current.m_y < m_destTileMap->m_height - 1)
-            addToResult(0, +1);
-        if (current.m_x > 0)
-            addToResult(-1, 0);
-        if (current.m_y > 0)
-            addToResult(0, -1);
-    };
-
-    std::vector<FHPos> makeNewZone(const FHPos& tilePos, const std::function<bool(const MapTileH3M&)>& pred)
-    {
-        // now we create new zone using flood-fill;
-        std::set<FHPos> newZone;
-        std::set<FHPos> newZoneIter;
-        newZone.insert(tilePos);
-        newZoneIter.insert(tilePos);
-        while (true) {
-            std::set<FHPos> newFloodTiles;
-            for (const FHPos& prevIterTile : newZoneIter) {
-                fillAdjucent(prevIterTile, newZone, newFloodTiles, pred);
-            }
-            if (newFloodTiles.empty())
-                break;
-
-            newZoneIter = newFloodTiles;
-            newZone.insert(newFloodTiles.cbegin(), newFloodTiles.cend());
-        }
-
-        m_zoned.insert(newZone.cbegin(), newZone.cend());
-        return std::vector<FHPos>(newZone.cbegin(), newZone.cend());
-    }
-
-    FloodFiller(const MapTileSet* src, const FHTileMap* dest)
-        : m_srcTileSet(src)
-        , m_destTileMap(dest)
-    {
-    }
-    const MapTileSet* const m_srcTileSet;
-    const FHTileMap* const  m_destTileMap;
-    std::set<FHPos>         m_zoned;
-};
-
 }
 
 H3M2FHConverter::H3M2FHConverter(const Core::IGameDatabase* database)
@@ -1275,92 +1217,29 @@ std::vector<Core::LibraryPlayerConstPtr> H3M2FHConverter::convertPlayerList(cons
 
 void H3M2FHConverter::convertTileMap(const H3Map& src, FHMap& dest) const
 {
-    const MapTileSet& tileSet     = src.m_tiles;
-    FHTileMap&        destTileMap = dest.m_tileMap;
+    dest.m_tileMap.updateSize();
+    dest.m_tileMap.eachPosTile([&src, this](const FHPos& tilePos, FHTileMap::Tile& destTile, size_t) {
+        const auto& tile              = src.m_tiles.get(tilePos.m_x, tilePos.m_y, tilePos.m_z);
+        destTile.m_terrainId          = m_terrainIds[tile.m_terType];
+        destTile.m_terrainView.m_view = tile.m_terView;
 
-    FloodFiller terrainFiller(&tileSet, &destTileMap);
+        destTile.m_riverType        = static_cast<FHRiverType>(tile.m_riverType);
+        destTile.m_riverView.m_view = tile.m_riverDir;
 
-    auto visitTerrain = [this, &terrainFiller, &tileSet, &dest](const MapTileH3M& tile, const FHPos& tilePos) {
-        if (terrainFiller.m_zoned.contains(tilePos))
-            return;
+        destTile.m_roadType        = static_cast<FHRoadType>(tile.m_roadType);
+        destTile.m_roadView.m_view = tile.m_roadDir;
 
-        auto tiles = terrainFiller.makeNewZone(tilePos, [&tile](const MapTileH3M& neighbourTile) -> bool {
-            if (neighbourTile.m_terType != tile.m_terType)
-                return true;
-            return false;
-        });
+        destTile.m_terrainView.m_flipHor  = tile.m_flipHor;
+        destTile.m_terrainView.m_flipVert = tile.m_flipVert;
 
-        FHZone fhZone;
-        fhZone.m_tiles = std::move(tiles);
-        for (auto& pos : fhZone.m_tiles) {
-            auto& ter = tileSet.get(pos.m_x, pos.m_y, pos.m_z);
-            fhZone.m_tilesVariants.push_back(ter.m_terView);
-            fhZone.m_tilesFlippedHor.push_back(ter.m_extTileFlags & MapTileH3M::ExtFlags::TerrainFlipHor);
-            fhZone.m_tilesFlippedVert.push_back(ter.m_extTileFlags & MapTileH3M::ExtFlags::TerrainFlipVert);
-        }
-        fhZone.m_terrainId = m_terrainIds[tile.m_terType];
-        assert(fhZone.m_terrainId);
-        dest.m_zones.push_back(std::move(fhZone));
-    };
+        destTile.m_riverView.m_flipHor  = tile.m_riverFlipHor;
+        destTile.m_riverView.m_flipVert = tile.m_riverFlipVert;
 
-    FloodFiller roadFiller(&tileSet, &destTileMap);
+        destTile.m_roadView.m_flipHor  = tile.m_roadFlipHor;
+        destTile.m_roadView.m_flipVert = tile.m_roadFlipVert;
 
-    auto visitRoad = [&roadFiller, &tileSet, &dest](const MapTileH3M& tile, const FHPos& tilePos) {
-        if (tile.m_roadType == 0)
-            return;
-
-        if (roadFiller.m_zoned.contains(tilePos))
-            return;
-
-        auto tiles = roadFiller.makeNewZone(tilePos, [&tile](const MapTileH3M& neighbourTile) -> bool {
-            return (neighbourTile.m_roadType != tile.m_roadType);
-        });
-
-        FHRoad fhRoad;
-        fhRoad.m_tiles = std::move(tiles);
-        for (auto& pos : fhRoad.m_tiles) {
-            auto roadVariant = tileSet.get(pos.m_x, pos.m_y, pos.m_z).m_roadDir;
-            fhRoad.m_tilesVariants.push_back(roadVariant);
-        }
-        fhRoad.m_type = static_cast<FHRoadType>(tile.m_roadType);
-        dest.m_roads.push_back(std::move(fhRoad));
-    };
-
-    FloodFiller riverFiller(&tileSet, &destTileMap);
-
-    auto visitRiver = [&riverFiller, &tileSet, &dest](const MapTileH3M& tile, const FHPos& tilePos) {
-        if (tile.m_riverType == 0)
-            return;
-
-        if (riverFiller.m_zoned.contains(tilePos))
-            return;
-
-        auto tiles = riverFiller.makeNewZone(tilePos, [&tile](const MapTileH3M& neighbourTile) -> bool {
-            return (neighbourTile.m_riverType != tile.m_riverType);
-        });
-
-        FHRiver fhRiver;
-        fhRiver.m_tiles = std::move(tiles);
-        for (auto& pos : fhRiver.m_tiles) {
-            auto riverVariant = tileSet.get(pos.m_x, pos.m_y, pos.m_z).m_riverDir;
-            fhRiver.m_tilesVariants.push_back(riverVariant);
-        }
-        fhRiver.m_type = static_cast<FHRiverType>(tile.m_riverType);
-        dest.m_rivers.push_back(std::move(fhRiver));
-    };
-    for (int z = 0; z < dest.m_tileMap.m_depth; ++z) {
-        for (int y = 0; y < dest.m_tileMap.m_height; ++y) {
-            for (int x = 0; x < dest.m_tileMap.m_width; ++x) {
-                auto&       tile = tileSet.get(x, y, z);
-                const FHPos tilePos{ x, y, z };
-                visitTerrain(tile, tilePos);
-                visitRoad(tile, tilePos);
-                visitRiver(tile, tilePos);
-            }
-        }
-    }
-
-    assert(terrainFiller.m_zoned.size() == dest.m_tileMap.totalSize());
+        destTile.m_coastal = tile.m_coastal;
+    });
 }
 
 Core::LibraryObjectDef H3M2FHConverter::convertDef(const ObjectTemplate& objTempl) const

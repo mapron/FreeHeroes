@@ -436,8 +436,8 @@ struct MAPUTIL_EXPORT FHMap {
     Core::GameVersion m_version = Core::GameVersion::Invalid;
     uint64_t          m_seed{ 0 };
 
-    FHTileMap m_tileMap;
-    bool      m_tileMapUpdateRequired = true;
+    FHTileMap       m_tileMap;
+    FHPackedTileMap m_packedTileMap;
 
     std::string m_name;
     std::string m_descr;
@@ -445,10 +445,10 @@ struct MAPUTIL_EXPORT FHMap {
     bool        m_isWaterMap = false;
     bool        m_anyPlayers = true;
 
-    PlayersMap               m_players;
-    std::vector<FHHero>      m_wanderingHeroes;
-    std::vector<FHTown>      m_towns;
-    std::vector<FHZone>      m_zones;
+    PlayersMap          m_players;
+    std::vector<FHHero> m_wanderingHeroes;
+    std::vector<FHTown> m_towns;
+
     std::vector<FHDebugTile> m_debugTiles;
     FHTemplate               m_template;
 
@@ -562,10 +562,10 @@ struct MAPUTIL_EXPORT FHMap {
         bool operator==(const Config&) const noexcept = default;
     } m_config;
 
-    std::vector<FHRiver> m_rivers;
-    std::vector<FHRoad>  m_roads;
+    //std::vector<FHRiver> m_rivers;
+    //std::vector<FHRoad>  m_roads;
 
-    Core::LibraryTerrainConstPtr m_defaultTerrain = nullptr;
+    //Core::LibraryTerrainConstPtr m_defaultTerrain = nullptr;
 
     template<class Ptr>
     struct DisableConfig {
@@ -639,8 +639,6 @@ struct MAPUTIL_EXPORT FHMap {
     void fromJson(Mernel::PropertyTree data, const Core::IGameDatabase* database);
 
     void applyRngUserSettings(const Mernel::PropertyTree& data, const Core::IGameDatabase* database);
-
-    void initTiles(const Core::IGameDatabase* database);
 
     void rescaleToUserSize();
 };

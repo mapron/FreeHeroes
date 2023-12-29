@@ -145,20 +145,20 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         });
     }
 
-    fhMap.m_tileMap.eachPosTile([&makeItemById, &result](const FHPos& pos, const FHTileMap::Tile& tile) {
-        if (tile.m_terrain) {
-            SpriteMap::Item item = makeItemById(SpriteMap::Layer::Terrain, tile.m_terrain->presentationParams.defFile, pos);
-            item.m_spriteGroup   = tile.m_view;
-            item.m_flipHor       = tile.m_flipHor;
-            item.m_flipVert      = tile.m_flipVert;
+    fhMap.m_tileMap.eachPosTile([&makeItemById, &result](const FHPos& pos, const FHTileMap::Tile& tile, size_t) {
+        if (tile.m_terrainId) {
+            SpriteMap::Item item = makeItemById(SpriteMap::Layer::Terrain, tile.m_terrainId->presentationParams.defFile, pos);
+            item.m_spriteGroup   = tile.m_terrainView.m_view;
+            item.m_flipHor       = tile.m_terrainView.m_flipHor;
+            item.m_flipVert      = tile.m_terrainView.m_flipVert;
             item.m_priority      = SpriteMap::s_terrainPriority;
-            item.addInfo("id", tile.m_terrain->id);
-            item.addInfo("view", std::to_string(tile.m_view));
+            item.addInfo("id", tile.m_terrainId->id);
+            item.addInfo("view", std::to_string(tile.m_terrainView.m_view));
             item.addInfo("flipHor", item.m_flipHor ? "true" : "false");
             item.addInfo("flipVert", item.m_flipVert ? "true" : "false");
 
-            result.getCellMerged(item).m_colorBlocked   = makeColor(tile.m_terrain->presentationParams.minimapBlocked);
-            result.getCellMerged(item).m_colorUnblocked = makeColor(tile.m_terrain->presentationParams.minimapUnblocked);
+            result.getCellMerged(item).m_colorBlocked   = makeColor(tile.m_terrainId->presentationParams.minimapBlocked);
+            result.getCellMerged(item).m_colorUnblocked = makeColor(tile.m_terrainId->presentationParams.minimapUnblocked);
             result.addItem(std::move(item));
         }
         if (tile.m_riverType != FHRiverType::Invalid) {
@@ -175,9 +175,9 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
 
             SpriteMap::Item item = makeItemById(SpriteMap::Layer::Terrain, id, pos);
 
-            item.m_spriteGroup = tile.m_riverView;
-            item.m_flipHor     = tile.m_riverFlipHor;
-            item.m_flipVert    = tile.m_riverFlipVert;
+            item.m_spriteGroup = tile.m_riverView.m_view;
+            item.m_flipHor     = tile.m_riverView.m_flipHor;
+            item.m_flipVert    = tile.m_riverView.m_flipVert;
             item.m_priority    = SpriteMap::s_riverPriority;
 
             item.addInfo("flipHor", item.m_flipHor ? "true" : "false");
@@ -195,9 +195,9 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
 
             SpriteMap::Item item = makeItemById(SpriteMap::Layer::Terrain, id, pos);
 
-            item.m_spriteGroup   = tile.m_roadView;
-            item.m_flipHor       = tile.m_roadFlipHor;
-            item.m_flipVert      = tile.m_roadFlipVert;
+            item.m_spriteGroup   = tile.m_roadView.m_view;
+            item.m_flipHor       = tile.m_roadView.m_flipHor;
+            item.m_flipVert      = tile.m_roadView.m_flipVert;
             item.m_shiftHalfTile = true;
             item.m_priority      = SpriteMap::s_roadPriority;
 
@@ -437,7 +437,7 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
 
     for (auto& obj : fhMap.m_objects.m_pandoras) {
         rendered.insert(&obj);
-        bool        water = fhMap.m_tileMap.get(obj.m_pos).m_terrain->id == Core::LibraryTerrain::s_terrainWater;
+        bool        water = fhMap.m_tileMap.get(obj.m_pos).m_terrainId->id == Core::LibraryTerrain::s_terrainWater;
         std::string id    = water ? "ava0128w" : "ava0128";
         auto*       item  = result.addItem(makeItemById(SpriteMap::Layer::Pandora, id, obj.m_pos));
         if (!obj.m_reward.units.empty()) {

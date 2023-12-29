@@ -378,6 +378,7 @@ struct StackSetFixed {
     void writeBinary(ByteOrderDataStreamWriter& stream) const
     {
         auto* m_features = getFeaturesFromStream(stream);
+        assert(m_features->m_stackSize == (int) m_stacks.size());
         for (auto& stack : m_stacks) {
             if (m_features->m_stackId16Bit)
                 stream << stack.m_id;

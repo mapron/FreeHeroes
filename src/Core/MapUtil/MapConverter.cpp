@@ -579,6 +579,7 @@ void MapConverter::propertyDeserializeH3C()
 
 void MapConverter::propertySerializeFH()
 {
+    m_mapFH.m_packedTileMap.packFromMap(m_mapFH.m_tileMap);
     m_mapFH.toJson(m_mainFile.m_json);
 }
 
@@ -593,14 +594,7 @@ void MapConverter::propertyDeserializeFH()
 
 void MapConverter::convertFHtoH3M()
 {
-    auto rng = m_rngFactory->create();
-    rng->setSeed(m_mapFH.m_seed);
-
     auto* db = m_databaseContainer->getDatabase(m_mapFH.m_version);
-
-    m_mapFH.initTiles(db);
-    m_mapFH.m_tileMap.rngTiles(rng.get(), m_mapFH.m_template.m_roughTilePercentage);
-
     convertFH2H3M(m_mapFH, m_mapH3M, db);
 }
 

@@ -97,7 +97,7 @@ void SegmentHelper::makeInitialZones(std::vector<TileZone>& tileZones)
             const int64_t diff           = std::abs(placedArea - intendedArea);
             const int64_t diffPercent    = diff * 100 / tileZone.m_absoluteArea;
             //zoneSettings.m_initialCentroid = centroid;
-            zoneSettings.m_areaHint = correctionArea;
+            zoneSettings.m_areaHint = std::max(int64_t(1), correctionArea);
             if (intendedRadius < placedRadius) { // need shrink zone = need bigger distance weight
                 //zoneSettings.m_insideWeight  = zoneSettings.m_insideWeight * (100 + diffPercent) / 100;
                 //zoneSettings.m_outsideWeight = zoneSettings.m_outsideWeight * (100 + diffPercent) / 100;

@@ -122,15 +122,6 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_garison,
     m_garisonRmg)
 
-// clang-format off
-STRUCT_REFLECTION_PAIRED(
-    FHZone::Rect,
-    "pos",                 m_pos,
-    "w",                   m_width,
-    "h",                   m_height
-)
-// clang-format on
-
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHResource,
     m_pos,
@@ -618,7 +609,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_version,
     m_seed,
     m_tileMap,
-    m_tileMapUpdateRequired,
+    m_packedTileMap,
     m_name,
     m_descr,
     m_difficulty,
@@ -627,13 +618,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_players,
     m_wanderingHeroes,
     m_towns,
-    m_zones,
     m_debugTiles,
     m_objects,
     m_config,
-    m_rivers,
-    m_roads,
-    m_defaultTerrain,
     m_disabledHeroes,
     m_disabledArtifacts,
     m_disabledSpells,

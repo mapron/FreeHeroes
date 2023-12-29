@@ -114,13 +114,20 @@ ENUM_REFLECTION_STRINGIFY(
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     MapTileH3M,
-    m_extTileFlags,
     m_roadDir,
     m_roadType,
     m_riverDir,
     m_riverType,
     m_terView,
-    m_terType)
+    m_terType,
+    m_flipHor,
+    m_flipVert,
+    m_riverFlipHor,
+    m_riverFlipVert,
+    m_roadFlipHor,
+    m_roadFlipVert,
+    m_coastal,
+    m_unused)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     MapTileSet,

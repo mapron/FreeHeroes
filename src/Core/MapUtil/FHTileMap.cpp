@@ -6,6 +6,7 @@
 #include "FHTileMap.hpp"
 
 #include "IRandomGenerator.hpp"
+#include "IGameDatabase.hpp"
 
 #include "MernelPlatform/Logger.hpp"
 
@@ -81,34 +82,34 @@ struct TileNeightbours {
         BL.set(tileXX.BL);
         BR.set(tileXX.BR);
 
-        auto* terrTL = map.getNeighbour(pos, -1, -1).m_terrain;
-        auto* terrTC = map.getNeighbour(pos, +0, -1).m_terrain;
-        auto* terrTR = map.getNeighbour(pos, +1, -1).m_terrain;
-        auto* terrCL = map.getNeighbour(pos, -1, +0).m_terrain;
-        auto* terrCR = map.getNeighbour(pos, +1, +0).m_terrain;
-        auto* terrBL = map.getNeighbour(pos, -1, +1).m_terrain;
-        auto* terrBC = map.getNeighbour(pos, +0, +1).m_terrain;
-        auto* terrBR = map.getNeighbour(pos, +1, +1).m_terrain;
+        auto* terrTL = map.getNeighbour(pos, -1, -1).m_terrainId;
+        auto* terrTC = map.getNeighbour(pos, +0, -1).m_terrainId;
+        auto* terrTR = map.getNeighbour(pos, +1, -1).m_terrainId;
+        auto* terrCL = map.getNeighbour(pos, -1, +0).m_terrainId;
+        auto* terrCR = map.getNeighbour(pos, +1, +0).m_terrainId;
+        auto* terrBL = map.getNeighbour(pos, -1, +1).m_terrainId;
+        auto* terrBC = map.getNeighbour(pos, +0, +1).m_terrainId;
+        auto* terrBR = map.getNeighbour(pos, +1, +1).m_terrainId;
 
-        auto* terrT2 = map.getNeighbour(pos, +0, -2).m_terrain;
-        auto* terrL2 = map.getNeighbour(pos, -2, +0).m_terrain;
-        auto* terrR2 = map.getNeighbour(pos, +2, +0).m_terrain;
-        auto* terrB2 = map.getNeighbour(pos, +0, +2).m_terrain;
+        auto* terrT2 = map.getNeighbour(pos, +0, -2).m_terrainId;
+        auto* terrL2 = map.getNeighbour(pos, -2, +0).m_terrainId;
+        auto* terrR2 = map.getNeighbour(pos, +2, +0).m_terrainId;
+        auto* terrB2 = map.getNeighbour(pos, +0, +2).m_terrainId;
 
-        TL.EQ = terrTL == tileXX.m_terrain;
-        TR.EQ = terrTR == tileXX.m_terrain;
-        BL.EQ = terrBL == tileXX.m_terrain;
-        BR.EQ = terrBR == tileXX.m_terrain;
+        TL.EQ = terrTL == tileXX.m_terrainId;
+        TR.EQ = terrTR == tileXX.m_terrainId;
+        BL.EQ = terrBL == tileXX.m_terrainId;
+        BR.EQ = terrBR == tileXX.m_terrainId;
 
-        TC.EQ = terrTC == tileXX.m_terrain;
-        CL.EQ = terrCL == tileXX.m_terrain;
-        CR.EQ = terrCR == tileXX.m_terrain;
-        BC.EQ = terrBC == tileXX.m_terrain;
+        TC.EQ = terrTC == tileXX.m_terrainId;
+        CL.EQ = terrCL == tileXX.m_terrainId;
+        CR.EQ = terrCR == tileXX.m_terrainId;
+        BC.EQ = terrBC == tileXX.m_terrainId;
 
-        T2.EQ = terrT2 == tileXX.m_terrain;
-        L2.EQ = terrL2 == tileXX.m_terrain;
-        R2.EQ = terrR2 == tileXX.m_terrain;
-        B2.EQ = terrB2 == tileXX.m_terrain;
+        T2.EQ = terrT2 == tileXX.m_terrainId;
+        L2.EQ = terrL2 == tileXX.m_terrainId;
+        R2.EQ = terrR2 == tileXX.m_terrainId;
+        B2.EQ = terrB2 == tileXX.m_terrainId;
 
         {
             const bool waterNeighbour = false
@@ -120,7 +121,7 @@ struct TileNeightbours {
                                         || terrBL == waterTerrain
                                         || terrBC == waterTerrain
                                         || terrBR == waterTerrain;
-            m_coastal = tileXX.m_terrain != waterTerrain && waterNeighbour;
+            m_coastal = tileXX.m_terrainId != waterTerrain && waterNeighbour;
         }
     }
 
@@ -442,7 +443,7 @@ const std::vector<PatternMatcher> g_matchers{
 
 bool FHTileMap::Tile::setViewBorderSpecial(Core::LibraryTerrain::BorderType borderType)
 {
-    auto& pp = m_terrain->presentationParams;
+    auto& pp = m_terrainId->presentationParams;
 
     if (pp.specialBorderTilesOffset < 0)
         return setViewCenter();
@@ -455,7 +456,7 @@ bool FHTileMap::Tile::setViewBorderSpecial(Core::LibraryTerrain::BorderType bord
 
 bool FHTileMap::Tile::setViewBorderMixed(Core::LibraryTerrain::BorderType borderType)
 {
-    auto& pp = m_terrain->presentationParams;
+    auto& pp = m_terrainId->presentationParams;
 
     if (pp.mixedBorderTilesOffset < 0)
         return setViewCenter();
@@ -468,7 +469,7 @@ bool FHTileMap::Tile::setViewBorderMixed(Core::LibraryTerrain::BorderType border
 
 bool FHTileMap::Tile::setViewBorderSandOrDirt(Core::LibraryTerrain::BorderType borderType, bool sandBorder)
 {
-    auto& pp = m_terrain->presentationParams;
+    auto& pp = m_terrainId->presentationParams;
 
     if (!sandBorder) {
         if (pp.dirtBorderTilesOffset < 0)
@@ -483,16 +484,16 @@ bool FHTileMap::Tile::setViewBorderSandOrDirt(Core::LibraryTerrain::BorderType b
         m_tileOffset = pp.sandBorderTilesOffset + pp.borderOffsets.at(borderType);
         m_tileCount  = pp.borderCounts.at(borderType);
     }
-    if (m_terrain->presentationParams.hasRotations) {
+    if (m_terrainId->presentationParams.hasRotations) {
         if (borderType == BorderType::L)
-            m_tileOffset += m_tileCount * m_flipHor;
+            m_tileOffset += m_tileCount * m_terrainView.m_recommendedFlipHor;
         else if (borderType == BorderType::T)
-            m_tileOffset += m_tileCount * m_flipVert;
+            m_tileOffset += m_tileCount * m_terrainView.m_recommendedFlipVert;
         else
-            m_tileOffset += m_tileCount * 2 * m_flipVert + m_tileCount * m_flipHor;
+            m_tileOffset += m_tileCount * 2 * m_terrainView.m_recommendedFlipVert + m_tileCount * m_terrainView.m_recommendedFlipHor;
 
-        m_flipHor  = false;
-        m_flipVert = false;
+        m_terrainView.m_recommendedFlipHor  = false;
+        m_terrainView.m_recommendedFlipVert = false;
     }
     updateMinMax();
     return true;
@@ -500,8 +501,8 @@ bool FHTileMap::Tile::setViewBorderSandOrDirt(Core::LibraryTerrain::BorderType b
 
 bool FHTileMap::Tile::setViewCenter()
 {
-    if (m_terrain) {
-        auto& pp         = m_terrain->presentationParams;
+    if (m_terrainId) {
+        auto& pp         = m_terrainId->presentationParams;
         m_tileOffset     = pp.centerTilesOffset;
         m_tileCount      = pp.centerTilesCount;
         m_tileCountClear = pp.centerTilesClearCount;
@@ -532,32 +533,30 @@ bool FHTileMap::Tile::setView(Core::LibraryTerrain::BorderClass bc, Core::Librar
 
 void FHTileMap::Tile::updateMinMax()
 {
-    m_viewMin            = static_cast<uint8_t>(m_tileOffset);
-    const int clearCount = m_tileCountClear > 0 ? m_tileCountClear : m_tileCount;
-    m_viewMid            = static_cast<uint8_t>(m_viewMin + clearCount - 1);
-    m_viewMax            = static_cast<uint8_t>(m_viewMin + m_tileCount - 1);
+    m_terrainView.m_viewMin = static_cast<uint8_t>(m_tileOffset);
+    const int clearCount    = m_tileCountClear > 0 ? m_tileCountClear : m_tileCount;
+    m_terrainView.m_viewMid = static_cast<uint8_t>(m_terrainView.m_viewMin + clearCount - 1);
+    m_terrainView.m_viewMax = static_cast<uint8_t>(m_terrainView.m_viewMin + m_tileCount - 1);
 }
 
-void FHTileMap::correctTerrainTypes(Core::LibraryTerrainConstPtr dirtTerrain,
-                                    Core::LibraryTerrainConstPtr sandTerrain,
-                                    Core::LibraryTerrainConstPtr waterTerrain)
+void FHTileMap::determineTerrainViewRotation(Core::LibraryTerrainConstPtr dirtTerrain,
+                                             Core::LibraryTerrainConstPtr sandTerrain,
+                                             Core::LibraryTerrainConstPtr waterTerrain)
 {
     //std::ofstream ofs("E:/debug.txt");
     //int           row = 0;
 
-    eachPos([this](const FHPos& pos) {
-        FHTileMap::Tile& XX = get(pos);
-        XX.TL               = SubtileType::Invalid;
-        XX.TR               = SubtileType::Invalid;
-        XX.BL               = SubtileType::Invalid;
-        XX.BR               = SubtileType::Invalid;
+    eachPosTile([](const FHPos& pos, FHTileMap::Tile& XX, size_t) {
+        XX.TL = SubtileType::Invalid;
+        XX.TR = SubtileType::Invalid;
+        XX.BL = SubtileType::Invalid;
+        XX.BR = SubtileType::Invalid;
     });
 
-    eachPos([this,
-             dirtTerrain,
-             sandTerrain](const FHPos& pos) {
-        FHTileMap::Tile& XX     = get(pos);
-        auto             makest = [this,
+    eachPosTile([this,
+                 dirtTerrain,
+                 sandTerrain](const FHPos& pos, FHTileMap::Tile& XX, size_t) {
+        auto makest = [this,
                        dirtTerrain,
                        sandTerrain](const FHPos&     pos,
                                     FHTileMap::Tile& tileXX,
@@ -565,7 +564,7 @@ void FHTileMap::correctTerrainTypes(Core::LibraryTerrainConstPtr dirtTerrain,
                                     int              dx,
                                     int              dy) {
             // fo sand, it contains only 4 native 'sand' subtiles.
-            if (tileXX.m_terrain == sandTerrain) {
+            if (tileXX.m_terrainId == sandTerrain) {
                 sub = SubtileType::Native;
                 return;
             }
@@ -574,9 +573,9 @@ void FHTileMap::correctTerrainTypes(Core::LibraryTerrainConstPtr dirtTerrain,
             const FHTileMap::Tile& tileDY  = getNeighbour(pos, 0, dy);
             const FHTileMap::Tile& tileDXY = getNeighbour(pos, dx, dy);
 
-            const bool eqDX  = tileDX.m_terrain == tileXX.m_terrain;
-            const bool eqDY  = tileDY.m_terrain == tileXX.m_terrain;
-            const bool eqDXY = tileDXY.m_terrain == tileXX.m_terrain;
+            const bool eqDX  = tileDX.m_terrainId == tileXX.m_terrainId;
+            const bool eqDY  = tileDY.m_terrainId == tileXX.m_terrainId;
+            const bool eqDXY = tileDXY.m_terrainId == tileXX.m_terrainId;
 
             const bool allEq = eqDX && eqDY && eqDXY;
             if (allEq) {
@@ -584,22 +583,22 @@ void FHTileMap::correctTerrainTypes(Core::LibraryTerrainConstPtr dirtTerrain,
                 return;
             }
 
-            const bool sandDX  = tileDX.m_terrain->tileBase == Core::LibraryTerrain::TileBase::Sand;
-            const bool sandDY  = tileDY.m_terrain->tileBase == Core::LibraryTerrain::TileBase::Sand;
-            const bool sandDXY = tileDXY.m_terrain->tileBase == Core::LibraryTerrain::TileBase::Sand;
+            const bool sandDX  = tileDX.m_terrainId->tileBase == Core::LibraryTerrain::TileBase::Sand;
+            const bool sandDY  = tileDY.m_terrainId->tileBase == Core::LibraryTerrain::TileBase::Sand;
+            const bool sandDXY = tileDXY.m_terrainId->tileBase == Core::LibraryTerrain::TileBase::Sand;
 
             const bool anySand = sandDX || sandDY || sandDXY;
             if (anySand) {
                 sub = SubtileType::Sand;
                 return;
             }
-            if (tileXX.m_terrain->tileBase == Core::LibraryTerrain::TileBase::Sand) {
+            if (tileXX.m_terrainId->tileBase == Core::LibraryTerrain::TileBase::Sand) {
                 sub = SubtileType::Sand;
                 return;
             }
 
             // dirt can contain mix of native 'dirt' and sand tiles.
-            if (tileXX.m_terrain == dirtTerrain) {
+            if (tileXX.m_terrainId == dirtTerrain) {
                 sub = SubtileType::Native;
                 return;
             }
@@ -611,23 +610,19 @@ void FHTileMap::correctTerrainTypes(Core::LibraryTerrainConstPtr dirtTerrain,
         makest(pos, XX, XX.BR, +1, +1);
     });
 
-    eachPos([this](const FHPos& pos) {
-        [[maybe_unused]] FHTileMap::Tile& XX = get(pos);
-
+    eachPosTile([](const FHPos& pos, FHTileMap::Tile& XX, size_t) {
         assert(XX.TL != SubtileType::Invalid);
         assert(XX.TR != SubtileType::Invalid);
         assert(XX.BL != SubtileType::Invalid);
         assert(XX.BR != SubtileType::Invalid);
     });
 
-    eachPos([this,
-             dirtTerrain,
-             sandTerrain,
-             //&ofs,
-             //&row,
-             waterTerrain](const FHPos& pos) {
-        auto& XX = get(pos);
-
+    eachPosTile([this,
+                 dirtTerrain,
+                 sandTerrain,
+                 //&ofs,
+                 //&row,
+                 waterTerrain](const FHPos& pos, FHTileMap::Tile& XX, size_t) {
         TileNeightbours tilen;
         tilen.read(dirtTerrain,
                    sandTerrain,
@@ -646,7 +641,7 @@ void FHTileMap::correctTerrainTypes(Core::LibraryTerrainConstPtr dirtTerrain,
             ofs << tilen.debugString() << '\t';
         }*/
 
-        if (XX.m_terrain == sandTerrain) {
+        if (XX.m_terrainId == sandTerrain) {
             XX.setViewCenter();
             return;
         }
@@ -663,19 +658,19 @@ void FHTileMap::correctTerrainTypes(Core::LibraryTerrainConstPtr dirtTerrain,
                         continue;
                     if (!matcher.m_doFlipVert && t.m_flippedVert)
                         continue;
-                    if (XX.m_terrain == dirtTerrain && !matcher.m_useOnDirt) {
+                    if (XX.m_terrainId == dirtTerrain && !matcher.m_useOnDirt) {
                         continue;
                     }
 
                     if (matcher.m_f(t, false)) {
-                        XX.m_flipHor  = t.m_flippedHor;
-                        XX.m_flipVert = t.m_flippedVert;
+                        XX.m_terrainView.m_recommendedFlipHor  = t.m_flippedHor;
+                        XX.m_terrainView.m_recommendedFlipVert = t.m_flippedVert;
                         XX.setView(matcher.m_class, matcher.m_type);
                         matchedBts.push_back(static_cast<int>(matcher.m_type));
                     }
                     if (matcher.m_class == BorderClass::NormalDirt && matcher.m_f(t, true)) {
-                        XX.m_flipHor  = t.m_flippedHor;
-                        XX.m_flipVert = t.m_flippedVert;
+                        XX.m_terrainView.m_recommendedFlipHor  = t.m_flippedHor;
+                        XX.m_terrainView.m_recommendedFlipVert = t.m_flippedVert;
                         XX.setView(BorderClass::NormalSand, matcher.m_type);
                         matchedBts.push_back(static_cast<int>(matcher.m_type));
                     }
@@ -693,17 +688,9 @@ void FHTileMap::correctTerrainTypes(Core::LibraryTerrainConstPtr dirtTerrain,
             return true;
         }();
     });
-
-    eachPos([this](const FHPos& pos) {
-        auto& XX = get(pos);
-        if (XX.m_origFlipInit) {
-            XX.m_flipHor  = XX.m_origFlipHor;
-            XX.m_flipVert = XX.m_origFlipVert;
-        }
-    });
 }
 
-void FHTileMap::correctRoads()
+void FHTileMap::determineRoadViewRotation()
 {
     // true = pattern found
     auto correctTile = [this](const FHPos& pos, bool flipHor, bool flipVert, int order) -> bool {
@@ -730,10 +717,10 @@ void FHTileMap::correctRoads()
         const auto eBL = (X.m_roadType == FHRoadType::Invalid) == (BL.m_roadType == FHRoadType::Invalid);
 
         auto setView = [&X, flipHor, flipVert](uint8_t min, uint8_t max) {
-            X.m_roadViewMin  = min;
-            X.m_roadViewMax  = max;
-            X.m_roadFlipHor  = flipHor;
-            X.m_roadFlipVert = flipVert;
+            X.m_roadView.m_viewMin             = min;
+            X.m_roadView.m_viewMax             = max;
+            X.m_roadView.m_recommendedFlipHor  = flipHor;
+            X.m_roadView.m_recommendedFlipVert = flipVert;
         };
 
         if (false) {
@@ -757,8 +744,8 @@ void FHTileMap::correctRoads()
             setView(15, 15);
         } else if (order == 2 && !eR && !eL && !eT && !eB) {
             setView(14, 14);
-            X.m_roadFlipHor  = false;
-            X.m_roadFlipVert = true;
+            X.m_roadView.m_recommendedFlipHor  = false;
+            X.m_roadView.m_recommendedFlipVert = true;
         } else {
             return false;
         }
@@ -787,16 +774,16 @@ void FHTileMap::correctRoads()
                 if (tileCorrected)
                     continue;
 
-                X.m_roadViewMin  = 9;
-                X.m_roadViewMax  = 10;
-                X.m_roadFlipHor  = false;
-                X.m_roadFlipVert = false;
+                X.m_roadView.m_viewMin             = 9;
+                X.m_roadView.m_viewMax             = 10;
+                X.m_roadView.m_recommendedFlipHor  = false;
+                X.m_roadView.m_recommendedFlipVert = false;
             }
         }
     }
 }
 
-void FHTileMap::correctRivers()
+void FHTileMap::determineRiverViewRotation()
 {
     // true = pattern found
     auto correctTile = [this](const FHPos& pos, bool flipHor, bool flipVert, int order) -> bool {
@@ -821,10 +808,10 @@ void FHTileMap::correctRivers()
         const auto eB = X.m_riverType == B.m_riverType;
 
         auto setView = [&X, flipHor, flipVert](uint8_t min, uint8_t max) {
-            X.m_riverViewMin  = min;
-            X.m_riverViewMax  = max;
-            X.m_riverFlipHor  = flipHor;
-            X.m_riverFlipVert = flipVert;
+            X.m_riverView.m_viewMin             = min;
+            X.m_riverView.m_viewMax             = max;
+            X.m_riverView.m_recommendedFlipHor  = flipHor;
+            X.m_riverView.m_recommendedFlipVert = flipVert;
         };
 
         if (false) {
@@ -876,117 +863,154 @@ void FHTileMap::correctRivers()
                 if (tileCorrected)
                     continue;
 
-                X.m_riverViewMin  = 9;
-                X.m_riverViewMax  = 10;
-                X.m_riverFlipHor  = false;
-                X.m_riverFlipVert = false;
+                X.m_riverView.m_viewMin             = 9;
+                X.m_riverView.m_viewMax             = 10;
+                X.m_riverView.m_recommendedFlipHor  = false;
+                X.m_riverView.m_recommendedFlipVert = false;
             }
         }
     }
 }
 
-void FHTileMap::rngTiles(Core::IRandomGenerator* rng, int roughTileChancePercent)
+void FHTileMap::determineViewRotation(const Core::IGameDatabase* database)
 {
+    const auto* dirtTerrain  = database->terrains()->find(std::string(Core::LibraryTerrain::s_terrainDirt));
+    const auto* sandTerrain  = database->terrains()->find(std::string(Core::LibraryTerrain::s_terrainSand));
+    const auto* waterTerrain = database->terrains()->find(std::string(Core::LibraryTerrain::s_terrainWater));
+
+    bool valid = true;
+    this->eachPosTile([&valid](const FHPos& pos, const FHTileMap::Tile& tile, size_t) {
+        valid = valid && tile.m_terrainId;
+        if (!tile.m_terrainId)
+            Logger(Logger::Err) << "No terrain at: " << pos.toPrintableString();
+    });
+    if (!valid)
+        throw std::runtime_error("some terrain tiles are missing");
+
+    determineTerrainViewRotation(dirtTerrain, sandTerrain, waterTerrain);
+    determineRoadViewRotation();
+    determineRiverViewRotation();
+}
+
+void FHTileMap::makeRecommendedRotation()
+{
+    this->eachPosTile([](const FHPos&, FHTileMap::Tile& tile, size_t) {
+        tile.m_terrainView.makeRecommendedRotation();
+        tile.m_roadView.makeRecommendedRotation();
+        tile.m_riverView.makeRecommendedRotation();
+    });
+}
+
+void FHTileMap::makeRngView(Core::IRandomGenerator* rng, int roughTileChancePercent)
+{
+    this->eachPosTile([rng, roughTileChancePercent](const FHPos&, FHTileMap::Tile& tile, size_t) {
+        tile.m_terrainView.makeRngView(rng, roughTileChancePercent, true);
+        tile.m_roadView.makeRngView(rng, roughTileChancePercent, false);
+        tile.m_riverView.makeRngView(rng, roughTileChancePercent, false);
+    });
+}
+
+void FHPackedTileMap::unpackToMap(FHTileMap& map) const
+{
+    if (m_tileTerrianIndexes.empty())
+        return;
+    map.eachPosTile([this](const FHPos& pos, FHTileMap::Tile& tile, size_t i) {
+        tile.m_terrainId              = m_terrains[m_tileTerrianIndexes[i]];
+        tile.m_terrainView.m_view     = m_tileViews[i];
+        tile.m_terrainView.m_flipHor  = m_terrainFlipHor[i];
+        tile.m_terrainView.m_flipVert = m_terrainFlipVert[i];
+        tile.m_coastal                = m_coastal[i];
+    });
+    for (auto& road : m_roads) {
+        for (size_t i = 0; i < road.m_tiles.size(); ++i) {
+            auto& tile                 = map.get(road.m_tiles[i]);
+            tile.m_roadType            = road.m_type;
+            tile.m_roadView.m_view     = road.m_views[i];
+            tile.m_roadView.m_flipHor  = road.m_flipHor[i];
+            tile.m_roadView.m_flipVert = road.m_flipVert[i];
+        }
+    }
+    for (auto& river : m_rivers) {
+        for (size_t i = 0; i < river.m_tiles.size(); ++i) {
+            auto& tile                  = map.get(river.m_tiles[i]);
+            tile.m_riverType            = river.m_type;
+            tile.m_riverView.m_view     = river.m_views[i];
+            tile.m_riverView.m_flipHor  = river.m_flipHor[i];
+            tile.m_riverView.m_flipVert = river.m_flipVert[i];
+        }
+    }
+}
+
+void FHPackedTileMap::packFromMap(const FHTileMap& map)
+{
+    size_t tilesSize = map.totalSize();
+    m_tileTerrianIndexes.resize(tilesSize);
+    m_tileViews.resize(tilesSize);
+    m_terrainFlipHor.resize(tilesSize);
+    m_terrainFlipVert.resize(tilesSize);
+    m_coastal.resize(tilesSize);
+    m_rivers.resize(4);
+    m_roads.resize(3);
+    m_roads[0].m_type = FHRoadType::Dirt;
+    m_roads[1].m_type = FHRoadType::Gravel;
+    m_roads[2].m_type = FHRoadType::Cobblestone;
+
+    m_rivers[0].m_type = FHRiverType::Water;
+    m_rivers[1].m_type = FHRiverType::Ice;
+    m_rivers[2].m_type = FHRiverType::Mud;
+    m_rivers[3].m_type = FHRiverType::Lava;
+
+    auto makeTerrainIndex = [this](Core::LibraryTerrainConstPtr terrain) -> uint8_t {
+        for (size_t i = 0; i < m_terrains.size(); ++i) {
+            if (m_terrains[i] == terrain)
+                return static_cast<uint8_t>(i);
+        }
+        m_terrains.push_back(terrain);
+        return static_cast<uint8_t>(m_terrains.size() - 1);
+    };
+    map.eachPosTile([&makeTerrainIndex, this](const FHPos& pos, const FHTileMap::Tile& tile, size_t i) {
+        m_tileTerrianIndexes[i] = makeTerrainIndex(tile.m_terrainId);
+        m_tileViews[i]          = tile.m_terrainView.m_view;
+        m_terrainFlipHor[i]     = tile.m_terrainView.m_flipHor;
+        m_terrainFlipVert[i]    = tile.m_terrainView.m_flipVert;
+        m_coastal[i]            = tile.m_coastal;
+        if (tile.m_roadType != FHRoadType::Invalid) {
+            auto& road = m_roads[static_cast<size_t>(tile.m_roadType) - 1];
+            road.m_tiles.push_back(pos);
+            road.m_views.push_back(tile.m_roadView.m_view);
+            road.m_flipHor.push_back(tile.m_roadView.m_flipHor);
+            road.m_flipVert.push_back(tile.m_roadView.m_flipVert);
+        }
+        if (tile.m_riverType != FHRiverType::Invalid) {
+            auto& river = m_rivers[static_cast<size_t>(tile.m_riverType) - 1];
+            river.m_tiles.push_back(pos);
+            river.m_views.push_back(tile.m_riverView.m_view);
+            river.m_flipHor.push_back(tile.m_riverView.m_flipHor);
+            river.m_flipVert.push_back(tile.m_riverView.m_flipVert);
+        }
+    });
+}
+
+void FHTileMap::TileView::makeRngView(Core::IRandomGenerator* rng, int roughTileChancePercent, bool useMid)
+{
+    if (m_viewMin == m_viewMax) {
+        m_view = m_viewMin;
+        return;
+    }
     auto rngView = [&rng](uint8_t min, uint8_t max) -> uint8_t {
         if (min == max)
             return min;
         uint8_t diff   = max - min;
         uint8_t result = rng->genSmall(diff);
-        //if (result >= 20)
-        //    result = rng->genSmall(diff);
         return min + result;
     };
-
-    m_changedViews.clear();
-
-    for (int z = 0; z < m_depth; ++z) {
-        for (int y = 0; y < m_height; ++y) {
-            for (int x = 0; x < m_width; ++x) {
-                auto& X = get(x, y, z);
-                if (!(X.m_view >= X.m_viewMin && X.m_view <= X.m_viewMax)) {
-                    if (X.m_view != 0xffU) {
-                        Logger(Logger::Warning) << "Change view at (" << x << "," << y << "," << z << ") " << int(X.m_view) << " -> [" << int(X.m_viewMin) << " .. " << int(X.m_viewMax) << "]";
-                        m_changedViews.push_back({ FHPos{ x, y, z }, X.m_view });
-                    }
-                    if (rng->genSmall(100) < roughTileChancePercent)
-                        X.m_view = rngView(X.m_viewMin, X.m_viewMax);
-                    else
-                        X.m_view = rngView(X.m_viewMin, X.m_viewMid);
-                }
-                if (!(X.m_roadView >= X.m_roadViewMin && X.m_roadView <= X.m_roadViewMax))
-                    X.m_roadView = rngView(X.m_roadViewMin, X.m_roadViewMax);
-                if (!(X.m_riverView >= X.m_riverViewMin && X.m_riverView <= X.m_riverViewMax))
-                    X.m_riverView = rngView(X.m_riverViewMin, X.m_riverViewMax);
-            }
+    if (useMid && m_viewMid != m_viewMax) {
+        if (rng->genSmall(100) >= roughTileChancePercent) {
+            m_view = rngView(m_viewMin, m_viewMid);
+            return;
         }
     }
-}
-
-void FHZone::placeOnMap(FHTileMap& map) const
-{
-    if (m_rect.has_value()) {
-        auto& rect = m_rect.value();
-        for (int x = 0; x < rect.m_width; ++x) {
-            for (int y = 0; y < rect.m_height; ++y) {
-                map.get(FHPos{ .m_x = x + rect.m_pos.m_x,
-                               .m_y = y + rect.m_pos.m_y,
-                               .m_z = rect.m_pos.m_z })
-                    .m_terrain
-                    = m_terrainId;
-            }
-        }
-        return;
-    }
-    if (!m_tiles.empty() && m_tilesVariants.size() == m_tiles.size()) {
-        for (size_t i = 0; i < m_tiles.size(); ++i) {
-            auto& tile          = map.get(m_tiles[i]);
-            tile.m_terrain      = m_terrainId;
-            tile.m_view         = m_tilesVariants[i];
-            tile.m_origFlipInit = true;
-            tile.m_origFlipHor  = m_tilesFlippedHor[i];
-            tile.m_origFlipVert = m_tilesFlippedVert[i];
-        }
-        return;
-    }
-    if (!m_tiles.empty()) {
-        for (auto& pos : m_tiles) {
-            map.get(pos).m_terrain = m_terrainId;
-        }
-    }
-}
-
-void FHRiver::placeOnMap(FHTileMap& map) const
-{
-    if (!m_tiles.empty() && m_tilesVariants.size() == m_tiles.size()) {
-        for (size_t i = 0; i < m_tiles.size(); ++i) {
-            auto& tile       = map.get(m_tiles[i]);
-            tile.m_riverType = m_type;
-            tile.m_riverView = m_tilesVariants[i];
-        }
-        return;
-    }
-    if (!m_tiles.empty()) {
-        for (auto& pos : m_tiles) {
-            map.get(pos).m_riverType = m_type;
-        }
-    }
-}
-
-void FHRoad::placeOnMap(FHTileMap& map) const
-{
-    if (!m_tiles.empty() && m_tilesVariants.size() == m_tiles.size()) {
-        for (size_t i = 0; i < m_tiles.size(); ++i) {
-            auto& tile      = map.get(m_tiles[i]);
-            tile.m_roadType = m_type;
-            tile.m_roadView = m_tilesVariants[i];
-        }
-        return;
-    }
-    if (!m_tiles.empty()) {
-        for (auto& pos : m_tiles) {
-            map.get(pos).m_roadType = m_type;
-        }
-    }
+    m_view = rngView(m_viewMin, m_viewMax);
 }
 
 }

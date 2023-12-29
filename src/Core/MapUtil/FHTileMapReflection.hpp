@@ -37,37 +37,36 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_z)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
-    FHZone,
-    m_id,
-    m_terrainId,
-    m_tiles,
-    m_tilesVariants,
-    m_tilesFlippedHor,
-    m_tilesFlippedVert,
-    m_rect)
-
-STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
-    FHRiver,
+    FHPackedTileMap::River,
     m_type,
     m_tiles,
-    m_tilesVariants)
+    m_views,
+    m_flipHor,
+    m_flipVert)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
-    FHRoad,
+    FHPackedTileMap::Road,
     m_type,
     m_tiles,
-    m_tilesVariants)
+    m_views,
+    m_flipHor,
+    m_flipVert)
+
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
-    FHTileMap::ChangedTile,
-    m_pos,
-    m_orig)
+    FHPackedTileMap,
+    m_terrains,
+    m_tileTerrianIndexes,
+    m_tileViews,
+    m_terrainFlipHor,
+    m_terrainFlipVert,
+    m_coastal,
+    m_rivers,
+    m_roads)
+
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHTileMap,
     m_width,
     m_height,
-    m_depth,
-    m_changedViews,
-    m_inverseFlipHor,
-    m_inverseFlipVert)
+    m_depth)
 
 }

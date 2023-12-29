@@ -486,8 +486,8 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
         uint32_t count = 0;
         stream >> count;
         m_objects.resize(count);
-        uint32_t index = 0;
-        for (auto& obj : m_objects) {
+
+        for (uint32_t index = 0; auto& obj : m_objects) {
             stream >> obj.m_pos >> obj.m_defnum;
 
             const ObjectTemplate& objTempl = m_objectDefs.at(obj.m_defnum);
@@ -503,9 +503,18 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
 
             obj.m_impl->readBinary(stream);
 
-            if (g_enableOffsetTrace)
+            if (g_enableOffsetTrace) {
                 Mernel::Logger(Mernel::Logger::Warning) << "finished readBinary [" << index << "]: (" << (int) obj.m_pos.m_x << "," << (int) obj.m_pos.m_y << "," << (int) obj.m_pos.m_z << ")  "
                                                         << objTempl.m_animationFile << ", type:" << objTempl.m_id << ", sub: " << objTempl.m_subid << ", current offset =" << stream.getBuffer().getOffsetRead();
+
+                if (0) {
+                    PropertyTree data;
+                    obj.m_impl->toJson(data);
+                    std::ostringstream os;
+                    PropertyTree::printReadableJson(os, data);
+                    Mernel::Logger(Mernel::Logger::Warning) << os.str();
+                }
+            }
 
             index++;
         }
@@ -641,13 +650,33 @@ void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
     {
         uint32_t count = m_objects.size();
         stream << count;
-        for (auto& obj : m_objects) {
+        for (uint32_t index = 0; auto& obj : m_objects) {
+            const ObjectTemplate& objTempl = m_objectDefs.at(obj.m_defnum);
+
             stream << obj.m_pos << obj.m_defnum;
             stream.zeroPadding(5);
             if (!obj.m_impl)
                 throw std::runtime_error("Empty object impl on write!");
 
+            if (g_enableOffsetTrace)
+                Mernel::Logger(Mernel::Logger::Warning) << "staring  writeBinary [" << index << "]: (" << (int) obj.m_pos.m_x << "," << (int) obj.m_pos.m_y << "," << (int) obj.m_pos.m_z << ")  "
+                                                        << objTempl.m_animationFile << ", type:" << objTempl.m_id << ", sub: " << objTempl.m_subid << " current offset =" << stream.getBuffer().getOffsetWrite();
+
             obj.m_impl->writeBinary(stream);
+
+            if (g_enableOffsetTrace) {
+                Mernel::Logger(Mernel::Logger::Warning) << "finished writeBinary [" << index << "]: (" << (int) obj.m_pos.m_x << "," << (int) obj.m_pos.m_y << "," << (int) obj.m_pos.m_z << ")  "
+                                                        << objTempl.m_animationFile << ", type:" << objTempl.m_id << ", sub: " << objTempl.m_subid << ", current offset =" << stream.getBuffer().getOffsetWrite();
+
+                if (0) {
+                    PropertyTree data;
+                    obj.m_impl->toJson(data);
+                    std::ostringstream os;
+                    PropertyTree::printReadableJson(os, data);
+                    Mernel::Logger(Mernel::Logger::Warning) << os.str();
+                }
+            }
+            index++;
         }
     }
 
@@ -736,12 +765,39 @@ void DisposedHero::writeBinary(ByteOrderDataStreamWriter& stream) const
 
 void MapTileH3M::readBinary(ByteOrderDataStreamReader& stream)
 {
-    stream >> m_terType >> m_terView >> m_riverType >> m_riverDir >> m_roadType >> m_roadDir >> m_extTileFlags;
+    uint8_t extTileFlags = 0;
+    stream >> m_terType >> m_terView >> m_riverType >> m_riverDir >> m_roadType >> m_roadDir >> extTileFlags;
+    m_flipHor       = extTileFlags & TerrainFlipHor;
+    m_flipVert      = extTileFlags & TerrainFlipVert;
+    m_riverFlipHor  = extTileFlags & RiverFlipHor;
+    m_riverFlipVert = extTileFlags & RiverFlipVert;
+    m_roadFlipHor   = extTileFlags & RoadFlipHor;
+    m_roadFlipVert  = extTileFlags & RoadFlipVert;
+    m_coastal       = extTileFlags & Coastal;
+    m_unused        = extTileFlags & Unused;
 }
 
 void MapTileH3M::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
-    stream << m_terType << m_terView << m_riverType << m_riverDir << m_roadType << m_roadDir << m_extTileFlags;
+    uint8_t extTileFlags = 0;
+    extTileFlags         = 0;
+    if (m_flipHor)
+        extTileFlags |= TerrainFlipHor;
+    if (m_flipVert)
+        extTileFlags |= TerrainFlipVert;
+    if (m_riverFlipHor)
+        extTileFlags |= RiverFlipHor;
+    if (m_riverFlipVert)
+        extTileFlags |= RiverFlipVert;
+    if (m_roadFlipHor)
+        extTileFlags |= RoadFlipHor;
+    if (m_roadFlipVert)
+        extTileFlags |= RoadFlipVert;
+    if (m_coastal)
+        extTileFlags |= Coastal;
+    if (m_unused)
+        extTileFlags |= Unused;
+    stream << m_terType << m_terView << m_riverType << m_riverDir << m_roadType << m_roadDir << extTileFlags;
 }
 
 void ObjectTemplate::prepareArrays(const MapFormatFeatures* m_features)
