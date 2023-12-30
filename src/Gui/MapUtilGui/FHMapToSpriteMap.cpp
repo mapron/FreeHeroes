@@ -62,11 +62,15 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         return item;
     };
 
-    auto makeItemById = [&makeItem, graphicsLibrary](SpriteMap::Layer layer, const std::string& id, const FHPos& pos, int priority = 0) -> SpriteMap::Item {
+    bool hasMissingSprites = false;
+
+    auto makeItemById = [&makeItem, &hasMissingSprites, graphicsLibrary](SpriteMap::Layer layer, const std::string& id, const FHPos& pos, int priority = 0) -> SpriteMap::Item {
         auto item    = makeItem(pos, priority);
         item.m_layer = layer;
 
-        auto sprite        = graphicsLibrary->getObjectAnimation(id);
+        auto sprite = graphicsLibrary->getObjectAnimation(id);
+        if (!sprite || !sprite->preload())
+            hasMissingSprites = true;
         item.m_sprite      = sprite;
         item.m_spriteGroup = 0;
         item.addInfo("def", id);
@@ -501,6 +505,9 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         addValueInfo(item, obj);
     }
     if (m_settings.m_strict) {
+        if (hasMissingSprites)
+            throw std::runtime_error("Some sprites are missing; make sure to convert all data from LOD files!");
+
         auto                            allObj = fhMap.m_objects.getAllObjects();
         std::set<const FHCommonObject*> allSet(allObj.cbegin(), allObj.cend());
 

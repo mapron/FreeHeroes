@@ -197,6 +197,8 @@ struct SpritePaintSettings {
     int  m_gridOpacity    = 110;
     int  m_tileSize       = 32;
 
+    bool m_strict = false;
+
     enum class ContourStyle
     {
         None,

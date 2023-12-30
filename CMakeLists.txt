@@ -461,8 +461,20 @@ AddTarget(TYPE app_ui NAME MapEditor
     QT_MODULES Widgets
     WIN_ICON
         ${CMAKE_CURRENT_SOURCE_DIR}/guiAssets/64_map.ico
-    UIC_POSTPROCESS_SCRIPTS
-        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
+    )
+
+AddTarget(TYPE app_ui NAME MapScreenshotToolCLI
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/MapScreenshotToolCLI
+    LINK_LIBRARIES
+        MernelPlatform
+        GuiUtils
+
+        CoreApplication
+        GuiApplication
+        GameInt
+        GuiInt
+        MapUtilGui
+    QT_MODULES Widgets
     )
 
 AddTarget(TYPE app_ui NAME MapToolUI

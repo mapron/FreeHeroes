@@ -25,6 +25,22 @@ class IAppSettings;
 
 class MAPUTILGUI_EXPORT MapEditorWidget : public QMainWindow {
 public:
+    struct ScreenshotTask {
+        std::string m_filename;
+        bool        m_strict = false;
+        bool        m_silent = true;
+
+        bool        m_dryRun = false;
+        std::string m_outputSurface;
+        std::string m_outputUnderground;
+
+        std::string m_minimapSurface;
+        std::string m_minimapUnderground;
+
+        int m_minimapSize = 144;
+    };
+
+public:
     MapEditorWidget(
         const Core::IGameDatabaseContainer*  gameDatabaseContainer,
         const Core::IRandomGeneratorFactory* rngFactory,
@@ -48,8 +64,7 @@ public:
     void saveFHDialog();
     void saveScreenshot();
 
-    bool saveScreenshots(const std::string& outputSurface,
-                         const std::string& outputUnderground);
+    bool saveScreenshots(const ScreenshotTask& task);
 
     void updateMap();
 

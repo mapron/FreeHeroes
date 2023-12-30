@@ -24,6 +24,7 @@
 #include "ViewSettingsWidget.hpp"
 #include "SceneView.hpp"
 #include "InspectorWidget.hpp"
+#include "SpriteMapPainter.hpp"
 #include "MiniMapWidget.hpp"
 #include "MapScene.hpp"
 #include "LibraryModels.hpp"
@@ -439,31 +440,52 @@ void MapEditorWidget::saveScreenshot()
     image.save(filename);
 }
 
-bool MapEditorWidget::saveScreenshots(const std::string& outputSurface,
-                                      const std::string& outputUnderground)
+bool MapEditorWidget::saveScreenshots(const ScreenshotTask& task)
 {
-    if (m_impl->m_spriteMap.m_depth == 0)
+    Mernel::Logger(Mernel::Logger::Notice) << "Loading " << task.m_filename;
+    if (!load(task.m_filename, task.m_strict, task.m_silent))
         return false;
-    if (outputSurface.empty() && outputUnderground.empty())
-        return false;
-    for (int d : { 0, 1 }) {
-        const std::string& outFilename = d == 0 ? outputSurface : outputUnderground;
-        if (outFilename.empty())
-            continue;
 
-        if (d >= m_impl->m_spriteMap.m_depth)
-            continue;
+    try {
+        for (int d : { 0, 1 }) {
+            const std::string& outFilename  = d == 0 ? task.m_outputSurface : task.m_outputUnderground;
+            const std::string& miniFilename = d == 0 ? task.m_minimapSurface : task.m_minimapUnderground;
 
-        m_impl->m_depth = d;
-        showCurrentItem();
+            if (d >= m_impl->m_spriteMap.m_depth)
+                break;
 
-        QImage   image(m_impl->m_scene->width(), m_impl->m_scene->height(), QImage::Format_ARGB32);
-        QPainter painter(&image);
-        m_impl->m_scene->render(&painter);
-        Mernel::Logger(Mernel::Logger::Warning) << "Saving image to: " << outFilename;
-        if (outFilename != "DRYRUN")
-            image.save(QString::fromStdString(outFilename));
+            m_impl->m_depth = d;
+
+            m_impl->m_viewSettings.m_paintSettings.m_strict = task.m_strict;
+            SpriteMapPainter spainter(&(m_impl->m_viewSettings.m_paintSettings), m_impl->m_depth);
+
+            QImage   imageMap(m_impl->m_scene->width(), m_impl->m_scene->height(), QImage::Format_ARGB32);
+            QPainter painterMap(&imageMap);
+
+            QImage   imageMini(task.m_minimapSize, task.m_minimapSize, QImage::Format_ARGB32);
+            QPainter painterMini(&imageMini);
+
+            spainter.paint(&painterMap, &(m_impl->m_spriteMap), 0, 0);
+            spainter.paintMinimap(&painterMini, &(m_impl->m_spriteMap), QSize{ task.m_minimapSize, task.m_minimapSize }, QRectF());
+
+            if (task.m_dryRun)
+                continue;
+
+            if (!outFilename.empty()) {
+                Mernel::Logger(Mernel::Logger::Notice) << "Saving map to: " << outFilename;
+                imageMap.save(QString::fromStdString(outFilename));
+            }
+            if (!miniFilename.empty()) {
+                Mernel::Logger(Mernel::Logger::Notice) << "Saving minimap to: " << miniFilename;
+                imageMini.save(QString::fromStdString(miniFilename));
+            }
+        }
     }
+    catch (std::exception& ex) {
+        Mernel::Logger(Mernel::Logger::Err) << ex.what();
+        return false;
+    }
+
     return true;
 }
 

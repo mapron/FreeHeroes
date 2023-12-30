@@ -110,10 +110,10 @@ Application::~Application()
     m_impl->appConfig->save();
 }
 
-bool Application::load()
+bool Application::load(int logLevel)
 {
     {
-        m_impl->coreApp->initLogger(m_impl->appConfig->global().logLevel);
+        m_impl->coreApp->initLogger(logLevel == -1 ? m_impl->appConfig->global().logLevel : logLevel);
         qInstallMessageHandler(loggerQtOutput);
         Logger(Logger::Notice) << "Application started. Log level is " << m_impl->appConfig->global().logLevel;
         qWarning() << "checking Qt logs";

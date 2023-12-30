@@ -319,6 +319,8 @@ void SpriteMapPainter::paintMinimap(QPainter*        painter,
 
     painter->drawPixmap(QRect(QPoint(0, 0), minimapSize), QPixmap::fromImage(img));
 
+    if (visible.isNull())
+        return;
     QSizeF  newSize(visible.width() * minimapSize.width(), visible.height() * minimapSize.height());
     QPointF newTopLeft(visible.left() * minimapSize.width(), visible.top() * minimapSize.height());
     QRectF  visibleScaled(newTopLeft, newSize);

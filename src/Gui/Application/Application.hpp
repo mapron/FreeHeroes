@@ -63,7 +63,7 @@ public:
     {}
     ~Application();
 
-    bool load();
+    bool load(int logLevel = -1);
 
     const IGraphicsLibrary* getGraphicsLibrary() const
     {
