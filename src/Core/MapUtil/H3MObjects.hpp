@@ -550,8 +550,8 @@ struct MapHero : public MapObjectAbstract {
     uint8_t    m_formation = 0;
     HeroArtSet m_artSet;
 
-    uint8_t     m_patrolRadius       = 0xff;
-    bool        m_hasCustomBiography = false;
+    uint8_t     m_patrolRadius = 0xff;
+    bool        m_hasCustomBio = false;
     std::string m_bio;
     uint8_t     m_sex = 0xff;
 
@@ -889,7 +889,8 @@ struct MapEvent : public MapObjectAbstract {
 };
 
 struct MapDwelling : public MapObjectAbstract {
-    MapObjectType m_objectType;
+    bool m_hasFaction = true;
+    bool m_hasLevel   = true;
 
     uint8_t  m_owner       = 0;
     uint32_t m_factionId   = 0;
@@ -897,8 +898,9 @@ struct MapDwelling : public MapObjectAbstract {
     uint8_t  m_minLevel    = 0;
     uint8_t  m_maxLevel    = 0;
 
-    MapDwelling(MapObjectType objectType)
-        : m_objectType(objectType)
+    MapDwelling(bool hasFaction, bool hasLevel)
+        : m_hasFaction(hasFaction)
+        , m_hasLevel(hasLevel)
     {
     }
 

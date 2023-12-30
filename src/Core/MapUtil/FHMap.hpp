@@ -43,7 +43,9 @@ struct FHPlayer {
     bool m_humanPossible{ false };
     bool m_aiPossible{ false };
 
+    bool m_hasRandomHero{ false };
     bool m_generateHeroAtMainTown{ false };
+    bool m_isFactionRandom{ false };
 
     AiTactic m_aiTactic = AiTactic::RANDOM;
 
@@ -51,6 +53,7 @@ struct FHPlayer {
 
     int         m_team{ -1 };
     uint8_t     m_unused1{ 0 };
+    uint8_t     m_placeholder{ 0 };
     uint8_t     m_generatedHeroTownFaction{ 0 };
     uint8_t     m_mainCustomHeroPortrait = 0xFFU;
     std::string m_mainCustomHeroName;
@@ -78,8 +81,11 @@ struct FHHeroData {
     bool m_hasName       = false;
     bool m_hasPortrait   = false;
 
+    std::string m_bio;
+
     std::string m_name;
     int         m_portrait = -1;
+    int         m_sex      = -1;
 
     Core::AdventureArmy m_army;
 
@@ -115,7 +121,8 @@ struct FHHero : public FHPlayerControlledObject {
     bool       m_isMain{ false };
     FHHeroData m_data;
 
-    int m_patrolRadius = -1;
+    int  m_patrolRadius = -1;
+    bool m_isRandom     = false;
 
     uint32_t m_questIdentifier = 0;
 
@@ -126,6 +133,20 @@ struct FHDwelling : public FHPlayerControlledObject {
     Core::LibraryDwellingConstPtr m_id = nullptr;
 
     bool operator==(const FHDwelling&) const noexcept = default;
+};
+
+struct FHRandomDwelling : public FHPlayerControlledObject {
+    Core::LibraryObjectDefConstPtr m_id = nullptr;
+
+    bool m_hasFaction = true;
+    bool m_hasLevel   = true;
+
+    uint32_t m_factionId   = 0;
+    uint16_t m_factionMask = 0;
+    uint8_t  m_minLevel    = 0;
+    uint8_t  m_maxLevel    = 0;
+
+    bool operator==(const FHRandomDwelling&) const noexcept = default;
 };
 
 struct FHMine : public FHPlayerControlledObject {
@@ -177,6 +198,8 @@ struct FHRandomArtifact : public FHCommonObject {
 
     Type m_type = Type::Invalid;
 
+    FHMessageWithBattle m_messageWithBattle;
+
     bool operator==(const FHRandomArtifact&) const noexcept = default;
 };
 
@@ -191,8 +214,9 @@ struct FHPandora : public FHCommonObject {
 };
 
 struct FHMonster : public FHCommonObject {
-    Core::LibraryUnitConstPtr m_id    = nullptr;
-    uint32_t                  m_count = 0;
+    Core::LibraryUnitConstPtr m_id          = nullptr;
+    uint32_t                  m_count       = 0;
+    int                       m_randomLevel = -1;
 
     int m_aggressionMin = 1;
     int m_aggressionMax = 10;
@@ -470,8 +494,22 @@ struct MAPUTIL_EXPORT FHMap {
     using PlayersMap = std::map<Core::LibraryPlayerConstPtr, FHPlayer>;
     using DefMap     = std::map<Core::LibraryObjectDefConstPtr, Core::LibraryObjectDef>;
 
-    Core::GameVersion m_version = Core::GameVersion::Invalid;
-    uint64_t          m_seed{ 0 };
+    enum class MapFormat
+    {
+        Invalid = 0,
+        ROE     = 0x0e,
+        AB      = 0x15,
+        SOD     = 0x1c,
+        HC      = 0x1d,
+        HOTA1   = 0x1e,
+        HOTA2   = 0x1f,
+        HOTA3   = 0x20,
+        WOG     = 0x33,
+        VCMI    = 0xF0,
+    };
+
+    MapFormat m_format = MapFormat::Invalid;
+    uint64_t  m_seed{ 0 };
 
     FHTileMap       m_tileMap;
     FHPackedTileMap m_packedTileMap;
@@ -496,6 +534,7 @@ struct MAPUTIL_EXPORT FHMap {
         std::vector<FHRandomArtifact>      m_artifactsRandom;
         std::vector<FHMonster>             m_monsters;
         std::vector<FHDwelling>            m_dwellings;
+        std::vector<FHRandomDwelling>      m_randomDwellings;
         std::vector<FHBank>                m_banks;
         std::vector<FHObstacle>            m_obstacles;
         std::vector<FHVisitable>           m_visitables;
@@ -544,6 +583,7 @@ struct MAPUTIL_EXPORT FHMap {
                 m_artifactsRandom,
                 m_monsters,
                 m_dwellings,
+                m_randomDwellings,
                 m_banks,
                 m_obstacles,
                 m_visitables,

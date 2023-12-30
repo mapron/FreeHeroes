@@ -50,10 +50,13 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_aiPossible,
     m_humanPossible,
     m_generateHeroAtMainTown,
+    m_hasRandomHero,
+    m_isFactionRandom,
     m_aiTactic,
     m_startingFactions,
     m_team,
     m_unused1,
+    m_placeholder,
     m_generatedHeroTownFaction,
     m_mainCustomHeroPortrait,
     m_mainCustomHeroName,
@@ -89,7 +92,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_hasName,
     m_hasPortrait,
     m_portrait,
+    m_sex,
     m_name,
+    m_bio,
     m_army)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
@@ -102,8 +107,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 
     m_isMain,
     m_data,
-    m_questIdentifier,
-    m_patrolRadius)
+    m_patrolRadius,
+    m_isRandom,
+    m_questIdentifier)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHTownEvent,
@@ -162,6 +168,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRandomResource,
     m_pos,
     m_order,
+    m_defIndex,
     m_guard,
     m_score,
     m_generationId,
@@ -188,7 +195,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_score,
     m_generationId,
 
-    m_type)
+    m_type,
+    m_messageWithBattle)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHPandora,
@@ -223,6 +231,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 
     m_id,
     m_count,
+    m_randomLevel,
     m_aggressionMin,
     m_aggressionMax,
     m_joinOnlyForMoney,
@@ -240,13 +249,33 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHDwelling,
     m_pos,
     m_order,
-    m_player,
     m_defIndex,
     m_guard,
     m_score,
     m_generationId,
 
+    m_player,
+
     m_id)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHRandomDwelling,
+    m_pos,
+    m_order,
+    m_defIndex,
+    m_guard,
+    m_score,
+    m_generationId,
+
+    m_player,
+
+    m_id,
+    m_hasFaction,
+    m_hasLevel,
+    m_factionId,
+    m_factionMask,
+    m_minLevel,
+    m_maxLevel)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHMine,
@@ -549,6 +578,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_artifactsRandom,
     m_monsters,
     m_dwellings,
+    m_randomDwellings,
     m_banks,
     m_obstacles,
     m_visitables,
@@ -638,13 +668,29 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_roundLimit,
     m_levelLimit,
     m_hotaVersion)
+
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHMap::Rumor,
     m_name,
     m_text)
+
+ENUM_REFLECTION_STRINGIFY(
+    FHMap::MapFormat,
+    Invalid,
+    Invalid,
+    ROE,
+    AB,
+    SOD,
+    HC,
+    HOTA1,
+    HOTA2,
+    HOTA3,
+    WOG,
+    VCMI)
+
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHMap,
-    m_version,
+    m_format,
     m_seed,
     m_tileMap,
     m_packedTileMap,

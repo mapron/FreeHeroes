@@ -231,7 +231,9 @@ std::unique_ptr<IMapObject> IMapObject::Create(MapObjectType type, uint32_t subi
         case MapObjectType::RANDOM_DWELLING_LVL:     //same as castle, fixed level   217
         case MapObjectType::RANDOM_DWELLING_FACTION: //level range, fixed faction    218
         {
-            return std::make_unique<MapDwelling>(type);
+            bool hasFaction = type == MapObjectType::RANDOM_DWELLING || type == MapObjectType::RANDOM_DWELLING_LVL;
+            bool hasLevel   = type == MapObjectType::RANDOM_DWELLING || type == MapObjectType::RANDOM_DWELLING_FACTION;
+            return std::make_unique<MapDwelling>(hasFaction, hasLevel);
         }
 
         case MapObjectType::HERO_PLACEHOLDER:
@@ -288,6 +290,8 @@ void MapHero::readBinary(ByteOrderDataStreamReader& stream)
 
     } else {
         stream >> m_exp;
+        if (m_exp >= 0)
+            m_hasExp = true;
     }
 
     stream >> m_hasPortrait;
@@ -309,8 +313,8 @@ void MapHero::readBinary(ByteOrderDataStreamReader& stream)
     stream >> m_patrolRadius;
 
     if (m_features->m_heroHasBio) {
-        stream >> m_hasCustomBiography;
-        if (m_hasCustomBiography)
+        stream >> m_hasCustomBio;
+        if (m_hasCustomBio)
             stream >> m_bio;
 
         stream >> m_sex;
@@ -362,8 +366,8 @@ void MapHero::writeBinary(ByteOrderDataStreamWriter& stream) const
     stream << m_patrolRadius;
 
     if (m_features->m_heroHasBio) {
-        stream << m_hasCustomBiography;
-        if (m_hasCustomBiography)
+        stream << m_hasCustomBio;
+        if (m_hasCustomBio)
             stream << m_bio;
 
         stream << m_sex;
@@ -1504,15 +1508,13 @@ void MapDwelling::readBinary(ByteOrderDataStreamReader& stream)
     stream >> m_owner;
     stream.zeroPaddingChecked(3, g_enablePaddingCheck);
 
-    //216 and 217
-    if (m_objectType == MapObjectType::RANDOM_DWELLING || m_objectType == MapObjectType::RANDOM_DWELLING_LVL) {
+    if (m_hasFaction) {
         stream >> m_factionId;
         if (!m_factionId)
             stream >> m_factionMask;
     }
 
-    //216 and 218
-    if (m_objectType == MapObjectType::RANDOM_DWELLING || m_objectType == MapObjectType::RANDOM_DWELLING_FACTION)
+    if (m_hasLevel)
         stream >> m_minLevel >> m_maxLevel;
 }
 
@@ -1521,15 +1523,13 @@ void MapDwelling::writeBinary(ByteOrderDataStreamWriter& stream) const
     stream << m_owner;
     stream.zeroPadding(3);
 
-    //216 and 217
-    if (m_objectType == MapObjectType::RANDOM_DWELLING || m_objectType == MapObjectType::RANDOM_DWELLING_LVL) {
+    if (m_hasFaction) {
         stream << m_factionId;
         if (!m_factionId)
             stream << m_factionMask;
     }
 
-    //216 and 218
-    if (m_objectType == MapObjectType::RANDOM_DWELLING || m_objectType == MapObjectType::RANDOM_DWELLING_FACTION)
+    if (m_hasLevel)
         stream << m_minLevel << m_maxLevel;
 }
 
@@ -1542,7 +1542,7 @@ void MapDwelling::toJson(PropertyTree& data) const
 void MapDwelling::fromJson(const PropertyTree& data)
 {
     Mernel::Reflection::PropertyTreeReader reader;
-    *this = { m_objectType };
+    *this = { m_hasFaction, m_hasLevel };
     reader.jsonToValue(data, *this);
 }
 

@@ -166,8 +166,8 @@ struct AdventureHero {
     {
         if (isValid() != another.isValid())
             return false;
-        if (!isValid() && !another.isValid())
-            return true;
+        //if (!isValid() && !another.isValid())
+        //    return true;
         return asTuple() == another.asTuple();
     }
     bool isValid() const noexcept { return !!library; }

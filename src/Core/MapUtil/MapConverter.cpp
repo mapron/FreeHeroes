@@ -585,26 +585,28 @@ void MapConverter::propertySerializeFH()
 
 void MapConverter::propertyDeserializeFH()
 {
-    if (m_mainFile.m_json["version"].getScalar().toString() == "HOTA")
-        m_mapFH.m_version = Core::GameVersion::HOTA;
-    else
-        m_mapFH.m_version = Core::GameVersion::SOD;
-    m_mapFH.fromJson(m_mainFile.m_json, m_databaseContainer->getDatabase(m_mapFH.m_version));
+    Core::GameVersion version = Core::GameVersion::SOD;
+    if (m_mainFile.m_json["format"].getScalar().toString().starts_with("HOTA"))
+        version = Core::GameVersion::HOTA;
+    m_mapFH.fromJson(m_mainFile.m_json, m_databaseContainer->getDatabase(version));
 }
 
 void MapConverter::convertFHtoH3M()
 {
-    auto* db = m_databaseContainer->getDatabase(m_mapFH.m_version);
+    Core::GameVersion version = Core::GameVersion::SOD;
+    if (m_mapFH.m_format >= FHMap::MapFormat::HOTA1 && m_mapFH.m_format <= FHMap::MapFormat::HOTA3)
+        version = Core::GameVersion::HOTA;
+    auto* db = m_databaseContainer->getDatabase(version);
     convertFH2H3M(m_mapFH, m_mapH3M, db);
 }
 
 void MapConverter::convertH3MtoFH()
 {
-    if (m_mapH3M.m_format >= MapFormat::HOTA1)
-        m_mapFH.m_version = Core::GameVersion::HOTA;
-    else
-        m_mapFH.m_version = Core::GameVersion::SOD;
-    convertH3M2FH(m_mapH3M, m_mapFH, m_databaseContainer->getDatabase(m_mapFH.m_version));
+    Core::GameVersion version = Core::GameVersion::SOD;
+    if (m_mapH3M.m_format >= MapFormat::HOTA1 && m_mapH3M.m_format <= MapFormat::HOTA3)
+        version = Core::GameVersion::HOTA;
+
+    convertH3M2FH(m_mapH3M, m_mapFH, m_databaseContainer->getDatabase(version));
 }
 
 void MapConverter::convertFHTPLtoFH()
@@ -613,7 +615,11 @@ void MapConverter::convertFHTPLtoFH()
     if (m_settings.m_seed)
         m_mapFH.m_seed = m_settings.m_seed;
 
-    auto* db = m_databaseContainer->getDatabase(m_mapFH.m_version);
+    Core::GameVersion version = Core::GameVersion::SOD;
+    if (m_mapFH.m_format >= FHMap::MapFormat::HOTA1 && m_mapFH.m_format <= FHMap::MapFormat::HOTA3)
+        version = Core::GameVersion::HOTA;
+
+    auto* db = m_databaseContainer->getDatabase(version);
 
     if (!m_settings.m_rngUserSettings.empty()) {
         m_logOutput << m_currentIndent << "Read: " << Mernel::path2string(m_settings.m_rngUserSettings) << '\n';

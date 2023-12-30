@@ -127,7 +127,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
 
     assume(src.m_tileMap.m_width == src.m_tileMap.m_height && src.m_tileMap.m_width > 0);
 
-    dest.m_format                 = src.m_version == Core::GameVersion::SOD ? MapFormat::SOD : MapFormat::HOTA3;
+    dest.m_format                 = static_cast<MapFormat>(src.m_format);
     dest.m_anyPlayers             = src.m_anyPlayers;
     dest.m_tiles.m_size           = src.m_tileMap.m_width;
     dest.m_tiles.m_hasUnderground = src.m_tileMap.m_depth > 1;
@@ -204,7 +204,10 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         h3player.m_canHumanPlay             = fhPlayer.m_humanPossible;
         h3player.m_canComputerPlay          = fhPlayer.m_aiPossible;
         h3player.m_generateHeroAtMainTown   = fhPlayer.m_generateHeroAtMainTown;
+        h3player.m_hasRandomHero            = fhPlayer.m_hasRandomHero;
+        h3player.m_isFactionRandom          = fhPlayer.m_isFactionRandom;
         h3player.m_unused1                  = fhPlayer.m_unused1;
+        h3player.m_placeholder              = fhPlayer.m_placeholder;
         h3player.m_generatedHeroTownFaction = fhPlayer.m_generatedHeroTownFaction;
         h3player.m_mainCustomHeroPortrait   = fhPlayer.m_mainCustomHeroPortrait;
         h3player.m_mainCustomHeroName       = fhPlayer.m_mainCustomHeroName;
@@ -330,9 +333,8 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
     for (auto& fhHero : src.m_wanderingHeroes) {
         auto  playerIndex = fhHero.m_player->legacyId;
         auto* libraryHero = fhHero.m_data.m_army.hero.library;
-        assert(libraryHero);
 
-        const uint8_t heroId = libraryHero->legacyId;
+        const uint8_t heroId = libraryHero ? uint8_t(libraryHero->legacyId) : 0xFFU;
 
         if (playerIndex >= 0) {
             auto& h3player = dest.m_players[playerIndex];
@@ -356,6 +358,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
             hero->m_hasArmy                            = fhHero.m_data.m_hasArmy;
             hero->m_artSet.m_hasArts                   = fhHero.m_data.m_hasArts;
             hero->m_hasName                            = fhHero.m_data.m_hasName;
+            hero->m_hasCustomBio                       = fhHero.m_data.m_hasCustomBio;
             hero->m_hasPortrait                        = fhHero.m_data.m_hasPortrait;
             if (hero->m_hasExp)
                 hero->m_exp = static_cast<uint32_t>(fhHero.m_data.m_army.hero.experience);
@@ -363,9 +366,14 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
             if (hero->m_hasName) {
                 hero->m_name = fhHero.m_data.m_name;
             }
+            if (hero->m_hasCustomBio) {
+                hero->m_bio = fhHero.m_data.m_bio;
+            }
             if (hero->m_hasPortrait) {
                 hero->m_portrait = static_cast<uint8_t>(fhHero.m_data.m_portrait);
             }
+            if (fhHero.m_data.m_sex != -1)
+                hero->m_sex = static_cast<uint8_t>(fhHero.m_data.m_sex);
 
             if (hero->m_primSkillSet.m_hasCustomPrimSkills) {
                 auto& prim = hero->m_primSkillSet.m_primSkills;
@@ -389,9 +397,13 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
                 convertHeroArtifacts(fhHero.m_data.m_army.hero, hero->m_artSet);
             }
         }
-        dest.m_allowedHeroes[heroId] = 0;
+        if (libraryHero)
+            dest.m_allowedHeroes[heroId] = 0;
         if (playerIndex < 0) {
             addObject(fhHero, std::move(hero), [&tmplCache] { return tmplCache.addId("avxprsn0"); });
+        } else if (fhHero.m_isRandom) {
+            addObject(
+                fhHero, std::move(hero), [&tmplCache] { return tmplCache.addId("ahrandom"); }, true);
         } else {
             addObject(
                 fhHero, std::move(hero), [&tmplCache, libraryHero] { return tmplCache.addHero(libraryHero); }, true);
@@ -431,7 +443,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         dest.m_allowedHeroes[legacyId] = 0;
     }
 
-    if (src.m_version == Core::GameVersion::HOTA) {
+    if (src.m_format >= FHMap::MapFormat::HOTA1 && src.m_format <= FHMap::MapFormat::HOTA3) {
         // these artifact ids are just unexistent. @todo: do I really need this logic?
         dest.m_allowedArtifacts[145] = 1;
         dest.m_allowedArtifacts[144] = 1;
@@ -441,8 +453,9 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
             continue;
         if (!src.m_disabledArtifacts.isDisabled(src.m_isWaterMap, artId))
             continue;
-        const auto legacyId               = (artId)->legacyId;
-        dest.m_allowedArtifacts[legacyId] = 0;
+        const auto legacyId = (artId)->legacyId;
+        if (legacyId < (int) dest.m_allowedArtifacts.size())
+            dest.m_allowedArtifacts[legacyId] = 0;
     }
     for (const auto spellId : m_database->spells()->records()) {
         if (spellId->legacyId < 0)
@@ -472,6 +485,8 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         destHero.m_primSkillSet.m_hasCustomPrimSkills = customHero.m_hasPrimSkills;
         destHero.m_spellSet.m_hasCustomSpells         = customHero.m_hasSpells;
         destHero.m_artSet.m_hasArts                   = customHero.m_hasArts;
+        if (customHero.m_sex != -1)
+            destHero.m_sex = static_cast<uint8_t>(customHero.m_sex);
         if (customHero.m_hasPrimSkills) {
             auto& prim = destHero.m_primSkillSet.m_primSkills;
             prim.resize(4);
@@ -486,6 +501,9 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         if (destHero.m_spellSet.m_hasCustomSpells) {
             for (auto* spell : customHero.m_army.hero.spellbook)
                 destHero.m_spellSet.m_spells[spell->legacyId] = 1;
+        }
+        if (destHero.m_hasCustomBio) {
+            destHero.m_bio = customHero.m_bio;
         }
 
         if (customHero.m_hasExp)
@@ -527,6 +545,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
     for (auto& fhArt : src.m_objects.m_artifactsRandom) {
         auto art = std::make_unique<MapArtifact>(false);
         art->prepareArrays(dest.m_features.get());
+        convertMessage(fhArt.m_messageWithBattle, art->m_message);
         std::string id = "";
         switch (fhArt.m_type) {
             case FHRandomArtifact::Type::Any:
@@ -593,7 +612,21 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
                 monster->m_artID = uint16_t(fhMon.m_reward.artifacts[0].onlyArtifacts.at(0)->legacyId);
             }
         }
-
+        if (fhMon.m_randomLevel >= 0) {
+            static const std::vector<std::string> s_randomIds{
+                "avwmrnd0",
+                "avwmon1",
+                "avwmon2",
+                "avwmon3",
+                "avwmon4",
+                "avwmon5",
+                "avwmon6",
+                "avwmon7",
+            };
+            auto id = s_randomIds[fhMon.m_randomLevel];
+            addObject(fhMon, std::move(monster), [&tmplCache, id] { return tmplCache.addId(id); });
+            continue;
+        }
         auto* def = fhMon.m_id->objectDefs.get({});
         addObject(
             fhMon, std::move(monster), [&tmplCache, def]() { return tmplCache.add(def); }, true);
@@ -611,6 +644,18 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
 
         addObjectCommon(fhDwelling, std::move(impl));
     }
+    for (auto& fhDwelling : src.m_objects.m_randomDwellings) {
+        auto dwell     = std::make_unique<MapDwelling>(fhDwelling.m_hasFaction, fhDwelling.m_hasLevel);
+        dwell->m_owner = static_cast<uint8_t>(fhDwelling.m_player->legacyId);
+
+        dwell->m_factionId   = fhDwelling.m_factionId;
+        dwell->m_factionMask = fhDwelling.m_factionMask;
+        dwell->m_minLevel    = fhDwelling.m_minLevel;
+        dwell->m_maxLevel    = fhDwelling.m_maxLevel;
+
+        addObject(fhDwelling, std::move(dwell), [&fhDwelling, &tmplCache] { return tmplCache.add(fhDwelling.m_id); });
+    }
+
     for (auto& fhMine : src.m_objects.m_mines) {
         auto mine     = std::make_unique<MapObjectWithOwner>();
         mine->m_owner = static_cast<uint8_t>(fhMine.m_player->legacyId);

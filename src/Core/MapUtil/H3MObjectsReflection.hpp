@@ -109,7 +109,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_formation,
     m_artSet,
     m_patrolRadius,
-    m_hasCustomBiography,
+    m_hasCustomBio,
     m_bio,
     m_sex,
     m_spellSet,

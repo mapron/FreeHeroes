@@ -91,11 +91,8 @@ H3M2FHConverter::H3M2FHConverter(const Core::IGameDatabase* database)
 
 void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
 {
-    dest = {};
-    if (src.m_format >= MapFormat::HOTA1)
-        dest.m_version = Core::GameVersion::HOTA;
-    else
-        dest.m_version = Core::GameVersion::SOD;
+    dest          = {};
+    dest.m_format = static_cast<FHMap::MapFormat>(src.m_format);
 
     dest.m_config.m_hotaVersion.m_ver1 = src.m_hotaVer.m_ver1;
     dest.m_config.m_hotaVersion.m_ver2 = src.m_hotaVer.m_ver2;
@@ -155,8 +152,11 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
         fhPlayer.m_aiPossible               = playerInfo.m_canComputerPlay;
         fhPlayer.m_humanPossible            = playerInfo.m_canHumanPlay;
         fhPlayer.m_generateHeroAtMainTown   = playerInfo.m_generateHeroAtMainTown;
+        fhPlayer.m_hasRandomHero            = playerInfo.m_hasRandomHero;
+        fhPlayer.m_isFactionRandom          = playerInfo.m_isFactionRandom;
         fhPlayer.m_team                     = playerInfo.m_team == 0xff ? -1 : playerInfo.m_team;
         fhPlayer.m_unused1                  = playerInfo.m_unused1;
+        fhPlayer.m_placeholder              = playerInfo.m_placeholder;
         fhPlayer.m_generatedHeroTownFaction = playerInfo.m_generatedHeroTownFaction;
         fhPlayer.m_mainCustomHeroPortrait   = playerInfo.m_mainCustomHeroPortrait;
         fhPlayer.m_mainCustomHeroName       = playerInfo.m_mainCustomHeroName;
@@ -295,13 +295,15 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             } break;
             case MapObjectType::HERO:
             case MapObjectType::PRISON:
+            case MapObjectType::RANDOM_HERO:
             {
                 assert(dynamic_cast<const MapHero*>(impl) != nullptr);
                 const auto* hero = static_cast<const MapHero*>(impl);
 
                 const auto playerId = m_playerIds.at(hero->m_playerOwner);
                 FHHero     fhhero;
-                fhhero.m_player = playerId;
+                fhhero.m_isRandom = type == MapObjectType::RANDOM_HERO;
+                fhhero.m_player   = playerId;
                 initCommon(fhhero);
                 fhhero.m_pos             = posFromH3M(obj.m_pos, type == MapObjectType::PRISON ? 0 : -1);
                 fhhero.m_isMain          = mainHeroes.contains(playerId) && mainHeroes[playerId] == hero->m_subID;
@@ -309,8 +311,11 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 fhhero.m_patrolRadius    = hero->m_patrolRadius == 0xff ? -1 : hero->m_patrolRadius;
 
                 FHHeroData& destHero = fhhero.m_data;
-                destHero.m_army.hero = Core::AdventureHero(m_heroIds[hero->m_subID]);
-                destHero.m_hasExp    = hero->m_hasExp;
+                if (fhhero.m_isRandom)
+                    destHero.m_army.hero = Core::AdventureHero(nullptr);
+                else
+                    destHero.m_army.hero = Core::AdventureHero(m_heroIds[hero->m_subID]);
+                destHero.m_hasExp = hero->m_hasExp;
                 if (destHero.m_hasExp) {
                     destHero.m_army.hero.experience = hero->m_exp;
                 }
@@ -318,10 +323,15 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 if (destHero.m_hasName) {
                     destHero.m_name = hero->m_name;
                 }
+                destHero.m_hasCustomBio = hero->m_hasCustomBio;
+                if (destHero.m_hasCustomBio) {
+                    destHero.m_bio = hero->m_bio;
+                }
                 destHero.m_hasPortrait = hero->m_hasPortrait;
                 if (destHero.m_hasPortrait) {
                     destHero.m_portrait = hero->m_portrait;
                 }
+                destHero.m_sex           = hero->m_sex == 0xFFU ? -1 : static_cast<int>(hero->m_sex);
                 destHero.m_hasPrimSkills = hero->m_primSkillSet.m_hasCustomPrimSkills;
                 destHero.m_hasSpells     = hero->m_spellSet.m_hasCustomSpells;
                 destHero.m_hasSecSkills  = hero->m_hasSecSkills;
@@ -359,10 +369,6 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 dest.m_wanderingHeroes.push_back(std::move(fhhero));
             } break;
 
-            case MapObjectType::RANDOM_HERO:
-            {
-                assert(!"unsupported");
-            } break;
             case MapObjectType::MONSTER:
             case MapObjectType::RANDOM_MONSTER:
             case MapObjectType::RANDOM_MONSTER_L1:
@@ -374,7 +380,8 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             case MapObjectType::RANDOM_MONSTER_L7:
             {
                 assert(dynamic_cast<const MapMonster*>(impl) != nullptr);
-                const auto* monster = static_cast<const MapMonster*>(impl);
+                const auto* monster  = static_cast<const MapMonster*>(impl);
+                bool        isRandom = type != MapObjectType::MONSTER;
                 FHMonster   fhMonster;
                 initCommon(fhMonster);
                 fhMonster.m_pos = posFromH3M(obj.m_pos);
@@ -384,8 +391,26 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                     auto combinedMask   = Core::LibraryObjectDef::makeCombinedMask(blockMapPlanar, visitMapPlanar);
                     fhMonster.m_pos.m_x = fhMonster.m_pos.m_x + combinedMask.m_visitable.begin()->m_x;
                 }
-                fhMonster.m_count           = monster->m_count;
-                fhMonster.m_id              = m_unitIds[objDefCorrected.subId];
+                fhMonster.m_count = monster->m_count;
+                if (isRandom) {
+                    switch (type) {
+                            // clang-format off
+                        case MapObjectType::RANDOM_MONSTER   : fhMonster.m_randomLevel = 0; break;
+                        case MapObjectType::RANDOM_MONSTER_L1: fhMonster.m_randomLevel = 1; break;
+                        case MapObjectType::RANDOM_MONSTER_L2: fhMonster.m_randomLevel = 2; break;
+                        case MapObjectType::RANDOM_MONSTER_L3: fhMonster.m_randomLevel = 3; break;
+                        case MapObjectType::RANDOM_MONSTER_L4: fhMonster.m_randomLevel = 4; break;
+                        case MapObjectType::RANDOM_MONSTER_L5: fhMonster.m_randomLevel = 5; break;
+                        case MapObjectType::RANDOM_MONSTER_L6: fhMonster.m_randomLevel = 6; break;
+                        case MapObjectType::RANDOM_MONSTER_L7: fhMonster.m_randomLevel = 7; break;
+                            // clang-format on
+
+                        default:
+                            break;
+                    }
+                } else {
+                    fhMonster.m_id = m_unitIds[objDefCorrected.subId];
+                }
                 fhMonster.m_questIdentifier = monster->m_questIdentifier;
                 switch (monster->m_joinAppeal) {
                     case 0:
@@ -565,6 +590,10 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             {
                 FHRandomArtifact art;
                 initCommon(art);
+                assert(dynamic_cast<const MapArtifact*>(impl) != nullptr);
+                const auto* artifact = static_cast<const MapArtifact*>(impl);
+
+                art.m_messageWithBattle = convertMessage(artifact->m_message);
                 if (type == MapObjectType::RANDOM_ART)
                     art.m_type = FHRandomArtifact::Type::Any;
                 else if (type == MapObjectType::RANDOM_TREASURE_ART)
@@ -794,9 +823,24 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             case MapObjectType::RANDOM_DWELLING_FACTION: //level range, fixed faction    218
             {
                 assert(dynamic_cast<const MapDwelling*>(impl) != nullptr);
-                const auto* mapDwelling = static_cast<const MapDwelling*>(impl);
-                (void) mapDwelling;
-                assert(!"unsupported");
+                const auto*      mapDwelling = static_cast<const MapDwelling*>(impl);
+                FHRandomDwelling dwelling;
+                initCommon(dwelling);
+
+                assert(objDefDatabase);
+                dwelling.m_id     = objDefDatabase;
+                dwelling.m_player = m_playerIds.at(mapDwelling->m_owner);
+
+                dwelling.m_hasFaction = mapDwelling->m_hasFaction;
+                dwelling.m_hasLevel   = mapDwelling->m_hasLevel;
+
+                dwelling.m_factionId   = mapDwelling->m_factionId;
+                dwelling.m_factionMask = mapDwelling->m_factionMask;
+                dwelling.m_minLevel    = mapDwelling->m_minLevel;
+                dwelling.m_maxLevel    = mapDwelling->m_maxLevel;
+
+                dest.m_objects.m_randomDwellings.push_back(std::move(dwelling));
+
             } break;
 
             case MapObjectType::HERO_PLACEHOLDER:
@@ -919,6 +963,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
         destHero.m_hasPrimSkills = customHero.m_primSkillSet.m_hasCustomPrimSkills;
         destHero.m_hasSpells     = customHero.m_spellSet.m_hasCustomSpells;
         destHero.m_hasArts       = customHero.m_artSet.m_hasArts;
+        destHero.m_sex           = customHero.m_sex == 0xFFU ? -1 : static_cast<int>(customHero.m_sex);
 
         if (destHero.m_hasSecSkills) {
             auto& skillList = destHero.m_army.hero.secondarySkills;
@@ -942,6 +987,9 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
         }
         if (destHero.m_hasArts) {
             convertHeroArtifacts(customHero.m_artSet, destHero.m_army.hero);
+        }
+        if (destHero.m_hasCustomBio) {
+            destHero.m_bio = customHero.m_bio;
         }
 
         if (destHero.m_hasExp)

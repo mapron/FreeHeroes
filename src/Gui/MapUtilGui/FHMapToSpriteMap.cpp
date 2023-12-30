@@ -220,15 +220,23 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     for (auto& fhHero : fhMap.m_wanderingHeroes) {
         const bool isPlayable  = fhHero.m_player->isPlayable;
         auto*      libraryHero = fhHero.m_data.m_army.hero.library;
-        assert(libraryHero);
 
         auto pos = fhHero.m_pos;
         if (isPlayable)
             pos.m_x += 1;
-        const std::string id = !isPlayable ? "avxprsn0" : libraryHero->getAdventureSprite() + "e";
-        result.addItem(makeItemById(SpriteMap::Layer::Hero, id, pos)
-                           .addInfo("id", libraryHero->id)
-                           .setPriority(SpriteMap::s_objectMaxPriority + 1));
+        std::string id = "avxprsn0";
+        if (isPlayable) {
+            if (fhHero.m_isRandom)
+                id = "ahrandom";
+            else
+                id = libraryHero->getAdventureSprite() + "e";
+        }
+        auto* item = result.addItem(makeItemById(SpriteMap::Layer::Hero, id, pos)
+                                        .setPriority(isPlayable ? SpriteMap::s_objectMaxPriority + 1 : 0));
+
+        if (libraryHero) {
+            item->addInfo("id", libraryHero->id);
+        }
     }
     for (auto& obj : fhMap.m_objects.m_resources) {
         rendered.insert(&obj);
@@ -296,11 +304,30 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
 
         auto strCount = std::to_string(obj.m_count);
 
-        auto* def  = obj.m_id->objectDefs.get({});
-        auto* item = result.addItem(makeItemByDef(SpriteMap::Layer::Monster, def, pos)
-                                        .addInfo("id", obj.m_id->id)
-                                        .addInfo("count", strCount)
-                                        .addInfo("value", std::to_string(obj.m_guardValue)));
+        SpriteMap::Item* item = nullptr;
+        if (obj.m_randomLevel >= 0) {
+            static const std::vector<std::string> s_randomIds{
+                "avwmrnd0",
+                "avwmon1",
+                "avwmon2",
+                "avwmon3",
+                "avwmon4",
+                "avwmon5",
+                "avwmon6",
+                "avwmon7",
+            };
+            auto id = s_randomIds[obj.m_randomLevel];
+            item    = result.addItem(makeItemById(SpriteMap::Layer::Monster, id, pos)
+                                      .addInfo("id", id));
+
+        } else {
+            auto* def = obj.m_id->objectDefs.get({});
+            item      = result.addItem(makeItemByDef(SpriteMap::Layer::Monster, def, pos)
+                                      .addInfo("id", obj.m_id->id));
+        }
+        item->addInfo("count", strCount);
+        item->addInfo("value", std::to_string(obj.m_guardValue));
+
         addValueInfo(item, obj);
         strCount            = strCount == "0" ? "?" : strCount;
         item->m_overlayInfo = strCount + (obj.m_upgradedStack == FHMonster::UpgradedStack::Yes ? " u" : "");
@@ -313,6 +340,14 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         item->m_keyColor = makePlayerColor(obj.m_player);
         addValueInfo(item, obj);
     }
+    for (auto& obj : fhMap.m_objects.m_randomDwellings) {
+        rendered.insert(&obj);
+        auto* def        = obj.m_id;
+        auto* item       = result.addItem(makeItemByDef(SpriteMap::Layer::Dwelling, def, obj.m_pos).addInfo("id", obj.m_id->id));
+        item->m_keyColor = makePlayerColor(obj.m_player);
+        addValueInfo(item, obj);
+    }
+
     for (auto& obj : fhMap.m_objects.m_mines) {
         rendered.insert(&obj);
         auto* def        = obj.m_id->minesDefs.get(obj.m_defIndex);
