@@ -404,7 +404,7 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     for (auto& obj : fhMap.m_objects.m_obstacles) {
         rendered.insert(&obj);
         auto* def = obj.m_id->objectDefs.get(obj.m_defIndex);
-        addValueInfo(result.addItem(makeItemByDef(SpriteMap::Layer::Decoration, def, obj.m_pos).addInfo("id", obj.m_id->id)), obj);
+        addValueInfo(result.addItem(makeItemByDef(SpriteMap::Layer::Decoration, def, obj.m_pos).addInfo("id", obj.m_id->id).setRowPriority(-1)), obj);
     }
     for (auto& obj : fhMap.m_objects.m_visitables) {
         rendered.insert(&obj);
@@ -457,7 +457,7 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     for (auto& obj : fhMap.m_objects.m_garisons) {
         rendered.insert(&obj);
 
-        addValueInfo(result.addItem(makeItemByVisitable(SpriteMap::Layer::Decoration, obj)), obj);
+        addValueInfo(result.addItem(makeItemByVisitable(SpriteMap::Layer::Bank, obj)), obj);
     }
     for (auto& obj : fhMap.m_objects.m_heroPlaceholders) {
         rendered.insert(&obj);
@@ -478,7 +478,7 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         rendered.insert(&obj);
 
         std::string id   = obj.m_defId;
-        auto*       item = result.addItem(makeItemById(SpriteMap::Layer::Decoration, id, obj.m_pos));
+        auto*       item = result.addItem(makeItemById(SpriteMap::Layer::Decoration, id, obj.m_pos).setRowPriority(-1));
         addValueInfo(item, obj);
     }
 
@@ -534,9 +534,11 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
 
     for (int z = 0; const auto& plane : result.m_planes) {
         for (const auto& [priority, grid] : plane.m_grids) {
-            for (const auto& [rowIndex, row] : grid.m_rows) {
-                for (const auto& [colIndex, cell] : row.m_cells) {
-                    checkCell(cell, colIndex, rowIndex, z);
+            for (const auto& [rowIndex, rowSlice] : grid.m_rowsSlices) {
+                for (const auto& [rowPriority, row] : rowSlice.m_rows) {
+                    for (const auto& [colIndex, cell] : row.m_cells) {
+                        checkCell(cell, colIndex, rowIndex, z);
+                    }
                 }
             }
         }

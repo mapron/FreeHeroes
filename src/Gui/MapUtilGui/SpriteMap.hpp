@@ -63,10 +63,11 @@ struct SpriteMap {
         bool  m_flipVert      = false;
         bool  m_shiftHalfTile = false;
 
-        int m_x        = 0;
-        int m_y        = 0;
-        int m_z        = 0;
-        int m_priority = 0;
+        int m_x           = 0;
+        int m_y           = 0;
+        int m_z           = 0;
+        int m_priority    = 0;
+        int m_rowPriority = 0;
 
         double m_opacity = 1.0;
 
@@ -90,6 +91,11 @@ struct SpriteMap {
             m_priority = priority;
             return *this;
         }
+        Item& setRowPriority(int priority)
+        {
+            m_rowPriority = priority;
+            return *this;
+        }
     };
 
     struct Cell {
@@ -98,8 +104,11 @@ struct SpriteMap {
     struct Row {
         std::map<int, Cell> m_cells;
     };
-    struct LayerGrid {
+    struct RowSlices {
         std::map<int, Row> m_rows;
+    };
+    struct LayerGrid {
+        std::map<int, RowSlices> m_rowsSlices;
     };
 
     struct CellIntegral {
@@ -147,7 +156,7 @@ struct SpriteMap {
 
     Cell& getCell(const Item& item)
     {
-        auto& cell = m_planes[item.m_z].m_grids[item.m_priority].m_rows[item.m_y].m_cells[item.m_x];
+        auto& cell = m_planes[item.m_z].m_grids[item.m_priority].m_rowsSlices[item.m_y].m_rows[item.m_rowPriority].m_cells[item.m_x];
         return cell;
     }
     CellIntegral& getCellMerged(const Item& item)
@@ -163,12 +172,14 @@ struct SpriteMap {
             return {};
 
         for (const auto& [priority, grid] : m_planes[z].m_grids) {
-            if (!grid.m_rows.contains(y))
+            if (!grid.m_rowsSlices.contains(y))
                 continue;
-            const auto& row = grid.m_rows.at(y);
-            if (!row.m_cells.contains(x))
-                continue;
-            res.push_back(&row.m_cells.at(x));
+            const auto& rowSlice = grid.m_rowsSlices.at(y);
+            for (const auto& [rowPriorty, row] : rowSlice.m_rows) {
+                if (!row.m_cells.contains(x))
+                    continue;
+                res.push_back(&row.m_cells.at(x));
+            }
         }
         return res;
     }

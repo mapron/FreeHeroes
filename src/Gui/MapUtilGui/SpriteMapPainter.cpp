@@ -202,9 +202,11 @@ void SpriteMapPainter::paint(QPainter*        painter,
     for (const auto& [priority, grid] : spriteMap->m_planes[m_depth].m_grids) {
         if (priority >= 0)
             break;
-        for (const auto& [rowIndex, row] : grid.m_rows) {
-            for (const auto& [colIndex, cell] : row.m_cells) {
-                drawCell(cell, colIndex, rowIndex, false);
+        for (const auto& [rowIndex, rowSlice] : grid.m_rowsSlices) {
+            for (const auto& [rowPriority, row] : rowSlice.m_rows) {
+                for (const auto& [colIndex, cell] : row.m_cells) {
+                    drawCell(cell, colIndex, rowIndex, false);
+                }
             }
         }
     }
@@ -218,9 +220,11 @@ void SpriteMapPainter::paint(QPainter*        painter,
     for (const auto& [priority, grid] : spriteMap->m_planes[m_depth].m_grids) {
         if (priority < 0)
             continue;
-        for (const auto& [rowIndex, row] : grid.m_rows) {
-            for (const auto& [colIndex, cell] : row.m_cells) {
-                drawCell(cell, colIndex, rowIndex, false);
+        for (const auto& [rowIndex, rowSlice] : grid.m_rowsSlices) {
+            for (const auto& [rowPriority, row] : rowSlice.m_rows) {
+                for (const auto& [colIndex, cell] : row.m_cells) {
+                    drawCell(cell, colIndex, rowIndex, false);
+                }
             }
         }
     }
@@ -230,9 +234,11 @@ void SpriteMapPainter::paint(QPainter*        painter,
         for (const auto& [priority, grid] : spriteMap->m_planes[m_depth].m_grids) {
             if (priority < 0)
                 continue;
-            for (const auto& [rowIndex, row] : grid.m_rows) {
-                for (const auto& [colIndex, cell] : row.m_cells) {
-                    drawCell(cell, colIndex, rowIndex, true);
+            for (const auto& [rowIndex, rowSlice] : grid.m_rowsSlices) {
+                for (const auto& [rowPriority, row] : rowSlice.m_rows) {
+                    for (const auto& [colIndex, cell] : row.m_cells) {
+                        drawCell(cell, colIndex, rowIndex, true);
+                    }
                 }
             }
         }
