@@ -303,6 +303,7 @@ bool ZoneObjectDistributor::makeInitialDistribution(DistributionResult& distribu
             freeCells.insert(seg.m_spacingArea.intersectWith(seg.m_originalArea));
             freeCells.insert(seg.m_freeArea);
         }
+        freeCells.erase(freeRoads);
         if (freeCells.size() < distribution.m_segFreePickables.size()) {
             m_logOutput << m_indent << "Segment spacing size " << freeCells.size() << " < " << distribution.m_segFreePickables.size() << "\n";
             return false;
@@ -317,25 +318,50 @@ void ZoneObjectDistributor::doPlaceDistribution(DistributionResult& distribution
     if (distribution.m_allObjects.empty())
         return;
 
-    MergedRegion totalFreeTiles;
+    MergedRegion  totalFreeTiles;
+    MapTileRegion placedTiles;
 
     for (ZoneSegment& seg : distribution.m_segments) {
-        for (auto* object : seg.m_successNormal)
-            commitPlacement(distribution, object, &seg);
+        for (auto* object : seg.m_successNormal) {
+            commitPlacement(distribution, object, placedTiles);
+        }
     }
 
     if (distribution.m_stopAfterHeat == 1000) {
         const auto& roadRegion = distribution.m_allFreeRoads;
-        const auto& freeCells  = distribution.m_allFreeCells;
+        auto&       freeCells  = distribution.m_allFreeCells;
+        if (!placedTiles.intersectWith(roadRegion).empty())
+            throw std::runtime_error("roadRegion tiles already were used");
+        std::set<size_t> indexes;
         for (size_t i = 0; auto* obj : distribution.m_roadPickables) {
-            obj->m_absPos = roadRegion[i++ * roadRegion.size() / distribution.m_roadPickables.size()];
-            obj->place();
-            distribution.m_placedIds.push_back(obj->m_object->getId());
+            size_t index = i++ * roadRegion.size() / distribution.m_roadPickables.size();
+            if (indexes.contains(index))
+                throw std::runtime_error("using same pickable incex twice");
+            if (obj->m_occupiedWithDangerZone.size() > 1)
+                throw std::runtime_error("occupied area of pickable must be 1");
+            indexes.insert(index);
+            obj->m_absPos = roadRegion[index];
+            obj->estimateOccupied(obj->m_absPos);
+
+            commitPlacement(distribution, obj, placedTiles);
         }
+
+        freeCells.erase(placedTiles);
+
+        if (!placedTiles.intersectWith(freeCells).empty())
+            throw std::runtime_error("freeCells tiles already were used");
+        indexes.clear();
         for (size_t i = 0; auto* obj : distribution.m_segFreePickables) {
-            obj->m_absPos = freeCells[i++ * freeCells.size() / distribution.m_segFreePickables.size()];
-            obj->place();
-            distribution.m_placedIds.push_back(obj->m_object->getId());
+            size_t index = i++ * freeCells.size() / distribution.m_segFreePickables.size();
+            if (indexes.contains(index))
+                throw std::runtime_error("using same pickable incex twice");
+            if (obj->m_occupiedWithDangerZone.size() > 1)
+                throw std::runtime_error("occupied area of pickable must be 1");
+            indexes.insert(index);
+            obj->m_absPos = freeCells[index];
+            obj->estimateOccupied(obj->m_absPos);
+
+            commitPlacement(distribution, obj, placedTiles);
         }
     }
 
@@ -426,8 +452,13 @@ bool ZoneObjectDistributor::placeWrapIntoSegments(DistributionResult& distributi
     return false;
 }
 
-void ZoneObjectDistributor::commitPlacement(DistributionResult& distribution, ZoneObjectWrap* object, ZoneSegment* seg) const
+void ZoneObjectDistributor::commitPlacement(DistributionResult& distribution, ZoneObjectWrap* object, MapTileRegion& placedTiles) const
 {
+    if (!placedTiles.intersectWith(object->m_occupiedWithDangerZone).empty())
+        throw std::runtime_error("Placing object in same area twice");
+
+    placedTiles.insert(object->m_occupiedWithDangerZone);
+
     object->place();
     //m_map.m_debugTiles.push_back(FHDebugTile{ .m_pos = seg.m_originalAreaCentroid->m_pos, .m_text = std::to_string(seg.m_segmentIndex) });
 

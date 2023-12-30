@@ -185,5 +185,5 @@ int main(int argc, char** argv)
             std::cerr << sett.m_inputs.m_h3m.m_binary << "\n";
     }
 
-    return batchFailedTrip.size() + batchFatalError.size() == 0;
+    return batchFailedTrip.size() + batchFatalError.size() != 0;
 }

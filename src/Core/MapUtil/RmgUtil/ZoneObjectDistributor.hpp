@@ -164,7 +164,7 @@ public:
 
 private:
     bool placeWrapIntoSegments(DistributionResult& distribution, ZoneObjectWrap* object, std::vector<ZoneSegment*>& segCandidates) const;
-    void commitPlacement(DistributionResult& distribution, ZoneObjectWrap* object, ZoneSegment* seg) const;
+    void commitPlacement(DistributionResult& distribution, ZoneObjectWrap* object, MapTileRegion& placedTiles) const;
     void makePreferredPoint(DistributionResult& distribution, ZoneObjectWrap* object, int angleStartOffset, size_t index, size_t count) const;
 
 private:
