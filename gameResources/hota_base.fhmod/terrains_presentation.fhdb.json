@@ -152,7 +152,7 @@
 {
     "order": 9,
     "minimapUnblocked" : [ 8, 81, 148 ],
-    "minimapBlocked"   : [ 8, 81, 148 ],
+    "minimapBlocked"   : [ 0, 42, 108 ],
     "music" : "water",
     "backgroundsBattle" : ["cmbkboat","cmbkdeck" ],
     "defFile" : "watrtl",

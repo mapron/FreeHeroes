@@ -114,9 +114,11 @@ struct SpriteMap {
     struct CellIntegral {
         QColor m_colorUnblocked;
         QColor m_colorBlocked;
+        QColor m_colorPlayer;
 
         bool m_blocked   = false;
         bool m_visitable = false;
+        bool m_player    = false;
 
         struct DebugPiece {
             QColor m_shapeColor;

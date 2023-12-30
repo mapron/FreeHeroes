@@ -525,8 +525,14 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
 
     auto checkCell = [&result](const SpriteMap::Cell& cell, int x, int y, int z) {
         for (const auto& item : cell.m_items) {
-            for (auto& point : item.m_blockMask.m_blocked)
-                result.m_planes[z].m_merged.m_rows[y + point.m_y].m_cells[x + point.m_x].m_blocked = true;
+            for (auto& point : item.m_blockMask.m_blocked) {
+                auto& merged     = result.m_planes[z].m_merged.m_rows[y + point.m_y].m_cells[x + point.m_x];
+                merged.m_blocked = true;
+                if (item.m_keyColor.isValid()) {
+                    merged.m_colorPlayer = item.m_keyColor;
+                    merged.m_player      = true;
+                }
+            }
             for (auto& point : item.m_blockMask.m_visitable)
                 result.m_planes[z].m_merged.m_rows[y + point.m_y].m_cells[x + point.m_x].m_visitable = true;
         }

@@ -319,7 +319,7 @@ void SpriteMapPainter::paintMinimap(QPainter*        painter,
     for (const auto& [y, row] : spriteMap->m_planes[m_depth].m_merged.m_rows) {
         for (const auto& [x, cell] : row.m_cells) {
             if (cell.m_colorUnblocked.isValid() && cell.m_colorBlocked.isValid())
-                img.setPixelColor(x, y, cell.m_blocked ? cell.m_colorBlocked : cell.m_colorUnblocked);
+                img.setPixelColor(x, y, cell.m_player ? cell.m_colorPlayer : (cell.m_blocked && !cell.m_visitable ? cell.m_colorBlocked : cell.m_colorUnblocked));
         }
     }
 
