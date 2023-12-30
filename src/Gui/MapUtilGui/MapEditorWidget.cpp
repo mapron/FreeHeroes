@@ -459,7 +459,9 @@ bool MapEditorWidget::saveScreenshots(const ScreenshotTask& task)
             m_impl->m_viewSettings.m_paintSettings.m_strict = task.m_strict;
             SpriteMapPainter spainter(&(m_impl->m_viewSettings.m_paintSettings), m_impl->m_depth);
 
-            QImage   imageMap(m_impl->m_scene->width(), m_impl->m_scene->height(), QImage::Format_ARGB32);
+            QSize mainSize(m_impl->m_scene->width(), m_impl->m_scene->height());
+
+            QImage   imageMap(mainSize, QImage::Format_ARGB32);
             QPainter painterMap(&imageMap);
 
             QImage   imageMini(task.m_minimapSize, task.m_minimapSize, QImage::Format_ARGB32);
@@ -472,8 +474,15 @@ bool MapEditorWidget::saveScreenshots(const ScreenshotTask& task)
                 continue;
 
             if (!outFilename.empty()) {
+                QImage imageMapSaving = imageMap;
+                if (mainSize.width() > task.m_maxSize) {
+                    while (mainSize.width() > task.m_maxSize) {
+                        mainSize = mainSize / 2.0;
+                    }
+                    imageMapSaving = imageMapSaving.scaled(mainSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+                }
                 Mernel::Logger(Mernel::Logger::Notice) << "Saving map to: " << outFilename;
-                imageMap.save(QString::fromStdString(outFilename));
+                imageMapSaving.save(QString::fromStdString(outFilename));
             }
             if (!miniFilename.empty()) {
                 Mernel::Logger(Mernel::Logger::Notice) << "Saving minimap to: " << miniFilename;

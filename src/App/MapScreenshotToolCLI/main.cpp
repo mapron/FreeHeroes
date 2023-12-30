@@ -27,6 +27,7 @@ int main(int argc, char* argv[])
                                    "output-png-mini-underground",
                                    "logging-level",
                                    "minimap-size",
+                                   "max-size",
                                    "strict", // if save have errors it's over
                                },
                                {});
@@ -56,6 +57,9 @@ int main(int argc, char* argv[])
     const std::string minimapSizeStr = parser.getArg("minimap-size");
     if (!minimapSizeStr.empty())
         task.m_minimapSize = std::strtoull(minimapSizeStr.c_str(), nullptr, 10);
+    const std::string maxSizeStr = parser.getArg("max-size");
+    if (!maxSizeStr.empty())
+        task.m_maxSize = std::strtoull(maxSizeStr.c_str(), nullptr, 10);
 
     Core::CoreApplication fhCoreApp;
     fhCoreApp.setLoadUserMods(true);

@@ -38,6 +38,7 @@ public:
         std::string m_minimapUnderground;
 
         int m_minimapSize = 144;
+        int m_maxSize     = 32000;
     };
 
 public:
