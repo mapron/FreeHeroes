@@ -930,6 +930,7 @@ void MapSeerHut::MapQuestWithReward::readBinary(ByteOrderDataStreamReader& strea
     if (m_features->m_seerHutExtendedQuest) {
         stream >> m_quest;
     } else {
+        m_quest.prepareArrays(m_features);
         //RoE
         uint8_t artID = 0;
         stream >> artID;
@@ -1128,8 +1129,8 @@ void MapScholar::fromJson(const PropertyTree& data)
 void MapWitchHut::readBinary(ByteOrderDataStreamReader& stream)
 {
     auto* m_features = getFeaturesFromStream(stream);
+    prepareArrays(m_features);
     if (m_features->m_witchHutAllowedSkills) {
-        prepareArrays(m_features);
         stream.readBits(m_allowedSkills);
     }
 }

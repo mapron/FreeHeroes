@@ -121,8 +121,9 @@ struct FHHero : public FHPlayerControlledObject {
     bool       m_isMain{ false };
     FHHeroData m_data;
 
-    int  m_patrolRadius = -1;
-    bool m_isRandom     = false;
+    int  m_patrolRadius     = -1;
+    bool m_isRandom         = false;
+    bool m_groupedFormation = false;
 
     uint32_t m_questIdentifier = 0;
 

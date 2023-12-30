@@ -267,7 +267,9 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         addObject(obj, std::move(impl), [&obj, &tmplCache] { return tmplCache.add(obj.m_id->objectDefs.get(obj.m_defIndex)); });
     };
     auto addObjectVisitable = [&addObject, &tmplCache](const auto& obj, std::shared_ptr<IMapObject> impl) {
-        addObject(obj, std::move(impl), [&obj, &tmplCache] { return tmplCache.add(obj.m_visitableId->objectDefs.get(obj.m_defIndex)); });
+        addObject(obj, std::move(impl), [&obj, &tmplCache] {
+            return tmplCache.add(obj.m_visitableId ? obj.m_visitableId->objectDefs.get(obj.m_defIndex) : obj.m_fixedDef);
+        });
     };
 
     for (auto& fhTown : src.m_towns) {
@@ -278,8 +280,8 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
                 const int townGateOffset = 2;
                 h3player.m_hasMainTown   = true;
                 h3player.m_posOfMainTown = int3fromPos(fhTown.m_pos, -townGateOffset);
-                if (fhTown.m_factionId)
-                    h3player.m_generatedHeroTownFaction = static_cast<uint8_t>(fhTown.m_factionId->legacyId);
+                //if (fhTown.m_factionId)
+                //    h3player.m_generatedHeroTownFaction = static_cast<uint8_t>(fhTown.m_factionId->legacyId);
             }
         }
         auto cas1                  = std::make_unique<MapTown>();
@@ -357,6 +359,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         hero->m_playerOwner     = playerIndex;
         hero->m_subID           = heroId;
         hero->m_questIdentifier = fhHero.m_questIdentifier;
+        hero->m_formation       = fhHero.m_groupedFormation;
         hero->m_patrolRadius    = static_cast<uint8_t>(fhHero.m_patrolRadius);
 
         hero->prepareArrays(dest.m_features.get());

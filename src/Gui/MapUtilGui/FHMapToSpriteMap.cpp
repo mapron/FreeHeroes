@@ -82,6 +82,15 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         return item;
     };
 
+    auto makeItemByVisitable = [&makeItemByDef](SpriteMap::Layer layer, const FHCommonVisitable& obj) -> SpriteMap::Item {
+        auto* def = obj.m_visitableId ? obj.m_visitableId->objectDefs.get(obj.m_defIndex) : obj.m_fixedDef;
+        assert(def);
+        auto item = makeItemByDef(layer, def, obj.m_pos);
+        if (obj.m_visitableId)
+            item.addInfo("id", obj.m_visitableId->id);
+        return item;
+    };
+
     auto addValueInfo = [](SpriteMap::Item* item, const FHCommonObject& obj) {
         if (obj.m_guard)
             item->addInfo("Guard", std::to_string(obj.m_guard));
@@ -359,8 +368,7 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     }
     for (auto& obj : fhMap.m_objects.m_abandonedMines) {
         rendered.insert(&obj);
-        auto* def  = obj.m_visitableId->objectDefs.get(obj.m_defIndex);
-        auto* item = result.addItem(makeItemByDef(SpriteMap::Layer::Mine, def, obj.m_pos).addInfo("id", obj.m_visitableId->id));
+        auto* item = result.addItem(makeItemByVisitable(SpriteMap::Layer::Mine, obj));
 
         addValueInfo(item, obj);
     }
@@ -396,20 +404,17 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     }
     for (auto& obj : fhMap.m_objects.m_visitables) {
         rendered.insert(&obj);
-        auto* def = obj.m_visitableId->objectDefs.get(obj.m_defIndex);
-        addValueInfo(result.addItem(makeItemByDef(SpriteMap::Layer::GeneralVisitable, def, obj.m_pos).addInfo("id", obj.m_visitableId->id)), obj);
+        addValueInfo(result.addItem(makeItemByVisitable(SpriteMap::Layer::GeneralVisitable, obj)), obj);
     }
     for (auto& obj : fhMap.m_objects.m_controlledVisitables) {
         rendered.insert(&obj);
-        auto* def        = obj.m_visitableId->objectDefs.get(obj.m_defIndex);
-        auto* item       = result.addItem(makeItemByDef(SpriteMap::Layer::GeneralVisitable, def, obj.m_pos).addInfo("id", obj.m_visitableId->id));
+        auto* item       = result.addItem(makeItemByVisitable(SpriteMap::Layer::GeneralVisitable, obj));
         item->m_keyColor = makePlayerColor(obj.m_player);
         addValueInfo(item, obj);
     }
     for (auto& obj : fhMap.m_objects.m_shrines) {
         rendered.insert(&obj);
-        auto* def  = obj.m_visitableId->objectDefs.get(obj.m_defIndex);
-        auto* item = result.addItem(makeItemByDef(SpriteMap::Layer::Shrine, def, obj.m_pos).addInfo("id", obj.m_visitableId->id));
+        auto* item = result.addItem(makeItemByVisitable(SpriteMap::Layer::Shrine, obj));
         addValueInfo(item, obj);
         if (obj.m_spellId) {
             item->m_overlayInfo        = obj.m_spellId->presentationParams.shortName.ts.at("en_US");
@@ -418,24 +423,20 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     }
     for (auto& obj : fhMap.m_objects.m_skillHuts) {
         rendered.insert(&obj);
-        auto* def = obj.m_visitableId->objectDefs.get(obj.m_defIndex);
-        addValueInfo(result.addItem(makeItemByDef(SpriteMap::Layer::SkillHut, def, obj.m_pos).addInfo("id", obj.m_visitableId->id)), obj);
+        addValueInfo(result.addItem(makeItemByVisitable(SpriteMap::Layer::SkillHut, obj)), obj);
     }
     for (auto& obj : fhMap.m_objects.m_scholars) {
         rendered.insert(&obj);
-        auto* def = obj.m_visitableId->objectDefs.get(obj.m_defIndex);
-        addValueInfo(result.addItem(makeItemByDef(SpriteMap::Layer::Scholar, def, obj.m_pos).addInfo("id", obj.m_visitableId->id)), obj);
+        addValueInfo(result.addItem(makeItemByVisitable(SpriteMap::Layer::Scholar, obj)), obj);
     }
 
     for (auto& obj : fhMap.m_objects.m_questHuts) {
         rendered.insert(&obj);
-        auto* def = obj.m_visitableId->objectDefs.get(obj.m_defIndex);
-        addValueInfo(result.addItem(makeItemByDef(SpriteMap::Layer::QuestHut, def, obj.m_pos).addInfo("id", obj.m_visitableId->id)), obj);
+        addValueInfo(result.addItem(makeItemByVisitable(SpriteMap::Layer::QuestHut, obj)), obj);
     }
     for (auto& obj : fhMap.m_objects.m_questGuards) {
         rendered.insert(&obj);
-        auto* def = obj.m_visitableId->objectDefs.get(obj.m_defIndex);
-        addValueInfo(result.addItem(makeItemByDef(SpriteMap::Layer::QuestGuard, def, obj.m_pos).addInfo("id", obj.m_visitableId->id)), obj);
+        addValueInfo(result.addItem(makeItemByVisitable(SpriteMap::Layer::QuestGuard, obj)), obj);
     }
     for (auto& obj : fhMap.m_objects.m_localEvents) {
         rendered.insert(&obj);
@@ -447,14 +448,12 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     for (auto& obj : fhMap.m_objects.m_signs) {
         rendered.insert(&obj);
 
-        auto* def = obj.m_visitableId->objectDefs.get(obj.m_defIndex);
-        addValueInfo(result.addItem(makeItemByDef(SpriteMap::Layer::Decoration, def, obj.m_pos).addInfo("id", obj.m_visitableId->id)), obj);
+        addValueInfo(result.addItem(makeItemByVisitable(SpriteMap::Layer::Decoration, obj)), obj);
     }
     for (auto& obj : fhMap.m_objects.m_garisons) {
         rendered.insert(&obj);
 
-        auto* def = obj.m_visitableId->objectDefs.get(obj.m_defIndex);
-        addValueInfo(result.addItem(makeItemByDef(SpriteMap::Layer::Decoration, def, obj.m_pos).addInfo("id", obj.m_visitableId->id)), obj);
+        addValueInfo(result.addItem(makeItemByVisitable(SpriteMap::Layer::Decoration, obj)), obj);
     }
     for (auto& obj : fhMap.m_objects.m_heroPlaceholders) {
         rendered.insert(&obj);

@@ -31,6 +31,7 @@ struct FHCommonObject {
 
 struct FHCommonVisitable : public FHCommonObject {
     Core::LibraryMapVisitableConstPtr m_visitableId = nullptr;
+    Core::LibraryObjectDefConstPtr    m_fixedDef    = nullptr;
 
     bool operator==(const FHCommonVisitable&) const noexcept = default;
 };

@@ -267,8 +267,17 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             objDefDatabase        = objDefDatabase->substituteFor;
         }
 
-        defIndex.variant = objDefDatabase->mappings.key;
-        auto& mappings   = objDefDatabase->mappings;
+        defIndex.variant    = objDefDatabase->mappings.key;
+        auto& mappings      = objDefDatabase->mappings;
+        auto  initVisitable = [&mappings, &objDefDatabase](FHCommonVisitable& common) {
+            auto* visitableId = mappings.mapVisitable;
+            if (visitableId)
+                common.m_visitableId = visitableId;
+            else if (objDefDatabase)
+                common.m_fixedDef = objDefDatabase;
+            else
+                assert(!"Impossible state");
+        };
 
         /*Logger(Logger::Warning) << "[" << obj.m_defnum << "] pos=" << posFromH3M(obj.m_pos).toPrintableString()
 
@@ -312,10 +321,11 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 fhhero.m_isRandom = type == MapObjectType::RANDOM_HERO;
                 fhhero.m_player   = playerId;
                 initCommon(fhhero);
-                fhhero.m_pos             = posFromH3M(obj.m_pos, type == MapObjectType::PRISON ? 0 : -1);
-                fhhero.m_isMain          = mainHeroes.contains(playerId) && mainHeroes[playerId] == hero->m_subID;
-                fhhero.m_questIdentifier = hero->m_questIdentifier;
-                fhhero.m_patrolRadius    = hero->m_patrolRadius == 0xff ? -1 : hero->m_patrolRadius;
+                fhhero.m_pos              = posFromH3M(obj.m_pos, type == MapObjectType::PRISON ? 0 : -1);
+                fhhero.m_isMain           = mainHeroes.contains(playerId) && mainHeroes[playerId] == hero->m_subID;
+                fhhero.m_questIdentifier  = hero->m_questIdentifier;
+                fhhero.m_patrolRadius     = hero->m_patrolRadius == 0xff ? -1 : hero->m_patrolRadius;
+                fhhero.m_groupedFormation = hero->m_formation;
 
                 FHHeroData& destHero = fhhero.m_data;
                 if (fhhero.m_isRandom)
@@ -491,13 +501,10 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 assert(dynamic_cast<const MapSignBottle*>(impl) != nullptr);
                 const auto* bottle = static_cast<const MapSignBottle*>(impl);
 
-                if (!mappings.mapVisitable)
-                    throw std::runtime_error("Unknown def for visitable:" + objDefEmbedded.id);
-
                 FHSign fhVisitable;
                 initCommon(fhVisitable);
-                fhVisitable.m_text        = bottle->m_message;
-                fhVisitable.m_visitableId = mappings.mapVisitable;
+                initVisitable(fhVisitable);
+                fhVisitable.m_text = bottle->m_message;
                 dest.m_objects.m_signs.push_back(std::move(fhVisitable));
             } break;
             case MapObjectType::SEER_HUT:
@@ -505,13 +512,9 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 assert(dynamic_cast<const MapSeerHut*>(impl) != nullptr);
                 const auto* hut = static_cast<const MapSeerHut*>(impl);
 
-                auto* visitableId = mappings.mapVisitable;
-                if (!visitableId)
-                    throw std::runtime_error("Unknown def for seer hut:" + objDefEmbedded.id);
-
                 FHQuestHut fhQuestHut;
                 initCommon(fhQuestHut);
-                fhQuestHut.m_visitableId = visitableId;
+                initVisitable(fhQuestHut);
                 fhQuestHut.m_questsOneTime.resize(hut->m_questsOneTime.size());
                 fhQuestHut.m_questsRecurring.resize(hut->m_questsRecurring.size());
 
@@ -529,14 +532,11 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             case MapObjectType::WITCH_HUT:
             {
                 assert(dynamic_cast<const MapWitchHut*>(impl) != nullptr);
-                const auto* hut         = static_cast<const MapWitchHut*>(impl);
-                auto*       visitableId = mappings.mapVisitable;
-                if (!visitableId)
-                    throw std::runtime_error("Unknown def for witch hut:" + objDefEmbedded.id);
+                const auto* hut = static_cast<const MapWitchHut*>(impl);
 
                 FHSkillHut fhHut;
                 initCommon(fhHut);
-                fhHut.m_visitableId = visitableId;
+                initVisitable(fhHut);
                 for (size_t skillIndex = 0; skillIndex < hut->m_allowedSkills.size(); ++skillIndex) {
                     if (!hut->m_allowedSkills[skillIndex])
                         continue;
@@ -550,13 +550,11 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 assert(dynamic_cast<const MapScholar*>(impl) != nullptr);
                 const auto* scholar = static_cast<const MapScholar*>(impl);
 
-                auto* visitableId = mappings.mapVisitable;
-                assert(visitableId);
-
                 FHScholar fhScholar;
                 initCommon(fhScholar);
-                fhScholar.m_visitableId = visitableId;
-                fhScholar.m_type        = scholar->m_bonusType == 0xff ? FHScholar::Type::Random : static_cast<FHScholar::Type>(scholar->m_bonusType);
+                initVisitable(fhScholar);
+
+                fhScholar.m_type = scholar->m_bonusType == 0xff ? FHScholar::Type::Random : static_cast<FHScholar::Type>(scholar->m_bonusType);
                 if (fhScholar.m_type == FHScholar::Type::Primary) {
                     fhScholar.m_primaryType = static_cast<Core::HeroPrimaryParamType>(scholar->m_bonusId);
                 } else if (fhScholar.m_type == FHScholar::Type::Secondary) {
@@ -574,14 +572,12 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             {
                 assert(dynamic_cast<const MapGarison*>(impl) != nullptr);
                 const auto* garison = static_cast<const MapGarison*>(impl);
-                if (!mappings.mapVisitable)
-                    throw std::runtime_error("Unknown def for visitable:" + objDefEmbedded.id);
 
                 FHGarison fhVisitable;
                 initCommon(fhVisitable);
+                initVisitable(fhVisitable);
                 fhVisitable.m_player         = m_playerIds.at(garison->m_owner);
                 fhVisitable.m_removableUnits = garison->m_removableUnits;
-                fhVisitable.m_visitableId    = mappings.mapVisitable;
                 fhVisitable.m_garison        = convertSquad(garison->m_garison);
                 dest.m_objects.m_garisons.push_back(std::move(fhVisitable));
 
@@ -733,11 +729,8 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                     assert(dynamic_cast<const MapAbandonedMine*>(impl) != nullptr);
                     const auto*     objOwner = static_cast<const MapAbandonedMine*>(impl);
                     FHAbandonedMine mine;
-                    if (!mappings.mapVisitable)
-                        throw std::runtime_error("Unknown def for visitable:" + objDefEmbedded.id);
-
-                    mine.m_visitableId = mappings.mapVisitable;
                     initCommon(mine);
+                    initVisitable(mine);
                     for (size_t i = 0; i < m_resourceIds.size(); ++i) {
                         if (objOwner->m_resourceBits[i])
                             mine.m_resources.push_back(m_resourceIds[i]);
@@ -774,13 +767,10 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 assert(dynamic_cast<const MapObjectWithOwner*>(impl) != nullptr);
                 const auto* objOwner = static_cast<const MapObjectWithOwner*>(impl);
 
-                if (!mappings.mapVisitable)
-                    throw std::runtime_error("Unknown def for visitable:" + objDefEmbedded.id);
-
                 FHVisitableControlled fhVisitable;
                 initCommon(fhVisitable);
-                fhVisitable.m_player      = m_playerIds.at(objOwner->m_owner);
-                fhVisitable.m_visitableId = mappings.mapVisitable;
+                initVisitable(fhVisitable);
+                fhVisitable.m_player = m_playerIds.at(objOwner->m_owner);
                 dest.m_objects.m_controlledVisitables.push_back(std::move(fhVisitable));
 
             } break;
@@ -789,13 +779,11 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             case MapObjectType::SHRINE_OF_MAGIC_THOUGHT:
             {
                 assert(dynamic_cast<const MapShrine*>(impl) != nullptr);
-                const auto* shrine      = static_cast<const MapShrine*>(impl);
-                auto*       visitableId = mappings.mapVisitable;
-                assert(visitableId);
+                const auto* shrine = static_cast<const MapShrine*>(impl);
 
                 FHShrine fhShrine;
                 initCommon(fhShrine);
-                fhShrine.m_visitableId = visitableId;
+                initVisitable(fhShrine);
                 if (shrine->m_spell == 0xffU) {
                     switch (type) {
                         case MapObjectType::SHRINE_OF_MAGIC_INCANTATION:
@@ -841,7 +829,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 if (type == MapObjectType::BORDER_GATE && objDefCorrected.subId != 1000) {
                     FHVisitable fhVisitable;
                     initCommon(fhVisitable);
-                    fhVisitable.m_visitableId = mappings.mapVisitable;
+                    initVisitable(fhVisitable);
                     dest.m_objects.m_visitables.push_back(std::move(fhVisitable));
                     break;
                 }
@@ -849,11 +837,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 const auto*  questGuard = static_cast<const MapQuestGuard*>(impl);
                 FHQuestGuard fhQuestGuard;
                 initCommon(fhQuestGuard);
-                auto* visitableId = mappings.mapVisitable;
-                if (!visitableId)
-                    throw std::runtime_error("Unknown def for quest guard:" + objDefEmbedded.id);
-
-                fhQuestGuard.m_visitableId = visitableId;
+                initVisitable(fhQuestGuard);
 
                 fhQuestGuard.m_quest = convertQuest(questGuard->m_quest);
                 dest.m_objects.m_questGuards.push_back(std::move(fhQuestGuard));

@@ -109,6 +109,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_data,
     m_patrolRadius,
     m_isRandom,
+    m_groupedFormation,
     m_questIdentifier)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
@@ -185,6 +186,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHArtifact,
     m_pos,
     m_order,
+    m_defIndex,
     m_guard,
     m_score,
     m_generationId,
@@ -196,6 +198,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRandomArtifact,
     m_pos,
     m_order,
+    m_defIndex,
     m_guard,
     m_score,
     m_generationId,
@@ -317,6 +320,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_generationId,
 
     m_visitableId,
+    m_fixedDef,
 
     m_resources)
 
@@ -363,7 +367,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_score,
     m_generationId,
 
-    m_visitableId)
+    m_visitableId,
+    m_fixedDef)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHVisitableControlled,
@@ -375,6 +380,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_generationId,
 
     m_visitableId,
+    m_fixedDef,
 
     m_player)
 
@@ -388,6 +394,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_generationId,
 
     m_visitableId,
+    m_fixedDef,
 
     m_text)
 
@@ -401,6 +408,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_generationId,
 
     m_visitableId,
+    m_fixedDef,
 
     m_spellId,
     m_randomLevel)
@@ -415,6 +423,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_generationId,
 
     m_visitableId,
+    m_fixedDef,
 
     m_skillIds)
 
@@ -462,6 +471,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_generationId,
 
     m_visitableId,
+    m_fixedDef,
 
     m_questsOneTime,
     m_questsRecurring)
@@ -476,6 +486,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_generationId,
 
     m_visitableId,
+    m_fixedDef,
 
     m_quest)
 
@@ -497,6 +508,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_generationId,
 
     m_visitableId,
+    m_fixedDef,
 
     m_type,
     m_primaryType,
@@ -513,6 +525,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_generationId,
 
     m_visitableId,
+    m_fixedDef,
 
     m_message,
     m_reward,
@@ -531,6 +544,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_generationId,
 
     m_visitableId,
+    m_fixedDef,
+
     m_player,
 
     m_garison,
