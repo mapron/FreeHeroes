@@ -137,8 +137,9 @@ struct AdventureHero {
         return result;
     }
 
-    using ArtifactsBagMap = std::map<LibraryArtifactConstPtr, int>;
-    using ArtifactsOnMap  = std::map<ArtifactSlotType, LibraryArtifactConstPtr>;
+    using ArtifactsBagMap  = std::map<LibraryArtifactConstPtr, int>;
+    using ArtifactsBagList = std::vector<LibraryArtifactConstPtr>;
+    using ArtifactsOnMap   = std::map<ArtifactSlotType, LibraryArtifactConstPtr>;
 
     // main params:
     LibraryHeroConstPtr library = nullptr;
@@ -146,6 +147,7 @@ struct AdventureHero {
     HeroPrimaryParams              currentBasePrimary; // base parameters without artifacts.
     ArtifactsOnMap                 artifactsOn;
     ArtifactsBagMap                artifactsBag;
+    ArtifactsBagList               artifactsBagList; // @todo: back and forth with artifactsBag
     HeroSkillsList                 secondarySkills;
     std::set<LibrarySpellConstPtr> spellbook;
     LibrarySpell::Type             someSpell    = LibrarySpell::Type::Offensive;

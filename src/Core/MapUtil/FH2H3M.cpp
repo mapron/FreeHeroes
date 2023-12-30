@@ -69,9 +69,9 @@ public:
         return add(defsContainer->find(defId));
     }
 
-    uint32_t addHero(Core::LibraryHeroConstPtr hero)
+    uint32_t addHero(Core::LibraryHeroConstPtr hero, bool onBoat)
     {
-        std::string id = hero->getAdventureSprite() + "e";
+        std::string id = hero->getAdventureSpriteForMap(onBoat);
         return addId(std::move(id));
     }
 
@@ -275,10 +275,11 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         if (playerIndex >= 0) {
             auto& h3player = dest.m_players[playerIndex];
             if (fhTown.m_isMain) {
-                const int townGateOffset            = 2;
-                h3player.m_hasMainTown              = true;
-                h3player.m_posOfMainTown            = int3fromPos(fhTown.m_pos, -townGateOffset);
-                h3player.m_generatedHeroTownFaction = static_cast<uint8_t>(fhTown.m_factionId->legacyId);
+                const int townGateOffset = 2;
+                h3player.m_hasMainTown   = true;
+                h3player.m_posOfMainTown = int3fromPos(fhTown.m_pos, -townGateOffset);
+                if (fhTown.m_factionId)
+                    h3player.m_generatedHeroTownFaction = static_cast<uint8_t>(fhTown.m_factionId->legacyId);
             }
         }
         auto cas1                  = std::make_unique<MapTown>();
@@ -286,9 +287,11 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         cas1->m_hasFort            = fhTown.m_hasFort;
         cas1->m_questIdentifier    = fhTown.m_questIdentifier;
         cas1->m_spellResearch      = fhTown.m_spellResearch;
+        cas1->m_alignment          = static_cast<uint8_t>(fhTown.m_alignment);
         cas1->m_hasCustomBuildings = fhTown.m_hasCustomBuildings;
         cas1->m_hasGarison         = fhTown.m_hasGarison;
         cas1->m_hasName            = fhTown.m_hasName;
+        cas1->m_formation          = fhTown.m_groupedFormation;
         cas1->m_name               = fhTown.m_name;
 
         cas1->m_obligatorySpells = fhTown.m_obligatorySpells;
@@ -322,6 +325,13 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
             convertSquad(fhTown.m_garison, cas1->m_garison);
         }
 
+        if (fhTown.m_randomTown) {
+            auto* def = fhTown.m_randomId;
+            assert(def);
+
+            addObject(fhTown, std::move(cas1), [&tmplCache, def] { return tmplCache.add(def); });
+            continue;
+        }
         auto* libraryFaction = fhTown.m_factionId;
         assert(libraryFaction);
 
@@ -405,8 +415,9 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
             addObject(
                 fhHero, std::move(hero), [&tmplCache] { return tmplCache.addId("ahrandom"); }, true);
         } else {
+            bool onBoat = src.m_tileMap.get(fhHero.m_pos).m_terrainId->id == Core::LibraryTerrain::s_terrainWater;
             addObject(
-                fhHero, std::move(hero), [&tmplCache, libraryHero] { return tmplCache.addHero(libraryHero); }, true);
+                fhHero, std::move(hero), [&tmplCache, libraryHero, onBoat] { return tmplCache.addHero(libraryHero, onBoat); }, true);
         }
     }
 
@@ -439,8 +450,9 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
             continue;
         if (!src.m_disabledHeroes.isDisabled(src.m_isWaterMap, heroId))
             continue;
-        const auto legacyId            = (heroId)->legacyId;
-        dest.m_allowedHeroes[legacyId] = 0;
+        const auto legacyId = (heroId)->legacyId;
+        if (legacyId < (int) dest.m_allowedHeroes.size())
+            dest.m_allowedHeroes[legacyId] = 0;
     }
 
     if (src.m_format >= FHMap::MapFormat::HOTA1 && src.m_format <= FHMap::MapFormat::HOTA3) {
@@ -602,6 +614,15 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         if (fhMon.m_upgradedStack == FHMonster::UpgradedStack::Yes)
             monster->m_upgradedStack = 1;
 
+        if (fhMon.m_splitStackType == FHMonster::SplitStack::Exact)
+            monster->m_splitStack = static_cast<uint32_t>(fhMon.m_splitStackExact);
+        else if (fhMon.m_splitStackType == FHMonster::SplitStack::Average)
+            monster->m_splitStack = 4294967293U;
+        else if (fhMon.m_splitStackType == FHMonster::SplitStack::OneMore)
+            monster->m_splitStack = 0;
+        else if (fhMon.m_splitStackType == FHMonster::SplitStack::OneLess)
+            monster->m_splitStack = 4294967294U;
+
         monster->m_artID = uint16_t(-1);
 
         monster->m_hasMessage = fhMon.m_hasMessage;
@@ -624,7 +645,8 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
                 "avwmon7",
             };
             auto id = s_randomIds[fhMon.m_randomLevel];
-            addObject(fhMon, std::move(monster), [&tmplCache, id] { return tmplCache.addId(id); });
+            addObject(
+                fhMon, std::move(monster), [&tmplCache, id] { return tmplCache.addId(id); }, true);
             continue;
         }
         auto* def = fhMon.m_id->objectDefs.get({});
@@ -741,6 +763,11 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
             obj->m_questsOneTime[i].m_quest.prepareArrays(dest.m_features.get());
             convertRewardHut(fhQuestHut.m_questsOneTime[i].m_reward, obj->m_questsOneTime[i]);
             convertQuest(fhQuestHut.m_questsOneTime[i].m_quest, obj->m_questsOneTime[i].m_quest);
+        }
+        for (size_t i = 0; i < obj->m_questsRecurring.size(); ++i) {
+            obj->m_questsRecurring[i].m_quest.prepareArrays(dest.m_features.get());
+            convertRewardHut(fhQuestHut.m_questsRecurring[i].m_reward, obj->m_questsRecurring[i]);
+            convertQuest(fhQuestHut.m_questsRecurring[i].m_quest, obj->m_questsRecurring[i].m_quest);
         }
 
         addObjectVisitable(fhQuestHut, std::move(obj));
@@ -994,6 +1021,10 @@ void FH2H3MConverter::convertQuest(const FHQuest& fhQuest, MapQuest& quest) cons
             quest.m_missionType = MapQuest::Mission::PLAYER;
             quest.m_89val       = fhQuest.m_targetQuestId;
         } break;
+        case FHQuest::Type::Invalid:
+        {
+            quest.m_missionType = MapQuest::Mission::NONE;
+        } break;
         default:
             assert(!"Unsupported");
             break;
@@ -1002,6 +1033,8 @@ void FH2H3MConverter::convertQuest(const FHQuest& fhQuest, MapQuest& quest) cons
     quest.m_firstVisitText = fhQuest.m_firstVisitText;
     quest.m_nextVisitText  = fhQuest.m_nextVisitText;
     quest.m_completedText  = fhQuest.m_completedText;
+
+    quest.m_lastDay = fhQuest.m_lastDay;
 }
 
 void FH2H3MConverter::convertEvent(const FHGlobalMapEvent& fhEvent, GlobalMapEvent& event) const
@@ -1031,8 +1064,10 @@ void FH2H3MConverter::convertMessage(const FHMessageWithBattle& fhMessage, MapMe
 void FH2H3MConverter::convertSquad(const Core::AdventureSquad& squad, StackSetFixed& fixedStacks) const
 {
     for (size_t i = 0; const auto& stack : squad.stacks) {
-        if (stack.count)
+        if (stack.count && stack.library)
             fixedStacks.m_stacks.at(i) = StackBasicDescriptor{ .m_id = static_cast<uint16_t>(stack.library->legacyId), .m_count = static_cast<uint16_t>(stack.count) };
+        else if (stack.count && stack.randomTier >= 0)
+            fixedStacks.m_stacks.at(i) = StackBasicDescriptor{ .m_id = static_cast<uint16_t>(65534 - stack.randomTier), .m_count = static_cast<uint16_t>(stack.count) };
         else
             fixedStacks.m_stacks.at(i) = StackBasicDescriptor{ .m_id = (uint16_t) -1 };
         i++;
@@ -1059,9 +1094,9 @@ void FH2H3MConverter::convertHeroArtifacts(const Core::AdventureHero& hero, Hero
     artSet.m_cata = uint16_t(-1);
     artSet.m_book = hero.hasSpellBook ? uint16_t(0) : uint16_t(-1);
 
-    for (auto const& [art, cnt] : hero.artifactsBag) {
-        for (int i = 0; i < cnt; ++i)
-            artSet.m_bagSlots.push_back(uint16_t(art->legacyId));
+    artSet.m_bagSlots.clear();
+    for (auto* art : hero.artifactsBagList) {
+        artSet.m_bagSlots.push_back(uint16_t(art->legacyId));
     }
     if (artSet.m_bagSlots.size() > 64) {
         artSet.m_bagSlots.resize(64);

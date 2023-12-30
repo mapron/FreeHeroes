@@ -206,7 +206,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
 
             if (!foundKeyReplacement) {
                 if (record) {
-                    Logger(Logger::Warning) << "Def is corrupted/used for decration, making database reference null:" << fhDef.type << " sub:" << fhDef.subId;
+                    Logger(Logger::Warning) << "Def is corrupted/used for decoration, making database reference null:" << fhDef.type << " sub:" << fhDef.subId;
                     record = nullptr;
                 }
 
@@ -214,6 +214,12 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 record = nullptr;
                 for (auto* rec : it->second) {
                     if (rec->id == fhDef.id) {
+                        record = rec;
+                        break;
+                    }
+                }
+                for (auto* rec : it->second) {
+                    if (rec->terrainsSoft == fhDef.terrainsSoft) {
                         record = rec;
                         break;
                     }
@@ -252,6 +258,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             initCommon(fhUnknown);
             fhUnknown.m_defId = objDefCorrected.id;
             dest.m_objects.m_unknownObjects.push_back(std::move(fhUnknown));
+            Logger(Logger::Warning) << "unknown def:" << printObjDef(objDefCorrected);
             continue;
         }
 
@@ -453,6 +460,19 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 } else {
                     fhMonster.m_upgradedStack = FHMonster::UpgradedStack::No;
                 }
+                if (monster->m_splitStack == 0xffffffffU)
+                    fhMonster.m_splitStackType = FHMonster::SplitStack::Invalid;
+                else if (monster->m_splitStack == 4294967293U)
+                    fhMonster.m_splitStackType = FHMonster::SplitStack::Average;
+                else if (monster->m_splitStack == 0)
+                    fhMonster.m_splitStackType = FHMonster::SplitStack::OneMore;
+                else if (monster->m_splitStack == 4294967294U)
+                    fhMonster.m_splitStackType = FHMonster::SplitStack::OneLess;
+                else {
+                    fhMonster.m_splitStackExact = monster->m_splitStack;
+                    fhMonster.m_splitStackType  = FHMonster::SplitStack::Exact;
+                }
+
                 fhMonster.m_hasMessage = monster->m_hasMessage;
                 if (monster->m_hasMessage) {
                     fhMonster.m_message = monster->m_message;
@@ -498,6 +518,10 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 for (size_t i = 0; i < hut->m_questsOneTime.size(); ++i) {
                     fhQuestHut.m_questsOneTime[i].m_reward = convertRewardHut(hut->m_questsOneTime[i]);
                     fhQuestHut.m_questsOneTime[i].m_quest  = convertQuest(hut->m_questsOneTime[i].m_quest);
+                }
+                for (size_t i = 0; i < hut->m_questsRecurring.size(); ++i) {
+                    fhQuestHut.m_questsRecurring[i].m_reward = convertRewardHut(hut->m_questsRecurring[i]);
+                    fhQuestHut.m_questsRecurring[i].m_quest  = convertQuest(hut->m_questsRecurring[i].m_quest);
                 }
 
                 dest.m_objects.m_questHuts.push_back(std::move(fhQuestHut));
@@ -639,15 +663,23 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 const auto  playerId = m_playerIds.at(town->m_playerOwner);
                 FHTown      fhtown;
                 initCommon(fhtown);
-                fhtown.m_player    = playerId;
-                fhtown.m_factionId = m_factionIds[objDefCorrected.subId];
-                assert(fhtown.m_factionId == mappings.factionTown);
+                fhtown.m_player     = playerId;
+                fhtown.m_randomTown = type == MapObjectType::RANDOM_TOWN;
+                if (!fhtown.m_randomTown) {
+                    fhtown.m_factionId = m_factionIds[objDefCorrected.subId];
+                    assert(fhtown.m_factionId == mappings.factionTown);
+                } else {
+                    fhtown.m_randomId = objDefDatabase;
+                    assert(objDefDatabase);
+                }
                 fhtown.m_questIdentifier    = town->m_questIdentifier;
                 fhtown.m_hasFort            = town->m_hasFort;
                 fhtown.m_spellResearch      = town->m_spellResearch;
+                fhtown.m_alignment          = town->m_alignment == 0xFFU ? -1 : town->m_alignment;
                 fhtown.m_hasCustomBuildings = town->m_hasCustomBuildings;
                 fhtown.m_hasGarison         = town->m_hasGarison;
                 fhtown.m_hasName            = town->m_hasName;
+                fhtown.m_groupedFormation   = town->m_formation;
                 fhtown.m_name               = town->m_name;
 
                 fhtown.m_obligatorySpells = town->m_obligatorySpells;
@@ -804,7 +836,15 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 dest.m_objects.m_grails.push_back(std::move(fhObj));
             } break;
             case MapObjectType::QUEST_GUARD:
+            case MapObjectType::BORDER_GATE:
             {
+                if (type == MapObjectType::BORDER_GATE && objDefCorrected.subId != 1000) {
+                    FHVisitable fhVisitable;
+                    initCommon(fhVisitable);
+                    fhVisitable.m_visitableId = mappings.mapVisitable;
+                    dest.m_objects.m_visitables.push_back(std::move(fhVisitable));
+                    break;
+                }
                 assert(dynamic_cast<const MapQuestGuard*>(impl) != nullptr);
                 const auto*  questGuard = static_cast<const MapQuestGuard*>(impl);
                 FHQuestGuard fhQuestGuard;
@@ -913,6 +953,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                     initCommon(fhUnknown);
                     fhUnknown.m_defId = objDefCorrected.id;
                     dest.m_objects.m_unknownObjects.push_back(std::move(fhUnknown));
+                    Logger(Logger::Warning) << "unknown def:" << printObjDef(objDefCorrected);
                 }
             } break;
         }
@@ -1039,10 +1080,16 @@ Core::AdventureSquad H3M2FHConverter::convertSquad(const StackSetFixed& fixedSta
 {
     Core::AdventureSquad squad;
     for (const auto& stack : fixedStacks.m_stacks) {
-        if (stack.m_count && stack.m_id != uint16_t(-1))
+        if (stack.m_count && stack.m_id <= uint16_t(65534) && stack.m_id >= uint16_t(65520)) {
+            Core::AdventureStack as;
+            as.count      = stack.m_count;
+            as.randomTier = 65534 - stack.m_id;
+            squad.stacks.push_back(as);
+        } else if (stack.m_count && stack.m_id != uint16_t(-1)) {
             squad.stacks.push_back(Core::AdventureStack(m_unitIds[stack.m_id], stack.m_count));
-        else
+        } else {
             squad.stacks.push_back(Core::AdventureStack());
+        }
     }
     return squad;
 }
@@ -1192,6 +1239,10 @@ FHQuest H3M2FHConverter::convertQuest(const MapQuest& quest) const
             fhQuest.m_type          = FHQuest::Type::BePlayer;
             fhQuest.m_targetQuestId = quest.m_89val;
         } break;
+        case MapQuest::Mission::NONE:
+        {
+            fhQuest.m_type = FHQuest::Type::Invalid;
+        } break;
         default:
             Logger(Logger::Warning) << "Unsupported mission type:" << int(quest.m_missionType);
             assert(!"Unsupported");
@@ -1202,6 +1253,7 @@ FHQuest H3M2FHConverter::convertQuest(const MapQuest& quest) const
     fhQuest.m_nextVisitText  = quest.m_nextVisitText;
     fhQuest.m_completedText  = quest.m_completedText;
 
+    fhQuest.m_lastDay = quest.m_lastDay;
     return fhQuest;
 }
 
@@ -1245,8 +1297,9 @@ void H3M2FHConverter::convertHeroArtifacts(const HeroArtSet& artSet, Core::Adven
     if (artSet.m_misc5 != uint16_t(-1))
         hero.artifactsOn[Core::ArtifactSlotType::Misc4] = m_artifactIds.at(artSet.m_misc5);
 
+    hero.artifactsBagList.clear();
     for (uint16_t artId : artSet.m_bagSlots)
-        hero.artifactsBag[m_artifactIds.at(artId)]++;
+        hero.artifactsBagList.push_back(m_artifactIds.at(artId));
 
     hero.hasSpellBook = artSet.m_book != uint16_t(-1);
 }

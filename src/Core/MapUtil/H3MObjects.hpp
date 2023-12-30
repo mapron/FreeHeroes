@@ -96,6 +96,69 @@ struct MapFormatFeatures {
 
     MapFormatFeatures() = default;
     MapFormatFeatures(MapFormat baseFormat, int hotaVer1);
+
+    void readVarLength(ByteOrderDataStreamReader& stream, bool condition, uint16_t& data) const
+    {
+        if (condition) {
+            stream >> data;
+            return;
+        }
+        uint8_t tmp = 0;
+        stream >> tmp;
+        if (tmp == uint8_t(-1))
+            data = uint16_t(-1);
+        else
+            data = tmp;
+    }
+    void writeVarLength(ByteOrderDataStreamWriter& stream, bool condition, const uint16_t& data) const
+    {
+        if (condition) {
+            stream << data;
+            return;
+        }
+        if (data == uint16_t(-1))
+            stream << uint8_t(-1);
+        else
+            stream << static_cast<uint8_t>(data);
+    }
+
+    void readArtifact(ByteOrderDataStreamReader& stream, uint16_t& art) const
+    {
+        readVarLength(stream, m_artId16Bit, art);
+    }
+    void writeArtifact(ByteOrderDataStreamWriter& stream, const uint16_t& art) const
+    {
+        writeVarLength(stream, m_artId16Bit, art);
+    }
+    void readArtifact(ByteOrderDataStreamReader& stream, uint32_t& art) const
+    {
+        uint16_t artTmp = 0;
+        readVarLength(stream, m_artId16Bit, artTmp);
+        art = artTmp;
+    }
+    void writeArtifact(ByteOrderDataStreamWriter& stream, const uint32_t& art) const
+    {
+        writeVarLength(stream, m_artId16Bit, static_cast<uint16_t>(art));
+    }
+
+    void readUnit(ByteOrderDataStreamReader& stream, uint16_t& art) const
+    {
+        readVarLength(stream, m_stackId16Bit, art);
+    }
+    void writeUnit(ByteOrderDataStreamWriter& stream, const uint16_t& art) const
+    {
+        writeVarLength(stream, m_stackId16Bit, art);
+    }
+    void readUnit(ByteOrderDataStreamReader& stream, uint32_t& art) const
+    {
+        uint16_t artTmp = 0;
+        readVarLength(stream, m_stackId16Bit, artTmp);
+        art = artTmp;
+    }
+    void writeUnit(ByteOrderDataStreamWriter& stream, const uint32_t& art) const
+    {
+        writeVarLength(stream, m_stackId16Bit, static_cast<uint16_t>(art));
+    }
 };
 
 enum class MapObjectType
@@ -329,10 +392,7 @@ struct StackSet {
         m_stacks.resize(stream.readSize());
 
         for (auto& stack : m_stacks) {
-            if (m_features->m_stackId16Bit)
-                stream >> stack.m_id;
-            else
-                stack.m_id = stream.readScalar<uint8_t>();
+            m_features->readUnit(stream, stack.m_id);
             stream >> stack.m_count;
         }
     }
@@ -342,10 +402,7 @@ struct StackSet {
         auto  lock       = stream.setContainerSizeBytesGuarded(1);
         stream.writeSize(m_stacks.size());
         for (auto& stack : m_stacks) {
-            if (m_features->m_stackId16Bit)
-                stream << stack.m_id;
-            else
-                stream << static_cast<uint8_t>(stack.m_id);
+            m_features->writeUnit(stream, stack.m_id);
             stream << stack.m_count;
         }
     }
@@ -366,10 +423,7 @@ struct StackSetFixed {
         auto* m_features = getFeaturesFromStream(stream);
         prepareArrays(m_features);
         for (auto& stack : m_stacks) {
-            if (m_features->m_stackId16Bit)
-                stream >> stack.m_id;
-            else
-                stack.m_id = stream.readScalar<uint8_t>();
+            m_features->readUnit(stream, stack.m_id);
             stream >> stack.m_count;
         }
     }
@@ -378,10 +432,7 @@ struct StackSetFixed {
         auto* m_features = getFeaturesFromStream(stream);
         assert(m_features->m_stackSize == (int) m_stacks.size());
         for (auto& stack : m_stacks) {
-            if (m_features->m_stackId16Bit)
-                stream << stack.m_id;
-            else
-                stream << static_cast<uint8_t>(stack.m_id);
+            m_features->writeUnit(stream, stack.m_id);
             stream << stack.m_count;
         }
     }

@@ -24,10 +24,11 @@ struct AdventureStack {
     bool isValid() const { return count > 0 && library; }
 
     // main params
-    LibraryUnitConstPtr library = nullptr;
-    int                 count   = 0;
+    LibraryUnitConstPtr library    = nullptr;
+    int                 count      = 0;
+    int                 randomTier = -1;
 
-    bool isEqualTo(const AdventureStack& another) const noexcept { return library == another.library && count == another.count; }
+    bool isEqualTo(const AdventureStack& another) const noexcept { return library == another.library && count == another.count && randomTier == another.randomTier; }
 
     // estimation input:
     struct ArmyParams {

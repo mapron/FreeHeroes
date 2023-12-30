@@ -23,6 +23,7 @@ struct LibraryFactionHeroClass {
         std::string    battleSpriteFemale;
         std::string    adventureSpriteMale;
         std::string    adventureSpriteFemale;
+        std::string    adventureSpriteBoat;
         TranslationMap name;
     };
 

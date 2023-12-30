@@ -61,17 +61,23 @@ struct FHTownEvent {
 struct FHTown : public FHPlayerControlledObject {
     bool                         m_isMain{ false };
     Core::LibraryFactionConstPtr m_factionId = nullptr;
-    bool                         m_hasFort{ false };
-    uint32_t                     m_questIdentifier = 0;
-    bool                         m_spellResearch{ true };
-    bool                         m_hasCustomBuildings{ false };
-    bool                         m_hasGarison{ false };
-    bool                         m_hasName = false;
-    std::string                  m_name;
+
+    bool        m_hasFort{ false };
+    uint32_t    m_questIdentifier = 0;
+    bool        m_spellResearch{ true };
+    bool        m_hasCustomBuildings{ false };
+    bool        m_hasGarison{ false };
+    bool        m_hasName          = false;
+    bool        m_randomTown       = false;
+    bool        m_groupedFormation = false;
+    int         m_alignment        = -1;
+    std::string m_name;
 
     std::vector<Core::LibraryBuildingConstPtr> m_buildings;
     std::vector<Core::LibraryBuildingConstPtr> m_forbiddenBuildings;
     std::vector<FHTownEvent>                   m_events;
+
+    Core::LibraryObjectDefConstPtr m_randomId = nullptr;
 
     // @todo: investigate what stored there
     std::vector<uint8_t> m_obligatorySpells;

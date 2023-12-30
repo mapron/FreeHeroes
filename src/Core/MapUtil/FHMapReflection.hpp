@@ -128,11 +128,12 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHTown,
     m_pos,
     m_order,
-    m_player,
     m_defIndex,
     m_guard,
     m_score,
     m_generationId,
+
+    m_player,
 
     m_isMain,
     m_factionId,
@@ -147,6 +148,10 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_possibleSpells,
     m_hasGarison,
     m_hasName,
+    m_randomTown,
+    m_randomId,
+    m_alignment,
+    m_groupedFormation,
     m_name,
     m_garison,
     m_garisonRmg)
@@ -202,6 +207,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHPandora,
     m_pos,
     m_order,
+    m_defIndex,
     m_guard,
     m_score,
     m_generationId,
@@ -219,6 +225,15 @@ ENUM_REFLECTION_STRINGIFY(
     Random,
     Yes,
     No)
+ENUM_REFLECTION_STRINGIFY(
+    FHMonster::SplitStack,
+    Invalid,
+
+    Invalid,
+    Average,
+    OneMore,
+    OneLess,
+    Exact)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHMonster,
@@ -243,7 +258,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_hasMessage,
     m_reward,
     m_message,
-    m_upgradedStack)
+    m_upgradedStack,
+    m_splitStackExact,
+    m_splitStackType)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHDwelling,
@@ -423,6 +440,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_resources,
     m_primary,
     m_level,
+    m_lastDay,
     m_targetQuestId,
     m_firstVisitText,
     m_nextVisitText,

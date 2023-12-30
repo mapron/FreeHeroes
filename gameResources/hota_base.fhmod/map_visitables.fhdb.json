@@ -122,20 +122,23 @@
     "W": "avxwgtwh", "WA": "avxwgtbk", "WB": "avxwgtbl", "WC": "avxwgtbr", "WD": "avxwgtgr", "WE": "avxwgtlb", "WF": "avxwgtqu", "WG": "avxwgtrd", "WH": "avxwgtvl"}} ],
 "sod.visitable.borderGuard"                : [ ""              ,        0 ,    1000  , { "m" : {"": "avxbor00", "A": "avxbor10", "B": "avxbor20", "C": "avxbor30", "D": "avxbor40", "E": "avxbor50", "F": "avxbor60", "G": "avxbor70", "H": "avxbor80",
     "W": "avxwbor0", "WA": "avxwbor1", "WB": "avxwbor2", "WC": "avxwbor3", "WD": "avxwbor4", "WE": "avxwbor5", "WF": "avxwbor6", "WG": "avxwbor7", "WH": "avxwbor8"}} ],
+"hota.visitable.questGateHor"              : [ ""              ,        0 ,    1000  , "avxqgt" ],
+"hota.visitable.questGateVert"             : [ ""              ,        0 ,    1000  , "avxqgtv" ],
 "sod.visitable.keyTent"                    : [ ""              ,        0 ,    1000  , { "m" : {"": "avxkey00", "A": "avxkey10", "B": "avxkey20", "C": "avxkey30", "D": "avxkey40", "E": "avxkey50", "F": "avxkey60", "G": "avxkey70"}} ],
 "sod.visitable.whirlpool"                  : [ ""              ,        0 ,    1000  , "avxwhrl0" ],
 "sod.visitable.boat"                       : [ ""              ,        0 ,    1000  , { "m" : {"": "avxboat0", "A": "avxboat1", "B": "avxboat2", "C": "avxboat4", "D": "avxboat5", "E": "avxboat6"} } ],
 
 "sod.visitable.shipyard"                   : [ ""              ,        0 ,    1000  , "avxshyd0"  ],
 "sod.visitable.lighthouse"                 : [ ""              ,        0 ,    1000  , "avxlths0"  ],
-"sod.visitable.sign"                       : [ ""              ,        0 ,    1000  , { "m" : {"": "avxsndg0", "SD": "avxsnds0", "LV": "avxsnlv0", "SN": "avxsnsn0", "SW": "avxsnsw0", "WA": "avxsnwst", "HI": "avxsnhl", "WT": "avxbttl0" } }  ],
+"sod.visitable.sign"                       : [ ""              ,        0 ,    1000  , { "m" : {"": "avxsndg0", "SD": "avxsnds0", "LV": "avxsnlv0", "SN": "avxsnsn0", "SW": "avxsnsw0", "WA": "avxsnwst", "HI": "avxsnhl", "WT": "avxbttl0", "YK": "avlyuc30" } }  ],
 
-"sod.visitable.garisonVert"                : [ ""              ,        0 ,    1000  , { "m" : {"": "avcvgr", "WT" : "avcvgrw"} }  ],
-"sod.visitable.garisonHor"                 : [ ""              ,        0 ,    1000  , { "m" : {"": "avcgar10", "WT" : "avcgarw1", "E": "avcgare"} }  ],
+"sod.visitable.garisonVert"                : [ ""              ,        0 ,    1000  , { "m" : {"": "avcvgr", "WT" : "avcvgrw", "WOOD": "avgtzab3", "WOODS": "avgtzab4" } }  ],
+"sod.visitable.garisonHor"                 : [ ""              ,        0 ,    1000  , { "m" : {"": "avcgar10", "WT" : "avcgarw1", "E": "avcgare", "WOOD": "avgtzab1", "WOODS": "avgtzab2" } }  ],
 "sod.visitable.garisonVertMagic"           : [ ""              ,        0 ,    1000  , { "m" : {"": "avcvgarm"} }  ],
 "sod.visitable.garisonHorMagic"            : [ ""              ,        0 ,    1000  , { "m" : {"": "avcgar20"} }  ],
 
-"sod.visitable.abandonedMine"              : [ ""              ,        0 ,    1000  , { "m" : {"": "mntswpab" , "A": "avxamsw","B": "avxamds","C": "avxamgr","D": "avxamlv","E": "avxamro","F": "avxamsn","G": "avxamsu","H": "avxabnd0", "I": "avmabmg" } }  ]
+"sod.visitable.abandonedMine"              : [ ""              ,        0 ,    1000  , { "m" : {"": "mntswpab" , "A": "avxamsw","B": "avxamds","C": "avxamgr","D": "avxamlv","E": "avxamro","F": "avxamsn","G": "avxamsu",
+    "H": "avxabnd0", "I": "avmabmg", "J": "avxamdn", "K": "avxamh1", "L": "avxamwl"} }  ]
 
 }
 

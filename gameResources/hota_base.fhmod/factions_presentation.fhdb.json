@@ -8,15 +8,16 @@
         "battleSpriteMale"     : "ch00",
         "battleSpriteFemale"   : "ch00b",
         "adventureSpriteMale"  : "ah00_",
-        "adventureSpriteFemale": "ah00b_"
+        "adventureSpriteFemale": "ah00b_",
+        "adventureSpriteBoat"  : "avxboat1"
         }
     },
-
     "mageClass": { "pres": {
         "battleSpriteMale"     : "ch01b",
         "battleSpriteFemale"   : "ch01",
         "adventureSpriteMale"  : "ah01_",
-        "adventureSpriteFemale": "ah01b_"
+        "adventureSpriteFemale": "ah01b_",
+        "adventureSpriteBoat"  : "avxboat1"
         }
     },
     "pres": {"unitBackground": "crbkgcas" }
@@ -28,14 +29,16 @@
         "battleSpriteMale"     : "ch02",
         "battleSpriteFemale"   : "ch02b",
         "adventureSpriteMale"  : "ah02_",
-        "adventureSpriteFemale": "ah02b_"
+        "adventureSpriteFemale": "ah02b_",
+        "adventureSpriteBoat"  : "avxboat1"
         }
     },
     "mageClass": { "pres": {
         "battleSpriteMale"     : "ch03b",
         "battleSpriteFemale"   : "ch03",
         "adventureSpriteMale"  : "ah03_",
-        "adventureSpriteFemale": "ah03b_"
+        "adventureSpriteFemale": "ah03b_",
+        "adventureSpriteBoat"  : "avxboat1"
         }
     },
     "pres": { "unitBackground": "crbkgram", 
@@ -48,14 +51,16 @@
         "battleSpriteMale"     : "ch04b",
         "battleSpriteFemale"   : "ch04",
         "adventureSpriteMale"  : "ah04_",
-        "adventureSpriteFemale": "ah04b_"
+        "adventureSpriteFemale": "ah04b_",
+        "adventureSpriteBoat"  : "avxboat1"
         }
     },
     "mageClass": { "pres": {
         "battleSpriteMale"     : "ch05",
         "battleSpriteFemale"   : "ch05b",
         "adventureSpriteMale"  : "ah05_",
-        "adventureSpriteFemale": "ah05b_"
+        "adventureSpriteFemale": "ah05b_",
+        "adventureSpriteBoat"  : "avxboat1"
         }
     },
     "pres": {"unitBackground":"crbkgtow", 
@@ -67,14 +72,16 @@
         "battleSpriteMale"     : "ch06",
         "battleSpriteFemale"   : "ch06b",
         "adventureSpriteMale"  : "ah06_",
-        "adventureSpriteFemale": "ah06b_"
+        "adventureSpriteFemale": "ah06b_",
+        "adventureSpriteBoat"  : "avxboat1"
         }
     },
     "mageClass": { "pres": {
         "battleSpriteMale"     : "ch07b",
         "battleSpriteFemale"   : "ch07",
         "adventureSpriteMale"  : "ah07_",
-        "adventureSpriteFemale": "ah07b_"
+        "adventureSpriteFemale": "ah07b_",
+        "adventureSpriteBoat"  : "avxboat1"
         }
     },
     "pres": { "unitBackground":"crbkginf"}
@@ -85,14 +92,16 @@
         "battleSpriteMale"     : "ch08",
         "battleSpriteFemale"   : "ch08b",
         "adventureSpriteMale"  : "ah08_",
-        "adventureSpriteFemale": "ah08b_"
+        "adventureSpriteFemale": "ah08b_",
+        "adventureSpriteBoat"  : "avxboat0"
         }
     },
     "mageClass": { "pres": {
         "battleSpriteMale"     : "ch09b",
         "battleSpriteFemale"   : "ch09",
         "adventureSpriteMale"  : "ah09_",
-        "adventureSpriteFemale": "ah09b_"
+        "adventureSpriteFemale": "ah09b_",
+        "adventureSpriteBoat"  : "avxboat0"
         }
     },
     "pres": {"unitBackground":"crbkgnec" ,
@@ -105,14 +114,16 @@
         "battleSpriteMale"     : "ch010",
         "battleSpriteFemale"   : "ch010b",
         "adventureSpriteMale"  : "ah10_",
-        "adventureSpriteFemale": "ah10b_"
+        "adventureSpriteFemale": "ah10b_",
+        "adventureSpriteBoat"  : "avxboat1"
         }
     },
     "mageClass": { "pres": {
         "battleSpriteMale"     : "ch011b",
         "battleSpriteFemale"   : "ch11",
         "adventureSpriteMale"  : "ah11_",
-        "adventureSpriteFemale": "ah11b_"
+        "adventureSpriteFemale": "ah11b_",
+        "adventureSpriteBoat"  : "avxboat1"
         }
     },
     "pres": {"unitBackground":"crbkgdun",
@@ -124,14 +135,16 @@
         "battleSpriteMale"     : "ch013",
         "battleSpriteFemale"   : "ch012",
         "adventureSpriteMale"  : "ah13_",
-        "adventureSpriteFemale": "ah12_"
+        "adventureSpriteFemale": "ah12_",
+        "adventureSpriteBoat"  : "avxboat1"
         }
     },
     "mageClass": { "pres": {
         "battleSpriteMale"     : "ch013b",
         "battleSpriteFemale"   : "ch012b",
         "adventureSpriteMale"  : "ah13b_",
-        "adventureSpriteFemale": "ah12b_"
+        "adventureSpriteFemale": "ah12b_",
+        "adventureSpriteBoat"  : "avxboat1"
         }
     },
     "pres": { "unitBackground":"crbkgstr"}
@@ -144,14 +157,16 @@
         "battleSpriteMale"     : "ch014",
         "battleSpriteFemale"   : "ch014",
         "adventureSpriteMale"  : "ah14_",
-        "adventureSpriteFemale": "ah14_"
+        "adventureSpriteFemale": "ah14_",
+        "adventureSpriteBoat"  : "avxboat2"
         }
     },
     "mageClass": { "pres": {
         "battleSpriteMale"     : "ch015",
         "battleSpriteFemale"   : "ch015",
         "adventureSpriteMale"  : "ah15_",
-        "adventureSpriteFemale": "ah15_"
+        "adventureSpriteFemale": "ah15_",
+        "adventureSpriteBoat"  : "avxboat2"
         }
     },
     "pres": { "unitBackground":"crbkgfor",
@@ -163,14 +178,16 @@
         "battleSpriteMale"     : "ch16",
         "battleSpriteFemale"   : "ch16b",
         "adventureSpriteMale"  : "ah16_",
-        "adventureSpriteFemale": "ah16b_"
+        "adventureSpriteFemale": "ah16b_",
+        "adventureSpriteBoat"  : "avxboat6"
         }
     },
     "mageClass": { "pres": {
         "battleSpriteMale"     : "ch17",
         "battleSpriteFemale"   : "ch17b",
         "adventureSpriteMale"  : "ah17_",
-        "adventureSpriteFemale": "ah17b_"
+        "adventureSpriteFemale": "ah17b_",
+        "adventureSpriteBoat"  : "avxboat6"
         }
     },
     "pres": { "unitBackground":"crbkgele",
@@ -183,14 +200,16 @@
         "battleSpriteMale"     : "ch18b",
         "battleSpriteFemale"   : "ch18",
         "adventureSpriteMale"  : "ah18b_",
-        "adventureSpriteFemale": "ah18_"
+        "adventureSpriteFemale": "ah18_",
+        "adventureSpriteBoat"  : "avxboat4"
         }
     },
     "mageClass": { "pres": {
         "battleSpriteMale"     : "ch19",
         "battleSpriteFemale"   : "ch19b",
         "adventureSpriteMale"  : "ah19_",
-        "adventureSpriteFemale": "ah19b_"
+        "adventureSpriteFemale": "ah19b_",
+        "adventureSpriteBoat"  : "avxboat4"
         }
     },
     "pres": { "unitBackground":"crbkgcov",

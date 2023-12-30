@@ -589,11 +589,7 @@ void MapMonster::readBinary(ByteOrderDataStreamReader& stream)
     if (m_hasMessage) {
         stream >> m_message;
         stream >> m_resourceSet;
-
-        if (m_features->m_artId16Bit)
-            stream >> m_artID;
-        else
-            m_artID = stream.readScalar<uint8_t>();
+        m_features->readArtifact(stream, m_artID);
     }
 
     stream >> m_neverFlees >> m_notGrowingTeam;
@@ -619,10 +615,7 @@ void MapMonster::writeBinary(ByteOrderDataStreamWriter& stream) const
         stream << m_message;
         stream << m_resourceSet;
 
-        if (m_features->m_artId16Bit)
-            stream << m_artID;
-        else
-            stream << static_cast<uint8_t>(m_artID);
+        m_features->writeArtifact(stream, m_artID);
     }
 
     stream << m_neverFlees << m_notGrowingTeam;
@@ -976,11 +969,7 @@ void MapSeerHut::MapQuestWithReward::readBinary(ByteOrderDataStreamReader& strea
         }
         case RewardType::ARTIFACT:
         {
-            if (m_features->m_artId16Bit) {
-                m_rID = stream.readScalar<uint16_t>();
-            } else {
-                m_rID = stream.readScalar<uint8_t>();
-            }
+            m_features->readArtifact(stream, m_rID);
             break;
         }
         case RewardType::SPELL:
@@ -990,11 +979,7 @@ void MapSeerHut::MapQuestWithReward::readBinary(ByteOrderDataStreamReader& strea
         }
         case RewardType::CREATURE:
         {
-            if (m_features->m_stackId16Bit) {
-                m_rID = stream.readScalar<uint16_t>();
-            } else {
-                m_rID = stream.readScalar<uint8_t>();
-            }
+            m_features->readUnit(stream, m_rID);
             m_rVal = stream.readScalar<uint16_t>();
             break;
         }
@@ -1047,11 +1032,7 @@ void MapSeerHut::MapQuestWithReward::writeBinary(ByteOrderDataStreamWriter& stre
         }
         case RewardType::ARTIFACT:
         {
-            if (m_features->m_artId16Bit) {
-                stream << static_cast<uint16_t>(m_rID);
-            } else {
-                stream << static_cast<uint8_t>(m_rID);
-            }
+            m_features->writeArtifact(stream, m_rID);
             break;
         }
         case RewardType::SPELL:
@@ -1061,10 +1042,7 @@ void MapSeerHut::MapQuestWithReward::writeBinary(ByteOrderDataStreamWriter& stre
         }
         case RewardType::CREATURE:
         {
-            if (m_features->m_stackId16Bit)
-                stream << static_cast<uint16_t>(m_rID);
-            else
-                stream << static_cast<uint8_t>(m_rID);
+            m_features->writeUnit(stream, m_rID);
 
             stream << static_cast<uint16_t>(m_rVal);
             break;
@@ -1193,13 +1171,10 @@ void MapReward::readBinary(ByteOrderDataStreamReader& stream)
     auto lock = stream.setContainerSizeBytesGuarded(1);
     stream >> m_secSkills;
 
-    if (m_features->m_artId16Bit) {
-        stream >> m_artifacts;
-    } else {
-        std::vector<uint8_t> artifacts;
-        stream >> artifacts;
-        m_artifacts = std::vector<uint16_t>(artifacts.cbegin(), artifacts.cend());
-    }
+    auto artsize = stream.readSize();
+    m_artifacts.resize(artsize);
+    for (auto& art : m_artifacts)
+        m_features->readArtifact(stream, art);
 
     stream >> m_spells;
     stream >> m_creatures;
@@ -1215,14 +1190,9 @@ void MapReward::writeBinary(ByteOrderDataStreamWriter& stream) const
     auto lock = stream.setContainerSizeBytesGuarded(1);
     stream << m_secSkills;
 
-    if (m_features->m_artId16Bit) {
-        stream << m_artifacts;
-    } else {
-        std::vector<uint8_t> artifacts;
-        for (auto art : m_artifacts)
-            artifacts.push_back(static_cast<uint8_t>(art));
-        stream << artifacts;
-    }
+    stream.writeSize(m_artifacts.size());
+    for (auto& art : m_artifacts)
+        m_features->writeArtifact(stream, art);
 
     stream << m_spells;
     stream << m_creatures;
@@ -1337,10 +1307,7 @@ void HeroArtSet::readBinary(ByteOrderDataStreamReader& stream)
 
     auto loadArtifact = [&stream, m_features]() -> uint16_t {
         uint16_t result = 0;
-        if (m_features->m_artId16Bit)
-            stream >> result;
-        else
-            result = stream.readScalar<uint8_t>();
+        m_features->readArtifact(stream, result);
         return result;
     };
 
@@ -1370,10 +1337,7 @@ void HeroArtSet::writeBinary(ByteOrderDataStreamWriter& stream) const
         return;
 
     auto saveArtifact = [&stream, m_features](uint16_t art) {
-        if (m_features->m_artId16Bit)
-            stream << art;
-        else
-            stream << static_cast<uint8_t>(art);
+        m_features->writeArtifact(stream, art);
     };
 
     for (auto& art : m_mainSlots)

@@ -121,6 +121,7 @@ public:
 
     SpritePtr getBattleSprite() const { return m_battleSprite->get(); }
     SpritePtr getAdventureSprite() const { return m_adventureSprite->get(); }
+    SpritePtr getAdventureSpriteBoat() const { return m_adventureSpriteBoat->get(); }
 
     QString getClassName() const;
     QString getBio() const;
@@ -132,6 +133,7 @@ private:
     IAsyncPixmapPtr m_specIcon;
     IAsyncSpritePtr m_battleSprite;
     IAsyncSpritePtr m_adventureSprite;
+    IAsyncSpritePtr m_adventureSpriteBoat;
 };
 using GuiHeroConstPtr = const GuiHero*;
 class GuiHeroProvider {

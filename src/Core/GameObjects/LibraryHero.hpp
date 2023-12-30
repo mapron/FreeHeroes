@@ -83,9 +83,24 @@ struct LibraryHero {
         return isWarrior ? &faction->warriorClass : &faction->mageClass;
     }
 
-    auto getAdventureSprite() const
+    auto getBattleSprite() const
+    {
+        return presentationParams.gender == Presentation::Gender::Male ? heroClass()->presentationParams.battleSpriteMale : heroClass()->presentationParams.battleSpriteFemale;
+    }
+    auto getAdventureSpriteOnFoot() const
     {
         return presentationParams.gender == Presentation::Gender::Male ? heroClass()->presentationParams.adventureSpriteMale : heroClass()->presentationParams.adventureSpriteFemale;
+    }
+    auto getAdventureSpriteOnBoat() const
+    {
+        return heroClass()->presentationParams.adventureSpriteBoat;
+    }
+    auto getAdventureSpriteForMap(bool onBoat) const
+    {
+        if (onBoat)
+            return getAdventureSpriteOnBoat();
+        else
+            return getAdventureSpriteOnFoot() + "e";
     }
 
     bool sortLess(const LibraryHero& other) const noexcept

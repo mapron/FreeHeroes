@@ -44,18 +44,12 @@ void H3Map::VictoryCondition::readBinary(ByteOrderDataStreamReader& stream)
             break;
         case VictoryConditionType::ARTIFACT:
         {
-            if (features->m_artId16Bit)
-                stream >> m_artID;
-            else
-                m_artID = stream.readScalar<uint8_t>();
+            features->readArtifact(stream, m_artID);
             break;
         }
         case VictoryConditionType::GATHERTROOP:
         {
-            if (features->m_stackId16Bit)
-                stream >> m_creatureID;
-            else
-                m_creatureID = stream.readScalar<uint8_t>();
+            features->readUnit(stream, m_creatureID);
             stream >> m_creatureCount;
             break;
         }
@@ -133,18 +127,12 @@ void H3Map::VictoryCondition::writeBinary(ByteOrderDataStreamWriter& stream) con
             break;
         case VictoryConditionType::ARTIFACT:
         {
-            if (features->m_artId16Bit)
-                stream << m_artID;
-            else
-                stream << static_cast<uint8_t>(m_artID);
+            features->writeArtifact(stream, m_artID);
             break;
         }
         case VictoryConditionType::GATHERTROOP:
         {
-            if (features->m_stackId16Bit)
-                stream << m_creatureID;
-            else
-                stream << static_cast<uint8_t>(m_creatureID);
+            features->writeUnit(stream, m_creatureID);
             stream << m_creatureCount;
             break;
         }

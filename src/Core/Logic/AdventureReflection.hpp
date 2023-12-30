@@ -17,6 +17,7 @@ STRUCT_REFLECTION_PAIRED(
     "primary",               currentBasePrimary,
     "artifactsOn",           artifactsOn,
     "artifactsBag",          artifactsBag,
+    "artifactsBagList",      artifactsBagList,
     "secSkills",             secondarySkills,
     "spellbook",             spellbook,
     "hasSpellBook",          hasSpellBook,
@@ -34,7 +35,8 @@ STRUCT_REFLECTION_PAIRED(
 STRUCT_REFLECTION_PAIRED(
     AdventureStack,
     "n",                     count,
-    "id",                    library
+    "id",                    library,
+    "r",                     randomTier
 )
 
 

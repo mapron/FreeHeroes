@@ -278,6 +278,7 @@ STRUCT_REFLECTION_PAIRED(
     "battleSpriteFemale",          battleSpriteFemale,
     "adventureSpriteMale",         adventureSpriteMale,
     "adventureSpriteFemale",       adventureSpriteFemale,
+    "adventureSpriteBoat",         adventureSpriteBoat,
     "name",                        name
 )
 

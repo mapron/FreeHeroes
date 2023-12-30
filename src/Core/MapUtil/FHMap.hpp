@@ -238,10 +238,20 @@ struct FHMonster : public FHCommonObject {
         Invalid,
         Random,
         Yes,
-        No
+        No,
+    };
+    enum class SplitStack
+    {
+        Invalid,
+        Average,
+        OneMore,
+        OneLess,
+        Exact,
     };
 
-    UpgradedStack m_upgradedStack = UpgradedStack::Random;
+    UpgradedStack m_upgradedStack   = UpgradedStack::Random;
+    int           m_splitStackExact = -1;
+    SplitStack    m_splitStackType  = SplitStack::Invalid;
 
     bool operator==(const FHMonster&) const noexcept = default;
 };
@@ -315,7 +325,8 @@ struct FHQuest {
     std::vector<Core::UnitWithCount>           m_units;
     Core::ResourceAmount                       m_resources;
     Core::HeroPrimaryParams                    m_primary;
-    int                                        m_level = 0;
+    int                                        m_level   = 0;
+    int                                        m_lastDay = -1;
 
     std::string m_firstVisitText;
     std::string m_nextVisitText;

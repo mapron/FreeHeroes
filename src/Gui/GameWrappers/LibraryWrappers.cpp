@@ -293,15 +293,13 @@ GuiHero::GuiHero(Sound::IMusicBox*, const IGraphicsLibrary* graphicsLibrary, Cor
     , m_portraitLarge(graphicsLibrary->getPixmap(source->presentationParams.portrait))
     , m_specIcon(graphicsLibrary->getPixmap(source->spec->presentationParams.icon))
 {
-    auto hClass        = source->heroClass();
-    auto resNameBattle = source->presentationParams.gender == Core::LibraryHero::Presentation::Gender::Male ? hClass->presentationParams.battleSpriteMale : hClass->presentationParams.battleSpriteFemale;
-    auto resNameAdv    = source->presentationParams.gender == Core::LibraryHero::Presentation::Gender::Male ? hClass->presentationParams.adventureSpriteMale : hClass->presentationParams.adventureSpriteFemale;
-    m_battleSprite     = graphicsLibrary->getObjectAnimation(resNameBattle);
+    m_battleSprite = graphicsLibrary->getObjectAnimation(source->getBattleSprite());
     if (!m_battleSprite->exists()) {
         m_battleSprite = graphicsLibrary->getObjectAnimation("stub_hero");
         Q_ASSERT(m_battleSprite->exists());
     }
-    m_adventureSprite = graphicsLibrary->getObjectAnimation(resNameAdv);
+    m_adventureSprite     = graphicsLibrary->getObjectAnimation(source->getAdventureSpriteOnFoot());
+    m_adventureSpriteBoat = graphicsLibrary->getObjectAnimation(source->getAdventureSpriteOnBoat());
     //Q_ASSERT(m_adventureSprite->exists());
 }
 

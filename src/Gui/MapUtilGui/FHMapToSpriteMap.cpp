@@ -208,7 +208,8 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     });
 
     for (const auto& obj : fhMap.m_towns) {
-        auto* def = obj.m_factionId->objectDefs.get(obj.m_defIndex);
+        auto* def = obj.m_factionId ? obj.m_factionId->objectDefs.get(obj.m_defIndex) : obj.m_randomId;
+        assert(def);
 
         result.addItem(makeItemByDef(SpriteMap::Layer::Town, def, obj.m_pos)
                            .addInfo("player", playerToString(obj.m_player))
@@ -226,10 +227,11 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
             pos.m_x += 1;
         std::string id = "avxprsn0";
         if (isPlayable) {
+            bool water = fhMap.m_tileMap.get(fhHero.m_pos).m_terrainId->id == Core::LibraryTerrain::s_terrainWater;
             if (fhHero.m_isRandom)
                 id = "ahrandom";
             else
-                id = libraryHero->getAdventureSprite() + "e";
+                id = libraryHero->getAdventureSpriteForMap(water);
         }
         auto* item = result.addItem(makeItemById(SpriteMap::Layer::Hero, id, pos)
                                         .setPriority(isPlayable ? SpriteMap::s_objectMaxPriority + 1 : 0));

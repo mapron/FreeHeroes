@@ -483,17 +483,35 @@ GameDatabase::GameDatabase(const Mernel::PropertyTree& recordObjectMaps)
             assert(!faction->warriorClass.highLevelIncrease.empty());
         }
         if (faction->alignment != LibraryFaction::Alignment::Special && faction->alignment != LibraryFaction::Alignment::Independent) {
-            auto copyHeroDef = [this](const std::string& def) {
+            auto copyHeroDef = [this](const std::string& def, int legacyId, bool second) {
                 auto& objRecord        = m_impl->m_objectDefs.insertObject(def + "e");
                 objRecord              = *(m_impl->m_objectDefs.find("hero"));
                 objRecord.id           = def + "e";
                 objRecord.defFile      = objRecord.id;
                 objRecord.terrainsHard = objRecord.terrainsSoft;
+                if (legacyId > -1)
+                    objRecord.subId = legacyId * 2 + second;
+                else
+                    objRecord.subId = 1000;
             };
-            copyHeroDef(faction->mageClass.presentationParams.adventureSpriteMale);
-            copyHeroDef(faction->mageClass.presentationParams.adventureSpriteFemale);
-            copyHeroDef(faction->warriorClass.presentationParams.adventureSpriteMale);
-            copyHeroDef(faction->warriorClass.presentationParams.adventureSpriteFemale);
+            auto copyHeroDefBoat = [this](const std::string& id, const std::string& suffix, int legacyId, bool second) {
+                auto& objRecord        = m_impl->m_objectDefs.insertObject(suffix + "b");
+                objRecord              = *(m_impl->m_objectDefs.find("heroboat"));
+                objRecord.id           = suffix + "b";
+                objRecord.defFile      = objRecord.id;
+                objRecord.terrainsHard = objRecord.terrainsSoft;
+                if (legacyId > -1)
+                    objRecord.subId = legacyId * 2 + second;
+                else
+                    objRecord.subId = 1000;
+            };
+
+            copyHeroDef(faction->mageClass.presentationParams.adventureSpriteMale, faction->legacyId, true);
+            copyHeroDef(faction->mageClass.presentationParams.adventureSpriteFemale, faction->legacyId, true);
+            copyHeroDef(faction->warriorClass.presentationParams.adventureSpriteMale, faction->legacyId, false);
+            copyHeroDef(faction->warriorClass.presentationParams.adventureSpriteFemale, faction->legacyId, false);
+            copyHeroDefBoat(faction->mageClass.presentationParams.adventureSpriteBoat, faction->mageClass.presentationParams.adventureSpriteMale, faction->legacyId, true);
+            copyHeroDefBoat(faction->warriorClass.presentationParams.adventureSpriteBoat, faction->warriorClass.presentationParams.adventureSpriteMale, faction->legacyId, false);
         }
 
         for (const auto& [key, objConst] : faction->objectDefs.variants) {
