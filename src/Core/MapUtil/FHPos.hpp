@@ -143,7 +143,8 @@ inline FHPos operator-(const FHPos& left_, const FHPos& right_)
 
 enum class FHRiverType
 {
-    Invalid,
+    Invalid = -1,
+    None    = 0,
     Water,
     Ice,
     Mud,
@@ -151,7 +152,8 @@ enum class FHRiverType
 };
 enum class FHRoadType
 {
-    Invalid,
+    Invalid = -1,
+    None    = 0,
     Dirt,
     Gravel,
     Cobblestone,

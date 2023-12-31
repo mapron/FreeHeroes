@@ -52,8 +52,8 @@ struct MAPUTIL_EXPORT FHTileMap {
 
     struct Tile {
         Core::LibraryTerrainConstPtr m_terrainId = nullptr;
-        FHRiverType                  m_riverType = FHRiverType::Invalid;
-        FHRoadType                   m_roadType  = FHRoadType::Invalid;
+        FHRiverType                  m_riverType = FHRiverType::None;
+        FHRoadType                   m_roadType  = FHRoadType::None;
 
         SubtileType TL = SubtileType::Invalid;
         SubtileType TR = SubtileType::Invalid;
@@ -192,7 +192,7 @@ struct MAPUTIL_EXPORT FHTileMap {
 
 struct MAPUTIL_EXPORT FHPackedTileMap {
     struct River {
-        FHRiverType          m_type = FHRiverType::Invalid;
+        FHRiverType          m_type = FHRiverType::None;
         std::vector<FHPos>   m_tiles;
         std::vector<uint8_t> m_views;
         std::vector<uint8_t> m_flipHor;
@@ -202,7 +202,7 @@ struct MAPUTIL_EXPORT FHPackedTileMap {
     };
 
     struct Road {
-        FHRoadType           m_type = FHRoadType::Invalid;
+        FHRoadType           m_type = FHRoadType::None;
         std::vector<FHPos>   m_tiles;
         std::vector<uint8_t> m_views;
         std::vector<uint8_t> m_flipHor;

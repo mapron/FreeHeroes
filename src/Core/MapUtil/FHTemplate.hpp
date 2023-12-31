@@ -154,11 +154,12 @@ struct FHRngZone {
     FHPos   m_centerAvg;
     FHPos   m_centerDispersion;
 
-    int m_relativeSizeAvg        = 100;
-    int m_relativeSizeDispersion = 0;
-    int m_zoneGuardPercent       = 100;
-    int m_zoneGuardDispersion    = 5;
-    int m_maxHeat                = 10;
+    int        m_relativeSizeAvg        = 100;
+    int        m_relativeSizeDispersion = 0;
+    int        m_zoneGuardPercent       = 100;
+    int        m_zoneGuardDispersion    = 5;
+    int        m_maxHeat                = 10;
+    FHRoadType m_maxRoadLevel           = FHRoadType::Cobblestone;
 
     std::set<std::string> m_excludeFactionZones;
 

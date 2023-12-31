@@ -79,7 +79,12 @@ void RoadHelper::placeRoads(TileZone& tileZone)
             tileZone.m_midExitNodes.insert(path[path.size() / 2]);
         }
 
-        prepareRoad(tileZone, std::move(path), level);
+        auto newLevel = tileZone.m_roadTypes[level];
+        for (auto* rcell : path) {
+            auto oldLevel = tileZone.m_roads.getLevel(rcell);
+            if (oldLevel < newLevel)
+                tileZone.m_roads.add(rcell, newLevel);
+        }
     };
     for (const auto& [level, unconnectedRoadNodes] : tileZone.m_nodes.m_byLevel) {
         if (unconnectedRoadNodes.empty())
@@ -112,57 +117,26 @@ void RoadHelper::placeRoads(TileZone& tileZone)
     // redundant road cleanup
     while (redundantCleanup(tileZone)) {
     }
-}
 
-void RoadHelper::prepareRoad(TileZone& tileZone, const MapTilePtrList& tileList, RoadLevel level)
-{
-    if (tileList.empty())
-        return;
-
-    for (auto* cell : tileList) {
-        tileZone.m_roads.addIfNotExist(cell, level);
-    }
-}
-
-void RoadHelper::placeRoad(const MapTileRegion& region, RoadLevel level)
-{
-    auto regionSegments = region.splitByFloodFill(false);
-    for (auto& seg : regionSegments) {
-        std::vector<FHPos> path;
-        path.reserve(seg.size());
-        for (auto* cell : seg)
-            path.push_back(cell->m_pos);
-
-        placeRoadPath(std::move(path), level);
-    }
-}
-
-void RoadHelper::placeRoadPath(std::vector<FHPos> path, RoadLevel level)
-{
-    if (path.empty() || level == RoadLevel::NoRoad)
-        return;
-
-    auto&      settings = m_map.m_template.m_userSettings;
-    FHRoadType type     = settings.m_defaultRoad;
-    if (level == RoadLevel::InnerPoints)
-        type = settings.m_innerRoad;
-    if (level == RoadLevel::BorderPoints)
-        type = settings.m_borderRoad;
-    if (level == RoadLevel::Hidden)
-        type = FHRoadType::Invalid;
-
-    // protection from short pieces of inner road
-    if (path.size() <= 2 && level == RoadLevel::InnerPoints) {
-        if (settings.m_defaultRoad != settings.m_innerRoad && settings.m_innerRoad != FHRoadType::Invalid) {
-            type = settings.m_defaultRoad;
+    // correct intersections;
+    {
+        MapTileRegion copy = tileZone.m_roads.getCombinedRegion(FHRoadType::None);
+        for (auto* cell : copy) {
+            size_t cobbleCount = 0;
+            size_t gravelCount = 0;
+            for (auto* ncell : cell->m_orthogonalNeighbours) {
+                auto nlevel = tileZone.m_roads.getLevel(ncell);
+                if (nlevel == FHRoadType::Cobblestone)
+                    cobbleCount++;
+                if (nlevel == FHRoadType::Gravel)
+                    gravelCount++;
+            }
+            if (cobbleCount >= 2)
+                tileZone.m_roads.add(cell, FHRoadType::Cobblestone);
+            else if (gravelCount >= 2)
+                tileZone.m_roads.add(cell, FHRoadType::Gravel);
         }
     }
-
-    if (type == FHRoadType::Invalid)
-        return;
-
-    for (auto& pos : path)
-        m_map.m_tileMap.get(pos).m_roadType = type;
 }
 
 bool RoadHelper::redundantCleanup(TileZone& tileZone)
@@ -175,7 +149,7 @@ bool RoadHelper::redundantCleanup(TileZone& tileZone)
     // mustBeRoad=false - not exist in pendingRegion
     auto checkTileListAllOf = [&tileZone](const MapTilePtrList& tiles, bool mustBeRoad) {
         for (auto* cell : tiles) {
-            const bool isRoad = tileZone.m_roads.m_all.contains(cell);
+            const bool isRoad = tileZone.m_roads.getLevel(cell) > FHRoadType::None;
             if (mustBeRoad && !isRoad)
                 return false;
             if (!mustBeRoad && isRoad)
@@ -187,7 +161,8 @@ bool RoadHelper::redundantCleanup(TileZone& tileZone)
     auto applyCorrectionPattern = [&tileZone, &checkTileListAllOf, &result](const std::vector<FHPos>&              offsetsCheckRoad,
                                                                             const std::vector<FHPos>&              offsetsCheckNonRoad,
                                                                             const std::vector<MapTile::Transform>& transforms) {
-        auto copy = tileZone.m_roads.m_all;
+        MapTileRegion copy = tileZone.m_roads.getCombinedRegion(FHRoadType::None);
+        copy.erase(tileZone.m_roadIgnoredNodes);
         for (auto* cell : copy) {
             for (const MapTile::Transform& transform : transforms) {
                 const MapTilePtrList tilesCheckRoad    = cell->neighboursByOffsets(offsetsCheckRoad, transform);
@@ -358,6 +333,10 @@ MapTilePtrList RoadHelper::aStarPath(TileZone& zone, MapTilePtr start, MapTilePt
     if (!generator.isSuccess()) {
         throw std::runtime_error("Failed to find valid path in " + zone.m_id + ", from:" + start->toPrintableString() + " to:" + end->toPrintableString());
     }
+    //    if (std::find(path.cbegin(), path.cend(), start) == path.cend())
+    //        throw std::runtime_error("no start in path!");
+    //    if (std::find(path.cbegin(), path.cend(), end) == path.cend())
+    //        throw std::runtime_error("no end in path!");
 
     const auto pathCopy = path;
     path.clear();

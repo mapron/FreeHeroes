@@ -174,7 +174,7 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
             result.getCellMerged(item).m_colorUnblocked = makeColor(tile.m_terrainId->presentationParams.minimapUnblocked);
             result.addItem(std::move(item));
         }
-        if (tile.m_riverType != FHRiverType::Invalid) {
+        if (tile.m_riverType != FHRiverType::None) {
             std::string id = "";
             if (tile.m_riverType == FHRiverType::Water)
                 id = "clrrvr";
@@ -197,7 +197,7 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
             item.addInfo("flipVert", item.m_flipVert ? "true" : "false");
             result.addItem(std::move(item));
         }
-        if (tile.m_roadType != FHRoadType::Invalid) {
+        if (tile.m_roadType != FHRoadType::None) {
             std::string id = "";
             if (tile.m_roadType == FHRoadType::Dirt)
                 id = "dirtrd";

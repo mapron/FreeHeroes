@@ -285,7 +285,7 @@ MapGuardList SegmentHelper::makeBorders(std::vector<TileZone>& tileZones)
 
                 auto roadFrom = cell->makePathTo(false, cellInner, true);
                 for (auto* tile : roadFrom) {
-                    tileZone.m_roads.add(tile, conPath.m_road);
+                    tileZone.m_roads.add(tile, tileZone.m_roadTypes[conPath.m_road]);
                     tileZone.m_needPlaceObstacles.erase(tile);
                     tileZone.m_needPlaceObstaclesTentative.erase(tile);
                     for (auto* n : tile->m_orthogonalNeighbours) {
@@ -524,6 +524,8 @@ void SegmentHelper::makeHeatMap(TileZone& tileZone)
     std::set<MapTilePtr> remaining, completed;
 
     for (auto tile : tileZone.m_nodes.m_byLevel[RoadLevel::Towns])
+        completed.insert(tile);
+    for (auto tile : tileZone.m_midTownNodes)
         completed.insert(tile);
     if (completed.empty()) {
         for (auto tile : tileZone.m_nodes.m_byLevel[RoadLevel::Exits])

@@ -16,7 +16,7 @@ using namespace FreeHeroes;
 ENUM_REFLECTION_STRINGIFY(
     FHRiverType,
     Invalid,
-    Invalid,
+    None,
     Water,
     Ice,
     Mud,
@@ -25,7 +25,7 @@ ENUM_REFLECTION_STRINGIFY(
 ENUM_REFLECTION_STRINGIFY(
     FHRoadType,
     Invalid,
-    Invalid,
+    None,
     Dirt,
     Gravel,
     Cobblestone)

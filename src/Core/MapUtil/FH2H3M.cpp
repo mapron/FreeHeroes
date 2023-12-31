@@ -175,9 +175,9 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         auto& destTile       = dest.m_tiles.get(pos.m_x, pos.m_y, pos.m_z);
         destTile.m_terType   = static_cast<uint8_t>(tile.m_terrainId->legacyId);
         destTile.m_terView   = tile.m_terrainView.m_view;
-        destTile.m_riverType = static_cast<uint8_t>(tile.m_riverType);
+        destTile.m_riverType = tile.m_riverType == FHRiverType::Invalid ? 0 : static_cast<uint8_t>(tile.m_riverType);
         destTile.m_riverDir  = tile.m_riverView.m_view;
-        destTile.m_roadType  = static_cast<uint8_t>(tile.m_roadType);
+        destTile.m_roadType  = tile.m_roadType == FHRoadType::Invalid ? 0 : static_cast<uint8_t>(tile.m_roadType);
         destTile.m_roadDir   = tile.m_roadView.m_view;
 
         destTile.m_flipHor  = tile.m_terrainView.m_flipHor;

@@ -24,12 +24,8 @@ public:
                bool                          extraLogging);
 
     void placeRoads(TileZone& tileZone);
-    void placeRoad(const MapTileRegion& region, RoadLevel level);
 
 private:
-    void prepareRoad(TileZone& tileZone, const MapTilePtrList& tileList, RoadLevel level);
-    void placeRoadPath(std::vector<FHPos> path, RoadLevel level);
-
     bool           redundantCleanup(TileZone& tileZone);
     MapTilePtrList aStarPath(TileZone& zone, MapTilePtr start, MapTilePtr end) const;
 

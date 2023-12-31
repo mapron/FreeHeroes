@@ -479,6 +479,7 @@
                     "P2":{"town":{"hasFort":true, "garisonRmg":[{"levels":[60],"value":20000}]}, "useZoneFaction": true, "tilesToTarget": 8, "closeToConnection":"CC_P2_0_main"}},
 
                 "guardGroupLimit": 150000,
+                "maxRoadLevel": "Gravel",
 
                 "generators": {
                     "banks": {

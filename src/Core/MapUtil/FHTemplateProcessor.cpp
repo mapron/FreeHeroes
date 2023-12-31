@@ -235,6 +235,12 @@ void FHTemplateProcessor::run()
             tileZone.m_mainTownFaction = getRandomPlayableFaction(tileZone.m_rngZoneSettings.m_excludeFactionZones);
             factionSetup(tileZone);
         }
+        tileZone.m_roadTypes[RoadLevel::Towns]        = std::min(m_map.m_template.m_userSettings.m_defaultRoad, tileZone.m_rngZoneSettings.m_maxRoadLevel);
+        tileZone.m_roadTypes[RoadLevel::Exits]        = tileZone.m_roadTypes[RoadLevel::Towns];
+        tileZone.m_roadTypes[RoadLevel::InnerPoints]  = std::min(m_map.m_template.m_userSettings.m_innerRoad, tileZone.m_rngZoneSettings.m_maxRoadLevel);
+        tileZone.m_roadTypes[RoadLevel::BorderPoints] = std::min(m_map.m_template.m_userSettings.m_borderRoad, tileZone.m_rngZoneSettings.m_maxRoadLevel);
+        tileZone.m_roadTypes[RoadLevel::Hidden]       = FHRoadType::None;
+        tileZone.m_roadTypes[RoadLevel::NoRoad]       = FHRoadType::None;
     }
 
     Mernel::ProfilerContext                profileContext;
@@ -559,8 +565,10 @@ void FHTemplateProcessor::runTownsPlacement()
         for (auto&& pos : townPositions) {
             auto pos2 = pos->m_neighborB;
             tileZone.m_nodes.add(pos2, RoadLevel::Towns);
-            tileZone.m_roads.add(pos, RoadLevel::Towns);
-            tileZone.m_roads.add(pos2, RoadLevel::Towns);
+            tileZone.m_roads.add(pos, tileZone.m_roadTypes[RoadLevel::Towns]);
+            tileZone.m_roads.add(pos2, tileZone.m_roadTypes[RoadLevel::Towns]);
+            tileZone.m_roadIgnoredNodes.insert(pos);
+            tileZone.m_roadIgnoredNodes.insert(pos2);
         }
 
         {
@@ -594,13 +602,11 @@ void FHTemplateProcessor::runRoadsPlacement()
         if (isFilteredOut(tileZone))
             continue;
 
-        auto prevPlaced = tileZone.m_roads.m_tileLevels;
         roadHelper.placeRoads(tileZone);
-        for (auto& [tile, level] : prevPlaced)
-            tileZone.m_roads.add(tile, level);
 
         for (const auto& [level, region] : tileZone.m_roads.m_byLevel) {
-            roadHelper.placeRoad(region, level);
+            for (auto* cell : region)
+                m_map.m_tileMap.get(cell->m_pos).m_roadType = level;
         }
     }
 }

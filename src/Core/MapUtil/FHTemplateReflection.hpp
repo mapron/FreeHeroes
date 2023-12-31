@@ -217,6 +217,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_relativeSizeDispersion,
     m_zoneGuardPercent,
     m_zoneGuardDispersion,
+    m_maxHeat,
+    m_maxRoadLevel,
     m_excludeFactionZones,
     m_scoreTargets,
     m_generators,

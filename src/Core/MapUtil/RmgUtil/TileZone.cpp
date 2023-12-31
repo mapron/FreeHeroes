@@ -50,13 +50,14 @@ TileZone::TileIntMapping TileZone::makeMoveCosts(bool onlyUsable) const
     for (auto tile : area)
         costs[tile] = 100;
     for (const auto& [level, rarea] : m_roads.m_byLevel) {
-        int cost = 100;
-        if (level == RoadLevel::Towns)
+        // we are making arbitrary weight here unrelated to actual hero speed on roads.
+        int cost = 80;
+        if (level == FHRoadType::Cobblestone)
             cost = 20;
-        if (level == RoadLevel::Exits)
+        if (level == FHRoadType::Gravel)
             cost = 40;
-        if (level == RoadLevel::InnerPoints || level == RoadLevel::BorderPoints)
-            cost = 70;
+        if (level == FHRoadType::Dirt)
+            cost = 60;
         for (auto* tile : rarea)
             costs[tile] = cost;
     }

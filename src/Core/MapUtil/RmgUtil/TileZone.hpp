@@ -51,6 +51,15 @@ struct RegionMapping {
         return it == m_byLevel.cend() ? MapTileRegion{} : it->second;
     }
 
+    MapTileRegion getCombinedRegion(T greaterThanLevel) const
+    {
+        MapTileRegion copy;
+        for (auto& [level, reg] : m_byLevel)
+            if (level > greaterThanLevel)
+                copy.insert(reg);
+        return copy;
+    }
+
     void erase(MapTilePtr tile)
     {
         auto it = m_tileLevels.find(tile);
@@ -95,12 +104,16 @@ struct TileZone {
     std::vector<Segment> m_innerAreaSegments;
     MapTileRegion        m_innerAreaSegmentsUnited;
 
-    using RoadNetwork = RegionMapping<RoadLevel, RoadLevel::NoRoad>;
-    using HeatData    = RegionMapping<int, -1>;
+    using RoadNetworkNodes = RegionMapping<RoadLevel, RoadLevel::NoRoad>;
+    using RoadNetworkRoad  = RegionMapping<FHRoadType, FHRoadType::Invalid>;
+    using HeatData         = RegionMapping<int, -1>;
+    using RoadTypeMap      = std::map<RoadLevel, FHRoadType>;
 
-    MapTileRegion m_roadPotentialArea;
-    RoadNetwork   m_roads;
-    RoadNetwork   m_nodes;
+    MapTileRegion    m_roadIgnoredNodes; // town roads
+    MapTileRegion    m_roadPotentialArea;
+    RoadNetworkRoad  m_roads;
+    RoadNetworkNodes m_nodes;
+    RoadTypeMap      m_roadTypes;
 
     MapTileRegion m_midTownNodes; //nodes on the middle of roads connecting two towns. (towns.size - 1)
     MapTileRegion m_midExitNodes; //nodes on the middle of roads connecting exit and town. (exits.size)

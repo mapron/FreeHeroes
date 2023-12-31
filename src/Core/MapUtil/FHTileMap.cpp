@@ -709,12 +709,12 @@ void FHTileMap::determineRoadViewRotation()
         const auto& B  = getNeighbour(pos, flipHor ? +0 : +0, flipVert ? -1 : +1, def);
         // const auto& BR = getNeighbour(pos, flipHor ? -1 : +1, flipVert ? -1 : +1);
 
-        const auto eR  = (X.m_roadType == FHRoadType::Invalid) == (R.m_roadType == FHRoadType::Invalid);
-        const auto eL  = (X.m_roadType == FHRoadType::Invalid) == (L.m_roadType == FHRoadType::Invalid);
-        const auto eT  = (X.m_roadType == FHRoadType::Invalid) == (T.m_roadType == FHRoadType::Invalid);
-        const auto eB  = (X.m_roadType == FHRoadType::Invalid) == (B.m_roadType == FHRoadType::Invalid);
-        const auto eTR = (X.m_roadType == FHRoadType::Invalid) == (TR.m_roadType == FHRoadType::Invalid);
-        const auto eBL = (X.m_roadType == FHRoadType::Invalid) == (BL.m_roadType == FHRoadType::Invalid);
+        const auto eR  = (X.m_roadType == FHRoadType::None) == (R.m_roadType == FHRoadType::None);
+        const auto eL  = (X.m_roadType == FHRoadType::None) == (L.m_roadType == FHRoadType::None);
+        const auto eT  = (X.m_roadType == FHRoadType::None) == (T.m_roadType == FHRoadType::None);
+        const auto eB  = (X.m_roadType == FHRoadType::None) == (B.m_roadType == FHRoadType::None);
+        const auto eTR = (X.m_roadType == FHRoadType::None) == (TR.m_roadType == FHRoadType::None);
+        const auto eBL = (X.m_roadType == FHRoadType::None) == (BL.m_roadType == FHRoadType::None);
 
         auto setView = [&X, flipHor, flipVert](uint8_t min, uint8_t max) {
             X.m_roadView.m_viewMin             = min;
@@ -757,7 +757,7 @@ void FHTileMap::determineRoadViewRotation()
             for (int x = 0; x < m_width; ++x) {
                 const FHPos pos{ x, y, z };
                 auto&       X = get(pos);
-                if (X.m_roadType == FHRoadType::Invalid)
+                if (X.m_roadType == FHRoadType::None)
                     continue;
 
                 const bool tileCorrected = [&correctTile, &pos]() {
@@ -846,7 +846,7 @@ void FHTileMap::determineRiverViewRotation()
             for (int x = 0; x < m_width; ++x) {
                 const FHPos pos{ x, y, z };
                 auto&       X = get(pos);
-                if (X.m_riverType == FHRiverType::Invalid)
+                if (X.m_riverType == FHRiverType::None)
                     continue;
 
                 const bool tileCorrected = [&correctTile, &pos]() {
@@ -974,14 +974,14 @@ void FHPackedTileMap::packFromMap(const FHTileMap& map)
         m_terrainFlipHor[i]     = tile.m_terrainView.m_flipHor;
         m_terrainFlipVert[i]    = tile.m_terrainView.m_flipVert;
         m_coastal[i]            = tile.m_coastal;
-        if (tile.m_roadType != FHRoadType::Invalid) {
+        if (tile.m_roadType != FHRoadType::None) {
             auto& road = m_roads[static_cast<size_t>(tile.m_roadType) - 1];
             road.m_tiles.push_back(pos);
             road.m_views.push_back(tile.m_roadView.m_view);
             road.m_flipHor.push_back(tile.m_roadView.m_flipHor);
             road.m_flipVert.push_back(tile.m_roadView.m_flipVert);
         }
-        if (tile.m_riverType != FHRiverType::Invalid) {
+        if (tile.m_riverType != FHRiverType::None) {
             auto& river = m_rivers[static_cast<size_t>(tile.m_riverType) - 1];
             river.m_tiles.push_back(pos);
             river.m_views.push_back(tile.m_riverView.m_view);
