@@ -78,6 +78,8 @@ struct FHTown : public FHPlayerControlledObject {
     std::vector<Core::LibraryBuildingConstPtr> m_forbiddenBuildings;
     std::vector<FHTownEvent>                   m_events;
 
+    std::vector<uint8_t> m_somethingBuildingRelated;
+
     Core::LibraryObjectDefConstPtr m_randomId = nullptr;
 
     // @todo: investigate what stored there

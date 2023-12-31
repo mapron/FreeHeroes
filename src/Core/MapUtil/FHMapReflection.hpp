@@ -98,6 +98,11 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_army)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    FHCustomHeroDataExt,
+    m_unknown1,
+    m_unknown2)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHHero,
     m_pos,
     m_order,
@@ -111,7 +116,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_isRandom,
     m_isPrison,
     m_groupedFormation,
-    m_questIdentifier)
+    m_questIdentifier,
+    m_unknown1,
+    m_unknown2)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHTownEvent,
@@ -146,6 +153,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_buildings,
     m_forbiddenBuildings,
     m_events,
+    m_somethingBuildingRelated,
     m_obligatorySpells,
     m_possibleSpells,
     m_hasGarison,
@@ -193,7 +201,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_generationId,
 
     m_id,
-    m_messageWithBattle)
+    m_messageWithBattle,
+    m_pickupCondition1,
+    m_pickupCondition2)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHRandomArtifact,
@@ -205,7 +215,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_generationId,
 
     m_type,
-    m_messageWithBattle)
+    m_messageWithBattle,
+    m_pickupCondition1,
+    m_pickupCondition2)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHPandora,
@@ -259,6 +271,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_notGrowingTeam,
     m_questIdentifier,
     m_guardValue,
+    m_quantityMode,
+    m_quantityByAiValue,
     m_hasMessage,
     m_reward,
     m_message,
@@ -701,7 +715,11 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_hasRoundLimit,
     m_roundLimit,
     m_levelLimit,
-    m_hotaVersion)
+    m_hotaVersion,
+    m_unknown1,
+    m_unknown2,
+    m_unknown3,
+    m_unknown4)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHMap::Rumor,
@@ -747,6 +765,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_placeholderHeroes,
     m_disposedHeroes,
     m_customHeroes,
+    m_customHeroDataExt,
     m_globalEvents,
     m_objectDefs,
     m_victoryCondition,

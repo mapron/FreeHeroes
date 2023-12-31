@@ -92,6 +92,13 @@ struct FHHeroData {
     bool operator==(const FHHeroData&) const noexcept = default;
 };
 
+struct FHCustomHeroDataExt {
+    uint16_t m_unknown1 = 0;
+    uint32_t m_unknown2 = 0;
+
+    bool operator==(const FHCustomHeroDataExt&) const noexcept = default;
+};
+
 struct FHDisposedHero {
     Core::LibraryHeroConstPtr m_heroId   = nullptr;
     int                       m_portrait = -1;
@@ -127,6 +134,9 @@ struct FHHero : public FHPlayerControlledObject {
     bool m_groupedFormation = false;
 
     uint32_t m_questIdentifier = 0;
+
+    uint16_t m_unknown1 = 0;
+    uint32_t m_unknown2 = 0;
 
     MAPUTIL_EXPORT std::string getDefId(bool onWater) const;
 
@@ -186,6 +196,9 @@ struct FHArtifact : public FHCommonObject {
 
     FHMessageWithBattle m_messageWithBattle;
 
+    uint32_t m_pickupCondition1 = 0;
+    uint8_t  m_pickupCondition2 = 0;
+
     bool operator==(const FHArtifact&) const noexcept = default;
 };
 
@@ -203,6 +216,9 @@ struct FHRandomArtifact : public FHCommonObject {
     Type m_type = Type::Invalid;
 
     FHMessageWithBattle m_messageWithBattle;
+
+    uint32_t m_pickupCondition1 = 0;
+    uint8_t  m_pickupCondition2 = 0;
 
     bool operator==(const FHRandomArtifact&) const noexcept = default;
 };
@@ -232,6 +248,9 @@ struct FHMonster : public FHCommonObject {
 
     uint32_t m_questIdentifier = 0;
     int64_t  m_guardValue      = 0;
+
+    uint8_t  m_quantityMode      = 0;
+    uint32_t m_quantityByAiValue = 0;
 
     bool         m_hasMessage = false;
     Core::Reward m_reward;
@@ -653,6 +672,12 @@ struct MAPUTIL_EXPORT FHMap {
             bool operator==(const HotaVersion&) const noexcept = default;
         } m_hotaVersion;
 
+        uint32_t m_unknown1 = 0;
+        uint8_t  m_unknown2 = 0;
+
+        uint32_t m_unknown3 = 0;
+        uint32_t m_unknown4 = 0;
+
         bool operator==(const Config&) const noexcept = default;
     } m_config;
 
@@ -713,6 +738,8 @@ struct MAPUTIL_EXPORT FHMap {
     std::vector<FHDisposedHero>            m_disposedHeroes; // hero available in tavern for hire
 
     std::vector<FHHeroData> m_customHeroes;
+
+    std::vector<FHCustomHeroDataExt> m_customHeroDataExt;
 
     std::vector<FHGlobalMapEvent> m_globalEvents;
 

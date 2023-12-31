@@ -48,17 +48,23 @@ struct MapFormatFeatures {
     bool m_artId16Bit         = false;
     bool m_factions16Bit      = false;
 
-    bool m_heroHasExp          = false;
-    bool m_heroHasBio          = false;
-    bool m_heroHasCustomSpells = false;
-    bool m_heroHasOneSpell     = false;
-    bool m_heroHasPrimSkills   = false;
+    bool m_heroHasExp              = false;
+    bool m_heroHasBio              = false;
+    bool m_heroHasCustomSpells     = false;
+    bool m_heroHasOneSpell         = false;
+    bool m_heroHasPrimSkills       = false;
+    bool m_heroHasSomethingUnknown = false;
 
     bool m_townHasObligatorySpells = false;
     bool m_townHasSpellResearch    = false;
     bool m_townHasAlignment        = false;
+    bool m_townHasNewBuildingLogic = false;
+
+    bool m_artifactHasPickupConditions = false;
 
     bool m_monsterJoinPercent = false;
+
+    bool m_monsterHasQuantityByValue = false;
 
     bool m_creatureBankSize = false;
 
@@ -610,6 +616,9 @@ struct MapHero : public MapObjectAbstract {
     HeroSpellSet     m_spellSet;
     HeroPrimSkillSet m_primSkillSet;
 
+    uint16_t m_unknown1 = 0;
+    uint32_t m_unknown2 = 0;
+
     void prepareArrays(const MapFormatFeatures* m_features);
 
     void readBinary(ByteOrderDataStreamReader& stream) override;
@@ -665,6 +674,8 @@ struct MapTown : public MapObjectAbstract {
 
     uint8_t m_alignment = 0xff;
 
+    std::vector<uint8_t> m_somethingBuildingRelated;
+
     void prepareArrays(const MapFormatFeatures* m_features);
 
     void readBinary(ByteOrderDataStreamReader& stream) override;
@@ -692,6 +703,9 @@ struct MapMonster : public MapObjectAbstract {
     uint32_t m_upgradedStack    = 0xffffffffU;
     uint32_t m_splitStack       = 0xffffffffU;
 
+    uint8_t  m_quantityMode      = 0;
+    uint32_t m_quantityByAiValue = 0;
+
     void prepareArrays(const MapFormatFeatures* m_features);
 
     void readBinary(ByteOrderDataStreamReader& stream) override;
@@ -716,6 +730,9 @@ struct MapArtifact : public MapObjectAbstract {
     MapMessage m_message;
     uint32_t   m_spellId = 0;
     bool       m_isSpell = false;
+
+    uint32_t m_pickupCondition1 = 0;
+    uint8_t  m_pickupCondition2 = 0;
 
     MapArtifact(bool isSpell)
         : m_isSpell(isSpell)

@@ -93,11 +93,18 @@ MapFormatFeatures::MapFormatFeatures(MapFormat format, int hotaVer1)
     m_heroHasOneSpell     = format == MapFormat::AB;
     m_heroHasPrimSkills   = format > MapFormat::AB;
 
+    m_heroHasSomethingUnknown = isHotaFactory;
+
     m_townHasObligatorySpells = format > MapFormat::ROE;
     m_townHasSpellResearch    = format >= MapFormat::HOTA1;
     m_townHasAlignment        = format > MapFormat::AB;
 
-    m_monsterJoinPercent = format == MapFormat::HOTA3 && hotaVer1 >= 3;
+    m_townHasNewBuildingLogic = isHotaFactory;
+
+    m_artifactHasPickupConditions = isHotaFactory;
+
+    m_monsterJoinPercent        = format == MapFormat::HOTA3 && hotaVer1 >= 3;
+    m_monsterHasQuantityByValue = isHotaFactory;
 
     m_creatureBankSize = format == MapFormat::HOTA3 && hotaVer1 >= 3;
 
@@ -333,6 +340,10 @@ void MapHero::readBinary(ByteOrderDataStreamReader& stream)
     stream >> m_primSkillSet;
 
     stream.zeroPaddingChecked(16, g_enablePaddingCheck);
+
+    if (m_features->m_heroHasSomethingUnknown) {
+        stream >> m_unknown1 >> m_unknown2;
+    }
 }
 
 void MapHero::writeBinary(ByteOrderDataStreamWriter& stream) const
@@ -386,6 +397,10 @@ void MapHero::writeBinary(ByteOrderDataStreamWriter& stream) const
     stream << m_primSkillSet;
 
     stream.zeroPadding(16);
+
+    if (m_features->m_heroHasSomethingUnknown) {
+        stream << m_unknown1 << m_unknown2;
+    }
 }
 
 void MapHero::toJson(PropertyTree& data) const
@@ -501,6 +516,10 @@ void MapTown::readBinary(ByteOrderDataStreamReader& stream)
     if (m_features->m_townHasSpellResearch)
         stream >> m_spellResearch;
 
+    if (m_features->m_townHasNewBuildingLogic) {
+        stream >> m_somethingBuildingRelated;
+    }
+
     m_events.resize(stream.readSize());
     for (auto& event : m_events) {
         stream >> event;
@@ -547,6 +566,10 @@ void MapTown::writeBinary(ByteOrderDataStreamWriter& stream) const
 
     if (m_features->m_townHasSpellResearch)
         stream << m_spellResearch;
+
+    if (m_features->m_townHasNewBuildingLogic) {
+        stream << m_somethingBuildingRelated;
+    }
 
     stream << m_events;
 
@@ -609,6 +632,9 @@ void MapMonster::readBinary(ByteOrderDataStreamReader& stream)
         stream >> m_joinPercent;
         stream >> m_upgradedStack >> m_splitStack;
     }
+    if (m_features->m_monsterHasQuantityByValue) {
+        stream >> m_quantityMode >> m_quantityByAiValue;
+    }
 }
 
 void MapMonster::writeBinary(ByteOrderDataStreamWriter& stream) const
@@ -634,6 +660,9 @@ void MapMonster::writeBinary(ByteOrderDataStreamWriter& stream) const
         stream << m_aggressionExact << m_joinOnlyForMoney;
         stream << m_joinPercent;
         stream << m_upgradedStack << m_splitStack;
+    }
+    if (m_features->m_monsterHasQuantityByValue) {
+        stream << m_quantityMode << m_quantityByAiValue;
     }
 }
 
@@ -786,13 +815,22 @@ void MapArtifact::readBinary(ByteOrderDataStreamReader& stream)
 
     if (m_isSpell)
         stream >> m_spellId;
+
+    if (m_features->m_artifactHasPickupConditions) {
+        stream >> m_pickupCondition1 >> m_pickupCondition2;
+    }
 }
 
 void MapArtifact::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
+    auto* m_features = getFeaturesFromStream(stream);
     m_message.writeBinary(stream);
     if (m_isSpell)
         stream << m_spellId;
+
+    if (m_features->m_artifactHasPickupConditions) {
+        stream << m_pickupCondition1 << m_pickupCondition2;
+    }
 }
 
 void MapArtifact::toJson(PropertyTree& data) const

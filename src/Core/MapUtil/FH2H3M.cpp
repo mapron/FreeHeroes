@@ -144,6 +144,11 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
     dest.m_hotaVer.m_roundLimit        = src.m_config.m_hasRoundLimit ? src.m_config.m_roundLimit : 0xffffffffU;
     dest.m_levelLimit                  = static_cast<uint8_t>(src.m_config.m_levelLimit);
 
+    dest.m_hotaVer.m_unknown1 = src.m_config.m_unknown1;
+    dest.m_hotaVer.m_unknown2 = src.m_config.m_unknown2;
+    dest.m_hotaVer.m_unknown3 = src.m_config.m_unknown3;
+    dest.m_hotaVer.m_unknown4 = src.m_config.m_unknown4;
+
     {
         auto& srcCond                 = src.m_victoryCondition;
         auto& destCond                = dest.m_victoryCondition;
@@ -307,6 +312,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
             for (auto* building : fhTown.m_forbiddenBuildings)
                 cas1->m_forbiddenBuildings[building->legacyId] = 1;
         }
+        cas1->m_somethingBuildingRelated = fhTown.m_somethingBuildingRelated;
         for (auto& srcEvent : fhTown.m_events) {
             MapTownEvent destEvent;
 
@@ -351,6 +357,8 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
 
         hero->m_subID           = heroId;
         hero->m_questIdentifier = fhHero.m_questIdentifier;
+        hero->m_unknown1        = fhHero.m_unknown1;
+        hero->m_unknown2        = fhHero.m_unknown2;
         hero->m_formation       = fhHero.m_groupedFormation;
         hero->m_patrolRadius    = static_cast<uint8_t>(fhHero.m_patrolRadius);
         if (!fhHero.m_isPrison) {
@@ -550,6 +558,8 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         }
         art->prepareArrays(dest.m_features.get());
         convertMessage(fhArt.m_messageWithBattle, art->m_message);
+        art->m_pickupCondition1 = fhArt.m_pickupCondition1;
+        art->m_pickupCondition2 = fhArt.m_pickupCondition2;
 
         addObjectCommon(fhArt, std::move(art));
     }
@@ -557,7 +567,9 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         auto art = std::make_unique<MapArtifact>(false);
         art->prepareArrays(dest.m_features.get());
         convertMessage(fhArt.m_messageWithBattle, art->m_message);
-        std::string id = "";
+        art->m_pickupCondition1 = fhArt.m_pickupCondition1;
+        art->m_pickupCondition2 = fhArt.m_pickupCondition2;
+        std::string id          = "";
         switch (fhArt.m_type) {
             case FHRandomArtifact::Type::Any:
                 id = "avarand";
@@ -622,7 +634,9 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         else if (fhMon.m_splitStackType == FHMonster::SplitStack::OneLess)
             monster->m_splitStack = 4294967294U;
 
-        monster->m_artID = uint16_t(-1);
+        monster->m_artID             = uint16_t(-1);
+        monster->m_quantityMode      = fhMon.m_quantityMode;
+        monster->m_quantityByAiValue = fhMon.m_quantityByAiValue;
 
         monster->m_hasMessage = fhMon.m_hasMessage;
         if (monster->m_hasMessage) {
@@ -855,6 +869,9 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         event.prepareArrays(dest.m_features.get());
         convertEvent(fhEvent, event);
         dest.m_globalEvents.push_back(std::move(event));
+    }
+    for (size_t i = 0; auto& data : src.m_customHeroDataExt) {
+        dest.m_customHeroDataExt[i++] = { data.m_unknown1, data.m_unknown2 };
     }
 
     dest.m_objectDefs = std::move(tmplCache.m_objectDefs);

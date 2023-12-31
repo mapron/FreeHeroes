@@ -113,7 +113,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_bio,
     m_sex,
     m_spellSet,
-    m_primSkillSet)
+    m_primSkillSet,
+    m_unknown1,
+    m_unknown2)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     MapTownEvent,
@@ -145,9 +147,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_possibleSpells,
     m_spellResearch,
     m_events,
-    m_alignment
-
-)
+    m_alignment,
+    m_somethingBuildingRelated)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     MapMonster,
@@ -165,7 +166,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_aggressionExact,
     m_joinOnlyForMoney,
     m_upgradedStack,
-    m_splitStack)
+    m_splitStack,
+    m_quantityMode,
+    m_quantityByAiValue)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     MapQuest,
@@ -229,7 +232,9 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     MapArtifact,
     m_message,
     m_spellId,
-    m_isSpell)
+    m_isSpell,
+    m_pickupCondition1,
+    m_pickupCondition2)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     MapObjectCreatureBank,

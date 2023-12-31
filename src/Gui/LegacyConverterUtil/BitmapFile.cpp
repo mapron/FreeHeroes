@@ -484,6 +484,8 @@ void BitmapFile::toPixmapQt()
         }
     }
 
+    assert(m_width > 0);
+    assert(m_height > 0);
     m_pixmapQt = std::make_shared<QPixmap>(QPixmap::fromImage(std::move(image)));
     assert(m_pixmapQt->width() == (int) m_width);
     assert(m_pixmapQt->height() == (int) m_height);

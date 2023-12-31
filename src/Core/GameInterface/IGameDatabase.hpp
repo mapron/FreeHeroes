@@ -138,6 +138,8 @@ public:
             return getDatabase({ std::string(g_database_SOD) });
         if (version == GameVersion::HOTA)
             return getDatabase({ std::string(g_database_HOTA) });
+        if (version == GameVersion::HOTA_FACTORY)
+            return getDatabase({ std::string(g_database_HOTA_FACTORY) });
 
         return nullptr;
     }

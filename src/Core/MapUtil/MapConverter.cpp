@@ -587,7 +587,7 @@ void MapConverter::propertyDeserializeFH()
 {
     Core::GameVersion version = Core::GameVersion::SOD;
     if (m_mainFile.m_json["format"].getScalar().toString().starts_with("HOTA"))
-        version = Core::GameVersion::HOTA;
+        version = Core::GameVersion::HOTA_FACTORY;
     m_mapFH.fromJson(m_mainFile.m_json, m_databaseContainer->getDatabase(version));
 }
 
@@ -596,6 +596,8 @@ void MapConverter::convertFHtoH3M()
     Core::GameVersion version = Core::GameVersion::SOD;
     if (m_mapFH.m_format >= FHMap::MapFormat::HOTA1 && m_mapFH.m_format <= FHMap::MapFormat::HOTA3)
         version = Core::GameVersion::HOTA;
+    if (m_mapFH.m_format == FHMap::MapFormat::HOTA3 && m_mapFH.m_config.m_hotaVersion.m_ver1 >= 5)
+        version = Core::GameVersion::HOTA_FACTORY;
     auto* db = m_databaseContainer->getDatabase(version);
     convertFH2H3M(m_mapFH, m_mapH3M, db);
 }
@@ -605,6 +607,8 @@ void MapConverter::convertH3MtoFH()
     Core::GameVersion version = Core::GameVersion::SOD;
     if (m_mapH3M.m_format >= MapFormat::HOTA1 && m_mapH3M.m_format <= MapFormat::HOTA3)
         version = Core::GameVersion::HOTA;
+    if (m_mapH3M.m_format == MapFormat::HOTA3 && m_mapH3M.m_hotaVer.m_ver1 >= 5)
+        version = Core::GameVersion::HOTA_FACTORY;
 
     convertH3M2FH(m_mapH3M, m_mapFH, m_databaseContainer->getDatabase(version));
 }
@@ -618,6 +622,8 @@ void MapConverter::convertFHTPLtoFH()
     Core::GameVersion version = Core::GameVersion::SOD;
     if (m_mapFH.m_format >= FHMap::MapFormat::HOTA1 && m_mapFH.m_format <= FHMap::MapFormat::HOTA3)
         version = Core::GameVersion::HOTA;
+    if (m_mapH3M.m_format == MapFormat::HOTA3 && m_mapH3M.m_hotaVer.m_ver1 >= 5)
+        version = Core::GameVersion::HOTA_FACTORY;
 
     auto* db = m_databaseContainer->getDatabase(version);
 

@@ -111,6 +111,11 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
     if (dest.m_config.m_hasRoundLimit)
         dest.m_config.m_roundLimit = src.m_hotaVer.m_roundLimit;
     dest.m_config.m_levelLimit = src.m_levelLimit;
+
+    dest.m_config.m_unknown1 = src.m_hotaVer.m_unknown1;
+    dest.m_config.m_unknown2 = src.m_hotaVer.m_unknown2;
+    dest.m_config.m_unknown3 = src.m_hotaVer.m_unknown3;
+    dest.m_config.m_unknown4 = src.m_hotaVer.m_unknown4;
     {
         auto& srcCond                 = src.m_victoryCondition;
         auto& destCond                = dest.m_victoryCondition;
@@ -331,6 +336,8 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 }
                 fhhero.m_isMain           = mainHeroes.contains(playerId) && mainHeroes[playerId] == hero->m_subID;
                 fhhero.m_questIdentifier  = hero->m_questIdentifier;
+                fhhero.m_unknown1         = hero->m_unknown1;
+                fhhero.m_unknown2         = hero->m_unknown2;
                 fhhero.m_patrolRadius     = hero->m_patrolRadius == 0xff ? -1 : hero->m_patrolRadius;
                 fhhero.m_groupedFormation = hero->m_formation;
 
@@ -500,6 +507,9 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                     fhMonster.m_reward.resources = convertResources(monster->m_resourceSet.m_resourceAmount);
                 }
 
+                fhMonster.m_quantityMode      = monster->m_quantityMode;
+                fhMonster.m_quantityByAiValue = monster->m_quantityByAiValue;
+
                 dest.m_objects.m_monsters.push_back(std::move(fhMonster));
             } break;
             case MapObjectType::OCEAN_BOTTLE:
@@ -607,6 +617,9 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                     assert(objDefCorrected.subId != 0);
                     art.m_id = m_artifactIds[objDefCorrected.subId];
                 }
+
+                art.m_pickupCondition1 = artifact->m_pickupCondition1;
+                art.m_pickupCondition2 = artifact->m_pickupCondition2;
                 dest.m_objects.m_artifacts.push_back(std::move(art));
             } break;
             case MapObjectType::RANDOM_ART:
@@ -700,6 +713,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                             fhtown.m_forbiddenBuildings.push_back(m_buildingIds[i]);
                     }
                 }
+                fhtown.m_somethingBuildingRelated = town->m_somethingBuildingRelated;
                 for (auto& srcEvent : town->m_events) {
                     FHTownEvent destEvent;
 
@@ -1030,6 +1044,9 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
     }
     for (auto& event : src.m_globalEvents) {
         dest.m_globalEvents.push_back(convertEvent(event));
+    }
+    for (auto& data : src.m_customHeroDataExt) {
+        dest.m_customHeroDataExt.push_back({ data.m_unknown1, data.m_unknown2 });
     }
 
     convertTileMap(src, dest);

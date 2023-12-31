@@ -1,0 +1,446 @@
+[{
+"scope": "factions",
+
+"records" : {
+
+"hota.faction.factory"             : {
+    "untranslatedName" : "Factory",
+    "nativeTerrain": "hota.terrain.wasteland",
+    "warriorClass": {
+    "id": "hota.faction.factory.warrior",
+    "untranslatedName": "Mercenary",
+    "startParams": {"ad":{"attack":3, "defense":0}, "magic":{"sp":2, "int":1}},
+    "lowLevelIncrease" : {"attack":45, "defense":25, "sp":20, "int":10},
+    "highLevelIncrease": {"attack":30, "defense":30, "sp":20, "int":20},
+    "skills" :{
+        "sod.skill.artillery": -1,
+        "sod.skill.ballistics": -2,
+        "sod.skill.diplomacy": 2,
+        "sod.skill.armourer": -4,
+        "sod.skill.eagleEye": 2,
+        "sod.skill.estates": 1,
+        "sod.skill.intelligence": 1,
+        "sod.skill.leadership": 1,
+        "sod.skill.logistics": -1,
+        "sod.skill.magicAir": 1,
+        "sod.skill.magicEarth": 1,
+        "sod.skill.mysticism": -2,
+        "sod.skill.wisdom": -2,
+        "sod.skill.navigation": 1,
+        "sod.skill.offense": 1,
+        "sod.skill.learning": -2,
+        "sod.skill.pathfind": 2,
+        "sod.skill.scouting": -1,
+        "sod.skill.resistance": -2,
+        "hota.skill.interfere": -2,
+        "sod.skill.archery": 2,
+        "sod.skill.luck": 5
+
+    }
+    },
+    "mageClass": {
+    "id": "hota.faction.factory.mage",
+    "untranslatedName": "Artificer",
+    "startParams": {"ad":{"attack":2, "defense":0}, "magic":{"sp":1, "int":2}},
+    "lowLevelIncrease" : {"attack":15, "defense":10, "sp":40, "int":35},
+    "highLevelIncrease": {"attack":30, "defense":20, "sp":20, "int":30},
+    "skills" :{
+        "sod.skill.ballistics": -3,
+        "sod.skill.scholar": -2,
+        "sod.skill.diplomacy": -2,
+        "sod.skill.armourer": -2,
+        "sod.skill.eagleEye": -5,
+        "sod.skill.estates": -1,
+        "sod.skill.intelligence": 1,
+        "sod.skill.magicWater": 6,
+        "sod.skill.magicAir": 3,
+        "sod.skill.magicEarth": 1,
+        "sod.skill.magicFire": -1,
+        "sod.skill.mysticism": -4,
+        "sod.skill.navigation": 2,
+        "sod.skill.offense": 1,
+        "sod.skill.firstAid": -2,
+        "sod.skill.pathfind": 3,
+        "sod.skill.resistance": 4,
+        "hota.skill.interfere": 1,
+        "sod.skill.archery": 3,
+        "sod.skill.tactics": 2,
+        "sod.skill.luck": 1
+
+    }
+    }
+}
+
+}
+
+}, 
+{
+"scope": "factions",
+"uiOnly": true,
+"records" : {
+
+"hota.faction.factory"             : {
+    "warriorClass": { "pres": {
+        "battleSpriteMale"     : "ch18b",
+        "battleSpriteFemale"   : "ch18",
+        "adventureSpriteMale"  : "ah18b_",
+        "adventureSpriteFemale": "ah18_",
+        "adventureSpriteBoat"  : "avxboat4"
+        }
+    },
+    "mageClass": { "pres": {
+        "battleSpriteMale"     : "ch19",
+        "battleSpriteFemale"   : "ch19b",
+        "adventureSpriteMale"  : "ah19_",
+        "adventureSpriteFemale": "ah19b_",
+        "adventureSpriteBoat"  : "avxboat4"
+        }
+    },
+    "pres": { "unitBackground":"crbkgcov",
+        "goesAfterId":"hota.faction.cove" }
+}
+
+}
+},
+{
+"scope": "factions",
+"compactCols":                                [ "legacyId" ],
+"records" : {
+
+"hota.faction.factory"                         : [ 10 ]
+
+}
+},
+
+
+
+{
+"scope": "heroes",
+"uiOnly": true,
+"compactCols":           [ {"pres": ["order", "portrait", "portraitSmall",  "gender"] }],
+"records": {
+
+
+"hota.hero.factory.hw01"             : [ [ 1  , "hplp01"   ,  "hplp01s"   ,   "m"] ],
+"hota.hero.factory.hw02"             : [ [ 2  , "hplp02"   ,  "hplp02s"   ,   "m"] ],
+"hota.hero.factory.hw03"             : [ [ 3  , "hplp03"   ,  "hplp03s"   ,   "m"] ],
+"hota.hero.factory.hw04"             : [ [ 4  , "hplp05"   ,  "hplp05s"   ,   "m"] ],
+"hota.hero.factory.hw05"             : [ [ 5  , "hplp17"   ,  "hplp17s"   ,   "m"] ],
+"hota.hero.factory.hw06"             : [ [ 6  , "hplp06"   ,  "hplp06s"   ,   "f"] ],
+"hota.hero.factory.hw07"             : [ [ 7  , "hplp13"   ,  "hplp13s"   ,   "f"] ],
+"hota.hero.factory.hw08"             : [ [ 8  , "hplp15"   ,  "hplp15s"   ,   "f"] ],
+"hota.hero.factory.hm01"             : [ [ 9  , "hplp16"   ,  "hplp16s"   ,   "f"] ],
+"hota.hero.factory.hm02"             : [ [ 1  , "hplp04"   ,  "hplp04s"   ,   "f"] ],
+"hota.hero.factory.hm03"             : [ [ 2  , "hplp07"   ,  "hplp07s"   ,   "m"] ],
+"hota.hero.factory.hm04"             : [ [ 3  , "hplp08"   ,  "hplp08s"   ,   "m"] ],
+"hota.hero.factory.hm05"             : [ [ 4  , "hplp09"   ,  "hplp09s"   ,   "m"] ],
+"hota.hero.factory.hm06"             : [ [ 5  , "hplp10"   ,  "hplp10s"   ,   "m"] ],
+"hota.hero.factory.hm07"             : [ [ 6  , "hplp11"   ,  "hplp11s"   ,   "m"] ],
+"hota.hero.factory.hm08"             : [ [ 7  , "hplp12"   ,  "hplp12s"   ,   "f"] ],
+"hota.hero.factory.hu01"             : [ [ 0  , "hplp14"   ,  "hplp14s"   ,   "m"] ],
+"hota.hero.factory.hu02"             : [ [ 1  , "hplp14"   ,  "hplp14s"   ,   "m"] ],
+"hota.hero.factory.hu03"             : [ [ 2  , "hplp14"   ,  "hplp14s"   ,   "m"] ]
+
+}},
+
+
+
+
+{
+"scope": "heroes",
+
+"compactCols":                       ["untranslatedName" , "factionId"              , "isWarrior", "specId"                              , "startSpellId"                  , "startStacks"                                                                              , "flags" ],
+"records": {
+
+"hota.hero.factory.hw01"            : [ "Mercenary  1"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
+"hota.hero.factory.hw02"            : [ "Mercenary  2"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
+"hota.hero.factory.hw03"            : [ "Mercenary  3"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
+"hota.hero.factory.hw04"            : [ "Mercenary  4"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
+"hota.hero.factory.hw05"            : [ "Mercenary  5"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
+"hota.hero.factory.hw06"            : [ "Mercenary  6"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
+"hota.hero.factory.hw07"            : [ "Mercenary  7"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
+"hota.hero.factory.hw08"            : [ "Mercenary  8"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
+"hota.hero.factory.hm01"            : [ "Artificer  1"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
+"hota.hero.factory.hm02"            : [ "Artificer  2"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
+"hota.hero.factory.hm03"            : [ "Artificer  3"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
+"hota.hero.factory.hm04"            : [ "Artificer  4"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
+"hota.hero.factory.hm05"            : [ "Artificer  5"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
+"hota.hero.factory.hm06"            : [ "Artificer  6"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
+"hota.hero.factory.hm07"            : [ "Artificer  7"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
+"hota.hero.factory.hm08"            : [ "Artificer  8"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
+"hota.hero.factory.hu01"            : [ "Dunno      1"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
+"hota.hero.factory.hu02"            : [ "Dunno      2"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
+"hota.hero.factory.hu03"            : [ "Dunno      3"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ]
+
+
+}
+
+},
+
+
+{
+"scope": "heroes",
+"compactCols":            [ "isWaterContent",  "isEnabledByDefault"],
+
+"records" : {
+
+"hota.hero.factory.hw01"   : [ false, true ],
+"hota.hero.factory.hw02"   : [ false, true ],
+"hota.hero.factory.hw03"   : [ false, true ],
+"hota.hero.factory.hw04"   : [ false, true ],
+"hota.hero.factory.hw05"   : [ false, true ],
+"hota.hero.factory.hw06"   : [ false, true ],
+"hota.hero.factory.hw07"   : [ false, true ],
+"hota.hero.factory.hw08"   : [ false, true ],
+"hota.hero.factory.hm01"   : [ false, true ],
+"hota.hero.factory.hm02"   : [ false, true ],
+"hota.hero.factory.hm03"   : [ false, true ],
+"hota.hero.factory.hm04"   : [ false, true ],
+"hota.hero.factory.hm05"   : [ false, true ],
+"hota.hero.factory.hm06"   : [ false, true ],
+"hota.hero.factory.hm07"   : [ false, true ],
+"hota.hero.factory.hm08"   : [ false, true ],
+"hota.hero.factory.hu01"   : [ false, true ],
+"hota.hero.factory.hu02"   : [ false, true ],
+"hota.hero.factory.hu03"   : [ false, true ]
+
+}
+
+},
+
+
+
+{
+"scope": "heroes",
+"compactCols":                                [ "legacyId" ],
+"records": { 
+
+"hota.hero.factory.hw01"                      : [ 179 ],
+"hota.hero.factory.hw02"                      : [ 180 ],
+"hota.hero.factory.hw03"                      : [ 181 ],
+"hota.hero.factory.hw04"                      : [ 182 ],
+"hota.hero.factory.hw05"                      : [ 183 ],
+"hota.hero.factory.hw06"                      : [ 184 ],
+"hota.hero.factory.hw07"                      : [ 185 ],
+"hota.hero.factory.hw08"                      : [ 186 ],
+"hota.hero.factory.hm01"                      : [ 187 ],
+"hota.hero.factory.hm02"                      : [ 188 ],
+"hota.hero.factory.hm03"                      : [ 189 ],
+"hota.hero.factory.hm04"                      : [ 190 ],
+"hota.hero.factory.hm05"                      : [ 191 ],
+"hota.hero.factory.hm06"                      : [ 192 ],
+"hota.hero.factory.hm07"                      : [ 193 ],
+"hota.hero.factory.hm08"                      : [ 194 ],
+"hota.hero.factory.hu01"                      : [ 195 ],
+"hota.hero.factory.hu02"                      : [ 196 ],
+"hota.hero.factory.hu03"                      : [ 197 ]
+}
+
+},
+
+
+{
+"scope": "artifacts",
+
+"records" : {
+"hota.artifact.special.sleepkeeper"                 : {"class":"unique"  , "value":50000, "cost":50000, "guard": 40000, "untranslatedName": "Sleepkeeper"        ,"slot":"misc"  , "special":"resurrectFangarms"}
+}
+
+},
+{
+"scope": "artifacts",
+"compactCols":                               [ "isWaterContent",  "isEnabledByDefault", "legacyId"],
+
+"records" : {
+
+"hota.artifact.special.sleepkeeper"            : [ false, false, 165 ]
+
+}
+
+},
+{
+"scope": "artifacts",
+"uiOnly": true,
+"records" : {
+
+"hota.artifact.special.sleepkeeper"                   : { "pres": { "orderCategory" : "stats"  , "orderGroup":  1,            "iconStash":"artifactsInventory7"  , "iconBonus":"sod-sprites-artifactsBonus:7"   } }
+
+}
+},
+{
+"scope": "artifacts",
+"compactCols":                                [ "objectDefs" ],
+"records" : {
+
+"hota.artifact.special.sleepkeeper"               : [ "ava0165" ]
+
+}
+
+},
+
+{
+"scope":"objectDefs",
+"uiOnly": false,
+"compactCols":   [ "defFile"        , "blockMap"                                                                                       , "visitMap"                                                                                       , "terrainsHard"     , "terrainsSoft"  ,  "objId" , "subId" , "type", "priority", "substituteFor", "substituteKey" ],
+
+"records": {
+"ava0165"      : [ "AVA0165"        , [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,1,0,1,1,1,1,1,1,1,1,1], [0,0,0,0,0,0,0,0,0,0,0,1], 5, 165, 4, 0 ],
+
+"avwhbom"       : [ "AVWhbom"       , [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,1,0,1,1,1,1,1,1,1,1,1], [1,1,0,0,1,1,1,1,1,1,1,1], 54, 171, 2, 0],
+"avwmech"       : [ "AVWmech"       , [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,1,0,1,1,1,1,1,1,1,1,1], [1,1,0,0,1,1,1,1,1,1,1,1], 54, 172, 2, 0],
+"avwengn"       : [ "AVWengn"       , [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,1,0,1,1,1,1,1,1,1,1,1], [1,1,0,0,1,1,1,1,1,1,1,1], 54, 173, 2, 0],
+"avwalmd"       : [ "AVWalmd"       , [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,1,0,1,1,1,1,1,1,1,1,1], [1,1,0,0,1,1,1,1,1,1,1,1], 54, 174, 2, 0],
+"avwalmb"       : [ "AVWalmb"       , [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,1,0,1,1,1,1,1,1,1,1,1], [1,1,0,0,1,1,1,1,1,1,1,1], 54, 175, 2, 0],
+"avwauto"       : [ "AVWauto"       , [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,1,0,1,1,1,1,1,1,1,1,1], [1,1,0,0,1,1,1,1,1,1,1,1], 54, 176, 2, 0],
+"avwauth"       : [ "AVWauth"       , [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,1,0,1,1,1,1,1,1,1,1,1], [1,1,0,0,1,1,1,1,1,1,1,1], 54, 177, 2, 0],
+"avwworm"       : [ "AVWworm"       , [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,1,0,1,1,1,1,1,1,1,1,1], [1,1,0,0,1,1,1,1,1,1,1,1], 54, 178, 2, 0],
+"avwolgo"       : [ "AVWolgo"       , [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,1,0,1,1,1,1,1,1,1,1,1], [1,1,0,0,1,1,1,1,1,1,1,1], 54, 179, 2, 0],
+"avwguns"       : [ "AVWguns"       , [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,1,0,1,1,1,1,1,1,1,1,1], [1,1,0,0,1,1,1,1,1,1,1,1], 54, 180, 2, 0],
+"avwbhun"       : [ "AVWbhun"       , [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,1,0,1,1,1,1,1,1,1,1,1], [1,1,0,0,1,1,1,1,1,1,1,1], 54, 181, 2, 0],
+"avwcoat"       : [ "AVWccoat"      , [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,1,0,1,1,1,1,1,1,1,1,1], [1,1,0,0,1,1,1,1,1,1,1,1], 54, 182, 2, 0],
+"avwradc"       : [ "AVWradc"       , [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,1,0,1,1,1,1,1,1,1,1,1], [1,1,0,0,1,1,1,1,1,1,1,1], 54, 183, 2, 0],
+"avwdred"       : [ "AVWdred"       , [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,1,0,1,1,1,1,1,1,1,1,1], [1,1,0,0,1,1,1,1,1,1,1,1], 54, 184, 2, 0],
+"avwjugg"       : [ "AVWjugg"       , [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,1,0,1,1,1,1,1,1,1,1,1], [1,1,0,0,1,1,1,1,1,1,1,1], 54, 185, 2, 0],
+
+"avcface0"      : [ "AVCfacE0"      , [0,0,0,0,0,1,1,1,0,0,0,0,0,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,1,0,0,1,1,1,1,1,1,1,1], [1,1,0,0,1,1,1,1,1,1,1,1], 98, 10, 1, 0],
+"avcfacf0"      : [ "AVCfacF0"      , [0,0,0,0,0,1,1,1,0,0,0,0,0,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,1,0,0,1,1,1,1,1,1,1,1], [1,1,0,0,1,1,1,1,1,1,1,1], 98, 10, 1, 0],
+"avcfacc0"      : [ "AVCfacC0"      , [0,0,0,0,0,1,1,1,0,0,0,0,0,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,1,0,0,1,1,1,1,1,1,1,1], [1,1,0,0,1,1,1,1,1,1,1,1], 98, 10, 1, 0],
+"avcfacx0"      : [ "AVCfacX0"      , [0,0,0,0,0,1,1,1,0,0,0,0,0,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,1,0,0,1,1,1,1,1,1,1,1], [1,1,0,0,1,1,1,1,1,1,1,1], 98, 10, 1, 0],
+"avcfacz0"      : [ "AVCfacZ0"      , [0,0,0,0,0,1,1,1,0,0,0,0,0,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,1,0,0,1,1,1,1,1,1,1,1], [1,1,0,0,1,1,1,1,1,1,1,1], 98, 10, 1, 0]
+
+
+}
+
+},
+
+
+
+
+{
+"scope": "units",
+
+"compactCols": [  "untranslatedName" , {"primary":[{"dmg":["min","max"]},{"ad":["attack","defense"]},"maxHealth", "speed", "shoots"]},
+                                                                                                    "traits",                           "factionId"                , "level", "growth",   "cost",   "value", "guardMult1", "guardMult100",      "upgrades"    , {"countWithHeroBase":["min","max"]}   ],
+
+"records": {
+
+"sod.unit.halfling"            : [ "Halfling"             ,  [[ 1,  3], [4 ,  2],   4, 5, 24],     ["ranged"                        ],  "hota.faction.factory"         ,   10,      15,     "40"  ,                75  ,  110 ,  110  ,  ["hota.unit.halflingGrenadier"    ], [15, 25]          ],
+"hota.unit.halflingGrenadier"  : [ "Halfling Grenadier"   ,  [[ 1,  3], [4 ,  2],   4, 5, 24],     ["ranged"                        ],  "hota.faction.factory"         ,   11,      16,     "35"  ,                57  ,  100 ,  100                                                            ],
+"hota.unit.mechanic"           : [ "Mechanic"             ,  [[ 2,  4], [ 7,  4],  15, 5],         [                                ],  "hota.faction.factory"         ,   20,      9 ,     "110" ,                155 ,   90 ,   90  ,  ["hota.unit.engineer"             ], [6, 9]            ],
+"hota.unit.engineer"           : [ "Engineer"             ,  [[ 3,  4], [ 8,  6],  15, 6],         [                                ],  "hota.faction.factory"         ,   21,      9 ,     "140" ,                174 ,  100 ,  100                                                            ],
+"hota.unit.armadillo"          : [ "Armadillo"            ,  [[ 3,  7], [ 8,  6],  15, 6, 4],      [                                ],  "hota.faction.factory"         ,   30,      7 ,     "225" ,                312 ,  120 ,  120  ,  ["hota.unit.belArmadillo"         ], [4, 7]            ],
+"hota.unit.belArmadillo"       : [ "Bellwether Armadillo" ,  [[ 3,  7], [10,  8],  15, 7, 4],      [                                ],  "hota.faction.factory"         ,   31,      7 ,     "275" ,                407 ,  120 ,  120                                                            ],
+"hota.unit.automaton"          : [ "Automaton"            ,  [[ 6,  9], [10,  8],  30, 9],         [                                ],  "hota.faction.factory"         ,   40,      4 ,     "275" ,                502 ,  100 ,  100  ,  ["hota.unit.sentAutomaton"        ]                    ],
+"hota.unit.sentAutomaton"      : [ "Sentinel Automaton"   ,  [[ 6, 10], [11,  8],  30, 11],        [                                ],  "hota.faction.factory"         ,   41,      4 ,     "325" ,                645 ,  110 ,  110                                                            ],
+
+"hota.unit.sandworm"           : [ "Sandworm"             ,  [[10, 14], [12,  7],  35, 6, 12],     [                                ],  "hota.faction.factory"         ,   50,      3 ,     "515" ,                790 ,  120 ,  120  ,  ["hota.unit.upgSandworm"          ]                    ],
+"hota.unit.upgSandworm"        : [ "Olgoi-Korkoi"         ,  [[10, 16], [12,  9],  35, 7, 12],     [                                ],  "hota.faction.factory"         ,   51,      3 ,     "565" ,                852 ,  125 ,  125                                                            ],
+"hota.unit.gunslinger"         : [ "Gunslinger"           ,  [[18, 22], [13, 16],  80, 6],         [                                ],  "hota.faction.factory"         ,   60,      2 ,     "1000",                1415,  100 ,  100  ,  ["hota.unit.bountyHunter"         ]                    ],
+"hota.unit.bountyHunter"       : [ "Bounty Hunter"        ,  [[18, 22], [14, 17],  90, 7],         [                                ],  "hota.faction.factory"         ,   61,      2 ,     "1300",                2116,  100 ,  100                                                            ],
+"hota.unit.couatl"             : [ "Couatl"               ,  [[30, 55], [22, 16], 180, 9],         [                                ],  "hota.faction.factory"         ,   70,      1 ,     "2300,sulfur=1",       3953,  100 ,  100  ,  ["hota.unit.crimsonCouatl"        ]                    ],
+"hota.unit.crimsonCouatl"      : [ "Crimson Couatl"       ,  [[30, 55], [29, 20], 300, 12],        [                                ],  "hota.faction.factory"         ,   71,      1 ,     "4000,sulfur=2",       7220,  110 ,  105                                                            ],
+"hota.unit.dreadnought"        : [ "Dreadnought"          ,  [[30, 55], [22, 16], 180, 9],         [                                ],  "hota.faction.factory"         ,   70,      1 ,     "2300,sulfur=1",       3953,  100 ,  100  ,  ["hota.unit.juggernaut"            ]                   ],
+"hota.unit.juggernaut"         : [ "Juggernaut"           ,  [[30, 55], [29, 20], 300, 12],        [                                ],  "hota.faction.factory"         ,   71,      1 ,     "4000,sulfur=2",       7220,  110 ,  105                                                            ]
+
+}
+
+
+},
+
+{
+"scope": "units",
+
+"uiOnly": true,
+
+"compactCols":    [       {"pres": [    "spriteBattle"                                   ,    "portrait"                   ,  "portraitSM"                    ,  "soundId", "soundHasShoot", "soundHasMovementStart", "spriteProjectile"]} ],
+
+"records": {
+"hota.unit.halflingGrenadier"         : [ [  "halberdier-battle"             , "sod-sprites-portraitsLarge:3"  , "sod-sprites-portraitsSmall:3"   ,  "halb"   ,   false        , false                  ,  ""               ]  ],
+"hota.unit.mechanic"                  : [ [  "archer-battle"                 , "sod-sprites-portraitsLarge:4"  , "sod-sprites-portraitsSmall:4"   ,  "lcrs"   ,   true         , false                  ,  "plcbowx"        ]  ],
+"hota.unit.engineer"                  : [ [  "marksman-battle"               , "sod-sprites-portraitsLarge:5"  , "sod-sprites-portraitsSmall:5"   ,  "hcrs"   ,   true         , false                  ,  "plcbowx"        ]  ],
+"hota.unit.armadillo"                 : [ [  "griffin-battle"                , "sod-sprites-portraitsLarge:6"  , "sod-sprites-portraitsSmall:6"   ,  "grif"   ,   false        , false                  ,  ""               ]  ],
+"hota.unit.belArmadillo"              : [ [  "royalGriffin-battle"           , "sod-sprites-portraitsLarge:7"  , "sod-sprites-portraitsSmall:7"   ,  "rgrf"   ,   false        , false                  ,  ""               ]  ],
+"hota.unit.automaton"                 : [ [  "swordsman-battle"              , "sod-sprites-portraitsLarge:8"  , "sod-sprites-portraitsSmall:8"   ,  "swrd"   ,   false        , false                  ,  ""               ]  ],
+"hota.unit.sentAutomaton"             : [ [  "crusader-battle"               , "sod-sprites-portraitsLarge:9"  , "sod-sprites-portraitsSmall:9"   ,  "crus"   ,   false        , false                  ,  ""               ]  ],
+
+"hota.unit.sandworm"                  : [ [  "monk-battle"                   , "sod-sprites-portraitsLarge:10" , "sod-sprites-portraitsSmall:10"  ,  "monk"   ,   true         , false                  ,  "cprzeax"        ]  ],
+"hota.unit.upgSandworm"               : [ [  "zealot-battle"                 , "sod-sprites-portraitsLarge:11" , "sod-sprites-portraitsSmall:11"  ,  "zelt"   ,   true         , false                  ,  "cprzeax"        ]  ],
+"hota.unit.gunslinger"                : [ [  "cavalier-battle"               , "sod-sprites-portraitsLarge:12" , "sod-sprites-portraitsSmall:12"  ,  "cava"   ,   false        , false                  ,  ""               ]  ],
+"hota.unit.bountyHunter"              : [ [  "champion-battle"               , "sod-sprites-portraitsLarge:13" , "sod-sprites-portraitsSmall:13"  ,  "chmp"   ,   false        , false                  ,  ""               ]  ],
+"hota.unit.couatl"                    : [ [  "angel-battle"                  , "sod-sprites-portraitsLarge:14" , "sod-sprites-portraitsSmall:14"  ,  "angl"   ,   false        , false                  ,  ""               ]  ],
+"hota.unit.crimsonCouatl"             : [ [  "archangel-battle"              , "sod-sprites-portraitsLarge:15" , "sod-sprites-portraitsSmall:15"  ,  "aagl"   ,   false        , false                  ,  ""               ]  ],
+"hota.unit.dreadnought"               : [ [  "angel-battle"                  , "sod-sprites-portraitsLarge:14" , "sod-sprites-portraitsSmall:14"  ,  "angl"   ,   false        , false                  ,  ""               ]  ],
+"hota.unit.juggernaut"                : [ [  "archangel-battle"              , "sod-sprites-portraitsLarge:15" , "sod-sprites-portraitsSmall:15"  ,  "aagl"   ,   false        , false                  ,  ""               ]  ]
+}
+
+},
+
+{
+"scope": "units",
+
+"compactCols":                         [ "objectDefs" ],
+
+"records": {
+"hota.unit.halflingGrenadier"         : [ "avwhbom"   ],
+"hota.unit.mechanic"                  : [ "avwmech"   ],
+"hota.unit.engineer"                  : [ "avwengn"   ],
+"hota.unit.armadillo"                 : [ "avwalmd"   ],
+"hota.unit.belArmadillo"              : [ "avwalmb"   ],
+"hota.unit.automaton"                 : [ "avwauto"   ],
+"hota.unit.sentAutomaton"             : [ "avwauth"   ],
+
+"hota.unit.sandworm"                  : [ "avwworm"   ],
+"hota.unit.upgSandworm"               : [ "avwolgo"   ],
+"hota.unit.gunslinger"                : [ "avwguns"   ],
+"hota.unit.bountyHunter"              : [ "avwbhun"   ],
+"hota.unit.couatl"                    : [ "avwcoat"   ],
+"hota.unit.crimsonCouatl"             : [ "avwradc"   ],
+"hota.unit.dreadnought"               : [ "avwdred"   ],
+"hota.unit.juggernaut"                : [ "avwjugg"   ]
+}
+
+},
+
+
+{
+"scope": "units",
+
+
+"compactCols":                                [ "legacyId" ],
+"records" : {
+
+"hota.unit.halflingGrenadier"                 : [ 171  ],
+"hota.unit.mechanic"                          : [ 172  ],
+"hota.unit.engineer"                          : [ 173  ],
+"hota.unit.armadillo"                         : [ 174  ],
+"hota.unit.belArmadillo"                      : [ 175  ],
+"hota.unit.automaton"                         : [ 176  ],
+"hota.unit.sentAutomaton"                     : [ 177  ],
+
+"hota.unit.sandworm"                          : [ 178  ],
+"hota.unit.upgSandworm"                       : [ 179  ],
+"hota.unit.gunslinger"                        : [ 180  ],
+"hota.unit.bountyHunter"                      : [ 181  ],
+"hota.unit.couatl"                            : [ 182  ],
+"hota.unit.crimsonCouatl"                     : [ 183  ],
+"hota.unit.dreadnought"                       : [ 184  ],
+"hota.unit.juggernaut"                        : [ 185  ]
+
+}
+
+},
+
+{
+"scope": "factions",
+
+"compactCols":                         [ "objectDefs" ],
+
+"records" : {
+
+"hota.faction.factory"              : [ {"m": {"":"avcface0", "FORT": "avcfacf0", "CIT": "avcfacc0", "CAS": "avcfacx0", "CAP": "avcfacz0"}} ]
+
+}
+}
+
+]
+

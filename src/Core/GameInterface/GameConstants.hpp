@@ -7,14 +7,16 @@
 
 namespace FreeHeroes::Core {
 
-[[maybe_unused]] constexpr const char* g_database_HOTA = "hota_base";
-[[maybe_unused]] constexpr const char* g_database_SOD  = "sod_base";
+[[maybe_unused]] constexpr const char* g_database_HOTA         = "hota_base";
+[[maybe_unused]] constexpr const char* g_database_HOTA_FACTORY = "hota_factory";
+[[maybe_unused]] constexpr const char* g_database_SOD          = "sod_base";
 
 enum class GameVersion
 {
     Invalid,
     SOD,
     HOTA,
+    HOTA_FACTORY,
 };
 
 }
