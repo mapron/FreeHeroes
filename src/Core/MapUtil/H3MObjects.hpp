@@ -87,8 +87,9 @@ struct MapFormatFeatures {
     bool m_mapAllowedSpells         = false;
     bool m_mapAllowedSecSkills      = false;
 
-    bool m_mapCustomHeroData = false;
-    bool m_mapCustomHeroSize = false;
+    bool m_mapCustomHeroData         = false;
+    bool m_mapCustomHeroSize         = false;
+    bool m_mapCustomHeroDataExtended = false;
 
     bool m_mapEventHuman = false;
 

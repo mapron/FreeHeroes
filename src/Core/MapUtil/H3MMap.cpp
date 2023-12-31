@@ -274,6 +274,7 @@ void H3Map::prepareArrays()
     m_allowedSpells.resize(m_features->m_spellsRegularCount);
     m_allowedSecSkills.resize(m_features->m_secondarySkillCount);
     m_customHeroData.resize(m_features->m_heroesCount);
+    m_customHeroDataExt.resize(m_features->m_heroesCount);
 
     for (auto& heroData : m_customHeroData) {
         heroData.prepareArrays(m_features.get());
@@ -306,8 +307,13 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
     }
     if (m_format >= MapFormat::HOTA1) {
         stream >> m_hotaVer.m_ver1 >> m_hotaVer.m_ver2;
-        if (m_hotaVer.m_ver1 == 2 || m_hotaVer.m_ver1 == 3)
+        if (m_hotaVer.m_ver1 >= 2)
             stream >> m_hotaVer.m_ver3;
+        if (m_hotaVer.m_ver1 >= 5) {
+            stream >> m_hotaVer.m_unknown1 >> m_hotaVer.m_unknown2;
+            assert(m_hotaVer.m_unknown1 == 0x0B);
+            assert(m_hotaVer.m_unknown2 == 0x1F);
+        }
     }
     updateFeatures();
     prepareArrays();
@@ -378,9 +384,6 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
     if (g_enableOffsetTrace)
         Mernel::Logger(Mernel::Logger::Warning) << "After win/lose offset =" << stream.getBuffer().getOffsetRead();
 
-    //if (1)
-    //    return;
-
     stream >> m_teamCount;
     if (m_teamCount > 0) {
         for (PlayerInfo& playerInfo : m_players)
@@ -423,14 +426,21 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
         stream >> m_hotaVer.m_allowSpecialWeeks >> unknown1 >> unknown2;
         assert(unknown1 == 16);
         assert(unknown2 == 0);
-        if (m_hotaVer.m_ver1 == 3)
+        if (m_hotaVer.m_ver1 >= 3)
             stream >> m_hotaVer.m_roundLimit;
+        if (m_hotaVer.m_ver1 >= 5)
+            stream >> m_hotaVer.m_unknown3 >> m_hotaVer.m_unknown4;
     }
+    if (g_enableOffsetTrace)
+        Mernel::Logger(Mernel::Logger::Warning) << "After m_roundLimit offset =" << stream.getBuffer().getOffsetRead();
 
     if (m_features->m_mapAllowedArtifacts) {
         readBitsSized(m_allowedArtifacts, m_features->m_mapAllowedArtifactsSized, true);
         m_ignoredOffsets.insert(stream.getBuffer().getOffsetRead() - 1);
     }
+
+    if (g_enableOffsetTrace)
+        Mernel::Logger(Mernel::Logger::Warning) << "After AllowedArtifacts offset =" << stream.getBuffer().getOffsetRead();
 
     if (m_features->m_mapAllowedSpells)
         stream.readBits(m_allowedSpells, true);
@@ -446,6 +456,10 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
                 throw std::runtime_error("heroCount check failed for HOTA header");
         }
         for (auto& hero : m_customHeroData)
+            stream >> hero;
+    }
+    if (m_features->m_mapCustomHeroDataExtended) {
+        for (auto& hero : m_customHeroDataExt)
             stream >> hero;
     }
     if (g_enableOffsetTrace)
@@ -476,6 +490,9 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
         m_objects.resize(count);
 
         for (uint32_t index = 0; auto& obj : m_objects) {
+            if (g_enableOffsetTrace)
+                Mernel::Logger(Mernel::Logger::Warning) << "staring  obj [" << index << "]: current offset =" << stream.getBuffer().getOffsetRead();
+
             stream >> obj.m_pos >> obj.m_defnum;
 
             const ObjectTemplate& objTempl = m_objectDefs.at(obj.m_defnum);
@@ -524,8 +541,11 @@ void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
 
     if (m_format >= MapFormat::HOTA1) {
         stream << m_hotaVer.m_ver1 << m_hotaVer.m_ver2;
-        if (m_hotaVer.m_ver1 == 2 || m_hotaVer.m_ver1 == 3)
+        if (m_hotaVer.m_ver1 >= 2)
             stream << m_hotaVer.m_ver3;
+        if (m_hotaVer.m_ver1 >= 5) {
+            stream << m_hotaVer.m_unknown1 << m_hotaVer.m_unknown2;
+        }
     }
 
     stream << m_anyPlayers << m_tiles.m_size << m_tiles.m_hasUnderground;
@@ -569,9 +589,6 @@ void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
 
     stream << m_victoryCondition << m_lossCondition;
 
-    //if (1)
-    //    return;
-
     stream << m_teamCount;
 
     if (m_teamCount > 0) {
@@ -587,6 +604,9 @@ void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
 
     writeBitsSized(m_allowedHeroes, m_features->m_mapAllowedHeroesSized, false);
 
+    if (g_enableOffsetTrace)
+        Mernel::Logger(Mernel::Logger::Warning) << "After allowed heroes offset =" << stream.getBuffer().getOffsetWrite();
+
     if (m_features->m_mapPlaceholderHeroes) {
         stream << m_placeholderHeroes;
     }
@@ -597,18 +617,26 @@ void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
             stream << hero;
     }
 
+    if (g_enableOffsetTrace)
+        Mernel::Logger(Mernel::Logger::Warning) << "After disposed offset =" << stream.getBuffer().getOffsetWrite();
+
     stream.zeroPadding(31);
 
     if (m_features->m_mapHotaUnknown1) {
         uint16_t unknown1 = 16;
         uint32_t unknown2 = 0;
         stream << m_hotaVer.m_allowSpecialWeeks << unknown1 << unknown2;
-        if (m_hotaVer.m_ver1 == 3)
+        if (m_hotaVer.m_ver1 >= 3)
             stream << m_hotaVer.m_roundLimit;
+        if (m_hotaVer.m_ver1 >= 5)
+            stream << m_hotaVer.m_unknown3 << m_hotaVer.m_unknown4;
     }
 
     if (m_features->m_mapAllowedArtifacts)
         writeBitsSized(m_allowedArtifacts, m_features->m_mapAllowedArtifactsSized, true);
+
+    if (g_enableOffsetTrace)
+        Mernel::Logger(Mernel::Logger::Warning) << "After AllowedArtifacts offset =" << stream.getBuffer().getOffsetWrite();
 
     if (m_features->m_mapAllowedSpells)
         stream.writeBits(m_allowedSpells, true);
@@ -626,6 +654,14 @@ void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
             stream << hero;
     }
 
+    if (m_features->m_mapCustomHeroDataExtended) {
+        for (auto& hero : m_customHeroDataExt)
+            stream << hero;
+    }
+
+    if (g_enableOffsetTrace)
+        Mernel::Logger(Mernel::Logger::Warning) << "Before tiles offset =" << stream.getBuffer().getOffsetWrite();
+
     for (int ground = 0; ground < (1 + m_tiles.m_hasUnderground); ++ground) {
         for (int y = 0; y < m_tiles.m_size; y++) {
             for (int x = 0; x < m_tiles.m_size; x++) {
@@ -634,7 +670,11 @@ void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
         }
     }
 
+    if (g_enableOffsetTrace)
+        Mernel::Logger(Mernel::Logger::Warning) << "After tiles offset =" << stream.getBuffer().getOffsetWrite();
+
     stream << m_objectDefs;
+
     {
         uint32_t count = m_objects.size();
         stream << count;

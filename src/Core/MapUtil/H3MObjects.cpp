@@ -25,6 +25,8 @@ constexpr const bool g_enablePaddingCheck = true;
 
 MapFormatFeatures::MapFormatFeatures(MapFormat format, int hotaVer1)
 {
+    const bool isHotaFactory = format >= MapFormat::HOTA1 && format <= MapFormat::HOTA3 && hotaVer1 >= 5;
+
     m_factions = 8; //ROE
     if (format >= MapFormat::AB)
         m_factions = 9;
@@ -38,12 +40,16 @@ MapFormatFeatures::MapFormatFeatures(MapFormat format, int hotaVer1)
         m_artifactsCount = 141;
     if (format >= MapFormat::HOTA1)
         m_artifactsCount = 165;
+    if (isHotaFactory)
+        m_artifactsCount = 166; // +1
 
     m_heroesCount = 128; // ROE
     if (format >= MapFormat::AB)
         m_heroesCount = 156;
     if (format >= MapFormat::HOTA1)
         m_heroesCount = 179;
+    if (isHotaFactory)
+        m_heroesCount = 198; // + 19
 
     m_spellsCount          = 81;
     m_spellsAbilitiesCount = 11;
@@ -54,6 +60,8 @@ MapFormatFeatures::MapFormatFeatures(MapFormat format, int hotaVer1)
         m_creaturesCount = 150;
     if (format >= MapFormat::HOTA1)
         m_creaturesCount = 171;
+    if (isHotaFactory)
+        m_creaturesCount = 187; // +16
 
     m_secondarySkillCount = 28;
     if (format >= MapFormat::HOTA1)
@@ -89,19 +97,19 @@ MapFormatFeatures::MapFormatFeatures(MapFormat format, int hotaVer1)
     m_townHasSpellResearch    = format >= MapFormat::HOTA1;
     m_townHasAlignment        = format > MapFormat::AB;
 
-    m_monsterJoinPercent = format == MapFormat::HOTA3 && hotaVer1 == 3;
+    m_monsterJoinPercent = format == MapFormat::HOTA3 && hotaVer1 >= 3;
 
-    m_creatureBankSize = format == MapFormat::HOTA3 && hotaVer1 == 3;
+    m_creatureBankSize = format == MapFormat::HOTA3 && hotaVer1 >= 3;
 
     m_seerHutExtendedQuest  = format > MapFormat::ROE;
-    m_seerHutMultiQuest     = format == MapFormat::HOTA3 && hotaVer1 == 3;
+    m_seerHutMultiQuest     = format == MapFormat::HOTA3 && hotaVer1 >= 3;
     m_witchHutAllowedSkills = format > MapFormat::ROE;
 
     m_garisonRemovableUnits = format > MapFormat::ROE;
 
     m_artifactMiscFive = format > MapFormat::AB;
 
-    m_eventHasHumanActivate     = format == MapFormat::HOTA3 && hotaVer1 == 3;
+    m_eventHasHumanActivate     = format == MapFormat::HOTA3 && hotaVer1 >= 3;
     m_townEventHasHumanAffected = format > MapFormat::AB;
 
     m_playerP7               = format >= MapFormat::SOD;
@@ -118,8 +126,9 @@ MapFormatFeatures::MapFormatFeatures(MapFormat format, int hotaVer1)
     m_mapAllowedSpells         = format >= MapFormat::SOD;
     m_mapAllowedSecSkills      = format >= MapFormat::SOD;
 
-    m_mapCustomHeroData = format >= MapFormat::SOD;
-    m_mapCustomHeroSize = format >= MapFormat::HOTA1;
+    m_mapCustomHeroData         = format >= MapFormat::SOD;
+    m_mapCustomHeroSize         = format >= MapFormat::HOTA1;
+    m_mapCustomHeroDataExtended = isHotaFactory;
 
     m_mapEventHuman = format > MapFormat::AB;
 

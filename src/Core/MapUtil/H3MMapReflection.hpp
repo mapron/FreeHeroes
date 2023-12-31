@@ -176,13 +176,23 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_sex,
     m_spellSet,
     m_primSkillSet)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    CustomHeroDataExt,
+    m_unknown1,
+    m_unknown2)
+
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     H3Map::HotaVersion,
     m_ver1,
     m_ver2,
     m_ver3,
+    m_unknown1,
+    m_unknown2,
     m_allowSpecialWeeks,
-    m_roundLimit)
+    m_roundLimit,
+    m_unknown3,
+    m_unknown4)
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     H3Map::Rumor,
     m_name,
@@ -231,6 +241,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 
     m_rumors,
     m_customHeroData,
+    m_customHeroDataExt,
     m_tiles,
     m_objectDefs,
 

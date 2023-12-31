@@ -92,6 +92,8 @@ struct MapTileH3M {
     uint8_t m_roadType  = 0;
     uint8_t m_roadDir   = 0;
 
+    uint8_t m_unknown1 = 0;
+
     bool m_flipHor  = false;
     bool m_flipVert = false;
 
@@ -232,6 +234,16 @@ struct CustomHeroData {
     auto operator<=>(const CustomHeroData&) const = default;
 };
 
+struct CustomHeroDataExt {
+    uint16_t m_unknown1 = 0;
+    uint32_t m_unknown2 = 0;
+
+    void readBinary(ByteOrderDataStreamReader& stream) { stream >> m_unknown1 >> m_unknown2; }
+    void writeBinary(ByteOrderDataStreamWriter& stream) const { stream << m_unknown1 << m_unknown2; }
+
+    bool operator==(const CustomHeroDataExt&) const = default;
+};
+
 struct FHMap;
 struct H3Map {
     MapFormat m_format = MapFormat::Invalid;
@@ -240,8 +252,14 @@ struct H3Map {
         uint16_t m_ver2 = 0;
         uint32_t m_ver3 = 12;
 
+        uint32_t m_unknown1 = 0;
+        uint8_t  m_unknown2 = 0;
+
         uint32_t m_allowSpecialWeeks = 1;
         uint32_t m_roundLimit        = 0xffffffff;
+
+        uint32_t m_unknown3 = 0;
+        uint32_t m_unknown4 = 0;
     };
     HotaVersion                        m_hotaVer;
     std::shared_ptr<MapFormatFeatures> m_features;
@@ -337,6 +355,8 @@ struct H3Map {
 
     std::vector<Rumor>          m_rumors;
     std::vector<CustomHeroData> m_customHeroData;
+
+    std::vector<CustomHeroDataExt> m_customHeroDataExt;
 
     MapTileSet                  m_tiles;
     std::vector<ObjectTemplate> m_objectDefs;
