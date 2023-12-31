@@ -55,13 +55,77 @@ void SpriteMapPainter::paint(QPainter*        painter,
     painter->setRenderHint(QPainter::SmoothPixmapTransform, m_settings->getEffectiveScale() < 100);
     const int tileSize = m_settings->m_tileSize;
 
-    auto drawCell = [painter, tileSize, animationFrameOffsetTerrain, animationFrameOffsetObjects, this](const SpriteMap::Cell& cell, int x, int y, bool isOverlayPass) {
+    auto drawOverlayText = [painter, tileSize, this](const SpriteMap::Item& item, int x, const QTransform& posTransform) {
+        painter->setPen(Qt::white);
+        QFont font = painter->font();
+        font.setPixelSize(item.m_overlayInfoFont);
+        painter->setFont(font);
+        painter->setTransform(posTransform);
+        painter->translate((item.m_overlayInfoOffsetX) * tileSize, (0) * tileSize);
+
+        QFontMetrics fm(font);
+
+        const QString txt       = QString::fromStdString(item.m_overlayInfo);
+        int           textWidth = fm.horizontalAdvance(txt);
+        //int textHeight = fm.height();
+
+        const int textX = tileSize / 2 - textWidth / 2 - 2;
+        const int textY = tileSize / 2 - (tileSize / 4) * ((x + item.m_overlayInfoOffsetX) % 2);
+
+        painter->translate(textX, textY);
+
+        QPainterPath stroked = m_impl->findCache(txt, fm);
+
+        if (stroked.isEmpty()) {
+            QPainterPath myPath;
+            myPath.addText(0, 0, font, txt);
+
+            QPainterPathStroker stroker;
+            stroker.setWidth(3);
+            stroked = stroker.createStroke(myPath);
+            m_impl->m_cache[txt].push_back({ stroked, fm });
+
+            //qWarning() << "cache " << txt;
+        }
+
+        painter->setBrush(Qt::black);
+        painter->setPen(Qt::NoPen);
+        painter->drawPath(stroked);
+
+        painter->setBrush(Qt::white);
+        painter->setPen(Qt::white);
+        painter->drawText(0, 0, txt);
+    };
+
+    auto drawHeroFlag = [painter](const QColor& color) {
+        painter->setBrush(color);
+        painter->setPen(Qt::NoPen);
+        painter->drawRect(10, 9, 10, 7);
+        painter->drawPolygon(QPolygonF(QVector<QPointF>{ { 1, 10 }, { 10, 10 }, { 10, 14 } }));
+        painter->drawPolygon(QPolygonF(QVector<QPointF>{ { 1, 16 }, { 10, 16 }, { 10, 12 } }));
+        painter->drawRect(4, 16, 4, 1);
+
+        painter->setBrush(color.darker(120));
+        painter->drawRect(16, 9, 3, 7);
+        //painter->draw
+    };
+
+    auto drawCell = [painter, tileSize, animationFrameOffsetTerrain, animationFrameOffsetObjects, &drawOverlayText, &drawHeroFlag, this](const SpriteMap::Cell& cell, int x, int y, bool isOverlayPass) {
         for (const auto& item : cell.m_items) {
             if (item.m_isOverlayItem && !m_settings->m_overlay)
                 continue;
 
-            auto sprite = item.m_sprite->get();
+            if (item.m_flagColor.isValid()) {
+                auto oldTransform = painter->transform();
+                painter->translate(x * tileSize, y * tileSize);
+                drawHeroFlag(item.m_flagColor);
+                painter->setTransform(oldTransform);
+                continue;
+            }
 
+            if (!item.m_sprite)
+                continue;
+            auto sprite = item.m_sprite->get();
             if (!sprite)
                 continue;
             Gui::ISprite::SpriteSequencePtr seq = sprite->getFramesForGroup(item.m_spriteGroup);
@@ -140,47 +204,8 @@ void SpriteMapPainter::paint(QPainter*        painter,
                 pix = QPixmap::fromImage(img);
                 painter->drawPixmap(frame.m_paddingLeftTop, pix);
             }
-            if (isOverlayPass && !item.m_overlayInfo.empty()) {
-                painter->setPen(Qt::white);
-                QFont font = painter->font();
-                font.setPixelSize(item.m_overlayInfoFont);
-                painter->setFont(font);
-                painter->setTransform(posTransform);
-                painter->translate((item.m_overlayInfoOffsetX) * tileSize, (0) * tileSize);
-
-                QFontMetrics fm(font);
-
-                const QString txt       = QString::fromStdString(item.m_overlayInfo);
-                int           textWidth = fm.horizontalAdvance(txt);
-                //int textHeight = fm.height();
-
-                const int textX = tileSize / 2 - textWidth / 2 - 2;
-                const int textY = tileSize / 2 - (tileSize / 4) * ((x + item.m_overlayInfoOffsetX) % 2);
-
-                painter->translate(textX, textY);
-
-                QPainterPath stroked = m_impl->findCache(txt, fm);
-
-                if (stroked.isEmpty()) {
-                    QPainterPath myPath;
-                    myPath.addText(0, 0, font, txt);
-
-                    QPainterPathStroker stroker;
-                    stroker.setWidth(3);
-                    stroked = stroker.createStroke(myPath);
-                    m_impl->m_cache[txt].push_back({ stroked, fm });
-
-                    //qWarning() << "cache " << txt;
-                }
-
-                painter->setBrush(Qt::black);
-                painter->setPen(Qt::NoPen);
-                painter->drawPath(stroked);
-
-                painter->setBrush(Qt::white);
-                painter->setPen(Qt::white);
-                painter->drawText(0, 0, txt);
-            }
+            if (isOverlayPass && !item.m_overlayInfo.empty())
+                drawOverlayText(item, x, posTransform);
 
             painter->setTransform(oldTransform);
         }

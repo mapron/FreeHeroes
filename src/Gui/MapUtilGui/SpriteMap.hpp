@@ -56,6 +56,7 @@ struct SpriteMap {
         Gui::IAsyncSpritePtr m_sprite;
 
         QColor m_keyColor;
+        QColor m_flagColor;
 
         Layer m_layer         = Layer::Invalid;
         int   m_spriteGroup   = 0;

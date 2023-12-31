@@ -250,6 +250,12 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         if (libraryHero) {
             item->addInfo("id", libraryHero->id);
         }
+        if (!fhHero.m_isPrison) {
+            SpriteMap::Item flagItem = makeItem(fhHero.m_pos + FHPos{ 0, -1 }, -2);
+
+            flagItem.m_flagColor = makePlayerColor(fhHero.m_player);
+            result.addItem(flagItem);
+        }
     }
     for (auto& obj : fhMap.m_objects.m_resources) {
         rendered.insert(&obj);

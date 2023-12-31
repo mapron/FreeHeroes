@@ -132,11 +132,11 @@ constexpr int directionToDegree(FHPosDirection direction) noexcept
 
 inline FHPos operator+(const FHPos& left_, const FHPos& right_)
 {
-    return { left_.m_x + right_.m_x, left_.m_y + right_.m_y };
+    return { left_.m_x + right_.m_x, left_.m_y + right_.m_y, left_.m_z + right_.m_z };
 }
 inline FHPos operator-(const FHPos& left_, const FHPos& right_)
 {
-    return { left_.m_x - right_.m_x, left_.m_y - right_.m_y };
+    return { left_.m_x - right_.m_x, left_.m_y - right_.m_y, left_.m_z - right_.m_z };
 }
 
 [[maybe_unused]] static inline constexpr const FHPos g_invalidPos{ -1, -1, -1 };

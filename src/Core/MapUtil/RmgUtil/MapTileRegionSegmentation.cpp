@@ -61,7 +61,8 @@ struct KMeansData {
 
         void updateCentroid()
         {
-            m_centroid = m_centerMass;
+            m_centerMass.m_z = m_centroid.m_z;
+            m_centroid       = m_centerMass;
         }
 
         void clearMass()
@@ -81,6 +82,7 @@ struct KMeansData {
             if (m_pointsCount) {
                 m_centerMass.m_x /= m_pointsCount;
                 m_centerMass.m_y /= m_pointsCount;
+                m_centerMass.m_z = 0;
             } else {
                 throw std::runtime_error("no points");
             }
