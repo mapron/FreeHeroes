@@ -388,6 +388,18 @@ void postProcessSpriteGroupBattler(int groupIndex, Gui::Sprite::Group& seq, cons
     }
 }
 
+void replaceColors(QPixmap& pix, const QColor& src, const QColor& dest)
+{
+    auto image = pix.toImage();
+    for (int y = 0; y < image.height(); ++y) {
+        for (int x = 0; x < image.width(); ++x) {
+            if (image.pixelColor(x, y) == src)
+                image.setPixelColor(x, y, dest);
+        }
+    }
+    pix = QPixmap::fromImage(image);
+}
+
 struct AnimationPaletteShift {
     int m_from   = 0;
     int m_length = 0;
@@ -1305,8 +1317,6 @@ void SpriteFile::saveGuiSprite(const Mernel::std_path& jsonFilePath, const Merne
             for (const auto& [key, routineParam] : handlers.getMap()) {
                 if (key == "battle_unit") {
                     postProcessSpriteGroupBattler(group.m_groupId, uiGroup, routineParam);
-                } else if (key == "make_transparent") {
-                    // postProcessSpriteMakeTransparent(*newSeqPtr, routineParam);
                 }
             }
         }
@@ -1317,6 +1327,14 @@ void SpriteFile::saveGuiSprite(const Mernel::std_path& jsonFilePath, const Merne
         for (const auto& [key, routineParam] : handlers.getMap()) {
             if (key == "flip_vertical") {
                 uiSprite.m_bitmap = uiSprite.m_bitmap.transformed(QTransform().scale(1, -1));
+            } else if (key == "fix_transparent") {
+                QColor src(QString::fromStdString(routineParam["color"].getScalar().toString()));
+                QColor dest(0, 0, 0, 0);
+                replaceColors(uiSprite.m_bitmap, src, dest);
+            } else if (key == "fix_key") {
+                QColor src(QString::fromStdString(routineParam["color"].getScalar().toString()));
+                QColor dest(0, 0, 0, 1);
+                replaceColors(uiSprite.m_bitmap, src, dest);
             }
         }
     }

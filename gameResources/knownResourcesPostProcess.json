@@ -504,21 +504,20 @@
 "avwmage0"        : { "pad_sod": { "right": 32 } },
 "avwgrem0"        : { "pad_sod": { "right": 32 } },
 
-"speltrnr"        : {"make_transparent": {} },
-"speltrnl"        : {"make_transparent": {} },
+"speltrnr"        : {"fix_transparent": {"color": "#00FFFF"} },
+"speltrnl"        : {"fix_transparent": {"color": "#00FFFF"} },
 
-"twcrport"        : {},
-"cprsmall"        : {"make_transparent": {} },
+"avcinfc0"        : {"fix_key": {"color": "#00FF00"} },
+"avcinff0"        : {"fix_key": {"color": "#00FF00"} },
+"avcinft0"        : {"fix_key": {"color": "#00FF00"} },
+"avcinfx0"        : {"fix_key": {"color": "#00FF00"} },
+"avcinfz0"        : {"fix_key": {"color": "#00FF00"} },
+
 "artifact"        : {
     "unpack_sod": [  { "subdir" : "ArtifactsInventory", "template" : "artifactsInventory%1"  , "idOffset":0  , "startFrame" : 0  , "endFrame": 140 } ,
                      { "subdir" : "ArtifactsInventory", "template" : "artifactsInventoryLock", "idOffset":0  , "startFrame" : 145, "endFrame": 145 } ],
     "unpack_hota": [{ "subdir" : "ArtifactsInventory", "template" : "artifactsInventory%1"  , "idOffset":141, "startFrame" : 141, "endFrame": 143 },
                      { "subdir" : "ArtifactsInventory", "template" : "artifactsInventory%1"  , "idOffset":146, "startFrame" : 146, "endFrame": 164 } ] },
-
-"resource"        : {"make_transparent": {} },
-"resour82"        : {},
-"pskill"          : {},
-
 
 "hglnt018"        : {"concat": {"id":"highlands", "frames": true}},
 "hglnt017"        : {"concat": {"id":"highlands", "frames": true}},
