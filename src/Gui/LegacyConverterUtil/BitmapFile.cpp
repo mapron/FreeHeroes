@@ -192,7 +192,7 @@ void BitmapFile::readFromBlob(ByteArrayHolder& blob)
             for (auto& offset : m_rleData.m_rle2offsets)
                 stream >> offset;
             // some buggy defs has one extra unused offset
-            if (m_rleData.m_rle2offsets[0] != stream.getBuffer().getOffsetRead()) {
+            if (m_rleData.m_rle2offsets.size() && m_rleData.m_rle2offsets[0] != stream.getBuffer().getOffsetRead()) {
                 m_rleData.m_rle2offsets.push_back(stream.readScalar<uint16_t>());
             }
 
@@ -207,7 +207,7 @@ void BitmapFile::readFromBlob(ByteArrayHolder& blob)
             for (auto& offset : m_rleData.m_rle3offsets)
                 stream >> offset;
             // some buggy defs (avlskul0) has one extra unused offset
-            if (m_rleData.m_rle3offsets[0] != stream.getBuffer().getOffsetRead()) {
+            if (m_rleData.m_rle3offsets.size() && m_rleData.m_rle3offsets[0] != stream.getBuffer().getOffsetRead()) {
                 m_rleData.m_rle3offsets.push_back(stream.readScalar<uint16_t>());
             }
 

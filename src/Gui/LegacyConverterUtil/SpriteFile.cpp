@@ -636,8 +636,7 @@ void SpriteFile::readBinary(ByteOrderDataStreamReader& stream)
 
             if (!isEmpty)
                 assert(def.pixelBitSize == 32);
-        }
-        if (m_format == BinaryFormat::DEF) {
+        } else if (m_format == BinaryFormat::DEF) {
             stream
                 >> def.blobSize
                 >> def.rleCompress
@@ -657,6 +656,8 @@ void SpriteFile::readBinary(ByteOrderDataStreamReader& stream)
                 stream.getBuffer().setOffsetRead(stream.getBuffer().getOffsetRead() - 16);
                 frame.m_shortHeaderFormat = true;
             }
+        } else {
+            throw std::runtime_error("Unknown/unsupported format");
         }
 
         readFrameData(frame, def);
