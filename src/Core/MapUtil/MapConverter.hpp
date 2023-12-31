@@ -51,12 +51,15 @@ public:
     };
 
     struct Settings {
-        PathsSet         m_inputs;
-        PathsSet         m_outputs;
-        bool             m_dumpUncompressedBuffers = false;
-        bool             m_dumpBinaryDataJson      = false;
-        bool             m_extraLogging            = false;
-        uint64_t         m_seed                    = 0;
+        PathsSet m_inputs;
+        PathsSet m_outputs;
+        bool     m_dumpUncompressedBuffers = false;
+        bool     m_dumpBinaryDataJson      = false;
+    };
+
+    struct TemplateSettings {
+        bool             m_extraLogging = false;
+        uint64_t         m_seed         = 0;
         Mernel::std_path m_rngUserSettings;
         std::string      m_stopAfterStage;
         std::string      m_showDebugStage;
@@ -100,6 +103,7 @@ public:
                  Settings                             settings);
 
     void setSettings(Settings settings) { m_settings = std::move(settings); }
+    void setTemplateSettings(TemplateSettings settings) { m_templateSettings = std::move(settings); }
 
     void run(Task command, int recurse = 0) noexcept(false);
 
@@ -182,6 +186,7 @@ private:
     };
 
     Settings         m_settings;
+    TemplateSettings m_templateSettings;
     std::string      m_currentTask;
     std::string      m_currentIndent;
     Mernel::std_path m_inputFilename;

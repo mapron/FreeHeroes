@@ -20,6 +20,18 @@
 namespace FreeHeroes {
 using namespace Mernel;
 
+std::string FHHero::getDefId(bool onWater) const
+{
+    if (m_isPrison) {
+        return onWater ? "avwtprsn" : "avxprsn0";
+    } else if (m_isRandom) {
+        return onWater ? "avxboat5" : "ahrandom";
+    } else {
+        auto* libraryHero = m_data.m_army.hero.library;
+        return libraryHero->getAdventureSpriteForMap(onWater);
+    }
+}
+
 void FHMap::toJson(PropertyTree& data) const
 {
     Core::PropertyTreeWriterDatabase writer;

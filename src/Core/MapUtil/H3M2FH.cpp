@@ -319,9 +319,16 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 const auto playerId = m_playerIds.at(hero->m_playerOwner);
                 FHHero     fhhero;
                 fhhero.m_isRandom = type == MapObjectType::RANDOM_HERO;
+                fhhero.m_isPrison = type == MapObjectType::PRISON;
                 fhhero.m_player   = playerId;
                 initCommon(fhhero);
-                fhhero.m_pos              = posFromH3M(obj.m_pos, type == MapObjectType::PRISON ? 0 : -1);
+                fhhero.m_pos = posFromH3M(obj.m_pos);
+                {
+                    auto blockMapPlanar = Core::LibraryObjectDef::makePlanarMask(objDefCorrected.blockMap, true);
+                    auto visitMapPlanar = Core::LibraryObjectDef::makePlanarMask(objDefCorrected.visitMap, false);
+                    auto combinedMask   = Core::LibraryObjectDef::makeCombinedMask(blockMapPlanar, visitMapPlanar);
+                    fhhero.m_pos.m_x    = fhhero.m_pos.m_x + combinedMask.m_visitable.begin()->m_x;
+                }
                 fhhero.m_isMain           = mainHeroes.contains(playerId) && mainHeroes[playerId] == hero->m_subID;
                 fhhero.m_questIdentifier  = hero->m_questIdentifier;
                 fhhero.m_patrolRadius     = hero->m_patrolRadius == 0xff ? -1 : hero->m_patrolRadius;

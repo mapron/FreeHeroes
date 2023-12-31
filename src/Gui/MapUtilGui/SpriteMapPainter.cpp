@@ -57,6 +57,9 @@ void SpriteMapPainter::paint(QPainter*        painter,
 
     auto drawCell = [painter, tileSize, animationFrameOffsetTerrain, animationFrameOffsetObjects, this](const SpriteMap::Cell& cell, int x, int y, bool isOverlayPass) {
         for (const auto& item : cell.m_items) {
+            if (item.m_isOverlayItem && !m_settings->m_overlay)
+                continue;
+
             auto sprite = item.m_sprite->get();
 
             if (!sprite)

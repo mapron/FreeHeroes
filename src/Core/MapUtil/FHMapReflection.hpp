@@ -109,6 +109,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_data,
     m_patrolRadius,
     m_isRandom,
+    m_isPrison,
     m_groupedFormation,
     m_questIdentifier)
 

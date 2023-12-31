@@ -15,14 +15,12 @@
 #include "EnvDetect.hpp"
 #include "IRandomGenerator.hpp"
 #include "LibraryModels.hpp"
-#include "LibraryPlayer.hpp"
 #include "IAppSettings.hpp"
 
 #include "GameDatabasePropertyReader.hpp"
 #include "GameDatabasePropertyWriter.hpp"
 
 #include "MernelPlatform/AppLocations.hpp"
-#include "MernelPlatform/FileIOUtils.hpp"
 #include "MernelPlatform/FileFormatJson.hpp"
 
 #include "GitCommit.hpp"
@@ -211,14 +209,16 @@ void MapToolWindow::generateMap()
         debugStage = m_ui->comboBoxStageDebug->currentText().toStdString();
     }
 
+    MapConverter::TemplateSettings templateSettings{
+
+        .m_seed            = seed,
+        .m_rngUserSettings = m_appSettings->getCustomJsonPath(g_rngUserSettingsName),
+        .m_showDebugStage  = debugStage,
+    };
+
     MapConverter::Settings sett{
-        .m_inputs                  = { .m_fhTemplate = Mernel::string2path(fhTpl) },
-        .m_outputs                 = { .m_fhMap = Mernel::string2path(fhMap), .m_h3m = { .m_binary = Mernel::string2path(h3mMap) } },
-        .m_dumpUncompressedBuffers = false,
-        .m_dumpBinaryDataJson      = false,
-        .m_seed                    = seed,
-        .m_rngUserSettings         = m_appSettings->getCustomJsonPath(g_rngUserSettingsName),
-        .m_showDebugStage          = debugStage,
+        .m_inputs  = { .m_fhTemplate = Mernel::string2path(fhTpl) },
+        .m_outputs = { .m_fhMap = Mernel::string2path(fhMap), .m_h3m = { .m_binary = Mernel::string2path(h3mMap) } },
     };
 
     try {
@@ -226,6 +226,8 @@ void MapToolWindow::generateMap()
                                m_gameDatabaseContainer,
                                m_rngFactory,
                                sett);
+
+        converter.setTemplateSettings(templateSettings);
 
         converter.run(MapConverter::Task::FHTplToFHMap);
         if (!gamename.empty()) {

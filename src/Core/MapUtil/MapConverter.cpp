@@ -612,8 +612,8 @@ void MapConverter::convertH3MtoFH()
 void MapConverter::convertFHTPLtoFH()
 {
     auto rng = m_rngFactory->create();
-    if (m_settings.m_seed)
-        m_mapFH.m_seed = m_settings.m_seed;
+    if (m_templateSettings.m_seed)
+        m_mapFH.m_seed = m_templateSettings.m_seed;
 
     Core::GameVersion version = Core::GameVersion::SOD;
     if (m_mapFH.m_format >= FHMap::MapFormat::HOTA1 && m_mapFH.m_format <= FHMap::MapFormat::HOTA3)
@@ -621,9 +621,9 @@ void MapConverter::convertFHTPLtoFH()
 
     auto* db = m_databaseContainer->getDatabase(version);
 
-    if (!m_settings.m_rngUserSettings.empty()) {
-        m_logOutput << m_currentIndent << "Read: " << Mernel::path2string(m_settings.m_rngUserSettings) << '\n';
-        std::string buffer       = Mernel::readFileIntoBuffer(m_settings.m_rngUserSettings);
+    if (!m_templateSettings.m_rngUserSettings.empty()) {
+        m_logOutput << m_currentIndent << "Read: " << Mernel::path2string(m_templateSettings.m_rngUserSettings) << '\n';
+        std::string buffer       = Mernel::readFileIntoBuffer(m_templateSettings.m_rngUserSettings);
         auto        settingsJson = Mernel::readJsonFromBuffer(buffer);
 
         m_mapFH.applyRngUserSettings(settingsJson, db);
@@ -636,11 +636,11 @@ void MapConverter::convertFHTPLtoFH()
                                   db,
                                   rng.get(),
                                   m_logOutput,
-                                  m_settings.m_stopAfterStage,
-                                  m_settings.m_showDebugStage,
-                                  m_settings.m_tileFilter,
-                                  m_settings.m_stopAfterHeat,
-                                  m_settings.m_extraLogging);
+                                  m_templateSettings.m_stopAfterStage,
+                                  m_templateSettings.m_showDebugStage,
+                                  m_templateSettings.m_tileFilter,
+                                  m_templateSettings.m_stopAfterHeat,
+                                  m_templateSettings.m_extraLogging);
     converter.run();
 }
 

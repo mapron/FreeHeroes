@@ -123,9 +123,12 @@ struct FHHero : public FHPlayerControlledObject {
 
     int  m_patrolRadius     = -1;
     bool m_isRandom         = false;
+    bool m_isPrison         = false;
     bool m_groupedFormation = false;
 
     uint32_t m_questIdentifier = 0;
+
+    MAPUTIL_EXPORT std::string getDefId(bool onWater) const;
 
     bool operator==(const FHHero&) const noexcept = default;
 };

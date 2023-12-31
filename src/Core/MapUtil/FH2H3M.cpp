@@ -343,24 +343,26 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
     }
 
     for (auto& fhHero : src.m_wanderingHeroes) {
-        auto  playerIndex = fhHero.m_player->legacyId;
         auto* libraryHero = fhHero.m_data.m_army.hero.library;
 
         const uint8_t heroId = libraryHero ? uint8_t(libraryHero->legacyId) : 0xFFU;
 
-        if (playerIndex >= 0) {
-            auto& h3player = dest.m_players[playerIndex];
-            if (fhHero.m_isMain) {
-                h3player.m_mainCustomHeroId = heroId;
-            }
-        }
+        auto hero = std::make_unique<MapHero>();
 
-        auto hero               = std::make_unique<MapHero>();
-        hero->m_playerOwner     = playerIndex;
         hero->m_subID           = heroId;
         hero->m_questIdentifier = fhHero.m_questIdentifier;
         hero->m_formation       = fhHero.m_groupedFormation;
         hero->m_patrolRadius    = static_cast<uint8_t>(fhHero.m_patrolRadius);
+        if (!fhHero.m_isPrison) {
+            auto playerIndex    = fhHero.m_player->legacyId;
+            hero->m_playerOwner = playerIndex;
+            auto& h3player      = dest.m_players[playerIndex];
+            if (fhHero.m_isMain) {
+                h3player.m_mainCustomHeroId = heroId;
+            }
+        } else {
+            hero->m_playerOwner = uint8_t(-1);
+        }
 
         hero->prepareArrays(dest.m_features.get());
         {
@@ -410,18 +412,12 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
                 convertHeroArtifacts(fhHero.m_data.m_army.hero, hero->m_artSet);
             }
         }
+        bool onWater = src.m_tileMap.get(fhHero.m_pos).m_terrainId->id == Core::LibraryTerrain::s_terrainWater;
+
         if (libraryHero)
             dest.m_allowedHeroes[heroId] = 0;
-        if (playerIndex < 0) {
-            addObject(fhHero, std::move(hero), [&tmplCache] { return tmplCache.addId("avxprsn0"); });
-        } else if (fhHero.m_isRandom) {
-            addObject(
-                fhHero, std::move(hero), [&tmplCache] { return tmplCache.addId("ahrandom"); }, true);
-        } else {
-            bool onBoat = src.m_tileMap.get(fhHero.m_pos).m_terrainId->id == Core::LibraryTerrain::s_terrainWater;
-            addObject(
-                fhHero, std::move(hero), [&tmplCache, libraryHero, onBoat] { return tmplCache.addHero(libraryHero, onBoat); }, true);
-        }
+        addObject(
+            fhHero, std::move(hero), [&tmplCache, &fhHero, onWater] { return tmplCache.addId(fhHero.getDefId(onWater)); }, true);
     }
 
     for (auto& allowed : dest.m_allowedHeroes)

@@ -77,13 +77,22 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         return item;
     };
 
-    auto makeItemByDef = [&makeItemById](SpriteMap::Layer layer, Core::LibraryObjectDefConstPtr def, const FHPos& pos) -> SpriteMap::Item {
+    auto makeItemByDef = [&makeItemById](SpriteMap::Layer layer, Core::LibraryObjectDefConstPtr def, const FHPos& pos, bool calcX = false) -> SpriteMap::Item {
         auto resourceIdDef = def->substituteFor ? def->substituteFor : def;
         auto item          = makeItemById(layer, resourceIdDef->id, pos, def->priority);
         item.m_blockMask   = def->combinedMask;
+        if (calcX)
+            item.m_x = item.m_x - item.m_blockMask.m_visitable.begin()->m_x;
         if (def != resourceIdDef)
             item.addInfo("substDef", def->id);
         return item;
+    };
+
+    auto makeItemByDefId = [&makeItemByDef, database](SpriteMap::Layer layer, const std::string& id, const FHPos& pos, bool calcX = false) {
+        auto* def = database->objectDefs()->find(id);
+        if (!def)
+            throw std::runtime_error("failed to find def id:" + id);
+        return makeItemByDef(layer, def, pos, calcX);
     };
 
     auto makeItemByVisitable = [&makeItemByDef](SpriteMap::Layer layer, const FHCommonVisitable& obj) -> SpriteMap::Item {
@@ -232,22 +241,11 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     }
 
     for (auto& fhHero : fhMap.m_wanderingHeroes) {
-        const bool isPlayable  = fhHero.m_player->isPlayable;
-        auto*      libraryHero = fhHero.m_data.m_army.hero.library;
+        auto* libraryHero = fhHero.m_data.m_army.hero.library;
 
-        auto pos = fhHero.m_pos;
-        if (isPlayable)
-            pos.m_x += 1;
-        std::string id = "avxprsn0";
-        if (isPlayable) {
-            bool water = fhMap.m_tileMap.get(fhHero.m_pos).m_terrainId->id == Core::LibraryTerrain::s_terrainWater;
-            if (fhHero.m_isRandom)
-                id = "ahrandom";
-            else
-                id = libraryHero->getAdventureSpriteForMap(water);
-        }
-        auto* item = result.addItem(makeItemById(SpriteMap::Layer::Hero, id, pos)
-                                        .setPriority(isPlayable ? SpriteMap::s_objectMaxPriority + 1 : 0));
+        bool  water = fhMap.m_tileMap.get(fhHero.m_pos).m_terrainId->id == Core::LibraryTerrain::s_terrainWater;
+        auto* item  = result.addItem(makeItemByDefId(SpriteMap::Layer::Hero, fhHero.getDefId(water), fhHero.m_pos, true)
+                                        .setPriority(fhHero.m_isPrison ? SpriteMap::s_objectMaxPriority : SpriteMap::s_objectMaxPriority + 1));
 
         if (libraryHero) {
             item->addInfo("id", libraryHero->id);
@@ -273,7 +271,7 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     for (auto& obj : fhMap.m_objects.m_resourcesRandom) {
         rendered.insert(&obj);
         std::string id = "avtrndm0";
-        result.addItem(makeItemById(SpriteMap::Layer::Resource, id, obj.m_pos));
+        result.addItem(makeItemByDefId(SpriteMap::Layer::Resource, id, obj.m_pos));
     }
 
     for (auto& obj : fhMap.m_objects.m_artifacts) {
@@ -309,13 +307,12 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
             case FHRandomArtifact::Type::Invalid:
                 break;
         }
-        result.addItem(makeItemById(SpriteMap::Layer::Artifact, id, obj.m_pos));
+        result.addItem(makeItemByDefId(SpriteMap::Layer::Artifact, id, obj.m_pos));
     }
 
     for (auto& obj : fhMap.m_objects.m_monsters) {
         rendered.insert(&obj);
         auto pos = obj.m_pos;
-        pos.m_x += 1;
 
         auto strCount = std::to_string(obj.m_count);
 
@@ -332,12 +329,12 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
                 "avwmon7",
             };
             auto id = s_randomIds[obj.m_randomLevel];
-            item    = result.addItem(makeItemById(SpriteMap::Layer::Monster, id, pos)
+            item    = result.addItem(makeItemByDefId(SpriteMap::Layer::Monster, id, pos, true)
                                       .addInfo("id", id));
 
         } else {
             auto* def = obj.m_id->objectDefs.get({});
-            item      = result.addItem(makeItemByDef(SpriteMap::Layer::Monster, def, pos)
+            item      = result.addItem(makeItemByDef(SpriteMap::Layer::Monster, def, pos, true)
                                       .addInfo("id", obj.m_id->id));
         }
         item->addInfo("count", strCount);
@@ -396,8 +393,9 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
             auto* artdef  = art->objectDefs.get({});
             auto* artItem = result.addItem(makeItemByDef(SpriteMap::Layer::Artifact, artdef, artPos).setPriority(SpriteMap::s_objectMaxPriority + 2));
             estimateArtScore(art, artItem->m_score);
-            artItem->m_opacity   = obj.m_artifacts.size() > 1 ? 0.9 : 0.7;
-            artItem->m_blockMask = {};
+            artItem->m_opacity       = obj.m_artifacts.size() > 1 ? 0.9 : 0.7;
+            artItem->m_blockMask     = {};
+            artItem->m_isOverlayItem = true;
             addValueInfo(artItem, obj);
         }
     }
@@ -445,7 +443,7 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     for (auto& obj : fhMap.m_objects.m_localEvents) {
         rendered.insert(&obj);
         std::string id    = "avzevnt0";
-        auto*       item  = result.addItem(makeItemById(SpriteMap::Layer::Event, id, obj.m_pos));
+        auto*       item  = result.addItem(makeItemByDefId(SpriteMap::Layer::Event, id, obj.m_pos));
         item->m_blockMask = g_oneTileMask;
         addValueInfo(item, obj);
     }
@@ -465,20 +463,20 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         pos.m_x += 1;
 
         std::string id   = "ahplace";
-        auto*       item = result.addItem(makeItemById(SpriteMap::Layer::Hero, id, pos));
+        auto*       item = result.addItem(makeItemByDefId(SpriteMap::Layer::Hero, id, pos));
         addValueInfo(item, obj);
     }
     for (auto& obj : fhMap.m_objects.m_grails) {
         rendered.insert(&obj);
         std::string id   = "avzgrail";
-        auto*       item = result.addItem(makeItemById(SpriteMap::Layer::Artifact, id, obj.m_pos));
+        auto*       item = result.addItem(makeItemByDefId(SpriteMap::Layer::Artifact, id, obj.m_pos));
         addValueInfo(item, obj);
     }
     for (auto& obj : fhMap.m_objects.m_unknownObjects) {
         rendered.insert(&obj);
 
         std::string id   = obj.m_defId;
-        auto*       item = result.addItem(makeItemById(SpriteMap::Layer::Decoration, id, obj.m_pos).setRowPriority(-1));
+        auto*       item = result.addItem(makeItemByDefId(SpriteMap::Layer::Decoration, id, obj.m_pos).setRowPriority(-1));
         addValueInfo(item, obj);
     }
 
@@ -486,7 +484,7 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         rendered.insert(&obj);
         bool        water = fhMap.m_tileMap.get(obj.m_pos).m_terrainId->id == Core::LibraryTerrain::s_terrainWater;
         std::string id    = water ? "ava0128w" : "ava0128";
-        auto*       item  = result.addItem(makeItemById(SpriteMap::Layer::Pandora, id, obj.m_pos));
+        auto*       item  = result.addItem(makeItemByDefId(SpriteMap::Layer::Pandora, id, obj.m_pos));
         if (!obj.m_reward.units.empty()) {
             auto pos = obj.m_pos;
             pos.m_x += 1;
@@ -496,8 +494,9 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
                                              .addInfo("id", unit.unit->id)
                                              .addInfo("count", std::to_string(unit.count)));
             addValueInfo(itemG, obj);
-            itemG->m_opacity   = 0.7;
-            itemG->m_blockMask = {};
+            itemG->m_opacity       = 0.7;
+            itemG->m_isOverlayItem = true;
+            itemG->m_blockMask     = {};
         }
         item->m_blockMask          = g_oneTileMask;
         item->m_overlayInfo        = obj.m_key;

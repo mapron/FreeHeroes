@@ -516,6 +516,17 @@ AddTarget(TYPE app_console NAME MapToolCLI
         MapUtil
     )
 
+AddTarget(TYPE app_console NAME TemplateToolCLI
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/TemplateToolCLI
+    LINK_LIBRARIES
+        MernelPlatform
+        GameObjects
+        GameInt
+
+        CoreApplication
+        MapUtil
+    )
+
 AddTarget(TYPE app_ui NAME Launcher
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/Launcher
     LINK_LIBRARIES

@@ -62,6 +62,7 @@ struct SpriteMap {
         bool  m_flipHor       = false;
         bool  m_flipVert      = false;
         bool  m_shiftHalfTile = false;
+        bool  m_isOverlayItem = false;
 
         int m_x           = 0;
         int m_y           = 0;
