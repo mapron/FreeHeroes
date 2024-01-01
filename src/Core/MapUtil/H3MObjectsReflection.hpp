@@ -25,7 +25,8 @@ ENUM_REFLECTION_STRINGIFY(
     ARMY,
     RESOURCES,
     HERO,
-    PLAYER)
+    PLAYER,
+    WAIT_FOR_DAY_OR_BE_CLASS)
 
 ENUM_REFLECTION_STRINGIFY(
     MapQuest::Progress,
@@ -128,7 +129,11 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_firstOccurence,
     m_nextOccurence,
     m_buildings,
-    m_creaturesAmounts)
+    m_creaturesAmounts,
+    m_unknown1,
+    m_unknown2,
+    m_unknown3,
+    m_unknown4)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     MapTown,
@@ -181,11 +186,12 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_6creatures,
     m_7resources,
     m_89val,
+    m_minimumDay,
+    m_expectClasses,
+    m_dayClassDetermine,
     m_firstVisitText,
     m_nextVisitText,
-    m_completedText
-
-)
+    m_completedText)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     MapSeerHut::MapQuestWithReward,
@@ -215,7 +221,10 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     MapPandora,
     m_message,
-    m_reward)
+    m_reward,
+    m_unknown1,
+    m_movePointMode,
+    m_movePoints)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     MapGuards,
@@ -257,6 +266,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     MapEvent,
     m_message,
     m_reward,
+    m_movePointMode,
+    m_movePoints,
 
     m_players,
     m_computerActivate,
@@ -275,6 +286,47 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     MapQuestGuard,
     m_quest)
 
+ENUM_REFLECTION_STRINGIFY(
+    MapVisitableWithReward::Type,
+    Invalid,
+
+    Invalid,
+    Grave,
+    TreasureChest,
+    SeaChest,
+    Flotsam,
+    TreeOfKnowledge,
+    Lean,
+    Jetsam,
+    ManaVial,
+    CampFire,
+    Corpse,
+    AncientLamp,
+    Wagon,
+    WaterBarrel,
+    Survivor,
+    WarriorTomb,
+    Pyramid)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    MapVisitableWithReward,
+    m_type,
+    m_customIndex,
+    m_artId,
+    m_goldOrResource,
+    m_resourceId,
+    m_goldOrResourceSecond,
+    m_unknown1)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    MapBlackMarket,
+    m_artifacts)
+
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    MapUniversity,
+    m_customIndex,
+    m_allowedSkills)
+
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     MapHeroPlaceholder,
     m_owner,
@@ -283,7 +335,11 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     MapAbandonedMine,
-    m_resourceBits)
+    m_resourceBits,
+    m_customGuards,
+    m_creatureId,
+    m_countMin,
+    m_countMax)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     ResourceSet,

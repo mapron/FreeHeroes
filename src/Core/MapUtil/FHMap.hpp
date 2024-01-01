@@ -672,8 +672,8 @@ struct MAPUTIL_EXPORT FHMap {
             bool operator==(const HotaVersion&) const noexcept = default;
         } m_hotaVersion;
 
-        uint32_t m_unknown1 = 0;
-        uint8_t  m_unknown2 = 0;
+        uint32_t             m_unknown1 = 0;
+        std::vector<uint8_t> m_allowedDifficulties;
 
         uint32_t m_unknown3 = 0;
         uint32_t m_unknown4 = 0;

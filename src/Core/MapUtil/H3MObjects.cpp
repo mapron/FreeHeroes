@@ -21,6 +21,20 @@ constexpr const bool g_enablePaddingCheck = false;
 #else
 constexpr const bool g_enablePaddingCheck = true;
 #endif
+
+constexpr const bool g_enableOffsetTrace = false;
+
+[[maybe_unused]] void streamTrace(ByteOrderDataStreamReader& stream, const char* description)
+{
+    if (g_enableOffsetTrace)
+        Mernel::Logger(Mernel::Logger::Warning) << description << " offset=" << stream.getBuffer().getOffsetRead();
+}
+
+[[maybe_unused]] void streamTrace(ByteOrderDataStreamWriter& stream, const char* description)
+{
+    if (g_enableOffsetTrace)
+        Mernel::Logger(Mernel::Logger::Warning) << description << " offset=" << stream.getBuffer().getOffsetWrite();
+}
 }
 
 MapFormatFeatures::MapFormatFeatures(MapFormat format, int hotaVer1)
@@ -32,6 +46,8 @@ MapFormatFeatures::MapFormatFeatures(MapFormat format, int hotaVer1)
         m_factions = 9;
     if (format >= MapFormat::HOTA1)
         m_factions = 10;
+    if (isHotaFactory)
+        m_factions = 11;
 
     m_artifactsCount = 128; //ROE
     if (format >= MapFormat::AB)
@@ -83,9 +99,14 @@ MapFormatFeatures::MapFormatFeatures(MapFormat format, int hotaVer1)
         m_artifactsCount -= 2;
 
     m_hasQuestIdentifier = format > MapFormat::ROE;
-    m_stackId16Bit       = format > MapFormat::ROE;
-    m_artId16Bit         = format > MapFormat::ROE;
-    m_factions16Bit      = format > MapFormat::ROE;
+
+    if (format == MapFormat::ROE) {
+        m_stackIdSize = 1;
+        m_artIdSize   = 1;
+    }
+    if (isHotaFactory) {
+        m_artIdSize = 4;
+    }
 
     m_heroHasExp          = format > MapFormat::AB;
     m_heroHasBio          = format > MapFormat::ROE;
@@ -102,11 +123,15 @@ MapFormatFeatures::MapFormatFeatures(MapFormat format, int hotaVer1)
     m_townHasNewBuildingLogic = isHotaFactory;
 
     m_artifactHasPickupConditions = isHotaFactory;
+    m_rewardHasMovePoints         = isHotaFactory;
 
     m_monsterJoinPercent        = format == MapFormat::HOTA3 && hotaVer1 >= 3;
     m_monsterHasQuantityByValue = isHotaFactory;
 
     m_creatureBankSize = format == MapFormat::HOTA3 && hotaVer1 >= 3;
+
+    m_extraRewardsCustomization = isHotaFactory;
+    m_mineGuardsCustomization   = isHotaFactory;
 
     m_seerHutExtendedQuest  = format > MapFormat::ROE;
     m_seerHutMultiQuest     = format == MapFormat::HOTA3 && hotaVer1 >= 3;
@@ -116,8 +141,9 @@ MapFormatFeatures::MapFormatFeatures(MapFormat format, int hotaVer1)
 
     m_artifactMiscFive = format > MapFormat::AB;
 
-    m_eventHasHumanActivate     = format == MapFormat::HOTA3 && hotaVer1 >= 3;
-    m_townEventHasHumanAffected = format > MapFormat::AB;
+    m_eventHasHumanActivate       = format == MapFormat::HOTA3 && hotaVer1 >= 3;
+    m_townEventHasHumanAffected   = format > MapFormat::AB;
+    m_townEventHave4UnknownFields = isHotaFactory;
 
     m_playerP7               = format >= MapFormat::SOD;
     m_playerGenerateHeroInfo = format > MapFormat::ROE;
@@ -137,7 +163,8 @@ MapFormatFeatures::MapFormatFeatures(MapFormat format, int hotaVer1)
     m_mapCustomHeroSize         = format >= MapFormat::HOTA1;
     m_mapCustomHeroDataExtended = isHotaFactory;
 
-    m_mapEventHuman = format > MapFormat::AB;
+    m_mapEventHuman               = format > MapFormat::AB;
+    m_mapEventsHave4UnknownFields = isHotaFactory;
 
     m_mapHotaUnknown1 = format >= MapFormat::HOTA1;
 }
@@ -268,7 +295,82 @@ std::unique_ptr<IMapObject> IMapObject::Create(MapObjectType type, uint32_t subi
         {
             if (subid == 1000)
                 return std::make_unique<MapQuestGuard>();
+            if (subid == 1001)
+                return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::Grave);
             return std::make_unique<MapObjectSimple>();
+        }
+        case MapObjectType::BLACK_MARKET:
+        {
+            return std::make_unique<MapBlackMarket>();
+        }
+        case MapObjectType::UNIVERSITY:
+        {
+            return std::make_unique<MapUniversity>();
+        }
+        case MapObjectType::TREASURE_CHEST:
+        {
+            return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::TreasureChest);
+        }
+        case MapObjectType::SEA_CHEST:
+        {
+            return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::SeaChest);
+        }
+        case MapObjectType::TREE_OF_KNOWLEDGE:
+        {
+            return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::TreeOfKnowledge);
+        }
+        case MapObjectType::FLOTSAM:
+        {
+            return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::Flotsam);
+        }
+        case MapObjectType::LEAN_TO:
+        {
+            return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::Lean);
+        }
+        case MapObjectType::CAMPFIRE:
+        {
+            return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::CampFire);
+        }
+        case MapObjectType::HOTA_VISITABLE_2:
+        {
+            if (subid == (uint32_t) MapObjectType::HOTA_VISITABLE_2_ANCIENT_LAMP)
+                return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::AncientLamp);
+            if (subid == (uint32_t) MapObjectType::HOTA_VISITABLE_2_WATER_BARREL)
+                return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::WaterBarrel);
+            if (subid == (uint32_t) MapObjectType::HOTA_VISITABLE_2_JETSAM)
+                return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::Jetsam);
+            if (subid == (uint32_t) MapObjectType::HOTA_VISITABLE_2_MANA_VIAL)
+                return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::ManaVial);
+
+            assert(!"Should not happen");
+            return std::make_unique<MapObjectSimple>();
+        }
+        case MapObjectType::HOTA_VISITABLE_3:
+        {
+            if (subid == (uint32_t) MapObjectType::HOTA_VISITABLE_3_WATER_ACADEMY)
+                return std::make_unique<MapUniversity>();
+
+            return std::make_unique<MapObjectSimple>();
+        }
+        case MapObjectType::CORPSE:
+        {
+            return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::Corpse);
+        }
+        case MapObjectType::WAGON:
+        {
+            return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::Wagon);
+        }
+        case MapObjectType::SHIPWRECK_SURVIVOR:
+        {
+            return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::Survivor);
+        }
+        case MapObjectType::WARRIORS_TOMB:
+        {
+            return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::WarriorTomb);
+        }
+        case MapObjectType::PYRAMID:
+        {
+            return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::Pyramid);
         }
         default:
         {
@@ -442,6 +544,10 @@ void MapTownEvent::readBinary(ByteOrderDataStreamReader& stream)
     for (auto& amount : m_creaturesAmounts)
         stream >> amount;
 
+    if (m_features->m_townEventHave4UnknownFields) {
+        stream >> m_unknown1 >> m_unknown2 >> m_unknown3 >> m_unknown4;
+    }
+
     stream.zeroPaddingChecked(4, g_enablePaddingCheck);
 }
 
@@ -462,6 +568,10 @@ void MapTownEvent::writeBinary(ByteOrderDataStreamWriter& stream) const
 
     for (auto& amount : m_creaturesAmounts)
         stream << amount;
+
+    if (m_features->m_townEventHave4UnknownFields) {
+        stream << m_unknown1 << m_unknown2 << m_unknown3 << m_unknown4;
+    }
 
     stream.zeroPadding(4);
 }
@@ -621,7 +731,7 @@ void MapMonster::readBinary(ByteOrderDataStreamReader& stream)
     if (m_hasMessage) {
         stream >> m_message;
         stream >> m_resourceSet;
-        m_features->readArtifact(stream, m_artID);
+        m_features->readArtifact(stream, m_artID, 2); // well hota 1.7 made it so artifacts are 4 bytes but not everywhere.
     }
 
     stream >> m_neverFlees >> m_notGrowingTeam;
@@ -650,7 +760,7 @@ void MapMonster::writeBinary(ByteOrderDataStreamWriter& stream) const
         stream << m_message;
         stream << m_resourceSet;
 
-        m_features->writeArtifact(stream, m_artID);
+        m_features->writeArtifact(stream, m_artID, 2);
     }
 
     stream << m_neverFlees << m_notGrowingTeam;
@@ -816,7 +926,7 @@ void MapArtifact::readBinary(ByteOrderDataStreamReader& stream)
     if (m_isSpell)
         stream >> m_spellId;
 
-    if (m_features->m_artifactHasPickupConditions) {
+    if (m_features->m_artifactHasPickupConditions && !m_isSpell) {
         stream >> m_pickupCondition1 >> m_pickupCondition2;
     }
 }
@@ -828,7 +938,7 @@ void MapArtifact::writeBinary(ByteOrderDataStreamWriter& stream) const
     if (m_isSpell)
         stream << m_spellId;
 
-    if (m_features->m_artifactHasPickupConditions) {
+    if (m_features->m_artifactHasPickupConditions && !m_isSpell) {
         stream << m_pickupCondition1 << m_pickupCondition2;
     }
 }
@@ -871,8 +981,10 @@ void MapQuest::readBinary(ByteOrderDataStreamReader& stream)
         }
         case Mission::ART:
         {
-            auto lock = stream.setContainerSizeBytesGuarded(1);
-            stream >> m_5arts;
+            uint8_t size = stream.readScalar<uint8_t>();
+            m_5arts.resize(size);
+            for (auto& art : m_5arts)
+                m_features->readArtifact(stream, art);
 
             break;
         }
@@ -895,11 +1007,26 @@ void MapQuest::readBinary(ByteOrderDataStreamReader& stream)
             stream >> m_89val;
             break;
         }
+        case Mission::WAIT_FOR_DAY_OR_BE_CLASS:
+        {
+            stream >> m_dayClassDetermine;
+            if (m_dayClassDetermine == 0) {
+                auto s = stream.readSize();
+                if (m_expectClasses.size() != s) {
+                    throw std::runtime_error("Inconsistent bit array size, expected:" + std::to_string(m_expectClasses.size()) + ", found:" + std::to_string(s));
+                }
+                stream.readBits(m_expectClasses);
+            } else if (m_dayClassDetermine == 1) {
+                stream >> m_minimumDay;
+            } else {
+                throw std::runtime_error("unknown 10-Mission value:" + std::to_string(m_dayClassDetermine));
+            }
+            break;
+        }
         default:
             throw std::runtime_error("unknown Mission value:" + std::to_string((int) m_missionType));
             break;
     }
-
     stream >> m_lastDay;
 
     stream >> m_firstVisitText >> m_nextVisitText >> m_completedText;
@@ -907,6 +1034,8 @@ void MapQuest::readBinary(ByteOrderDataStreamReader& stream)
 
 void MapQuest::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
+    auto* m_features = getFeaturesFromStream(stream);
+
     stream << static_cast<uint8_t>(m_missionType);
 
     switch (m_missionType) {
@@ -927,8 +1056,9 @@ void MapQuest::writeBinary(ByteOrderDataStreamWriter& stream) const
         }
         case Mission::ART:
         {
-            auto lock = stream.setContainerSizeBytesGuarded(1);
-            stream << m_5arts;
+            stream << static_cast<uint8_t>(m_5arts.size());
+            for (auto& art : m_5arts)
+                m_features->writeArtifact(stream, art);
 
             break;
         }
@@ -949,6 +1079,20 @@ void MapQuest::writeBinary(ByteOrderDataStreamWriter& stream) const
         case Mission::PLAYER:
         {
             stream << m_89val;
+            break;
+        }
+        case Mission::WAIT_FOR_DAY_OR_BE_CLASS:
+        {
+            stream << m_dayClassDetermine;
+            if (m_dayClassDetermine == 0) {
+                stream.writeSize(m_expectClasses.size());
+                stream.writeBits(m_expectClasses);
+            } else if (m_dayClassDetermine == 1) {
+                stream << m_minimumDay;
+            } else {
+                throw std::runtime_error("unknown 10-Mission value:" + std::to_string(m_dayClassDetermine));
+            }
+
             break;
         }
         default:
@@ -1035,8 +1179,11 @@ void MapSeerHut::MapQuestWithReward::readBinary(ByteOrderDataStreamReader& strea
         {
             break;
         }
+        default:
+        {
+            throw std::runtime_error("Unknown seer hut reward");
+        }
     }
-    stream.zeroPaddingChecked(2, g_enablePaddingCheck);
 }
 
 void MapSeerHut::MapQuestWithReward::writeBinary(ByteOrderDataStreamWriter& stream) const
@@ -1100,7 +1247,6 @@ void MapSeerHut::MapQuestWithReward::writeBinary(ByteOrderDataStreamWriter& stre
             break;
         }
     }
-    stream.zeroPadding(2);
 }
 
 void MapSeerHut::MapQuestWithReward::toJson(PropertyTree& data) const
@@ -1121,10 +1267,13 @@ void MapSeerHut::readBinary(ByteOrderDataStreamReader& stream)
     auto* m_features = getFeaturesFromStream(stream);
 
     if (m_features->m_seerHutMultiQuest) {
-        stream >> m_questsOneTime >> m_questsRecurring;
+        stream >> m_questsOneTime;
+        stream >> m_questsRecurring;
+        stream.zeroPaddingChecked(2, g_enablePaddingCheck);
     } else {
         m_questsOneTime.resize(1);
         stream >> m_questsOneTime[0];
+        stream.zeroPaddingChecked(2, g_enablePaddingCheck);
     }
 }
 
@@ -1132,9 +1281,12 @@ void MapSeerHut::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
     auto* m_features = getFeaturesFromStream(stream);
     if (m_features->m_seerHutMultiQuest) {
-        stream << m_questsOneTime << m_questsRecurring;
+        stream << m_questsOneTime;
+        stream << m_questsRecurring;
+        stream.zeroPadding(2);
     } else {
         stream << m_questsOneTime.at(0);
+        stream.zeroPadding(2);
     }
 }
 
@@ -1226,6 +1378,8 @@ void MapReward::readBinary(ByteOrderDataStreamReader& stream)
 
     stream >> m_spells;
     stream >> m_creatures;
+
+    stream.zeroPaddingChecked(8, g_enablePaddingCheck);
 }
 
 void MapReward::writeBinary(ByteOrderDataStreamWriter& stream) const
@@ -1244,6 +1398,8 @@ void MapReward::writeBinary(ByteOrderDataStreamWriter& stream) const
 
     stream << m_spells;
     stream << m_creatures;
+
+    stream.zeroPadding(8);
 }
 
 void MapPandora::prepareArrays(const MapFormatFeatures* m_features)
@@ -1258,15 +1414,20 @@ void MapPandora::readBinary(ByteOrderDataStreamReader& stream)
     stream >> m_message;
     stream >> m_reward;
 
-    stream.zeroPaddingChecked(8, g_enablePaddingCheck);
+    if (m_features->m_rewardHasMovePoints) {
+        stream >> m_unknown1 >> m_movePointMode >> m_movePoints;
+    }
 }
 
 void MapPandora::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
+    auto* m_features = getFeaturesFromStream(stream);
     stream << m_message;
     stream << m_reward;
 
-    stream.zeroPadding(8);
+    if (m_features->m_rewardHasMovePoints) {
+        stream << m_unknown1 << m_movePointMode << m_movePoints;
+    }
 }
 
 void MapPandora::toJson(PropertyTree& data) const
@@ -1353,8 +1514,8 @@ void HeroArtSet::readBinary(ByteOrderDataStreamReader& stream)
     if (!m_hasArts)
         return;
 
-    auto loadArtifact = [&stream, m_features]() -> uint16_t {
-        uint16_t result = 0;
+    auto loadArtifact = [&stream, m_features]() -> uint32_t {
+        uint32_t result = 0;
         m_features->readArtifact(stream, result);
         return result;
     };
@@ -1384,7 +1545,7 @@ void HeroArtSet::writeBinary(ByteOrderDataStreamWriter& stream) const
     if (!m_hasArts)
         return;
 
-    auto saveArtifact = [&stream, m_features](uint16_t art) {
+    auto saveArtifact = [&stream, m_features](uint32_t art) {
         m_features->writeArtifact(stream, art);
     };
 
@@ -1479,13 +1640,18 @@ void MapEvent::readBinary(ByteOrderDataStreamReader& stream)
     auto* m_features = getFeaturesFromStream(stream);
     prepareArrays(m_features);
     stream >> m_message;
+
     stream >> m_reward;
-    stream.zeroPaddingChecked(8, g_enablePaddingCheck);
+
     stream.readBits(m_players);
     stream >> m_computerActivate >> m_removeAfterVisit;
-    stream.zeroPaddingChecked(4, g_enablePaddingCheck);
+    stream.zeroPaddingChecked(4, g_enablePaddingCheck && 0);
     if (m_features->m_eventHasHumanActivate)
         stream >> m_humanActivate;
+
+    if (m_features->m_rewardHasMovePoints) {
+        stream >> m_movePointMode >> m_movePoints;
+    }
 }
 
 void MapEvent::writeBinary(ByteOrderDataStreamWriter& stream) const
@@ -1494,12 +1660,15 @@ void MapEvent::writeBinary(ByteOrderDataStreamWriter& stream) const
     stream << m_message;
     stream << m_reward;
 
-    stream.zeroPadding(8);
     stream.writeBits(m_players);
     stream << m_computerActivate << m_removeAfterVisit;
     stream.zeroPadding(4);
     if (m_features->m_eventHasHumanActivate)
         stream << m_humanActivate;
+
+    if (m_features->m_rewardHasMovePoints) {
+        stream << m_movePointMode << m_movePoints;
+    }
 }
 
 void MapEvent::toJson(PropertyTree& data) const
@@ -1581,6 +1750,151 @@ void MapQuestGuard::fromJson(const PropertyTree& data)
     reader.jsonToValue(data, *this);
 }
 
+void MapVisitableWithReward::readBinary(ByteOrderDataStreamReader& stream)
+{
+    auto* m_features = getFeaturesFromStream(stream);
+    if (!m_features->m_extraRewardsCustomization)
+        return;
+
+    stream >> m_customIndex >> m_artId;
+
+    if (m_type == Type::Grave) {
+        stream >> m_goldOrResource >> m_resourceId >> m_goldOrResourceSecond >> m_unknown1;
+    } else if (m_type == Type::Lean) {
+        stream >> m_goldOrResource >> m_resourceId >> m_goldOrResourceSecond >> m_unknown1; // m_goldOrResourceSecond is always 1...
+    } else if (m_type == Type::CampFire) {
+        stream >> m_goldOrResource >> m_resourceId >> m_goldOrResourceSecond >> m_unknown1; // m_goldOrResource is just gold. and art id is unused.  resourceId + m_goldOrResourceSecond
+    } else if (m_type == Type::AncientLamp) {
+        stream >> m_goldOrResource >> m_resourceId >> m_goldOrResourceSecond >> m_unknown1; // m_goldOrResource is  genie count
+    } else if (m_type == Type::Wagon) {
+        stream >> m_goldOrResource >> m_resourceId >> m_goldOrResourceSecond >> m_unknown1; // m_goldOrResource is resource in resourceId. m_goldOrResourceSecond is always 1
+    } else if (m_type == Type::WaterBarrel) {
+        stream >> m_goldOrResource >> m_resourceId >> m_goldOrResourceSecond >> m_unknown1; // m_goldOrResource is resource in resourceId. m_goldOrResourceSecond is always 1
+    } else if (m_type == Type::TreasureChest) {
+    } else if (m_type == Type::SeaChest) {
+    } else if (m_type == Type::Flotsam) {
+        // art id is unused.
+    } else if (m_type == Type::TreeOfKnowledge) {
+        // art id is unused.
+    } else if (m_type == Type::Jetsam) {
+        // art id is unused.
+    } else if (m_type == Type::ManaVial) {
+        // art id is unused.
+    } else if (m_type == Type::Corpse) {
+    } else if (m_type == Type::Survivor) {
+    } else if (m_type == Type::WarriorTomb) {
+    } else if (m_type == Type::Pyramid) {
+        // art id is SPELL ID!
+    }
+}
+
+void MapVisitableWithReward::writeBinary(ByteOrderDataStreamWriter& stream) const
+{
+    auto* m_features = getFeaturesFromStream(stream);
+    if (!m_features->m_extraRewardsCustomization)
+        return;
+    stream << m_customIndex << m_artId;
+    if (m_type == Type::Grave) {
+        stream << m_goldOrResource << m_resourceId << m_goldOrResourceSecond << m_unknown1;
+    } else if (m_type == Type::Lean) {
+        stream << m_goldOrResource << m_resourceId << m_goldOrResourceSecond << m_unknown1;
+    } else if (m_type == Type::CampFire) {
+        stream << m_goldOrResource << m_resourceId << m_goldOrResourceSecond << m_unknown1;
+    } else if (m_type == Type::AncientLamp) {
+        stream << m_goldOrResource << m_resourceId << m_goldOrResourceSecond << m_unknown1;
+    } else if (m_type == Type::Wagon) {
+        stream << m_goldOrResource << m_resourceId << m_goldOrResourceSecond << m_unknown1;
+    } else if (m_type == Type::WaterBarrel) {
+        stream << m_goldOrResource << m_resourceId << m_goldOrResourceSecond << m_unknown1;
+    } else if (m_type == Type::TreasureChest) {
+    } else if (m_type == Type::SeaChest) {
+    } else if (m_type == Type::Flotsam) {
+    } else if (m_type == Type::TreeOfKnowledge) {
+    } else if (m_type == Type::Jetsam) {
+    } else if (m_type == Type::ManaVial) {
+    } else if (m_type == Type::Corpse) {
+    } else if (m_type == Type::Survivor) {
+    } else if (m_type == Type::WarriorTomb) {
+    } else if (m_type == Type::Pyramid) {
+    }
+}
+
+void MapVisitableWithReward::toJson(PropertyTree& data) const
+{
+    Mernel::Reflection::PropertyTreeWriter writer;
+    writer.valueToJson(*this, data);
+}
+
+void MapVisitableWithReward::fromJson(const PropertyTree& data)
+{
+    Mernel::Reflection::PropertyTreeReader reader;
+    *this = {};
+    reader.jsonToValue(data, *this);
+}
+
+void MapBlackMarket::readBinary(ByteOrderDataStreamReader& stream)
+{
+    auto* m_features = getFeaturesFromStream(stream);
+    prepareArrays(m_features);
+    for (auto& art : m_artifacts)
+        stream >> art;
+}
+
+void MapBlackMarket::writeBinary(ByteOrderDataStreamWriter& stream) const
+{
+    auto* m_features = getFeaturesFromStream(stream);
+    if (!m_features->m_extraRewardsCustomization)
+        return;
+    for (auto& art : m_artifacts)
+        stream << art;
+}
+
+void MapBlackMarket::toJson(PropertyTree& data) const
+{
+    Mernel::Reflection::PropertyTreeWriter writer;
+    writer.valueToJson(*this, data);
+}
+
+void MapBlackMarket::fromJson(const PropertyTree& data)
+{
+    Mernel::Reflection::PropertyTreeReader reader;
+    *this = {};
+    reader.jsonToValue(data, *this);
+}
+
+void MapUniversity::readBinary(ByteOrderDataStreamReader& stream)
+{
+    auto* m_features = getFeaturesFromStream(stream);
+    prepareArrays(m_features);
+    if (!m_features->m_extraRewardsCustomization)
+        return;
+    stream >> m_customIndex;
+    stream.readBits(m_allowedSkills);
+}
+
+void MapUniversity::writeBinary(ByteOrderDataStreamWriter& stream) const
+{
+    auto* m_features = getFeaturesFromStream(stream);
+    if (!m_features->m_extraRewardsCustomization)
+        return;
+
+    stream << m_customIndex;
+    stream.writeBits(m_allowedSkills);
+}
+
+void MapUniversity::toJson(PropertyTree& data) const
+{
+    Mernel::Reflection::PropertyTreeWriter writer;
+    writer.valueToJson(*this, data);
+}
+
+void MapUniversity::fromJson(const PropertyTree& data)
+{
+    Mernel::Reflection::PropertyTreeReader reader;
+    *this = {};
+    reader.jsonToValue(data, *this);
+}
+
 void MapGrail::toJson(PropertyTree& data) const
 {
     data["radius"] = PropertyTreeScalar(m_radius);
@@ -1616,6 +1930,27 @@ void MapHeroPlaceholder::fromJson(const PropertyTree& data)
     Mernel::Reflection::PropertyTreeReader reader;
     *this = {};
     reader.jsonToValue(data, *this);
+}
+
+void MapAbandonedMine::readBinary(ByteOrderDataStreamReader& stream)
+{
+    auto* m_features = getFeaturesFromStream(stream);
+
+    prepareArrays(m_features);
+    stream.readBits(m_resourceBits);
+    if (m_features->m_mineGuardsCustomization) {
+        stream >> m_customGuards >> m_creatureId >> m_countMin >> m_countMax;
+    }
+}
+
+void MapAbandonedMine::writeBinary(ByteOrderDataStreamWriter& stream) const
+{
+    auto* m_features = getFeaturesFromStream(stream);
+
+    stream.writeBits(m_resourceBits);
+    if (m_features->m_mineGuardsCustomization) {
+        stream << m_customGuards << m_creatureId << m_countMin << m_countMax;
+    }
 }
 
 void MapAbandonedMine::toJson(PropertyTree& data) const

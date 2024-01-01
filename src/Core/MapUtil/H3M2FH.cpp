@@ -112,10 +112,10 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
         dest.m_config.m_roundLimit = src.m_hotaVer.m_roundLimit;
     dest.m_config.m_levelLimit = src.m_levelLimit;
 
-    dest.m_config.m_unknown1 = src.m_hotaVer.m_unknown1;
-    dest.m_config.m_unknown2 = src.m_hotaVer.m_unknown2;
-    dest.m_config.m_unknown3 = src.m_hotaVer.m_unknown3;
-    dest.m_config.m_unknown4 = src.m_hotaVer.m_unknown4;
+    dest.m_config.m_unknown1            = src.m_hotaVer.m_unknown1;
+    dest.m_config.m_allowedDifficulties = src.m_hotaVer.m_allowedDifficulties;
+    dest.m_config.m_unknown3            = src.m_hotaVer.m_unknown3;
+    dest.m_config.m_unknown4            = src.m_hotaVer.m_unknown4;
     {
         auto& srcCond                 = src.m_victoryCondition;
         auto& destCond                = dest.m_victoryCondition;
@@ -178,12 +178,11 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             mainHeroes[playerId] = playerInfo.m_mainCustomHeroId;
         }
 
-        const uint16_t factionsBitmask = playerInfo.m_allowedFactionsBitmask;
         for (auto* faction : m_factionsContainer->records()) {
             if (faction->legacyId < 0)
                 continue;
 
-            if (factionsBitmask & (1U << uint32_t(faction->legacyId)))
+            if (playerInfo.m_allowedFactionsBitmask.at(faction->legacyId))
                 fhPlayer.m_startingFactions.push_back(faction);
         }
     }
@@ -296,6 +295,14 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                                 << ", dbDecord.objId=" << objDef->objId;*/
 
         //Logger(Logger::Warning) << "objTempl.m_id=" << objTempl.m_id << ", objDef.id=" << objDef->id << ", objDef.objId=" << objDef->objId;
+
+        auto makeVisitable = [&initCommon, &initVisitable, &dest, &mappings]() {
+            FHVisitable fhVisitable;
+            initCommon(fhVisitable);
+            initVisitable(fhVisitable);
+            fhVisitable.m_visitableId = mappings.mapVisitable;
+            dest.m_objects.m_visitables.push_back(std::move(fhVisitable));
+        };
 
         MapObjectType type = static_cast<MapObjectType>(objDefCorrected.objId);
         switch (type) {
@@ -500,7 +507,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 fhMonster.m_hasMessage = monster->m_hasMessage;
                 if (monster->m_hasMessage) {
                     fhMonster.m_message = monster->m_message;
-                    if (monster->m_artID != uint16_t(-1)) {
+                    if (monster->m_artID != uint32_t(-1)) {
                         fhMonster.m_reward.artifacts.resize(1);
                         fhMonster.m_reward.artifacts[0].onlyArtifacts.push_back(m_artifactIds.at(monster->m_artID));
                     }
@@ -847,21 +854,38 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             case MapObjectType::QUEST_GUARD:
             case MapObjectType::BORDER_GATE:
             {
-                if (type == MapObjectType::BORDER_GATE && objDefCorrected.subId != 1000) {
-                    FHVisitable fhVisitable;
-                    initCommon(fhVisitable);
-                    initVisitable(fhVisitable);
-                    dest.m_objects.m_visitables.push_back(std::move(fhVisitable));
-                    break;
-                }
-                assert(dynamic_cast<const MapQuestGuard*>(impl) != nullptr);
-                const auto*  questGuard = static_cast<const MapQuestGuard*>(impl);
-                FHQuestGuard fhQuestGuard;
-                initCommon(fhQuestGuard);
-                initVisitable(fhQuestGuard);
+                if (type == MapObjectType::QUEST_GUARD || (type == MapObjectType::BORDER_GATE && objDefCorrected.subId == 1000)) {
+                    assert(dynamic_cast<const MapQuestGuard*>(impl) != nullptr);
+                    const auto*  questGuard = static_cast<const MapQuestGuard*>(impl);
+                    FHQuestGuard fhQuestGuard;
+                    initCommon(fhQuestGuard);
+                    initVisitable(fhQuestGuard);
 
-                fhQuestGuard.m_quest = convertQuest(questGuard->m_quest);
-                dest.m_objects.m_questGuards.push_back(std::move(fhQuestGuard));
+                    fhQuestGuard.m_quest = convertQuest(questGuard->m_quest);
+                    dest.m_objects.m_questGuards.push_back(std::move(fhQuestGuard));
+
+                } else if (type == MapObjectType::BORDER_GATE && objDefCorrected.subId == 1001) {
+                    assert(dynamic_cast<const MapVisitableWithReward*>(impl) != nullptr);
+                    const auto* visitableWithReward = static_cast<const MapVisitableWithReward*>(impl);
+                    (void) visitableWithReward;
+                    assert(!"Not implemented");
+                } else {
+                    makeVisitable();
+                }
+            } break;
+            case MapObjectType::BLACK_MARKET:
+            {
+                assert(dynamic_cast<const MapBlackMarket*>(impl) != nullptr);
+                const auto* market = static_cast<const MapBlackMarket*>(impl);
+                (void) market;
+                assert(!"Not implemented");
+            } break;
+            case MapObjectType::UNIVERSITY:
+            {
+                assert(dynamic_cast<const MapUniversity*>(impl) != nullptr);
+                const auto* uni = static_cast<const MapUniversity*>(impl);
+                (void) uni;
+                assert(!"Not implemented");
             } break;
             case MapObjectType::RANDOM_DWELLING:         //same as castle + level range  216
             case MapObjectType::RANDOM_DWELLING_LVL:     //same as castle, fixed level   217
@@ -936,6 +960,41 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 }
                 dest.m_objects.m_banks.push_back(std::move(fhBank));
             } break;
+
+            case MapObjectType::HOTA_VISITABLE_2:
+            case MapObjectType::TREASURE_CHEST:
+            case MapObjectType::SEA_CHEST:
+            case MapObjectType::TREE_OF_KNOWLEDGE:
+            case MapObjectType::FLOTSAM:
+            case MapObjectType::CAMPFIRE:
+            case MapObjectType::LEAN_TO:
+            case MapObjectType::CORPSE:
+            case MapObjectType::WAGON:
+            case MapObjectType::WARRIORS_TOMB:
+            case MapObjectType::SHIPWRECK_SURVIVOR:
+            case MapObjectType::PYRAMID:
+            {
+                assert(dynamic_cast<const MapVisitableWithReward*>(impl) != nullptr);
+                const auto* visitable = static_cast<const MapVisitableWithReward*>(impl);
+                (void) visitable;
+                assert(!"Check reward");
+                FHVisitable fhVisitable;
+                initCommon(fhVisitable);
+                fhVisitable.m_visitableId = mappings.mapVisitable;
+                dest.m_objects.m_visitables.push_back(std::move(fhVisitable));
+            } break;
+            case MapObjectType::HOTA_VISITABLE_3:
+            {
+                if (objDefCorrected.subId == (uint32_t) MapObjectType::HOTA_VISITABLE_3_WATER_ACADEMY) {
+                    assert(dynamic_cast<const MapUniversity*>(impl) != nullptr);
+                    const auto* uni = static_cast<const MapUniversity*>(impl);
+                    (void) uni;
+                    assert(!"Not implemented");
+                    break;
+                }
+
+                makeVisitable();
+            } break;
             default:
             {
                 if (mappings.mapObstacle) {
@@ -946,10 +1005,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                     break;
                 }
                 if (mappings.mapVisitable) {
-                    FHVisitable fhVisitable;
-                    initCommon(fhVisitable);
-                    fhVisitable.m_visitableId = mappings.mapVisitable;
-                    dest.m_objects.m_visitables.push_back(std::move(fhVisitable));
+                    makeVisitable();
                     break;
                 }
 
@@ -1214,7 +1270,7 @@ FHQuest H3M2FHConverter::convertQuest(const MapQuest& quest) const
         case MapQuest::Mission::ART:
         {
             fhQuest.m_type = FHQuest::Type::BringArtifacts;
-            for (uint16_t id : quest.m_5arts)
+            for (uint32_t id : quest.m_5arts)
                 fhQuest.m_artifacts.push_back(m_artifactIds[id]);
         } break;
         case MapQuest::Mission::ARMY:
@@ -1297,19 +1353,19 @@ void H3M2FHConverter::convertHeroArtifacts(const HeroArtSet& artSet, Core::Adven
 {
     for (size_t i = 0; i < artSet.m_mainSlots.size(); ++i) {
         Core::ArtifactSlotType slot  = static_cast<Core::ArtifactSlotType>(i);
-        uint16_t               artId = artSet.m_mainSlots[i];
-        if (artId == uint16_t(-1))
+        uint32_t               artId = artSet.m_mainSlots[i];
+        if (artId == uint32_t(-1))
             continue;
         hero.artifactsOn[slot] = m_artifactIds.at(artId);
     }
-    if (artSet.m_misc5 != uint16_t(-1))
+    if (artSet.m_misc5 != uint32_t(-1))
         hero.artifactsOn[Core::ArtifactSlotType::Misc4] = m_artifactIds.at(artSet.m_misc5);
 
     hero.artifactsBagList.clear();
-    for (uint16_t artId : artSet.m_bagSlots)
+    for (uint32_t artId : artSet.m_bagSlots)
         hero.artifactsBagList.push_back(m_artifactIds.at(artId));
 
-    hero.hasSpellBook = artSet.m_book != uint16_t(-1);
+    hero.hasSpellBook = artSet.m_book != uint32_t(-1);
 }
 
 std::vector<Core::LibraryPlayerConstPtr> H3M2FHConverter::convertPlayerList(const std::vector<uint8_t>& players) const

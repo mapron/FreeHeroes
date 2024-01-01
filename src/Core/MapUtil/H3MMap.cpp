@@ -25,6 +25,19 @@ constexpr const bool g_enablePaddingCheck = true;
 #endif
 
 constexpr const bool g_enableOffsetTrace = false;
+
+void streamTrace(ByteOrderDataStreamReader& stream, const char* description)
+{
+    if (g_enableOffsetTrace)
+        Mernel::Logger(Mernel::Logger::Warning) << description << " offset=" << stream.getBuffer().getOffsetRead();
+}
+
+void streamTrace(ByteOrderDataStreamWriter& stream, const char* description)
+{
+    if (g_enableOffsetTrace)
+        Mernel::Logger(Mernel::Logger::Warning) << description << " offset=" << stream.getBuffer().getOffsetWrite();
+}
+
 }
 
 void H3Map::VictoryCondition::readBinary(ByteOrderDataStreamReader& stream)
@@ -259,6 +272,7 @@ void H3Map::LossCondition::writeBinary(ByteOrderDataStreamWriter& stream) const
 H3Map::H3Map()
 {
     m_features = std::make_shared<MapFormatFeatures>();
+    m_hotaVer.m_allowedDifficulties.resize(5);
 }
 
 void H3Map::updateFeatures()
@@ -310,16 +324,15 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
         if (m_hotaVer.m_ver1 >= 2)
             stream >> m_hotaVer.m_ver3;
         if (m_hotaVer.m_ver1 >= 5) {
-            stream >> m_hotaVer.m_unknown1 >> m_hotaVer.m_unknown2;
+            stream >> m_hotaVer.m_unknown1;
+            stream.readBits(m_hotaVer.m_allowedDifficulties);
             assert(m_hotaVer.m_unknown1 == 0x0B);
-            assert(m_hotaVer.m_unknown2 == 0x1F);
         }
     }
     updateFeatures();
     prepareArrays();
     stream.setUserData(m_features.get());
-    if (g_enableOffsetTrace)
-        Mernel::Logger(Mernel::Logger::Warning) << "After format offset =" << stream.getBuffer().getOffsetRead();
+    streamTrace(stream, "After format");
 
     stream >> m_anyPlayers >> m_tiles.m_size >> m_tiles.m_hasUnderground;
     stream >> m_mapName;
@@ -331,7 +344,11 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
     if (m_features->m_mapLevelLimit)
         stream >> m_levelLimit;
 
+    streamTrace(stream, "Before players");
+
     for (PlayerInfo& playerInfo : m_players) {
+        playerInfo.prepareArrays(m_features.get());
+
         stream >> playerInfo.m_canHumanPlay >> playerInfo.m_canComputerPlay;
         const bool isValid    = playerInfo.m_canHumanPlay || playerInfo.m_canComputerPlay;
         playerInfo.m_aiTactic = static_cast<PlayerInfo::AiTactic>(stream.readScalar<uint8_t>());
@@ -347,10 +364,7 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
         }
 
         // Factions this player can choose
-        if (m_features->m_factions16Bit)
-            stream >> playerInfo.m_allowedFactionsBitmask;
-        else
-            playerInfo.m_allowedFactionsBitmask = stream.readScalar<uint8_t>();
+        stream.readBits(playerInfo.m_allowedFactionsBitmask);
 
         if (!isValid)
             m_ignoredOffsets.insert(stream.getBuffer().getOffsetRead());
@@ -376,13 +390,11 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
         if (m_features->m_playerPlaceholders)
             stream >> playerInfo.m_placeholder >> playerInfo.m_heroesNames;
     }
-    if (g_enableOffsetTrace)
-        Mernel::Logger(Mernel::Logger::Warning) << "After players offset =" << stream.getBuffer().getOffsetRead();
+    streamTrace(stream, "After players");
 
     stream >> m_victoryCondition >> m_lossCondition;
 
-    if (g_enableOffsetTrace)
-        Mernel::Logger(Mernel::Logger::Warning) << "After win/lose offset =" << stream.getBuffer().getOffsetRead();
+    streamTrace(stream, "After win/lose");
 
     stream >> m_teamCount;
     if (m_teamCount > 0) {
@@ -401,8 +413,7 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
     };
 
     readBitsSized(m_allowedHeroes, m_features->m_mapAllowedHeroesSized, false);
-    if (g_enableOffsetTrace)
-        Mernel::Logger(Mernel::Logger::Warning) << "After allowed heroes offset =" << stream.getBuffer().getOffsetRead();
+    streamTrace(stream, "After allowed heroes");
 
     if (m_features->m_mapPlaceholderHeroes) {
         stream >> m_placeholderHeroes;
@@ -414,9 +425,7 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
         for (auto& hero : m_disposedHeroes)
             stream >> hero;
     }
-
-    if (g_enableOffsetTrace)
-        Mernel::Logger(Mernel::Logger::Warning) << "After disposed offset =" << stream.getBuffer().getOffsetRead();
+    streamTrace(stream, "After disposed");
 
     stream.zeroPaddingChecked(31, g_enablePaddingCheck);
 
@@ -428,19 +437,18 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
         assert(unknown2 == 0);
         if (m_hotaVer.m_ver1 >= 3)
             stream >> m_hotaVer.m_roundLimit;
+        assert(m_hotaVer.m_ver1 != 4); // unknown feature set for this.
         if (m_hotaVer.m_ver1 >= 5)
             stream >> m_hotaVer.m_unknown3 >> m_hotaVer.m_unknown4;
     }
-    if (g_enableOffsetTrace)
-        Mernel::Logger(Mernel::Logger::Warning) << "After m_roundLimit offset =" << stream.getBuffer().getOffsetRead();
+    streamTrace(stream, "After roundLimit");
 
     if (m_features->m_mapAllowedArtifacts) {
         readBitsSized(m_allowedArtifacts, m_features->m_mapAllowedArtifactsSized, true);
         m_ignoredOffsets.insert(stream.getBuffer().getOffsetRead() - 1);
     }
 
-    if (g_enableOffsetTrace)
-        Mernel::Logger(Mernel::Logger::Warning) << "After AllowedArtifacts offset =" << stream.getBuffer().getOffsetRead();
+    streamTrace(stream, "After allowedArtifacts");
 
     if (m_features->m_mapAllowedSpells)
         stream.readBits(m_allowedSpells, true);
@@ -455,15 +463,16 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
             if (m_customHeroData.size() != stream.readSize())
                 throw std::runtime_error("heroCount check failed for HOTA header");
         }
-        for (auto& hero : m_customHeroData)
+
+        for (auto& hero : m_customHeroData) {
             stream >> hero;
+        }
     }
     if (m_features->m_mapCustomHeroDataExtended) {
         for (auto& hero : m_customHeroDataExt)
             stream >> hero;
     }
-    if (g_enableOffsetTrace)
-        Mernel::Logger(Mernel::Logger::Warning) << "Before tiles offset =" << stream.getBuffer().getOffsetRead();
+    streamTrace(stream, "Before tiles");
 
     for (int ground = 0; ground < (1 + m_tiles.m_hasUnderground); ++ground) {
         for (int y = 0; y < m_tiles.m_size; y++) {
@@ -472,8 +481,7 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
             }
         }
     }
-    if (g_enableOffsetTrace)
-        Mernel::Logger(Mernel::Logger::Warning) << "After tiles offset =" << stream.getBuffer().getOffsetRead();
+    streamTrace(stream, "After tiles");
 
     {
         uint32_t count = 0;
@@ -491,7 +499,7 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
 
         for (uint32_t index = 0; auto& obj : m_objects) {
             if (g_enableOffsetTrace)
-                Mernel::Logger(Mernel::Logger::Warning) << "staring  obj [" << index << "]: current offset =" << stream.getBuffer().getOffsetRead();
+                Mernel::Logger(Mernel::Logger::Warning) << "starting        obj [" << index << "]: current offset =" << stream.getBuffer().getOffsetRead();
 
             stream >> obj.m_pos >> obj.m_defnum;
 
@@ -503,7 +511,7 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
                 throw std::runtime_error("Unsupported map object type:" + std::to_string(objTempl.m_id));
 
             if (g_enableOffsetTrace)
-                Mernel::Logger(Mernel::Logger::Warning) << "staring  readBinary [" << index << "]: (" << (int) obj.m_pos.m_x << "," << (int) obj.m_pos.m_y << "," << (int) obj.m_pos.m_z << ")  "
+                Mernel::Logger(Mernel::Logger::Warning) << "starting readBinary [" << index << "]: (" << (int) obj.m_pos.m_x << "," << (int) obj.m_pos.m_y << "," << (int) obj.m_pos.m_z << ")  "
                                                         << objTempl.m_animationFile << ", type:" << objTempl.m_id << ", sub: " << objTempl.m_subid << " current offset =" << stream.getBuffer().getOffsetRead();
 
             obj.m_impl->readBinary(stream);
@@ -512,7 +520,7 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
                 Mernel::Logger(Mernel::Logger::Warning) << "finished readBinary [" << index << "]: (" << (int) obj.m_pos.m_x << "," << (int) obj.m_pos.m_y << "," << (int) obj.m_pos.m_z << ")  "
                                                         << objTempl.m_animationFile << ", type:" << objTempl.m_id << ", sub: " << objTempl.m_subid << ", current offset =" << stream.getBuffer().getOffsetRead();
 
-                if (0) {
+                if (1) {
                     PropertyTree data;
                     obj.m_impl->toJson(data);
                     std::ostringstream os;
@@ -544,7 +552,8 @@ void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
         if (m_hotaVer.m_ver1 >= 2)
             stream << m_hotaVer.m_ver3;
         if (m_hotaVer.m_ver1 >= 5) {
-            stream << m_hotaVer.m_unknown1 << m_hotaVer.m_unknown2;
+            stream << m_hotaVer.m_unknown1;
+            stream.writeBits(m_hotaVer.m_allowedDifficulties);
         }
     }
 
@@ -563,10 +572,7 @@ void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
         if (m_features->m_playerP7)
             stream << playerInfo.m_unused1;
 
-        if (m_features->m_factions16Bit)
-            stream << playerInfo.m_allowedFactionsBitmask;
-        else
-            stream << uint8_t(playerInfo.m_allowedFactionsBitmask);
+        stream.writeBits(playerInfo.m_allowedFactionsBitmask);
 
         stream << playerInfo.m_isFactionRandom << playerInfo.m_hasMainTown;
         if (playerInfo.m_hasMainTown) {
@@ -604,8 +610,7 @@ void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
 
     writeBitsSized(m_allowedHeroes, m_features->m_mapAllowedHeroesSized, false);
 
-    if (g_enableOffsetTrace)
-        Mernel::Logger(Mernel::Logger::Warning) << "After allowed heroes offset =" << stream.getBuffer().getOffsetWrite();
+    streamTrace(stream, "After allowed heroes");
 
     if (m_features->m_mapPlaceholderHeroes) {
         stream << m_placeholderHeroes;
@@ -617,8 +622,7 @@ void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
             stream << hero;
     }
 
-    if (g_enableOffsetTrace)
-        Mernel::Logger(Mernel::Logger::Warning) << "After disposed offset =" << stream.getBuffer().getOffsetWrite();
+    streamTrace(stream, "After disposed");
 
     stream.zeroPadding(31);
 
@@ -635,8 +639,7 @@ void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
     if (m_features->m_mapAllowedArtifacts)
         writeBitsSized(m_allowedArtifacts, m_features->m_mapAllowedArtifactsSized, true);
 
-    if (g_enableOffsetTrace)
-        Mernel::Logger(Mernel::Logger::Warning) << "After AllowedArtifacts offset =" << stream.getBuffer().getOffsetWrite();
+    streamTrace(stream, "After allowedArtifacts");
 
     if (m_features->m_mapAllowedSpells)
         stream.writeBits(m_allowedSpells, true);
@@ -659,8 +662,7 @@ void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
             stream << hero;
     }
 
-    if (g_enableOffsetTrace)
-        Mernel::Logger(Mernel::Logger::Warning) << "Before tiles offset =" << stream.getBuffer().getOffsetWrite();
+    streamTrace(stream, "Before tiles");
 
     for (int ground = 0; ground < (1 + m_tiles.m_hasUnderground); ++ground) {
         for (int y = 0; y < m_tiles.m_size; y++) {
@@ -670,8 +672,7 @@ void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
         }
     }
 
-    if (g_enableOffsetTrace)
-        Mernel::Logger(Mernel::Logger::Warning) << "After tiles offset =" << stream.getBuffer().getOffsetWrite();
+    streamTrace(stream, "After tiles");
 
     stream << m_objectDefs;
 
@@ -680,6 +681,8 @@ void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
         stream << count;
         for (uint32_t index = 0; auto& obj : m_objects) {
             const ObjectTemplate& objTempl = m_objectDefs.at(obj.m_defnum);
+            if (g_enableOffsetTrace)
+                Mernel::Logger(Mernel::Logger::Warning) << "starting        obj [" << index << "]: current offset =" << stream.getBuffer().getOffsetWrite();
 
             stream << obj.m_pos << obj.m_defnum;
             stream.zeroPadding(5);
@@ -687,7 +690,7 @@ void H3Map::writeBinary(ByteOrderDataStreamWriter& stream) const
                 throw std::runtime_error("Empty object impl on write!");
 
             if (g_enableOffsetTrace)
-                Mernel::Logger(Mernel::Logger::Warning) << "staring  writeBinary [" << index << "]: (" << (int) obj.m_pos.m_x << "," << (int) obj.m_pos.m_y << "," << (int) obj.m_pos.m_z << ")  "
+                Mernel::Logger(Mernel::Logger::Warning) << "starting writeBinary [" << index << "]: (" << (int) obj.m_pos.m_x << "," << (int) obj.m_pos.m_y << "," << (int) obj.m_pos.m_z << ")  "
                                                         << objTempl.m_animationFile << ", type:" << objTempl.m_id << ", sub: " << objTempl.m_subid << " current offset =" << stream.getBuffer().getOffsetWrite();
 
             obj.m_impl->writeBinary(stream);
@@ -851,9 +854,7 @@ void ObjectTemplate::readBinary(ByteOrderDataStreamReader& stream)
     stream.readBits(m_terrainsHard, false, true);
     stream.readBits(m_terrainsSoft, false, true);
 
-    stream >> m_id >> m_subid;
-    m_type = static_cast<Type>(stream.readScalar<uint8_t>());
-    stream >> m_drawPriority;
+    stream >> m_id >> m_subid >> m_type >> m_drawPriority;
 
     stream.zeroPaddingChecked(16, g_enablePaddingCheck);
 }
@@ -868,8 +869,7 @@ void ObjectTemplate::writeBinary(ByteOrderDataStreamWriter& stream) const
     stream.writeBits(m_terrainsHard, false, true);
     stream.writeBits(m_terrainsSoft, false, true);
 
-    stream << m_id << m_subid;
-    stream << static_cast<uint8_t>(m_type) << m_drawPriority;
+    stream << m_id << m_subid << m_type << m_drawPriority;
 
     stream.zeroPadding(16);
 }
@@ -898,6 +898,10 @@ void GlobalMapEvent::readBinary(ByteOrderDataStreamReader& stream)
         >> m_nextOccurence;
 
     stream.zeroPaddingChecked(17, g_enablePaddingCheck);
+
+    if (m_features->m_mapEventsHave4UnknownFields) {
+        stream >> m_unknown1 >> m_unknown2 >> m_unknown3 >> m_unknown4;
+    }
 }
 
 void GlobalMapEvent::writeBinary(ByteOrderDataStreamWriter& stream) const
@@ -916,6 +920,10 @@ void GlobalMapEvent::writeBinary(ByteOrderDataStreamWriter& stream) const
            << m_nextOccurence;
 
     stream.zeroPadding(17);
+
+    if (m_features->m_mapEventsHave4UnknownFields) {
+        stream << m_unknown1 << m_unknown2 << m_unknown3 << m_unknown4;
+    }
 }
 
 void CustomHeroData::prepareArrays(const MapFormatFeatures* m_features)

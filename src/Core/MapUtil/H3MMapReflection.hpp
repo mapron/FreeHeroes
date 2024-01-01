@@ -102,16 +102,6 @@ ENUM_REFLECTION_STRINGIFY(
     TIMEEXPIRES,
     LOSSSTANDARD)
 
-ENUM_REFLECTION_STRINGIFY(
-    ObjectTemplate::Type,
-    INVALID,
-    INVALID,
-    COMMON,
-    CREATURE,
-    HERO,
-    ARTIFACT,
-    RESOURCE)
-
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     MapTileH3M,
     m_roadDir,
@@ -156,7 +146,11 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_humanAffected,
     m_computerAffected,
     m_firstOccurence,
-    m_nextOccurence)
+    m_nextOccurence,
+    m_unknown1,
+    m_unknown2,
+    m_unknown3,
+    m_unknown4)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     CustomHeroData::SecSkill,
@@ -188,7 +182,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_ver2,
     m_ver3,
     m_unknown1,
-    m_unknown2,
+    m_allowedDifficulties,
     m_allowSpecialWeeks,
     m_roundLimit,
     m_unknown3,

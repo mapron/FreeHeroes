@@ -86,7 +86,7 @@ public:
 
             .m_id           = static_cast<uint32_t>(record->objId),
             .m_subid        = static_cast<uint32_t>(record->subId),
-            .m_type         = static_cast<ObjectTemplate::Type>(record->type),
+            .m_type         = static_cast<uint8_t>(record->type),
             .m_drawPriority = static_cast<uint8_t>(record->priority),
         };
         if (!Mernel::strToLower(res.m_animationFile).ends_with(".def"))
@@ -144,10 +144,10 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
     dest.m_hotaVer.m_roundLimit        = src.m_config.m_hasRoundLimit ? src.m_config.m_roundLimit : 0xffffffffU;
     dest.m_levelLimit                  = static_cast<uint8_t>(src.m_config.m_levelLimit);
 
-    dest.m_hotaVer.m_unknown1 = src.m_config.m_unknown1;
-    dest.m_hotaVer.m_unknown2 = src.m_config.m_unknown2;
-    dest.m_hotaVer.m_unknown3 = src.m_config.m_unknown3;
-    dest.m_hotaVer.m_unknown4 = src.m_config.m_unknown4;
+    dest.m_hotaVer.m_unknown1            = src.m_config.m_unknown1;
+    dest.m_hotaVer.m_allowedDifficulties = src.m_config.m_allowedDifficulties;
+    dest.m_hotaVer.m_unknown3            = src.m_config.m_unknown3;
+    dest.m_hotaVer.m_unknown4            = src.m_config.m_unknown4;
 
     {
         auto& srcCond                 = src.m_victoryCondition;
@@ -155,7 +155,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         destCond.m_type               = static_cast<decltype(destCond.m_type)>(srcCond.m_type);
         destCond.m_allowNormalVictory = srcCond.m_allowNormalVictory;
         destCond.m_appliesToAI        = srcCond.m_appliesToAI;
-        destCond.m_artID              = srcCond.m_artID ? static_cast<uint16_t>(srcCond.m_artID->legacyId) : 0;
+        destCond.m_artID              = srcCond.m_artID ? static_cast<uint32_t>(srcCond.m_artID->legacyId) : 0;
         destCond.m_creatureID         = srcCond.m_creature.unit ? static_cast<uint16_t>(srcCond.m_creature.unit->legacyId) : 0;
         destCond.m_creatureCount      = static_cast<uint32_t>(srcCond.m_creature.count);
         destCond.m_resourceID         = srcCond.m_resourceID ? static_cast<uint8_t>(srcCond.m_resourceID->legacyId) : 0;
@@ -206,6 +206,8 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         auto  index    = playerId->legacyId;
         auto& h3player = dest.m_players[index];
 
+        h3player.prepareArrays(dest.m_features.get());
+
         h3player.m_canHumanPlay             = fhPlayer.m_humanPossible;
         h3player.m_canComputerPlay          = fhPlayer.m_aiPossible;
         h3player.m_generateHeroAtMainTown   = fhPlayer.m_generateHeroAtMainTown;
@@ -230,12 +232,10 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
             h3player.m_heroesNames.push_back({ .m_heroId = (uint8_t) fhHeroName.m_hero->legacyId, .m_heroName = fhHeroName.m_name });
         }
 
-        uint16_t factionsBitmask = 0;
         for (Core::LibraryFactionConstPtr faction : fhPlayer.m_startingFactions) {
             assume(faction != nullptr);
-            factionsBitmask |= 1U << uint32_t(faction->legacyId);
+            h3player.m_allowedFactionsBitmask.at(faction->legacyId) = 1;
         }
-        h3player.m_allowedFactionsBitmask = factionsBitmask;
     }
     if (hasTeams)
         dest.m_teamCount = maxTeam + 1;
@@ -634,7 +634,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         else if (fhMon.m_splitStackType == FHMonster::SplitStack::OneLess)
             monster->m_splitStack = 4294967294U;
 
-        monster->m_artID             = uint16_t(-1);
+        monster->m_artID             = uint32_t(-1);
         monster->m_quantityMode      = fhMon.m_quantityMode;
         monster->m_quantityByAiValue = fhMon.m_quantityByAiValue;
 
@@ -643,7 +643,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
             monster->m_message                      = fhMon.m_message;
             monster->m_resourceSet.m_resourceAmount = convertResources(fhMon.m_reward.resources);
             if (!fhMon.m_reward.artifacts.empty()) {
-                monster->m_artID = uint16_t(fhMon.m_reward.artifacts[0].onlyArtifacts.at(0)->legacyId);
+                monster->m_artID = uint32_t(fhMon.m_reward.artifacts[0].onlyArtifacts.at(0)->legacyId);
             }
         }
         if (fhMon.m_randomLevel >= 0) {
@@ -699,7 +699,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
     }
     for (auto& fhMine : src.m_objects.m_abandonedMines) {
         auto mine = std::make_unique<MapAbandonedMine>();
-        mine->prepareArrays();
+        mine->prepareArrays(dest.m_features.get());
         for (auto* res : fhMine.m_resources)
             mine->m_resourceBits[res->legacyId] = 1;
 
@@ -898,7 +898,7 @@ void FH2H3MConverter::convertReward(const Core::Reward& fhReward, MapReward& rew
 
     for (const auto& artSet : fhReward.artifacts) {
         for (auto* art : artSet.onlyArtifacts) {
-            reward.m_artifacts.push_back(static_cast<uint16_t>(art->legacyId));
+            reward.m_artifacts.push_back(static_cast<uint32_t>(art->legacyId));
         }
     }
     for (const Core::SkillHeroItem& skill : fhReward.secSkills)
@@ -1004,7 +1004,7 @@ void FH2H3MConverter::convertQuest(const FHQuest& fhQuest, MapQuest& quest) cons
         {
             quest.m_missionType = MapQuest::Mission::ART;
             for (auto* art : fhQuest.m_artifacts)
-                quest.m_5arts.push_back(static_cast<uint16_t>(art->legacyId));
+                quest.m_5arts.push_back(static_cast<uint32_t>(art->legacyId));
         } break;
         case FHQuest::Type::BringCreatures:
         {
@@ -1094,25 +1094,25 @@ void FH2H3MConverter::convertHeroArtifacts(const Core::AdventureHero& hero, Hero
 {
     for (size_t i = 0; i < artSet.m_mainSlots.size(); ++i) {
         Core::ArtifactSlotType slot  = static_cast<Core::ArtifactSlotType>(i);
-        uint16_t&              artId = artSet.m_mainSlots[i];
+        uint32_t&              artId = artSet.m_mainSlots[i];
         auto                   art   = hero.getArtifact(slot);
         if (!art)
-            artId = uint16_t(-1);
+            artId = uint32_t(-1);
         else
-            artId = uint16_t(art->legacyId);
+            artId = uint32_t(art->legacyId);
     }
     auto art5 = hero.getArtifact(Core::ArtifactSlotType::Misc4);
     if (!art5)
-        artSet.m_misc5 = uint16_t(-1);
+        artSet.m_misc5 = uint32_t(-1);
     else
-        artSet.m_misc5 = uint16_t(art5->legacyId);
+        artSet.m_misc5 = uint32_t(art5->legacyId);
 
-    artSet.m_cata = uint16_t(-1);
-    artSet.m_book = hero.hasSpellBook ? uint16_t(0) : uint16_t(-1);
+    artSet.m_cata = uint32_t(-1);
+    artSet.m_book = hero.hasSpellBook ? uint32_t(0) : uint32_t(-1);
 
     artSet.m_bagSlots.clear();
     for (auto* art : hero.artifactsBagList) {
-        artSet.m_bagSlots.push_back(uint16_t(art->legacyId));
+        artSet.m_bagSlots.push_back(uint32_t(art->legacyId));
     }
     if (artSet.m_bagSlots.size() > 64) {
         artSet.m_bagSlots.resize(64);

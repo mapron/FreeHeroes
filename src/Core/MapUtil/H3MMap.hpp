@@ -57,12 +57,17 @@ struct PlayerInfo {
         EXPLORER,
     };
 
+    void prepareArrays(const MapFormatFeatures* m_features)
+    {
+        m_allowedFactionsBitmask.resize(m_features->m_factions);
+    }
+
     bool     m_canHumanPlay    = false;
     bool     m_canComputerPlay = false;
     AiTactic m_aiTactic        = AiTactic::RANDOM;
 
-    uint16_t m_allowedFactionsBitmask{ 0 };
-    uint8_t  m_isFactionRandom{ 0 };
+    std::vector<uint8_t> m_allowedFactionsBitmask;
+    uint8_t              m_isFactionRandom{ 0 };
 
     /// Player has a random main hero
     bool m_hasRandomHero = false;
@@ -158,6 +163,7 @@ struct ObjectTemplate {
     std::vector<uint8_t> m_terrainsHard;
     std::vector<uint8_t> m_terrainsSoft;
 
+    // enum used just a reference.
     enum class Type
     {
         INVALID = 0,
@@ -166,11 +172,13 @@ struct ObjectTemplate {
         HERO,
         ARTIFACT,
         RESOURCE,
+
+        HOTA_UNKNOWN = 8, // introduced in 1.7
     };
 
     uint32_t m_id           = 0;
     uint32_t m_subid        = 0;
-    Type     m_type         = Type::INVALID;
+    uint8_t  m_type         = 0;
     uint8_t  m_drawPriority = 0;
 
     void prepareArrays(const MapFormatFeatures* m_features);
@@ -197,6 +205,11 @@ struct GlobalMapEvent {
     uint8_t  m_computerAffected = 0;
     uint16_t m_firstOccurence   = 0;
     uint8_t  m_nextOccurence    = 0;
+
+    uint32_t m_unknown1 = 0;
+    uint32_t m_unknown2 = 0;
+    uint32_t m_unknown3 = 0;
+    uint16_t m_unknown4 = 0;
 
     void prepareArrays(const MapFormatFeatures* m_features);
 
@@ -252,8 +265,8 @@ struct H3Map {
         uint16_t m_ver2 = 0;
         uint32_t m_ver3 = 12;
 
-        uint32_t m_unknown1 = 0;
-        uint8_t  m_unknown2 = 0;
+        uint32_t             m_unknown1 = 0;
+        std::vector<uint8_t> m_allowedDifficulties; // 5 size. [0] easy.
 
         uint32_t m_allowSpecialWeeks = 1;
         uint32_t m_roundLimit        = 0xffffffff;
@@ -304,7 +317,7 @@ struct H3Map {
         bool m_allowNormalVictory = false;
         bool m_appliesToAI        = false;
 
-        uint16_t m_artID = 0;
+        uint32_t m_artID = 0;
 
         uint16_t m_creatureID    = 0;
         uint32_t m_creatureCount = 0;

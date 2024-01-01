@@ -98,7 +98,7 @@ int main(int argc, char** argv)
                 continue;
             settings.m_inputs.m_h3m.m_binary             = path;
             settings.m_inputs.m_h3m.m_uncompressedBinary = settings.m_inputs.m_h3m.m_binary;
-            settings.m_inputs.m_h3m.m_uncompressedBinary.concat(".uncomressed");
+            settings.m_inputs.m_h3m.m_uncompressedBinary.concat(".uncompressed");
             settings.m_inputs.m_h3m.m_json = settings.m_inputs.m_h3m.m_binary;
             settings.m_inputs.m_h3m.m_json.concat(".json");
             batch.push_back(settings);

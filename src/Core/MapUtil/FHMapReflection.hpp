@@ -717,7 +717,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_levelLimit,
     m_hotaVersion,
     m_unknown1,
-    m_unknown2,
+    m_allowedDifficulties,
     m_unknown3,
     m_unknown4)
 

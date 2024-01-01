@@ -43,10 +43,9 @@ struct MapFormatFeatures {
     int m_stackSize           = 0;
     int m_secondarySkillCount = 0;
 
-    bool m_hasQuestIdentifier = false;
-    bool m_stackId16Bit       = false;
-    bool m_artId16Bit         = false;
-    bool m_factions16Bit      = false;
+    bool   m_hasQuestIdentifier = false;
+    size_t m_stackIdSize        = 2;
+    size_t m_artIdSize          = 2;
 
     bool m_heroHasExp              = false;
     bool m_heroHasBio              = false;
@@ -61,12 +60,16 @@ struct MapFormatFeatures {
     bool m_townHasNewBuildingLogic = false;
 
     bool m_artifactHasPickupConditions = false;
+    bool m_rewardHasMovePoints         = false;
 
     bool m_monsterJoinPercent = false;
 
     bool m_monsterHasQuantityByValue = false;
 
     bool m_creatureBankSize = false;
+
+    bool m_extraRewardsCustomization = false;
+    bool m_mineGuardsCustomization   = false;
 
     bool m_seerHutExtendedQuest  = false;
     bool m_seerHutMultiQuest     = false;
@@ -76,8 +79,10 @@ struct MapFormatFeatures {
 
     bool m_artifactMiscFive = false;
 
-    bool m_eventHasHumanActivate     = false;
-    bool m_townEventHasHumanAffected = false;
+    bool m_eventHasHumanActivate       = false;
+    bool m_townEventHasHumanAffected   = false;
+    bool m_mapEventsHave4UnknownFields = false;
+    bool m_townEventHave4UnknownFields = false;
 
     bool m_playerP7               = false;
     bool m_playerGenerateHeroInfo = false;
@@ -104,67 +109,73 @@ struct MapFormatFeatures {
     MapFormatFeatures() = default;
     MapFormatFeatures(MapFormat baseFormat, int hotaVer1);
 
-    void readVarLength(ByteOrderDataStreamReader& stream, bool condition, uint16_t& data) const
+    void readVarLength(ByteOrderDataStreamReader& stream, size_t byteSize, uint32_t& data) const
     {
-        if (condition) {
+        if (byteSize == 4) {
             stream >> data;
+            return;
+        }
+        if (byteSize == 2) {
+            uint16_t tmp = 0;
+            stream >> tmp;
+            if (tmp == uint16_t(-1))
+                data = uint32_t(-1);
+            else
+                data = tmp;
             return;
         }
         uint8_t tmp = 0;
         stream >> tmp;
         if (tmp == uint8_t(-1))
-            data = uint16_t(-1);
+            data = uint32_t(-1);
         else
             data = tmp;
     }
-    void writeVarLength(ByteOrderDataStreamWriter& stream, bool condition, const uint16_t& data) const
+    void writeVarLength(ByteOrderDataStreamWriter& stream, size_t byteSize, const uint32_t& data) const
     {
-        if (condition) {
+        if (byteSize == 4) {
             stream << data;
             return;
         }
-        if (data == uint16_t(-1))
+        if (byteSize == 2) {
+            if (data == uint32_t(-1))
+                stream << uint16_t(-1);
+            else
+                stream << static_cast<uint16_t>(data);
+            return;
+        }
+        if (data == uint32_t(-1))
             stream << uint8_t(-1);
         else
             stream << static_cast<uint8_t>(data);
     }
 
-    void readArtifact(ByteOrderDataStreamReader& stream, uint16_t& art) const
+    void readArtifact(ByteOrderDataStreamReader& stream, uint32_t& art, size_t maxSize = 4) const
     {
-        readVarLength(stream, m_artId16Bit, art);
+        readVarLength(stream, std::min(maxSize, m_artIdSize), art);
     }
-    void writeArtifact(ByteOrderDataStreamWriter& stream, const uint16_t& art) const
+    void writeArtifact(ByteOrderDataStreamWriter& stream, const uint32_t& art, size_t maxSize = 4) const
     {
-        writeVarLength(stream, m_artId16Bit, art);
-    }
-    void readArtifact(ByteOrderDataStreamReader& stream, uint32_t& art) const
-    {
-        uint16_t artTmp = 0;
-        readVarLength(stream, m_artId16Bit, artTmp);
-        art = artTmp;
-    }
-    void writeArtifact(ByteOrderDataStreamWriter& stream, const uint32_t& art) const
-    {
-        writeVarLength(stream, m_artId16Bit, static_cast<uint16_t>(art));
+        writeVarLength(stream, std::min(maxSize, m_artIdSize), art);
     }
 
-    void readUnit(ByteOrderDataStreamReader& stream, uint16_t& art) const
-    {
-        readVarLength(stream, m_stackId16Bit, art);
-    }
-    void writeUnit(ByteOrderDataStreamWriter& stream, const uint16_t& art) const
-    {
-        writeVarLength(stream, m_stackId16Bit, art);
-    }
     void readUnit(ByteOrderDataStreamReader& stream, uint32_t& art) const
     {
-        uint16_t artTmp = 0;
-        readVarLength(stream, m_stackId16Bit, artTmp);
-        art = artTmp;
+        readVarLength(stream, m_stackIdSize, art);
     }
     void writeUnit(ByteOrderDataStreamWriter& stream, const uint32_t& art) const
     {
-        writeVarLength(stream, m_stackId16Bit, static_cast<uint16_t>(art));
+        writeVarLength(stream, m_stackIdSize, art);
+    }
+    void readUnit(ByteOrderDataStreamReader& stream, uint16_t& art) const
+    {
+        uint32_t artTmp = 0;
+        readVarLength(stream, m_stackIdSize, artTmp);
+        art = artTmp;
+    }
+    void writeUnit(ByteOrderDataStreamWriter& stream, const uint16_t& art) const
+    {
+        writeVarLength(stream, m_stackIdSize, static_cast<uint32_t>(art));
     }
 };
 
@@ -176,7 +187,7 @@ enum class MapObjectType
     //    ARENA                       = 4,
     ARTIFACT     = 5,
     PANDORAS_BOX = 6,
-    //    BLACK_MARKET                = 7,
+    BLACK_MARKET = 7,
     //    BOAT                        = 8,
     //    BORDERGUARD                 = 9,
     //    KEYMASTER                   = 10,
@@ -191,14 +202,14 @@ enum class MapObjectType
     CREATURE_GENERATOR3 = 19,
     CREATURE_GENERATOR4 = 20,
     //    CURSED_GROUND1              = 21,
-    //    CORPSE                      = 22,
+    CORPSE = 22,
     //    MARLETTO_TOWER              = 23,
     DERELICT_SHIP = 24,
     DRAGON_UTOPIA = 25,
     EVENT         = 26,
     //    EYE_OF_MAGI                 = 27,
     //    FAERIE_RING                 = 28,
-    //    FLOTSAM                     = 29,
+    FLOTSAM = 29,
     //    FOUNTAIN_OF_FORTUNE         = 30,
     //    FOUNTAIN_OF_YOUTH           = 31,
     //    GARDEN_OF_REVELATION        = 32,
@@ -208,7 +219,7 @@ enum class MapObjectType
     GRAIL = 36,
     //    HUT_OF_MAGI                 = 37,
     //    IDOL_OF_FORTUNE             = 38,
-    //    LEAN_TO                     = 39,
+    LEAN_TO = 39,
     //    UNUSED_1                    = 40,
     //    LIBRARY_OF_ENLIGHTENMENT    = 41,
     LIGHTHOUSE = 42,
@@ -230,8 +241,8 @@ enum class MapObjectType
     OCEAN_BOTTLE = 59,
     //    PILLAR_OF_FIRE              = 60,
     //    STAR_AXIS                   = 61,
-    PRISON = 62,
-    //    PYRAMID                     = 63, //subtype 0
+    PRISON  = 62,
+    PYRAMID = 63, //subtype 0
     //    WOG_OBJECT                  = 63, //subtype > 0
     //    RALLY_FLAG                  = 64,
     RANDOM_ART          = 65,
@@ -250,12 +261,12 @@ enum class MapObjectType
     //    REFUGEE_CAMP                = 78,
     RESOURCE = 79,
     //    SANCTUARY                   = 80,
-    SCHOLAR = 81,
-    //    SEA_CHEST                   = 82,
-    SEER_HUT  = 83,
-    CRYPT     = 84,
-    SHIPWRECK = 85,
-    //    SHIPWRECK_SURVIVOR          = 86,
+    SCHOLAR                     = 81,
+    SEA_CHEST                   = 82,
+    SEER_HUT                    = 83,
+    CRYPT                       = 84,
+    SHIPWRECK                   = 85,
+    SHIPWRECK_SURVIVOR          = 86,
     SHIPYARD                    = 87,
     SHRINE_OF_MAGIC_INCANTATION = 88,
     SHRINE_OF_MAGIC_GESTURE     = 89,
@@ -270,14 +281,14 @@ enum class MapObjectType
     TOWN = 98,
     //    TRADING_POST                = 99,
     //    LEARNING_STONE              = 100,
-    TREASURE_CHEST = 101,
-    //    TREE_OF_KNOWLEDGE           = 102,
+    TREASURE_CHEST    = 101,
+    TREE_OF_KNOWLEDGE = 102,
     //    SUBTERRANEAN_GATE           = 103,
-    //    UNIVERSITY                  = 104,
-    //    WAGON                       = 105,
+    UNIVERSITY          = 104,
+    WAGON               = 105,
     WAR_MACHINE_FACTORY = 106,
     //    SCHOOL_OF_WAR               = 107,
-    //    WARRIORS_TOMB               = 108,
+    WARRIORS_TOMB = 108,
     //    WATER_WHEEL                 = 109,
     //    WATERING_HOLE               = 110,
     //    WHIRLPOOL                   = 111,
@@ -320,8 +331,17 @@ enum class MapObjectType
     //    RIVER_DELTA = 143,
 
     //    HOTA_VISITABLE_1 = 144,
-    //    HOTA_VISITABLE_2 = 145,
-    //    HOTA_VISITABLE_3 = 146,
+    HOTA_VISITABLE_2              = 145,
+    HOTA_VISITABLE_2_ANCIENT_LAMP = 0,
+    HOTA_VISITABLE_2_WATER_BARREL = 1,
+    HOTA_VISITABLE_2_JETSAM       = 2,
+    HOTA_VISITABLE_2_MANA_VIAL    = 3,
+
+    HOTA_VISITABLE_3                  = 146,
+    HOTA_VISITABLE_3_WATER_ACADEMY    = 0,
+    HOTA_VISITABLE_3_WATER_OBSRVATORY = 1,
+    HOTA_VISITABLE_3_ALTAR_OF_MANA    = 2,
+    HOTA_VISITABLE_3_TOWN_GATE        = 3,
 
     //    ROCK          = 147,
     //    SAND_DUNE     = 148,
@@ -488,11 +508,11 @@ struct PrimarySkillSet {
 struct HeroArtSet {
     bool m_hasArts = false;
 
-    std::vector<uint16_t> m_mainSlots;
-    uint16_t              m_cata  = 0;
-    uint16_t              m_book  = 0;
-    uint16_t              m_misc5 = 0;
-    std::vector<uint16_t> m_bagSlots;
+    std::vector<uint32_t> m_mainSlots;
+    uint32_t              m_cata  = 0;
+    uint32_t              m_book  = 0;
+    uint32_t              m_misc5 = 0;
+    std::vector<uint32_t> m_bagSlots;
 
     void prepareArrays(const MapFormatFeatures* m_features)
     {
@@ -640,6 +660,11 @@ struct MapTownEvent {
     std::vector<uint8_t>  m_buildings;
     std::vector<uint16_t> m_creaturesAmounts;
 
+    uint32_t m_unknown1 = 0;
+    uint32_t m_unknown2 = 0;
+    uint32_t m_unknown3 = 0;
+    uint16_t m_unknown4 = 0;
+
     auto operator<=>(const MapTownEvent&) const = default;
 
     void prepareArrays(const MapFormatFeatures* m_features);
@@ -693,9 +718,10 @@ struct MapMonster : public MapObjectAbstract {
     bool        m_hasMessage = false;
     std::string m_message;
     ResourceSet m_resourceSet;
-    uint16_t    m_artID          = uint16_t(-1);
+    uint32_t    m_artID          = uint32_t(-1);
     bool        m_neverFlees     = false;
     bool        m_notGrowingTeam = false;
+    //uint16_t    m_unknown1       = 0;
 
     uint32_t m_aggressionExact  = 0xffffffffU;
     uint32_t m_joinPercent      = 100;
@@ -758,7 +784,9 @@ struct MapQuest : public MapObjectAbstract {
         ARMY          = 6,
         RESOURCES     = 7,
         HERO          = 8,
-        PLAYER        = 9
+        PLAYER        = 9,
+
+        WAIT_FOR_DAY_OR_BE_CLASS = 10,
     };
     enum class Progress
     {
@@ -770,13 +798,17 @@ struct MapQuest : public MapObjectAbstract {
     Mission  m_missionType = Mission::NONE;
     Progress m_progress    = Progress::NOT_ACTIVE;
     int32_t  m_lastDay     = -1; //after this day (first day is 0) mission cannot be completed; if -1 - no limit
+    int32_t  m_minimumDay  = -1;
 
     uint32_t              m_134val = 0;
     std::vector<uint8_t>  m_2stats;
-    std::vector<uint16_t> m_5arts;      //artifacts id
+    std::vector<uint32_t> m_5arts;      //artifacts id
     StackSet              m_6creatures; //pair[cre id, cre count], CreatureSet info irrelevant
     std::vector<uint32_t> m_7resources; //TODO: use resourceset?
     uint8_t               m_89val = 0;
+
+    std::vector<uint8_t> m_expectClasses;
+    uint32_t             m_dayClassDetermine = 0; // choose between new HotA missions. 0 = be class. 1 - wait for day.
 
     std::string m_firstVisitText;
     std::string m_nextVisitText;
@@ -786,6 +818,7 @@ struct MapQuest : public MapObjectAbstract {
     {
         m_2stats.resize(m_features->m_primarySkillsCount);
         m_7resources.resize(m_features->m_resourceCount);
+        m_expectClasses.resize(m_features->m_factions * 2);
     }
 
     void readBinary(ByteOrderDataStreamReader& stream) override;
@@ -809,8 +842,8 @@ struct MapSeerHut : public MapObjectAbstract {
             MORALE_BONUS,
             LUCK_BONUS,
             RESOURCES,
-            PRIMARY_SKILL,
-            SECONDARY_SKILL,
+            PRIMARY_SKILL   = 6,
+            SECONDARY_SKILL = 7,
             ARTIFACT,
             SPELL,
             CREATURE
@@ -893,7 +926,7 @@ struct MapReward {
     ResourceSet               m_resourceSet;
     PrimarySkillSet           m_primSkillSet;
     std::vector<MapHeroSkill> m_secSkills;
-    std::vector<uint16_t>     m_artifacts;
+    std::vector<uint32_t>     m_artifacts;
     std::vector<uint8_t>      m_spells;
     StackSet                  m_creatures;
 
@@ -906,6 +939,10 @@ struct MapReward {
 struct MapPandora : public MapObjectAbstract {
     MapMessage m_message;
     MapReward  m_reward;
+
+    uint8_t  m_unknown1      = 0;
+    uint32_t m_movePointMode = 0;
+    uint32_t m_movePoints    = 0;
 
     void prepareArrays(const MapFormatFeatures* m_features);
 
@@ -943,6 +980,9 @@ struct MapSignBottle : public MapObjectAbstract {
 struct MapEvent : public MapObjectAbstract {
     MapMessage m_message;
     MapReward  m_reward;
+
+    uint32_t m_movePointMode = 0; // yes different from pandora
+    uint32_t m_movePoints    = 0;
 
     std::vector<uint8_t> m_players;
     uint8_t              m_computerActivate = 0;
@@ -990,6 +1030,81 @@ struct MapQuestGuard : public MapObjectAbstract {
     void fromJson(const PropertyTree& data) override;
 };
 
+// diggable grave or tomb of warrior
+struct MapVisitableWithReward : public MapObjectAbstract {
+    enum class Type
+    {
+        Invalid,
+        Grave,
+        TreasureChest,
+        SeaChest,
+        Flotsam,
+        TreeOfKnowledge,
+        Lean,
+        Jetsam,
+        ManaVial,
+        CampFire,
+        Corpse,
+        AncientLamp,
+        Wagon,
+        WaterBarrel,
+        Survivor,
+        WarriorTomb,
+        Pyramid,
+    };
+    Type m_type = Type::Invalid;
+
+    MapVisitableWithReward() = default;
+    MapVisitableWithReward(Type type)
+        : m_type(type)
+    {}
+
+    uint32_t m_customIndex    = 0; // for TC 0-2 is choice between 1000/1500/2000. for grave it is -1 (random) or 0 (custom)
+    uint32_t m_artId          = 0; // for pyramid it is spell id
+    uint32_t m_goldOrResource = 0; // for grave its is gold, for lean it's resource. for Lamp it's genie count
+
+    // unused fields can be filled with random garbage. careful.
+    uint8_t  m_resourceId           = 0;
+    uint32_t m_goldOrResourceSecond = 0; // used by CampFire
+    uint8_t  m_unknown1             = 0;
+
+    void readBinary(ByteOrderDataStreamReader& stream) override;
+    void writeBinary(ByteOrderDataStreamWriter& stream) const override;
+    void toJson(PropertyTree& data) const override;
+    void fromJson(const PropertyTree& data) override;
+};
+
+struct MapBlackMarket : public MapObjectAbstract {
+    std::vector<uint32_t> m_artifacts;
+
+    void prepareArrays(const MapFormatFeatures* m_features)
+    {
+        if (m_features->m_extraRewardsCustomization)
+            m_artifacts.resize(7);
+    }
+
+    void readBinary(ByteOrderDataStreamReader& stream) override;
+    void writeBinary(ByteOrderDataStreamWriter& stream) const override;
+    void toJson(PropertyTree& data) const override;
+    void fromJson(const PropertyTree& data) override;
+};
+
+struct MapUniversity : public MapObjectAbstract {
+    uint32_t             m_customIndex = 0;
+    std::vector<uint8_t> m_allowedSkills;
+
+    void prepareArrays(const MapFormatFeatures* m_features)
+    {
+        if (m_features->m_extraRewardsCustomization)
+            m_allowedSkills.resize(m_features->m_secondarySkillCount);
+    }
+
+    void readBinary(ByteOrderDataStreamReader& stream) override;
+    void writeBinary(ByteOrderDataStreamWriter& stream) const override;
+    void toJson(PropertyTree& data) const override;
+    void fromJson(const PropertyTree& data) override;
+};
+
 struct MapGrail : public MapObjectAbstract {
     uint32_t m_radius = 0;
 
@@ -1011,15 +1126,15 @@ struct MapHeroPlaceholder : public MapObjectWithOwner {
 
 struct MapAbandonedMine : public MapObjectAbstract {
     std::vector<uint8_t> m_resourceBits;
+    uint8_t              m_customGuards = 0;
+    uint32_t             m_creatureId   = 0;
+    uint32_t             m_countMin     = 0;
+    uint32_t             m_countMax     = 0;
 
-    void prepareArrays() { m_resourceBits.resize(32); }
+    void prepareArrays(const MapFormatFeatures* m_features) { m_resourceBits.resize(32); }
 
-    void readBinary(ByteOrderDataStreamReader& stream) override
-    {
-        prepareArrays();
-        stream.readBits(m_resourceBits);
-    }
-    void writeBinary(ByteOrderDataStreamWriter& stream) const override { stream.writeBits(m_resourceBits); }
+    void readBinary(ByteOrderDataStreamReader& stream) override;
+    void writeBinary(ByteOrderDataStreamWriter& stream) const override;
     void toJson(PropertyTree& data) const override;
     void fromJson(const PropertyTree& data) override;
 };
