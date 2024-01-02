@@ -306,7 +306,11 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     MapHeroPlaceholder,
     m_owner,
     m_hero,
-    m_powerRank)
+    m_powerRank,
+
+    m_hasArmy,
+    m_garison,
+    m_bagSlots)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     MapAbandonedMine,

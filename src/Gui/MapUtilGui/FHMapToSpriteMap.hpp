@@ -23,7 +23,7 @@ public:
         : m_settings(renderSettings)
     {}
 
-    SpriteMap render(const FHMap& fhMap, const Gui::IGraphicsLibrary* graphicsLibrary, const Core::IGameDatabase* database) const;
+    SpriteMap render(const FHMap& fhMap, const Gui::IGraphicsLibrary* graphicsLibrary) const;
 
 private:
     const SpriteRenderSettings m_settings;

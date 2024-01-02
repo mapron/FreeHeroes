@@ -38,7 +38,8 @@ private:
 
     void convertTileMap(const H3Map& src, FHMap& dest) const;
 
-    Core::LibraryObjectDef convertDef(const ObjectTemplate& objTempl) const;
+    Core::LibraryObjectDef        convertDef(const ObjectTemplate& objTempl) const;
+    Core::LibraryArtifactConstPtr convertArtifact(uint32_t id) const;
 
 private:
     const Core::IGameDatabase* const m_database;
@@ -61,6 +62,8 @@ private:
     std::vector<Core::LibrarySpellConstPtr>          m_spellIds;
     std::vector<Core::LibraryTerrainConstPtr>        m_terrainIds;
     std::vector<Core::LibraryUnitConstPtr>           m_unitIds;
+
+    std::map<uint32_t, Core::LibraryArtifactConstPtr> m_spellScrollsIds;
 };
 
 }

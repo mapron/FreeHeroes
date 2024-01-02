@@ -800,6 +800,8 @@ GameDatabase::GameDatabase(const Mernel::PropertyTree& recordObjectMaps)
         }
 
         m_impl->m_objectDefs.m_sorted.push_back(obj);
+
+        //Mernel::Logger(Mernel::Logger::Warning) << "obj:" << obj->id;
     }
 }
 

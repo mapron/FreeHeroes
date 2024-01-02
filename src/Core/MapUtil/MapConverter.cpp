@@ -586,9 +586,17 @@ void MapConverter::propertySerializeFH()
 void MapConverter::propertyDeserializeFH()
 {
     Core::GameVersion version = Core::GameVersion::SOD;
-    if (m_mainFile.m_json["format"].getScalar().toString().starts_with("HOTA"))
-        version = Core::GameVersion::HOTA_FACTORY;
-    m_mapFH.fromJson(m_mainFile.m_json, m_databaseContainer->getDatabase(version));
+    if (m_mainFile.m_json["format"].getScalar().toString().starts_with("HOTA")) {
+        version = Core::GameVersion::HOTA;
+        if (m_mainFile.m_json["config"].contains("hotaVersion") && m_mainFile.m_json["config"]["hotaVersion"].contains("ver1")) {
+            auto majorVersion = m_mainFile.m_json["config"]["hotaVersion"]["ver1"].getScalar().toInt();
+            if (majorVersion >= 5)
+                version = Core::GameVersion::HOTA_FACTORY;
+        }
+    }
+    m_mapFH.m_database = m_databaseContainer->getDatabase(version);
+    assert(m_mapFH.m_database);
+    m_mapFH.fromJson(m_mainFile.m_json);
 }
 
 void MapConverter::convertFHtoH3M()
@@ -598,8 +606,8 @@ void MapConverter::convertFHtoH3M()
         version = Core::GameVersion::HOTA;
     if (m_mapFH.m_format == FHMap::MapFormat::HOTA3 && m_mapFH.m_config.m_hotaVersion.m_ver1 >= 5)
         version = Core::GameVersion::HOTA_FACTORY;
-    auto* db = m_databaseContainer->getDatabase(version);
-    convertFH2H3M(m_mapFH, m_mapH3M, db);
+    m_mapFH.m_database = m_databaseContainer->getDatabase(version);
+    convertFH2H3M(m_mapFH, m_mapH3M);
 }
 
 void MapConverter::convertH3MtoFH()
@@ -610,7 +618,8 @@ void MapConverter::convertH3MtoFH()
     if (m_mapH3M.m_format == MapFormat::HOTA3 && m_mapH3M.m_hotaVer.m_ver1 >= 5)
         version = Core::GameVersion::HOTA_FACTORY;
 
-    convertH3M2FH(m_mapH3M, m_mapFH, m_databaseContainer->getDatabase(version));
+    m_mapFH.m_database = m_databaseContainer->getDatabase(version);
+    convertH3M2FH(m_mapH3M, m_mapFH);
 }
 
 void MapConverter::convertFHTPLtoFH()
@@ -625,21 +634,20 @@ void MapConverter::convertFHTPLtoFH()
     if (m_mapH3M.m_format == MapFormat::HOTA3 && m_mapH3M.m_hotaVer.m_ver1 >= 5)
         version = Core::GameVersion::HOTA_FACTORY;
 
-    auto* db = m_databaseContainer->getDatabase(version);
+    m_mapFH.m_database = m_databaseContainer->getDatabase(version);
 
     if (!m_templateSettings.m_rngUserSettings.empty()) {
         m_logOutput << m_currentIndent << "Read: " << Mernel::path2string(m_templateSettings.m_rngUserSettings) << '\n';
         std::string buffer       = Mernel::readFileIntoBuffer(m_templateSettings.m_rngUserSettings);
         auto        settingsJson = Mernel::readJsonFromBuffer(buffer);
 
-        m_mapFH.applyRngUserSettings(settingsJson, db);
+        m_mapFH.applyRngUserSettings(settingsJson);
     }
     m_mapFH.rescaleToUserSize();
 
     rng->setSeed(m_mapFH.m_seed);
 
     FHTemplateProcessor converter(m_mapFH,
-                                  db,
                                   rng.get(),
                                   m_logOutput,
                                   m_templateSettings.m_stopAfterStage,

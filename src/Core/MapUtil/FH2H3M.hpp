@@ -38,6 +38,8 @@ private:
     std::vector<StackBasicDescriptor> convertStacks(const std::vector<Core::UnitWithCount>& stacks) const;
     std::vector<uint8_t>              convertPrimaryStats(const Core::HeroPrimaryParams& stats) const;
 
+    uint32_t convertArtifact(Core::LibraryArtifactConstPtr id) const;
+
 private:
     class ObjectTemplateCache;
 

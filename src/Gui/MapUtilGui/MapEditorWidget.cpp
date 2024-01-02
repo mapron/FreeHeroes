@@ -346,6 +346,7 @@ bool MapEditorWidget::load(const std::string& filename,
         else
             converter.run(MapConverter::Task::LoadFH);
 
+        assert(converter.m_mapFH.m_database);
         m_impl->m_map = std::move(converter.m_mapFH);
 
         auto rng = m_rngFactory->create();
@@ -503,7 +504,8 @@ bool MapEditorWidget::saveScreenshots(const ScreenshotTask& task)
 void MapEditorWidget::updateMap()
 {
     MapRenderer renderer(m_impl->m_viewSettings.m_renderSettings);
-    m_impl->m_spriteMap = renderer.render(m_impl->m_map, m_graphicsLibrary, m_modelsProvider->database());
+    assert(m_impl->m_map.m_database);
+    m_impl->m_spriteMap = renderer.render(m_impl->m_map, m_graphicsLibrary);
 
     m_impl->m_scene->clear();
     m_impl->m_mapSprites.clear();

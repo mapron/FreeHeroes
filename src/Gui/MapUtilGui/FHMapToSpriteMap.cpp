@@ -48,9 +48,10 @@ QColor makePlayerColor(Core::LibraryPlayerConstPtr player)
 
 }
 
-SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* graphicsLibrary, const Core::IGameDatabase* database) const
+SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* graphicsLibrary) const
 {
-    SpriteMap result;
+    const Core::IGameDatabase* database = fhMap.m_database;
+    SpriteMap                  result;
     result.m_planes.resize(fhMap.m_tileMap.m_depth);
     std::set<const FHCommonObject*> rendered;
 

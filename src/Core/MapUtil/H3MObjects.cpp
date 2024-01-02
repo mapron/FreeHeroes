@@ -105,7 +105,9 @@ MapFormatFeatures::MapFormatFeatures(MapFormat format, int hotaVer1)
         m_artIdSize   = 1;
     }
     if (isHotaFactory) {
-        m_artIdSize = 4;
+        m_artIdSize      = 4; // not everywhere
+        m_stackCountSize = 4; // not everywhere, only in placeholders
+        m_stackIdSize    = 4;
     }
 
     m_heroHasExp          = format > MapFormat::AB;
@@ -114,7 +116,8 @@ MapFormatFeatures::MapFormatFeatures(MapFormat format, int hotaVer1)
     m_heroHasOneSpell     = format == MapFormat::AB;
     m_heroHasPrimSkills   = format > MapFormat::AB;
 
-    m_heroHasSomethingUnknown = isHotaFactory;
+    m_heroHasSomethingUnknown     = isHotaFactory;
+    m_heroPlaceholderHasExtraData = isHotaFactory;
 
     m_townHasObligatorySpells = format > MapFormat::ROE;
     m_townHasSpellResearch    = format >= MapFormat::HOTA1;
@@ -734,7 +737,7 @@ void MapMonster::readBinary(ByteOrderDataStreamReader& stream)
     if (m_hasMessage) {
         stream >> m_message;
         stream >> m_resourceSet;
-        m_features->readArtifact(stream, m_artID, 2); // well hota 1.7 made it so artifacts are 4 bytes but not everywhere.
+        m_features->readArtifact(stream, m_artID, 1, 2); // hota 1.7 made it so artifacts are 4 bytes but not everywhere.
     }
 
     stream >> m_neverFlees >> m_notGrowingTeam;
@@ -763,7 +766,7 @@ void MapMonster::writeBinary(ByteOrderDataStreamWriter& stream) const
         stream << m_message;
         stream << m_resourceSet;
 
-        m_features->writeArtifact(stream, m_artID, 2);
+        m_features->writeArtifact(stream, m_artID, 1, 2); // hota 1.7 made it so artifacts are 4 bytes but not everywhere.
     }
 
     stream << m_neverFlees << m_notGrowingTeam;
@@ -1174,7 +1177,7 @@ void MapSeerHut::MapQuestWithReward::readBinary(ByteOrderDataStreamReader& strea
         }
         case RewardType::CREATURE:
         {
-            m_features->readUnit(stream, m_rID);
+            m_features->readUnit(stream, m_rID, 1, 2);
             m_rVal = stream.readScalar<uint16_t>();
             break;
         }
@@ -1240,7 +1243,7 @@ void MapSeerHut::MapQuestWithReward::writeBinary(ByteOrderDataStreamWriter& stre
         }
         case RewardType::CREATURE:
         {
-            m_features->writeUnit(stream, m_rID);
+            m_features->writeUnit(stream, m_rID, 1, 2);
 
             stream << static_cast<uint16_t>(m_rVal);
             break;
@@ -1868,16 +1871,28 @@ void MapGrail::fromJson(const PropertyTree& data)
 
 void MapHeroPlaceholder::readBinary(ByteOrderDataStreamReader& stream)
 {
+    auto* m_features = getFeaturesFromStream(stream);
+
+    prepareArrays(m_features);
     stream >> m_owner >> m_hero;
     if (m_hero == uint8_t(-1))
         stream >> m_powerRank;
+
+    if (m_features->m_heroPlaceholderHasExtraData) {
+        stream >> m_hasArmy >> m_garison >> m_bagSlots;
+    }
 }
 
 void MapHeroPlaceholder::writeBinary(ByteOrderDataStreamWriter& stream) const
 {
+    auto* m_features = getFeaturesFromStream(stream);
     stream << m_owner << m_hero;
     if (m_hero == uint8_t(-1))
         stream << m_powerRank;
+
+    if (m_features->m_heroPlaceholderHasExtraData) {
+        stream << m_hasArmy << m_garison << m_bagSlots;
+    }
 }
 
 void MapHeroPlaceholder::toJson(PropertyTree& data) const

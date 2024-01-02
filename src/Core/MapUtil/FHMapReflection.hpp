@@ -115,6 +115,7 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_patrolRadius,
     m_isRandom,
     m_isPrison,
+    m_isCamp,
     m_groupedFormation,
     m_questIdentifier,
     m_unknown1,
@@ -601,7 +602,10 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_player,
 
     m_hero,
-    m_powerRank)
+    m_powerRank,
+    m_hasArmy,
+    m_garison,
+    m_bagSlots)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHGrail,

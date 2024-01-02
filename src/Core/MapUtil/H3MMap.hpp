@@ -319,7 +319,7 @@ struct H3Map {
 
         uint32_t m_artID = 0;
 
-        uint16_t m_creatureID    = 0;
+        uint32_t m_creatureID    = 0;
         uint32_t m_creatureCount = 0;
 
         uint8_t  m_resourceID     = 0;

@@ -10,15 +10,15 @@
 
 namespace FreeHeroes {
 
-void convertH3M2FH(const H3Map& src, FHMap& dest, const Core::IGameDatabase* database)
+void convertH3M2FH(const H3Map& src, FHMap& dest)
 {
-    H3M2FHConverter converter(database);
+    H3M2FHConverter converter(dest.m_database);
     converter.convertMap(src, dest);
 }
 
-void convertFH2H3M(const FHMap& src, H3Map& dest, const Core::IGameDatabase* database)
+void convertFH2H3M(const FHMap& src, H3Map& dest)
 {
-    FH2H3MConverter converter(database);
+    FH2H3MConverter converter(src.m_database);
     converter.convertMap(src, dest);
 }
 

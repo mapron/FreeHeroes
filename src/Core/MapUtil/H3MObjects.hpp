@@ -8,6 +8,8 @@
 #include "MernelPlatform/ByteOrderStream.hpp"
 #include "MernelPlatform/PropertyTree.hpp"
 
+#include <algorithm>
+
 namespace FreeHeroes {
 using ByteOrderDataStreamReader = Mernel::ByteOrderDataStreamReader;
 using ByteOrderDataStreamWriter = Mernel::ByteOrderDataStreamWriter;
@@ -44,6 +46,7 @@ struct MapFormatFeatures {
     int m_secondarySkillCount = 0;
 
     bool   m_hasQuestIdentifier = false;
+    size_t m_stackCountSize     = 2;
     size_t m_stackIdSize        = 2;
     size_t m_artIdSize          = 2;
 
@@ -53,6 +56,8 @@ struct MapFormatFeatures {
     bool m_heroHasOneSpell         = false;
     bool m_heroHasPrimSkills       = false;
     bool m_heroHasSomethingUnknown = false;
+
+    bool m_heroPlaceholderHasExtraData = false;
 
     bool m_townHasObligatorySpells = false;
     bool m_townHasSpellResearch    = false;
@@ -118,18 +123,12 @@ struct MapFormatFeatures {
         if (byteSize == 2) {
             uint16_t tmp = 0;
             stream >> tmp;
-            if (tmp == uint16_t(-1))
-                data = uint32_t(-1);
-            else
-                data = tmp;
+            data = static_cast<uint32_t>(static_cast<int32_t>(static_cast<int16_t>(tmp)));
             return;
         }
         uint8_t tmp = 0;
         stream >> tmp;
-        if (tmp == uint8_t(-1))
-            data = uint32_t(-1);
-        else
-            data = tmp;
+        data = static_cast<uint32_t>(static_cast<int32_t>(static_cast<int8_t>(tmp)));
     }
     void writeVarLength(ByteOrderDataStreamWriter& stream, size_t byteSize, const uint32_t& data) const
     {
@@ -138,44 +137,37 @@ struct MapFormatFeatures {
             return;
         }
         if (byteSize == 2) {
-            if (data == uint32_t(-1))
-                stream << uint16_t(-1);
-            else
-                stream << static_cast<uint16_t>(data);
+            stream << static_cast<int16_t>(static_cast<int32_t>(data));
             return;
         }
-        if (data == uint32_t(-1))
-            stream << uint8_t(-1);
-        else
-            stream << static_cast<uint8_t>(data);
+        stream << static_cast<int8_t>(static_cast<int32_t>(data));
     }
 
-    void readArtifact(ByteOrderDataStreamReader& stream, uint32_t& art, size_t maxSize = 4) const
+    void readArtifact(ByteOrderDataStreamReader& stream, uint32_t& art, size_t minSize = 1, size_t maxSize = 4) const
     {
-        readVarLength(stream, std::min(maxSize, m_artIdSize), art);
+        readVarLength(stream, std::clamp(m_artIdSize, minSize, maxSize), art);
     }
-    void writeArtifact(ByteOrderDataStreamWriter& stream, const uint32_t& art, size_t maxSize = 4) const
+    void writeArtifact(ByteOrderDataStreamWriter& stream, const uint32_t& art, size_t minSize = 1, size_t maxSize = 4) const
     {
-        writeVarLength(stream, std::min(maxSize, m_artIdSize), art);
+        writeVarLength(stream, std::clamp(m_artIdSize, minSize, maxSize), art);
     }
 
-    void readUnit(ByteOrderDataStreamReader& stream, uint32_t& art) const
+    void readUnit(ByteOrderDataStreamReader& stream, uint32_t& id, size_t minSize = 1, size_t maxSize = 4) const
     {
-        readVarLength(stream, m_stackIdSize, art);
+        readVarLength(stream, std::clamp(m_stackIdSize, minSize, maxSize), id);
     }
-    void writeUnit(ByteOrderDataStreamWriter& stream, const uint32_t& art) const
+    void writeUnit(ByteOrderDataStreamWriter& stream, const uint32_t& id, size_t minSize = 1, size_t maxSize = 4) const
     {
-        writeVarLength(stream, m_stackIdSize, art);
+        writeVarLength(stream, std::clamp(m_stackIdSize, minSize, maxSize), id);
     }
-    void readUnit(ByteOrderDataStreamReader& stream, uint16_t& art) const
+
+    void readUnitCount(ByteOrderDataStreamReader& stream, uint32_t& id, size_t minSize = 1, size_t maxSize = 4) const
     {
-        uint32_t artTmp = 0;
-        readVarLength(stream, m_stackIdSize, artTmp);
-        art = artTmp;
+        readVarLength(stream, std::clamp(m_stackCountSize, minSize, maxSize), id);
     }
-    void writeUnit(ByteOrderDataStreamWriter& stream, const uint16_t& art) const
+    void writeUnitCount(ByteOrderDataStreamWriter& stream, const uint32_t& id, size_t minSize = 1, size_t maxSize = 4) const
     {
-        writeVarLength(stream, m_stackIdSize, static_cast<uint32_t>(art));
+        writeVarLength(stream, std::clamp(m_stackCountSize, minSize, maxSize), id);
     }
 };
 
@@ -404,8 +396,8 @@ struct IMapObject {
 };
 
 struct StackBasicDescriptor {
-    uint16_t m_id    = uint16_t(-1);
-    uint16_t m_count = 0;
+    uint32_t m_id    = uint32_t(-1);
+    uint32_t m_count = 0;
 
     constexpr auto operator<=>(const StackBasicDescriptor&) const = default;
 };
@@ -413,14 +405,20 @@ struct StackBasicDescriptor {
 struct StackSet {
     std::vector<StackBasicDescriptor> m_stacks;
 
+    size_t m_stackIdSizeMin    = 1;
+    size_t m_stackIdSizeMax    = 2;
+    size_t m_stackCountSizeMin = 2;
+    size_t m_stackCountSizeMax = 2;
+    bool   m_inverseOrder      = false;
+
     void readBinary(ByteOrderDataStreamReader& stream)
     {
         auto* m_features = getFeaturesFromStream(stream);
         m_stacks.resize(stream.readSize());
 
         for (auto& stack : m_stacks) {
-            m_features->readUnit(stream, stack.m_id);
-            stream >> stack.m_count;
+            m_features->readUnit(stream, stack.m_id, m_stackIdSizeMin, m_stackIdSizeMax);
+            m_features->readUnitCount(stream, stack.m_count, m_stackCountSizeMin, m_stackCountSizeMax);
         }
     }
     void writeBinary(ByteOrderDataStreamWriter& stream) const
@@ -429,14 +427,20 @@ struct StackSet {
         auto  lock       = stream.setContainerSizeBytesGuarded(1);
         stream.writeSize(m_stacks.size());
         for (auto& stack : m_stacks) {
-            m_features->writeUnit(stream, stack.m_id);
-            stream << stack.m_count;
+            m_features->writeUnit(stream, stack.m_id, m_stackIdSizeMin, m_stackIdSizeMax);
+            m_features->writeUnitCount(stream, stack.m_count, m_stackCountSizeMin, m_stackCountSizeMax);
         }
     }
 };
 
 struct StackSetFixed {
     std::vector<StackBasicDescriptor> m_stacks;
+
+    size_t m_stackIdSizeMin    = 1;
+    size_t m_stackIdSizeMax    = 2;
+    size_t m_stackCountSizeMin = 2;
+    size_t m_stackCountSizeMax = 2;
+    bool   m_inverseOrder      = false;
 
     auto operator<=>(const StackSetFixed&) const = default;
 
@@ -450,8 +454,11 @@ struct StackSetFixed {
         auto* m_features = getFeaturesFromStream(stream);
         prepareArrays(m_features);
         for (auto& stack : m_stacks) {
-            m_features->readUnit(stream, stack.m_id);
-            stream >> stack.m_count;
+            if (!m_inverseOrder)
+                m_features->readUnit(stream, stack.m_id, m_stackIdSizeMin, m_stackIdSizeMax);
+            m_features->readUnitCount(stream, stack.m_count, m_stackCountSizeMin, m_stackCountSizeMax);
+            if (m_inverseOrder)
+                m_features->readUnit(stream, stack.m_id, m_stackIdSizeMin, m_stackIdSizeMax);
         }
     }
     void writeBinary(ByteOrderDataStreamWriter& stream) const
@@ -459,8 +466,11 @@ struct StackSetFixed {
         auto* m_features = getFeaturesFromStream(stream);
         assert(m_features->m_stackSize == (int) m_stacks.size());
         for (auto& stack : m_stacks) {
-            m_features->writeUnit(stream, stack.m_id);
-            stream << stack.m_count;
+            if (!m_inverseOrder)
+                m_features->writeUnit(stream, stack.m_id, m_stackIdSizeMin, m_stackIdSizeMax);
+            m_features->writeUnitCount(stream, stack.m_count, m_stackCountSizeMin, m_stackCountSizeMax);
+            if (m_inverseOrder)
+                m_features->writeUnit(stream, stack.m_id, m_stackIdSizeMin, m_stackIdSizeMax);
         }
     }
 };
@@ -1100,6 +1110,25 @@ struct MapGrail : public MapObjectAbstract {
 struct MapHeroPlaceholder : public MapObjectWithOwner {
     uint8_t m_hero      = 0;
     uint8_t m_powerRank = 0;
+
+    bool          m_hasArmy = false;
+    StackSetFixed m_garison;
+
+    std::vector<uint32_t> m_bagSlots;
+
+    MapHeroPlaceholder()
+    {
+        m_garison.m_stackIdSizeMin    = 4;
+        m_garison.m_stackIdSizeMax    = 4;
+        m_garison.m_stackCountSizeMin = 4;
+        m_garison.m_stackCountSizeMax = 4;
+        m_garison.m_inverseOrder      = true;
+    }
+
+    void prepareArrays(const MapFormatFeatures* m_features)
+    {
+        m_garison.prepareArrays(m_features);
+    }
 
     void readBinary(ByteOrderDataStreamReader& stream) override;
     void writeBinary(ByteOrderDataStreamWriter& stream) const override;

@@ -83,6 +83,14 @@ H3M2FHConverter::H3M2FHConverter(const Core::IGameDatabase* database)
     m_terrainIds  = database->terrains()->legacyOrderedRecords();
     m_unitIds     = database->units()->legacyOrderedRecords();
 
+    for (auto* art : database->artifacts()->records()) {
+        if (!art->scrollSpell)
+            continue;
+        if (art->scrollSpell->legacyId < 0)
+            continue;
+        m_spellScrollsIds[(uint32_t) art->scrollSpell->legacyId] = art;
+    }
+
     auto players = database->players()->legacyOrderedRecords();
     for (int i = 0; i < (int) players.size(); i++)
         m_playerIds[static_cast<uint8_t>(i)] = players[i];
@@ -91,7 +99,7 @@ H3M2FHConverter::H3M2FHConverter(const Core::IGameDatabase* database)
 
 void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
 {
-    dest          = {};
+    dest          = { .m_database = dest.m_database };
     dest.m_format = static_cast<FHMap::MapFormat>(src.m_format);
 
     dest.m_config.m_hotaVersion.m_ver1 = src.m_hotaVer.m_ver1;
@@ -125,7 +133,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
         destCond.m_type               = static_cast<decltype(destCond.m_type)>(srcCond.m_type);
         destCond.m_allowNormalVictory = srcCond.m_allowNormalVictory;
         destCond.m_appliesToAI        = srcCond.m_appliesToAI;
-        destCond.m_artID              = hasArt ? m_artifactIds.at(srcCond.m_artID) : 0;
+        destCond.m_artID              = hasArt ? convertArtifact(srcCond.m_artID) : 0;
         destCond.m_creature.unit      = hasUnit ? m_unitIds.at(srcCond.m_creatureID) : 0;
         destCond.m_creature.count     = hasUnit ? static_cast<uint32_t>(srcCond.m_creatureCount) : 0;
         destCond.m_resourceID         = hasRes ? m_resourceIds.at(srcCond.m_resourceID) : 0;
@@ -182,7 +190,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
             if (faction->legacyId < 0)
                 continue;
 
-            if (playerInfo.m_allowedFactionsBitmask.at(faction->legacyId))
+            if (faction->legacyId < (int) playerInfo.m_allowedFactionsBitmask.size() && playerInfo.m_allowedFactionsBitmask.at(faction->legacyId))
                 fhPlayer.m_startingFactions.push_back(faction);
         }
     }
@@ -327,6 +335,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 FHHero     fhhero;
                 fhhero.m_isRandom = type == MapObjectType::RANDOM_HERO;
                 fhhero.m_isPrison = type == MapObjectType::PRISON;
+                fhhero.m_isCamp   = fhhero.m_isPrison && objDefCorrected.subId == 1;
                 fhhero.m_player   = playerId;
                 initCommon(fhhero);
                 fhhero.m_pos = posFromH3M(obj.m_pos);
@@ -504,7 +513,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                     fhMonster.m_message = monster->m_message;
                     if (monster->m_artID != uint32_t(-1)) {
                         fhMonster.m_reward.artifacts.resize(1);
-                        fhMonster.m_reward.artifacts[0].onlyArtifacts.push_back(m_artifactIds.at(monster->m_artID));
+                        fhMonster.m_reward.artifacts[0].onlyArtifacts.push_back(convertArtifact(monster->m_artID));
                     }
                     fhMonster.m_reward.resources = convertResources(monster->m_resourceSet.m_resourceAmount);
                 }
@@ -617,7 +626,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                     assert(art.m_id);
                 } else {
                     assert(objDefCorrected.subId != 0);
-                    art.m_id = m_artifactIds[objDefCorrected.subId];
+                    art.m_id = convertArtifact(objDefCorrected.subId);
                 }
 
                 art.m_pickupCondition1 = artifact->m_pickupCondition1;
@@ -926,6 +935,12 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 fhObj.m_player    = m_playerIds.at(mapPlaceholder->m_owner);
                 fhObj.m_hero      = mapPlaceholder->m_hero;
                 fhObj.m_powerRank = mapPlaceholder->m_powerRank;
+                fhObj.m_hasArmy   = mapPlaceholder->m_hasArmy;
+                if (fhObj.m_hasArmy) {
+                    fhObj.m_garison = convertSquad(mapPlaceholder->m_garison);
+                }
+                for (auto artId : mapPlaceholder->m_bagSlots)
+                    fhObj.m_bagSlots.push_back(convertArtifact(artId));
                 dest.m_objects.m_heroPlaceholders.push_back(std::move(fhObj));
 
             } break;
@@ -958,10 +973,7 @@ void H3M2FHConverter::convertMap(const H3Map& src, FHMap& dest) const
                 }
 
                 for (uint32_t artId : bank->m_artifacts) {
-                    if (artId == uint32_t(-1))
-                        fhBank.m_artifacts.push_back(nullptr);
-                    else
-                        fhBank.m_artifacts.push_back(m_artifactIds[artId]);
+                    fhBank.m_artifacts.push_back(convertArtifact(artId));
                 }
                 dest.m_objects.m_banks.push_back(std::move(fhBank));
             } break;
@@ -1135,7 +1147,7 @@ std::vector<Core::UnitWithCount> H3M2FHConverter::convertStacks(const std::vecto
 {
     std::vector<Core::UnitWithCount> result;
     for (auto& stack : stacks)
-        result.push_back({ m_unitIds[stack.m_id], stack.m_count });
+        result.push_back({ m_unitIds[stack.m_id], static_cast<int>(stack.m_count) });
     return result;
 }
 
@@ -1143,12 +1155,12 @@ Core::AdventureSquad H3M2FHConverter::convertSquad(const StackSetFixed& fixedSta
 {
     Core::AdventureSquad squad;
     for (const auto& stack : fixedStacks.m_stacks) {
-        if (stack.m_count && stack.m_id <= uint16_t(65534) && stack.m_id >= uint16_t(65520)) {
+        if (stack.m_count && stack.m_id <= uint32_t(-2) && stack.m_id >= uint32_t(-20)) {
             Core::AdventureStack as;
             as.count      = stack.m_count;
-            as.randomTier = 65534 - stack.m_id;
+            as.randomTier = uint32_t(-2) - stack.m_id;
             squad.stacks.push_back(as);
-        } else if (stack.m_count && stack.m_id != uint16_t(-1)) {
+        } else if (stack.m_count && stack.m_id != uint32_t(-1)) {
             squad.stacks.push_back(Core::AdventureStack(m_unitIds[stack.m_id], stack.m_count));
         } else {
             squad.stacks.push_back(Core::AdventureStack());
@@ -1204,7 +1216,7 @@ Core::Reward H3M2FHConverter::convertRewardHut(const MapSeerHut::MapQuestWithRew
         }
         case RewardType::ARTIFACT:
         {
-            fhReward.artifacts.push_back(Core::ArtifactFilter{ .onlyArtifacts = { m_artifactIds[questWithReward.m_rID] } });
+            fhReward.artifacts.push_back(Core::ArtifactFilter{ .onlyArtifacts = { convertArtifact(questWithReward.m_rID) } });
             break;
         }
         case RewardType::SPELL:
@@ -1242,7 +1254,7 @@ Core::Reward H3M2FHConverter::convertReward(const MapReward& reward) const
         fhReward.secSkills.push_back({ m_secSkillIds[skill.m_id], skill.m_level - 1 });
 
     for (auto artId : reward.m_artifacts) {
-        fhReward.artifacts.push_back(Core::ArtifactFilter{ .onlyArtifacts = { m_artifactIds[artId] } });
+        fhReward.artifacts.push_back(Core::ArtifactFilter{ .onlyArtifacts = { convertArtifact(artId) } });
     }
 
     for (uint8_t spellId : reward.m_spells)
@@ -1273,7 +1285,7 @@ FHQuest H3M2FHConverter::convertQuest(const MapQuest& quest) const
         {
             fhQuest.m_type = FHQuest::Type::BringArtifacts;
             for (uint32_t id : quest.m_5arts)
-                fhQuest.m_artifacts.push_back(m_artifactIds[id]);
+                fhQuest.m_artifacts.push_back(convertArtifact(id));
         } break;
         case MapQuest::Mission::ARMY:
         {
@@ -1374,14 +1386,14 @@ void H3M2FHConverter::convertHeroArtifacts(const HeroArtSet& artSet, Core::Adven
         uint32_t               artId = artSet.m_mainSlots[i];
         if (artId == uint32_t(-1))
             continue;
-        hero.artifactsOn[slot] = m_artifactIds.at(artId);
+        hero.artifactsOn[slot] = convertArtifact(artId);
     }
     if (artSet.m_misc5 != uint32_t(-1))
-        hero.artifactsOn[Core::ArtifactSlotType::Misc4] = m_artifactIds.at(artSet.m_misc5);
+        hero.artifactsOn[Core::ArtifactSlotType::Misc4] = convertArtifact(artSet.m_misc5);
 
     hero.artifactsBagList.clear();
     for (uint32_t artId : artSet.m_bagSlots)
-        hero.artifactsBagList.push_back(m_artifactIds.at(artId));
+        hero.artifactsBagList.push_back(convertArtifact(artId));
 
     hero.hasSpellBook = artSet.m_book != uint32_t(-1);
 }
@@ -1393,7 +1405,7 @@ void H3M2FHConverter::convertVisitableRewards(const MapVisitableWithReward& visi
 
     if (fhVisitable.m_customChoice >= 0) {
         if (visitable.m_artId != uint32_t(-1)) {
-            fhVisitable.m_reward.artifacts.push_back(Core::ArtifactFilter{ .onlyArtifacts = { m_artifactIds.at(visitable.m_artId) } });
+            fhVisitable.m_reward.artifacts.push_back(Core::ArtifactFilter{ .onlyArtifacts = { convertArtifact(visitable.m_artId) } });
         }
         if (visitable.m_spellId != uint32_t(-1)) {
             fhVisitable.m_reward.spells.onlySpells.push_back(m_spellIds.at(visitable.m_spellId));
@@ -1407,7 +1419,7 @@ void H3M2FHConverter::convertVisitableRewards(const MapVisitableWithReward& visi
 
     if (visitable.hasBehaviour(MapVisitableWithReward::Behaviour::ArtifactsSale)) {
         for (uint32_t id : visitable.m_artifactsForSale)
-            fhVisitable.m_artifactsForSale.push_back(id == uint32_t(-1) ? nullptr : m_artifactIds[id]);
+            fhVisitable.m_artifactsForSale.push_back(convertArtifact(id));
     }
     if (visitable.hasBehaviour(MapVisitableWithReward::Behaviour::SecondarySkills)) {
         for (uint32_t id : visitable.m_skillsToLearn)
@@ -1481,6 +1493,18 @@ Core::LibraryObjectDef H3M2FHConverter::convertDef(const ObjectTemplate& objTemp
         fhDef.defFile = fhDef.defFile.substr(0, fhDef.defFile.size() - 4);
 
     return fhDef;
+}
+
+Core::LibraryArtifactConstPtr H3M2FHConverter::convertArtifact(uint32_t id) const
+{
+    if (id == uint32_t(-1))
+        return nullptr;
+
+    uint16_t upperWord = (id & 0xFFFF0000U) >> 16;
+    uint16_t lowerWord = (id & 0xFFFFU);
+    if (!upperWord)
+        return m_artifactIds.at(lowerWord);
+    return m_spellScrollsIds.at(upperWord);
 }
 
 }

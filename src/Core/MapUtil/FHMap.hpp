@@ -131,6 +131,7 @@ struct FHHero : public FHPlayerControlledObject {
     int  m_patrolRadius     = -1;
     bool m_isRandom         = false;
     bool m_isPrison         = false;
+    bool m_isCamp           = false; // preview of a hero
     bool m_groupedFormation = false;
 
     uint32_t m_questIdentifier = 0;
@@ -444,6 +445,10 @@ struct FHHeroPlaceholder : public FHPlayerControlledObject {
     uint8_t m_hero      = 0;
     uint8_t m_powerRank = 0;
 
+    bool                                       m_hasArmy = false;
+    Core::AdventureSquad                       m_garison;
+    std::vector<Core::LibraryArtifactConstPtr> m_bagSlots;
+
     bool operator==(const FHHeroPlaceholder&) const noexcept = default;
 };
 struct FHGrail : public FHCommonObject {
@@ -695,9 +700,9 @@ struct MAPUTIL_EXPORT FHMap {
         int  m_levelLimit        = 0;
 
         struct HotaVersion {
-            uint32_t m_ver1 = 3;
+            uint32_t m_ver1 = 0;
             uint16_t m_ver2 = 0;
-            uint32_t m_ver3 = 12;
+            uint32_t m_ver3 = 0;
 
             bool operator==(const HotaVersion&) const noexcept = default;
         } m_hotaVersion;
@@ -787,10 +792,12 @@ struct MAPUTIL_EXPORT FHMap {
 
     std::vector<Rumor> m_rumors;
 
-    void toJson(Mernel::PropertyTree& data) const;
-    void fromJson(Mernel::PropertyTree data, const Core::IGameDatabase* database);
+    const Core::IGameDatabase* m_database = nullptr;
 
-    void applyRngUserSettings(const Mernel::PropertyTree& data, const Core::IGameDatabase* database);
+    void toJson(Mernel::PropertyTree& data) const;
+    void fromJson(Mernel::PropertyTree data);
+
+    void applyRngUserSettings(const Mernel::PropertyTree& data);
 
     void rescaleToUserSize();
 };

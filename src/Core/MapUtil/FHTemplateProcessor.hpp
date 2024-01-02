@@ -22,15 +22,14 @@ namespace FreeHeroes {
 
 class MAPUTIL_EXPORT FHTemplateProcessor {
 public:
-    FHTemplateProcessor(FHMap&                     map,
-                        const Core::IGameDatabase* database,
-                        Core::IRandomGenerator*    rng,
-                        std::ostream&              logOutput,
-                        const std::string&         stopAfterStage,
-                        const std::string&         debugStage,
-                        const std::string&         tileZoneFilter,
-                        int                        stopAfterHeat,
-                        bool                       extraLogs);
+    FHTemplateProcessor(FHMap&                  map,
+                        Core::IRandomGenerator* rng,
+                        std::ostream&           logOutput,
+                        const std::string&      stopAfterStage,
+                        const std::string&      debugStage,
+                        const std::string&      tileZoneFilter,
+                        int                     stopAfterHeat,
+                        bool                    extraLogs);
 
     enum class Stage
     {

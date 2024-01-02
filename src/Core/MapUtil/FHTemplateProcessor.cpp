@@ -77,17 +77,16 @@ struct DistanceRecord {
 
 }
 
-FHTemplateProcessor::FHTemplateProcessor(FHMap&                     map,
-                                         const Core::IGameDatabase* database,
-                                         Core::IRandomGenerator*    rng,
-                                         std::ostream&              logOutput,
-                                         const std::string&         stopAfterStage,
-                                         const std::string&         debugStage,
-                                         const std::string&         tileZoneFilter,
-                                         int                        stopAfterHeat,
-                                         bool                       extraLogs)
+FHTemplateProcessor::FHTemplateProcessor(FHMap&                  map,
+                                         Core::IRandomGenerator* rng,
+                                         std::ostream&           logOutput,
+                                         const std::string&      stopAfterStage,
+                                         const std::string&      debugStage,
+                                         const std::string&      tileZoneFilter,
+                                         int                     stopAfterHeat,
+                                         bool                    extraLogs)
     : m_map(map)
-    , m_database(database)
+    , m_database(map.m_database)
     , m_rng(rng)
     , m_logOutput(logOutput)
     , m_stopAfter(stringToStage(stopAfterStage))

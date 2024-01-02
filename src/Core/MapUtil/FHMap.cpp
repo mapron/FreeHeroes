@@ -23,6 +23,8 @@ using namespace Mernel;
 std::string FHHero::getDefId(bool onWater) const
 {
     if (m_isPrison) {
+        if (m_isCamp)
+            return "avxhcamp";
         return onWater ? "avwtprsn" : "avxprsn0";
     } else if (m_isRandom) {
         return onWater ? "avxboat5" : "ahrandom";
@@ -38,10 +40,11 @@ void FHMap::toJson(PropertyTree& data) const
     writer.valueToJson(*this, data);
 }
 
-void FHMap::fromJson(PropertyTree data, const Core::IGameDatabase* database)
+void FHMap::fromJson(PropertyTree data)
 {
-    Core::PropertyTreeReaderDatabase reader(database);
-    *this = {};
+    Core::PropertyTreeReaderDatabase reader(m_database);
+
+    *this = { .m_database = m_database };
     reader.jsonToValue(data, *this);
 
     m_tileMap.updateSize();
@@ -81,9 +84,9 @@ void FHMap::fromJson(PropertyTree data, const Core::IGameDatabase* database)
     }
 }
 
-void FHMap::applyRngUserSettings(const Mernel::PropertyTree& data, const Core::IGameDatabase* database)
+void FHMap::applyRngUserSettings(const Mernel::PropertyTree& data)
 {
-    Core::PropertyTreeReaderDatabase reader(database);
+    Core::PropertyTreeReaderDatabase reader(m_database);
     reader.jsonToValue(data, m_template.m_userSettings);
 }
 

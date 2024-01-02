@@ -62,7 +62,7 @@ void H3Map::VictoryCondition::readBinary(ByteOrderDataStreamReader& stream)
         }
         case VictoryConditionType::GATHERTROOP:
         {
-            features->readUnit(stream, m_creatureID);
+            features->readUnit(stream, m_creatureID, 1, 2);
             stream >> m_creatureCount;
             break;
         }
@@ -145,7 +145,7 @@ void H3Map::VictoryCondition::writeBinary(ByteOrderDataStreamWriter& stream) con
         }
         case VictoryConditionType::GATHERTROOP:
         {
-            features->writeUnit(stream, m_creatureID);
+            features->writeUnit(stream, m_creatureID, 1, 2);
             stream << m_creatureCount;
             break;
         }

@@ -65,8 +65,9 @@ public:
         auto* defsContainer = m_database->objectDefs();
         if (defId.ends_with(".def"))
             defId = defId.substr(0, defId.size() - 4);
-        defId = Mernel::strToLower(defId);
-        return add(defsContainer->find(defId));
+        defId        = Mernel::strToLower(defId);
+        auto* record = defsContainer->find(defId);
+        return add(record);
     }
 
     uint32_t addHero(Core::LibraryHeroConstPtr hero, bool onBoat)
@@ -155,8 +156,8 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         destCond.m_type               = static_cast<decltype(destCond.m_type)>(srcCond.m_type);
         destCond.m_allowNormalVictory = srcCond.m_allowNormalVictory;
         destCond.m_appliesToAI        = srcCond.m_appliesToAI;
-        destCond.m_artID              = srcCond.m_artID ? static_cast<uint32_t>(srcCond.m_artID->legacyId) : 0;
-        destCond.m_creatureID         = srcCond.m_creature.unit ? static_cast<uint16_t>(srcCond.m_creature.unit->legacyId) : 0;
+        destCond.m_artID              = srcCond.m_artID ? convertArtifact(srcCond.m_artID) : 0;
+        destCond.m_creatureID         = srcCond.m_creature.unit ? static_cast<uint32_t>(srcCond.m_creature.unit->legacyId) : 0;
         destCond.m_creatureCount      = static_cast<uint32_t>(srcCond.m_creature.count);
         destCond.m_resourceID         = srcCond.m_resourceID ? static_cast<uint8_t>(srcCond.m_resourceID->legacyId) : 0;
         destCond.m_resourceAmount     = srcCond.m_resourceAmount;
@@ -246,8 +247,8 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
     ObjectTemplateCache tmplCache(m_database);
     tmplCache.init(src.m_objectDefs);
 
-    tmplCache.addId("avwmrnd0");
-    tmplCache.addId("avlholg0");
+    //tmplCache.addId("avwmrnd0");
+    //tmplCache.addId("avlholg0");
 
     auto addObject = [&dest, &tmplCache](const FHCommonObject& obj, std::shared_ptr<IMapObject> impl, auto defNumMaker, bool calcXoffset = false) {
         Object o;
@@ -648,7 +649,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
             monster->m_message                      = fhMon.m_message;
             monster->m_resourceSet.m_resourceAmount = convertResources(fhMon.m_reward.resources);
             if (!fhMon.m_reward.artifacts.empty()) {
-                monster->m_artID = uint32_t(fhMon.m_reward.artifacts[0].onlyArtifacts.at(0)->legacyId);
+                monster->m_artID = convertArtifact(fhMon.m_reward.artifacts[0].onlyArtifacts.at(0));
             }
         }
         if (fhMon.m_randomLevel >= 0) {
@@ -730,7 +731,7 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         }
 
         for (auto* art : fhBank.m_artifacts)
-            bank->m_artifacts.push_back(art ? (uint32_t) art->legacyId : uint32_t(-1));
+            bank->m_artifacts.push_back(convertArtifact(art));
 
         addObjectCommon(fhBank, std::move(bank));
     }
@@ -871,6 +872,14 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         obj->m_owner     = static_cast<uint8_t>(fhObj.m_player->legacyId);
         obj->m_hero      = fhObj.m_hero;
         obj->m_powerRank = fhObj.m_powerRank;
+        obj->m_hasArmy   = fhObj.m_hasArmy;
+        obj->prepareArrays(dest.m_features.get());
+        if (obj->m_hasArmy) {
+            convertSquad(fhObj.m_garison, obj->m_garison);
+        }
+        for (auto* art : fhObj.m_bagSlots)
+            obj->m_bagSlots.push_back(convertArtifact(art));
+
         addObject(fhObj, std::move(obj), [&tmplCache] { return tmplCache.addId("ahplace"); });
     }
     for (auto& fhObj : src.m_objects.m_grails) {
@@ -918,7 +927,7 @@ void FH2H3MConverter::convertReward(const Core::Reward& fhReward, MapReward& rew
 
     for (const auto& artSet : fhReward.artifacts) {
         for (auto* art : artSet.onlyArtifacts) {
-            reward.m_artifacts.push_back(static_cast<uint32_t>(art->legacyId));
+            reward.m_artifacts.push_back(convertArtifact(art));
         }
     }
     for (const Core::SkillHeroItem& skill : fhReward.secSkills)
@@ -979,7 +988,7 @@ void FH2H3MConverter::convertRewardHut(const Core::Reward& fhReward, MapSeerHut:
     }
     if (!fhReward.artifacts.empty()) {
         questWithReward.m_reward = MapSeerHut::MapQuestWithReward::RewardType::ARTIFACT;
-        questWithReward.m_rID    = fhReward.artifacts[0].onlyArtifacts[0]->legacyId;
+        questWithReward.m_rID    = convertArtifact(fhReward.artifacts[0].onlyArtifacts[0]);
     }
     if (!fhReward.spells.isDefault()) {
         questWithReward.m_reward = MapSeerHut::MapQuestWithReward::RewardType::SPELL;
@@ -996,7 +1005,7 @@ std::vector<StackBasicDescriptor> FH2H3MConverter::convertStacks(const std::vect
 {
     std::vector<StackBasicDescriptor> result;
     for (auto& stack : stacks)
-        result.push_back({ static_cast<uint16_t>(stack.unit->legacyId), static_cast<uint16_t>(stack.count) });
+        result.push_back({ static_cast<uint32_t>(stack.unit->legacyId), static_cast<uint32_t>(stack.count) });
     return result;
 }
 
@@ -1008,6 +1017,18 @@ std::vector<uint8_t> FH2H3MConverter::convertPrimaryStats(const Core::HeroPrimar
     res[2] = stats.magic.spellPower;
     res[3] = stats.magic.intelligence;
     return res;
+}
+
+uint32_t FH2H3MConverter::convertArtifact(Core::LibraryArtifactConstPtr id) const
+{
+    if (!id)
+        return uint32_t(-1);
+    if (id->scrollSpell) {
+        uint32_t spellId = id->scrollSpell->legacyId;
+        spellId          = (spellId << 16U) | 1U;
+        return spellId;
+    }
+    return uint32_t(id->legacyId);
 }
 
 void FH2H3MConverter::convertQuest(const FHQuest& fhQuest, MapQuest& quest) const
@@ -1027,13 +1048,13 @@ void FH2H3MConverter::convertQuest(const FHQuest& fhQuest, MapQuest& quest) cons
         {
             quest.m_missionType = MapQuest::Mission::ART;
             for (auto* art : fhQuest.m_artifacts)
-                quest.m_5arts.push_back(static_cast<uint32_t>(art->legacyId));
+                quest.m_5arts.push_back(convertArtifact(art));
         } break;
         case FHQuest::Type::BringCreatures:
         {
             quest.m_missionType = MapQuest::Mission::ARMY;
             for (const auto& stack : fhQuest.m_units)
-                quest.m_6creatures.m_stacks.push_back({ static_cast<uint16_t>(stack.unit->legacyId), static_cast<uint16_t>(stack.count) });
+                quest.m_6creatures.m_stacks.push_back({ static_cast<uint32_t>(stack.unit->legacyId), static_cast<uint32_t>(stack.count) });
         } break;
         case FHQuest::Type::BringResource:
         {
@@ -1121,11 +1142,11 @@ void FH2H3MConverter::convertSquad(const Core::AdventureSquad& squad, StackSetFi
 {
     for (size_t i = 0; const auto& stack : squad.stacks) {
         if (stack.count && stack.library)
-            fixedStacks.m_stacks.at(i) = StackBasicDescriptor{ .m_id = static_cast<uint16_t>(stack.library->legacyId), .m_count = static_cast<uint16_t>(stack.count) };
+            fixedStacks.m_stacks.at(i) = StackBasicDescriptor{ .m_id = static_cast<uint32_t>(stack.library->legacyId), .m_count = static_cast<uint32_t>(stack.count) };
         else if (stack.count && stack.randomTier >= 0)
-            fixedStacks.m_stacks.at(i) = StackBasicDescriptor{ .m_id = static_cast<uint16_t>(65534 - stack.randomTier), .m_count = static_cast<uint16_t>(stack.count) };
+            fixedStacks.m_stacks.at(i) = StackBasicDescriptor{ .m_id = static_cast<uint32_t>(-2 - stack.randomTier), .m_count = static_cast<uint32_t>(stack.count) };
         else
-            fixedStacks.m_stacks.at(i) = StackBasicDescriptor{ .m_id = (uint16_t) -1 };
+            fixedStacks.m_stacks.at(i) = StackBasicDescriptor{ .m_id = (uint32_t) -1 };
         i++;
     }
 }
