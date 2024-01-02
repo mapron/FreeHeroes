@@ -390,6 +390,8 @@ void MapEditorWidget::save(const std::string& filename, bool isH3M)
                                m_rngFactory,
                                sett);
 
+        converter.m_mapFH = m_impl->m_map;
+
         if (isH3M)
             converter.run(MapConverter::Task::SaveH3M);
         else
