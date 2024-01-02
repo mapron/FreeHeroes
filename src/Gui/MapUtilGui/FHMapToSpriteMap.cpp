@@ -10,6 +10,7 @@
 
 #include "IGameDatabase.hpp"
 
+#include "LibraryBuilding.hpp"
 #include "LibraryDwelling.hpp"
 #include "LibraryMapBank.hpp"
 #include "LibraryMapObstacle.hpp"
@@ -230,7 +231,24 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     });
 
     for (const auto& obj : fhMap.m_towns) {
-        auto* def = obj.m_factionId ? obj.m_factionId->objectDefs.get(obj.m_defIndex) : obj.m_randomId;
+        Core::ObjectDefIndex defIndex;
+        //
+        //"sod.faction.castle"          : [ {"m": {"":"avccast0", "FORT": "avccasf0", "CIT": "avccasc0", "CAS": "avccasx0", "CAP": "avccasz0"}} ],
+        if (!obj.m_hasFort)
+            defIndex.variant = "";
+        else
+            defIndex.variant = "FORT";
+        std::set<std::string> buildingIds;
+        for (auto* building : obj.m_buildings)
+            buildingIds.insert(building->id);
+        if (buildingIds.contains("fort2"))
+            defIndex.variant = "CIT";
+        if (buildingIds.contains("fort3"))
+            defIndex.variant = "CAS";
+        if (buildingIds.contains("townHall3"))
+            defIndex.variant = "CAP";
+
+        auto* def = obj.m_factionId ? obj.m_factionId->objectDefs.get(defIndex) : obj.m_randomId;
         assert(def);
 
         result.addItem(makeItemByDef(SpriteMap::Layer::Town, def, obj.m_pos)
