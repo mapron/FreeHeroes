@@ -234,19 +234,24 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         Core::ObjectDefIndex defIndex;
         //
         //"sod.faction.castle"          : [ {"m": {"":"avccast0", "FORT": "avccasf0", "CIT": "avccasc0", "CAS": "avccasx0", "CAP": "avccasz0"}} ],
-        if (!obj.m_hasFort)
-            defIndex.variant = "";
-        else
-            defIndex.variant = "FORT";
-        std::set<std::string> buildingIds;
-        for (auto* building : obj.m_buildings)
-            buildingIds.insert(building->id);
-        if (buildingIds.contains("fort2"))
-            defIndex.variant = "CIT";
-        if (buildingIds.contains("fort3"))
-            defIndex.variant = "CAS";
-        if (buildingIds.contains("townHall3"))
-            defIndex.variant = "CAP";
+        if (!obj.m_hasCustomBuildings) {
+            if (!obj.m_hasFort)
+                defIndex.variant = "";
+            else
+                defIndex.variant = "FORT";
+        } else {
+            std::set<std::string> buildingIds;
+            for (auto* building : obj.m_buildings)
+                buildingIds.insert(building->id);
+            if (buildingIds.contains("fort1"))
+                defIndex.variant = "FORT";
+            if (buildingIds.contains("fort2"))
+                defIndex.variant = "CIT";
+            if (buildingIds.contains("fort3"))
+                defIndex.variant = "CAS";
+            if (buildingIds.contains("townHall3"))
+                defIndex.variant = "CAP";
+        }
 
         auto* def = obj.m_factionId ? obj.m_factionId->objectDefs.get(defIndex) : obj.m_randomId;
         assert(def);
