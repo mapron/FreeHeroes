@@ -391,6 +391,7 @@ void postProcessSpriteGroupBattler(int groupIndex, Gui::Sprite::Group& seq, cons
 void replaceColors(QPixmap& pix, const QColor& src, const QColor& dest)
 {
     auto image = pix.toImage();
+    image.convertTo(QImage::Format_RGBA8888);
     for (int y = 0; y < image.height(); ++y) {
         for (int x = 0; x < image.width(); ++x) {
             if (image.pixelColor(x, y) == src)
@@ -960,7 +961,7 @@ void SpriteFile::fromPixmap(BitmapFile data)
     frame.m_hasBitmap                             = true;
 }
 
-void SpriteFile::fromPixmapList(std::vector<BitmapFile> data)
+void SpriteFile::fromPixmapList(std::vector<BitmapFile> data, bool singleGroup)
 {
     m_embeddedBitmapData = false;
     m_bitmaps            = std::move(data);
@@ -972,16 +973,31 @@ void SpriteFile::fromPixmapList(std::vector<BitmapFile> data)
     m_boundaryHeight      = h;
     m_boundaryWidth       = w;
 
-    m_groups.resize(m_bitmaps.size());
-    for (int i = 0; Group & group : m_groups) {
-        group.m_groupId = i;
-        group.m_frames.resize(1);
-        Frame& frame        = group.m_frames[0];
-        frame.m_bitmapIndex = size_t(i);
-        frame.m_bitmapWidth = frame.m_boundaryWidth = w;
-        frame.m_bitmapHeight = frame.m_boundaryHeight = h;
-        frame.m_hasBitmap                             = true;
-        i++;
+    if (singleGroup) {
+        m_groups.resize(1);
+        Group& group    = m_groups[0];
+        group.m_groupId = 0;
+        group.m_frames.resize(m_bitmaps.size());
+
+        for (int i = 0; Frame & frame : group.m_frames) {
+            frame.m_bitmapIndex = size_t(i);
+            frame.m_bitmapWidth = frame.m_boundaryWidth = w;
+            frame.m_bitmapHeight = frame.m_boundaryHeight = h;
+            frame.m_hasBitmap                             = true;
+            i++;
+        }
+    } else {
+        m_groups.resize(m_bitmaps.size());
+        for (int i = 0; Group & group : m_groups) {
+            group.m_groupId = i;
+            group.m_frames.resize(1);
+            Frame& frame        = group.m_frames[0];
+            frame.m_bitmapIndex = size_t(i);
+            frame.m_bitmapWidth = frame.m_boundaryWidth = w;
+            frame.m_bitmapHeight = frame.m_boundaryHeight = h;
+            frame.m_hasBitmap                             = true;
+            i++;
+        }
     }
 }
 
@@ -1328,14 +1344,21 @@ void SpriteFile::saveGuiSprite(const Mernel::std_path& jsonFilePath, const Merne
         for (const auto& [key, routineParam] : handlers.getMap()) {
             if (key == "flip_vertical") {
                 uiSprite.m_bitmap = uiSprite.m_bitmap.transformed(QTransform().scale(1, -1));
-            } else if (key == "fix_transparent") {
-                QColor src(QString::fromStdString(routineParam["color"].getScalar().toString()));
-                QColor dest(0, 0, 0, 0);
-                replaceColors(uiSprite.m_bitmap, src, dest);
-            } else if (key == "fix_key") {
-                QColor src(QString::fromStdString(routineParam["color"].getScalar().toString()));
-                QColor dest(0, 0, 0, 1);
-                replaceColors(uiSprite.m_bitmap, src, dest);
+            } else if (key == "fix_colors") {
+                const std::map<std::string, QColor> names{
+                    { "tr", QColor(0, 0, 0, 0) },
+                    { "key", QColor(0, 0, 0, 1) },
+                    { "shadow", QColor(0, 0, 0, 0x80) },
+                    { "shadowborder", QColor(0, 0, 0, 0x40) },
+                };
+                for (auto& [name, destColor] : names) {
+                    if (!routineParam.contains(name))
+                        continue;
+                    QColor src(QString::fromStdString(routineParam[name].getScalar().toString()));
+
+                    replaceColors(uiSprite.m_bitmap, src, destColor);
+                }
+                *m_bitmaps[0].m_pixmapQt.get() = uiSprite.m_bitmap;
             }
         }
     }

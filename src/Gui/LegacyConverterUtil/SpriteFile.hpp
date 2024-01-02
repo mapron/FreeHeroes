@@ -112,7 +112,7 @@ public:
     void fromJson(const Mernel::PropertyTree& data);
 
     void fromPixmap(BitmapFile data);
-    void fromPixmapList(std::vector<BitmapFile> data);
+    void fromPixmapList(std::vector<BitmapFile> data, bool singleGroup = false);
 
     void saveBitmapsData(const Mernel::std_path& jsonFilePath) const;
     void loadBitmapsData(const Mernel::std_path& jsonFilePath);

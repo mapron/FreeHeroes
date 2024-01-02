@@ -81,18 +81,18 @@
 
 "hota.faction.factory"             : {
     "warriorClass": { "pres": {
-        "battleSpriteMale"     : "ch18b",
-        "battleSpriteFemale"   : "ch18",
-        "adventureSpriteMale"  : "ah18b_",
-        "adventureSpriteFemale": "ah18_",
+        "battleSpriteMale"     : "ch20b",
+        "battleSpriteFemale"   : "ch20",
+        "adventureSpriteMale"  : "ah20b_",
+        "adventureSpriteFemale": "ah20_",
         "adventureSpriteBoat"  : "avxboat4"
         }
     },
     "mageClass": { "pres": {
-        "battleSpriteMale"     : "ch19",
-        "battleSpriteFemale"   : "ch19b",
-        "adventureSpriteMale"  : "ah19_",
-        "adventureSpriteFemale": "ah19b_",
+        "battleSpriteMale"     : "ch21",
+        "battleSpriteFemale"   : "ch21b",
+        "adventureSpriteMale"  : "ah21_",
+        "adventureSpriteFemale": "ah21b_",
         "adventureSpriteBoat"  : "avxboat4"
         }
     },
@@ -160,14 +160,14 @@
 "hota.hero.factory.hw06"            : [ "Mercenary  6"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
 "hota.hero.factory.hw07"            : [ "Mercenary  7"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
 "hota.hero.factory.hw08"            : [ "Mercenary  8"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
-"hota.hero.factory.hm01"            : [ "Artificer  1"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
-"hota.hero.factory.hm02"            : [ "Artificer  2"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
-"hota.hero.factory.hm03"            : [ "Artificer  3"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
-"hota.hero.factory.hm04"            : [ "Artificer  4"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
-"hota.hero.factory.hm05"            : [ "Artificer  5"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
-"hota.hero.factory.hm06"            : [ "Artificer  6"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
-"hota.hero.factory.hm07"            : [ "Artificer  7"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
-"hota.hero.factory.hm08"            : [ "Artificer  8"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
+"hota.hero.factory.hm01"            : [ "Artificer  1"       , "hota.faction.factory"      ,  false ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
+"hota.hero.factory.hm02"            : [ "Artificer  2"       , "hota.faction.factory"      ,  false ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
+"hota.hero.factory.hm03"            : [ "Artificer  3"       , "hota.faction.factory"      ,  false ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
+"hota.hero.factory.hm04"            : [ "Artificer  4"       , "hota.faction.factory"      ,  false ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
+"hota.hero.factory.hm05"            : [ "Artificer  5"       , "hota.faction.factory"      ,  false ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
+"hota.hero.factory.hm06"            : [ "Artificer  6"       , "hota.faction.factory"      ,  false ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
+"hota.hero.factory.hm07"            : [ "Artificer  7"       , "hota.faction.factory"      ,  false ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
+"hota.hero.factory.hm08"            : [ "Artificer  8"       , "hota.faction.factory"      ,  false ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
 "hota.hero.factory.hu01"            : [ "Dunno      1"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
 "hota.hero.factory.hu02"            : [ "Dunno      2"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ],
 "hota.hero.factory.hu03"            : [ "Dunno      3"       , "hota.faction.factory"      ,  true  ,   "sod.speciality.skill.archery"                   ,  ""                             ,  [ "sod.unit.pikeman"       ,  "sod.unit.archer"        ,  "sod.unit.griffin"       ], [] ]
@@ -312,7 +312,7 @@
 "avwolgo"       : [ "AVWolgo"       , [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,1,0,1,1,1,1,1,1,1,1,1], [1,1,0,0,1,1,1,1,1,1,1,1], 54, 179, 2, 0],
 "avwguns"       : [ "AVWguns"       , [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,1,0,1,1,1,1,1,1,1,1,1], [1,1,0,0,1,1,1,1,1,1,1,1], 54, 180, 2, 0],
 "avwbhun"       : [ "AVWbhun"       , [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,1,0,1,1,1,1,1,1,1,1,1], [1,1,0,0,1,1,1,1,1,1,1,1], 54, 181, 2, 0],
-"avwcoat"       : [ "AVWccoat"      , [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,1,0,1,1,1,1,1,1,1,1,1], [1,1,0,0,1,1,1,1,1,1,1,1], 54, 182, 2, 0],
+"avwcoat"       : [ "AVWcoat"       , [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,1,0,1,1,1,1,1,1,1,1,1], [1,1,0,0,1,1,1,1,1,1,1,1], 54, 182, 2, 0],
 "avwradc"       : [ "AVWradc"       , [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,1,0,1,1,1,1,1,1,1,1,1], [1,1,0,0,1,1,1,1,1,1,1,1], 54, 183, 2, 0],
 "avwdred"       : [ "AVWdred"       , [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,1,0,1,1,1,1,1,1,1,1,1], [1,1,0,0,1,1,1,1,1,1,1,1], 54, 184, 2, 0],
 "avwjugg"       : [ "AVWjugg"       , [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,1,0,1,1,1,1,1,1,1,1,1], [1,1,0,0,1,1,1,1,1,1,1,1], 54, 185, 2, 0],

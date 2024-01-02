@@ -112,18 +112,20 @@ class GameExtract::ConcatProcessor {
 public:
     struct ConcatData {
         std::map<std_path, SpriteFile> m_sprites;
-        bool                           m_makeFrames = false;
+        bool                           m_makeFrames  = false;
+        bool                           m_singleGroup = false;
         //std_path m_someSpritePath;
     };
     std::map<std::string, ConcatData> m_data;
     std::mutex                        m_mutex;
 
-    void addSprite(const SpriteFile& sprite, const std_path& path, const std::string& concatId, bool makeFrames)
+    void addSprite(const SpriteFile& sprite, const std_path& path, const std::string& concatId, bool makeFrames, bool singleGroup)
     {
         std::unique_lock lock(m_mutex);
 
         auto& data           = m_data[concatId];
         data.m_makeFrames    = makeFrames;
+        data.m_singleGroup   = singleGroup;
         data.m_sprites[path] = sprite;
     }
 
@@ -145,7 +147,7 @@ public:
                     bmp.m_pixmapQt = std::make_shared<QPixmap>(pix);
                     bmps.push_back(std::move(bmp));
                 }
-                outFile.fromPixmapList(bmps);
+                outFile.fromPixmapList(bmps, concatData.m_singleGroup);
             } else {
                 QSize size(0, 0);
                 for (auto& pix : pixmaps) {
@@ -473,7 +475,7 @@ void GameExtract::processFile(Mernel::TaskQueue&      taskQueue,
         if (Mernel::std_fs::exists(outputJson))
             return;
 
-        const std::vector<std::string> names{ "fix_transparent", "fix_key", "unpack", "pad" };
+        const std::vector<std::string> names{ "fix_colors", "unpack", "pad" };
         for (const auto& name : names) {
             if (handlers.contains(name + "_hota")) {
                 if (isHota)
@@ -503,10 +505,13 @@ void GameExtract::processFile(Mernel::TaskQueue&      taskQueue,
 
                 pixHandler.m_sprite->saveGuiSprite(outputJson, handlers);
                 if (handlers.contains("concat")) {
+                    auto& c      = handlers["concat"];
+                    auto  single = c.contains("singleGroup") ? c["singleGroup"].getScalar().toBool() : false;
                     concatProcessor.addSprite(*pixHandler.m_sprite,
                                               outputJson,
-                                              handlers["concat"]["id"].getScalar().toString(),
-                                              handlers["concat"]["frames"].getScalar().toBool());
+                                              c["id"].getScalar().toString(),
+                                              c["frames"].getScalar().toBool(),
+                                              single);
                 }
             }
             catch (std::exception& ex) {
