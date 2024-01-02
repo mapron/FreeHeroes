@@ -10,9 +10,15 @@
 namespace FreeHeroes {
 
 struct H3CCampaign {
-    uint32_t    m_version = 0;
-    uint8_t     m_campId  = 0;
+    uint32_t m_version         = 0;
+    uint32_t m_somethingHota1  = 0;
+    uint32_t m_somethingHota2  = 0;
+    uint8_t  m_somethingHota2a = 0;
+    uint32_t m_somethingHota3  = 0;
+    uint8_t  m_campId          = 0;
+
     std::string m_name;
+    uint16_t    m_somethingHota4 = 0;
     std::string m_description;
     uint8_t     m_musicId                   = 0;
     uint8_t     m_difficultyChoosenByPlayer = 0;
@@ -30,6 +36,7 @@ struct H3CCampaign {
     struct Scenario {
         uint32_t m_version        = 0;
         uint32_t m_totalScenarios = 0; // need to be filled before reading.
+        uint32_t m_index          = 0;
 
         std::string          m_filename;
         std::uint32_t        m_packedMapSize = 0;
