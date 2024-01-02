@@ -216,15 +216,15 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_secSkills,
     m_artifacts,
     m_spells,
-    m_creatures)
+    m_creatures,
+    m_movePointMode,
+    m_movePoints)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     MapPandora,
     m_message,
     m_reward,
-    m_unknown1,
-    m_movePointMode,
-    m_movePoints)
+    m_unknown1)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     MapGuards,
@@ -266,8 +266,6 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     MapEvent,
     m_message,
     m_reward,
-    m_movePointMode,
-    m_movePoints,
 
     m_players,
     m_computerActivate,
@@ -286,46 +284,23 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     MapQuestGuard,
     m_quest)
 
-ENUM_REFLECTION_STRINGIFY(
-    MapVisitableWithReward::Type,
-    Invalid,
-
-    Invalid,
-    Grave,
-    TreasureChest,
-    SeaChest,
-    Flotsam,
-    TreeOfKnowledge,
-    Lean,
-    Jetsam,
-    ManaVial,
-    CampFire,
-    Corpse,
-    AncientLamp,
-    Wagon,
-    WaterBarrel,
-    Survivor,
-    WarriorTomb,
-    Pyramid)
-
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     MapVisitableWithReward,
-    m_type,
     m_customIndex,
     m_artId,
-    m_goldOrResource,
-    m_resourceId,
-    m_goldOrResourceSecond,
-    m_unknown1)
-
-STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
-    MapBlackMarket,
-    m_artifacts)
-
-STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
-    MapUniversity,
-    m_customIndex,
-    m_allowedSkills)
+    m_spellId,
+    m_unitCount,
+    m_resourceId1,
+    m_resourceAmount1,
+    m_resourceId2,
+    m_resourceAmount2,
+    m_unknown0,
+    m_unknown1,
+    m_unknown2,
+    m_unknown3,
+    m_unknown4,
+    m_artifactsForSale,
+    m_skillsToLearn)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     MapHeroPlaceholder,

@@ -32,6 +32,8 @@ private:
 
     void convertHeroArtifacts(const HeroArtSet& artSet, Core::AdventureHero& hero) const;
 
+    void convertVisitableRewards(const MapVisitableWithReward& visitable, FHVisitable& fhVisitable) const;
+
     std::vector<Core::LibraryPlayerConstPtr> convertPlayerList(const std::vector<uint8_t>& players) const;
 
     void convertTileMap(const H3Map& src, FHMap& dest) const;

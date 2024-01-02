@@ -97,8 +97,6 @@ struct MapTileH3M {
     uint8_t m_roadType  = 0;
     uint8_t m_roadDir   = 0;
 
-    uint8_t m_unknown1 = 0;
-
     bool m_flipHor  = false;
     bool m_flipVert = false;
 
@@ -171,9 +169,11 @@ struct ObjectTemplate {
         CREATURE,
         HERO,
         ARTIFACT,
-        RESOURCE,
+        RESOURCE = 5,
 
-        HOTA_UNKNOWN = 8, // introduced in 1.7
+        HOTA_CREATURE_GENERATOR = 6, // Hota: introduced in 1.7.
+        HOTA_TELEPORTERS        = 7, // Hota: introduced in 1.7.
+        HOTA_GUARDS             = 8, // Hota: introduced in 1.7. Map editor: Garisons, border guards and tents
     };
 
     uint32_t m_id           = 0;
@@ -248,8 +248,8 @@ struct CustomHeroData {
 };
 
 struct CustomHeroDataExt {
-    uint16_t m_unknown1 = 0;
-    uint32_t m_unknown2 = 0;
+    uint16_t m_unknown1 = 1;
+    uint32_t m_unknown2 = 1;
 
     void readBinary(ByteOrderDataStreamReader& stream) { stream >> m_unknown1 >> m_unknown2; }
     void writeBinary(ByteOrderDataStreamWriter& stream) const { stream << m_unknown1 << m_unknown2; }

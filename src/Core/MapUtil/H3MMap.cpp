@@ -520,7 +520,7 @@ void H3Map::readBinary(ByteOrderDataStreamReader& stream)
                 Mernel::Logger(Mernel::Logger::Warning) << "finished readBinary [" << index << "]: (" << (int) obj.m_pos.m_x << "," << (int) obj.m_pos.m_y << "," << (int) obj.m_pos.m_z << ")  "
                                                         << objTempl.m_animationFile << ", type:" << objTempl.m_id << ", sub: " << objTempl.m_subid << ", current offset =" << stream.getBuffer().getOffsetRead();
 
-                if (1) {
+                if (0) {
                     PropertyTree data;
                     obj.m_impl->toJson(data);
                     std::ostringstream os;

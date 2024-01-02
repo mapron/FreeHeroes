@@ -133,6 +133,7 @@
     { "name": "III" , "frequencyRel": 300, "rewardIndex": 2, "guards": [ "sod.unit.beholder=20", "sod.unit.beholder=20", "sod.unit.beholder=20", "sod.unit.beholder=20", "sod.unit.beholder=20"]},
     { "name": "IV"  , "frequencyRel": 100, "rewardIndex": 3, "guards": [ "sod.unit.beholder=30", "sod.unit.beholder=30", "sod.unit.beholder=30", "sod.unit.beholder=30", "sod.unit.beholder=30"]}
     ]
+    ,"upgradedStackIndex": 3
 
 },
 "hota.map.templeSea"           : {
@@ -183,7 +184,7 @@
     { "name": "III"  , "frequencyRel": 300, "rewardIndex": 2, "guards": [ "sod.unit.griffin=30", "sod.unit.griffin=30", "sod.unit.griffin=30"     , "sod.unit.griffin=30", "sod.unit.griffin=30"]},
     { "name": "IV"   , "frequencyRel": 100, "rewardIndex": 3, "guards": [ "sod.unit.griffin=40", "sod.unit.griffin=40", "sod.unit.griffin=40"     , "sod.unit.griffin=40", "sod.unit.griffin=40"]}
     ],
-    "updgradedStackPossible": true
+    "upgradedStackIndex": 3
 },
 "sod.map.hive"           : {
     "untranslatedName": "Dragonflies hive",
@@ -257,7 +258,8 @@
     { "name": "III" , "frequencyRel": 300, "rewardIndex": 2, "guards": [ "sod.unit.fireElemental=21", "sod.unit.fireElemental=21", "sod.unit.fireElemental=21", "sod.unit.fireElemental=21", "sod.unit.fireElemental=21"  ]},
     { "name": "IV"  , "frequencyRel": 100, "rewardIndex": 3, "guards": [ "sod.unit.fireElemental=28", "sod.unit.fireElemental=28", "sod.unit.fireElemental=28", "sod.unit.fireElemental=28", "sod.unit.fireElemental=28"  ]}
     ]
-
+    
+    , "upgradedStackIndex": 3
 },
 "hota.map.pirateCave"             : {
     "untranslatedName": "Pirate Cave",

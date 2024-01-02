@@ -636,8 +636,8 @@ struct MapHero : public MapObjectAbstract {
     HeroSpellSet     m_spellSet;
     HeroPrimSkillSet m_primSkillSet;
 
-    uint16_t m_unknown1 = 0;
-    uint32_t m_unknown2 = 0;
+    uint16_t m_unknown1 = 1;
+    uint32_t m_unknown2 = 1;
 
     void prepareArrays(const MapFormatFeatures* m_features);
 
@@ -930,6 +930,10 @@ struct MapReward {
     std::vector<uint8_t>      m_spells;
     StackSet                  m_creatures;
 
+    // those fields read in MapPandora / MapEvent as they have different padding from the rest of the reward.
+    uint32_t m_movePointMode = 0;
+    uint32_t m_movePoints    = 0;
+
     void prepareArrays(const MapFormatFeatures* m_features);
 
     void readBinary(ByteOrderDataStreamReader& stream);
@@ -940,9 +944,7 @@ struct MapPandora : public MapObjectAbstract {
     MapMessage m_message;
     MapReward  m_reward;
 
-    uint8_t  m_unknown1      = 0;
-    uint32_t m_movePointMode = 0;
-    uint32_t m_movePoints    = 0;
+    uint8_t m_unknown1 = 0;
 
     void prepareArrays(const MapFormatFeatures* m_features);
 
@@ -980,9 +982,6 @@ struct MapSignBottle : public MapObjectAbstract {
 struct MapEvent : public MapObjectAbstract {
     MapMessage m_message;
     MapReward  m_reward;
-
-    uint32_t m_movePointMode = 0; // yes different from pandora
-    uint32_t m_movePoints    = 0;
 
     std::vector<uint8_t> m_players;
     uint8_t              m_computerActivate = 0;
@@ -1030,74 +1029,58 @@ struct MapQuestGuard : public MapObjectAbstract {
     void fromJson(const PropertyTree& data) override;
 };
 
-// diggable grave or tomb of warrior
 struct MapVisitableWithReward : public MapObjectAbstract {
-    enum class Type
+    enum class Behaviour
     {
-        Invalid,
-        Grave,
-        TreasureChest,
-        SeaChest,
-        Flotsam,
-        TreeOfKnowledge,
-        Lean,
-        Jetsam,
-        ManaVial,
-        CampFire,
-        Corpse,
-        AncientLamp,
-        Wagon,
-        WaterBarrel,
-        Survivor,
-        WarriorTomb,
-        Pyramid,
+        Option,
+        Artifact,
+        ArtifactStub,
+        Spell,
+        UnitCount,
+        Resource1,
+        Resource2,
+        ArtifactsSale,
+        SecondarySkills,
     };
-    Type m_type = Type::Invalid;
+    using BehaviourList = std::vector<Behaviour>;
 
-    MapVisitableWithReward() = default;
-    MapVisitableWithReward(Type type)
-        : m_type(type)
+    MapVisitableWithReward(BehaviourList behaviours)
+        : m_behaviours(std::move(behaviours))
     {}
 
-    uint32_t m_customIndex    = 0; // for TC 0-2 is choice between 1000/1500/2000. for grave it is -1 (random) or 0 (custom)
-    uint32_t m_artId          = 0; // for pyramid it is spell id
-    uint32_t m_goldOrResource = 0; // for grave its is gold, for lean it's resource. for Lamp it's genie count
-
-    // unused fields can be filled with random garbage. careful.
-    uint8_t  m_resourceId           = 0;
-    uint32_t m_goldOrResourceSecond = 0; // used by CampFire
-    uint8_t  m_unknown1             = 0;
-
-    void readBinary(ByteOrderDataStreamReader& stream) override;
-    void writeBinary(ByteOrderDataStreamWriter& stream) const override;
-    void toJson(PropertyTree& data) const override;
-    void fromJson(const PropertyTree& data) override;
-};
-
-struct MapBlackMarket : public MapObjectAbstract {
-    std::vector<uint32_t> m_artifacts;
-
     void prepareArrays(const MapFormatFeatures* m_features)
     {
-        if (m_features->m_extraRewardsCustomization)
-            m_artifacts.resize(7);
+        if (m_features->m_extraRewardsCustomization) {
+            m_artifactsForSale.resize(7);
+            m_skillsToLearn.resize(m_features->m_secondarySkillCount);
+        }
     }
 
-    void readBinary(ByteOrderDataStreamReader& stream) override;
-    void writeBinary(ByteOrderDataStreamWriter& stream) const override;
-    void toJson(PropertyTree& data) const override;
-    void fromJson(const PropertyTree& data) override;
-};
-
-struct MapUniversity : public MapObjectAbstract {
-    uint32_t             m_customIndex = 0;
-    std::vector<uint8_t> m_allowedSkills;
-
-    void prepareArrays(const MapFormatFeatures* m_features)
+    bool hasBehaviour(Behaviour beh) const
     {
-        if (m_features->m_extraRewardsCustomization)
-            m_allowedSkills.resize(m_features->m_secondarySkillCount);
+        return std::find(m_behaviours.cbegin(), m_behaviours.cend(), beh) != m_behaviours.cend();
     }
+
+    std::vector<Behaviour> m_behaviours;
+
+    uint32_t m_customIndex = uint32_t(-1); // for TC 0-2 is choice between 1000/1500/2000. for grave it is -1 (random) or 0 (custom)
+    uint32_t m_artId       = uint32_t(-1);
+    uint32_t m_spellId     = uint32_t(-1);
+    uint32_t m_unitCount   = 0;
+
+    uint32_t m_resourceAmount1 = 0;
+    uint8_t  m_resourceId1     = 0;
+    uint32_t m_resourceAmount2 = 0;
+    uint8_t  m_resourceId2     = 0;
+
+    uint32_t m_unknown0 = 0;
+    uint32_t m_unknown1 = 1; // unused fields can be filled with random garbage. careful.
+    uint8_t  m_unknown2 = 1;
+    uint32_t m_unknown3 = 0;
+    uint8_t  m_unknown4 = 0;
+
+    std::vector<uint32_t> m_artifactsForSale;
+    std::vector<uint8_t>  m_skillsToLearn;
 
     void readBinary(ByteOrderDataStreamReader& stream) override;
     void writeBinary(ByteOrderDataStreamWriter& stream) const override;

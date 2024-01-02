@@ -327,6 +327,11 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
             destEvent.m_buildings                    = srcEvent.m_buildings;
             destEvent.m_creaturesAmounts             = srcEvent.m_creaturesAmounts;
 
+            destEvent.m_unknown1 = srcEvent.m_unknown1;
+            destEvent.m_unknown2 = srcEvent.m_unknown2;
+            destEvent.m_unknown3 = srcEvent.m_unknown3;
+            destEvent.m_unknown4 = srcEvent.m_unknown4;
+
             cas1->m_events.push_back(std::move(destEvent));
         }
         if (cas1->m_hasGarison) {
@@ -703,6 +708,11 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         for (auto* res : fhMine.m_resources)
             mine->m_resourceBits[res->legacyId] = 1;
 
+        mine->m_customGuards = fhMine.m_customGuards;
+        mine->m_creatureId   = fhMine.m_creatureId;
+        mine->m_countMin     = fhMine.m_countMin;
+        mine->m_countMax     = fhMine.m_countMax;
+
         addObjectVisitable(fhMine, std::move(mine));
     }
 
@@ -730,7 +740,17 @@ void FH2H3MConverter::convertMap(const FHMap& src, H3Map& dest) const
         addObjectCommon(fhObstacle, std::move(obj));
     }
     for (auto& fhVisitable : src.m_objects.m_visitables) {
-        auto obj = std::make_unique<MapObjectSimple>();
+        auto* def = fhVisitable.m_visitableId ? fhVisitable.m_visitableId->objectDefs.get(fhVisitable.m_defIndex) : fhVisitable.m_fixedDef;
+        if (fhVisitable.m_defIndex.forcedIndex >= 0)
+            def = &tmplCache.m_objectDefsLibrary[fhVisitable.m_defIndex.forcedIndex];
+
+        auto  obj        = IMapObject::Create(MapObjectType(def->objId), def->subId);
+        auto* withReward = dynamic_cast<MapVisitableWithReward*>(obj.get());
+        if (withReward) {
+            withReward->prepareArrays(dest.m_features.get());
+            convertVisitableRewards(fhVisitable, *withReward);
+        }
+
         addObjectVisitable(fhVisitable, std::move(obj));
     }
     for (auto& fhVisitable : src.m_objects.m_controlledVisitables) {
@@ -908,6 +928,9 @@ void FH2H3MConverter::convertReward(const Core::Reward& fhReward, MapReward& rew
         reward.m_spells.push_back(static_cast<uint8_t>(spell->legacyId));
 
     reward.m_creatures.m_stacks = convertStacks(fhReward.units);
+
+    reward.m_movePointMode = fhReward.movePointMode == Core::Reward::MovePointBehaviour::Invalid ? 0 : static_cast<uint32_t>(fhReward.movePointMode);
+    reward.m_movePoints    = fhReward.movePoints;
 }
 
 void FH2H3MConverter::convertRewardHut(const Core::Reward& fhReward, MapSeerHut::MapQuestWithReward& questWithReward) const
@@ -1041,6 +1064,18 @@ void FH2H3MConverter::convertQuest(const FHQuest& fhQuest, MapQuest& quest) cons
         {
             quest.m_missionType = MapQuest::Mission::NONE;
         } break;
+        case FHQuest::Type::BeHeroClass:
+        {
+            quest.m_dayClassDetermine = 0;
+            quest.m_missionType       = MapQuest::Mission::WAIT_FOR_DAY_OR_BE_CLASS;
+            quest.m_expectClasses     = fhQuest.m_expectClasses;
+        } break;
+        case FHQuest::Type::WaitUntilDay:
+        {
+            quest.m_dayClassDetermine = 1;
+            quest.m_missionType       = MapQuest::Mission::WAIT_FOR_DAY_OR_BE_CLASS;
+            quest.m_minimumDay        = fhQuest.m_minimumDay;
+        } break;
         default:
             assert(!"Unsupported");
             break;
@@ -1065,6 +1100,11 @@ void FH2H3MConverter::convertEvent(const FHGlobalMapEvent& fhEvent, GlobalMapEve
     event.m_computerAffected = fhEvent.m_computerAffected;
     event.m_firstOccurence   = fhEvent.m_firstOccurence;
     event.m_nextOccurence    = fhEvent.m_nextOccurence;
+
+    event.m_unknown1 = fhEvent.m_unknown1;
+    event.m_unknown2 = fhEvent.m_unknown2;
+    event.m_unknown3 = fhEvent.m_unknown3;
+    event.m_unknown4 = fhEvent.m_unknown4;
 }
 
 void FH2H3MConverter::convertMessage(const FHMessageWithBattle& fhMessage, MapMessage& message) const
@@ -1117,6 +1157,52 @@ void FH2H3MConverter::convertHeroArtifacts(const Core::AdventureHero& hero, Hero
     if (artSet.m_bagSlots.size() > 64) {
         artSet.m_bagSlots.resize(64);
     }
+}
+
+void FH2H3MConverter::convertVisitableRewards(const FHVisitable& fhVisitable, MapVisitableWithReward& visitable) const
+{
+    visitable.m_customIndex = fhVisitable.m_customChoice;
+    visitable.m_unitCount   = fhVisitable.m_creatureCount;
+
+    if (!fhVisitable.m_reward.artifacts.empty()) {
+        visitable.m_artId = fhVisitable.m_reward.artifacts[0].onlyArtifacts[0]->legacyId;
+    }
+    if (!fhVisitable.m_reward.spells.onlySpells.empty()) {
+        visitable.m_spellId = fhVisitable.m_reward.spells.onlySpells[0]->legacyId;
+    }
+
+    if (visitable.hasBehaviour(MapVisitableWithReward::Behaviour::Resource1)) {
+        std::vector<std::pair<uint8_t, uint32_t>> res;
+
+        for (const auto& [id, count] : fhVisitable.m_reward.resources.data) {
+            if (count > 0)
+                res.push_back(std::pair{ uint8_t(id->legacyId), uint32_t(count) });
+        }
+        if (res.size() > 2)
+            throw std::runtime_error("convertVisitableRewards: this field support max 2 resources");
+        if (res.size() == 2 && res[1].first == 6)
+            std::swap(res[1], res[0]);
+
+        if (res.size() > 0) {
+            visitable.m_resourceId1     = res[0].first;
+            visitable.m_resourceAmount1 = res[0].second;
+        }
+        if (res.size() > 1) {
+            visitable.m_resourceId2     = res[1].first;
+            visitable.m_resourceAmount2 = res[1].second;
+        }
+    }
+
+    for (size_t i = 0; auto* id : fhVisitable.m_artifactsForSale)
+        visitable.m_artifactsForSale[i++] = id ? id->legacyId : uint32_t(-1);
+    for (size_t i = 0; auto* id : fhVisitable.m_skillsToLearn)
+        visitable.m_skillsToLearn[i++] = id ? id->legacyId : uint8_t(-1);
+
+    visitable.m_unknown0 = fhVisitable.m_unknown0;
+    visitable.m_unknown1 = fhVisitable.m_unknown1;
+    visitable.m_unknown2 = fhVisitable.m_unknown2;
+    visitable.m_unknown3 = fhVisitable.m_unknown3;
+    visitable.m_unknown4 = fhVisitable.m_unknown4;
 }
 
 }

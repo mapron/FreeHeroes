@@ -49,6 +49,19 @@ struct Reward {
 
     SpellFilter spells;
 
+    enum class MovePointBehaviour
+    {
+        Invalid = -1,
+        Give    = 0,
+        Take,
+        Nullify,
+        Set,
+        Replenish,
+    };
+
+    MovePointBehaviour movePointMode = MovePointBehaviour::Give;
+    int                movePoints    = 0;
+
     // no spells in calculation of this. probably confusing.
     size_t totalItems() const noexcept { return resources.nonEmptyAmount()
                                                 + (units.size())

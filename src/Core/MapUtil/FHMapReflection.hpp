@@ -131,7 +131,11 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_firstOccurence,
     m_nextOccurence,
     m_buildings,
-    m_creaturesAmounts)
+    m_creaturesAmounts,
+    m_unknown1,
+    m_unknown2,
+    m_unknown3,
+    m_unknown4)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHTown,
@@ -337,7 +341,11 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_visitableId,
     m_fixedDef,
 
-    m_resources)
+    m_resources,
+    m_customGuards,
+    m_creatureId,
+    m_countMin,
+    m_countMax)
 
 ENUM_REFLECTION_STRINGIFY(
     FHBank::UpgradedStack,
@@ -383,7 +391,18 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_generationId,
 
     m_visitableId,
-    m_fixedDef)
+    m_fixedDef,
+
+    m_customChoice,
+    m_creatureCount,
+    m_reward,
+    m_artifactsForSale,
+    m_skillsToLearn,
+    m_unknown0,
+    m_unknown1,
+    m_unknown2,
+    m_unknown3,
+    m_unknown4)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHVisitableControlled,
@@ -454,7 +473,9 @@ ENUM_REFLECTION_STRINGIFY(
     BringCreatures,
     BringResource,
     BeHero,
-    BePlayer)
+    BePlayer,
+    BeHeroClass,
+    WaitUntilDay)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     FHQuest,
@@ -465,6 +486,8 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_primary,
     m_level,
     m_lastDay,
+    m_minimumDay,
+    m_expectClasses,
     m_targetQuestId,
     m_firstVisitText,
     m_nextVisitText,
@@ -655,7 +678,11 @@ STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     m_humanAffected,
     m_computerAffected,
     m_firstOccurence,
-    m_nextOccurence)
+    m_nextOccurence,
+    m_unknown1,
+    m_unknown2,
+    m_unknown3,
+    m_unknown4)
 
 ENUM_REFLECTION_STRINGIFY(
     FHVictoryCondition::Type,

@@ -877,6 +877,14 @@ STRUCT_REFLECTION_PAIRED(
     "all",                         all
 )
 
+ENUM_REFLECTION_STRINGIFY(Reward::MovePointBehaviour, Invalid,
+    Invalid,
+    Give,
+    Take,
+    Nullify,
+    Set,
+    Replenish)
+
 STRUCT_REFLECTION_PAIRED(
     Reward,
     "resources"   ,                resources,
@@ -888,7 +896,9 @@ STRUCT_REFLECTION_PAIRED(
     "rng"         ,                rngBonus,
     "stat"        ,                statBonus,
     "secSkills"   ,                secSkills,
-    "spells"      ,                spells
+    "spells"      ,                spells,
+    "mpMode"      ,                movePointMode,
+    "mp"          ,                movePoints
 )
 
 // ------------------------------------------------------------------------------------------

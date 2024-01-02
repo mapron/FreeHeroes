@@ -171,6 +171,9 @@ MapFormatFeatures::MapFormatFeatures(MapFormat format, int hotaVer1)
 
 std::unique_ptr<IMapObject> IMapObject::Create(MapObjectType type, uint32_t subid)
 {
+    using Beh     = MapVisitableWithReward::Behaviour;
+    using BehList = MapVisitableWithReward::BehaviourList;
+
     switch (type) {
         case MapObjectType::EVENT:
         {
@@ -296,51 +299,51 @@ std::unique_ptr<IMapObject> IMapObject::Create(MapObjectType type, uint32_t subi
             if (subid == 1000)
                 return std::make_unique<MapQuestGuard>();
             if (subid == 1001)
-                return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::Grave);
+                return std::make_unique<MapVisitableWithReward>(BehList{ Beh::Option, Beh::Artifact, Beh::Resource1 });
             return std::make_unique<MapObjectSimple>();
         }
         case MapObjectType::BLACK_MARKET:
         {
-            return std::make_unique<MapBlackMarket>();
+            return std::make_unique<MapVisitableWithReward>(BehList{ Beh::ArtifactsSale });
         }
         case MapObjectType::UNIVERSITY:
         {
-            return std::make_unique<MapUniversity>();
+            return std::make_unique<MapVisitableWithReward>(BehList{ Beh::Option, Beh::SecondarySkills });
         }
         case MapObjectType::TREASURE_CHEST:
         {
-            return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::TreasureChest);
+            return std::make_unique<MapVisitableWithReward>(BehList{ Beh::Option, Beh::Artifact });
         }
         case MapObjectType::SEA_CHEST:
         {
-            return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::SeaChest);
+            return std::make_unique<MapVisitableWithReward>(BehList{ Beh::Option, Beh::Artifact });
         }
         case MapObjectType::TREE_OF_KNOWLEDGE:
         {
-            return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::TreeOfKnowledge);
+            return std::make_unique<MapVisitableWithReward>(BehList{ Beh::Option, Beh::ArtifactStub });
         }
         case MapObjectType::FLOTSAM:
         {
-            return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::Flotsam);
+            return std::make_unique<MapVisitableWithReward>(BehList{ Beh::Option, Beh::Artifact });
         }
         case MapObjectType::LEAN_TO:
         {
-            return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::Lean);
+            return std::make_unique<MapVisitableWithReward>(BehList{ Beh::Option, Beh::ArtifactStub, Beh::Resource1 });
         }
         case MapObjectType::CAMPFIRE:
         {
-            return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::CampFire);
+            return std::make_unique<MapVisitableWithReward>(BehList{ Beh::Option, Beh::ArtifactStub, Beh::Resource1, Beh::Resource2 });
         }
         case MapObjectType::HOTA_VISITABLE_2:
         {
             if (subid == (uint32_t) MapObjectType::HOTA_VISITABLE_2_ANCIENT_LAMP)
-                return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::AncientLamp);
+                return std::make_unique<MapVisitableWithReward>(BehList{ Beh::Option, Beh::Artifact, Beh::UnitCount });
             if (subid == (uint32_t) MapObjectType::HOTA_VISITABLE_2_WATER_BARREL)
-                return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::WaterBarrel);
+                return std::make_unique<MapVisitableWithReward>(BehList{ Beh::Option, Beh::Artifact, Beh::Resource1 });
             if (subid == (uint32_t) MapObjectType::HOTA_VISITABLE_2_JETSAM)
-                return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::Jetsam);
+                return std::make_unique<MapVisitableWithReward>(BehList{ Beh::Option, Beh::Artifact });
             if (subid == (uint32_t) MapObjectType::HOTA_VISITABLE_2_MANA_VIAL)
-                return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::ManaVial);
+                return std::make_unique<MapVisitableWithReward>(BehList{ Beh::Option, Beh::Artifact });
 
             assert(!"Should not happen");
             return std::make_unique<MapObjectSimple>();
@@ -348,29 +351,29 @@ std::unique_ptr<IMapObject> IMapObject::Create(MapObjectType type, uint32_t subi
         case MapObjectType::HOTA_VISITABLE_3:
         {
             if (subid == (uint32_t) MapObjectType::HOTA_VISITABLE_3_WATER_ACADEMY)
-                return std::make_unique<MapUniversity>();
+                return std::make_unique<MapVisitableWithReward>(BehList{ Beh::Option, Beh::SecondarySkills });
 
             return std::make_unique<MapObjectSimple>();
         }
         case MapObjectType::CORPSE:
         {
-            return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::Corpse);
+            return std::make_unique<MapVisitableWithReward>(BehList{ Beh::Option, Beh::Artifact });
         }
         case MapObjectType::WAGON:
         {
-            return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::Wagon);
+            return std::make_unique<MapVisitableWithReward>(BehList{ Beh::Option, Beh::Artifact, Beh::Resource1 });
         }
         case MapObjectType::SHIPWRECK_SURVIVOR:
         {
-            return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::Survivor);
+            return std::make_unique<MapVisitableWithReward>(BehList{ Beh::Option, Beh::Artifact });
         }
         case MapObjectType::WARRIORS_TOMB:
         {
-            return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::WarriorTomb);
+            return std::make_unique<MapVisitableWithReward>(BehList{ Beh::Option, Beh::Artifact });
         }
         case MapObjectType::PYRAMID:
         {
-            return std::make_unique<MapVisitableWithReward>(MapVisitableWithReward::Type::Pyramid);
+            return std::make_unique<MapVisitableWithReward>(BehList{ Beh::Option, Beh::Spell });
         }
         default:
         {
@@ -1415,7 +1418,7 @@ void MapPandora::readBinary(ByteOrderDataStreamReader& stream)
     stream >> m_reward;
 
     if (m_features->m_rewardHasMovePoints) {
-        stream >> m_unknown1 >> m_movePointMode >> m_movePoints;
+        stream >> m_unknown1 >> m_reward.m_movePointMode >> m_reward.m_movePoints;
     }
 }
 
@@ -1426,7 +1429,7 @@ void MapPandora::writeBinary(ByteOrderDataStreamWriter& stream) const
     stream << m_reward;
 
     if (m_features->m_rewardHasMovePoints) {
-        stream << m_unknown1 << m_movePointMode << m_movePoints;
+        stream << m_unknown1 << m_reward.m_movePointMode << m_reward.m_movePoints;
     }
 }
 
@@ -1650,7 +1653,7 @@ void MapEvent::readBinary(ByteOrderDataStreamReader& stream)
         stream >> m_humanActivate;
 
     if (m_features->m_rewardHasMovePoints) {
-        stream >> m_movePointMode >> m_movePoints;
+        stream >> m_reward.m_movePointMode >> m_reward.m_movePoints;
     }
 }
 
@@ -1667,7 +1670,7 @@ void MapEvent::writeBinary(ByteOrderDataStreamWriter& stream) const
         stream << m_humanActivate;
 
     if (m_features->m_rewardHasMovePoints) {
-        stream << m_movePointMode << m_movePoints;
+        stream << m_reward.m_movePointMode << m_reward.m_movePoints;
     }
 }
 
@@ -1752,39 +1755,48 @@ void MapQuestGuard::fromJson(const PropertyTree& data)
 
 void MapVisitableWithReward::readBinary(ByteOrderDataStreamReader& stream)
 {
+    /// If you think this code is a mess of a logic to readm it is.
+    /// Basically you have [32][32] or [32][32] [32][8][32][8]. But unused fields are filled with garbage.
     auto* m_features = getFeaturesFromStream(stream);
     if (!m_features->m_extraRewardsCustomization)
         return;
+    prepareArrays(m_features);
 
-    stream >> m_customIndex >> m_artId;
+    if (hasBehaviour(Behaviour::Option)) {
+        stream >> m_customIndex;
+    }
+    if (hasBehaviour(Behaviour::Artifact)) {
+        if (m_customIndex == uint32_t(-1))
+            stream >> m_unknown0;
+        else
+            stream >> m_artId;
+    }
+    if (hasBehaviour(Behaviour::ArtifactStub)) {
+        stream >> m_unknown0;
+    }
+    if (hasBehaviour(Behaviour::Spell)) {
+        if (m_customIndex == uint32_t(-1))
+            stream >> m_unknown0;
+        else
+            stream >> m_spellId;
+    }
+    if (hasBehaviour(Behaviour::Resource1) && hasBehaviour(Behaviour::Resource2)) {
+        stream >> m_resourceAmount1 >> m_resourceId1 >> m_resourceAmount2 >> m_resourceId2;
+    } else if (hasBehaviour(Behaviour::Resource1)) {
+        stream >> m_resourceAmount1 >> m_resourceId1 >> m_unknown1 >> m_unknown2;
+    } else if (hasBehaviour(Behaviour::Resource2)) {
+        assert(!"Not how it works");
+    }
+    if (hasBehaviour(Behaviour::UnitCount)) {
+        stream >> m_unitCount >> m_unknown2 >> m_unknown3 >> m_unknown4;
+    }
 
-    if (m_type == Type::Grave) {
-        stream >> m_goldOrResource >> m_resourceId >> m_goldOrResourceSecond >> m_unknown1;
-    } else if (m_type == Type::Lean) {
-        stream >> m_goldOrResource >> m_resourceId >> m_goldOrResourceSecond >> m_unknown1; // m_goldOrResourceSecond is always 1...
-    } else if (m_type == Type::CampFire) {
-        stream >> m_goldOrResource >> m_resourceId >> m_goldOrResourceSecond >> m_unknown1; // m_goldOrResource is just gold. and art id is unused.  resourceId + m_goldOrResourceSecond
-    } else if (m_type == Type::AncientLamp) {
-        stream >> m_goldOrResource >> m_resourceId >> m_goldOrResourceSecond >> m_unknown1; // m_goldOrResource is  genie count
-    } else if (m_type == Type::Wagon) {
-        stream >> m_goldOrResource >> m_resourceId >> m_goldOrResourceSecond >> m_unknown1; // m_goldOrResource is resource in resourceId. m_goldOrResourceSecond is always 1
-    } else if (m_type == Type::WaterBarrel) {
-        stream >> m_goldOrResource >> m_resourceId >> m_goldOrResourceSecond >> m_unknown1; // m_goldOrResource is resource in resourceId. m_goldOrResourceSecond is always 1
-    } else if (m_type == Type::TreasureChest) {
-    } else if (m_type == Type::SeaChest) {
-    } else if (m_type == Type::Flotsam) {
-        // art id is unused.
-    } else if (m_type == Type::TreeOfKnowledge) {
-        // art id is unused.
-    } else if (m_type == Type::Jetsam) {
-        // art id is unused.
-    } else if (m_type == Type::ManaVial) {
-        // art id is unused.
-    } else if (m_type == Type::Corpse) {
-    } else if (m_type == Type::Survivor) {
-    } else if (m_type == Type::WarriorTomb) {
-    } else if (m_type == Type::Pyramid) {
-        // art id is SPELL ID!
+    if (hasBehaviour(Behaviour::ArtifactsSale)) {
+        for (auto& art : m_artifactsForSale)
+            stream >> art;
+    }
+    if (hasBehaviour(Behaviour::SecondarySkills)) {
+        stream.readBits(m_skillsToLearn);
     }
 }
 
@@ -1793,29 +1805,41 @@ void MapVisitableWithReward::writeBinary(ByteOrderDataStreamWriter& stream) cons
     auto* m_features = getFeaturesFromStream(stream);
     if (!m_features->m_extraRewardsCustomization)
         return;
-    stream << m_customIndex << m_artId;
-    if (m_type == Type::Grave) {
-        stream << m_goldOrResource << m_resourceId << m_goldOrResourceSecond << m_unknown1;
-    } else if (m_type == Type::Lean) {
-        stream << m_goldOrResource << m_resourceId << m_goldOrResourceSecond << m_unknown1;
-    } else if (m_type == Type::CampFire) {
-        stream << m_goldOrResource << m_resourceId << m_goldOrResourceSecond << m_unknown1;
-    } else if (m_type == Type::AncientLamp) {
-        stream << m_goldOrResource << m_resourceId << m_goldOrResourceSecond << m_unknown1;
-    } else if (m_type == Type::Wagon) {
-        stream << m_goldOrResource << m_resourceId << m_goldOrResourceSecond << m_unknown1;
-    } else if (m_type == Type::WaterBarrel) {
-        stream << m_goldOrResource << m_resourceId << m_goldOrResourceSecond << m_unknown1;
-    } else if (m_type == Type::TreasureChest) {
-    } else if (m_type == Type::SeaChest) {
-    } else if (m_type == Type::Flotsam) {
-    } else if (m_type == Type::TreeOfKnowledge) {
-    } else if (m_type == Type::Jetsam) {
-    } else if (m_type == Type::ManaVial) {
-    } else if (m_type == Type::Corpse) {
-    } else if (m_type == Type::Survivor) {
-    } else if (m_type == Type::WarriorTomb) {
-    } else if (m_type == Type::Pyramid) {
+
+    if (hasBehaviour(Behaviour::Option)) {
+        stream << m_customIndex;
+    }
+    if (hasBehaviour(Behaviour::Artifact)) {
+        if (m_customIndex == uint32_t(-1))
+            stream << m_unknown0;
+        else
+            stream << m_artId;
+    }
+    if (hasBehaviour(Behaviour::ArtifactStub)) {
+        stream << m_unknown0;
+    }
+    if (hasBehaviour(Behaviour::Spell)) {
+        if (m_customIndex == uint32_t(-1))
+            stream << m_unknown0;
+        else
+            stream << m_spellId;
+    }
+
+    if (hasBehaviour(Behaviour::Resource1) && hasBehaviour(Behaviour::Resource2)) {
+        stream << m_resourceAmount1 << m_resourceId1 << m_resourceAmount2 << m_resourceId2;
+    } else if (hasBehaviour(Behaviour::Resource1)) {
+        stream << m_resourceAmount1 << m_resourceId1 << m_unknown1 << m_unknown2;
+    }
+    if (hasBehaviour(Behaviour::UnitCount)) {
+        stream << m_unitCount << m_unknown2 << m_unknown3 << m_unknown4;
+    }
+
+    if (hasBehaviour(Behaviour::ArtifactsSale)) {
+        for (auto& art : m_artifactsForSale)
+            stream << art;
+    }
+    if (hasBehaviour(Behaviour::SecondarySkills)) {
+        stream.writeBits(m_skillsToLearn);
     }
 }
 
@@ -1828,70 +1852,7 @@ void MapVisitableWithReward::toJson(PropertyTree& data) const
 void MapVisitableWithReward::fromJson(const PropertyTree& data)
 {
     Mernel::Reflection::PropertyTreeReader reader;
-    *this = {};
-    reader.jsonToValue(data, *this);
-}
-
-void MapBlackMarket::readBinary(ByteOrderDataStreamReader& stream)
-{
-    auto* m_features = getFeaturesFromStream(stream);
-    prepareArrays(m_features);
-    for (auto& art : m_artifacts)
-        stream >> art;
-}
-
-void MapBlackMarket::writeBinary(ByteOrderDataStreamWriter& stream) const
-{
-    auto* m_features = getFeaturesFromStream(stream);
-    if (!m_features->m_extraRewardsCustomization)
-        return;
-    for (auto& art : m_artifacts)
-        stream << art;
-}
-
-void MapBlackMarket::toJson(PropertyTree& data) const
-{
-    Mernel::Reflection::PropertyTreeWriter writer;
-    writer.valueToJson(*this, data);
-}
-
-void MapBlackMarket::fromJson(const PropertyTree& data)
-{
-    Mernel::Reflection::PropertyTreeReader reader;
-    *this = {};
-    reader.jsonToValue(data, *this);
-}
-
-void MapUniversity::readBinary(ByteOrderDataStreamReader& stream)
-{
-    auto* m_features = getFeaturesFromStream(stream);
-    prepareArrays(m_features);
-    if (!m_features->m_extraRewardsCustomization)
-        return;
-    stream >> m_customIndex;
-    stream.readBits(m_allowedSkills);
-}
-
-void MapUniversity::writeBinary(ByteOrderDataStreamWriter& stream) const
-{
-    auto* m_features = getFeaturesFromStream(stream);
-    if (!m_features->m_extraRewardsCustomization)
-        return;
-
-    stream << m_customIndex;
-    stream.writeBits(m_allowedSkills);
-}
-
-void MapUniversity::toJson(PropertyTree& data) const
-{
-    Mernel::Reflection::PropertyTreeWriter writer;
-    writer.valueToJson(*this, data);
-}
-
-void MapUniversity::fromJson(const PropertyTree& data)
-{
-    Mernel::Reflection::PropertyTreeReader reader;
-    *this = {};
+    *this = { m_behaviours };
     reader.jsonToValue(data, *this);
 }
 

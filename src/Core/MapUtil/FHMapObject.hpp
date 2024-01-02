@@ -56,6 +56,11 @@ struct FHTownEvent {
     std::vector<uint8_t>  m_buildings;
     std::vector<uint16_t> m_creaturesAmounts;
 
+    uint32_t m_unknown1 = 0;
+    uint32_t m_unknown2 = 0;
+    uint32_t m_unknown3 = 0;
+    uint32_t m_unknown4 = 0;
+
     bool operator==(const FHTownEvent&) const noexcept = default;
 };
 

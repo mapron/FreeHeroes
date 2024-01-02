@@ -93,8 +93,8 @@ struct FHHeroData {
 };
 
 struct FHCustomHeroDataExt {
-    uint16_t m_unknown1 = 0;
-    uint32_t m_unknown2 = 0;
+    uint16_t m_unknown1 = 1;
+    uint32_t m_unknown2 = 1;
 
     bool operator==(const FHCustomHeroDataExt&) const noexcept = default;
 };
@@ -135,8 +135,8 @@ struct FHHero : public FHPlayerControlledObject {
 
     uint32_t m_questIdentifier = 0;
 
-    uint16_t m_unknown1 = 0;
-    uint32_t m_unknown2 = 0;
+    uint32_t m_unknown1 = 1;
+    uint32_t m_unknown2 = 1;
 
     MAPUTIL_EXPORT std::string getDefId(bool onWater) const;
 
@@ -171,6 +171,11 @@ struct FHMine : public FHPlayerControlledObject {
 
 struct FHAbandonedMine : public FHCommonVisitable {
     std::vector<Core::LibraryResourceConstPtr> m_resources;
+
+    bool     m_customGuards = false;
+    uint32_t m_creatureId   = 0;
+    uint32_t m_countMin     = 0;
+    uint32_t m_countMax     = 0;
 
     bool operator==(const FHAbandonedMine&) const noexcept = default;
 };
@@ -303,6 +308,20 @@ struct FHObstacle : public FHCommonObject {
     bool operator==(const FHObstacle&) const noexcept = default;
 };
 struct FHVisitable : public FHCommonVisitable {
+    int          m_customChoice  = -1;
+    int          m_creatureCount = -1;
+    Core::Reward m_reward; // resources, gold, artifact
+
+    std::vector<Core::LibraryArtifactConstPtr>       m_artifactsForSale;
+    std::vector<Core::LibrarySecondarySkillConstPtr> m_skillsToLearn;
+
+    // garbage date to preserve round-trip
+    uint32_t m_unknown0 = 0;
+    uint32_t m_unknown1 = 1;
+    uint32_t m_unknown2 = 1;
+    uint32_t m_unknown3 = 0;
+    uint32_t m_unknown4 = 0;
+
     bool operator==(const FHVisitable&) const noexcept = default;
 };
 struct FHVisitableControlled : public FHCommonVisitable {
@@ -341,6 +360,8 @@ struct FHQuest {
         BringResource,
         BeHero,
         BePlayer,
+        BeHeroClass,
+        WaitUntilDay,
     };
     Type m_type = Type::Invalid;
 
@@ -348,8 +369,11 @@ struct FHQuest {
     std::vector<Core::UnitWithCount>           m_units;
     Core::ResourceAmount                       m_resources;
     Core::HeroPrimaryParams                    m_primary;
-    int                                        m_level   = 0;
-    int                                        m_lastDay = -1;
+    int                                        m_level      = 0;
+    int                                        m_lastDay    = -1;
+    int                                        m_minimumDay = -1;
+
+    std::vector<uint8_t> m_expectClasses;
 
     std::string m_firstVisitText;
     std::string m_nextVisitText;
@@ -445,6 +469,12 @@ struct FHGlobalMapEvent {
     bool     m_computerAffected = false;
     uint16_t m_firstOccurence   = 0;
     uint8_t  m_nextOccurence    = 0;
+
+    // mysterious undocumented HotA data. keep for roundtrip.
+    uint32_t m_unknown1 = 0;
+    uint32_t m_unknown2 = 0;
+    uint32_t m_unknown3 = 0;
+    uint16_t m_unknown4 = 0;
 
     bool operator==(const FHGlobalMapEvent&) const noexcept = default;
 };
