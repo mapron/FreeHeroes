@@ -94,7 +94,7 @@ void MapConverterFile::detectCompression()
     memcpy(buffer.data(), m_binaryBuffer.data(), m_binaryBuffer.size());
 
     /// @todo: other comressions?
-    const std::string_view gzipDeflate("\x1f\x8b\x08\x00", 4);
+    const std::string_view gzipDeflate("\x1f\x8b\x08", 3);
     if (buffer.starts_with(gzipDeflate)) {
         m_compressionMethod = CompressionMethod::Gzip;
         m_compressionOffsets.push_back(0);
