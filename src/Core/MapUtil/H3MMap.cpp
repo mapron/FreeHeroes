@@ -57,7 +57,7 @@ void H3Map::VictoryCondition::readBinary(ByteOrderDataStreamReader& stream)
             break;
         case VictoryConditionType::ARTIFACT:
         {
-            features->readArtifact(stream, m_artID);
+            features->readArtifact(stream, m_artID, 1, 2);
             break;
         }
         case VictoryConditionType::GATHERTROOP:
@@ -140,7 +140,7 @@ void H3Map::VictoryCondition::writeBinary(ByteOrderDataStreamWriter& stream) con
             break;
         case VictoryConditionType::ARTIFACT:
         {
-            features->writeArtifact(stream, m_artID);
+            features->writeArtifact(stream, m_artID, 1, 2);
             break;
         }
         case VictoryConditionType::GATHERTROOP:
