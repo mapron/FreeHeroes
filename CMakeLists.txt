@@ -551,6 +551,37 @@ AddTarget(TYPE app_ui NAME PostInstallSetup
     )
 endif()
 
+# api bindings
+
+AddTarget(TYPE shared NAME FreeHeroesAPI
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/API/FreeHeroesAPI
+    LINK_LIBRARIES
+        MernelPlatform
+        GuiUtils
+    
+        GameObjects
+        GameInt
+    
+        CoreResource
+        CoreLogic
+        CoreRng
+        GameInt
+        GuiInt
+        MapUtilGui
+    QT_MODULES Widgets
+    )
+
+AddTarget(TYPE app_console NAME FreeHeroesAPITest
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/API/FreeHeroesAPITest
+        INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/src/API/FreeHeroesAPI
+        LINK_LIBRARIES
+            MernelPlatform # just for SharedLibLoader.
+            
+           # FreeHeroesAPI # todo: remove link after debug is done.
+          #  QT_MODULES Widgets
+    )
+add_dependencies(FreeHeroesAPITest FreeHeroesAPI) # build-only.
+
 # tests
 
 AddTarget(TYPE app_console NAME CoreTests OUTPUT_NAME Tests_CoreLogic
