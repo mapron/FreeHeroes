@@ -471,6 +471,9 @@ void BitmapFile::toPixmapQt()
     if (m_pixmapQt)
         return;
 
+    if (!m_width || !m_width)
+        throw std::runtime_error("Image have zero dimensions.");
+
     QImage image(m_width, m_height, QImage::Format_RGBA8888);
     for (uint32_t y = 0; y < m_height; y++) {
         const auto& row = m_rows[y];
@@ -484,8 +487,6 @@ void BitmapFile::toPixmapQt()
         }
     }
 
-    assert(m_width > 0);
-    assert(m_height > 0);
     m_pixmapQt = std::make_shared<QPixmap>(QPixmap::fromImage(std::move(image)));
     assert(m_pixmapQt->width() == (int) m_width);
     assert(m_pixmapQt->height() == (int) m_height);

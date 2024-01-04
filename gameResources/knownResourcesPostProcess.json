@@ -824,6 +824,14 @@
 "avlhpn11"       : {"skip":{}},
 "avlhpn12"       : {"skip":{}},
 
+"aairmark"       : {"skip":{}},
+"c03spa1"        : {"skip":{}},
+"c11spa1"        : {"skip":{}},
+"cprsmall"       : {"skip":{}},
+"tbfaholy"       : {"skip":{}},
+"tp_sel"         : {"skip":{}},
+"crtoinfo"       : {"skip":{}},
+
 "ch09b"       : {"skip":{}},
 "ch16b"       : {"skip":{}},
 
