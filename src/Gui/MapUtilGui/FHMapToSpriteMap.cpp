@@ -79,10 +79,24 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         return item;
     };
 
-    auto makeItemByDef = [&makeItemById](SpriteMap::Layer layer, Core::LibraryObjectDefConstPtr def, const FHPos& pos, bool calcX = false) -> SpriteMap::Item {
-        auto resourceIdDef = def->substituteFor ? def->substituteFor : def;
-        auto item          = makeItemById(layer, resourceIdDef->id, pos, def->priority);
-        item.m_blockMask   = def->combinedMask;
+    auto makeItemByDef = [&makeItemById](SpriteMap::Layer layer, Core::LibraryObjectDefConstPtr def, const FHPos& pos, bool calcX = false, bool updateBlockmap = false, int xOffset = 0) -> SpriteMap::Item {
+        auto            resourceIdDef = def->substituteFor ? def->substituteFor : def;
+        SpriteMap::Item item          = makeItemById(layer, resourceIdDef->id, pos, def->priority);
+        item.m_blockMask              = def->combinedMask;
+        if (updateBlockmap) {
+            auto dx = item.m_blockMask.m_visitable.begin()->m_x + xOffset;
+            item.m_blockMask.m_visitable.clear();
+            item.m_blockMask.m_blocked.clear();
+            for (auto point : def->combinedMask.m_blocked) {
+                point.m_x -= dx;
+                item.m_blockMask.m_blocked.insert(point);
+            }
+            for (auto point : def->combinedMask.m_visitable) {
+                point.m_x -= dx;
+                item.m_blockMask.m_visitable.insert(point);
+            }
+        }
+        item.m_x += xOffset;
         if (calcX)
             item.m_x = item.m_x - item.m_blockMask.m_visitable.begin()->m_x;
         if (def != resourceIdDef)
@@ -90,11 +104,11 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         return item;
     };
 
-    auto makeItemByDefId = [&makeItemByDef, database](SpriteMap::Layer layer, const std::string& id, const FHPos& pos, bool calcX = false) {
+    auto makeItemByDefId = [&makeItemByDef, database](SpriteMap::Layer layer, const std::string& id, const FHPos& pos, bool calcX = false, bool updateBlockmap = false, int xOffset = 0) {
         auto* def = database->objectDefs()->find(id);
         if (!def)
             throw std::runtime_error("failed to find def id:" + id);
-        return makeItemByDef(layer, def, pos, calcX);
+        return makeItemByDef(layer, def, pos, calcX, updateBlockmap, xOffset);
     };
 
     auto makeItemByVisitable = [&makeItemByDef](SpriteMap::Layer layer, const FHCommonVisitable& obj) -> SpriteMap::Item {
@@ -359,12 +373,12 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
                 "avwmon7",
             };
             auto id = s_randomIds[obj.m_randomLevel];
-            item    = result.addItem(makeItemByDefId(SpriteMap::Layer::Monster, id, pos, true)
+            item    = result.addItem(makeItemByDefId(SpriteMap::Layer::Monster, id, pos, false, true, 1)
                                       .addInfo("id", id));
 
         } else {
             auto* def = obj.m_id->objectDefs.get({});
-            item      = result.addItem(makeItemByDef(SpriteMap::Layer::Monster, def, pos, true)
+            item      = result.addItem(makeItemByDef(SpriteMap::Layer::Monster, def, pos, false, true, 1)
                                       .addInfo("id", obj.m_id->id));
         }
         item->addInfo("count", strCount);
