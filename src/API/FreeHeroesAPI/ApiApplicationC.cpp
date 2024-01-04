@@ -138,7 +138,7 @@ FHResult fh_map_paint_v1(FHAppHandle app, int x, int y, int z, int width, int he
     return toApp(app)->paint(x, y, z, width, height);
 }
 
-FHRgbaArray fh_get_map_paint_result_v1(FHAppHandle app)
+FHBitmap fh_get_map_paint_result_v1(FHAppHandle app)
 {
     if (!app)
         return nullptr;
@@ -209,7 +209,7 @@ FHResult fh_global_map_paint_v1(int x, int y, int z, int width, int height)
 {
     return fh_map_paint_v1(g_globalHandle, x, y, z, width, height);
 }
-FHRgbaArray fh_global_get_map_paint_result_v1(void)
+FHBitmap fh_global_get_map_paint_result_v1(void)
 {
     return fh_get_map_paint_result_v1(g_globalHandle);
 }

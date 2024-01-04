@@ -7,6 +7,8 @@
 
 #include "SpriteMap.hpp"
 
+#include "MapRenderUtilExport.hpp"
+
 namespace FreeHeroes {
 
 struct FHMap;
@@ -17,7 +19,7 @@ namespace Gui {
 class IGraphicsLibrary;
 }
 
-class MapRenderer {
+class MAPRENDERUTIL_EXPORT MapRenderer {
 public:
     MapRenderer(const SpriteRenderSettings& renderSettings)
         : m_settings(renderSettings)

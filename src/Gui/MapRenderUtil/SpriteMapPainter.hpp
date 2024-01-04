@@ -6,12 +6,13 @@
 #pragma once
 
 #include "SpriteMap.hpp"
+#include "MapRenderUtilExport.hpp"
 
 class QPainter;
 
 namespace FreeHeroes {
 
-class SpriteMapPainter {
+class MAPRENDERUTIL_EXPORT SpriteMapPainter {
 public:
     SpriteMapPainter(const SpritePaintSettings* settings, int depth);
     ~SpriteMapPainter();

@@ -9,6 +9,7 @@
 
 #include "LibraryObjectDef.hpp"
 #include "MapScore.hpp"
+#include "MapRenderUtilExport.hpp"
 
 #include <vector>
 #include <map>
@@ -16,7 +17,7 @@
 
 namespace FreeHeroes {
 
-struct SpriteMap {
+struct MAPRENDERUTIL_EXPORT SpriteMap {
     enum class Layer
     {
         Invalid,
@@ -203,12 +204,12 @@ struct SpritePaintSettings {
     bool m_doubleScale      = false;
     bool m_doubleScaleTmp   = false;
 
-    bool m_animateTerrain = false;
+    bool m_animateTerrain = true;
     bool m_animateObjects = true;
-    bool m_grid           = true;
+    bool m_grid           = false;
     bool m_gridOnTop      = false;
     bool m_blockMask      = false;
-    bool m_overlay        = true;
+    bool m_overlay        = false;
     int  m_gridOpacity    = 110;
     int  m_tileSize       = 32;
 

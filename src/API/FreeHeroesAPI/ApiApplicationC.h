@@ -29,10 +29,10 @@ extern "C" {
 
 #include <stdint.h>
 
-typedef const char*     FHString;
-typedef void*           FHAppHandle;
-typedef const uint32_t* FHRgbaArray;
-typedef int             FHResult; // 0 = error, 1 = success
+typedef const char*    FHString;
+typedef void*          FHAppHandle;
+typedef const uint8_t* FHBitmap;
+typedef int            FHResult; // 0 = error, 1 = success
 
 /// Create FreeHeroes application instance. never fails.
 FREEHEROESAPI_EXPORT FHAppHandle fh_create_v1(void);
@@ -83,8 +83,8 @@ FREEHEROESAPI_EXPORT FHResult fh_map_prepare_render_v1(FHAppHandle app);
 /// Need to call get_paint_result for actual data.
 FREEHEROESAPI_EXPORT FHResult fh_map_paint_v1(FHAppHandle app, int x, int y, int z, int width, int height);
 
-/// returns NULL if map_paint was not called properly. Otherwise return pointer to array containing width*height*tile_size*tile_size elements (uint32_t).
-FREEHEROESAPI_EXPORT FHRgbaArray fh_get_map_paint_result_v1(FHAppHandle app);
+/// returns NULL if map_paint was not called properly. Otherwise return pointer to array containing width*height*tile_size*tile_size*4 bytes.
+FREEHEROESAPI_EXPORT FHBitmap fh_get_map_paint_result_v1(FHAppHandle app);
 
 typedef struct {
     FHAppHandle (*create)(void);
@@ -104,7 +104,7 @@ typedef struct {
     FHResult (*map_prepare_render)(FHAppHandle);
 
     FHResult (*map_paint)(FHAppHandle, int x, int y, int z, int width, int height);
-    FHRgbaArray (*get_map_paint_result)(FHAppHandle);
+    FHBitmap (*get_map_paint_result)(FHAppHandle);
 } FHApiPointers;
 
 FREEHEROESAPI_EXPORT FHApiPointers fh_get_api_pointers_v1(void);
@@ -117,21 +117,21 @@ typedef FHApiPointers (*fh_get_api_pointers_v1_f)(void);
 /// Note: if global_create was already called, then global_destroy will be called on global object.
 FREEHEROESAPI_EXPORT void fh_global_create_v1(void);
 
-FREEHEROESAPI_EXPORT void        fh_global_destroy_v1(void);
-FREEHEROESAPI_EXPORT FHString    fh_global_get_last_error_v1(void);
-FREEHEROESAPI_EXPORT FHString    fh_global_get_last_output_v1(void);
-FREEHEROESAPI_EXPORT FHResult    fh_global_init_v1(FHString mainResourcePath, FHString userResourcePath);
-FREEHEROESAPI_EXPORT FHResult    fh_global_convert_lod_v1(FHString lodPath, FHString userResourcePath);
-FREEHEROESAPI_EXPORT FHResult    fh_global_map_load_v1(FHString mapFile);
-FREEHEROESAPI_EXPORT int         fh_global_get_map_version_v1(void);
-FREEHEROESAPI_EXPORT int         fh_global_get_map_width_v1(void);
-FREEHEROESAPI_EXPORT int         fh_global_get_map_height_v1(void);
-FREEHEROESAPI_EXPORT int         fh_global_get_map_depth_v1(void);
-FREEHEROESAPI_EXPORT int         fh_global_get_map_tile_size_v1(void);
-FREEHEROESAPI_EXPORT FHResult    fh_global_map_derandomize_v1(void);
-FREEHEROESAPI_EXPORT FHResult    fh_global_map_prepare_render_v1(void);
-FREEHEROESAPI_EXPORT FHResult    fh_global_map_paint_v1(int x, int y, int z, int width, int height);
-FREEHEROESAPI_EXPORT FHRgbaArray fh_global_get_map_paint_result_v1(void);
+FREEHEROESAPI_EXPORT void     fh_global_destroy_v1(void);
+FREEHEROESAPI_EXPORT FHString fh_global_get_last_error_v1(void);
+FREEHEROESAPI_EXPORT FHString fh_global_get_last_output_v1(void);
+FREEHEROESAPI_EXPORT FHResult fh_global_init_v1(FHString mainResourcePath, FHString userResourcePath);
+FREEHEROESAPI_EXPORT FHResult fh_global_convert_lod_v1(FHString lodPath, FHString userResourcePath);
+FREEHEROESAPI_EXPORT FHResult fh_global_map_load_v1(FHString mapFile);
+FREEHEROESAPI_EXPORT int      fh_global_get_map_version_v1(void);
+FREEHEROESAPI_EXPORT int      fh_global_get_map_width_v1(void);
+FREEHEROESAPI_EXPORT int      fh_global_get_map_height_v1(void);
+FREEHEROESAPI_EXPORT int      fh_global_get_map_depth_v1(void);
+FREEHEROESAPI_EXPORT int      fh_global_get_map_tile_size_v1(void);
+FREEHEROESAPI_EXPORT FHResult fh_global_map_derandomize_v1(void);
+FREEHEROESAPI_EXPORT FHResult fh_global_map_prepare_render_v1(void);
+FREEHEROESAPI_EXPORT FHResult fh_global_map_paint_v1(int x, int y, int z, int width, int height);
+FREEHEROESAPI_EXPORT FHBitmap fh_global_get_map_paint_result_v1(void);
 
 typedef struct {
     void (*create)(void);
@@ -151,7 +151,7 @@ typedef struct {
     FHResult (*map_prepare_render)(void);
 
     FHResult (*map_paint)(int x, int y, int z, int width, int height);
-    FHRgbaArray (*get_map_paint_result)(void);
+    FHBitmap (*get_map_paint_result)(void);
 } FHApiPointersGlobal;
 
 FREEHEROESAPI_EXPORT FHApiPointersGlobal fh_global_get_api_pointers_v1(void);

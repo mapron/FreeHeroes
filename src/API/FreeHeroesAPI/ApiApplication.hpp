@@ -22,7 +22,7 @@ public:
         int m_depth    = 0;
         int m_tileSize = 0;
     };
-    using RGBAArray = const uint32_t*;
+    using Bitmap = const uint8_t*;
 
 public:
     ApiApplication() noexcept;
@@ -40,8 +40,8 @@ public:
     void derandomize();
     void prepareRender();
 
-    void      paint(int x, int y, int z, int width, int height);
-    RGBAArray getRGBA() const noexcept;
+    void   paint(int x, int y, int z, int width, int height);
+    Bitmap getRGBA() const noexcept;
 
 private:
     struct Impl;
@@ -50,8 +50,8 @@ private:
 
 class FREEHEROESAPI_EXPORT ApiApplicationNoexcept {
 public:
-    using MapInfo   = ApiApplication::MapInfo;
-    using RGBAArray = ApiApplication::RGBAArray;
+    using MapInfo = ApiApplication::MapInfo;
+    using Bitmap  = ApiApplication::Bitmap;
 
 public:
     ApiApplicationNoexcept() noexcept;
@@ -69,8 +69,8 @@ public:
     bool derandomize() noexcept;
     bool prepareRender() noexcept;
 
-    bool      paint(int x, int y, int z, int width, int height) noexcept;
-    RGBAArray getRGBA() const noexcept;
+    bool   paint(int x, int y, int z, int width, int height) noexcept;
+    Bitmap getRGBA() const noexcept;
 
 private:
     struct Impl;

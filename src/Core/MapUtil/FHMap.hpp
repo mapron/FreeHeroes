@@ -596,6 +596,9 @@ struct MAPUTIL_EXPORT FHMap {
     std::vector<FHDebugTile> m_debugTiles;
     FHTemplate               m_template;
 
+    bool isHotAMap() const { return m_format >= MapFormat::HOTA1 && m_format <= MapFormat::HOTA3; }
+    bool isSoDMap() const { return m_format >= MapFormat::ROE && m_format <= MapFormat::HC; }
+
     struct Objects {
         std::vector<FHResource>            m_resources;
         std::vector<FHRandomResource>      m_resourcesRandom;

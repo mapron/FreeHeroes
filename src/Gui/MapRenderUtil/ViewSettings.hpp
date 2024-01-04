@@ -7,13 +7,15 @@
 
 #include "SpriteMap.hpp"
 
+#include "MapRenderUtilExport.hpp"
+
 namespace Mernel {
 class PropertyTree;
 }
 
 namespace FreeHeroes {
 
-struct ViewSettings {
+struct MAPRENDERUTIL_EXPORT ViewSettings {
     SpriteRenderSettings m_renderSettings;
     SpritePaintSettings  m_paintSettings;
 

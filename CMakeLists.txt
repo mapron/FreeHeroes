@@ -334,6 +334,21 @@ AddTarget(TYPE shared NAME MapUtil OUTPUT_PREFIX FH
         MernelReflection
     )
 
+AddTarget(TYPE shared NAME MapRenderUtil OUTPUT_PREFIX FH
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/MapRenderUtil
+    EXPORT_INCLUDES
+    LINK_LIBRARIES
+        MernelPlatform
+        MernelReflection
+        GuiInt
+        GameObjects
+        GameInt
+
+        CoreLogic
+        MapUtil
+    QT_MODULES Gui
+    )
+
 AddTarget(TYPE shared NAME MapUtilGui OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/MapUtilGui
     EXPORT_INCLUDES
@@ -351,6 +366,7 @@ AddTarget(TYPE shared NAME MapUtilGui OUTPUT_PREFIX FH
         GuiGameWrappers
         CoreLogic
         MapUtil
+        MapRenderUtil
     QT_MODULES Widgets
     UIC_POSTPROCESS_SCRIPTS
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
@@ -567,8 +583,10 @@ AddTarget(TYPE shared NAME FreeHeroesAPI
         CoreRng
         GameInt
         GuiInt
-        MapUtilGui
-    QT_MODULES Widgets
+        GuiResource
+        MapUtil
+        MapRenderUtil
+    QT_MODULES Gui
     )
 
 AddTarget(TYPE app_console NAME FreeHeroesAPITest

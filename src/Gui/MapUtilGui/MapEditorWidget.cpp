@@ -349,9 +349,6 @@ bool MapEditorWidget::load(const std::string& filename,
         assert(converter.m_mapFH.m_database);
         m_impl->m_map = std::move(converter.m_mapFH);
 
-        auto rng = m_rngFactory->create();
-        rng->setSeed(m_impl->m_map.m_seed);
-
         m_impl->m_filterGen->clear();
         m_impl->m_filterGen->addItem(tr("-- select gen layer --"));
         auto              allObjects = m_impl->m_map.m_objects.getAllObjects();

@@ -12,14 +12,23 @@
 #include "ResourceLibraryFactory.hpp"
 #include "GameDatabaseContainer.hpp"
 #include "RandomGenerator.hpp"
+#include "MapConverter.hpp"
+#include "GraphicsLibrary.hpp"
+
+#include "SpriteMap.hpp"
+#include "ViewSettings.hpp"
+#include "FHMapToSpriteMap.hpp"
+#include "SpriteMapPainter.hpp"
 
 #include <string>
 
-// @todo: switch to QGui!
-#include <QApplication>
+#include <QGuiApplication>
+#include <QPainter>
 
 namespace FreeHeroes {
 using namespace Mernel;
+
+const uint32_t g_mapAnimationInterval = 160;
 
 struct ApiApplication::Impl {
     Impl() = default;
@@ -43,16 +52,23 @@ struct ApiApplication::Impl {
     std::string                     m_lastOutput;
     ApiApplicationNoexcept::MapInfo m_mapInfo;
 
-    int                           m_argc = 1; // qt require argc+argv by reference!
-    std::vector<std::string>      m_argvData;
-    std::vector<char*>            m_argv;
-    std::unique_ptr<QApplication> m_qtApp;
+    int                              m_argc = 1; // qt require argc+argv by reference!
+    std::vector<std::string>         m_argvData;
+    std::vector<char*>               m_argv;
+    std::unique_ptr<QGuiApplication> m_qtApp;
 
     std::shared_ptr<const Core::IResourceLibrary>       m_resourceLibrary;
     std::shared_ptr<Core::IRandomGeneratorFactory>      m_randomGeneratorFactory;
     std::shared_ptr<const Core::IGameDatabaseContainer> m_gameDatabaseContainer;
+    std::shared_ptr<Gui::IGraphicsLibrary>              m_graphicsLibrary;
 
-    std::vector<uint32_t> m_rgba;
+    FHMap m_map;
+
+    ScopeTimer   m_timer;
+    SpriteMap    m_spriteMap;
+    ViewSettings m_viewSettings;
+
+    std::vector<uint8_t> m_rgba;
 };
 
 ApiApplication::ApiApplication() noexcept
@@ -77,7 +93,7 @@ void ApiApplication::init(const std::string& appResourcePath, const std::string&
 
     m_impl->m_argvData = { "FreeHeroes", "" };
     m_impl->m_argv     = std::vector<char*>{ m_impl->m_argvData[0].data(), m_impl->m_argvData[1].data() };
-    m_impl->m_qtApp    = std::make_unique<QApplication>(m_impl->m_argc, m_impl->m_argv.data());
+    m_impl->m_qtApp    = std::make_unique<QGuiApplication>(m_impl->m_argc, m_impl->m_argv.data());
 
     Logger(Logger::Info) << "CoreApplication::load - start";
 
@@ -99,18 +115,57 @@ void ApiApplication::init(const std::string& appResourcePath, const std::string&
         ProfilerScope scope("GameDatabaseContainer load");
         m_impl->m_gameDatabaseContainer = std::make_shared<Core::GameDatabaseContainer>(m_impl->m_resourceLibrary.get());
     }
+    {
+        ProfilerScope scope("GraphicsLibrary");
+        m_impl->m_graphicsLibrary = std::make_shared<Gui::GraphicsLibrary>(m_impl->m_resourceLibrary.get());
+    }
 
     Logger(Logger::Info) << "CoreApplication::load - end";
 }
 
 void ApiApplication::convertLoD(const std::string& lodPath, const std::string& userResourcePath) noexcept(false)
 {
-    throw std::runtime_error("todo");
+    //throw std::runtime_error("todo");
 }
 
 void ApiApplication::loadMap(const std::string& mapPath) noexcept(false)
 {
-    throw std::runtime_error("todo");
+    std::ostringstream os;
+    auto               fullpath = Mernel::string2path(mapPath);
+    auto               ext      = fullpath.extension();
+    const bool         isH3M    = Mernel::path2string(ext) == ".h3m";
+
+    MapConverter::Settings sett;
+    if (isH3M)
+        sett.m_inputs = { .m_h3m = { .m_binary = fullpath } };
+    else
+        sett.m_inputs = { .m_fhMap = fullpath };
+
+    try {
+        MapConverter converter(os,
+                               m_impl->m_gameDatabaseContainer.get(),
+                               m_impl->m_randomGeneratorFactory.get(),
+                               sett);
+
+        if (isH3M)
+            converter.run(MapConverter::Task::LoadH3M);
+        else
+            converter.run(MapConverter::Task::LoadFH);
+
+        assert(converter.m_mapFH.m_database);
+        m_impl->m_map                = std::move(converter.m_mapFH);
+        m_impl->m_mapInfo            = { .m_width  = m_impl->m_map.m_tileMap.m_width,
+                                         .m_height = m_impl->m_map.m_tileMap.m_height,
+                                         .m_depth  = m_impl->m_map.m_tileMap.m_depth };
+        m_impl->m_mapInfo.m_tileSize = 32;
+        m_impl->m_mapInfo.m_version  = m_impl->m_map.isSoDMap() ? 1 : (m_impl->m_map.isHotAMap() ? 2 : 0);
+
+        //updateMap();
+    }
+    catch (std::exception&) {
+        m_impl->m_lastOutput += os.str();
+        throw;
+    }
 }
 
 const ApiApplication::MapInfo& ApiApplication::getMapInfo() const noexcept
@@ -120,20 +175,47 @@ const ApiApplication::MapInfo& ApiApplication::getMapInfo() const noexcept
 
 void ApiApplication::derandomize()
 {
-    throw std::runtime_error("todo");
+    //throw std::runtime_error("todo");
 }
 
 void ApiApplication::prepareRender()
 {
-    throw std::runtime_error("todo");
+    //throw std::runtime_error("todo");
+    MapRenderer renderer(m_impl->m_viewSettings.m_renderSettings);
+    assert(m_impl->m_map.m_database);
+    m_impl->m_spriteMap = renderer.render(m_impl->m_map, m_impl->m_graphicsLibrary.get());
 }
 
 void ApiApplication::paint(int x, int y, int z, int width, int height)
 {
-    throw std::runtime_error("todo");
+    QSize windowSize(width, height);
+    windowSize = windowSize * m_impl->m_mapInfo.m_tileSize;
+
+    m_impl->m_rgba.resize(windowSize.width() * windowSize.height() * 4);
+
+    SpriteMapPainter spainter(&(m_impl->m_viewSettings.m_paintSettings), z);
+
+    QImage   imageMap(windowSize, QImage::Format_ARGB32);
+    QPainter painterMap(&imageMap);
+    painterMap.translate(QPoint(-x * m_impl->m_mapInfo.m_tileSize, -y * m_impl->m_mapInfo.m_tileSize));
+
+    const auto tick = static_cast<uint32_t>(m_impl->m_timer.elapsedUS() / 1000 / g_mapAnimationInterval);
+
+    spainter.paint(&painterMap, &(m_impl->m_spriteMap), tick, tick);
+    for (int y1 = 0; y1 < windowSize.height(); ++y1) {
+        for (int x1 = 0; x1 < windowSize.width(); ++x1) {
+            uint8_t* bitmapPixel = m_impl->m_rgba.data() + y1 * windowSize.width() * 4 + x1 * 4;
+            auto     color       = imageMap.pixelColor(x1, y1);
+            bitmapPixel[0]       = color.red();
+            bitmapPixel[1]       = color.green();
+            bitmapPixel[2]       = color.blue();
+            bitmapPixel[3]       = color.alpha();
+        }
+    }
+    //imageMap.save("D:/tmp3/out.png");
 }
 
-ApiApplication::RGBAArray ApiApplication::getRGBA() const noexcept
+ApiApplication::Bitmap ApiApplication::getRGBA() const noexcept
 {
     return m_impl->m_rgba.size() > 0 ? m_impl->m_rgba.data() : nullptr;
 }
@@ -229,7 +311,7 @@ bool ApiApplicationNoexcept::paint(int x, int y, int z, int width, int height) n
     return m_impl->handle("paint", [=, this] { m_impl->m_app.paint(x, y, z, width, height); });
 }
 
-ApiApplicationNoexcept::RGBAArray ApiApplicationNoexcept::getRGBA() const noexcept
+ApiApplicationNoexcept::Bitmap ApiApplicationNoexcept::getRGBA() const noexcept
 {
     return m_impl->m_app.getRGBA();
 }
