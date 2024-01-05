@@ -15,6 +15,7 @@ SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake ${MERNEL_ROOT}/cmake)
 
 #project options
 option( WARNING_AS_ERROR "" ON )
+option( DISABLE_QWIDGET "" OFF )
 option( USE_SANITIZER "" OFF )
 set(FFMPEG_BINARY "" CACHE FILEPATH "Path to ffmpeg binary")
 
@@ -98,6 +99,10 @@ endif()
 
 set(QT_MODULE_LIST Core Gui Widgets Multimedia Network)
 set(QT_MODULE_LIST_BUILD_ONLY ${QT_MODULE_LIST} LinguistTools)
+if (DISABLE_QWIDGET)
+    set(QT_MODULE_LIST Core Gui)
+    set(QT_MODULE_LIST_BUILD_ONLY ${QT_MODULE_LIST})
+endif()
 
 find_package(Qt6 COMPONENTS ${QT_MODULE_LIST_BUILD_ONLY})
 
@@ -163,7 +168,7 @@ AddTarget(TYPE header_only GENERATE_STUB NAME GameObjects OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/GameObjects)
 AddTarget(TYPE header_only GENERATE_STUB NAME SoundInt OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Sound/Interface
-    QT_MODULES Widgets)
+    )
 
 # Core
 
@@ -174,7 +179,7 @@ AddTarget(TYPE header_only GENERATE_STUB NAME GameInt OUTPUT_PREFIX FH
 AddTarget(TYPE header_only GENERATE_STUB NAME GuiInt OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Interface
     LINK_LIBRARIES MernelPlatform GameObjects GameInt  OUTPUT_PREFIX FH
-    QT_MODULES Widgets) # todo: GameObjects remove for cursors.
+    QT_MODULES Gui) # todo: GameObjects remove for cursors.
 
 AddTarget(TYPE shared NAME CoreRng OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/Rng
@@ -214,14 +219,14 @@ AddTarget(TYPE shared NAME CoreApplication OUTPUT_PREFIX FH
     )
 
 # Sound
-
+if (NOT DISABLE_QWIDGET)
 AddTarget(TYPE shared NAME SoundPlayer OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Sound/Player
     EXPORT_INCLUDES
     LINK_LIBRARIES SoundInt CoreResource MernelPlatform GameInt
     QT_MODULES Multimedia
     )
-
+endif()
 
 # Gui
 set(assetsPath ../../../assets)
@@ -231,11 +236,12 @@ AddTarget(TYPE shared NAME GuiResource OUTPUT_PREFIX FH
     LINK_LIBRARIES
         GuiInt MernelPlatform CoreLogic
         MernelReflection
-    QT_MODULES Widgets
+    QT_MODULES Gui
     UIC_POSTPROCESS_SCRIPTS
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
 
+if (NOT DISABLE_QWIDGET)
 AddTarget(TYPE shared NAME GuiGameWrappers OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/GameWrappers
     EXPORT_INCLUDES
@@ -246,17 +252,19 @@ AddTarget(TYPE shared NAME GuiGameWrappers OUTPUT_PREFIX FH
     UIC_POSTPROCESS_SCRIPTS
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
+endif()
 
 AddTarget(TYPE shared NAME GuiUtils OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Utils
     EXPORT_INCLUDES
     LINK_LIBRARIES
         GuiInt
-    QT_MODULES Widgets
+    QT_MODULES Core
     UIC_POSTPROCESS_SCRIPTS
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
 
+if (NOT DISABLE_QWIDGET)
 AddTarget(TYPE shared NAME GuiWidgets OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Widgets
     EXPORT_INCLUDES
@@ -321,6 +329,8 @@ AddTarget(TYPE shared NAME GuiApplication OUTPUT_PREFIX FH
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
 
+endif()
+
 AddTarget(TYPE shared NAME MapUtil OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/MapUtil
     EXPORT_INCLUDES
@@ -349,6 +359,7 @@ AddTarget(TYPE shared NAME MapRenderUtil OUTPUT_PREFIX FH
     QT_MODULES Gui
     )
 
+if (NOT DISABLE_QWIDGET)
 AddTarget(TYPE shared NAME MapUtilGui OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/MapUtilGui
     EXPORT_INCLUDES
@@ -371,6 +382,7 @@ AddTarget(TYPE shared NAME MapUtilGui OUTPUT_PREFIX FH
     UIC_POSTPROCESS_SCRIPTS
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
+endif()
 
 AddTarget(TYPE shared NAME LegacyConverterUtil OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/LegacyConverterUtil
@@ -392,7 +404,7 @@ AddTarget(TYPE shared NAME LegacyConverterUtil OUTPUT_PREFIX FH
     )
 
 # App
-
+if (NOT DISABLE_QWIDGET)
 AddTarget( TYPE app_ui NAME LegacyConverter
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/LegacyConverter
     LINK_LIBRARIES
@@ -412,6 +424,7 @@ AddTarget( TYPE app_ui NAME LegacyConverter
     UIC_POSTPROCESS_SCRIPTS
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
+endif()
 AddTarget( TYPE app_console NAME LegacyConverterCLI
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/LegacyConverterCLI
     LINK_LIBRARIES
@@ -438,7 +451,7 @@ AddTarget( TYPE app_console NAME GameLegacyConverterCLI
 
     QT_MODULES Gui
     )
-
+if (NOT DISABLE_QWIDGET)
 AddTarget(TYPE app_ui NAME BattleEmulator
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/BattleEmulator
     LINK_LIBRARIES
@@ -478,7 +491,9 @@ AddTarget(TYPE app_ui NAME MapEditor
     WIN_ICON
         ${CMAKE_CURRENT_SOURCE_DIR}/guiAssets/64_map.ico
     )
+endif()
 
+if (NOT DISABLE_QWIDGET) #todo: should be fine without widget, remove MapEditor
 AddTarget(TYPE app_ui NAME MapScreenshotToolCLI
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/MapScreenshotToolCLI
     LINK_LIBRARIES
@@ -492,7 +507,8 @@ AddTarget(TYPE app_ui NAME MapScreenshotToolCLI
         MapUtilGui
     QT_MODULES Widgets
     )
-
+endif()
+if (NOT DISABLE_QWIDGET)
 AddTarget(TYPE app_ui NAME MapToolUI
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/MapToolUI
     LINK_LIBRARIES
@@ -521,6 +537,8 @@ AddTarget(TYPE app_ui NAME MapToolUI
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
 
+endif()
+
 AddTarget(TYPE app_console NAME MapToolCLI
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/MapToolCLI
     LINK_LIBRARIES
@@ -543,6 +561,7 @@ AddTarget(TYPE app_console NAME TemplateToolCLI
         MapUtil
     )
 
+if (NOT DISABLE_QWIDGET)
 AddTarget(TYPE app_ui NAME Launcher
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/Launcher
     LINK_LIBRARIES
@@ -554,8 +573,9 @@ AddTarget(TYPE app_ui NAME Launcher
     UIC_POSTPROCESS_SCRIPTS
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
+endif()
 
-if (WIN32)
+if (WIN32 AND NOT DISABLE_QWIDGET)
 AddTarget(TYPE app_ui NAME PostInstallSetup
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/PostInstallSetup
     LINK_LIBRARIES
@@ -586,6 +606,7 @@ AddTarget(TYPE shared NAME FreeHeroesAPI
         GuiResource
         MapUtil
         MapRenderUtil
+        LegacyConverterUtil
     QT_MODULES Gui
     )
 
@@ -615,6 +636,7 @@ AddTarget(TYPE app_console NAME CoreTests OUTPUT_NAME Tests_CoreLogic
     gtest gtest_main MernelReflection
     )
 
+if (NOT DISABLE_QWIDGET)
 AddTarget(TYPE app_ui NAME SoundTests OUTPUT_NAME Tests_Sound
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Sound/Tests
     LINK_LIBRARIES
@@ -629,13 +651,15 @@ AddTarget(TYPE app_ui NAME SoundTests OUTPUT_NAME Tests_Sound
     UIC_POSTPROCESS_SCRIPTS
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
+endif()
 
-
+if (NOT DISABLE_QWIDGET)
 # Qt UI resource files = qrc + ts/qm
 GenerateQrcFromAssets(Application)
 GenerateQrcFromAssets(Battle)
 GenerateQrcWithTranslations(Translations ${CMAKE_CURRENT_SOURCE_DIR}/guiAssets/TranslationSource )
 AddResourceCustomTarget("all_resources" Application Battle Translations)
+endif()
 
 #[[
 ########## Game Resources ##########

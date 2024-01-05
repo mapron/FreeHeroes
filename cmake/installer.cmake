@@ -8,7 +8,12 @@ if(NOT WIN32)
 endif()
 
 # Qt install - plugins
+set(QtPluginsList)
+if (NOT DISABLE_QWIDGET)
 set(QtPluginsList ${QT_CMAKE_EXPORT_NAMESPACE}::QWebpPlugin ${${QT_CMAKE_EXPORT_NAMESPACE}Multimedia_PLUGINS})
+endif()
+
+if (NOT DISABLE_QWIDGET)
 if(APPLE)
     list(APPEND QtPluginsList ${QT_CMAKE_EXPORT_NAMESPACE}::QCocoaIntegrationPlugin)
 elseif(WIN32)
@@ -18,6 +23,11 @@ list(REMOVE_ITEM QtPluginsList ${QT_CMAKE_EXPORT_NAMESPACE}::QM3uPlaylistPlugin)
 
 if (QT_CMAKE_EXPORT_NAMESPACE STREQUAL Qt6)
     list(REMOVE_ITEM QtPluginsList ${QT_CMAKE_EXPORT_NAMESPACE}::QWebpPlugin)
+endif()
+else()
+    if(WIN32)
+        list(APPEND QtPluginsList ${QT_CMAKE_EXPORT_NAMESPACE}::QWindowsIntegrationPlugin)
+    endif()
 endif()
 
 foreach(plugin ${QtPluginsList})
