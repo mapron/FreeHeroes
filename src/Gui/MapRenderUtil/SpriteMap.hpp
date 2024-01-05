@@ -246,10 +246,23 @@ struct SpritePaintSettings {
         return percent;
     }
 };
-
+struct FHPos;
 struct SpriteRenderSettings {
     bool m_reserved = true;
     bool m_strict   = false;
+
+    bool m_showEvents = true;
+    bool m_showGrail  = true;
+
+    bool m_useRenderWindow = false;
+
+    int m_z    = 0;
+    int m_xMin = 0;
+    int m_yMin = 0;
+    int m_xMax = 0;
+    int m_yMax = 0;
+
+    bool isFilteredOut(const FHPos& pos) const;
 };
 
 }

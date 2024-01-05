@@ -22,6 +22,13 @@ public:
         int m_depth    = 0;
         int m_tileSize = 0;
     };
+    struct RenderWindow {
+        int m_x      = 0;
+        int m_y      = 0;
+        int m_z      = 0;
+        int m_width  = 0;
+        int m_height = 0;
+    };
     using Bitmap = const uint8_t*;
 
 public:
@@ -38,9 +45,10 @@ public:
     const MapInfo& getMapInfo() const noexcept;
 
     void derandomize();
+    void setRenderWindow(const RenderWindow& renderWindow) noexcept;
     void prepareRender();
 
-    void   paint(int x, int y, int z, int width, int height);
+    void   paint();
     Bitmap getRGBA() const noexcept;
 
 private:
@@ -50,8 +58,9 @@ private:
 
 class FREEHEROESAPI_EXPORT ApiApplicationNoexcept {
 public:
-    using MapInfo = ApiApplication::MapInfo;
-    using Bitmap  = ApiApplication::Bitmap;
+    using MapInfo      = ApiApplication::MapInfo;
+    using Bitmap       = ApiApplication::Bitmap;
+    using RenderWindow = ApiApplication::RenderWindow;
 
 public:
     ApiApplicationNoexcept() noexcept;
@@ -67,9 +76,10 @@ public:
     const MapInfo& getMapInfo() const noexcept;
 
     bool derandomize() noexcept;
+    bool setRenderWindow(const RenderWindow& renderWindow) noexcept;
     bool prepareRender() noexcept;
 
-    bool   paint(int x, int y, int z, int width, int height) noexcept;
+    bool   paint() noexcept;
     Bitmap getRGBA() const noexcept;
 
 private:

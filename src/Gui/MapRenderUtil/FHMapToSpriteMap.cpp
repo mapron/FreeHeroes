@@ -66,13 +66,15 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
 
     bool hasMissingSprites = false;
 
-    auto makeItemById = [&makeItem, &hasMissingSprites, graphicsLibrary](SpriteMap::Layer layer, const std::string& id, const FHPos& pos, int priority = 0) -> SpriteMap::Item {
+    auto makeItemById = [&makeItem, &hasMissingSprites, graphicsLibrary, this](SpriteMap::Layer layer, const std::string& id, const FHPos& pos, int priority = 0) -> SpriteMap::Item {
         auto item    = makeItem(pos, priority);
         item.m_layer = layer;
 
         auto sprite = graphicsLibrary->getObjectAnimation(id);
-        if (!sprite || !sprite->preload())
-            hasMissingSprites = true;
+        if (m_settings.m_strict) {
+            if (!sprite || !sprite->preload())
+                hasMissingSprites = true;
+        }
         item.m_sprite      = sprite;
         item.m_spriteGroup = 0;
         item.addInfo("def", id);
@@ -183,7 +185,9 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         });
     }
 
-    fhMap.m_tileMap.eachPosTile([&makeItemById, &result](const FHPos& pos, const FHTileMap::Tile& tile, size_t) {
+    fhMap.m_tileMap.eachPosTile([&makeItemById, &result, this](const FHPos& pos, const FHTileMap::Tile& tile, size_t) {
+        if (m_settings.isFilteredOut(pos))
+            return;
         if (tile.m_terrainId) {
             SpriteMap::Item item = makeItemById(SpriteMap::Layer::Terrain, tile.m_terrainId->presentationParams.defFile, pos);
             item.m_spriteGroup   = tile.m_terrainView.m_view;
@@ -246,6 +250,8 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     });
 
     for (const auto& obj : fhMap.m_towns) {
+        if (m_settings.isFilteredOut(obj.m_pos))
+            continue;
         Core::ObjectDefIndex defIndex;
         //
         //"sod.faction.castle"          : [ {"m": {"":"avccast0", "FORT": "avccasf0", "CIT": "avccasc0", "CAS": "avccasx0", "CAP": "avccasz0"}} ],
@@ -279,6 +285,8 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     }
 
     for (auto& fhHero : fhMap.m_wanderingHeroes) {
+        if (m_settings.isFilteredOut(fhHero.m_pos))
+            continue;
         auto* libraryHero = fhHero.m_data.m_army.hero.library;
 
         bool  water = fhMap.m_tileMap.get(fhHero.m_pos).m_terrainId->id == Core::LibraryTerrain::s_terrainWater;
@@ -296,6 +304,8 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         }
     }
     for (auto& obj : fhMap.m_objects.m_resources) {
+        if (m_settings.isFilteredOut(obj.m_pos))
+            continue;
         rendered.insert(&obj);
         Core::LibraryObjectDefConstPtr def;
         def = obj.m_id->objectDefs.get({});
@@ -313,12 +323,16 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     }
 
     for (auto& obj : fhMap.m_objects.m_resourcesRandom) {
+        if (m_settings.isFilteredOut(obj.m_pos))
+            continue;
         rendered.insert(&obj);
         std::string id = "avtrndm0";
         result.addItem(makeItemByDefId(SpriteMap::Layer::Resource, id, obj.m_pos));
     }
 
     for (auto& obj : fhMap.m_objects.m_artifacts) {
+        if (m_settings.isFilteredOut(obj.m_pos))
+            continue;
         rendered.insert(&obj);
         auto* def = obj.m_id->objectDefs.get({});
 
@@ -330,6 +344,8 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         }
     }
     for (auto& obj : fhMap.m_objects.m_artifactsRandom) {
+        if (m_settings.isFilteredOut(obj.m_pos))
+            continue;
         rendered.insert(&obj);
         std::string id = "";
         switch (obj.m_type) {
@@ -355,6 +371,8 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     }
 
     for (auto& obj : fhMap.m_objects.m_monsters) {
+        if (m_settings.isFilteredOut(obj.m_pos))
+            continue;
         rendered.insert(&obj);
         auto pos = obj.m_pos;
 
@@ -390,6 +408,8 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     }
 
     for (auto& obj : fhMap.m_objects.m_dwellings) {
+        if (m_settings.isFilteredOut(obj.m_pos))
+            continue;
         rendered.insert(&obj);
         auto* def        = obj.m_id->objectDefs.get(obj.m_defIndex);
         auto* item       = result.addItem(makeItemByDef(SpriteMap::Layer::Dwelling, def, obj.m_pos).addInfo("id", obj.m_id->id));
@@ -397,6 +417,8 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         addValueInfo(item, obj);
     }
     for (auto& obj : fhMap.m_objects.m_randomDwellings) {
+        if (m_settings.isFilteredOut(obj.m_pos))
+            continue;
         rendered.insert(&obj);
         auto* def        = obj.m_id;
         auto* item       = result.addItem(makeItemByDef(SpriteMap::Layer::Dwelling, def, obj.m_pos).addInfo("id", obj.m_id->id));
@@ -405,6 +427,8 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     }
 
     for (auto& obj : fhMap.m_objects.m_mines) {
+        if (m_settings.isFilteredOut(obj.m_pos))
+            continue;
         rendered.insert(&obj);
         auto* def        = obj.m_id->minesDefs.get(obj.m_defIndex);
         auto* item       = result.addItem(makeItemByDef(SpriteMap::Layer::Mine, def, obj.m_pos).addInfo("id", obj.m_id->id));
@@ -412,6 +436,8 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         addValueInfo(item, obj);
     }
     for (auto& obj : fhMap.m_objects.m_abandonedMines) {
+        if (m_settings.isFilteredOut(obj.m_pos))
+            continue;
         rendered.insert(&obj);
         auto* item = result.addItem(makeItemByVisitable(SpriteMap::Layer::Mine, obj));
 
@@ -419,6 +445,8 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     }
 
     for (auto& obj : fhMap.m_objects.m_banks) {
+        if (m_settings.isFilteredOut(obj.m_pos))
+            continue;
         rendered.insert(&obj);
         auto* def               = obj.m_id->objectDefs.get(obj.m_defIndex);
         auto  strCount          = obj.m_guardsVariant < 0 ? "R" : std::to_string(obj.m_guardsVariant + 1);
@@ -444,21 +472,29 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         }
     }
     for (auto& obj : fhMap.m_objects.m_obstacles) {
+        if (m_settings.isFilteredOut(obj.m_pos))
+            continue;
         rendered.insert(&obj);
         auto* def = obj.m_id->objectDefs.get(obj.m_defIndex);
         addValueInfo(result.addItem(makeItemByDef(SpriteMap::Layer::Decoration, def, obj.m_pos).addInfo("id", obj.m_id->id).setRowPriority(-1)), obj);
     }
     for (auto& obj : fhMap.m_objects.m_visitables) {
+        if (m_settings.isFilteredOut(obj.m_pos))
+            continue;
         rendered.insert(&obj);
         addValueInfo(result.addItem(makeItemByVisitable(SpriteMap::Layer::GeneralVisitable, obj)), obj);
     }
     for (auto& obj : fhMap.m_objects.m_controlledVisitables) {
+        if (m_settings.isFilteredOut(obj.m_pos))
+            continue;
         rendered.insert(&obj);
         auto* item       = result.addItem(makeItemByVisitable(SpriteMap::Layer::GeneralVisitable, obj));
         item->m_keyColor = makePlayerColor(obj.m_player);
         addValueInfo(item, obj);
     }
     for (auto& obj : fhMap.m_objects.m_shrines) {
+        if (m_settings.isFilteredOut(obj.m_pos))
+            continue;
         rendered.insert(&obj);
         auto* item = result.addItem(makeItemByVisitable(SpriteMap::Layer::Shrine, obj));
         addValueInfo(item, obj);
@@ -468,23 +504,33 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         }
     }
     for (auto& obj : fhMap.m_objects.m_skillHuts) {
+        if (m_settings.isFilteredOut(obj.m_pos))
+            continue;
         rendered.insert(&obj);
         addValueInfo(result.addItem(makeItemByVisitable(SpriteMap::Layer::SkillHut, obj)), obj);
     }
     for (auto& obj : fhMap.m_objects.m_scholars) {
+        if (m_settings.isFilteredOut(obj.m_pos))
+            continue;
         rendered.insert(&obj);
         addValueInfo(result.addItem(makeItemByVisitable(SpriteMap::Layer::Scholar, obj)), obj);
     }
 
     for (auto& obj : fhMap.m_objects.m_questHuts) {
+        if (m_settings.isFilteredOut(obj.m_pos))
+            continue;
         rendered.insert(&obj);
         addValueInfo(result.addItem(makeItemByVisitable(SpriteMap::Layer::QuestHut, obj)), obj);
     }
     for (auto& obj : fhMap.m_objects.m_questGuards) {
+        if (m_settings.isFilteredOut(obj.m_pos))
+            continue;
         rendered.insert(&obj);
         addValueInfo(result.addItem(makeItemByVisitable(SpriteMap::Layer::QuestGuard, obj)), obj);
     }
     for (auto& obj : fhMap.m_objects.m_localEvents) {
+        if (m_settings.isFilteredOut(obj.m_pos) || !m_settings.m_showEvents)
+            continue;
         rendered.insert(&obj);
         std::string id    = "avzevnt0";
         auto*       item  = result.addItem(makeItemByDefId(SpriteMap::Layer::Event, id, obj.m_pos));
@@ -492,16 +538,22 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         addValueInfo(item, obj);
     }
     for (auto& obj : fhMap.m_objects.m_signs) {
+        if (m_settings.isFilteredOut(obj.m_pos))
+            continue;
         rendered.insert(&obj);
 
         addValueInfo(result.addItem(makeItemByVisitable(SpriteMap::Layer::Decoration, obj)), obj);
     }
     for (auto& obj : fhMap.m_objects.m_garisons) {
+        if (m_settings.isFilteredOut(obj.m_pos))
+            continue;
         rendered.insert(&obj);
 
         addValueInfo(result.addItem(makeItemByVisitable(SpriteMap::Layer::Bank, obj)), obj);
     }
     for (auto& obj : fhMap.m_objects.m_heroPlaceholders) {
+        if (m_settings.isFilteredOut(obj.m_pos))
+            continue;
         rendered.insert(&obj);
         auto pos = obj.m_pos;
         pos.m_x += 1;
@@ -511,12 +563,16 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         addValueInfo(item, obj);
     }
     for (auto& obj : fhMap.m_objects.m_grails) {
+        if (m_settings.isFilteredOut(obj.m_pos) || !m_settings.m_showGrail)
+            continue;
         rendered.insert(&obj);
         std::string id   = "avzgrail";
         auto*       item = result.addItem(makeItemByDefId(SpriteMap::Layer::Artifact, id, obj.m_pos));
         addValueInfo(item, obj);
     }
     for (auto& obj : fhMap.m_objects.m_unknownObjects) {
+        if (m_settings.isFilteredOut(obj.m_pos))
+            continue;
         rendered.insert(&obj);
 
         std::string id   = obj.m_defId;
@@ -525,6 +581,8 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
     }
 
     for (auto& obj : fhMap.m_objects.m_pandoras) {
+        if (m_settings.isFilteredOut(obj.m_pos))
+            continue;
         rendered.insert(&obj);
         bool        water = fhMap.m_tileMap.get(obj.m_pos).m_terrainId->id == Core::LibraryTerrain::s_terrainWater;
         std::string id    = water ? "ava0128w" : "ava0128";

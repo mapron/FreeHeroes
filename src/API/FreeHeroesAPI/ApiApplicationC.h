@@ -77,11 +77,14 @@ FREEHEROESAPI_EXPORT int fh_get_map_tile_size_v1(FHAppHandle app);
 /// make all random dwelling/monsters not-random.
 FREEHEROESAPI_EXPORT FHResult fh_map_derandomize_v1(FHAppHandle app);
 
+/// set render window to filter for future  prepare_render/paint calls.
+FREEHEROESAPI_EXPORT FHResult fh_set_map_render_window_v1(FHAppHandle app, int x, int y, int z, int width, int height);
+
 /// prepare map sprites
 FREEHEROESAPI_EXPORT FHResult fh_map_prepare_render_v1(FHAppHandle app);
 
 /// Need to call get_paint_result for actual data.
-FREEHEROESAPI_EXPORT FHResult fh_map_paint_v1(FHAppHandle app, int x, int y, int z, int width, int height);
+FREEHEROESAPI_EXPORT FHResult fh_map_paint_v1(FHAppHandle app);
 
 /// returns NULL if map_paint was not called properly. Otherwise return pointer to array containing width*height*tile_size*tile_size*4 bytes.
 FREEHEROESAPI_EXPORT FHBitmap fh_get_map_paint_result_v1(FHAppHandle app);
@@ -101,9 +104,9 @@ typedef struct {
     int (*get_map_depth)(FHAppHandle);
     int (*get_map_tile_size)(FHAppHandle);
     FHResult (*map_derandomize)(FHAppHandle);
+    FHResult (*set_map_render_window)(FHAppHandle, int x, int y, int z, int width, int height);
     FHResult (*map_prepare_render)(FHAppHandle);
-
-    FHResult (*map_paint)(FHAppHandle, int x, int y, int z, int width, int height);
+    FHResult (*map_paint)(FHAppHandle);
     FHBitmap (*get_map_paint_result)(FHAppHandle);
 } FHApiPointers;
 
@@ -129,8 +132,9 @@ FREEHEROESAPI_EXPORT int      fh_global_get_map_height_v1(void);
 FREEHEROESAPI_EXPORT int      fh_global_get_map_depth_v1(void);
 FREEHEROESAPI_EXPORT int      fh_global_get_map_tile_size_v1(void);
 FREEHEROESAPI_EXPORT FHResult fh_global_map_derandomize_v1(void);
+FREEHEROESAPI_EXPORT FHResult fh_global_set_map_render_window_v1(int x, int y, int z, int width, int height);
 FREEHEROESAPI_EXPORT FHResult fh_global_map_prepare_render_v1(void);
-FREEHEROESAPI_EXPORT FHResult fh_global_map_paint_v1(int x, int y, int z, int width, int height);
+FREEHEROESAPI_EXPORT FHResult fh_global_map_paint_v1(void);
 FREEHEROESAPI_EXPORT FHBitmap fh_global_get_map_paint_result_v1(void);
 
 typedef struct {
@@ -148,9 +152,9 @@ typedef struct {
     int (*get_map_depth)(void);
     int (*get_map_tile_size)(void);
     FHResult (*map_derandomize)(void);
+    FHResult (*set_map_render_window)(int x, int y, int z, int width, int height);
     FHResult (*map_prepare_render)(void);
-
-    FHResult (*map_paint)(int x, int y, int z, int width, int height);
+    FHResult (*map_paint)(void);
     FHBitmap (*get_map_paint_result)(void);
 } FHApiPointersGlobal;
 

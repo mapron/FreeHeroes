@@ -8,6 +8,7 @@
 #include "MernelPlatform/ScopeExit.hpp"
 #include "MernelPlatform/ByteOrderStream.hpp"
 #include "MernelPlatform/FileIOUtils.hpp"
+#include "MernelPlatform/Profiler.hpp"
 
 #include "ApiApplicationC.h"
 
@@ -112,6 +113,8 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    Mernel::ScopeTimer launchTimer;
+
     const std::string heroesPath = argv[1];
     const std::string tmpPath    = argv[2];
     const std::string pluginRoot = argc >= 4 ? argv[3] : ".";
@@ -161,7 +164,7 @@ int main(int argc, char** argv)
     if (!checkApiCall("init", [&api, appPath, userPath] { return api.init(appPath.c_str(), userPath.c_str()); }))
         return 1;
 
-    const std::string lodPath1 = heroesPath + "/Data/H3bitmap.lod";
+    const std::string lodPath1 = heroesPath + "/Data/H3sprite.lod";
     const std::string lodPath2 = heroesPath + "/Data/HotA.lod";
 
     if (!checkApiCall("convert_lod 1", [&api, lodPath1, userPath] { return api.convert_lod(lodPath1.c_str(), userPath.c_str()); }))
@@ -187,8 +190,6 @@ int main(int argc, char** argv)
 
     if (!checkApiCall("map_derandomize", [&api, mapPath] { return api.map_derandomize(); }))
         return 1;
-    if (!checkApiCall("map_prepare_render", [&api, mapPath] { return api.map_prepare_render(); }))
-        return 1;
 
     const int paintXoffset = 2;
     const int paintYoffset = 2;
@@ -197,7 +198,13 @@ int main(int argc, char** argv)
     const int paintWidth  = 10;
     const int paintHeight = 8;
 
-    if (!checkApiCall("map_paint 1", [=, &api] { return api.map_paint(paintXoffset, paintYoffset, paintZoffset, paintWidth, paintHeight); }))
+    if (!checkApiCall("set_map_render_window", [=, &api] { return api.set_map_render_window(paintXoffset, paintYoffset, paintZoffset, paintWidth, paintHeight); }))
+        return 1;
+
+    if (!checkApiCall("map_prepare_render", [&api, mapPath] { return api.map_prepare_render(); }))
+        return 1;
+
+    if (!checkApiCall("map_paint 1", [=, &api] { return api.map_paint(); }))
         return 1;
 
     auto* result = api.get_map_paint_result();
@@ -205,13 +212,14 @@ int main(int argc, char** argv)
         std::cerr << "No paint result!\n"; // we probably shouldn't get there but just in case.
         return 1;
     }
+    std::cout << "Total run time from app launch to completed first paint: " << (launchTimer.elapsedUS() / 1000) << " ms.\n";
     if (!saveBMP(tmpPath + "/out1.bmp", result, paintWidth * tileSize, paintHeight * tileSize)) {
-        std::cerr << "Failed to save output bmitmap\n";
+        std::cerr << "Failed to save output bitmap\n";
         return 1;
     }
     // repeat for getting ext animation frame
     std::this_thread::sleep_for(std::chrono::milliseconds(180));
-    if (!checkApiCall("map_paint 2", [=, &api] { return api.map_paint(paintXoffset, paintYoffset, paintZoffset, paintWidth, paintHeight); }))
+    if (!checkApiCall("map_paint 2", [=, &api] { return api.map_paint(); }))
         return 1;
     result = api.get_map_paint_result();
     if (!result) {

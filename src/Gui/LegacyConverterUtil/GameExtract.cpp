@@ -377,46 +377,50 @@ void GameExtract::run(const DetectedSources& sources) const
                         wrapper.m_isHota);
         }
     }
-    const DetectedPathList& defCopy = sources.m_sources.at(SourceType::DefCopy);
-    for (const auto& src : defCopy) {
-        const auto     resourceModName    = "hd_res.fhmod";
-        const std_path extractArchiveRoot = m_settings.m_mainExtractRoot / resourceModName;
-        const auto     srcFolderPath      = src.m_path;
-        for (auto&& it : std_fs::directory_iterator(srcFolderPath)) {
-            if (!it.is_regular_file())
-                continue;
-            const auto srcPath  = it.path();
-            auto       ext      = pathToLower(srcPath.extension());
-            auto       basename = pathToLower(srcPath.stem());
+    if (sources.m_sources.contains(SourceType::DefCopy)) {
+        const DetectedPathList& defCopy = sources.m_sources.at(SourceType::DefCopy);
+        for (const auto& src : defCopy) {
+            const auto     resourceModName    = "hd_res.fhmod";
+            const std_path extractArchiveRoot = m_settings.m_mainExtractRoot / resourceModName;
+            const auto     srcFolderPath      = src.m_path;
+            for (auto&& it : std_fs::directory_iterator(srcFolderPath)) {
+                if (!it.is_regular_file())
+                    continue;
+                const auto srcPath  = it.path();
+                auto       ext      = pathToLower(srcPath.extension());
+                auto       basename = pathToLower(srcPath.stem());
 
-            processFile(taskQueue,
-                        knownResources,
-                        basename,
-                        ext,
-                        srcPath,
-                        extractArchiveRoot,
-                        !sources.m_ffmpegPath.empty(),
-                        concatProcessor,
-                        false,
-                        false);
+                processFile(taskQueue,
+                            knownResources,
+                            basename,
+                            ext,
+                            srcPath,
+                            extractArchiveRoot,
+                            !sources.m_ffmpegPath.empty(),
+                            concatProcessor,
+                            false,
+                            false);
+            }
         }
     }
 
-    const DetectedPathList& mp3Copy = sources.m_sources.at(SourceType::MusicCopy);
-    for (const auto& src : mp3Copy) {
-        const auto     resourceModName    = "sod_res.fhmod";
-        const std_path extractArchiveRoot = m_settings.m_mainExtractRoot / resourceModName;
-        std_fs::create_directories(extractArchiveRoot);
-        for (auto&& it : std_fs::directory_iterator(src.m_path)) {
-            if (!it.is_regular_file())
-                continue;
-            const auto srcPath  = it.path();
-            auto       ext      = pathToLower(srcPath.extension());
-            auto       basename = pathToLower(srcPath.stem());
+    if (sources.m_sources.contains(SourceType::MusicCopy)) {
+        const DetectedPathList& mp3Copy = sources.m_sources.at(SourceType::MusicCopy);
+        for (const auto& src : mp3Copy) {
+            const auto     resourceModName    = "sod_res.fhmod";
+            const std_path extractArchiveRoot = m_settings.m_mainExtractRoot / resourceModName;
+            std_fs::create_directories(extractArchiveRoot);
+            for (auto&& it : std_fs::directory_iterator(src.m_path)) {
+                if (!it.is_regular_file())
+                    continue;
+                const auto srcPath  = it.path();
+                auto       ext      = pathToLower(srcPath.extension());
+                auto       basename = pathToLower(srcPath.stem());
 
-            auto            destPath = extractArchiveRoot / (basename + ".mp3");
-            std::error_code ec;
-            std_fs::copy(srcPath, destPath, std_fs::copy_options::skip_existing, ec);
+                auto            destPath = extractArchiveRoot / (basename + ".mp3");
+                std::error_code ec;
+                std_fs::copy(srcPath, destPath, std_fs::copy_options::skip_existing, ec);
+            }
         }
     }
 
@@ -431,6 +435,9 @@ void GameExtract::run(const DetectedSources& sources) const
     }
 
     concatProcessor.create();
+
+    if (!m_settings.m_needLocalization)
+        return;
 
     LocalizationConverter loc(m_databaseContainer->getDatabase(Core::GameVersion::HOTA), m_databaseContainer->getDatabase(Core::GameVersion::SOD));
 

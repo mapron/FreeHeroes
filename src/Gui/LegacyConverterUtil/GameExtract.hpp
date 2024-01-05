@@ -27,7 +27,8 @@ public:
         Mernel::std_path m_heroesRoot;
         Mernel::std_path m_archiveExtractRoot;
         Mernel::std_path m_mainExtractRoot;
-        bool             m_forceExtract = false;
+        bool             m_forceExtract     = false;
+        bool             m_needLocalization = true;
     };
 
     enum class SourceType

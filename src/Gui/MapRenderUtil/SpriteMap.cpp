@@ -5,6 +5,8 @@
  */
 #include "SpriteMap.hpp"
 
+#include "FHPos.hpp"
+
 #include <QObject>
 
 namespace FreeHeroes {
@@ -72,6 +74,19 @@ QString SpriteMap::layerTypeToString(Layer layer)
             return QObject::tr("Invalid");
             break;
     }
+}
+
+bool SpriteRenderSettings::isFilteredOut(const FHPos& pos) const
+{
+    if (!m_useRenderWindow)
+        return false;
+    if (pos.m_z != m_z)
+        return true;
+    if (pos.m_x < m_xMin || pos.m_x > m_xMax)
+        return true;
+    if (pos.m_y < m_yMin || pos.m_y > m_yMax)
+        return true;
+    return false;
 }
 
 }

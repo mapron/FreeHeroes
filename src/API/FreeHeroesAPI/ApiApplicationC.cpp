@@ -25,23 +25,23 @@ FHAppHandle toHandle(ApiApplicationNoexcept* app)
 FHApiPointers fh_get_api_pointers_v1()
 {
     return FHApiPointers{
-        .create             = &fh_create_v1,
-        .destroy            = &fh_destroy_v1,
-        .get_last_error     = &fh_get_last_error_v1,
-        .get_last_output    = &fh_get_last_output_v1,
-        .init               = &fh_init_v1,
-        .convert_lod        = &fh_convert_lod_v1,
-        .map_load           = &fh_map_load_v1,
-        .get_map_version    = &fh_get_map_version_v1,
-        .get_map_width      = &fh_get_map_width_v1,
-        .get_map_height     = &fh_get_map_height_v1,
-        .get_map_depth      = &fh_get_map_depth_v1,
-        .get_map_tile_size  = &fh_get_map_tile_size_v1,
-        .map_derandomize    = &fh_map_derandomize_v1,
-        .map_prepare_render = &fh_map_prepare_render_v1,
-
-        .map_paint            = &fh_map_paint_v1,
-        .get_map_paint_result = &fh_get_map_paint_result_v1,
+        .create                = &fh_create_v1,
+        .destroy               = &fh_destroy_v1,
+        .get_last_error        = &fh_get_last_error_v1,
+        .get_last_output       = &fh_get_last_output_v1,
+        .init                  = &fh_init_v1,
+        .convert_lod           = &fh_convert_lod_v1,
+        .map_load              = &fh_map_load_v1,
+        .get_map_version       = &fh_get_map_version_v1,
+        .get_map_width         = &fh_get_map_width_v1,
+        .get_map_height        = &fh_get_map_height_v1,
+        .get_map_depth         = &fh_get_map_depth_v1,
+        .get_map_tile_size     = &fh_get_map_tile_size_v1,
+        .map_derandomize       = &fh_map_derandomize_v1,
+        .set_map_render_window = &fh_set_map_render_window_v1,
+        .map_prepare_render    = &fh_map_prepare_render_v1,
+        .map_paint             = &fh_map_paint_v1,
+        .get_map_paint_result  = &fh_get_map_paint_result_v1,
     };
 }
 
@@ -124,6 +124,13 @@ FHResult fh_map_derandomize_v1(FHAppHandle app)
     return toApp(app)->derandomize();
 }
 
+FHResult fh_set_map_render_window_v1(FHAppHandle app, int x, int y, int z, int width, int height)
+{
+    if (!app)
+        return 0;
+    return toApp(app)->setRenderWindow({ .m_x = x, .m_y = y, .m_z = z, .m_width = width, .m_height = height });
+}
+
 FHResult fh_map_prepare_render_v1(FHAppHandle app)
 {
     if (!app)
@@ -131,11 +138,11 @@ FHResult fh_map_prepare_render_v1(FHAppHandle app)
     return toApp(app)->prepareRender();
 }
 
-FHResult fh_map_paint_v1(FHAppHandle app, int x, int y, int z, int width, int height)
+FHResult fh_map_paint_v1(FHAppHandle app)
 {
     if (!app)
         return 0;
-    return toApp(app)->paint(x, y, z, width, height);
+    return toApp(app)->paint();
 }
 
 FHBitmap fh_get_map_paint_result_v1(FHAppHandle app)
@@ -201,13 +208,17 @@ FHResult fh_global_map_derandomize_v1(void)
 {
     return fh_map_derandomize_v1(g_globalHandle);
 }
+FHResult fh_global_set_map_render_window_v1(int x, int y, int z, int width, int height)
+{
+    return fh_set_map_render_window_v1(g_globalHandle, x, y, z, width, height);
+}
 FHResult fh_global_map_prepare_render_v1(void)
 {
     return fh_map_prepare_render_v1(g_globalHandle);
 }
-FHResult fh_global_map_paint_v1(int x, int y, int z, int width, int height)
+FHResult fh_global_map_paint_v1(void)
 {
-    return fh_map_paint_v1(g_globalHandle, x, y, z, width, height);
+    return fh_map_paint_v1(g_globalHandle);
 }
 FHBitmap fh_global_get_map_paint_result_v1(void)
 {
@@ -217,21 +228,22 @@ FHBitmap fh_global_get_map_paint_result_v1(void)
 FHApiPointersGlobal fh_global_get_api_pointers_v1()
 {
     return FHApiPointersGlobal{
-        .create               = &fh_global_create_v1,
-        .destroy              = &fh_global_destroy_v1,
-        .get_last_error       = &fh_global_get_last_error_v1,
-        .get_last_output      = &fh_global_get_last_output_v1,
-        .init                 = &fh_global_init_v1,
-        .convert_lod          = &fh_global_convert_lod_v1,
-        .map_load             = &fh_global_map_load_v1,
-        .get_map_version      = &fh_global_get_map_version_v1,
-        .get_map_width        = &fh_global_get_map_width_v1,
-        .get_map_height       = &fh_global_get_map_height_v1,
-        .get_map_depth        = &fh_global_get_map_depth_v1,
-        .get_map_tile_size    = &fh_global_get_map_tile_size_v1,
-        .map_derandomize      = &fh_global_map_derandomize_v1,
-        .map_prepare_render   = &fh_global_map_prepare_render_v1,
-        .map_paint            = &fh_global_map_paint_v1,
-        .get_map_paint_result = &fh_global_get_map_paint_result_v1,
+        .create                = &fh_global_create_v1,
+        .destroy               = &fh_global_destroy_v1,
+        .get_last_error        = &fh_global_get_last_error_v1,
+        .get_last_output       = &fh_global_get_last_output_v1,
+        .init                  = &fh_global_init_v1,
+        .convert_lod           = &fh_global_convert_lod_v1,
+        .map_load              = &fh_global_map_load_v1,
+        .get_map_version       = &fh_global_get_map_version_v1,
+        .get_map_width         = &fh_global_get_map_width_v1,
+        .get_map_height        = &fh_global_get_map_height_v1,
+        .get_map_depth         = &fh_global_get_map_depth_v1,
+        .get_map_tile_size     = &fh_global_get_map_tile_size_v1,
+        .map_derandomize       = &fh_global_map_derandomize_v1,
+        .set_map_render_window = &fh_global_set_map_render_window_v1,
+        .map_prepare_render    = &fh_global_map_prepare_render_v1,
+        .map_paint             = &fh_global_map_paint_v1,
+        .get_map_paint_result  = &fh_global_get_map_paint_result_v1,
     };
 }

@@ -11,6 +11,7 @@
 #include "MernelReflection/PropertyTreeReader.hpp"
 #include "MernelReflection/PropertyTreeWriter.hpp"
 #include "MernelPlatform/Logger.hpp"
+#include "MernelPlatform/Profiler.hpp"
 
 #include "FsUtilsQt.hpp"
 #include "SpritesReflection.hpp"
@@ -29,13 +30,37 @@ std_path makePngPath(const std_path& jsonFilePath)
 
 void Sprite::load(const std_path& jsonFilePath)
 {
-    const std::string          buffer = Mernel::readFileIntoBuffer(jsonFilePath);
-    const Mernel::PropertyTree data   = Mernel::readJsonFromBuffer(buffer);
+    Mernel::ProfilerScope scope1("Sprite::load");
+    {
+        std::string          buffer;
+        Mernel::PropertyTree data;
+        {
+            Mernel::ProfilerScope scope2("read json file");
+            buffer = Mernel::readFileIntoBuffer(jsonFilePath);
+        }
+        {
+            Mernel::ProfilerScope scope2("parse json");
+            data = Mernel::readJsonFromBuffer(buffer);
+        }
 
-    Mernel::Reflection::PropertyTreeReader reader;
-    reader.jsonToValue(data, *this);
-
-    m_bitmap.load(stdPath2QString(makePngPath(jsonFilePath)));
+        {
+            Mernel::Reflection::PropertyTreeReader reader;
+            Mernel::ProfilerScope                  scope2("deserialize from json");
+            reader.jsonToValue(data, *this);
+        }
+    }
+    {
+        std::string buffer;
+        {
+            Mernel::ProfilerScope scope2("read image file");
+            auto                  pngPath = makePngPath(jsonFilePath);
+            buffer                        = Mernel::readFileIntoBuffer(pngPath);
+        }
+        {
+            Mernel::ProfilerScope scope2("load pixmap");
+            m_bitmap.loadFromData(reinterpret_cast<const uchar*>(buffer.data()), buffer.size());
+        }
+    }
 }
 
 void Sprite::save(const std_path& jsonFilePath) const
