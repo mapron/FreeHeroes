@@ -12,6 +12,7 @@
 #include "MernelReflection/PropertyTreeReader.hpp"
 #include "MernelReflection/PropertyTreeWriter.hpp"
 #include "MernelPlatform/StringUtils.hpp"
+#include "MernelPlatform/Logger.hpp"
 
 #include "Sprites.hpp"
 
@@ -513,9 +514,7 @@ void SpriteFile::readBinary(ByteOrderDataStreamReader& stream)
 
         uint32_t u1, u2, u3;
         stream >> u1 >> u2 >> u3;
-        assert(u1 == 1);
-        assert(u2 == 8);
-        assert(u3 == 1);
+        assert((u1 == 1 && u2 == 8 && u3 == 1) || (u1 == 18 && u2 == 8 && u3 == 22) || (u1 == 16 && u2 == 8 && u3 == 22));
 
         uint32_t headerTotal, u5, frameCount, u7;
         stream >> headerTotal >> u5 >> frameCount >> u7;
@@ -607,11 +606,14 @@ void SpriteFile::readBinary(ByteOrderDataStreamReader& stream)
     }
 
     // ==========================   FRAMES =====================================
-
+    bool skipRemainingReadCheck = false;
     for (Frame* framep : allFrames) {
-        Frame&                          frame        = *framep;
-        [[maybe_unused]] const uint32_t streamOffset = stream.getBuffer().getOffsetRead();
-        assert(frame.m_originalOffset == streamOffset);
+        Frame&         frame        = *framep;
+        const uint32_t streamOffset = stream.getBuffer().getOffsetRead();
+        if (frame.m_originalOffset != streamOffset) {
+            stream.getBuffer().setOffsetRead(frame.m_originalOffset);
+            skipRemainingReadCheck = true;
+        }
 
         SpriteDef def;
         if (m_format == BinaryFormat::DEF32) {
@@ -657,6 +659,13 @@ void SpriteFile::readBinary(ByteOrderDataStreamReader& stream)
                 stream.getBuffer().setOffsetRead(stream.getBuffer().getOffsetRead() - 16);
                 frame.m_shortHeaderFormat = true;
             }
+            // special case for new buggy Hota 1.7 sprites like avlmhs02.def
+            const auto remainingRead = stream.getBuffer().getRemainRead();
+            if (def.blobSize > remainingRead) {
+                if (def.blobSize - 32 == remainingRead) {
+                    def.blobSize -= 32;
+                }
+            }
         } else {
             throw std::runtime_error("Unknown/unsupported format");
         }
@@ -666,7 +675,7 @@ void SpriteFile::readBinary(ByteOrderDataStreamReader& stream)
 
     // ====================== trailer ========================
     const auto remainingRead = stream.getBuffer().getRemainRead();
-    if (remainingRead > 0) {
+    if (!skipRemainingReadCheck && remainingRead > 0) {
         uint8_t a = 0, b = 0;
         stream >> a >> b;
         if (a == 0x0d && b == 0xa) {

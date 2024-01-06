@@ -471,8 +471,10 @@ void BitmapFile::toPixmapQt()
     if (m_pixmapQt)
         return;
 
-    if (!m_width || !m_width)
-        throw std::runtime_error("Image have zero dimensions.");
+    if (!m_width || !m_width) {
+        m_pixmapQt = std::make_shared<QPixmap>();
+        return;
+    }
 
     QImage image(m_width, m_height, QImage::Format_RGBA8888);
     for (uint32_t y = 0; y < m_height; y++) {
@@ -500,6 +502,9 @@ void BitmapFile::fromPixmapQt()
 
     if (!m_pixmapQt)
         throw std::runtime_error("Qt pixmap is missing.");
+
+    if (m_pixmapQt->isNull())
+        throw std::runtime_error("Qt pixmap is null.");
 
     const QImage image = m_pixmapQt->toImage();
     if (image.width() != (int) m_width || image.height() != (int) m_height)
@@ -537,6 +542,9 @@ void BitmapFile::savePixmapQt(const Mernel::std_path& filename) const
 {
     if (!m_pixmapQt)
         throw std::runtime_error("Qt pixmap is missing.");
+    if (m_pixmapQt->isNull())
+        throw std::runtime_error("Qt pixmap is null.");
+
     Mernel::std_fs::create_directories(filename.parent_path());
     m_pixmapQt->save(Gui::stdPath2QString(filename));
     assert(Mernel::std_fs::exists(filename));
