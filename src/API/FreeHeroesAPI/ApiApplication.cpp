@@ -131,6 +131,7 @@ void ApiApplication::convertLoD(const std::string& lodPath, const std::string& u
         .m_archiveExtractRoot = Mernel::string2path(userResourcePath + "/Archives"),
         .m_mainExtractRoot    = Mernel::string2path(userResourcePath + "/Imported"),
         .m_forceExtract       = false,
+        .m_skipIfFolderExist  = true,
         .m_needLocalization   = false,
     };
 

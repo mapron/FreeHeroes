@@ -48,6 +48,7 @@ struct ArchiveWrapper {
     std::string      m_resourceModName;
 
     bool m_doExtract = false;
+    bool m_doSkip    = false;
     bool m_required  = false;
 
     bool m_isSod  = false;
@@ -314,6 +315,8 @@ void GameExtract::run(const DetectedSources& sources) const
                 wrapper.m_doExtract = true;
                 sendMessage("- " + wrapper.m_folderName + " : exists, but forcing re-EXTRACT from " + wrapper.m_datFilename);
             } else {
+                if (m_settings.m_skipIfFolderExist)
+                    wrapper.m_doSkip = true;
                 sendMessage("- " + wrapper.m_folderName + " : exists, SKIPPING");
             }
         } else {
@@ -327,8 +330,14 @@ void GameExtract::run(const DetectedSources& sources) const
                                                                                               .m_uncompressArchive = true,
                                                                                           });
     }
-    const int total = archiveWrappers.size();
+    const int total     = archiveWrappers.size();
+    int       scheduled = 0;
     for (int current = 0; ArchiveWrapper & wrapper : archiveWrappers) {
+        if (wrapper.m_doSkip) {
+            m_onProgress(current++, total);
+            continue;
+        }
+        scheduled++;
         try {
             m_onProgress(current++, total);
             if (wrapper.m_doExtract) {
@@ -345,6 +354,8 @@ void GameExtract::run(const DetectedSources& sources) const
             return;
         }
     }
+    if (!scheduled)
+        return;
 
     sendMessage("archives loaded in " + std::to_string(timer.elapsedUS()) + " us.");
     sendMessage("Converting data...", true);
@@ -357,6 +368,8 @@ void GameExtract::run(const DetectedSources& sources) const
     KnownResources knownResources(appRoot / "gameResources" / "knownResources.json", appRoot / "gameResources" / "knownResourcesPostProcess.json");
 
     for (const ArchiveWrapper& wrapper : archiveWrappers) {
+        if (wrapper.m_doSkip)
+            continue;
         sendMessage(wrapper.m_folderName + " convert...");
         if (wrapper.m_resourceModName.empty())
             continue;
