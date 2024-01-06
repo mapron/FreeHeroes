@@ -203,7 +203,9 @@ const ApiApplication::MapInfo& ApiApplication::getMapInfo() const noexcept
 
 void ApiApplication::derandomize()
 {
-    //throw std::runtime_error("todo");
+    auto rng = m_impl->m_randomGeneratorFactory->create();
+    rng->makeGoodSeed();
+    m_impl->m_map.derandomize(rng.get());
 }
 
 void ApiApplication::setRenderWindow(const RenderWindow& renderWindow) noexcept
@@ -353,6 +355,8 @@ bool ApiApplicationNoexcept::derandomize() noexcept
 
 bool ApiApplicationNoexcept::setRenderWindow(const RenderWindow& renderWindow) noexcept
 {
+    m_impl->m_lastError.clear();
+    m_impl->m_lastOutput.clear();
     m_impl->m_app.setRenderWindow(renderWindow);
     return true;
 }

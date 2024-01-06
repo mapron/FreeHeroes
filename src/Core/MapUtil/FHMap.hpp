@@ -803,6 +803,7 @@ struct MAPUTIL_EXPORT FHMap {
     void applyRngUserSettings(const Mernel::PropertyTree& data);
 
     void rescaleToUserSize();
+    void derandomize(Core::IRandomGenerator* rng);
 };
 
 // clang-format off

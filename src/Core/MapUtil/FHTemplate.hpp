@@ -66,7 +66,8 @@ struct FHScoreSettings {
     using AttrMap = std::map<Core::ScoreAttr, ScoreScope>;
 
     AttrMap m_score;
-    bool    m_isEnabled = false;
+    bool    m_isEnabled     = false;
+    bool    m_allowAnything = false;
 
     int64_t m_guardThreshold  = -1;
     int64_t m_guardMinToGroup = -1;
@@ -105,6 +106,8 @@ struct FHScoreSettings {
 
     bool isValidValue(Core::ScoreAttr attr, int64_t value) const noexcept
     {
+        if (m_allowAnything)
+            return true;
         auto it = m_score.find(attr);
         if (it == m_score.cend())
             return false;

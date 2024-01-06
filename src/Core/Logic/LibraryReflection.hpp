@@ -534,6 +534,7 @@ STRUCT_REFLECTION_PAIRED(
     "countWithHeroBase",           countWithHeroBase,
     "cost",                        cost,
     "value",                       value,
+    "valueFight",                  valueFight,
     "guardMult1",                  guardMult1,
     "guardMult100",                guardMult100,
     "upgrades",                    upgrades,

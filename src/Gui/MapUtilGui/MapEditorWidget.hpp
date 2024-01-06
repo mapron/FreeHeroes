@@ -68,6 +68,7 @@ public:
     bool saveScreenshots(const ScreenshotTask& task);
 
     void updateMap();
+    void derandomize();
 
 private:
     void showCurrentItem();

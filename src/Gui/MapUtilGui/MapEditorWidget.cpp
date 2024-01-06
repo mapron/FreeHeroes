@@ -288,6 +288,12 @@ MapEditorWidget::MapEditorWidget(const Core::IGameDatabaseContainer*  gameDataba
         connect(saveFH, &QAction::triggered, this, &MapEditorWidget::saveFHDialog);
         connect(saveScreenshot, &QAction::triggered, this, &MapEditorWidget::saveScreenshot);
     }
+    QMenu* actionsMenu = menuBar()->addMenu(tr("Actions"));
+    {
+        QAction* derando = actionsMenu->addAction(tr("Replace random objects"));
+
+        connect(derando, &QAction::triggered, this, &MapEditorWidget::derandomize);
+    }
 
     resize(1000, 800);
 
@@ -516,6 +522,14 @@ void MapEditorWidget::updateMap()
 
     const auto tileSize = m_impl->m_viewSettings.m_paintSettings.m_tileSize;
     m_impl->m_scene->setSceneRect(QRectF(0, 0, m_impl->m_spriteMap.m_width * tileSize, m_impl->m_spriteMap.m_height * tileSize));
+}
+
+void MapEditorWidget::derandomize()
+{
+    auto rng = m_rngFactory->create();
+    rng->makeGoodSeed();
+    m_impl->m_map.derandomize(rng.get());
+    updateMap();
 }
 
 void MapEditorWidget::showCurrentItem()

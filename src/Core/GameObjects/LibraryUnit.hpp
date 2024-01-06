@@ -155,6 +155,7 @@ struct LibraryUnit {
     HeroStackSize                    countWithHeroBase;
     ResourceAmount                   cost;
     int                              value        = 0;
+    int                              valueFight   = 0;
     int                              guardMult1   = 100;
     int                              guardMult100 = 100;
     std::vector<LibraryUnitConstPtr> upgrades;
