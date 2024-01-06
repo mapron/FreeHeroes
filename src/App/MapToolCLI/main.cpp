@@ -21,12 +21,14 @@ int main(int argc, char** argv)
                                    "input-h3m",
                                    "input-h3c",
                                    "input-h3svg",
+                                   "input-h3tpl",
                                    "input-diff-json",
                                    "input-folder",
                                    "output-fhMap",
                                    "output-h3m",
                                    "output-h3c",
                                    "output-h3svg",
+                                   "output-h3tpl",
                                    "output-diff-json",
                                    "output-folder",
                                    "dump-uncompressed",
@@ -59,6 +61,7 @@ int main(int argc, char** argv)
         const std::string h3m      = parser.getArg(prefix + "h3m");
         const std::string h3c      = parser.getArg(prefix + "h3c");
         const std::string h3sav    = parser.getArg(prefix + "h3svg");
+        const std::string h3tpl    = parser.getArg(prefix + "h3tpl");
         const std::string diffjson = parser.getArg(prefix + "diff-json");
 
         const std::string h3mUncompressed = h3m.empty() ? "" : h3m + ".uncompressed";
@@ -70,11 +73,14 @@ int main(int argc, char** argv)
         const std::string h3savUncompressed = h3sav.empty() ? "" : h3sav + ".uncompressed";
         const std::string h3savJson         = h3sav.empty() ? "" : h3sav + ".json";
 
+        const std::string h3tplJson = h3tpl.empty() ? "" : h3tpl + ".json";
+
         MapConverter::PathsSet result;
         result.m_fhMap    = fhMap;
         result.m_h3m      = { .m_binary = h3m, .m_uncompressedBinary = h3mUncompressed, .m_json = h3mJson };
         result.m_h3c      = { .m_binary = h3c, .m_uncompressedBinary = h3cUncompressed, .m_json = h3cJson };
         result.m_h3svg    = { .m_binary = h3sav, .m_uncompressedBinary = h3savUncompressed, .m_json = h3savJson };
+        result.m_h3tpl    = { .m_binary = h3tpl, .m_uncompressedBinary = h3tpl, .m_json = h3tplJson };
         result.m_jsonDiff = diffjson;
         result.m_folder   = folder;
         return result;

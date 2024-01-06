@@ -12,6 +12,7 @@
 #include "H3MMap.hpp"
 #include "H3CCampaign.hpp"
 #include "FHMap.hpp"
+#include "H3Template.hpp"
 
 #include "MapConverterFile.hpp"
 
@@ -46,6 +47,7 @@ public:
         BinaryPathsSet   m_h3c;
         BinaryPathsSet   m_h3m;
         BinaryPathsSet   m_h3svg;
+        BinaryPathsSet   m_h3tpl;
         Mernel::std_path m_jsonDiff;
         Mernel::std_path m_folder;
     };
@@ -71,29 +73,61 @@ public:
     {
         Invalid,
 
-        CheckBinaryInputOutputEquality,
-        CheckJsonInputOutputEquality,
-        ConvertH3MToJson,
-        ConvertJsonToH3M,
-        ConvertH3SVGToJson,
-        ConvertJsonToH3SVG,
-        ConvertH3CToFolderList,
-        LoadFHTpl,
-        LoadFH,
-        SaveFH,
+        // low-level
+        LoadH3MRaw,
+        SaveH3MRaw,
         LoadH3M,
         SaveH3M,
+        ConvertH3MToJson,
+        ConvertJsonToH3M,
+        H3MRoundTripJson,
+        H3MRoundTripFH,
+
+        LoadH3SVGRaw,
+        SaveH3SVGRaw,
+        LoadH3SVG,
+        SaveH3SVG,
+        ConvertH3SVGToJson,
+        ConvertJsonToH3SVG,
+        H3SVGRoundTripJson,
+        H3SVGRoundTripFH,
+
         LoadH3C,
         SaveH3C,
+        ConvertH3CToFolderList,
+        ConvertFolderListToH3C,
+
+        LoadH3TPLRaw,
+        SaveH3TPLRaw,
+        LoadH3TPL,
+        SaveH3TPL,
+        ConvertH3TPLToJson,
+        ConvertJsonToH3TPL,
+        H3TPLRoundTripJson,
+        H3TPLRoundTripFH,
+
+        // high-level
+        LoadFHTpl,
+        SaveFHTpl,
+        LoadFH,
+        SaveFH,
         LoadFolder,
         SaveFolder,
 
+        // convenience calls
         FHMapToH3M,
         H3MToFHMap,
-        FHTplToFHMap,
-        H3MRoundTripJson,
-        H3SVGRoundTripJson,
-        H3MRoundTripFH,
+        FHMapToH3SVG,
+        H3SVGToFHMap,
+        FHTplToH3TPL,
+        H3TPLToFHTpl,
+        H3CToFolder,
+
+        GenerateFHMap,
+
+        // utilities
+        CheckBinaryInputOutputEquality,
+        CheckJsonInputOutputEquality,
     };
 
 public:
@@ -112,6 +146,7 @@ public: // todo:
     H3SVGMap           m_mapH3SVG;
     H3CCampaign        m_mapH3C;
     FHMap              m_mapFH;
+    H3Template         m_templateH3;
     MapConverterFile   m_mainFile;
     MapConverterFolder m_folder;
 
@@ -155,12 +190,24 @@ private:
     void propertySerializeH3C();
     void propertyDeserializeH3C();
 
+    void binaryDeserializeH3TPL();
+    void binarySerializeH3TPL();
+    void propertySerializeH3TPL();
+    void propertyDeserializeH3TPL();
+
     void propertySerializeFH();
     void propertyDeserializeFH();
+    void propertySerializeFHTpl();
+    void propertyDeserializeFHTpl();
 
     void convertFHtoH3M();
     void convertH3MtoFH();
-    void convertFHTPLtoFH();
+    void convertFHtoH3SVG();
+    void convertH3SVGtoFH();
+    void convertFHTpltoH3TPL();
+    void convertH3TPLtoFHTpl();
+
+    void generateFHMapFromFHTpl();
 
     void checkBinaryInputOutputEquality();
     void checkJsonInputOutputEquality();

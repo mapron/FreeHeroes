@@ -9,6 +9,7 @@
 
 #include "MernelPlatform/FileIOUtils.hpp"
 #include "MernelPlatform/FileFormatJson.hpp"
+#include "MernelPlatform/FileFormatCSV.hpp"
 
 #include "IGameDatabase.hpp"
 #include "IRandomGenerator.hpp"
@@ -28,28 +29,62 @@ ENUM_REFLECTION_STRINGIFY(
     MapConverter::Task,
     Invalid,
     Invalid,
-    CheckBinaryInputOutputEquality,
-    CheckJsonInputOutputEquality,
-    ConvertH3MToJson,
-    ConvertJsonToH3M,
-    ConvertH3SVGToJson,
-    ConvertJsonToH3SVG,
-    ConvertH3CToFolderList,
-    LoadFHTpl,
-    LoadFH,
-    SaveFH,
+
+    // low-level
+    LoadH3MRaw,
+    SaveH3MRaw,
     LoadH3M,
     SaveH3M,
+    ConvertH3MToJson,
+    ConvertJsonToH3M,
+    H3MRoundTripJson,
+    H3MRoundTripFH,
+
+    LoadH3SVGRaw,
+    SaveH3SVGRaw,
+    LoadH3SVG,
+    SaveH3SVG,
+    ConvertH3SVGToJson,
+    ConvertJsonToH3SVG,
+    H3SVGRoundTripJson,
+    H3SVGRoundTripFH,
+
     LoadH3C,
     SaveH3C,
+    ConvertH3CToFolderList,
+    ConvertFolderListToH3C,
+
+    LoadH3TPLRaw,
+    SaveH3TPLRaw,
+    LoadH3TPL,
+    SaveH3TPL,
+    ConvertH3TPLToJson,
+    ConvertJsonToH3TPL,
+    H3TPLRoundTripJson,
+    H3TPLRoundTripFH,
+
+    // high-level
+    LoadFHTpl,
+    SaveFHTpl,
+    LoadFH,
+    SaveFH,
     LoadFolder,
     SaveFolder,
+
+    // convenience calls
     FHMapToH3M,
     H3MToFHMap,
-    FHTplToFHMap,
-    H3MRoundTripJson,
-    H3SVGRoundTripJson,
-    H3MRoundTripFH)
+    FHMapToH3SVG,
+    H3SVGToFHMap,
+    FHTplToH3TPL,
+    H3TPLToFHTpl,
+    H3CToFolder,
+
+    GenerateFHMap,
+
+    // utilities
+    CheckBinaryInputOutputEquality,
+    CheckJsonInputOutputEquality)
 
 }
 
@@ -86,21 +121,16 @@ void MapConverter::run(Task task, int recurse) noexcept(false)
     try {
         m_currentTask = taskToString(task);
         ScopeLogger scope(m_currentTask, recurse, m_logOutput);
-
+        using enum Task;
         switch (task) {
             case Task::Invalid:
             {
                 throw std::runtime_error("Can't execute invalid task.");
             }
-            case Task::CheckBinaryInputOutputEquality:
-            {
-                checkBinaryInputOutputEquality();
-            } break;
-            case Task::CheckJsonInputOutputEquality:
-            {
-                checkJsonInputOutputEquality();
-            } break;
-            case Task::ConvertH3MToJson:
+                // low-level
+                // -----------------H3M---------------------
+
+            case Task::LoadH3MRaw:
             {
                 setInput(m_inputs.m_h3m.m_binary);
                 runMember(readBinaryBufferData);
@@ -113,16 +143,9 @@ void MapConverter::run(Task task, int recurse) noexcept(false)
                 }
 
                 runMember(binaryDeserializeH3M);
-                runMember(propertySerializeH3M);
-                setOutput(m_outputs.m_h3m.m_json);
-                runMember(writeJsonFromProperty);
             } break;
-            case Task::ConvertJsonToH3M:
+            case Task::SaveH3MRaw:
             {
-                setInput(m_inputs.m_h3m.m_json);
-                runMember(readJsonToProperty);
-
-                runMember(propertyDeserializeH3M);
                 runMember(binarySerializeH3M);
                 if (m_settings.m_dumpUncompressedBuffers) {
                     setOutput(m_outputs.m_h3m.m_uncompressedBinary);
@@ -134,90 +157,9 @@ void MapConverter::run(Task task, int recurse) noexcept(false)
                 setOutput(m_outputs.m_h3m.m_binary);
                 runMember(writeBinaryBufferData);
             } break;
-            case Task::ConvertH3SVGToJson:
-            {
-                setInput(m_inputs.m_h3svg.m_binary);
-                runMember(readBinaryBufferData);
-
-                runMember(detectCompression);
-                runMember(uncompressRaw);
-                if (m_settings.m_dumpUncompressedBuffers) {
-                    setOutput(m_inputs.m_h3svg.m_uncompressedBinary);
-                    runMember(writeBinaryBufferDataAsUncompressed);
-                }
-
-                runMember(binaryDeserializeH3SVG);
-                runMember(propertySerializeH3SVG);
-                setOutput(m_outputs.m_h3svg.m_json);
-                runMember(writeJsonFromProperty);
-            } break;
-            case Task::ConvertJsonToH3SVG:
-            {
-                setInput(m_inputs.m_h3svg.m_json);
-                runMember(readJsonToProperty);
-
-                runMember(propertyDeserializeH3SVG);
-                runMember(binarySerializeH3SVG);
-                if (m_settings.m_dumpUncompressedBuffers) {
-                    setOutput(m_outputs.m_h3svg.m_uncompressedBinary);
-                    runMember(writeBinaryBufferDataAsUncompressed);
-                }
-
-                m_mainFile.m_compressionMethod = CompressionMethod::Gzip;
-                runMember(compressRaw);
-                setOutput(m_outputs.m_h3svg.m_binary);
-                runMember(writeBinaryBufferData);
-            } break;
-            case Task::ConvertH3CToFolderList:
-            {
-                m_folder.m_files.clear();
-                for (auto& sc : m_mapH3C.m_scenarios)
-                    m_folder.m_files.push_back(MapConverterFile{
-                        .m_binaryBuffer = sc.m_data,
-                        .m_rawState     = RawState::Uncompressed,
-                        .m_filename     = sc.m_filename,
-                    });
-                MapConverterFile meta;
-                m_mapH3C.toJson(meta.m_json);
-                meta.m_filename = "meta.json";
-                meta.writeJsonFromPropertyToBuffer();
-                meta.m_rawState = RawState::Uncompressed;
-                m_folder.m_files.push_back(std::move(meta));
-
-            } break;
-            case Task::LoadFHTpl:
-            {
-                setInput(m_inputs.m_fhTemplate);
-                runMember(readJsonToProperty);
-
-                runMember(propertyDeserializeFH);
-            } break;
-            case Task::LoadFH:
-            {
-                setInput(m_inputs.m_fhMap);
-                runMember(readJsonToProperty);
-
-                runMember(propertyDeserializeFH);
-            } break;
-            case Task::SaveFH:
-            {
-                runMember(propertySerializeFH);
-                setOutput(m_outputs.m_fhMap);
-                runMember(writeJsonFromProperty);
-            } break;
             case Task::LoadH3M:
             {
-                setInput(m_inputs.m_h3m.m_binary);
-                runMember(readBinaryBufferData);
-
-                runMember(detectCompression);
-                runMember(uncompressRaw);
-                if (m_settings.m_dumpUncompressedBuffers) {
-                    setOutput(m_inputs.m_h3m.m_uncompressedBinary);
-                    runMember(writeBinaryBufferDataAsUncompressed);
-                }
-
-                runMember(binaryDeserializeH3M);
+                run(Task::LoadH3MRaw, recurse + 1);
                 if (m_settings.m_dumpBinaryDataJson) {
                     runMember(propertySerializeH3M);
                     setOutput(m_inputs.m_h3m.m_json);
@@ -233,18 +175,155 @@ void MapConverter::run(Task task, int recurse) noexcept(false)
                     setOutput(m_outputs.m_h3m.m_json);
                     runMember(writeJsonFromProperty);
                 }
+                run(Task::SaveH3MRaw, recurse + 1);
+            } break;
+            case Task::ConvertH3MToJson:
+            {
+                run(Task::LoadH3MRaw, recurse + 1);
 
-                runMember(binarySerializeH3M);
+                runMember(propertySerializeH3M);
+                setOutput(m_outputs.m_h3m.m_json);
+                runMember(writeJsonFromProperty);
+            } break;
+            case Task::ConvertJsonToH3M:
+            {
+                setInput(m_inputs.m_h3m.m_json);
+                runMember(readJsonToProperty);
+
+                runMember(propertyDeserializeH3M);
+
+                run(Task::SaveH3MRaw, recurse + 1);
+            } break;
+            case Task::H3MRoundTripJson:
+            {
+                if (!m_settings.m_dumpUncompressedBuffers)
+                    throw std::runtime_error("You need to set dumpUncompressedBuffers");
+
+                run(Task::ConvertH3MToJson, recurse + 1);
+                safeCopy(m_settings.m_outputs.m_h3m.m_json, m_settings.m_inputs.m_h3m.m_json);
+                run(Task::ConvertJsonToH3M, recurse + 1);
+
+                setInput(m_inputs.m_h3m.m_uncompressedBinary);
+                setOutput(m_outputs.m_h3m.m_uncompressedBinary);
+                run(Task::CheckBinaryInputOutputEquality, recurse + 1);
+            } break;
+            case Task::H3MRoundTripFH:
+            {
+                if (!m_settings.m_dumpUncompressedBuffers)
+                    throw std::runtime_error("You need to set dumpUncompressedBuffers");
+
+                run(Task::H3MToFHMap, recurse + 1);
+                safeCopy(m_settings.m_outputs.m_fhMap, m_settings.m_inputs.m_fhMap);
+                run(Task::FHMapToH3M, recurse + 1);
+
+                setInput(m_inputs.m_h3m.m_json);
+                setOutput(m_outputs.m_h3m.m_json);
+                run(Task::CheckJsonInputOutputEquality, recurse + 1);
+
+                setInput(m_inputs.m_h3m.m_uncompressedBinary);
+                setOutput(m_outputs.m_h3m.m_uncompressedBinary);
+                run(Task::CheckBinaryInputOutputEquality, recurse + 1);
+            } break;
+
+                // ----------------H3SVG---------------------
+
+            case Task::LoadH3SVGRaw:
+            {
+                setInput(m_inputs.m_h3svg.m_binary);
+                runMember(readBinaryBufferData);
+
+                runMember(detectCompression);
+                runMember(uncompressRaw);
                 if (m_settings.m_dumpUncompressedBuffers) {
-                    setOutput(m_outputs.m_h3m.m_uncompressedBinary);
+                    setOutput(m_inputs.m_h3svg.m_uncompressedBinary);
+                    runMember(writeBinaryBufferDataAsUncompressed);
+                }
+
+                runMember(binaryDeserializeH3SVG);
+            } break;
+            case Task::SaveH3SVGRaw:
+            {
+                runMember(binarySerializeH3SVG);
+                if (m_settings.m_dumpUncompressedBuffers) {
+                    setOutput(m_outputs.m_h3svg.m_uncompressedBinary);
                     runMember(writeBinaryBufferDataAsUncompressed);
                 }
 
                 m_mainFile.m_compressionMethod = CompressionMethod::Gzip;
                 runMember(compressRaw);
-                setOutput(m_outputs.m_h3m.m_binary);
+                setOutput(m_outputs.m_h3svg.m_binary);
                 runMember(writeBinaryBufferData);
             } break;
+            case Task::LoadH3SVG:
+            {
+                run(Task::LoadH3SVGRaw, recurse + 1);
+                if (m_settings.m_dumpBinaryDataJson) {
+                    runMember(propertySerializeH3SVG);
+                    setOutput(m_inputs.m_h3svg.m_json);
+                    runMember(writeJsonFromProperty);
+                }
+                runMember(convertH3SVGtoFH);
+            } break;
+            case Task::SaveH3SVG:
+            {
+                runMember(convertFHtoH3SVG);
+                if (m_settings.m_dumpBinaryDataJson) {
+                    runMember(propertySerializeH3SVG);
+                    setOutput(m_outputs.m_h3svg.m_json);
+                    runMember(writeJsonFromProperty);
+                }
+                run(Task::SaveH3SVGRaw, recurse + 1);
+            } break;
+            case Task::ConvertH3SVGToJson:
+            {
+                run(Task::LoadH3SVGRaw, recurse + 1);
+
+                runMember(propertySerializeH3SVG);
+                setOutput(m_outputs.m_h3svg.m_json);
+                runMember(writeJsonFromProperty);
+            } break;
+            case Task::ConvertJsonToH3SVG:
+            {
+                setInput(m_inputs.m_h3svg.m_json);
+                runMember(readJsonToProperty);
+
+                runMember(propertyDeserializeH3SVG);
+
+                run(Task::SaveH3SVGRaw, recurse + 1);
+            } break;
+            case Task::H3SVGRoundTripJson:
+            {
+                if (!m_settings.m_dumpUncompressedBuffers)
+                    throw std::runtime_error("You need to set dumpUncompressedBuffers");
+
+                run(Task::ConvertH3SVGToJson, recurse + 1);
+                safeCopy(m_settings.m_outputs.m_h3svg.m_json, m_settings.m_inputs.m_h3svg.m_json);
+                run(Task::ConvertJsonToH3SVG, recurse + 1);
+
+                setInput(m_inputs.m_h3svg.m_uncompressedBinary);
+                setOutput(m_outputs.m_h3svg.m_uncompressedBinary);
+                run(Task::CheckBinaryInputOutputEquality, recurse + 1);
+            } break;
+            case Task::H3SVGRoundTripFH:
+            {
+                if (!m_settings.m_dumpUncompressedBuffers)
+                    throw std::runtime_error("You need to set dumpUncompressedBuffers");
+
+                run(Task::H3SVGToFHMap, recurse + 1);
+                safeCopy(m_settings.m_outputs.m_fhMap, m_settings.m_inputs.m_fhMap);
+                run(Task::FHMapToH3SVG, recurse + 1);
+
+                setInput(m_inputs.m_h3svg.m_json);
+                setOutput(m_outputs.m_h3svg.m_json);
+                run(Task::CheckJsonInputOutputEquality, recurse + 1);
+
+                setInput(m_inputs.m_h3svg.m_uncompressedBinary);
+                setOutput(m_outputs.m_h3svg.m_uncompressedBinary);
+                run(Task::CheckBinaryInputOutputEquality, recurse + 1);
+            } break;
+
+                // ----------------H3C---------------------
+
             case Task::LoadH3C:
             {
                 setInput(m_inputs.m_h3c.m_binary);
@@ -285,6 +364,150 @@ void MapConverter::run(Task task, int recurse) noexcept(false)
                 setOutput(m_outputs.m_h3c.m_binary);
                 runMember(writeBinaryBufferData);
             } break;
+
+            case Task::ConvertH3CToFolderList:
+            {
+                m_folder.m_files.clear();
+                for (auto& sc : m_mapH3C.m_scenarios)
+                    m_folder.m_files.push_back(MapConverterFile{
+                        .m_binaryBuffer = sc.m_data,
+                        .m_rawState     = RawState::Uncompressed,
+                        .m_filename     = sc.m_filename,
+                    });
+                MapConverterFile meta;
+                m_mapH3C.toJson(meta.m_json);
+                meta.m_filename = "meta.json";
+                meta.writeJsonFromPropertyToBuffer();
+                meta.m_rawState = RawState::Uncompressed;
+                m_folder.m_files.push_back(std::move(meta));
+
+            } break;
+            case ConvertFolderListToH3C:
+            {
+                throw std::runtime_error("Unsupported yet");
+            } break;
+
+                // ----------------H3TPL----------------------
+
+            case Task::LoadH3TPLRaw:
+            {
+                setInput(m_inputs.m_h3tpl.m_binary);
+                runMember(readBinaryBufferData);
+
+                m_mainFile.m_compressionMethod                   = CompressionMethod::NoCompression;
+                m_mainFile.m_rawState                            = RawState::Uncompressed;
+                m_settings.m_inputs.m_h3tpl.m_uncompressedBinary = m_settings.m_inputs.m_h3tpl.m_binary;
+
+                runMember(binaryDeserializeH3TPL);
+            } break;
+            case Task::SaveH3TPLRaw:
+            {
+                runMember(binarySerializeH3TPL);
+
+                m_settings.m_outputs.m_h3tpl.m_uncompressedBinary = m_settings.m_outputs.m_h3tpl.m_binary;
+
+                m_mainFile.m_compressionMethod = CompressionMethod::NoCompression;
+                m_mainFile.m_rawState          = RawState::Compressed;
+
+                setOutput(m_outputs.m_h3tpl.m_binary);
+                runMember(writeBinaryBufferData);
+            } break;
+            case Task::LoadH3TPL:
+            {
+                run(Task::LoadH3TPLRaw, recurse + 1);
+                if (m_settings.m_dumpBinaryDataJson) {
+                    runMember(propertySerializeH3TPL);
+                    setOutput(m_inputs.m_h3tpl.m_json);
+                    runMember(writeJsonFromProperty);
+                }
+                runMember(convertH3TPLtoFHTpl);
+            } break;
+            case Task::SaveH3TPL:
+            {
+                runMember(convertFHTpltoH3TPL);
+                if (m_settings.m_dumpBinaryDataJson) {
+                    runMember(propertySerializeH3TPL);
+                    setOutput(m_outputs.m_h3tpl.m_json);
+                    runMember(writeJsonFromProperty);
+                }
+                run(Task::SaveH3TPLRaw, recurse + 1);
+            } break;
+            case Task::ConvertH3TPLToJson:
+            {
+                run(Task::LoadH3TPLRaw, recurse + 1);
+
+                runMember(propertySerializeH3TPL);
+                setOutput(m_outputs.m_h3tpl.m_json);
+                runMember(writeJsonFromProperty);
+            } break;
+            case Task::ConvertJsonToH3TPL:
+            {
+                setInput(m_inputs.m_h3tpl.m_json);
+                runMember(readJsonToProperty);
+
+                runMember(propertyDeserializeH3TPL);
+
+                run(Task::SaveH3TPLRaw, recurse + 1);
+            } break;
+            case Task::H3TPLRoundTripJson:
+            {
+                if (!m_settings.m_dumpUncompressedBuffers)
+                    throw std::runtime_error("You need to set dumpUncompressedBuffers");
+
+                run(Task::ConvertH3TPLToJson, recurse + 1);
+                safeCopy(m_settings.m_outputs.m_h3tpl.m_json, m_settings.m_inputs.m_h3tpl.m_json);
+                run(Task::ConvertJsonToH3TPL, recurse + 1);
+
+                setInput(m_inputs.m_h3tpl.m_uncompressedBinary);
+                setOutput(m_outputs.m_h3tpl.m_uncompressedBinary);
+                run(Task::CheckBinaryInputOutputEquality, recurse + 1);
+            } break;
+            case Task::H3TPLRoundTripFH:
+            {
+                if (!m_settings.m_dumpUncompressedBuffers)
+                    throw std::runtime_error("You need to set dumpUncompressedBuffers");
+
+                run(Task::H3TPLToFHTpl, recurse + 1);
+                safeCopy(m_settings.m_outputs.m_fhMap, m_settings.m_inputs.m_fhMap);
+                run(Task::FHTplToH3TPL, recurse + 1);
+
+                setInput(m_inputs.m_h3tpl.m_json);
+                setOutput(m_outputs.m_h3tpl.m_json);
+                run(Task::CheckJsonInputOutputEquality, recurse + 1);
+
+                setInput(m_inputs.m_h3tpl.m_uncompressedBinary);
+                setOutput(m_outputs.m_h3tpl.m_uncompressedBinary);
+                run(Task::CheckBinaryInputOutputEquality, recurse + 1);
+            } break;
+
+                // ----------------------------------------
+
+            // high-level
+            case Task::LoadFHTpl:
+            {
+                setInput(m_inputs.m_fhTemplate);
+                runMember(readJsonToProperty);
+                runMember(propertyDeserializeFHTpl);
+            } break;
+            case Task::SaveFHTpl:
+            {
+                runMember(propertySerializeFHTpl);
+                setOutput(m_outputs.m_fhTemplate);
+                runMember(writeJsonFromProperty);
+            } break;
+            case Task::LoadFH:
+            {
+                setInput(m_inputs.m_fhMap);
+                runMember(readJsonToProperty);
+
+                runMember(propertyDeserializeFH);
+            } break;
+            case Task::SaveFH:
+            {
+                runMember(propertySerializeFH);
+                setOutput(m_outputs.m_fhMap);
+                runMember(writeJsonFromProperty);
+            } break;
             case Task::LoadFolder:
             {
                 setInput(m_inputs.m_folder);
@@ -297,6 +520,8 @@ void MapConverter::run(Task task, int recurse) noexcept(false)
                 m_folder.m_root = m_outputFilename;
                 m_folder.write();
             } break;
+
+            // convenience calls
             case Task::FHMapToH3M:
             {
                 run(Task::LoadFH, recurse + 1);
@@ -307,56 +532,50 @@ void MapConverter::run(Task task, int recurse) noexcept(false)
                 run(Task::LoadH3M, recurse + 1);
                 run(Task::SaveFH, recurse + 1);
             } break;
-            case Task::FHTplToFHMap:
+            case Task::FHMapToH3SVG:
+            {
+                run(Task::LoadFH, recurse + 1);
+                run(Task::SaveH3SVG, recurse + 1);
+            } break;
+            case Task::H3SVGToFHMap:
+            {
+                run(Task::LoadH3SVG, recurse + 1);
+                run(Task::SaveFH, recurse + 1);
+            } break;
+            case Task::FHTplToH3TPL:
+            {
+                run(Task::LoadFHTpl, recurse + 1);
+                run(Task::SaveH3TPL, recurse + 1);
+            } break;
+            case Task::H3TPLToFHTpl:
+            {
+                run(Task::LoadH3TPL, recurse + 1);
+                run(Task::SaveFHTpl, recurse + 1);
+            } break;
+
+            case H3CToFolder:
+            {
+                run(Task::LoadH3C, recurse + 1);
+                run(Task::ConvertH3CToFolderList, recurse + 1);
+                run(Task::SaveFolder, recurse + 1);
+            } break;
+            case Task::GenerateFHMap:
             {
                 run(Task::LoadFHTpl, recurse + 1);
 
-                runMember(convertFHTPLtoFH);
+                runMember(generateFHMapFromFHTpl);
 
                 run(Task::SaveFH, recurse + 1);
             } break;
-            case Task::H3MRoundTripJson:
+
+            // utilities
+            case Task::CheckBinaryInputOutputEquality:
             {
-                if (!m_settings.m_dumpUncompressedBuffers)
-                    throw std::runtime_error("You need to set dumpUncompressedBuffers");
-
-                run(Task::ConvertH3MToJson, recurse + 1);
-                safeCopy(m_settings.m_outputs.m_h3m.m_json, m_settings.m_inputs.m_h3m.m_json);
-                run(Task::ConvertJsonToH3M, recurse + 1);
-
-                setInput(m_inputs.m_h3m.m_uncompressedBinary);
-                setOutput(m_outputs.m_h3m.m_uncompressedBinary);
-                run(Task::CheckBinaryInputOutputEquality, recurse + 1);
+                checkBinaryInputOutputEquality();
             } break;
-            case Task::H3SVGRoundTripJson:
+            case Task::CheckJsonInputOutputEquality:
             {
-                if (!m_settings.m_dumpUncompressedBuffers)
-                    throw std::runtime_error("You need to set dumpUncompressedBuffers");
-
-                run(Task::ConvertH3SVGToJson, recurse + 1);
-                safeCopy(m_settings.m_outputs.m_h3svg.m_json, m_settings.m_inputs.m_h3svg.m_json);
-                run(Task::ConvertJsonToH3SVG, recurse + 1);
-
-                setInput(m_inputs.m_h3svg.m_uncompressedBinary);
-                setOutput(m_outputs.m_h3svg.m_uncompressedBinary);
-                run(Task::CheckBinaryInputOutputEquality, recurse + 1);
-            } break;
-            case Task::H3MRoundTripFH:
-            {
-                if (!m_settings.m_dumpUncompressedBuffers)
-                    throw std::runtime_error("You need to set dumpUncompressedBuffers");
-
-                run(Task::H3MToFHMap, recurse + 1);
-                safeCopy(m_settings.m_outputs.m_fhMap, m_settings.m_inputs.m_fhMap);
-                run(Task::FHMapToH3M, recurse + 1);
-
-                setInput(m_inputs.m_h3m.m_json);
-                setOutput(m_outputs.m_h3m.m_json);
-                run(Task::CheckJsonInputOutputEquality, recurse + 1);
-
-                setInput(m_inputs.m_h3m.m_uncompressedBinary);
-                setOutput(m_outputs.m_h3m.m_uncompressedBinary);
-                run(Task::CheckBinaryInputOutputEquality, recurse + 1);
+                checkJsonInputOutputEquality();
             } break;
         }
     }
@@ -577,6 +796,29 @@ void MapConverter::propertyDeserializeH3C()
     m_mapH3C.fromJson(m_mainFile.m_json);
 }
 
+void MapConverter::binaryDeserializeH3TPL()
+{
+    m_mainFile.readCsvFromBuffer();
+    m_templateH3.readCSV(m_mainFile.m_csv);
+}
+
+void MapConverter::binarySerializeH3TPL()
+{
+    m_mainFile.m_csv = {};
+    m_templateH3.writeCSV(m_mainFile.m_csv);
+    m_mainFile.writeCsvToBuffer();
+}
+
+void MapConverter::propertySerializeH3TPL()
+{
+    m_templateH3.toJson(m_mainFile.m_json);
+}
+
+void MapConverter::propertyDeserializeH3TPL()
+{
+    m_templateH3.fromJson(m_mainFile.m_json);
+}
+
 void MapConverter::propertySerializeFH()
 {
     m_mapFH.m_packedTileMap.packFromMap(m_mapFH.m_tileMap);
@@ -597,6 +839,18 @@ void MapConverter::propertyDeserializeFH()
     m_mapFH.m_database = m_databaseContainer->getDatabase(version);
     assert(m_mapFH.m_database);
     m_mapFH.fromJson(m_mainFile.m_json);
+}
+
+void MapConverter::propertySerializeFHTpl()
+{
+    // @todo:
+    propertySerializeFH();
+}
+
+void MapConverter::propertyDeserializeFHTpl()
+{
+    // @todo:
+    propertyDeserializeFH();
 }
 
 void MapConverter::convertFHtoH3M()
@@ -622,7 +876,27 @@ void MapConverter::convertH3MtoFH()
     convertH3M2FH(m_mapH3M, m_mapFH);
 }
 
-void MapConverter::convertFHTPLtoFH()
+void MapConverter::convertFHtoH3SVG()
+{
+    throw std::runtime_error("Unsupported yet.");
+}
+
+void MapConverter::convertH3SVGtoFH()
+{
+    throw std::runtime_error("Unsupported yet.");
+}
+
+void MapConverter::convertFHTpltoH3TPL()
+{
+    throw std::runtime_error("Unsupported yet.");
+}
+
+void MapConverter::convertH3TPLtoFHTpl()
+{
+    throw std::runtime_error("Unsupported yet.");
+}
+
+void MapConverter::generateFHMapFromFHTpl()
 {
     auto rng = m_rngFactory->create();
     if (m_templateSettings.m_seed)

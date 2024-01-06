@@ -7,6 +7,7 @@
 
 #include "MernelPlatform/PropertyTree.hpp"
 #include "MernelPlatform/ByteBuffer.hpp"
+#include "MernelPlatform/FileFormatCSVTable.hpp"
 
 #include "MernelPlatform/FsUtils.hpp"
 #include "MernelPlatform/Profiler.hpp"
@@ -29,7 +30,9 @@ struct MapConverterFile {
     };
 
     Mernel::PropertyTree                 m_json;
+    Mernel::CSVTable                     m_csv;
     Mernel::ByteArrayHolder              m_binaryBuffer;
+    std::string                          m_bufferStr;
     RawState                             m_rawState          = RawState::Undefined;
     CompressionMethod                    m_compressionMethod = CompressionMethod::Undefined;
     Mernel::std_path                     m_filename;
@@ -45,8 +48,14 @@ struct MapConverterFile {
     void readJsonToProperty();
     void writeJsonFromProperty();
 
+    void binaryBufferToString();
+    void binaryBufferFromString();
+
     void readJsonToPropertyFromBuffer();
     void writeJsonFromPropertyToBuffer();
+
+    void readCsvFromBuffer();
+    void writeCsvToBuffer();
 
     // Compression tasks
     void detectCompression();

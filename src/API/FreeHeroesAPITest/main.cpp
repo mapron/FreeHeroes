@@ -35,23 +35,6 @@ const std::string g_pluginExtension = ".so";
 const std::string g_pluginFullName = g_pluginName + g_pluginSuffix + g_pluginExtension;
 }
 
-/*
-
-typedef struct{
-    uint32_t dibheadersize;
-    uint32_t width;
-    uint32_t height;
-    uint16_t planes;
-    uint16_t bitsperpixel;
-    uint32_t compression;
-    uint32_t imagesize;
-    uint32_t ypixelpermeter;
-    uint32_t xpixelpermeter;
-    uint32_t numcolorspallette;
-    uint32_t mostimpcolor;
-} bitmapinfoheader;
-*/
-
 bool saveBMP(const std::string& path, const uint8_t* rgbapixels, int w, int h)
 {
     // Function to round an int to a multiple of 4
@@ -121,7 +104,6 @@ int main(int argc, char** argv)
     const std::string pluginRoot = argc >= 4 ? argv[3] : ".";
     std::cout << "Using heroesPath=" << heroesPath << ", tmpPath=" << tmpPath << ", pluginRoot=" << pluginRoot << "\n";
 
-#if 1
     SharedLibLoader loader;
     if (!loader.open(pluginRoot + "/" + g_pluginFullName)) {
         std::cerr << "Failed to load: " << g_pluginFullName << ", " << loader.getLastError() << "\n";
@@ -136,9 +118,6 @@ int main(int argc, char** argv)
     }
     FHApiPointersGlobal api = reinterpret_cast<fh_global_get_api_pointers_v1_f>(address)();
 
-#else
-    FHApiPointersGlobal api = fh_global_get_api_pointers_v1();
-#endif
     if (!api.create) {
         std::cerr << "Something really bad with getting address struct!\n";
         return 1;

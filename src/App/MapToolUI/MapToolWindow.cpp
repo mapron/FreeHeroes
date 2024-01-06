@@ -229,7 +229,7 @@ void MapToolWindow::generateMap()
 
         converter.setTemplateSettings(templateSettings);
 
-        converter.run(MapConverter::Task::FHTplToFHMap);
+        converter.run(MapConverter::Task::GenerateFHMap);
         if (!gamename.empty()) {
             converter.m_mapFH.m_name  = gamename + " - " + converter.m_mapFH.m_name;
             converter.m_mapFH.m_descr = gamename + " - " + converter.m_mapFH.m_descr + "\n";

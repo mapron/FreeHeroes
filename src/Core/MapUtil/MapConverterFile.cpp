@@ -7,6 +7,7 @@
 
 #include "MernelPlatform/FileIOUtils.hpp"
 #include "MernelPlatform/FileFormatJson.hpp"
+#include "MernelPlatform/FileFormatCSV.hpp"
 #include "MernelPlatform/Compression.hpp"
 
 namespace FreeHeroes {
@@ -63,19 +64,44 @@ void MapConverterFile::writeJsonFromProperty()
     Mernel::writeFileFromBuffer(m_filename, buffer);
 }
 
+void MapConverterFile::binaryBufferToString()
+{
+    m_bufferStr.resize(m_binaryBuffer.size());
+    memcpy(m_bufferStr.data(), m_binaryBuffer.data(), m_binaryBuffer.size());
+}
+
+void MapConverterFile::binaryBufferFromString()
+{
+    m_binaryBuffer.resize(m_bufferStr.size());
+    memcpy(m_binaryBuffer.data(), m_bufferStr.data(), m_bufferStr.size());
+}
+
 void MapConverterFile::readJsonToPropertyFromBuffer()
 {
-    std::string buffer;
-    buffer.resize(m_binaryBuffer.size());
-    memcpy(buffer.data(), m_binaryBuffer.data(), m_binaryBuffer.size());
-    m_json = Mernel::readJsonFromBuffer(buffer);
+    binaryBufferToString();
+    m_json = Mernel::readJsonFromBuffer(m_bufferStr);
 }
 
 void MapConverterFile::writeJsonFromPropertyToBuffer()
 {
-    std::string buffer = Mernel::writeJsonToBuffer(m_json);
-    m_binaryBuffer.resize(buffer.size());
-    memcpy(m_binaryBuffer.data(), buffer.data(), buffer.size());
+    m_bufferStr = Mernel::writeJsonToBuffer(m_json);
+    binaryBufferFromString();
+}
+
+void MapConverterFile::readCsvFromBuffer()
+{
+    m_csv.useColumns = false;
+    binaryBufferToString();
+    if (!Mernel::readCSVFromBuffer(m_bufferStr, m_csv))
+        throw std::runtime_error("Failed to parse csv");
+}
+
+void MapConverterFile::writeCsvToBuffer()
+{
+    m_csv.useColumns = false;
+    if (!Mernel::writeCSVToBuffer(m_bufferStr, m_csv))
+        throw std::runtime_error("Failed to write csv (HOW?)");
+    binaryBufferFromString();
 }
 
 void MapConverterFile::detectCompression()

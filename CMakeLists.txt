@@ -615,9 +615,6 @@ AddTarget(TYPE app_console NAME FreeHeroesAPITest
         INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/src/API/FreeHeroesAPI
         LINK_LIBRARIES
             MernelPlatform # just for SharedLibLoader.
-            
-           # FreeHeroesAPI # todo: remove link after debug is done.
-          #  QT_MODULES Widgets
     )
 add_dependencies(FreeHeroesAPITest FreeHeroesAPI) # build-only.
 
