@@ -73,14 +73,15 @@ int main(int argc, char** argv)
         const std::string h3savUncompressed = h3sav.empty() ? "" : h3sav + ".uncompressed";
         const std::string h3savJson         = h3sav.empty() ? "" : h3sav + ".json";
 
-        const std::string h3tplJson = h3tpl.empty() ? "" : h3tpl + ".json";
+        const std::string h3tplUncompressed = h3tpl.empty() ? "" : h3tpl + ".csv";
+        const std::string h3tplJson         = h3tpl.empty() ? "" : h3tpl + ".json";
 
         MapConverter::PathsSet result;
         result.m_fhMap    = fhMap;
         result.m_h3m      = { .m_binary = h3m, .m_uncompressedBinary = h3mUncompressed, .m_json = h3mJson };
         result.m_h3c      = { .m_binary = h3c, .m_uncompressedBinary = h3cUncompressed, .m_json = h3cJson };
         result.m_h3svg    = { .m_binary = h3sav, .m_uncompressedBinary = h3savUncompressed, .m_json = h3savJson };
-        result.m_h3tpl    = { .m_binary = h3tpl, .m_uncompressedBinary = h3tpl, .m_json = h3tplJson };
+        result.m_h3tpl    = { .m_binary = h3tpl, .m_uncompressedBinary = h3tplUncompressed, .m_json = h3tplJson };
         result.m_jsonDiff = diffjson;
         result.m_folder   = folder;
         return result;

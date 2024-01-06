@@ -99,6 +99,7 @@ void MapConverterFile::readCsvFromBuffer()
 void MapConverterFile::writeCsvToBuffer()
 {
     m_csv.useColumns = false;
+    m_csv.endsWithNL = true;
     if (!Mernel::writeCSVToBuffer(m_bufferStr, m_csv))
         throw std::runtime_error("Failed to write csv (HOW?)");
     binaryBufferFromString();

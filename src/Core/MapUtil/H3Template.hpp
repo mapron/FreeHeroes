@@ -16,7 +16,6 @@ using CSVTable     = Mernel::CSVTable;
 
 struct H3Template {
     std::string m_packName;
-    bool        m_endsWithNL = false;
 
     std::vector<std::vector<std::string>> m_data;
 

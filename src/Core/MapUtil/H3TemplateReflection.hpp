@@ -16,7 +16,6 @@ using namespace FreeHeroes;
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     H3Template,
     m_packName,
-    m_data,
-    m_endsWithNL)
+    m_data)
 
 }

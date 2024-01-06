@@ -18,8 +18,7 @@ void H3Template::readCSV(const CSVTable& table)
     if (table.rows.empty())
         throw std::runtime_error("Empty csv file");
 
-    m_endsWithNL = table.endsWithNL;
-    m_packName   = table.rows[0].data[0].str;
+    m_packName = table.rows[0].data[0].str;
     m_data.resize(table.rows.size());
     for (size_t i = 0; i < m_data.size(); ++i) {
         m_data[i].resize(table.rows[i].data.size());
@@ -31,7 +30,6 @@ void H3Template::readCSV(const CSVTable& table)
 
 void H3Template::writeCSV(CSVTable& table) const
 {
-    table.endsWithNL = m_endsWithNL;
     table.rows.resize(m_data.size());
     for (size_t i = 0; i < m_data.size(); ++i) {
         table.rows[i].data.resize(m_data[i].size());
@@ -39,10 +37,6 @@ void H3Template::writeCSV(CSVTable& table) const
             table.rows[i].data[j].str = m_data[i][j];
         }
     }
-    /*
-    table.rows.resize(1);
-    table.rows[0].data.resize(1);
-    table.rows[0].data[0].str = m_packName;*/
 }
 
 void H3Template::toJson(PropertyTree& data) const

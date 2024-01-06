@@ -394,17 +394,27 @@ void MapConverter::run(Task task, int recurse) noexcept(false)
                 setInput(m_inputs.m_h3tpl.m_binary);
                 runMember(readBinaryBufferData);
 
-                m_mainFile.m_compressionMethod                   = CompressionMethod::NoCompression;
-                m_mainFile.m_rawState                            = RawState::Uncompressed;
-                m_settings.m_inputs.m_h3tpl.m_uncompressedBinary = m_settings.m_inputs.m_h3tpl.m_binary;
+                m_mainFile.m_compressionMethod = CompressionMethod::NoCompression;
+                m_mainFile.m_rawState          = RawState::Uncompressed;
 
+                m_mainFile.readCsvFromBuffer();
+                m_mainFile.writeCsvToBuffer();
+                if (m_settings.m_dumpUncompressedBuffers) {
+                    setOutput(m_inputs.m_h3tpl.m_uncompressedBinary);
+                    runMember(writeBinaryBufferDataAsUncompressed);
+                }
                 runMember(binaryDeserializeH3TPL);
             } break;
             case Task::SaveH3TPLRaw:
             {
                 runMember(binarySerializeH3TPL);
 
-                m_settings.m_outputs.m_h3tpl.m_uncompressedBinary = m_settings.m_outputs.m_h3tpl.m_binary;
+                m_mainFile.writeCsvToBuffer();
+
+                if (m_settings.m_dumpUncompressedBuffers) {
+                    setOutput(m_outputs.m_h3tpl.m_uncompressedBinary);
+                    runMember(writeBinaryBufferDataAsUncompressed);
+                }
 
                 m_mainFile.m_compressionMethod = CompressionMethod::NoCompression;
                 m_mainFile.m_rawState          = RawState::Compressed;
@@ -798,7 +808,6 @@ void MapConverter::propertyDeserializeH3C()
 
 void MapConverter::binaryDeserializeH3TPL()
 {
-    m_mainFile.readCsvFromBuffer();
     m_templateH3.readCSV(m_mainFile.m_csv);
 }
 
@@ -806,7 +815,6 @@ void MapConverter::binarySerializeH3TPL()
 {
     m_mainFile.m_csv = {};
     m_templateH3.writeCSV(m_mainFile.m_csv);
-    m_mainFile.writeCsvToBuffer();
 }
 
 void MapConverter::propertySerializeH3TPL()
