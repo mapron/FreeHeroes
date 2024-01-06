@@ -1248,7 +1248,7 @@
 "ah20_e"          : [ "ah20_e"                                  , "Sprites/AdventureHero/factory"           ],
 "ah20b"           : [ "ah20b"                                   , "Sprites/AdventureHero/factory"           ],
 "ah20b_"          : [ "ah20b_"                                  , "Sprites/AdventureHero/factory"           ],
-"ah20b_e"         : [ "ab_e"                                    , "Sprites/AdventureHero/factory"           ],
+"ah20b_e"         : [ "ah20b_e"                                 , "Sprites/AdventureHero/factory"           ],
 "ah21"            : [ "ah21"                                    , "Sprites/AdventureHero/factory"           ],
 "ah21_"           : [ "ah21_"                                   , "Sprites/AdventureHero/factory"           ],
 "ah21_e"          : [ "ah21_e"                                  , "Sprites/AdventureHero/factory"           ],
