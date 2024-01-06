@@ -9,6 +9,7 @@
 #include "MernelPlatform/FileFormatJson.hpp"
 #include "MernelPlatform/FileFormatCSV.hpp"
 #include "MernelPlatform/Compression.hpp"
+#include <cstring>
 
 namespace FreeHeroes {
 

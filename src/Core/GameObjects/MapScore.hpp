@@ -6,6 +6,7 @@
 #pragma once
 
 #include <map>
+#include <stdint.h>
 
 namespace FreeHeroes::Core {
 

@@ -11,6 +11,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <cstdint>
 
 namespace FreeHeroes::Core {
 
