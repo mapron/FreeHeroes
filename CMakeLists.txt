@@ -452,6 +452,9 @@ AddTarget( TYPE app_console NAME LegacyConverterCLI
         CoreResource
         CoreApplication
         LegacyConverterUtil
+
+        [ NOT DISABLE_QT QT_MODULES Gui ]
+        COMPILE_DEFINITIONS [ DISABLE_QT DISABLE_QT ]
     )
 AddTarget( TYPE app_console NAME GameLegacyConverterCLI
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/GameLegacyConverterCLI

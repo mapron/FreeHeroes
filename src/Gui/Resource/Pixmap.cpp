@@ -37,6 +37,7 @@
 
 #ifndef DISABLE_QT
 #include <QPixmap>
+#include <QBuffer>
 #endif
 
 namespace FreeHeroes {
@@ -80,6 +81,17 @@ void Pixmap::savePng(const Mernel::std_path& path) const
 
 void Pixmap::loadPngFromBuffer(const Mernel::ByteArrayHolder& holder)
 {
+#ifndef DISABLE_QT
+    {
+        QPixmap pix;
+        if (pix.loadFromData(holder.data(), holder.size())) {
+            fromQtPixmap(pix);
+            return;
+        }
+    }
+
+#endif
+
     int      w, h, channelsInFile;
     stbi_uc* data = stbi_load_from_memory(holder.data(), (int) holder.size(), &w, &h, &channelsInFile, 4);
     if (!data)
@@ -100,6 +112,19 @@ void Pixmap::loadPngFromBuffer(const Mernel::ByteArrayHolder& holder)
 
 void Pixmap::savePngToBuffer(Mernel::ByteArrayHolder& holder) const
 {
+#ifndef DISABLE_QT
+    {
+        QByteArray buffer;
+        QBuffer    buf(&buffer);
+        QPixmap    pix = toQtPixmap();
+        if (pix.save(&buf)) {
+            holder.resize(buffer.size());
+            memcpy(holder.data(), buffer.data(), buffer.size());
+            return;
+        }
+    }
+
+#endif
     int  comp   = 4;
     auto result = stbi_write_png_to_func(&write_func, &holder, m_size.m_width, m_size.m_height, comp, (const void*) m_pixels.data(), m_size.m_width * 4);
     if (result != 1)
@@ -216,6 +241,25 @@ QPixmap Pixmap::toQtPixmap() const
         memcpy(line, m_pixels.data() + y * w, w * 4);
     }
     return QPixmap::fromImage(std::move(result));
+}
+
+void Pixmap::fromQtPixmap(const QPixmap& pixmap)
+{
+    int h  = pixmap.height();
+    int w  = pixmap.width();
+    m_size = { w, h };
+    updateSize();
+    QImage img = pixmap.toImage();
+    for (int y = 0; y < h; ++y) {
+        for (int x = 0; x < w; ++x) {
+            auto&      colorDest = get(x, y).m_color;
+            const auto colorSrc  = img.pixelColor(x, y);
+            colorDest.m_r        = colorSrc.red();
+            colorDest.m_g        = colorSrc.green();
+            colorDest.m_b        = colorSrc.blue();
+            colorDest.m_a        = colorSrc.alpha();
+        }
+    }
 }
 #endif
 

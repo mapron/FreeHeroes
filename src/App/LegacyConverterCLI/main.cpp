@@ -6,6 +6,10 @@
 
 #include <iostream>
 
+#ifndef DISABLE_QT
+#include <QGuiApplication>
+#endif
+
 #include "CoreApplication.hpp"
 #include "MernelPlatform/CommandLineUtils.hpp"
 
@@ -54,6 +58,10 @@ int main(int argc, char** argv)
     fhCoreApp.initLogger();
     if (!fhCoreApp.load())
         return 1;
+
+#ifndef DISABLE_QT
+    QGuiApplication guiApp(argc, argv);
+#endif
 
     auto makePaths = [&parser](const std::string& prefix) -> ConversionHandler::PathsSet {
         const auto dat     = Mernel::string2path(parser.getArg(prefix + "dat"));

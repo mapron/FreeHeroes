@@ -524,6 +524,8 @@ void BitmapFile::fromPixmapQt()
 
 void BitmapFile::loadPixmapQt(const Mernel::std_path& filename)
 {
+    if (!m_pixmap)
+        m_pixmap = std::make_shared<Pixmap>();
     m_pixmap->loadPng(filename);
     if (m_pixmap->m_size.m_width != (int) m_width || m_pixmap->m_size.m_height != (int) m_height)
         throw std::runtime_error("pixmap has wrong dimensions.");

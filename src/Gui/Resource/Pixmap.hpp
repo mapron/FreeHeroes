@@ -170,6 +170,7 @@ struct GUIRESOURCE_EXPORT Pixmap {
     void   flipVertical();
 
     QPixmap toQtPixmap() const;
+    void    fromQtPixmap(const QPixmap& pixmap);
 };
 
 }
