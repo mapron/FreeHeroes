@@ -719,7 +719,7 @@ void BattleFieldItem::beforeAttackRanged(BattleStackConstPtr stack, const Affect
 
     if (projectileSprite) {
         const auto   projOffsets   = frameGroup->m_params.m_actionPoint;
-        QPoint       initialOffset = projOffsets.isNull() ? QPoint{ 40, -60 } : projOffsets;
+        QPoint       initialOffset = projOffsets.isNull() ? QPoint{ 40, -60 } : projOffsets.toQPoint();
         const QPoint directionOffset{ attackDirectionLeft ? -30 : 20, 20 };
         if (attackDirectionLeft)
             initialOffset.setX(-initialOffset.x());
@@ -1170,7 +1170,7 @@ void BattleFieldItem::addSpriteForBattleStack(BattleStackConstPtr stack)
     item->setIsLarge(stack->library->traits.large);
     item->setStartDirectionRight(isAttacker);
     item->setAcceptedMouseButtons(Qt::MouseButtons());
-    if (sprite->getGroupsIds().contains(static_cast<int>(BattleAnimation::Nervous)))
+    if (sprite->hasGroupId(static_cast<int>(BattleAnimation::Nervous)))
         item->setAnimGroupSporadic(h->getAnimSettings(BattleAnimation::Nervous));
 
     m_unitGraphics[stack] = { item, projectileSprite, SporadicHandle{ { true, 4000, 4000, [item] { item->triggerSporadic(); }, [&]() -> bool { return m_sporadicOrchestrator.checkEventLimit(10000, 5); } } } };

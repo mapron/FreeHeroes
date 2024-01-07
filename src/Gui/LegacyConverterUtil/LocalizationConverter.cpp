@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: MIT
  * See LICENSE file for details.
  */
+#ifndef DISABLE_QT
 #include "LocalizationConverter.hpp"
 
 #include "FsUtilsQt.hpp"
@@ -381,3 +382,4 @@ LocalizationConverter::TxtTable LocalizationConverter::readTable(const Localizat
 }
 
 }
+#endif

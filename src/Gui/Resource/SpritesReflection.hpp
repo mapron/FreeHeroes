@@ -13,24 +13,17 @@
 namespace Mernel::Reflection {
 using namespace ::FreeHeroes::Gui;
 
-// clang-format off
-template<>
-struct MetaInfo::MetaFields<QPoint> {
-static inline constexpr const std::tuple s_fields{
-    SetGetLambda<QPoint, int>("x", [](QPoint& obj, int val) { obj.setX(val); }, [](const QPoint& obj) { return obj.x(); }),
-    SetGetLambda<QPoint, int>("y", [](QPoint& obj, int val) { obj.setY(val); }, [](const QPoint& obj) { return obj.y(); }),
-};
-};
+STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
+    ::FreeHeroes::PixmapPoint,
+    m_x,
+    m_y)
 
-template<>
-struct MetaInfo::MetaFields<QSize> {
-static inline constexpr const std::tuple s_fields{
-    SetGetLambda<QSize, int>("w", [](QSize& obj, int val) { obj.setWidth(val);  }, [](const QSize& obj) { return obj.width(); }),
-    SetGetLambda<QSize, int>("h", [](QSize& obj, int val) { obj.setHeight(val); }, [](const QSize& obj) { return obj.height(); }),
-};
-};
-
-// clang-format on
+STRUCT_REFLECTION_PAIRED(
+    ::FreeHeroes::PixmapSize,
+    "w",
+    m_width,
+    "h",
+    m_height)
 
 STRUCT_REFLECTION_STRINGIFY_OFFSET_2(
     Sprite,

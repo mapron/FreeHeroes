@@ -150,16 +150,16 @@ UiCommonModel::UiCommonModel(Sound::IMusicBox*       musicBox,
     win.music  = musicBox->musicPrepare(Sound::IMusicBox::MusicSettings{ Sound::IMusicBox::MusicSet::Win }.setLoopAround(false));
     lose.music = musicBox->musicPrepare(Sound::IMusicBox::MusicSettings{ Sound::IMusicBox::MusicSet::Lose }.setLoopAround(false));
 
-    battleControl.wait       = graphicsLibrary->getIcon({ "icm0060", "icm0061", "icm0062" });
-    battleControl.guard      = graphicsLibrary->getIcon({ "icm0070", "icm0071", "icm0072" });
-    battleControl.spellBook  = graphicsLibrary->getIcon({ "icm0050", "icm0051", "icm0052" });
-    battleControl.surrender  = graphicsLibrary->getIcon({ "icm0010", "icm0011", "icm0012" });
-    battleControl.autoCombat = graphicsLibrary->getIcon({ "icm0040", "icm0041", "icm0042" });
-    battleControl.settings   = graphicsLibrary->getIcon({ "icm0030", "icm0031", "icm0032" });
+    battleControl.wait       = graphicsLibrary->getIconFromCodeList({ "icm0060", "icm0061", "icm0062" });
+    battleControl.guard      = graphicsLibrary->getIconFromCodeList({ "icm0070", "icm0071", "icm0072" });
+    battleControl.spellBook  = graphicsLibrary->getIconFromCodeList({ "icm0050", "icm0051", "icm0052" });
+    battleControl.surrender  = graphicsLibrary->getIconFromCodeList({ "icm0010", "icm0011", "icm0012" });
+    battleControl.autoCombat = graphicsLibrary->getIconFromCodeList({ "icm0040", "icm0041", "icm0042" });
+    battleControl.settings   = graphicsLibrary->getIconFromCodeList({ "icm0030", "icm0031", "icm0032" });
 
-    battleControl.unitCast    = graphicsLibrary->getIcon({ "icmalt030", "icmalt031", "icmalt032" });
-    battleControl.rangeAttack = graphicsLibrary->getIcon({ "icmalt020", "icmalt021", "icmalt022" });
-    battleControl.meleeAttack = graphicsLibrary->getIcon({ "icmalt010", "icmalt011", "icmalt012" });
+    battleControl.unitCast    = graphicsLibrary->getIconFromCodeList({ "icmalt030", "icmalt031", "icmalt032" });
+    battleControl.rangeAttack = graphicsLibrary->getIconFromCodeList({ "icmalt020", "icmalt021", "icmalt022" });
+    battleControl.meleeAttack = graphicsLibrary->getIconFromCodeList({ "icmalt010", "icmalt011", "icmalt012" });
 }
 
 QString UiCommonModel::getCommonString(UiCommonModel::UIString common) const

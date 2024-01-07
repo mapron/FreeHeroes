@@ -12,6 +12,7 @@
 class QIcon;
 class QMovie;
 class QObject;
+class QPixmap;
 
 namespace FreeHeroes::Gui {
 

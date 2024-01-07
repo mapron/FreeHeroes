@@ -30,6 +30,10 @@ else()
     endif()
 endif()
 
+if (DISABLE_QT)
+    set(QtPluginsList)
+endif()
+
 foreach(plugin ${QtPluginsList})
     get_target_property(imploc_RELEASE ${plugin} IMPORTED_LOCATION_RELEASE)
     get_target_property(imploc_DEBUG   ${plugin} IMPORTED_LOCATION_DEBUG)

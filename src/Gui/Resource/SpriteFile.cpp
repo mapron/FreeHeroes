@@ -16,11 +16,11 @@
 
 #include "Sprites.hpp"
 
+#include "Pixmap.hpp"
+#include "Painter.hpp"
+
 #include <array>
 #include <iostream>
-
-#include <QPixmap>
-#include <QPainter>
 
 namespace FreeHeroes {
 using namespace Mernel;
@@ -382,24 +382,19 @@ void postProcessSpriteGroupBattler(int groupIndex, Gui::Sprite::Group& seq, cons
     }
     for (auto& frame : seq.m_frames) {
         if (isWide) {
-            frame.m_padding += QPoint(6, -10); // That's strange, but Battle sprites not perfectly centered. That's unconvenient.
+            frame.m_padding += PixmapPoint(6, -10); // That's strange, but Battle sprites not perfectly centered. That's unconvenient.
         } else {
-            frame.m_padding += QPoint(30, -10);
+            frame.m_padding += PixmapPoint(30, -10);
         }
     }
 }
 
-void replaceColors(QPixmap& pix, const QColor& src, const QColor& dest)
+void replaceColors(Pixmap& pix, const PixmapColor& src, const PixmapColor& dest)
 {
-    auto image = pix.toImage();
-    image.convertTo(QImage::Format_RGBA8888);
-    for (int y = 0; y < image.height(); ++y) {
-        for (int x = 0; x < image.width(); ++x) {
-            if (image.pixelColor(x, y) == src)
-                image.setPixelColor(x, y, dest);
-        }
+    for (auto& p : pix.m_pixels) {
+        if (p.m_color == src)
+            p.m_color = dest;
     }
-    pix = QPixmap::fromImage(image);
 }
 
 struct AnimationPaletteShift {
@@ -849,15 +844,15 @@ void SpriteFile::readBinaryPCX(Mernel::ByteOrderDataStreamReader& stream)
         uint32_t u1 = 0, u2 = 0, u3 = 0, u4 = 0;
         stream >> size >> u1 >> u2 >> width >> height >> u3 >> u4;
 
-        QImage tmp(width, height, QImage::Format_RGBA8888);
+        Pixmap tmp(width, height);
         for (uint32_t h = 0; h < height; h++)
             for (uint32_t w = 0; w < width; w++) {
                 uint8_t r, g, b, a;
                 stream >> b >> g >> r >> a;
-                tmp.setPixelColor(w, height - h - 1, QColor(r, g, b, a));
+                tmp.get(w, height - h - 1).m_color = PixmapColor(r, g, b, a);
             }
 
-        bmp.m_pixmapQt = std::make_shared<QPixmap>(QPixmap::fromImage(tmp));
+        bmp.m_pixmap = std::make_shared<Pixmap>(std::move(tmp));
         return fromPixmap(std::move(bmp));
     }
     if (width == 0 || height == 0) {
@@ -865,47 +860,47 @@ void SpriteFile::readBinaryPCX(Mernel::ByteOrderDataStreamReader& stream)
     }
 
     if (width * height * 3 == size && fileSize == size + 12) { // RGB no pallete
-        QImage tmp(width, height, QImage::Format_RGB888);
+        Pixmap tmp(width, height);
         for (uint32_t h = 0; h < height; h++)
             for (uint32_t w = 0; w < width; w++) {
                 uint8_t r = 0, g = 0, b = 0;
                 stream >> b >> g >> r;
-                tmp.setPixelColor(w, height - h - 1, QColor(r, g, b));
+                tmp.get(w, height - h - 1).m_color = PixmapColor(r, g, b, 255);
             }
 
-        bmp.m_pixmapQt = std::make_shared<QPixmap>(QPixmap::fromImage(tmp));
+        bmp.m_pixmap = std::make_shared<Pixmap>(std::move(tmp));
         return fromPixmap(std::move(bmp));
     }
 
     // PAL8 format. Pallete in the end of file.
-    QVector<QVector<uint8_t>> pal8(height);
+    std::vector<std::vector<uint8_t>> pal8(height);
 
-    QImage tmp(width, height, QImage::Format_RGB888);
+    Pixmap tmp(width, height);
     for (uint32_t h = 0; h < height; h++) {
         pal8[h].resize(width);
         for (uint32_t w = 0; w < width; w++) {
             stream >> pal8[h][w];
         }
     }
-    QVector<QColor> palette(256);
-    for (int i = 0; i < palette.size(); i++) {
+    std::vector<PixmapColor> palette(256);
+    for (size_t i = 0; i < palette.size(); i++) {
         uint8_t r = 0, g = 0, b = 0;
         stream >> r >> g >> b;
-        palette[i] = QColor(r, g, b);
+        palette[i] = PixmapColor(r, g, b, 255);
     }
     for (uint32_t h = 0; h < height; h++) {
         for (uint32_t w = 0; w < width; w++)
-            tmp.setPixelColor(w, h, palette[pal8[h][w]]);
+            tmp.get(w, h).m_color = palette[pal8[h][w]];
     }
-    bmp.m_pixmapQt = std::make_shared<QPixmap>(QPixmap::fromImage(tmp));
+    bmp.m_pixmap = std::make_shared<Pixmap>(std::move(tmp));
     fromPixmap(std::move(bmp));
 }
 
 void SpriteFile::readBMP(const Mernel::std_path& bmpFilePath)
 {
-    QImage     tmp(QString::fromStdString(path2string(bmpFilePath)));
     BitmapFile bmp;
-    bmp.m_pixmapQt = std::make_shared<QPixmap>(QPixmap::fromImage(tmp));
+    bmp.m_pixmap = std::make_shared<Pixmap>();
+    bmp.m_pixmap->loadBmp(bmpFilePath);
     fromPixmap(std::move(bmp));
 }
 
@@ -952,8 +947,8 @@ void SpriteFile::fromPixmap(BitmapFile data)
     m_embeddedBitmapData = false;
     m_bitmaps.resize(1);
     m_bitmaps[0] = std::move(data);
-    const auto w = m_bitmaps[0].m_pixmapQt->width();
-    const auto h = m_bitmaps[0].m_pixmapQt->height();
+    const auto w = m_bitmaps[0].m_pixmap->m_size.m_width;
+    const auto h = m_bitmaps[0].m_pixmap->m_size.m_height;
 
     m_bitmaps[0].m_width  = w;
     m_bitmaps[0].m_height = h;
@@ -974,8 +969,8 @@ void SpriteFile::fromPixmapList(std::vector<BitmapFile> data, bool singleGroup)
 {
     m_embeddedBitmapData = false;
     m_bitmaps            = std::move(data);
-    const auto w         = m_bitmaps[0].m_pixmapQt->width();
-    const auto h         = m_bitmaps[0].m_pixmapQt->height();
+    const auto w         = m_bitmaps[0].m_pixmap->m_size.m_width;
+    const auto h         = m_bitmaps[0].m_pixmap->m_size.m_height;
 
     m_bitmaps[0].m_width  = w;
     m_bitmaps[0].m_height = h;
@@ -1178,29 +1173,29 @@ void SpriteFile::mergeBitmaps()
         maxWidth = std::max(maxWidth, g.m_totalWidth);
     }
 
-    QPixmap out(maxWidth, totalHeight);
-    out.fill(Qt::transparent);
+    Pixmap out(maxWidth, totalHeight);
+    out.fill({});
 
     for (Group& group : m_groups) {
         int x = 0;
         for (Frame& frame : group.m_frames) {
             if (!frame.m_hasBitmap)
                 continue;
-            QPixmap pix           = *m_bitmaps[frame.m_bitmapIndex].m_pixmapQt.get();
+            Pixmap pix            = *m_bitmaps[frame.m_bitmapIndex].m_pixmap.get();
             frame.m_bitmapIndex   = 0;
             frame.m_bitmapOffsetX = x;
             x += frame.m_bitmapWidth;
 
-            QPainter painter(&out);
-            painter.drawPixmap(QPoint(frame.m_bitmapOffsetX, frame.m_bitmapOffsetY), pix);
+            Painter painter(&out);
+            painter.drawPixmap(PixmapPoint(frame.m_bitmapOffsetX, frame.m_bitmapOffsetY), pix);
         }
     }
 
     m_bitmaps.clear();
     m_bitmaps.resize(1);
-    m_bitmaps[0].m_pixmapQt = std::make_shared<QPixmap>(std::move(out));
-    m_bitmaps[0].m_width    = m_bitmaps[0].m_pixmapQt->width();
-    m_bitmaps[0].m_height   = m_bitmaps[0].m_pixmapQt->height();
+    m_bitmaps[0].m_pixmap = std::make_shared<Pixmap>(std::move(out));
+    m_bitmaps[0].m_width  = m_bitmaps[0].m_pixmap->m_size.m_width;
+    m_bitmaps[0].m_height = m_bitmaps[0].m_pixmap->m_size.m_height;
 }
 
 void SpriteFile::saveGuiSprite(const Mernel::std_path& jsonFilePath, const Mernel::PropertyTree& handlers)
@@ -1316,7 +1311,7 @@ void SpriteFile::saveGuiSprite(const Mernel::std_path& jsonFilePath, const Merne
     }
 
     Gui::Sprite uiSprite;
-    uiSprite.m_bitmap       = *m_bitmaps[0].m_pixmapQt.get();
+    uiSprite.m_bitmap       = *m_bitmaps[0].m_pixmap.get();
     uiSprite.m_boundarySize = { m_boundaryWidth + boundaryPadWidth, m_boundaryHeight + boundaryPadHeight };
     std::vector<const Frame*> headerOrderFrames;
     for (const Group& group : m_groups) {
@@ -1352,22 +1347,22 @@ void SpriteFile::saveGuiSprite(const Mernel::std_path& jsonFilePath, const Merne
     if (handlers.isMap()) {
         for (const auto& [key, routineParam] : handlers.getMap()) {
             if (key == "flip_vertical") {
-                uiSprite.m_bitmap = uiSprite.m_bitmap.transformed(QTransform().scale(1, -1));
+                uiSprite.m_bitmap.flipVertical();
             } else if (key == "fix_colors") {
-                const std::map<std::string, QColor> names{
-                    { "tr", QColor(0, 0, 0, 0) },
-                    { "key", QColor(0, 0, 0, 1) },
-                    { "shadow", QColor(0, 0, 0, 0x80) },
-                    { "shadowborder", QColor(0, 0, 0, 0x40) },
+                const std::map<std::string, PixmapColor> names{
+                    { "tr", PixmapColor(0, 0, 0, 0) },
+                    { "key", PixmapColor(0, 0, 0, 1) },
+                    { "shadow", PixmapColor(0, 0, 0, 0x80) },
+                    { "shadowborder", PixmapColor(0, 0, 0, 0x40) },
                 };
                 for (auto& [name, destColor] : names) {
                     if (!routineParam.contains(name))
                         continue;
-                    QColor src(QString::fromStdString(routineParam[name].getScalar().toString()));
+                    PixmapColor src(routineParam[name].getScalar().toString());
 
                     replaceColors(uiSprite.m_bitmap, src, destColor);
                 }
-                *m_bitmaps[0].m_pixmapQt.get() = uiSprite.m_bitmap;
+                *m_bitmaps[0].m_pixmap.get() = uiSprite.m_bitmap;
             }
         }
     }

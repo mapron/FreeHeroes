@@ -21,17 +21,21 @@
 
 #include "IGraphicsLibrary.hpp"
 
+#ifndef DISABLE_QT
+#include <QColor>
+#endif
+
 namespace FreeHeroes {
 
 namespace {
 
 const Core::CombinedMask g_oneTileMask = Core::createOneTileCombinedMask();
 
-QColor makeColor(const std::vector<int>& rgb)
+PixmapColor makeColor(const std::vector<int>& rgb)
 {
     if (rgb.size() == 3)
-        return QColor(rgb[0], rgb[1], rgb[2]);
-    return QColor();
+        return PixmapColor(rgb[0], rgb[1], rgb[2]);
+    return PixmapColor();
 }
 
 std::string playerToString(Core::LibraryPlayerConstPtr player)
@@ -39,11 +43,11 @@ std::string playerToString(Core::LibraryPlayerConstPtr player)
     return player->untranslatedName;
 }
 
-QColor makePlayerColor(Core::LibraryPlayerConstPtr player)
+PixmapColor makePlayerColor(Core::LibraryPlayerConstPtr player)
 {
     if (!player)
         return {};
-    return QColor("#" + QString::fromStdString(player->presentationParams.colorRGB));
+    return PixmapColor(player->presentationParams.colorRGB);
 }
 
 }
@@ -147,15 +151,13 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
             };
 
             if (hue == 0)
-                return QColor(Qt::transparent);
+                return PixmapColor();
             if (hue == -1) {
-                QColor clr(Qt::black);
-                clr.setAlpha(alpha);
+                PixmapColor clr(0, 0, 0, alpha);
                 return clr;
             }
             if (hue == -2) {
-                QColor clr(Qt::white);
-                clr.setAlpha(alpha);
+                PixmapColor clr(255, 255, 255, alpha);
                 return clr;
             }
 
@@ -171,8 +173,15 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
                 }
             }
 
-            QColor clr;
-            clr.setHsv(hue, 255, 255, alpha);
+            PixmapColor clr;
+#ifndef DISABLE_QT
+            QColor qclr;
+            qclr.setHsv(hue, 255, 255, alpha);
+            clr.m_r = qclr.red();
+            clr.m_g = qclr.green();
+            clr.m_b = qclr.blue();
+            clr.m_a = alpha;
+#endif
             return clr;
         };
         cell.m_debug.push_back({
@@ -181,7 +190,7 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
             .m_textColor   = makeClr(tile.m_textColor, tile.m_textPalette, tile.m_textAlpha),
             .m_shape       = tile.m_shape,
             .m_shapeRadius = tile.m_shapeRadius,
-            .m_text        = QString::fromStdString(tile.m_text),
+            .m_text        = (tile.m_text),
         });
     }
 

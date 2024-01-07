@@ -111,7 +111,7 @@ void SpriteItem::displayCurrentPixmap()
     const auto               size        = m_currentSequence->m_frames.size();
     const auto               index       = settings.reverse ? size - m_currentFrameIndex - 1 : m_currentFrameIndex;
     auto&                    spriteFrame = m_currentSequence->m_frames[index];
-    m_pixmap                             = spriteFrame.m_frame;
+    m_pixmap                             = spriteFrame.m_frame.toQtPixmap();
 
     m_boundingOrigin = QPointF(0, 0);
     if (m_drawOriginH == DrawOriginH::Right)
@@ -124,7 +124,7 @@ void SpriteItem::displayCurrentPixmap()
     if (m_drawOriginV == DrawOriginV::Center)
         m_boundingOrigin.ry() -= m_boundingSize.height() / 2;
 
-    m_pixmapPadding = spriteFrame.m_paddingLeftTop;
+    m_pixmapPadding = spriteFrame.m_paddingLeftTop.toQPoint();
     update();
 }
 
@@ -198,12 +198,12 @@ void SpriteItem::setAnimGroupInternal()
     Q_ASSERT(settings.durationMs > 0);
     m_currentSequence   = m_sprite->getFramesForGroup(settings.group);
     m_currentFrameIndex = settings.startFrame;
-    if (m_currentFrameIndex >= m_currentSequence->m_frames.size())
+    if (m_currentFrameIndex >= (int) m_currentSequence->m_frames.size())
         m_currentFrameIndex = 0;
     m_frameMsTick = 0;
 
     prepareGeometryChange();
-    m_boundingSize = m_currentSequence->m_boundarySize;
+    m_boundingSize = m_currentSequence->m_boundarySize.toQSize();
 
     displayCurrentPixmap();
 }

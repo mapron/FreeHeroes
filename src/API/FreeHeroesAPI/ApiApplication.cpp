@@ -19,12 +19,10 @@
 #include "SpriteMap.hpp"
 #include "ViewSettings.hpp"
 #include "FHMapToSpriteMap.hpp"
-#include "SpriteMapPainter.hpp"
+#include "SpriteMapPainterPixmap.hpp"
+#include "Painter.hpp"
 
 #include <string>
-
-#include <QGuiApplication>
-#include <QPainter>
 
 namespace FreeHeroes {
 using namespace Mernel;
@@ -52,11 +50,6 @@ struct ApiApplication::Impl {
 
     std::string                     m_lastOutput;
     ApiApplicationNoexcept::MapInfo m_mapInfo;
-
-    int                              m_argc = 1; // qt require argc+argv by reference!
-    std::vector<std::string>         m_argvData;
-    std::vector<char*>               m_argv;
-    std::unique_ptr<QGuiApplication> m_qtApp;
 
     std::shared_ptr<const Core::IResourceLibrary>       m_resourceLibrary;
     std::shared_ptr<Core::IRandomGeneratorFactory>      m_randomGeneratorFactory;
@@ -92,10 +85,6 @@ void ApiApplication::clearOutput() noexcept
 void ApiApplication::init(const std::string& appResourcePath, const std::string& userResourcePath) noexcept(false)
 {
     Logger::SetLoggerBackend(std::make_unique<Impl::LoggerString>(m_impl->m_lastOutput));
-
-    m_impl->m_argvData = { "FreeHeroes", "" };
-    m_impl->m_argv     = std::vector<char*>{ m_impl->m_argvData[0].data(), m_impl->m_argvData[1].data() };
-    m_impl->m_qtApp    = std::make_unique<QGuiApplication>(m_impl->m_argc, m_impl->m_argv.data());
 
     Logger(Logger::Info) << "CoreApplication::load - start";
 
@@ -240,31 +229,31 @@ void ApiApplication::prepareRender()
 
 void ApiApplication::paint()
 {
-    QSize windowSize(m_impl->m_renderWindow.m_width, m_impl->m_renderWindow.m_height);
-    windowSize = windowSize * m_impl->m_mapInfo.m_tileSize;
+    PixmapSize windowSize(m_impl->m_renderWindow.m_width, m_impl->m_renderWindow.m_height);
+    windowSize.m_height *= m_impl->m_mapInfo.m_tileSize;
+    windowSize.m_width *= m_impl->m_mapInfo.m_tileSize;
 
-    m_impl->m_rgba.resize(windowSize.width() * windowSize.height() * 4);
+    m_impl->m_rgba.resize(windowSize.m_width * windowSize.m_height * 4);
 
-    SpriteMapPainter spainter(&(m_impl->m_viewSettings.m_paintSettings), m_impl->m_renderWindow.m_z);
+    SpriteMapPainterPixmap spainter(&(m_impl->m_viewSettings.m_paintSettings), m_impl->m_renderWindow.m_z);
 
-    QImage   imageMap(windowSize, QImage::Format_ARGB32);
-    QPainter painterMap(&imageMap);
-    painterMap.translate(QPoint(-m_impl->m_renderWindow.m_x * m_impl->m_mapInfo.m_tileSize, -m_impl->m_renderWindow.m_y * m_impl->m_mapInfo.m_tileSize));
+    Pixmap  imageMap(windowSize);
+    Painter painterMap(&imageMap);
+    painterMap.translate(PixmapPoint(-m_impl->m_renderWindow.m_x * m_impl->m_mapInfo.m_tileSize, -m_impl->m_renderWindow.m_y * m_impl->m_mapInfo.m_tileSize));
 
     const auto tick = static_cast<uint32_t>(m_impl->m_timer.elapsedUS() / 1000 / g_mapAnimationInterval);
 
     spainter.paint(&painterMap, &(m_impl->m_spriteMap), tick, tick);
-    for (int y1 = 0; y1 < windowSize.height(); ++y1) {
-        for (int x1 = 0; x1 < windowSize.width(); ++x1) {
-            uint8_t* bitmapPixel = m_impl->m_rgba.data() + y1 * windowSize.width() * 4 + x1 * 4;
-            auto     color       = imageMap.pixelColor(x1, y1);
-            bitmapPixel[0]       = color.red();
-            bitmapPixel[1]       = color.green();
-            bitmapPixel[2]       = color.blue();
-            bitmapPixel[3]       = color.alpha();
+    for (int y1 = 0; y1 < windowSize.m_height; ++y1) {
+        for (int x1 = 0; x1 < windowSize.m_width; ++x1) {
+            uint8_t* bitmapPixel = m_impl->m_rgba.data() + y1 * windowSize.m_width * 4 + x1 * 4;
+            auto&    color       = imageMap.get(x1, y1).m_color;
+            bitmapPixel[0]       = color.m_r;
+            bitmapPixel[1]       = color.m_g;
+            bitmapPixel[2]       = color.m_b;
+            bitmapPixel[3]       = color.m_a;
         }
     }
-    //imageMap.save("D:/tmp3/out.png");
 }
 
 ApiApplication::Bitmap ApiApplication::getRGBA() const noexcept

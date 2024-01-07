@@ -60,7 +60,7 @@ struct LayerOption {
             return QString::fromStdString(m_descr);
         if (m_options.empty())
             return "";
-        return SpriteMap::layerTypeToString(*m_options.begin());
+        return QString::fromStdString(SpriteMap::layerTypeToString(*m_options.begin()));
     }
 };
 

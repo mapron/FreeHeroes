@@ -74,7 +74,7 @@ void InspectorWidget::displayInfo(int x, int y, int depth)
 
     for (const auto* cell : allObjectCells) {
         for (const auto& item : cell->m_items) {
-            addHeader(SpriteMap::layerTypeToString(item.m_layer));
+            addHeader(QString::fromStdString(SpriteMap::layerTypeToString(item.m_layer)));
             for (const auto& [key, val] : item.m_info)
                 addKeyValue(QString::fromStdString(key), QString::fromStdString(val));
         }

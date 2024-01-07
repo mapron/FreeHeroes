@@ -14,6 +14,7 @@
 
 #include <QObject>
 #include <QMap>
+#include <QPixmap>
 
 namespace FreeHeroes::Sound {
 class IMusicBox;

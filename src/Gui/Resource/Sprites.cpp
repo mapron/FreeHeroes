@@ -13,11 +13,10 @@
 #include "MernelPlatform/Logger.hpp"
 #include "MernelPlatform/Profiler.hpp"
 
-#include "FsUtilsQt.hpp"
 #include "SpritesReflection.hpp"
 
 namespace FreeHeroes::Gui {
-
+using namespace Mernel;
 namespace {
 std_path makePngPath(const std_path& jsonFilePath)
 {
@@ -50,15 +49,15 @@ void Sprite::load(const std_path& jsonFilePath)
         }
     }
     {
-        std::string buffer;
+        ByteArrayHolder holder;
         {
             Mernel::ProfilerScope scope2("read image file");
             auto                  pngPath = makePngPath(jsonFilePath);
-            buffer                        = Mernel::readFileIntoBuffer(pngPath);
+            holder                        = Mernel::readFileIntoHolder(pngPath);
         }
         {
             Mernel::ProfilerScope scope2("load pixmap");
-            m_bitmap.loadFromData(reinterpret_cast<const uchar*>(buffer.data()), buffer.size());
+            m_bitmap.loadPngFromBuffer(holder);
         }
     }
 }
@@ -72,14 +71,22 @@ void Sprite::save(const std_path& jsonFilePath) const
     Mernel::writeFileFromBuffer(jsonFilePath, buffer);
 
     Mernel::std_fs::create_directories(jsonFilePath.parent_path());
-    m_bitmap.save(stdPath2QString(makePngPath(jsonFilePath)));
+    auto                    pngPath = makePngPath(jsonFilePath);
+    Mernel::ByteArrayHolder holder;
+    m_bitmap.savePngToBuffer(holder);
+    Mernel::writeFileFromHolder(pngPath, holder);
+    if (!Mernel::std_fs::exists(pngPath)) {
+        Mernel::std_fs::remove(jsonFilePath);
+        throw std::runtime_error("failed to write:" + Mernel::path2string(pngPath));
+    }
 }
 
-QList<int> Sprite::getGroupsIds() const
+std::vector<int> Sprite::getGroupsIds() const
 {
-    QList<int> result;
+    std::vector<int> result;
+    result.reserve(m_groups.size());
     for (const auto& [key, group] : m_groups)
-        result << key;
+        result.push_back(key);
     return result;
 }
 
@@ -99,15 +106,12 @@ ISprite::SpriteSequencePtr Sprite::getFramesForGroup(int groupId) const
 
     for (const auto& frame : group.m_frames) {
         if (!frame.m_hasBitmap) {
-            seq->m_frames << SpriteFrame{};
+            seq->m_frames.push_back(SpriteFrame{});
             continue;
         }
 
-        auto framePix = m_bitmap.copy(frame.m_bitmapOffset.x(),
-                                      frame.m_bitmapOffset.y(),
-                                      frame.m_bitmapSize.width(),
-                                      frame.m_bitmapSize.height());
-        seq->m_frames << SpriteFrame{ .m_frame = std::move(framePix), .m_paddingLeftTop = frame.m_padding };
+        auto framePix = m_bitmap.subframe(frame.m_bitmapOffset, frame.m_bitmapSize);
+        seq->m_frames.push_back(SpriteFrame{ .m_frame = std::move(framePix), .m_paddingLeftTop = frame.m_padding });
     }
     group.m_cache = seq;
     return seq;

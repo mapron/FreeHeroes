@@ -5,30 +5,21 @@
  */
 #pragma once
 
-#ifndef DISABLE_QT
-
 #include "SpriteMap.hpp"
 #include "MapRenderUtilExport.hpp"
 
-class QPainter;
-class QRectF;
-
 namespace FreeHeroes {
+class Painter;
 
-class MAPRENDERUTIL_EXPORT SpriteMapPainter {
+class MAPRENDERUTIL_EXPORT SpriteMapPainterPixmap {
 public:
-    SpriteMapPainter(const SpritePaintSettings* settings, int depth);
-    ~SpriteMapPainter();
+    SpriteMapPainterPixmap(const SpritePaintSettings* settings, int depth);
+    ~SpriteMapPainterPixmap();
 
-    void paint(QPainter*        painter,
+    void paint(Painter*         painter,
                const SpriteMap* spriteMap,
                uint32_t         animationFrameOffsetTerrain,
                uint32_t         animationFrameOffsetObjects) const;
-
-    void paintMinimap(QPainter*        painter,
-                      const SpriteMap* spriteMap,
-                      QSize            minimapSize,
-                      QRectF           visible) const;
 
 private:
     const SpritePaintSettings* m_settings;
@@ -39,5 +30,3 @@ private:
 };
 
 }
-
-#endif

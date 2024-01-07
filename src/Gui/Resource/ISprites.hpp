@@ -5,8 +5,7 @@
  */
 #pragma once
 
-#include <QList>
-#include <QPixmap>
+#include "Pixmap.hpp"
 
 #include <memory>
 
@@ -15,15 +14,15 @@ namespace FreeHeroes::Gui {
 class ISprite {
 public:
     struct SpriteFrame {
-        QPixmap m_frame;
-        QPoint  m_paddingLeftTop;
+        Pixmap      m_frame;
+        PixmapPoint m_paddingLeftTop;
     };
 
     struct SpriteSequenceParams {
-        int    m_scaleFactorPercent     = 100;
-        int    m_animationCycleDuration = 1000;
-        int    m_specialFrameIndex      = -1;
-        QPoint m_actionPoint;
+        int         m_scaleFactorPercent     = 100;
+        int         m_animationCycleDuration = 1000;
+        int         m_specialFrameIndex      = -1;
+        PixmapPoint m_actionPoint;
     };
 
     struct SpriteSequenceMask {
@@ -34,10 +33,10 @@ public:
     };
 
     struct SpriteSequence {
-        QList<SpriteFrame>   m_frames;
-        QSize                m_boundarySize;
-        SpriteSequenceParams m_params;
-        SpriteSequenceMask   m_mask;
+        std::vector<SpriteFrame> m_frames;
+        PixmapSize               m_boundarySize;
+        SpriteSequenceParams     m_params;
+        SpriteSequenceMask       m_mask;
     };
 
     using SpriteSequencePtr = std::shared_ptr<const SpriteSequence>;
@@ -46,7 +45,8 @@ public:
     virtual ~ISprite()                 = default;
     virtual int getGroupsCount() const = 0;
 
-    virtual QList<int> getGroupsIds() const = 0;
+    virtual std::vector<int> getGroupsIds() const        = 0;
+    virtual bool             hasGroupId(int group) const = 0;
 
     virtual SpriteSequencePtr getFramesForGroup(int group) const = 0;
 };

@@ -10,12 +10,14 @@
 #include "MernelPlatform/ByteOrderStream.hpp"
 #include "MernelPlatform/FsUtils.hpp"
 
+#include "GuiResourceExport.hpp"
+
 namespace Mernel {
 class PropertyTree;
 }
 
 namespace FreeHeroes {
-class SpriteFile {
+class GUIRESOURCE_EXPORT SpriteFile {
 public:
     enum class BinaryFormat
     {

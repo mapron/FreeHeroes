@@ -6,7 +6,9 @@
 
 #include <iostream>
 
+#ifndef DISABLE_QT
 #include <QGuiApplication>
+#endif
 
 #include "CoreApplication.hpp"
 #include "MernelPlatform/CommandLineUtils.hpp"
@@ -41,7 +43,9 @@ int main(int argc, char** argv)
     if (!fhCoreApp.load())
         return 1;
 
+#ifndef DISABLE_QT
     QGuiApplication guiApp(argc, argv);
+#endif
 
     std::cout << "Start game extractor module...\n";
 

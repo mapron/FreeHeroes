@@ -18,6 +18,7 @@
 #include "LibraryUnit.hpp"
 
 #include "IMusicBox.hpp"
+#include "MernelPlatform/StringUtils.hpp"
 
 #include <QCoreApplication>
 #include <QIcon>
@@ -230,8 +231,7 @@ GuiUnit::GuiUnit(Sound::IMusicBox*, const IGraphicsLibrary* graphicsLibrary, Cor
     , m_projectileSprite(graphicsLibrary->getObjectAnimation(source->presentationParams.spriteProjectile))
 {
     std::string splashButtons = source->abilities.splashButtons;
-    QStringList icns          = QString::fromStdString(splashButtons).split(",");
-    m_splashControl           = graphicsLibrary->getIcon(icns);
+    m_splashControl           = graphicsLibrary->getIconFromCodeList(Mernel::splitLine(splashButtons, ','));
     if (!m_battleSprite->exists()) {
         const bool isWide = source->traits.large;
         m_battleSprite    = graphicsLibrary->getObjectAnimation(isWide ? "stub_unit_wide" : "stub_unit_normal");

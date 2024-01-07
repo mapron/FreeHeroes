@@ -16,8 +16,13 @@ SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake ${MERNEL_ROOT}/cmake)
 #project options
 option( WARNING_AS_ERROR "" ON )
 option( DISABLE_QWIDGET "" OFF )
+option( DISABLE_QT "" OFF )
 option( USE_SANITIZER "" OFF )
 set(FFMPEG_BINARY "" CACHE FILEPATH "Path to ffmpeg binary")
+if ((NOT DISABLE_QWIDGET) AND DISABLE_QT)
+    message("Disabling QWIDGET!")
+    set(DISABLE_QWIDGET ON CACHE BOOL "" FORCE)
+endif()
 
 find_package(Git REQUIRED)
 
@@ -97,6 +102,8 @@ endif()
 # Qt Setup
 # QtNetwork is only for QtMultimedia
 
+if (NOT DISABLE_QT)
+
 set(QT_MODULE_LIST Core Gui Widgets Multimedia Network)
 set(QT_MODULE_LIST_BUILD_ONLY ${QT_MODULE_LIST} LinguistTools)
 if (DISABLE_QWIDGET)
@@ -123,6 +130,7 @@ else()
     set(${QT_CMAKE_EXPORT_NAMESPACE}::lrelease ${Qt5_LRELEASE_EXECUTABLE})
 endif()
 
+endif()
 
 include(targets)
 include(qt_helpers)
@@ -158,6 +166,7 @@ AddTarget(TYPE static NAME lua_static SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rd
 AddTarget(TYPE interface NAME sol SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/sol/include LINK_LIBRARIES lua_static)
 
 
+AddTarget(TYPE interface NAME stb SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/stb)
 
 #[[
 ########## FreeHeroes code targets ##########
@@ -176,10 +185,13 @@ AddTarget(TYPE header_only GENERATE_STUB NAME SoundInt OUTPUT_PREFIX FH
 AddTarget(TYPE header_only GENERATE_STUB NAME GameInt OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/GameInterface
     LINK_LIBRARIES GameObjects MernelPlatform)
+if (NOT DISABLE_QT)
 AddTarget(TYPE header_only GENERATE_STUB NAME GuiInt OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Interface
     LINK_LIBRARIES MernelPlatform GameObjects GameInt  OUTPUT_PREFIX FH
-    QT_MODULES Gui) # todo: GameObjects remove for cursors.
+    [ NOT DISABLE_QT QT_MODULES Gui ]
+) # todo: GameObjects remove for cursors.
+endif()
 
 AddTarget(TYPE shared NAME CoreRng OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/Rng
@@ -234,11 +246,13 @@ AddTarget(TYPE shared NAME GuiResource OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Resource
     EXPORT_INCLUDES
     LINK_LIBRARIES
-        GuiInt MernelPlatform CoreLogic
+        MernelPlatform CoreLogic GameInt
         MernelReflection
-    QT_MODULES Gui
-    UIC_POSTPROCESS_SCRIPTS
-        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
+        stb
+
+        [ NOT DISABLE_QT GuiInt ]
+        [ NOT DISABLE_QT QT_MODULES Gui ]
+    COMPILE_DEFINITIONS [ DISABLE_QT DISABLE_QT ]
     )
 
 if (NOT DISABLE_QWIDGET)
@@ -254,15 +268,15 @@ AddTarget(TYPE shared NAME GuiGameWrappers OUTPUT_PREFIX FH
     )
 endif()
 
+if (NOT DISABLE_QT)
 AddTarget(TYPE shared NAME GuiUtils OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Utils
     EXPORT_INCLUDES
     LINK_LIBRARIES
         GuiInt
     QT_MODULES Core
-    UIC_POSTPROCESS_SCRIPTS
-        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
+endif()
 
 if (NOT DISABLE_QWIDGET)
 AddTarget(TYPE shared NAME GuiWidgets OUTPUT_PREFIX FH
@@ -271,7 +285,7 @@ AddTarget(TYPE shared NAME GuiWidgets OUTPUT_PREFIX FH
     LINK_LIBRARIES
         GuiInt MernelPlatform GameObjects GameInt SoundInt
 
-        GuiGameWrappers GuiUtils
+        GuiGameWrappers GuiUtils GuiResource
     QT_MODULES Widgets
     UIC_POSTPROCESS_SCRIPTS
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
@@ -284,7 +298,7 @@ AddTarget(TYPE shared NAME GuiEditor OUTPUT_PREFIX FH
         GuiInt MernelPlatform GameObjects GameInt SoundInt
         GuiGameWrappers
 
-        GuiWidgets GuiUtils
+        GuiWidgets GuiUtils GuiResource
     QT_MODULES Widgets
     UIC_POSTPROCESS_SCRIPTS
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
@@ -294,7 +308,7 @@ AddTarget(TYPE shared NAME GuiBattle OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Battle
     EXPORT_INCLUDES
     LINK_LIBRARIES
-        GuiInt MernelPlatform SoundInt GameObjects GameInt
+        GuiInt MernelPlatform SoundInt GameObjects GameInt GuiResource
 
         CoreLogic
         GuiUtils
@@ -350,13 +364,15 @@ AddTarget(TYPE shared NAME MapRenderUtil OUTPUT_PREFIX FH
     LINK_LIBRARIES
         MernelPlatform
         MernelReflection
-        GuiInt
+        GuiResource
         GameObjects
         GameInt
 
         CoreLogic
         MapUtil
-    QT_MODULES Gui
+        
+        [ NOT DISABLE_QT QT_MODULES Gui ]
+    COMPILE_DEFINITIONS [ DISABLE_QT DISABLE_QT ]
     )
 
 if (NOT DISABLE_QWIDGET)
@@ -378,6 +394,7 @@ AddTarget(TYPE shared NAME MapUtilGui OUTPUT_PREFIX FH
         CoreLogic
         MapUtil
         MapRenderUtil
+        GuiResource
     QT_MODULES Widgets
     UIC_POSTPROCESS_SCRIPTS
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
@@ -391,16 +408,16 @@ AddTarget(TYPE shared NAME LegacyConverterUtil OUTPUT_PREFIX FH
         CoreLogic
         MernelPlatform
         GameInt
-        GuiInt
-        GuiUtils
+        [ NOT DISABLE_QT GuiUtils GuiInt ]
         GuiResource
         GameObjects
     
         CoreResource
     
         ${PTHREAD} MernelReflection MernelExecution
-    QT_MODULES Core
-        [ QT_CMAKE_EXPORT_NAMESPACE STREQUAL Qt6 ? Core5Compat ]
+        
+        [ NOT DISABLE_QT QT_MODULES Gui ]
+    COMPILE_DEFINITIONS [ DISABLE_QT DISABLE_QT ]
     )
 
 # App
@@ -435,8 +452,6 @@ AddTarget( TYPE app_console NAME LegacyConverterCLI
         CoreResource
         CoreApplication
         LegacyConverterUtil
-
-    QT_MODULES Gui
     )
 AddTarget( TYPE app_console NAME GameLegacyConverterCLI
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/GameLegacyConverterCLI
@@ -449,7 +464,8 @@ AddTarget( TYPE app_console NAME GameLegacyConverterCLI
         CoreApplication
         LegacyConverterUtil
 
-    QT_MODULES Gui
+        [ NOT DISABLE_QT QT_MODULES Gui ]
+        COMPILE_DEFINITIONS [ DISABLE_QT DISABLE_QT ]
     )
 if (NOT DISABLE_QWIDGET)
 AddTarget(TYPE app_ui NAME BattleEmulator
@@ -460,6 +476,7 @@ AddTarget(TYPE app_ui NAME BattleEmulator
         SoundInt
         GameObjects
         GameInt
+        GuiResource
 
         CoreApplication
         GuiApplication
@@ -519,6 +536,7 @@ AddTarget(TYPE app_ui NAME MapToolUI
         SoundInt
         GameObjects
         GameInt
+        GuiResource
 
         CoreApplication
         GuiApplication
@@ -593,7 +611,6 @@ AddTarget(TYPE shared NAME FreeHeroesAPI
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/API/FreeHeroesAPI
     LINK_LIBRARIES
         MernelPlatform
-        GuiUtils
     
         GameObjects
         GameInt
@@ -602,12 +619,10 @@ AddTarget(TYPE shared NAME FreeHeroesAPI
         CoreLogic
         CoreRng
         GameInt
-        GuiInt
         GuiResource
         MapUtil
         MapRenderUtil
         LegacyConverterUtil
-    QT_MODULES Gui
     )
 
 AddTarget(TYPE app_console NAME FreeHeroesAPITest

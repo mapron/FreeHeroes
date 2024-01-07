@@ -4,6 +4,7 @@
  * See LICENSE file for details.
  */
 #pragma once
+#ifndef DISABLE_QT
 
 #include "IGraphicsLibrary.hpp"
 #include "ICursorLibrary.hpp"
@@ -29,3 +30,4 @@ public:
 };
 
 }
+#endif

@@ -48,12 +48,12 @@ public:
         auto key = splitKeyFromString(resourceCode);
         return getPixmapByKey(key);
     }
-
-    IAsyncIconPtr getIcon(const QStringList& resourceCodes) const
+    IAsyncIconPtr getIconFromCodeList(std::vector<std::string> resourceCodes) const
     {
         PixmapKeyList tmp;
+        tmp.reserve(resourceCodes.size());
         for (auto& s : resourceCodes)
-            tmp.emplace_back(s.toStdString(), 0, 0);
+            tmp.emplace_back(std::move(s), 0, 0);
         return getIcon(tmp);
     }
     IAsyncIconPtr getIcon(const std::string& resourceCodeBase, int count) const

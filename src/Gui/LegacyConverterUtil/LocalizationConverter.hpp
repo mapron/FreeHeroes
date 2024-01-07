@@ -5,6 +5,7 @@
  */
 #pragma once
 
+#ifndef DISABLE_QT
 #include "MernelPlatform/FsUtils.hpp"
 #include "IResourceLibrary.hpp"
 
@@ -46,3 +47,4 @@ private:
 };
 
 }
+#endif

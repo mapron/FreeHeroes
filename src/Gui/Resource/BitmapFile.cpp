@@ -8,16 +8,12 @@
 #include "MernelPlatform/ByteOrderStream.hpp"
 #include "MernelPlatform/PropertyTree.hpp"
 
-#include "FsUtilsQt.hpp"
+#include "Pixmap.hpp"
 
 #include "BitmapFileReflection.hpp"
 
 #include "MernelReflection/PropertyTreeReader.hpp"
 #include "MernelReflection/PropertyTreeWriter.hpp"
-
-// for destructor of shared_ptr.
-#include <QPixmap>
-#include <QImage>
 
 #include <sstream>
 #include <iostream>
@@ -468,85 +464,77 @@ void BitmapFile::toPixmapQt()
     if (m_compression != Compression::None)
         throw std::runtime_error("You must uncompress RLE first.");
 
-    if (m_pixmapQt)
+    if (m_pixmap)
         return;
 
     if (!m_width || !m_width) {
-        m_pixmapQt = std::make_shared<QPixmap>();
+        m_pixmap = std::make_shared<Pixmap>();
         return;
     }
 
-    QImage image(m_width, m_height, QImage::Format_RGBA8888);
+    Pixmap image(m_width, m_height);
     for (uint32_t y = 0; y < m_height; y++) {
         const auto& row = m_rows[y];
         for (uint32_t x = 0; x < m_width; x++) {
             const Pixel& pix = row[x];
             if (m_pixFormat == PixFormat::Gray) {
-                image.setPixelColor(x, y, QColor(pix.m_alphaOrGray, pix.m_alphaOrGray, pix.m_alphaOrGray));
+                image.get(x, y).m_color = PixmapColor(pix.m_alphaOrGray, pix.m_alphaOrGray, pix.m_alphaOrGray, 255);
             } else {
-                image.setPixelColor(x, y, QColor(pix.m_r, pix.m_g, pix.m_b, pix.m_alphaOrGray));
+                image.get(x, y).m_color = PixmapColor(pix.m_r, pix.m_g, pix.m_b, pix.m_alphaOrGray);
             }
         }
     }
-
-    m_pixmapQt = std::make_shared<QPixmap>(QPixmap::fromImage(std::move(image)));
-    assert(m_pixmapQt->width() == (int) m_width);
-    assert(m_pixmapQt->height() == (int) m_height);
+    m_pixmap = std::make_shared<Pixmap>(std::move(image));
     m_rows.clear();
 }
 
 void BitmapFile::fromPixmapQt()
 {
     if (m_compression != Compression::None)
-        throw std::runtime_error("Cannot go to RLE compression from Qt Pixmap.");
+        throw std::runtime_error("Cannot go to RLE compression from Pixmap.");
 
-    if (!m_pixmapQt)
-        throw std::runtime_error("Qt pixmap is missing.");
+    if (!m_pixmap)
+        throw std::runtime_error("pixmap is missing.");
 
-    if (m_pixmapQt->isNull())
-        throw std::runtime_error("Qt pixmap is null.");
+    if (m_pixmap->isNull())
+        throw std::runtime_error("pixmap is null.");
 
-    const QImage image = m_pixmapQt->toImage();
-    if (image.width() != (int) m_width || image.height() != (int) m_height)
-        throw std::runtime_error("Qt pixmap has wrong dimensions.");
+    if (m_pixmap->m_size.m_width != (int) m_width || m_pixmap->m_size.m_height != (int) m_height)
+        throw std::runtime_error("pixmap has wrong dimensions.");
 
     m_rows.resize(m_height);
     for (uint32_t y = 0; y < m_height; y++) {
         auto& row = m_rows[y];
         row.resize(m_width);
         for (uint32_t x = 0; x < m_width; x++) {
-            Pixel&       pix   = row[x];
-            const QColor color = image.pixelColor(x, y);
+            Pixel&     pix   = row[x];
+            const auto color = m_pixmap->get(x, y).m_color;
             if (m_pixFormat == PixFormat::Gray) {
-                pix.m_alphaOrGray = color.red();
+                pix.m_alphaOrGray = color.m_r;
             } else {
-                pix.m_r           = color.red();
-                pix.m_g           = color.green();
-                pix.m_b           = color.blue();
-                pix.m_alphaOrGray = color.alpha();
+                pix.m_r           = color.m_r;
+                pix.m_g           = color.m_g;
+                pix.m_b           = color.m_b;
+                pix.m_alphaOrGray = color.m_a;
             }
         }
     }
-    m_pixmapQt.reset();
+    m_pixmap.reset();
 }
 
 void BitmapFile::loadPixmapQt(const Mernel::std_path& filename)
 {
-    m_pixmapQt = std::make_shared<QPixmap>(Gui::stdPath2QString(filename));
-
-    if (m_pixmapQt->width() != (int) m_width || m_pixmapQt->height() != (int) m_height)
-        throw std::runtime_error("Qt pixmap has wrong dimensions.");
+    m_pixmap->loadPng(filename);
+    if (m_pixmap->m_size.m_width != (int) m_width || m_pixmap->m_size.m_height != (int) m_height)
+        throw std::runtime_error("pixmap has wrong dimensions.");
 }
 
 void BitmapFile::savePixmapQt(const Mernel::std_path& filename) const
 {
-    if (!m_pixmapQt)
-        throw std::runtime_error("Qt pixmap is missing.");
-    if (m_pixmapQt->isNull())
-        throw std::runtime_error("Qt pixmap is null.");
+    if (!m_pixmap)
+        throw std::runtime_error("pixmap is missing.");
+    m_pixmap->savePng(filename);
 
-    Mernel::std_fs::create_directories(filename.parent_path());
-    m_pixmapQt->save(Gui::stdPath2QString(filename));
     assert(Mernel::std_fs::exists(filename));
 }
 

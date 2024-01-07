@@ -7,15 +7,19 @@
 
 #include "Sprites.hpp"
 
-#include "FsUtilsQt.hpp"
-
 #include "MernelPlatform/Logger.hpp"
+#include "MernelPlatform/StringUtils.hpp"
 
+#include <functional>
+
+#ifndef DISABLE_QT
+#include "FsUtilsQt.hpp"
 #include <QBitmap>
 #include <QPainter>
 #include <QSet>
 #include <QIcon>
 #include <QMovie>
+#endif
 
 namespace FreeHeroes::Gui {
 using namespace Core;
@@ -82,6 +86,7 @@ public:
     bool      preload() const override { return m_record.preload(); }
     SpritePtr get() const override { return m_record.get(); }
 };
+#ifndef DISABLE_QT
 class GraphicsLibrary::AsyncPixmap : public IAsyncPixmap {
 public:
     PixmapContainer::AsyncRecord& m_record;
@@ -115,18 +120,21 @@ public:
     bool    preload() const override { return true; }
     QMovie* create(QObject* parent) const override;
 };
+#endif
 
 struct GraphicsLibrary::Impl {
     const Core::IResourceLibrary* m_resourceLibrary;
 
     CacheContainer<std::string, SpritePtr> m_spriteCache;
-    CacheContainer<PixmapKey, QPixmap>     m_pixmapCache;
-    CacheContainer<PixmapKeyList, QIcon>   m_iconCache;
+#ifndef DISABLE_QT
+    CacheContainer<PixmapKey, QPixmap>   m_pixmapCache;
+    CacheContainer<PixmapKeyList, QIcon> m_iconCache;
+#endif
 
     bool      createSprite(const std::string& resourceName, SpritePtr& result);
     bool      checkSprite(const std::string& resourceName);
     SpritePtr getCachedSprite(const std::string& resourceName);
-
+#ifndef DISABLE_QT
     bool    createPixmap(const PixmapKey& resourceCode, QPixmap& result);
     QPixmap getCachedPixmap(const PixmapKey& resourceCode);
 
@@ -138,11 +146,13 @@ struct GraphicsLibrary::Impl {
     {
         return m_resourceLibrary->fileExists(ResourceType::Video, resourceName);
     }
-
+#endif
     Impl(const Core::IResourceLibrary* resourceLibrary)
         : m_resourceLibrary(resourceLibrary)
     {
         m_spriteCache.m_existCheck = [this](const std::string& resourceName) { return checkSprite(resourceName); };
+        m_spriteCache.m_factory    = [this](const std::string& resourceName, SpritePtr& result) { return createSprite(resourceName, result); };
+#ifndef DISABLE_QT
         m_pixmapCache.m_existCheck = [this](const PixmapKey& resourceCode) { return checkSprite(resourceCode.resourceName); };
         m_iconCache.m_existCheck   = [this](const PixmapKeyList& resourceCodes) {
             for (const auto& code : resourceCodes)
@@ -150,9 +160,9 @@ struct GraphicsLibrary::Impl {
                     return false;
             return true;
         };
-        m_spriteCache.m_factory = [this](const std::string& resourceName, SpritePtr& result) { return createSprite(resourceName, result); };
         m_pixmapCache.m_factory = [this](const PixmapKey& resourceCode, QPixmap& result) { return createPixmap(resourceCode, result); };
         m_iconCache.m_factory   = [this](const PixmapKeyList& resourceCodes, QIcon& result) { return createIcon(resourceCodes, result); };
+#endif
     }
 };
 
@@ -169,7 +179,7 @@ IAsyncSpritePtr GraphicsLibrary::getObjectAnimation(const std::string& resourceN
 {
     return std::make_shared<AsyncSprite>(m_impl.get(), resourceName);
 }
-
+#ifndef DISABLE_QT
 IAsyncPixmapPtr GraphicsLibrary::getPixmapByKey(const PixmapKey& resourceCode) const
 {
     return std::make_shared<AsyncPixmap>(m_impl.get(), resourceCode);
@@ -184,18 +194,36 @@ IAsyncIconPtr GraphicsLibrary::getIcon(const PixmapKeyList& resourceCodes) const
 {
     return std::make_shared<AsyncIcon>(m_impl.get(), resourceCodes);
 }
+#else
+IAsyncPixmapPtr GraphicsLibrary::getPixmapByKey(const PixmapKey& resourceCode) const
+{
+    return nullptr;
+}
+
+IAsyncMoviePtr GraphicsLibrary::getVideo(const std::string& resourceName) const
+{
+    return nullptr;
+}
+
+IAsyncIconPtr GraphicsLibrary::getIcon(const PixmapKeyList& resourceCodes) const
+{
+    return nullptr;
+}
+
+#endif
 
 IGraphicsLibrary::PixmapKey GraphicsLibrary::splitKeyFromString(const std::string& resourceName) const
 {
-    QStringList parts      = QString::fromStdString(resourceName).split(":");
-    std::string resourceId = parts.takeFirst().toStdString();
-    int         groupId    = 0;
-    int         frameId    = 0;
+    auto        parts      = Mernel::splitLine(resourceName, ":");
+    std::string resourceId = parts[0];
+    parts.erase(parts.begin());
+    int groupId = 0;
+    int frameId = 0;
     if (parts.size() == 2) {
-        groupId = parts[0].toInt();
-        frameId = parts[1].toInt();
+        groupId = std::atoi(parts[0].c_str());
+        frameId = std::atoi(parts[1].c_str());
     } else if (parts.size() == 1) {
-        frameId = parts[0].toInt();
+        frameId = std::atoi(parts[0].c_str());
     }
 
     return PixmapKey{ resourceId, groupId, frameId };
@@ -235,28 +263,22 @@ SpritePtr GraphicsLibrary::Impl::getCachedSprite(const std::string& resourceName
 {
     return m_spriteCache.makeAsyncRecord(resourceName).get();
 }
-
+#ifndef DISABLE_QT
 bool GraphicsLibrary::Impl::createPixmap(const PixmapKey& resourceCode, QPixmap& result)
 {
     SpritePtr sprite = getCachedSprite(resourceCode.resourceName);
     if (!sprite)
         return false;
 
-    if (!sprite->getGroupsIds().contains(resourceCode.group))
+    if (!sprite->hasGroupId(resourceCode.group))
         return false;
 
     auto seq = sprite->getFramesForGroup(resourceCode.group);
-    if (resourceCode.frame >= seq->m_frames.size() || resourceCode.frame < 0) // @todo: maybe allow Python-like [-1] = last elem etc.
+    if (resourceCode.frame >= (int) seq->m_frames.size() || resourceCode.frame < 0) // @todo: maybe allow Python-like [-1] = last elem etc.
         return false;
 
-    result = seq->m_frames[resourceCode.frame].m_frame;
-    if (seq->m_boundarySize != result.size()) {
-        QImage padded{ seq->m_boundarySize, QImage::Format_RGBA8888 };
-        padded.fill(Qt::transparent);
-        QPainter p{ &padded };
-        p.drawPixmap(seq->m_frames[resourceCode.frame].m_paddingLeftTop, result);
-        result = QPixmap::fromImage(padded);
-    }
+    result = seq->m_frames[resourceCode.frame].m_frame.padToSize(seq->m_boundarySize, seq->m_frames[resourceCode.frame].m_paddingLeftTop).toQtPixmap();
+
     return true;
 }
 
@@ -296,12 +318,6 @@ bool GraphicsLibrary::Impl::createIcon(const PixmapKeyList& resourceCodes, QIcon
     }
     return true;
 }
-
-GraphicsLibrary::AsyncSprite::AsyncSprite(Impl* impl, const std::string& resourceName)
-    : m_record(impl->m_spriteCache.makeAsyncRecord(resourceName))
-{
-}
-
 GraphicsLibrary::AsyncPixmap::AsyncPixmap(Impl* impl, const PixmapKey& resourceCode)
     : m_record(impl->m_pixmapCache.makeAsyncRecord(resourceCode))
 {
@@ -317,10 +333,15 @@ GraphicsLibrary::AsyncMovie::AsyncMovie(Impl* impl, const std::string& resourceN
     , m_resourceName(resourceName)
     , m_exists(m_impl->checkVideo(m_resourceName))
 {}
-
 QMovie* GraphicsLibrary::AsyncMovie::create(QObject* parent) const
 {
     return m_impl->createVideo(m_resourceName, parent);
+}
+#endif
+
+GraphicsLibrary::AsyncSprite::AsyncSprite(Impl* impl, const std::string& resourceName)
+    : m_record(impl->m_spriteCache.makeAsyncRecord(resourceName))
+{
 }
 
 }

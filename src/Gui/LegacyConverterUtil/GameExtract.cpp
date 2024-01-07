@@ -5,16 +5,20 @@
  */
 #include "GameExtract.hpp"
 
+#ifndef DISABLE_QT
 #include "EnvDetect.hpp"
+#include "FsUtilsQt.hpp"
+#include "LocalizationConverter.hpp"
+#endif
 
 #include "ConversionHandler.hpp"
 
 #include "Archive.hpp"
-#include "FsUtilsQt.hpp"
 #include "KnownResources.hpp"
-#include "LocalizationConverter.hpp"
 #include "SpriteFile.hpp"
 #include "IGameDatabase.hpp"
+#include "Pixmap.hpp"
+#include "Painter.hpp"
 
 #include "MernelExecution/ParallelExecutor.hpp"
 #include "MernelExecution/TaskQueueWatcher.hpp"
@@ -27,10 +31,9 @@
 
 #include <sstream>
 
-#include <QEventLoop>
-#include <QImage>
-#include <QPainter>
-#include <QProcess>
+#ifndef DISABLE_QT
+#include <QProcess> // ffmpeg
+#endif
 
 namespace FreeHeroes {
 using namespace Mernel;
@@ -55,7 +58,7 @@ struct ArchiveWrapper {
     bool m_isHota = false;
     bool m_isHD   = false;
 };
-
+#ifndef DISABLE_QT
 bool executeFFMpeg(QStringList args, QString* programOut = nullptr)
 {
     QProcess ffmpeg;
@@ -84,6 +87,7 @@ bool executeFFMpeg(QStringList args, QString* programOut = nullptr)
     }
     return rc == 0;
 }
+#endif
 
 Mernel::std_path findPathChild(const Mernel::std_path& parent, const std::string& lowerCaseName)
 {
@@ -133,10 +137,10 @@ public:
     void create()
     {
         for (const auto& [id, concatData] : m_data) {
-            std::vector<QPixmap> pixmaps;
+            std::vector<Pixmap> pixmaps;
             pixmaps.reserve(concatData.m_sprites.size());
             for (const auto& [path, sprite] : concatData.m_sprites) {
-                pixmaps.push_back(*sprite.m_bitmaps[0].m_pixmapQt.get());
+                pixmaps.push_back(*sprite.m_bitmaps[0].m_pixmap.get());
             }
             const auto root = concatData.m_sprites.begin()->first.parent_path();
             SpriteFile outFile;
@@ -145,25 +149,25 @@ public:
                 std::vector<BitmapFile> bmps;
                 for (auto& pix : pixmaps) {
                     BitmapFile bmp;
-                    bmp.m_pixmapQt = std::make_shared<QPixmap>(pix);
+                    bmp.m_pixmap = std::make_shared<Pixmap>(pix);
                     bmps.push_back(std::move(bmp));
                 }
                 outFile.fromPixmapList(bmps, concatData.m_singleGroup);
             } else {
-                QSize size(0, 0);
+                PixmapSize size(0, 0);
                 for (auto& pix : pixmaps) {
-                    size.setWidth(std::max(size.width(), pix.width()));
-                    size.setHeight(size.height() + pix.height());
+                    size.m_width = std::max(size.m_width, pix.m_size.m_width);
+                    size.m_height += pix.m_size.m_height;
                 }
-                QImage result(size.width(), size.height(), QImage::Format_RGBA8888);
-                QPoint offset(0, 0);
+                Pixmap      result(size);
+                PixmapPoint offset(0, 0);
                 for (auto& pix : pixmaps) {
-                    QPainter p(&result);
+                    Painter p(&result);
                     p.drawPixmap(offset, pix);
-                    offset += QPoint(0, pix.height());
+                    offset += PixmapPoint(0, pix.m_size.m_height);
                 }
                 BitmapFile bmp;
-                bmp.m_pixmapQt = std::make_shared<QPixmap>(QPixmap::fromImage(result));
+                bmp.m_pixmap = std::make_shared<Pixmap>(std::move(result));
 
                 outFile.fromPixmap(std::move(bmp));
             }
@@ -185,7 +189,9 @@ GameExtract::DetectedSources GameExtract::probe() const
     DetectedSources result;
     result.m_heroesRoot = m_settings.m_heroesRoot;
     if (result.m_heroesRoot.empty()) {
+#ifndef DISABLE_QT
         result.m_heroesRoot = findHeroes3Installation();
+#endif
     }
     std::error_code ec;
     if (result.m_heroesRoot.empty() || !Mernel::std_fs::exists(result.m_heroesRoot, ec))
@@ -261,10 +267,12 @@ GameExtract::DetectedSources GameExtract::probe() const
             result.m_sources[SourceType::MusicCopy].push_back(DetectedPath{ .m_type = SourceType::MusicCopy, .m_path = mpFolder, .m_isSod = true });
     }
     {
+#ifndef DISABLE_QT
         QString ffmpegBinary;
         if (executeFFMpeg({ "-version" }, &ffmpegBinary)) {
             result.m_ffmpegPath = Gui::QString2stdPath(ffmpegBinary);
         }
+#endif
     }
 
     return result;
@@ -452,6 +460,7 @@ void GameExtract::run(const DetectedSources& sources) const
     if (!m_settings.m_needLocalization)
         return;
 
+#ifndef DISABLE_QT
     LocalizationConverter loc(m_databaseContainer->getDatabase(Core::GameVersion::HOTA), m_databaseContainer->getDatabase(Core::GameVersion::SOD));
 
     if (hasSod)
@@ -462,6 +471,7 @@ void GameExtract::run(const DetectedSources& sources) const
             loc.extractSOD(m_settings.m_archiveExtractRoot / "hota_lng_lod", m_settings.m_mainExtractRoot / "hota_res.fhmod" / "hota_trlng_update.fhdb.json");
         }
     }
+#endif
 }
 
 void GameExtract::processFile(Mernel::TaskQueue&      taskQueue,
@@ -539,7 +549,9 @@ void GameExtract::processFile(Mernel::TaskQueue&      taskQueue,
                 return;
             }
         });
-    } else if (extWithDot == ".wav") {
+    }
+#ifndef DISABLE_QT
+    else if (extWithDot == ".wav") {
         auto outputWav = extractFolder / (newId + ".wav");
         if (!hasFfmpeg)
             return;
@@ -560,5 +572,6 @@ void GameExtract::processFile(Mernel::TaskQueue&      taskQueue,
             executeFFMpeg({ "-y", "-i", Gui::stdPath2QString(srcPath), "-threads", "1", Gui::stdPath2QString(outputWebp) });
         });
     }
+#endif
 }
 }

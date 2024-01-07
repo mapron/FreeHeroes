@@ -7,14 +7,14 @@
 
 #include "MernelPlatform/FsUtils.hpp"
 
+#include "GuiResourceExport.hpp"
+
 #include <cstdint>
 #include <vector>
 #include <memory>
 #include <string>
 #include <compare>
 #include <map>
-
-class QPixmap;
 
 namespace Mernel {
 class ByteOrderDataStreamReader;
@@ -24,8 +24,8 @@ class ByteArrayHolder;
 }
 
 namespace FreeHeroes {
-
-class BitmapFile {
+struct Pixmap;
+class GUIRESOURCE_EXPORT BitmapFile {
 public:
     BitmapFile();
     ~BitmapFile();
@@ -129,7 +129,7 @@ public:
 
     RLEData m_rleData;
 
-    std::shared_ptr<QPixmap> m_pixmapQt;
+    std::shared_ptr<Pixmap> m_pixmap;
 
     void readFromBlob(Mernel::ByteArrayHolder& blob);
     void writeToBlob(Mernel::ByteArrayHolder& blob) const;

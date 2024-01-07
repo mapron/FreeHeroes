@@ -10,6 +10,7 @@
 #include "LibraryObjectDef.hpp"
 #include "MapScore.hpp"
 #include "MapRenderUtilExport.hpp"
+#include "Pixmap.hpp"
 
 #include <vector>
 #include <map>
@@ -56,8 +57,8 @@ struct MAPRENDERUTIL_EXPORT SpriteMap {
     struct Item {
         Gui::IAsyncSpritePtr m_sprite;
 
-        QColor m_keyColor;
-        QColor m_flagColor;
+        PixmapColor m_keyColor;
+        PixmapColor m_flagColor;
 
         Layer m_layer         = Layer::Invalid;
         int   m_spriteGroup   = 0;
@@ -115,23 +116,23 @@ struct MAPRENDERUTIL_EXPORT SpriteMap {
     };
 
     struct CellIntegral {
-        QColor m_colorUnblocked;
-        QColor m_colorBlocked;
-        QColor m_colorPlayer;
+        PixmapColor m_colorUnblocked;
+        PixmapColor m_colorBlocked;
+        PixmapColor m_colorPlayer;
 
         bool m_blocked   = false;
         bool m_visitable = false;
         bool m_player    = false;
 
         struct DebugPiece {
-            QColor m_shapeColor;
-            QColor m_penColor;
-            QColor m_textColor;
+            PixmapColor m_shapeColor;
+            PixmapColor m_penColor;
+            PixmapColor m_textColor;
 
             int m_shape       = 1; // 0 - none, 1 - circle, 2 - square
             int m_shapeRadius = 2; // 1..4
 
-            QString m_text;
+            std::string m_text;
         };
         std::vector<DebugPiece> m_debug;
     };
@@ -196,7 +197,7 @@ struct MAPRENDERUTIL_EXPORT SpriteMap {
         return &cell.m_items.back();
     }
 
-    static QString layerTypeToString(Layer layer);
+    static std::string layerTypeToString(Layer layer);
 };
 
 struct SpritePaintSettings {

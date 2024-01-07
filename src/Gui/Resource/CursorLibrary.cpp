@@ -4,6 +4,9 @@
  * See LICENSE file for details.
  */
 #include "CursorLibrary.hpp"
+#ifndef DISABLE_QT
+
+#include <QPixmap>
 
 namespace FreeHeroes::Gui {
 
@@ -16,20 +19,20 @@ CursorLibrary::CursorLibrary(const IGraphicsLibrary* graphicsLibrary)
         return;
     auto frames                           = sprite->getFramesForGroup(0);
     auto spellCastFrames                  = spellCast->getFramesForGroup(0);
-    otherCursors[Type::Stop]              = QCursor(frames->m_frames[0].m_frame, 13, 13);
-    otherCursors[Type::Walk]              = QCursor(frames->m_frames[1].m_frame, 12, 25);
-    otherCursors[Type::Fly]               = QCursor(frames->m_frames[2].m_frame, 12, 25);
-    otherCursors[Type::RangeAttack]       = QCursor(frames->m_frames[3].m_frame, 22, 3);
-    otherCursors[Type::HeroView]          = QCursor(frames->m_frames[4].m_frame, 14, 12);
-    otherCursors[Type::Question]          = QCursor(frames->m_frames[5].m_frame, 9, 12);
-    otherCursors[Type::PlainArrow]        = QCursor(frames->m_frames[6].m_frame, 0, 0);
-    otherCursors[Type::RangeAttackBroken] = QCursor(frames->m_frames[15].m_frame, 27, 15);
+    otherCursors[Type::Stop]              = QCursor(frames->m_frames[0].m_frame.toQtPixmap(), 13, 13);
+    otherCursors[Type::Walk]              = QCursor(frames->m_frames[1].m_frame.toQtPixmap(), 12, 25);
+    otherCursors[Type::Fly]               = QCursor(frames->m_frames[2].m_frame.toQtPixmap(), 12, 25);
+    otherCursors[Type::RangeAttack]       = QCursor(frames->m_frames[3].m_frame.toQtPixmap(), 22, 3);
+    otherCursors[Type::HeroView]          = QCursor(frames->m_frames[4].m_frame.toQtPixmap(), 14, 12);
+    otherCursors[Type::Question]          = QCursor(frames->m_frames[5].m_frame.toQtPixmap(), 9, 12);
+    otherCursors[Type::PlainArrow]        = QCursor(frames->m_frames[6].m_frame.toQtPixmap(), 0, 0);
+    otherCursors[Type::RangeAttackBroken] = QCursor(frames->m_frames[15].m_frame.toQtPixmap(), 27, 15);
 
     for (auto& f : spellCastFrames->m_frames) {
-        cast << QCursor(f.m_frame, f.m_frame.width() / 2, f.m_frame.height() - 1);
+        cast << QCursor(f.m_frame.toQtPixmap(), f.m_frame.width() / 2, f.m_frame.height() - 1);
     }
 
-    QPixmap sword = frames->m_frames[13].m_frame;
+    QPixmap sword = frames->m_frames[13].m_frame.toQtPixmap();
     for (auto attackDirection : {
              BattleDirection::TR,
              BattleDirection::R,
@@ -61,3 +64,5 @@ CursorLibrary::CursorLibrary(const IGraphicsLibrary* graphicsLibrary)
 }
 
 }
+
+#endif

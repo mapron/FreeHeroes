@@ -4,6 +4,7 @@
  * See LICENSE file for details.
  */
 
+#ifndef DISABLE_QT
 #include "SpriteMapPainter.hpp"
 
 #include "SpriteMap.hpp"
@@ -118,7 +119,7 @@ void SpriteMapPainter::paint(QPainter*        painter,
             if (item.m_flagColor.isValid()) {
                 auto oldTransform = painter->transform();
                 painter->translate(x * tileSize, y * tileSize);
-                drawHeroFlag(item.m_flagColor);
+                drawHeroFlag(item.m_flagColor.toQColor());
                 painter->setTransform(oldTransform);
                 continue;
             }
@@ -149,7 +150,7 @@ void SpriteMapPainter::paint(QPainter*        painter,
             const size_t frameIndex = psrHash + (item.m_layer == SpriteMap::Layer::Terrain ? animationFrameOffsetTerrain : animationFrameOffsetObjects);
             const auto   frame      = seq->m_frames[frameIndex % seq->m_frames.size()];
 
-            const QSize boundingSize = seq->m_boundarySize;
+            const QSize boundingSize = seq->m_boundarySize.toQSize();
 
             auto oldTransform = painter->transform();
             painter->translate(x * tileSize, y * tileSize);
@@ -187,10 +188,10 @@ void SpriteMapPainter::paint(QPainter*        painter,
             painter->setOpacity(opacity);
 
             if (!isOverlayPass)
-                painter->drawPixmap(frame.m_paddingLeftTop, frame.m_frame);
+                painter->drawPixmap(frame.m_paddingLeftTop.toQPoint(), frame.m_frame.toQtPixmap());
             painter->setOpacity(1.0);
             if (!isOverlayPass && item.m_keyColor.isValid()) {
-                QPixmap pix     = frame.m_frame;
+                QPixmap pix     = frame.m_frame.toQtPixmap();
                 QImage  imgOrig = pix.toImage();
                 pix.fill(Qt::transparent);
                 QImage img = pix.toImage();
@@ -198,11 +199,11 @@ void SpriteMapPainter::paint(QPainter*        painter,
                 for (int imgy = 0; imgy < img.height(); imgy++) {
                     for (int imgx = 0; imgx < img.width(); imgx++) {
                         if (imgOrig.pixelColor(imgx, imgy).alpha() == 1)
-                            img.setPixelColor(imgx, imgy, item.m_keyColor);
+                            img.setPixelColor(imgx, imgy, item.m_keyColor.toQColor());
                     }
                 }
                 pix = QPixmap::fromImage(img);
-                painter->drawPixmap(frame.m_paddingLeftTop, pix);
+                painter->drawPixmap(frame.m_paddingLeftTop.toQPoint(), pix);
             }
             if (isOverlayPass && !item.m_overlayInfo.empty())
                 drawOverlayText(item, x, posTransform);
@@ -301,8 +302,8 @@ void SpriteMapPainter::paint(QPainter*        painter,
                 painter->translate(x * tileSize, y * tileSize);
 
                 if (debugPiece.m_shape) {
-                    painter->setBrush(debugPiece.m_shapeColor);
-                    painter->setPen(QPen(debugPiece.m_penColor, 3));
+                    painter->setBrush(debugPiece.m_shapeColor.toQColor());
+                    painter->setPen(QPen(debugPiece.m_penColor.toQColor(), 3));
 
                     const int radius    = std::clamp(debugPiece.m_shapeRadius, 1, 4);
                     const int shapeSize = tileSize * radius / 4;
@@ -313,14 +314,14 @@ void SpriteMapPainter::paint(QPainter*        painter,
                         painter->drawRect(shapeRect);
                 }
 
-                if (!debugPiece.m_text.isEmpty()) {
+                if (!debugPiece.m_text.empty()) {
                     QRect cellRect(0, 0, tileSize, tileSize);
                     QFont font = painter->font();
                     font.setPixelSize(8);
                     painter->setFont(font);
-                    painter->setBrush(debugPiece.m_textColor);
-                    painter->setPen(debugPiece.m_textColor);
-                    painter->drawText(cellRect, Qt::AlignCenter, debugPiece.m_text);
+                    painter->setBrush(debugPiece.m_textColor.toQColor());
+                    painter->setPen(debugPiece.m_textColor.toQColor());
+                    painter->drawText(cellRect, Qt::AlignCenter, QString::fromStdString(debugPiece.m_text));
                 }
 
                 painter->setTransform(oldTransform);
@@ -346,8 +347,10 @@ void SpriteMapPainter::paintMinimap(QPainter*        painter,
 
     for (const auto& [y, row] : spriteMap->m_planes[m_depth].m_merged.m_rows) {
         for (const auto& [x, cell] : row.m_cells) {
-            if (cell.m_colorUnblocked.isValid() && cell.m_colorBlocked.isValid())
-                img.setPixelColor(x, y, cell.m_player ? cell.m_colorPlayer : (cell.m_blocked && !cell.m_visitable ? cell.m_colorBlocked : cell.m_colorUnblocked));
+            if (cell.m_colorUnblocked.isValid() && cell.m_colorBlocked.isValid()) {
+                auto color = cell.m_player ? cell.m_colorPlayer : (cell.m_blocked && !cell.m_visitable ? cell.m_colorBlocked : cell.m_colorUnblocked);
+                img.setPixelColor(x, y, color.toQColor());
+            }
         }
     }
 
@@ -364,3 +367,5 @@ void SpriteMapPainter::paintMinimap(QPainter*        painter,
 }
 
 }
+
+#endif

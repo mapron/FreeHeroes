@@ -10,21 +10,21 @@
 #include "GuiResourceExport.hpp"
 #include "MernelPlatform/FsUtils.hpp"
 
-#include <QMap>
+#include <map>
 
 namespace FreeHeroes::Gui {
 
 struct GUIRESOURCE_EXPORT Sprite : public ISprite {
-    QPixmap m_bitmap;
+    Pixmap m_bitmap;
 
     struct FrameImpl {
-        QPoint m_padding;
-        bool   m_hasBitmap = true;
+        PixmapPoint m_padding;
+        bool        m_hasBitmap = true;
 
-        QSize  m_bitmapSize;
-        QPoint m_bitmapOffset;
+        PixmapSize  m_bitmapSize;
+        PixmapPoint m_bitmapOffset;
 
-        QSize m_boundarySize;
+        PixmapSize m_boundarySize;
     };
 
     struct Group {
@@ -35,7 +35,7 @@ struct GUIRESOURCE_EXPORT Sprite : public ISprite {
         mutable SpriteSequencePtr m_cache;
     };
 
-    QSize m_boundarySize;
+    PixmapSize m_boundarySize;
 
     SpriteSequenceMask m_mask;
 
@@ -45,7 +45,8 @@ struct GUIRESOURCE_EXPORT Sprite : public ISprite {
     void save(const Mernel::std_path& jsonFilePath) const;
 
     int               getGroupsCount() const override { return static_cast<int>(m_groups.size()); }
-    QList<int>        getGroupsIds() const override;
+    std::vector<int>  getGroupsIds() const override;
+    bool              hasGroupId(int group) const override { return m_groups.contains(group); }
     SpriteSequencePtr getFramesForGroup(int group) const override;
 };
 
