@@ -19,6 +19,8 @@ public:
     }
 
     void drawPixmap(const PixmapPoint& offset, const Pixmap& pixmap, bool flipHor = false, bool flipVert = false);
+    void drawRect(const PixmapPoint& topLeft, const PixmapSize& size, const PixmapColor& color);
+
     void translate(int x, int y)
     {
         m_offset.m_x += x;

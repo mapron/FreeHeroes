@@ -32,18 +32,17 @@ void SpriteMapPainterPixmap::paint(Painter*         painter,
     const int tileSize = m_settings->m_tileSize;
 
     auto drawHeroFlag = [painter](const PixmapColor& color) {
-        // @todo:
-        /*
-        painter->setBrush(color);
-        painter->setPen(Qt::NoPen);
-        painter->drawRect(10, 9, 10, 7);
-        painter->drawPolygon(QPolygonF(QVector<QPointF>{ { 1, 10 }, { 10, 10 }, { 10, 14 } }));
-        painter->drawPolygon(QPolygonF(QVector<QPointF>{ { 1, 16 }, { 10, 16 }, { 10, 12 } }));
-        painter->drawRect(4, 16, 4, 1);
+        painter->drawRect(PixmapPoint(10, 9), PixmapSize(10, 7), color);
+        painter->drawRect(PixmapPoint(7, 10), PixmapSize(3, 6), color);
+        painter->drawRect(PixmapPoint(2, 10), PixmapSize(5, 1), color);
+        painter->drawRect(PixmapPoint(4, 11), PixmapSize(3, 1), color);
+        painter->drawRect(PixmapPoint(4, 14), PixmapSize(3, 1), color);
+        painter->drawRect(PixmapPoint(2, 15), PixmapSize(5, 1), color);
+        painter->drawRect(PixmapPoint(4, 16), PixmapSize(4, 1), color);
 
-        painter->setBrush(color.darker(120));
-        painter->drawRect(16, 9, 3, 7);*/
-        //painter->draw
+        painter->drawRect(PixmapPoint(16, 9), PixmapSize(3, 7), PixmapColor(0, 0, 0, 30));
+        painter->drawRect(PixmapPoint(14, 9), PixmapSize(6, 7), PixmapColor(0, 0, 0, 20));
+        painter->drawRect(PixmapPoint(4, 16), PixmapSize(4, 1), PixmapColor(0, 0, 0, 30));
     };
 
     auto drawCell = [painter, tileSize, animationFrameOffsetTerrain, animationFrameOffsetObjects, &drawHeroFlag, this](const SpriteMap::Cell& cell, int x, int y) {

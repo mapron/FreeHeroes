@@ -152,7 +152,7 @@ int main(int argc, char** argv)
     if (!checkApiCall("convert_lod 2", [&api, lodPath2, userPath] { return api.convert_lod(lodPath2.c_str(), userPath.c_str()); }))
         return 1;
 
-    const std::string mapPath = heroesPath + "/Maps/[HotA] Air Supremacy.h3m"; // 1.7.0 map!
+    const std::string mapPath = "D:/Games/Heroes3_HotA_170/Maps/not_so_simple_17.h3m"; //heroesPath + "/Maps/[HotA] Air Supremacy.h3m"; // 1.7.0 map!
 
     if (!checkApiCall("map_load", [&api, mapPath] { return api.map_load(mapPath.c_str()); }))
         return 1;
@@ -171,8 +171,8 @@ int main(int argc, char** argv)
     if (!checkApiCall("map_derandomize", [&api, mapPath] { return api.map_derandomize(); }))
         return 1;
 
-    const int paintXoffset = 2;
-    const int paintYoffset = 2;
+    const int paintXoffset = 13;
+    const int paintYoffset = 6;
     const int paintZoffset = 0; // surface
 
     const int paintWidth  = 10;

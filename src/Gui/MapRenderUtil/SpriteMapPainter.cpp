@@ -108,7 +108,6 @@ void SpriteMapPainter::paint(QPainter*        painter,
 
         painter->setBrush(color.darker(120));
         painter->drawRect(16, 9, 3, 7);
-        //painter->draw
     };
 
     auto drawCell = [painter, tileSize, animationFrameOffsetTerrain, animationFrameOffsetObjects, &drawOverlayText, &drawHeroFlag, this](const SpriteMap::Cell& cell, int x, int y, bool isOverlayPass) {

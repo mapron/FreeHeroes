@@ -29,11 +29,12 @@ void Painter::drawPixmap(const PixmapPoint& offset, const Pixmap& pixmap, bool f
     int w = pixmap.m_size.m_width;
     for (int y = 0; y < h; ++y) {
         for (int x = 0; x < w; ++x) {
-            auto&     srcColor = pixmap.get(x, y);
-            const int destX    = (flipHor ? w - x - 1 : x) + offset.m_x + m_offset.m_x;
-            const int destY    = (flipVert ? h - y - 1 : y) + offset.m_y + m_offset.m_y;
+            const int destX = (flipHor ? w - x - 1 : x) + offset.m_x + m_offset.m_x;
+            const int destY = (flipVert ? h - y - 1 : y) + offset.m_y + m_offset.m_y;
             if (!m_canvas.inBounds(destX, destY))
                 continue;
+
+            auto& srcColor  = pixmap.get(x, y);
             auto& destColor = m_canvas.get(destX, destY);
             if (srcColor.m_color.m_a == 255)
                 destColor = srcColor;
@@ -41,6 +42,27 @@ void Painter::drawPixmap(const PixmapPoint& offset, const Pixmap& pixmap, bool f
                 continue;
             else
                 blend(destColor.m_color, srcColor.m_color);
+        }
+    }
+}
+
+void Painter::drawRect(const PixmapPoint& topLeft, const PixmapSize& size, const PixmapColor& color)
+{
+    if (color.m_a == 0)
+        return;
+    int h = size.m_height;
+    int w = size.m_width;
+    for (int y = 0; y < h; ++y) {
+        for (int x = 0; x < w; ++x) {
+            const int destX = x + topLeft.m_x + m_offset.m_x;
+            const int destY = y + topLeft.m_y + m_offset.m_y;
+            if (!m_canvas.inBounds(destX, destY))
+                continue;
+            auto& destColor = m_canvas.get(destX, destY);
+            if (color.m_a == 255)
+                destColor.m_color = color;
+            else
+                blend(destColor.m_color, color);
         }
     }
 }

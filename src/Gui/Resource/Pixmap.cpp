@@ -177,10 +177,17 @@ void PixmapColor::fromString(const std::string& str) noexcept
         ptr++;
     const uint32_t pix = std::strtoul(ptr, nullptr, 16);
 
-    m_a = pix & 0xFFU;
-    m_b = (pix & (0xFFU << 8)) >> 8;
-    m_g = (pix & (0xFFU << 16)) >> 16;
-    m_r = (pix & (0xFFU << 24)) >> 24;
+    if (str.size() >= 8) {
+        m_a = pix & 0xFFU;
+        m_b = (pix & (0xFFU << 8)) >> 8;
+        m_g = (pix & (0xFFU << 16)) >> 16;
+        m_r = (pix & (0xFFU << 24)) >> 24;
+    } else {
+        m_b = pix & 0xFFU;
+        m_g = (pix & (0xFFU << 8)) >> 8;
+        m_r = (pix & (0xFFU << 16)) >> 16;
+        m_a = 255;
+    }
 }
 
 #ifndef DISABLE_QT
