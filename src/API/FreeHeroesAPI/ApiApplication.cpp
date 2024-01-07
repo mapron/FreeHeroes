@@ -114,9 +114,10 @@ void ApiApplication::init(const std::string& appResourcePath, const std::string&
     Logger(Logger::Info) << "CoreApplication::load - end";
 }
 
-void ApiApplication::convertLoD(const std::string& lodPath, const std::string& userResourcePath) noexcept(false)
+void ApiApplication::convertLoD(const std::string& lodPath, const std::string& appResourcePath, const std::string& userResourcePath) noexcept(false)
 {
     const auto settings = GameExtract::Settings{
+        .m_appResourcePath    = Mernel::string2path(appResourcePath),
         .m_archiveExtractRoot = Mernel::string2path(userResourcePath + "/Archives"),
         .m_mainExtractRoot    = Mernel::string2path(userResourcePath + "/Imported"),
         .m_forceExtract       = false,
@@ -312,9 +313,9 @@ bool ApiApplicationNoexcept::init(const char* appResourcePath, const char* userR
     return m_impl->handle("init", [=, this] { m_impl->m_app.init(appResourcePath, userResourcePath); });
 }
 
-bool ApiApplicationNoexcept::convertLoD(const char* lodPath, const char* userResourcePath) noexcept
+bool ApiApplicationNoexcept::convertLoD(const char* lodPath, const char* appResourcePath, const char* userResourcePath) noexcept
 {
-    return m_impl->handle("convertLoD", [=, this] { m_impl->m_app.convertLoD(lodPath, userResourcePath); });
+    return m_impl->handle("convertLoD", [=, this] { m_impl->m_app.convertLoD(lodPath, appResourcePath, userResourcePath); });
 }
 
 bool ApiApplicationNoexcept::loadMap(const char* mapPath) noexcept

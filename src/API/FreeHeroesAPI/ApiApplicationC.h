@@ -60,7 +60,7 @@ FREEHEROESAPI_EXPORT FHResult fh_init_v1(FHAppHandle app, FHString mainResourceP
 
 /// Convert lodPath=/path/to/bitmap.lod to fhmod format. Result is extracted in userResourcePath
 /// @todo: single-file resources?
-FREEHEROESAPI_EXPORT FHResult fh_convert_lod_v1(FHAppHandle app, FHString lodPath, FHString userResourcePath);
+FREEHEROESAPI_EXPORT FHResult fh_convert_lod_v1(FHAppHandle app, FHString lodPath, FHString appResourcePath, FHString userResourcePath);
 
 /// mapFile is path to .h3m or fh .json map file.
 FREEHEROESAPI_EXPORT FHResult fh_map_load_v1(FHAppHandle app, FHString mapFile);
@@ -96,7 +96,7 @@ typedef struct {
     FHString (*get_last_output)(FHAppHandle);
 
     FHResult (*init)(FHAppHandle, FHString, FHString);
-    FHResult (*convert_lod)(FHAppHandle, FHString, FHString);
+    FHResult (*convert_lod)(FHAppHandle, FHString, FHString, FHString);
     FHResult (*map_load)(FHAppHandle, FHString);
     int (*get_map_version)(FHAppHandle);
     int (*get_map_width)(FHAppHandle);
@@ -144,7 +144,7 @@ typedef struct {
     FHString (*get_last_output)(void);
 
     FHResult (*init)(FHString, FHString);
-    FHResult (*convert_lod)(FHString, FHString);
+    FHResult (*convert_lod)(FHString, FHString, FHString);
     FHResult (*map_load)(FHString);
     int (*get_map_version)(void);
     int (*get_map_width)(void);
