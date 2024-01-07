@@ -69,11 +69,11 @@ FHResult fh_init_v1(FHAppHandle app, FHString mainResourcePath, FHString userRes
         return 0;
     return toApp(app)->init(mainResourcePath, userResourcePath);
 }
-FHResult fh_convert_lod_v1(FHAppHandle app, FHString lodPath, FHString userResourcePath)
+FHResult fh_convert_lod_v1(FHAppHandle app, FHString lodPath, FHString appResourcePath, FHString userResourcePath)
 {
     if (!app)
         return 0;
-    return toApp(app)->convertLoD(lodPath, userResourcePath);
+    return toApp(app)->convertLoD(lodPath, appResourcePath, userResourcePath);
 }
 
 FHResult fh_map_load_v1(FHAppHandle app, FHString mapFile)
@@ -175,9 +175,9 @@ FHResult fh_global_init_v1(FHString mainResourcePath, FHString userResourcePath)
 {
     return fh_init_v1(g_globalHandle, mainResourcePath, userResourcePath);
 }
-FHResult fh_global_convert_lod_v1(FHString lodPath, FHString userResourcePath)
+FHResult fh_global_convert_lod_v1(FHString lodPath, FHString appResourcePath, FHString userResourcePath)
 {
-    return fh_convert_lod_v1(g_globalHandle, lodPath, userResourcePath);
+    return fh_convert_lod_v1(g_globalHandle, lodPath, appResourcePath, userResourcePath);
 }
 FHResult fh_global_map_load_v1(FHString mapFile)
 {

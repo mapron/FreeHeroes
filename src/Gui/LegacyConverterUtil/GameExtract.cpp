@@ -371,9 +371,9 @@ void GameExtract::run(const DetectedSources& sources) const
     TaskQueue       taskQueue;
     ConcatProcessor concatProcessor;
 
-    const auto appRoot = AppLocations("").getBinDir();
+    const auto appRoot = m_settings.m_appResourcePath;
 
-    KnownResources knownResources(appRoot / "gameResources" / "knownResources.json", appRoot / "gameResources" / "knownResourcesPostProcess.json");
+    KnownResources knownResources(appRoot / "knownResources.json", appRoot / "knownResourcesPostProcess.json");
 
     for (const ArchiveWrapper& wrapper : archiveWrappers) {
         if (wrapper.m_doSkip)
