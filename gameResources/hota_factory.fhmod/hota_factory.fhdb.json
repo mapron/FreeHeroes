@@ -411,23 +411,22 @@
 
 "records": {
 
-"sod.unit.halfling"            : [ "Halfling"             ,  [[ 1,  3], [4 ,  2],   4, 5, 24],     ["ranged"                        ],  "hota.faction.factory"         ,   10,      15,     "40"  ,             0,   75 ,  110 ,  110  ,  ["hota.unit.halflingGrenadier"    ], [15, 25]          ],
-"hota.unit.halflingGrenadier"  : [ "Halfling Grenadier"   ,  [[ 1,  3], [4 ,  2],   4, 5, 24],     ["ranged"                        ],  "hota.faction.factory"         ,   11,      16,     "35"  ,            76,   95 ,  100 ,  100                                                            ],
-"hota.unit.mechanic"           : [ "Mechanic"             ,  [[ 2,  4], [ 7,  4],  15, 5],         [                                ],  "hota.faction.factory"         ,   20,      9 ,     "110" ,           186,   186,   90 ,   90  ,  ["hota.unit.engineer"             ], [6, 9]            ],
-"hota.unit.engineer"           : [ "Engineer"             ,  [[ 3,  4], [ 8,  6],  15, 6],         [                                ],  "hota.faction.factory"         ,   21,      9 ,     "140" ,           232,   278,  100 ,  100                                                            ],
-"hota.unit.armadillo"          : [ "Armadillo"            ,  [[ 3,  7], [ 8,  6],  15, 6, 4],      [                                ],  "hota.faction.factory"         ,   30,      7 ,     "225" ,           248,   198,  120 ,  120  ,  ["hota.unit.belArmadillo"         ], [4, 7]            ],
-"hota.unit.belArmadillo"       : [ "Bellwether Armadillo" ,  [[ 3,  7], [10,  8],  15, 7, 4],      [                                ],  "hota.faction.factory"         ,   31,      7 ,     "275" ,           256,   256,  120 ,  120                                                            ],
-"hota.unit.automaton"          : [ "Automaton"            ,  [[ 6,  9], [10,  8],  30, 9],         [                                ],  "hota.faction.factory"         ,   40,      4 ,     "275" ,           398,   669,  100 ,  100  ,  ["hota.unit.sentAutomaton"        ]                    ],
-"hota.unit.sentAutomaton"      : [ "Sentinel Automaton"   ,  [[ 6, 10], [11,  8],  30, 11],        [                                ],  "hota.faction.factory"         ,   41,      4 ,     "325" ,           631,   947,  110 ,  110                                                            ],
-
-"hota.unit.sandworm"           : [ "Sandworm"             ,  [[10, 14], [12,  7],  35, 6, 12],     [                                ],  "hota.faction.factory"         ,   50,      3 ,     "515" ,           793,   991 ,  120 ,  120  ,  ["hota.unit.upgSandworm"          ]                    ],
-"hota.unit.upgSandworm"        : [ "Olgoi-Korkoi"         ,  [[10, 16], [12,  9],  35, 7, 12],     [                                ],  "hota.faction.factory"         ,   51,      3 ,     "565" ,           894,   1220,  125 ,  125                                                            ],
-"hota.unit.gunslinger"         : [ "Gunslinger"           ,  [[18, 22], [13, 16],  80, 6],         [                                ],  "hota.faction.factory"         ,   60,      2 ,     "1000",           904,   1351,  100 ,  100  ,  ["hota.unit.bountyHunter"         ]                    ],
-"hota.unit.bountyHunter"       : [ "Bounty Hunter"        ,  [[18, 22], [14, 17],  90, 7],         [                                ],  "hota.faction.factory"         ,   61,      2 ,     "1300",           932,   1454,  100 ,  100                                                            ],
-"hota.unit.couatl"             : [ "Couatl"               ,  [[30, 55], [22, 16], 180, 9],         [                                ],  "hota.faction.factory"         ,   70,      1 ,     "2300,sulfur=1", 2521,   3574,  100 ,  100  ,  ["hota.unit.crimsonCouatl"        ]                    ],
-"hota.unit.crimsonCouatl"      : [ "Crimson Couatl"       ,  [[30, 55], [29, 20], 300, 12],        [                                ],  "hota.faction.factory"         ,   71,      1 ,     "4000,sulfur=2", 3815,   5341,  110 ,  105                                                            ],
-"hota.unit.dreadnought"        : [ "Dreadnought"          ,  [[30, 55], [22, 16], 180, 9],         [                                ],  "hota.faction.factory"         ,   70,      1 ,     "2300,sulfur=1", 3879,   3879,  100 ,  100  ,  ["hota.unit.juggernaut"            ]                   ],
-"hota.unit.juggernaut"         : [ "Juggernaut"           ,  [[30, 55], [29, 20], 300, 12],        [                                ],  "hota.faction.factory"         ,   71,      1 ,     "4000,sulfur=2", 5361,   6433,  110 ,  105                                                            ]
+"sod.unit.halfling"            : [ "Halfling"             ,  [[ 1,  3], [ 4,  2],   4,  5, 24],   ["ranged"                        ],  "hota.faction.factory"         ,   10,      15,     "40" ,              0,     75 ,  110 ,  110  ,  ["hota.unit.halflingGrenadier"    ], [15, 25]          ],
+"hota.unit.halflingGrenadier"  : [ "Halfling Grenadier"   ,  [[ 2,  3], [ 5,  2],   4,  6, 24],   ["ranged"                        ],  "hota.faction.factory"         ,   11,      15,     "65" ,             76,     95 ,  110 ,  110                                                            ],
+"hota.unit.mechanic"           : [ "Mechanic"             ,  [[ 2,  4], [ 6,  5],  14,  6],       [                                ],  "hota.faction.factory"         ,   20,      8 ,     "140",            186,     186,  100 ,  100  ,  ["hota.unit.engineer"             ], [4, 6]            ],
+"hota.unit.engineer"           : [ "Engineer"             ,  [[ 2,  5], [ 7,  5],  16,  7],       [                                ],  "hota.faction.factory"         ,   21,      8 ,     "170",            232,     278,  100 ,  100                                                            ],
+"hota.unit.armadillo"          : [ "Armadillo"            ,  [[ 3,  5], [ 5, 10],  25,  4],       ["large"                         ],  "hota.faction.factory"         ,   30,      6 ,     "200",            248,     198,  100 ,  100  ,  ["hota.unit.belArmadillo"         ], [4, 6]            ],
+"hota.unit.belArmadillo"       : [ "Bellwether Armadillo" ,  [[ 3,  5], [ 5, 11],  25,  6],       ["large"                         ],  "hota.faction.factory"         ,   31,      6 ,     "230",            256,     256,  100 ,  100                                                            ],
+"hota.unit.automaton"          : [ "Automaton"            ,  [[ 7,  7], [12, 10],  30,  8],       ["large"                         ],  "hota.faction.factory"         ,   40,      5 ,     "350",            398,     669,  100 ,  100  ,  ["hota.unit.sentAutomaton"        ]                    ],
+"hota.unit.sentAutomaton"      : [ "Sentinel Automaton"   ,  [[ 9,  9], [12, 10],  30,  9],       ["large"                         ],  "hota.faction.factory"         ,   41,      5 ,     "450",            631,     947,  100 ,  100                                                            ],
+"hota.unit.sandworm"           : [ "Sandworm"             ,  [[12, 16], [13, 12],  50,  8],       ["large", "teleport"             ],  "hota.faction.factory"         ,   50,      3 ,     "575",            793,    991 ,  100 ,  100  ,  ["hota.unit.upgSandworm"          ]                    ],
+"hota.unit.upgSandworm"        : [ "Olgoi-Korkoi"         ,  [[12, 16], [15, 12],  60, 10],       ["large", "teleport"             ],  "hota.faction.factory"         ,   51,      3 ,     "650",            894,    1220,  100 ,  100                                                            ],
+"hota.unit.gunslinger"         : [ "Gunslinger"           ,  [[14, 24], [17, 12],  45,  7, 16],   ["ranged"                        ],  "hota.faction.factory"         ,   60,      2 ,     "800",            904,    1351,  120 ,  120  ,  ["hota.unit.bountyHunter"         ]                    ],
+"hota.unit.bountyHunter"       : [ "Bounty Hunter"        ,  [[14, 24], [18, 14],  45,  8, 25],   ["ranged"                        ],  "hota.faction.factory"         ,   61,      2 ,     "1100",           932,    1454,  120 ,  120                                                            ],
+"hota.unit.couatl"             : [ "Couatl"               ,  [[25, 45], [17, 17], 160, 11],       ["large","fly"                   ],  "hota.faction.factory"         ,   70,      1 ,     "2000",           2521,   3574,  100 ,  100  ,  ["hota.unit.crimsonCouatl"        ]                    ],
+"hota.unit.crimsonCouatl"      : [ "Crimson Couatl"       ,  [[25, 45], [21, 21], 200, 15],       ["large","fly"                   ],  "hota.faction.factory"         ,   71,      1 ,     "3500,crystal=1", 3815,   5341,  100 ,  100                                                            ],
+"hota.unit.dreadnought"        : [ "Dreadnought"          ,  [[40, 50], [18, 20], 200,  6],       ["large"                         ],  "hota.faction.factory"         ,   70,      1 ,     "2500,crystal=1", 3879,   3879,  100 ,  100  ,  ["hota.unit.juggernaut"            ]                   ],
+"hota.unit.juggernaut"         : [ "Juggernaut"           ,  [[40, 50], [23, 23], 300,  7],       ["large"                         ],  "hota.faction.factory"         ,   71,      1 ,     "4000,crystal=2", 5361,   6433,  100 ,  100                                                            ]
 
 }
 
@@ -439,28 +438,29 @@
 
 "uiOnly": true,
 
-"compactCols":    [       {"pres": [    "spriteBattle"                                   ,    "portrait"                   ,  "portraitSM"                    ,  "soundId", "soundHasShoot", "soundHasMovementStart", "spriteProjectile"]} ],
+"compactCols":        [       {"pres": [    "spriteBattle"                       ,    "portrait"                   ,  "portraitSM"                      ,  "soundId", "soundHasShoot", "soundHasMovementStart", "spriteProjectile"]} ],
 
 "records": {
-"hota.unit.halflingGrenadier"         : [ [  "halberdier-battle"             , "sod-sprites-portraitsLarge:3"  , "sod-sprites-portraitsSmall:3"   ,  "halb"   ,   false        , false                  ,  ""               ]  ],
-"hota.unit.mechanic"                  : [ [  "archer-battle"                 , "sod-sprites-portraitsLarge:4"  , "sod-sprites-portraitsSmall:4"   ,  "lcrs"   ,   true         , false                  ,  "plcbowx"        ]  ],
-"hota.unit.engineer"                  : [ [  "marksman-battle"               , "sod-sprites-portraitsLarge:5"  , "sod-sprites-portraitsSmall:5"   ,  "hcrs"   ,   true         , false                  ,  "plcbowx"        ]  ],
-"hota.unit.armadillo"                 : [ [  "griffin-battle"                , "sod-sprites-portraitsLarge:6"  , "sod-sprites-portraitsSmall:6"   ,  "grif"   ,   false        , false                  ,  ""               ]  ],
-"hota.unit.belArmadillo"              : [ [  "royalGriffin-battle"           , "sod-sprites-portraitsLarge:7"  , "sod-sprites-portraitsSmall:7"   ,  "rgrf"   ,   false        , false                  ,  ""               ]  ],
-"hota.unit.automaton"                 : [ [  "swordsman-battle"              , "sod-sprites-portraitsLarge:8"  , "sod-sprites-portraitsSmall:8"   ,  "swrd"   ,   false        , false                  ,  ""               ]  ],
-"hota.unit.sentAutomaton"             : [ [  "crusader-battle"               , "sod-sprites-portraitsLarge:9"  , "sod-sprites-portraitsSmall:9"   ,  "crus"   ,   false        , false                  ,  ""               ]  ],
+"hota.unit.halflingGrenadier"         : [ [  "halflingBrigadier-battle"          , "sod-sprites-portraitsLarge:173"  , "sod-sprites-portraitsSmall:173"  ,  "half"   ,   true         , false                  ,  "pbomb"          ]  ],
+"hota.unit.mechanic"                  : [ [  "mechanic-battle"                   , "sod-sprites-portraitsLarge:174"  , "sod-sprites-portraitsSmall:174"  ,  "mech"   ,   false        , false                  ,  ""               ]  ],
+"hota.unit.engineer"                  : [ [  "enigneer-battle"                   , "sod-sprites-portraitsLarge:175"  , "sod-sprites-portraitsSmall:175"  ,  "mech"   ,   false        , false                  ,  ""               ]  ],
+"hota.unit.armadillo"                 : [ [  "armadillo-battle"                  , "sod-sprites-portraitsLarge:176"  , "sod-sprites-portraitsSmall:176"  ,  "arma"   ,   false        , false                  ,  ""               ]  ],
+"hota.unit.belArmadillo"              : [ [  "armadilloBellwether-battle"        , "sod-sprites-portraitsLarge:177"  , "sod-sprites-portraitsSmall:177"  ,  "arma"   ,   false        , false                  ,  ""               ]  ],
+"hota.unit.automaton"                 : [ [  "automaton-battle"                  , "sod-sprites-portraitsLarge:178"  , "sod-sprites-portraitsSmall:178"  ,  "auto"   ,   false        , false                  ,  ""               ]  ],
+"hota.unit.sentAutomaton"             : [ [  "automatonSentinel-battle"          , "sod-sprites-portraitsLarge:179"  , "sod-sprites-portraitsSmall:179"  ,  "auto"   ,   false        , false                  ,  ""               ]  ],
 
-"hota.unit.sandworm"                  : [ [  "monk-battle"                   , "sod-sprites-portraitsLarge:10" , "sod-sprites-portraitsSmall:10"  ,  "monk"   ,   true         , false                  ,  "cprzeax"        ]  ],
-"hota.unit.upgSandworm"               : [ [  "zealot-battle"                 , "sod-sprites-portraitsLarge:11" , "sod-sprites-portraitsSmall:11"  ,  "zelt"   ,   true         , false                  ,  "cprzeax"        ]  ],
-"hota.unit.gunslinger"                : [ [  "cavalier-battle"               , "sod-sprites-portraitsLarge:12" , "sod-sprites-portraitsSmall:12"  ,  "cava"   ,   false        , false                  ,  ""               ]  ],
-"hota.unit.bountyHunter"              : [ [  "champion-battle"               , "sod-sprites-portraitsLarge:13" , "sod-sprites-portraitsSmall:13"  ,  "chmp"   ,   false        , false                  ,  ""               ]  ],
-"hota.unit.couatl"                    : [ [  "angel-battle"                  , "sod-sprites-portraitsLarge:14" , "sod-sprites-portraitsSmall:14"  ,  "angl"   ,   false        , false                  ,  ""               ]  ],
-"hota.unit.crimsonCouatl"             : [ [  "archangel-battle"              , "sod-sprites-portraitsLarge:15" , "sod-sprites-portraitsSmall:15"  ,  "aagl"   ,   false        , false                  ,  ""               ]  ],
-"hota.unit.dreadnought"               : [ [  "angel-battle"                  , "sod-sprites-portraitsLarge:14" , "sod-sprites-portraitsSmall:14"  ,  "angl"   ,   false        , false                  ,  ""               ]  ],
-"hota.unit.juggernaut"                : [ [  "archangel-battle"              , "sod-sprites-portraitsLarge:15" , "sod-sprites-portraitsSmall:15"  ,  "aagl"   ,   false        , false                  ,  ""               ]  ]
+"hota.unit.sandworm"                  : [ [  "sandworm-battle"                   , "sod-sprites-portraitsLarge:180"  , "sod-sprites-portraitsSmall:180"  ,  "worm"   ,   false        , false                  ,  ""               ]  ],
+"hota.unit.upgSandworm"               : [ [  "olgoi-battle"                      , "sod-sprites-portraitsLarge:181"  , "sod-sprites-portraitsSmall:181"  ,  "worm"   ,   false        , false                  ,  ""               ]  ],
+"hota.unit.gunslinger"                : [ [  "gunslinger-battle"                 , "sod-sprites-portraitsLarge:182"  , "sod-sprites-portraitsSmall:182"  ,  "guns"   ,   true         , false                  ,  "aairmark"       ]  ],
+"hota.unit.bountyHunter"              : [ [  "bountyHunter-battle"               , "sod-sprites-portraitsLarge:183"  , "sod-sprites-portraitsSmall:183"  ,  "guns"   ,   true         , false                  ,  "aairmark"       ]  ],
+"hota.unit.couatl"                    : [ [  "firebird-battle"                   , "sod-sprites-portraitsLarge:184"  , "sod-sprites-portraitsSmall:184"  ,  "ccot"   ,   false        , false                  ,  ""               ]  ],
+"hota.unit.crimsonCouatl"             : [ [  "phoenix-battle"                    , "sod-sprites-portraitsLarge:185"  , "sod-sprites-portraitsSmall:185"  ,  "ccot"   ,   false        , false                  ,  ""               ]  ],
+"hota.unit.dreadnought"               : [ [  "dreadnaught-battle"                , "sod-sprites-portraitsLarge:186"  , "sod-sprites-portraitsSmall:186"  ,  "dred"   ,   false        , false                  ,  ""               ]  ],
+"hota.unit.juggernaut"                : [ [  "juggernaut-battle"                 , "sod-sprites-portraitsLarge:187"  , "sod-sprites-portraitsSmall:187"  ,  "dred"   ,   false        , false                  ,  ""               ]  ]
 }
 
 },
+
 
 {
 "scope": "units",

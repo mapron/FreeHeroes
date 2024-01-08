@@ -19,7 +19,7 @@ QVector<QPointF> getSelectionRegionBorder(const QImage& img, QPointF offset)
     for (int h = 0; h < img.height(); ++h) {
         for (int w = 0; w < img.width(); ++w) {
             const auto alpha = img.pixelColor(w, h).alpha();
-            if (alpha % 16 == 1) // logic in SpriteFile.cpp palette stuff.
+            if (alpha % 16 == 1) // logic in SpriteFile.cpp palette stuff.  @fixme: broken atm? no alpha=1 pixels in sprites?
                 points << QPointF(w, h) + offset;
         }
     }
