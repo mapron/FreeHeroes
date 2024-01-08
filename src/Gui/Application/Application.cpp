@@ -94,7 +94,7 @@ Application::Application(CoreApplication*   coreApp,
     m_impl->extraTs = QString::fromStdString(tsExtraModule);
     QApplication::setApplicationName(QString::fromUtf8(CoreApplication::getAppFolder()));
 
-    m_impl->appConfig = std::make_unique<Gui::AppSettings>(coreApp->getLocations().getAppdataDir(), "AppConfig.ini");
+    m_impl->appConfig = std::make_unique<Gui::AppSettings>(coreApp->getAppDataRoot(), "AppConfig.ini");
 
     m_impl->appConfig->load();
     QString currentLocale = m_impl->appConfig->global().localeId;
@@ -138,7 +138,7 @@ bool Application::load(int logLevel)
     }
 
     Logger(Logger::Info) << "Application::load - start";
-    const auto    binPath = m_impl->coreApp->getLocations().getBinDir();
+    const auto    binPath = m_impl->coreApp->getBinRoot();
     QString       binDir  = QString::fromStdString(path2string(binPath));
     QString       binDir2 = QString::fromStdWString(binPath.wstring());
     ProfilerScope scopeAll("Application::load");

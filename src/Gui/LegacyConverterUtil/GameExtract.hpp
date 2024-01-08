@@ -24,7 +24,7 @@ class KnownResources;
 class LEGACYCONVERTERUTIL_EXPORT GameExtract {
 public:
     struct Settings {
-        Mernel::std_path m_appResourcePath;
+        Mernel::std_path m_appResourcePath; // required path containing knownResources.json
         Mernel::std_path m_heroesRoot;
         Mernel::std_path m_archiveExtractRoot;
         Mernel::std_path m_mainExtractRoot;

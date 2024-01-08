@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
 
     fhApp.load();
 
-    ConverterDialog dlg(fhCoreApp.getDatabaseContainer());
+    ConverterDialog dlg(fhCoreApp.getDatabaseContainer(), &fhCoreApp);
     dlg.show();
 
     return app.exec();
