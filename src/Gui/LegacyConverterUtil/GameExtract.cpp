@@ -6,7 +6,6 @@
 #include "GameExtract.hpp"
 
 #ifndef DISABLE_QT
-#include "EnvDetect.hpp"
 #include "FsUtilsQt.hpp"
 #include "LocalizationConverter.hpp"
 #endif
@@ -24,7 +23,6 @@
 #include "MernelExecution/TaskQueueWatcher.hpp"
 #include "MernelExecution/TaskQueue.hpp"
 
-#include "MernelPlatform/AppLocations.hpp"
 #include "MernelPlatform/Logger.hpp"
 #include "MernelPlatform/Profiler.hpp"
 #include "MernelPlatform/StringUtils.hpp"
@@ -180,6 +178,8 @@ GameExtract::GameExtract(const Core::IGameDatabaseContainer* databaseContainer, 
     : m_databaseContainer(databaseContainer)
     , m_settings(std::move(settings))
 {
+    if (m_settings.m_appResourcePath.empty())
+        throw std::runtime_error("appResourcePath is required");
 }
 
 GameExtract::~GameExtract() = default;
@@ -188,16 +188,11 @@ GameExtract::DetectedSources GameExtract::probe() const
 {
     DetectedSources result;
     result.m_heroesRoot = m_settings.m_heroesRoot;
-    if (result.m_heroesRoot.empty()) {
-#ifndef DISABLE_QT
-        result.m_heroesRoot = findHeroes3Installation();
-#endif
-    }
     std::error_code ec;
     if (result.m_heroesRoot.empty() || !Mernel::std_fs::exists(result.m_heroesRoot, ec))
         return result;
 
-    sendMessage("Probing path:" + Mernel::path2string(result.m_heroesRoot));
+    sendMessage("Probing path: " + Mernel::path2string(result.m_heroesRoot));
 
     Mernel::std_path dataFolder  = findPathChild(result.m_heroesRoot, "data"),
                      mp3Folder   = findPathChild(result.m_heroesRoot, "mp3"),

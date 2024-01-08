@@ -5,10 +5,11 @@
  */
 #pragma once
 
+#include "MernelPlatform/FsUtils.hpp"
+
 #include "CoreApplicationExport.hpp"
 
 #include "IGameDatabase.hpp"
-#include "MernelPlatform/AppLocations.hpp"
 
 #include <memory>
 #include <map>
@@ -44,7 +45,10 @@ public:
     {
         return m_gameDatabaseContainer.get();
     }
-    const Mernel::AppLocations& getLocations() const { return m_locations; }
+    Mernel::std_path getAppDataRoot() const { return m_appDataRoot; }
+    Mernel::std_path getBinRoot() const { return m_binRoot; }
+    Mernel::std_path getUserResourcesPath() const { return m_userResources; }
+    Mernel::std_path getAppResourcesPath() const { return m_appResources; }
 
     static const char* getAppFolder();
 
@@ -53,7 +57,10 @@ private:
     std::shared_ptr<IRandomGeneratorFactory>      m_randomGeneratorFactory;
     std::shared_ptr<const IGameDatabaseContainer> m_gameDatabaseContainer;
 
-    Mernel::AppLocations m_locations;
+    Mernel::std_path m_appDataRoot;
+    Mernel::std_path m_binRoot;
+    Mernel::std_path m_userResources;
+    Mernel::std_path m_appResources;
 
     bool                     m_loadAppBinMods = true;
     bool                     m_loadUserMods   = false;

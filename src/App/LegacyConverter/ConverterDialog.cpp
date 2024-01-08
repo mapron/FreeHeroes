@@ -8,6 +8,7 @@
 #include "ui_ConverterDialog.h"
 
 #include "IGameDatabase.hpp"
+#include "CoreApplication.hpp"
 
 #include "GameExtract.hpp"
 
@@ -18,7 +19,6 @@
 // Platform
 #include "MernelPlatform/ShellUtils.hpp"
 #include "MernelPlatform/Logger.hpp"
-#include "MernelPlatform/AppLocations.hpp"
 
 #include <QFileDialog>
 #include <QDateTime>
@@ -40,16 +40,18 @@ void displayStatus(QLabel* label, bool status)
 
 }
 
-ConverterDialog::ConverterDialog(const Core::IGameDatabaseContainer* databaseContainer, QWidget* parent)
+ConverterDialog::ConverterDialog(const Core::IGameDatabaseContainer* databaseContainer,
+                                 const Core::CoreApplication*        coreApp,
+                                 QWidget*                            parent)
     : QDialog(parent)
     , m_ui(std::make_unique<Ui::ConverterDialog>())
-    , m_appData(Mernel::AppLocations("FreeHeroes").getAppdataDir())
-    , m_converterSettings(QString::fromStdString(path2string(m_appData / "ConverterSettings.ini")), QSettings::IniFormat)
+    , m_coreApp(coreApp)
+    , m_converterSettings(QString::fromStdString(path2string(m_coreApp->getAppDataRoot() / "ConverterSettings.ini")), QSettings::IniFormat)
     , m_databaseContainer(databaseContainer)
 {
     m_ui->setupUi(this);
 
-    m_ui->dstPath->setText(QString::fromStdString(path2string(m_appData / "Resources" / "Imported")));
+    m_ui->dstPath->setText(QString::fromStdString(path2string(m_coreApp->getUserResourcesPath())));
     m_ui->dstPath->setFrame(false);
 
     QString path = m_converterSettings.value("srcPath").toString();
@@ -91,7 +93,7 @@ ConverterDialog::ConverterDialog(const Core::IGameDatabaseContainer* databaseCon
     connect(m_ui->pushButtonCleanupUnpack, &QPushButton::clicked, this, &ConverterDialog::cleanUnpackDestination);
     pathChanged();
 
-    GameExtract extractor(m_databaseContainer, GameExtract::Settings{ .m_heroesRoot = m_hotaInstallDir });
+    GameExtract extractor(m_databaseContainer, GameExtract::Settings{ .m_appResourcePath = m_coreApp->getAppResourcesPath(), .m_heroesRoot = m_hotaInstallDir });
     auto        res = extractor.probe();
 
     const bool ffmpegFound = !res.m_ffmpegPath.empty();
@@ -120,7 +122,7 @@ void ConverterDialog::pathChanged()
 {
     m_hotaInstallDir = QString2stdPath(m_ui->srcPath->text());
 
-    GameExtract extractor(m_databaseContainer, GameExtract::Settings{ .m_heroesRoot = m_hotaInstallDir });
+    GameExtract extractor(m_databaseContainer, GameExtract::Settings{ .m_appResourcePath = m_coreApp->getAppResourcesPath(), .m_heroesRoot = m_hotaInstallDir });
     auto        res = extractor.probe();
     displayStatus(m_ui->labelSodFoundStatus, res.m_hasSod);
     displayStatus(m_ui->labelHotaFoundStatus, res.m_hasHota);
@@ -137,10 +139,10 @@ void ConverterDialog::run()
     m_start = QDateTime::currentSecsSinceEpoch();
     m_ui->pushButtonConvert->setEnabled(false);
     m_thread = std::thread([this] {
-        const std_path baseExtract = QString2stdPath(m_ui->dstPath->text());
-        const std_path archives    = baseExtract.parent_path() / "Archives";
+        const std_path baseExtract = m_coreApp->getUserResourcesPath() / "Imported";
+        const std_path archives    = m_coreApp->getUserResourcesPath() / "Archives";
 
-        GameExtract extractor(m_databaseContainer, GameExtract::Settings{ .m_heroesRoot = m_hotaInstallDir, .m_archiveExtractRoot = archives, .m_mainExtractRoot = baseExtract });
+        GameExtract extractor(m_databaseContainer, GameExtract::Settings{ .m_appResourcePath = m_coreApp->getAppResourcesPath(), .m_heroesRoot = m_hotaInstallDir, .m_archiveExtractRoot = archives, .m_mainExtractRoot = baseExtract });
         auto        res = extractor.probe();
         extractor.setProgressCallback([this](int current, int total) { emit progressInternal(current, total); });
         extractor.run(res);

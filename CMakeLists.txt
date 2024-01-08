@@ -467,7 +467,8 @@ AddTarget( TYPE app_console NAME GameLegacyConverterCLI
         CoreResource
         CoreApplication
         LegacyConverterUtil
-
+        
+        [ NOT DISABLE_QT GuiUtils ]
         [ NOT DISABLE_QT QT_MODULES Gui ]
         COMPILE_DEFINITIONS [ DISABLE_QT DISABLE_QT ]
     )

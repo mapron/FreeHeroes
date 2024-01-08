@@ -20,6 +20,7 @@ class ConverterDialog;
 
 namespace FreeHeroes::Core {
 class IGameDatabaseContainer;
+class CoreApplication;
 }
 
 namespace FreeHeroes {
@@ -28,7 +29,9 @@ class GameExtract;
 class ConverterDialog : public QDialog {
     Q_OBJECT
 public:
-    ConverterDialog(const Core::IGameDatabaseContainer* databaseContainer, QWidget* parent = nullptr);
+    ConverterDialog(const Core::IGameDatabaseContainer* databaseContainer,
+                    const Core::CoreApplication*        coreApp,
+                    QWidget*                            parent = nullptr);
     ~ConverterDialog();
 
 signals:
@@ -46,7 +49,7 @@ private:
 private:
     std::unique_ptr<Ui::ConverterDialog>      m_ui;
     std::unique_ptr<GameExtract>              m_extract;
-    const Mernel::std_path                    m_appData;
+    const Core::CoreApplication* const        m_coreApp;
     Mernel::std_path                          m_hotaInstallDir;
     QSettings                                 m_converterSettings;
     const Core::IGameDatabaseContainer* const m_databaseContainer;

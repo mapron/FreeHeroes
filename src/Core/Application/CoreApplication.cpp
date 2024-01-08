@@ -5,6 +5,8 @@
  */
 #include "CoreApplication.hpp"
 
+#include "MernelPlatform/AppLocations.hpp"
+
 // Core
 #include "ResourceLibraryFactory.hpp"
 #include "GameDatabaseContainer.hpp"
@@ -20,8 +22,12 @@ constexpr const char* s_FHFolderName = "FreeHeroes";
 }
 
 CoreApplication::CoreApplication(const std::string& appName)
-    : m_locations(s_FHFolderName, appName)
 {
+    Mernel::AppLocations locations(s_FHFolderName, appName);
+    m_appDataRoot   = locations.getAppdataDir();
+    m_binRoot       = locations.getBinDir();
+    m_userResources = m_appDataRoot / "Resources";
+    m_appResources  = m_binRoot / "gameResources";
 }
 
 CoreApplication::~CoreApplication() = default;
@@ -36,7 +42,7 @@ void CoreApplication::initLogger(int debugLevel) const
         true,  /*outputTimeoffsets*/
         10,
         50000,
-        m_locations.getAppdataDir() / "Logs"));
+        m_appDataRoot / "Logs"));
 }
 
 bool CoreApplication::load()
@@ -49,10 +55,10 @@ bool CoreApplication::load()
     {
         ProfilerScope scope("ResourceLibrary search");
         if (m_loadUserMods)
-            factory.scanForMods(m_locations.getAppdataDir() / "Resources");
+            factory.scanForMods(m_userResources);
 
         if (m_loadAppBinMods)
-            factory.scanForMods(m_locations.getBinDir() / "gameResources");
+            factory.scanForMods(m_appResources);
     }
     {
         ProfilerScope scope("ResourceLibrary load");
