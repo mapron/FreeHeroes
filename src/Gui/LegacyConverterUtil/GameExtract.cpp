@@ -314,13 +314,12 @@ void GameExtract::run(const DetectedSources& sources) const
             wrapper.m_resourceModName = "hd_res.fhmod";
 
         if (Mernel::std_fs::exists(wrapper.m_folder)) {
-            if (m_settings.m_forceExtract) {
+            if (m_settings.m_skipIfFolderExist) {
+                wrapper.m_doSkip = true;
+                sendMessage("- " + wrapper.m_folderName + " : exists, SKIPPING");
+            } else {
                 wrapper.m_doExtract = true;
                 sendMessage("- " + wrapper.m_folderName + " : exists, but forcing re-EXTRACT from " + wrapper.m_datFilename);
-            } else {
-                if (m_settings.m_skipIfFolderExist)
-                    wrapper.m_doSkip = true;
-                sendMessage("- " + wrapper.m_folderName + " : exists, SKIPPING");
             }
         } else {
             wrapper.m_doExtract = true;
@@ -329,7 +328,7 @@ void GameExtract::run(const DetectedSources& sources) const
         wrapper.m_converter = std::make_unique<ConversionHandler>(wrapper.m_converterLog, ConversionHandler::Settings{
                                                                                               .m_inputs            = { .m_datFile = wrapper.m_dat, .m_folder = wrapper.m_folder },
                                                                                               .m_outputs           = { .m_folder = wrapper.m_folder },
-                                                                                              .m_forceWrite        = true,
+                                                                                              .m_forceWrite        = false,
                                                                                               .m_uncompressArchive = true,
                                                                                           });
     }
