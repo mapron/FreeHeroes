@@ -4,6 +4,7 @@
  * See LICENSE file for details.
  */
 #include "GameExtract.hpp"
+#include "thread"
 
 #ifndef DISABLE_QT
 #include "FsUtilsQt.hpp"
