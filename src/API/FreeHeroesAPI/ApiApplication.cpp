@@ -51,6 +51,10 @@ struct ApiApplication::Impl {
     std::string                     m_lastOutput;
     ApiApplicationNoexcept::MapInfo m_mapInfo;
 
+    Mernel::std_path                        m_appResourcePath;
+    Mernel::std_path                        m_userResourcePath;
+    Core::IResourceLibraryFactory::ModOrder m_modOrder = { "sod_res", "hota_res" };
+
     std::shared_ptr<const Core::IResourceLibrary>       m_resourceLibrary;
     std::shared_ptr<Core::IRandomGeneratorFactory>      m_randomGeneratorFactory;
     std::shared_ptr<const Core::IGameDatabaseContainer> m_gameDatabaseContainer;
@@ -86,18 +90,21 @@ void ApiApplication::init(const std::string& appResourcePath, const std::string&
 {
     Logger::SetLoggerBackend(std::make_unique<Impl::LoggerString>(m_impl->m_lastOutput));
 
-    Logger(Logger::Info) << "CoreApplication::load - start";
+    Logger(Logger::Info) << "init - start";
+
+    m_impl->m_appResourcePath  = string2path(appResourcePath);
+    m_impl->m_userResourcePath = string2path(userResourcePath);
 
     Core::ResourceLibraryFactory factory;
     {
         ProfilerScope scope("ResourceLibrary search");
-        factory.scanForMods(string2path(appResourcePath));
-        factory.scanForMods(string2path(userResourcePath));
+        factory.scanForMods(m_impl->m_appResourcePath);
+        factory.scanForMods(m_impl->m_userResourcePath);
     }
     {
         ProfilerScope scope("ResourceLibrary load");
         factory.scanModSubfolders();
-        m_impl->m_resourceLibrary = factory.create({ "sod_res", "hota_res" });
+        m_impl->m_resourceLibrary = factory.create(m_impl->m_modOrder);
     }
 
     m_impl->m_randomGeneratorFactory = std::make_shared<Core::RandomGeneratorFactory>();
@@ -111,15 +118,49 @@ void ApiApplication::init(const std::string& appResourcePath, const std::string&
         m_impl->m_graphicsLibrary = std::make_shared<Gui::GraphicsLibrary>(m_impl->m_resourceLibrary.get());
     }
 
-    Logger(Logger::Info) << "CoreApplication::load - end";
+    Logger(Logger::Info) << "init - end";
 }
 
-void ApiApplication::convertLoD(const std::string& lodPath, const std::string& appResourcePath, const std::string& userResourcePath) noexcept(false)
+void ApiApplication::reinit() noexcept(false)
+{
+    Logger(Logger::Info) << "reinit - start";
+
+    Core::ResourceLibraryFactory factory;
+    {
+        ProfilerScope scope("ResourceLibrary search");
+        factory.scanForMods(m_impl->m_appResourcePath);
+        factory.scanForMods(m_impl->m_userResourcePath);
+    }
+    {
+        ProfilerScope scope("ResourceLibrary load");
+        factory.scanModSubfolders();
+        m_impl->m_resourceLibrary = factory.create(m_impl->m_modOrder);
+    }
+
+    m_impl->m_randomGeneratorFactory = std::make_shared<Core::RandomGeneratorFactory>();
+
+    {
+        ProfilerScope scope("GameDatabaseContainer load");
+        m_impl->m_gameDatabaseContainer = std::make_shared<Core::GameDatabaseContainer>(m_impl->m_resourceLibrary.get());
+    }
+    {
+        ProfilerScope scope("GraphicsLibrary");
+        m_impl->m_graphicsLibrary = std::make_shared<Gui::GraphicsLibrary>(m_impl->m_resourceLibrary.get());
+    }
+    {
+        m_impl->m_map       = {};
+        m_impl->m_spriteMap = {};
+    }
+
+    Logger(Logger::Info) << "reinit - end";
+}
+
+void ApiApplication::convertLoD(const std::string& lodPath) noexcept(false)
 {
     const auto settings = GameExtract::Settings{
-        .m_appResourcePath    = Mernel::string2path(appResourcePath),
-        .m_archiveExtractRoot = Mernel::string2path(userResourcePath + "/Archives"),
-        .m_mainExtractRoot    = Mernel::string2path(userResourcePath + "/Imported"),
+        .m_appResourcePath    = m_impl->m_appResourcePath,
+        .m_archiveExtractRoot = m_impl->m_userResourcePath / "Archives",
+        .m_mainExtractRoot    = m_impl->m_userResourcePath / "Imported",
         .m_forceExtract       = false,
         .m_skipIfFolderExist  = true,
         .m_needLocalization   = false,
@@ -313,9 +354,14 @@ bool ApiApplicationNoexcept::init(const char* appResourcePath, const char* userR
     return m_impl->handle("init", [=, this] { m_impl->m_app.init(appResourcePath, userResourcePath); });
 }
 
-bool ApiApplicationNoexcept::convertLoD(const char* lodPath, const char* appResourcePath, const char* userResourcePath) noexcept
+bool ApiApplicationNoexcept::reinit() noexcept
 {
-    return m_impl->handle("convertLoD", [=, this] { m_impl->m_app.convertLoD(lodPath, appResourcePath, userResourcePath); });
+    return m_impl->handle("reinit", [=, this] { m_impl->m_app.reinit(); });
+}
+
+bool ApiApplicationNoexcept::convertLoD(const char* lodPath) noexcept
+{
+    return m_impl->handle("convertLoD", [=, this] { m_impl->m_app.convertLoD(lodPath); });
 }
 
 bool ApiApplicationNoexcept::loadMap(const char* mapPath) noexcept

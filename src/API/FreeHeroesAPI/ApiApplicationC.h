@@ -58,9 +58,12 @@ FREEHEROESAPI_EXPORT FHString fh_get_last_output_v1(FHAppHandle app);
 /// Register application resources in both path and create in-game database.
 FREEHEROESAPI_EXPORT FHResult fh_init_v1(FHAppHandle app, FHString mainResourcePath, FHString userResourcePath);
 
+/// Parses mainResourcePath and userResourcePath again. Any map created will be reset.
+FREEHEROESAPI_EXPORT FHResult fh_reinit_v1(FHAppHandle app);
+
 /// Convert lodPath=/path/to/bitmap.lod to fhmod format. Result is extracted in userResourcePath
 /// @todo: single-file resources?
-FREEHEROESAPI_EXPORT FHResult fh_convert_lod_v1(FHAppHandle app, FHString lodPath, FHString appResourcePath, FHString userResourcePath);
+FREEHEROESAPI_EXPORT FHResult fh_convert_lod_v1(FHAppHandle app, FHString lodPath);
 
 /// mapFile is path to .h3m or fh .json map file.
 FREEHEROESAPI_EXPORT FHResult fh_map_load_v1(FHAppHandle app, FHString mapFile);
@@ -96,7 +99,8 @@ typedef struct {
     FHString (*get_last_output)(FHAppHandle);
 
     FHResult (*init)(FHAppHandle, FHString, FHString);
-    FHResult (*convert_lod)(FHAppHandle, FHString, FHString, FHString);
+    FHResult (*reinit)(FHAppHandle);
+    FHResult (*convert_lod)(FHAppHandle, FHString);
     FHResult (*map_load)(FHAppHandle, FHString);
     int (*get_map_version)(FHAppHandle);
     int (*get_map_width)(FHAppHandle);
@@ -124,7 +128,8 @@ FREEHEROESAPI_EXPORT void     fh_global_destroy_v1(void);
 FREEHEROESAPI_EXPORT FHString fh_global_get_last_error_v1(void);
 FREEHEROESAPI_EXPORT FHString fh_global_get_last_output_v1(void);
 FREEHEROESAPI_EXPORT FHResult fh_global_init_v1(FHString mainResourcePath, FHString userResourcePath);
-FREEHEROESAPI_EXPORT FHResult fh_global_convert_lod_v1(FHString lodPath, FHString userResourcePath);
+FREEHEROESAPI_EXPORT FHResult fh_global_reinit_v1(void);
+FREEHEROESAPI_EXPORT FHResult fh_global_convert_lod_v1(FHString lodPath);
 FREEHEROESAPI_EXPORT FHResult fh_global_map_load_v1(FHString mapFile);
 FREEHEROESAPI_EXPORT int      fh_global_get_map_version_v1(void);
 FREEHEROESAPI_EXPORT int      fh_global_get_map_width_v1(void);
@@ -144,7 +149,8 @@ typedef struct {
     FHString (*get_last_output)(void);
 
     FHResult (*init)(FHString, FHString);
-    FHResult (*convert_lod)(FHString, FHString, FHString);
+    FHResult (*reinit)(void);
+    FHResult (*convert_lod)(FHString);
     FHResult (*map_load)(FHString);
     int (*get_map_version)(void);
     int (*get_map_width)(void);
