@@ -446,64 +446,6 @@ void MapEditorWidget::saveScreenshot()
     image.save(filename);
 }
 
-bool MapEditorWidget::saveScreenshots(const ScreenshotTask& task)
-{
-    Mernel::Logger(Mernel::Logger::Notice) << "Loading " << task.m_filename;
-    if (!load(task.m_filename, task.m_strict, task.m_silent))
-        return false;
-
-    try {
-        for (int d : { 0, 1 }) {
-            const std::string& outFilename  = d == 0 ? task.m_outputSurface : task.m_outputUnderground;
-            const std::string& miniFilename = d == 0 ? task.m_minimapSurface : task.m_minimapUnderground;
-
-            if (d >= m_impl->m_spriteMap.m_depth)
-                break;
-
-            m_impl->m_depth = d;
-
-            m_impl->m_viewSettings.m_paintSettings.m_strict = task.m_strict;
-            SpriteMapPainter spainter(&(m_impl->m_viewSettings.m_paintSettings), m_impl->m_depth);
-
-            QSize mainSize(m_impl->m_scene->width(), m_impl->m_scene->height());
-
-            QImage   imageMap(mainSize, QImage::Format_ARGB32);
-            QPainter painterMap(&imageMap);
-
-            QImage   imageMini(task.m_minimapSize, task.m_minimapSize, QImage::Format_ARGB32);
-            QPainter painterMini(&imageMini);
-
-            spainter.paint(&painterMap, &(m_impl->m_spriteMap), 0, 0);
-            spainter.paintMinimap(&painterMini, &(m_impl->m_spriteMap), QSize{ task.m_minimapSize, task.m_minimapSize }, QRectF());
-
-            if (task.m_dryRun)
-                continue;
-
-            if (!outFilename.empty()) {
-                QImage imageMapSaving = imageMap;
-                if (mainSize.width() > task.m_maxSize) {
-                    while (mainSize.width() > task.m_maxSize) {
-                        mainSize = mainSize / 2.0;
-                    }
-                    imageMapSaving = imageMapSaving.scaled(mainSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-                }
-                Mernel::Logger(Mernel::Logger::Notice) << "Saving map to: " << outFilename;
-                imageMapSaving.save(QString::fromStdString(outFilename));
-            }
-            if (!miniFilename.empty()) {
-                Mernel::Logger(Mernel::Logger::Notice) << "Saving minimap to: " << miniFilename;
-                imageMini.save(QString::fromStdString(miniFilename));
-            }
-        }
-    }
-    catch (std::exception& ex) {
-        Mernel::Logger(Mernel::Logger::Err) << ex.what();
-        return false;
-    }
-
-    return true;
-}
-
 void MapEditorWidget::updateMap()
 {
     MapRenderer renderer(m_impl->m_viewSettings.m_renderSettings);

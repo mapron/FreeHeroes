@@ -218,8 +218,6 @@ void ApiApplication::loadMap(const std::string& mapPath) noexcept(false)
                                          .m_depth  = m_impl->m_map.m_tileMap.m_depth };
         m_impl->m_mapInfo.m_tileSize = 32;
         m_impl->m_mapInfo.m_version  = m_impl->m_map.isSoDMap() ? 1 : (m_impl->m_map.isHotAMap() ? 2 : 0);
-
-        //updateMap();
     }
     catch (std::exception&) {
         m_impl->m_lastOutput += os.str();

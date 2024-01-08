@@ -232,7 +232,7 @@ IGraphicsLibrary::PixmapKey GraphicsLibrary::splitKeyFromString(const std::strin
 bool GraphicsLibrary::Impl::createSprite(const std::string& resourceName, SpritePtr& result)
 {
     if (!m_resourceLibrary->fileExists(ResourceType::Sprite, resourceName)) {
-        Mernel::Logger(Mernel::Logger::Notice) << "createSprite() failed, id does not exist: " << resourceName;
+        Mernel::Logger(Mernel::Logger::Warning) << "createSprite() failed, id does not exist: " << resourceName;
         return false;
     }
 

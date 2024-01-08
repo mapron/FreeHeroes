@@ -515,19 +515,21 @@ AddTarget(TYPE app_ui NAME MapEditor
     )
 endif()
 
-if (NOT DISABLE_QWIDGET) #todo: should be fine without widget, remove MapEditor
-AddTarget(TYPE app_ui NAME MapScreenshotToolCLI
+if (NOT DISABLE_QT)
+AddTarget(TYPE app_console NAME MapScreenshotToolCLI
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/MapScreenshotToolCLI
     LINK_LIBRARIES
         MernelPlatform
         GuiUtils
+        GuiResource
 
         CoreApplication
         GuiApplication
         GameInt
         GuiInt
-        MapUtilGui
-    QT_MODULES Widgets
+        MapRenderUtil
+        MapUtil
+    QT_MODULES Gui
     )
 endif()
 if (NOT DISABLE_QWIDGET)
