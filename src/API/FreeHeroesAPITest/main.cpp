@@ -147,12 +147,17 @@ int main(int argc, char** argv)
     const std::string lodPath1 = heroesPath + "/Data/H3sprite.lod";
     const std::string lodPath2 = heroesPath + "/Data/HotA.lod";
 
-    if (!checkApiCall("convert_lod 1", [&api, lodPath1, appPath, userPath] { return api.convert_lod(lodPath1.c_str(), appPath.c_str(), userPath.c_str()); }))
+    if (!checkApiCall("convert_lod 1", [&api, lodPath1] { return api.convert_lod(lodPath1.c_str()); }))
         return 1;
-    if (!checkApiCall("convert_lod 2", [&api, lodPath2, appPath, userPath] { return api.convert_lod(lodPath2.c_str(), appPath.c_str(), userPath.c_str()); }))
+    if (!checkApiCall("convert_lod 2", [&api, lodPath2] { return api.convert_lod(lodPath2.c_str()); }))
         return 1;
 
-    const std::string mapPath = "D:/Games/Heroes3_HotA_170/Maps/not_so_simple_17.h3m"; //heroesPath + "/Maps/[HotA] Air Supremacy.h3m"; // 1.7.0 map!
+    // we don't need to call reinit every time.
+    // in this example we call it to make sure resources are parsed after fresh first call to convert_lod();
+    if (!checkApiCall("reinit", [&api] { return api.reinit(); }))
+        return 1;
+
+    const std::string mapPath = heroesPath + "/Maps/[HotA] Air Supremacy.h3m"; // 1.7.0 map!
 
     if (!checkApiCall("map_load", [&api, mapPath] { return api.map_load(mapPath.c_str()); }))
         return 1;

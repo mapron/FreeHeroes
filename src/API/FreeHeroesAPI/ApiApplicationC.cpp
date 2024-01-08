@@ -30,6 +30,7 @@ FHApiPointers fh_get_api_pointers_v1()
         .get_last_error        = &fh_get_last_error_v1,
         .get_last_output       = &fh_get_last_output_v1,
         .init                  = &fh_init_v1,
+        .reinit                = &fh_reinit_v1,
         .convert_lod           = &fh_convert_lod_v1,
         .map_load              = &fh_map_load_v1,
         .get_map_version       = &fh_get_map_version_v1,
@@ -69,11 +70,17 @@ FHResult fh_init_v1(FHAppHandle app, FHString mainResourcePath, FHString userRes
         return 0;
     return toApp(app)->init(mainResourcePath, userResourcePath);
 }
-FHResult fh_convert_lod_v1(FHAppHandle app, FHString lodPath, FHString appResourcePath, FHString userResourcePath)
+FHResult fh_reinit_v1(FHAppHandle app)
 {
     if (!app)
         return 0;
-    return toApp(app)->convertLoD(lodPath, appResourcePath, userResourcePath);
+    return toApp(app)->reinit();
+}
+FHResult fh_convert_lod_v1(FHAppHandle app, FHString lodPath)
+{
+    if (!app)
+        return 0;
+    return toApp(app)->convertLoD(lodPath);
 }
 
 FHResult fh_map_load_v1(FHAppHandle app, FHString mapFile)
@@ -175,9 +182,13 @@ FHResult fh_global_init_v1(FHString mainResourcePath, FHString userResourcePath)
 {
     return fh_init_v1(g_globalHandle, mainResourcePath, userResourcePath);
 }
-FHResult fh_global_convert_lod_v1(FHString lodPath, FHString appResourcePath, FHString userResourcePath)
+FHResult fh_global_reinit_v1(void)
 {
-    return fh_convert_lod_v1(g_globalHandle, lodPath, appResourcePath, userResourcePath);
+    return fh_reinit_v1(g_globalHandle);
+}
+FHResult fh_global_convert_lod_v1(FHString lodPath)
+{
+    return fh_convert_lod_v1(g_globalHandle, lodPath);
 }
 FHResult fh_global_map_load_v1(FHString mapFile)
 {
@@ -233,6 +244,7 @@ FHApiPointersGlobal fh_global_get_api_pointers_v1()
         .get_last_error        = &fh_global_get_last_error_v1,
         .get_last_output       = &fh_global_get_last_output_v1,
         .init                  = &fh_global_init_v1,
+        .reinit                = &fh_global_reinit_v1,
         .convert_lod           = &fh_global_convert_lod_v1,
         .map_load              = &fh_global_map_load_v1,
         .get_map_version       = &fh_global_get_map_version_v1,

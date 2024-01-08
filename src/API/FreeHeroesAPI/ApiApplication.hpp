@@ -39,7 +39,8 @@ public:
     void               clearOutput() noexcept;
 
     void init(const std::string& appResourcePath, const std::string& userResourcePath) noexcept(false);
-    void convertLoD(const std::string& lodPath, const std::string& appResourcePath, const std::string& userResourcePath) noexcept(false);
+    void reinit() noexcept(false);
+    void convertLoD(const std::string& lodPath) noexcept(false);
     void loadMap(const std::string& mapPath) noexcept(false);
 
     const MapInfo& getMapInfo() const noexcept;
@@ -70,7 +71,8 @@ public:
     const char* getLastOutput() const noexcept;
 
     bool init(const char* appResourcePath, const char* userResourcePath) noexcept;
-    bool convertLoD(const char* lodPath, const char* appResourcePath, const char* userResourcePath) noexcept;
+    bool reinit() noexcept;
+    bool convertLoD(const char* lodPath) noexcept;
     bool loadMap(const char* mapPath) noexcept;
 
     const MapInfo& getMapInfo() const noexcept;
