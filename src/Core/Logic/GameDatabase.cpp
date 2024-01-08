@@ -26,6 +26,7 @@
 #include "LibrarySerialize.hpp"
 
 #include "MernelPlatform/Logger.hpp"
+#include "MernelPlatform/Profiler.hpp"
 
 #include <deque>
 #include <unordered_map>
@@ -353,6 +354,7 @@ LibraryGameRulesConstPtr GameDatabase::gameRules() const
 GameDatabase::GameDatabase(const Mernel::PropertyTree& recordObjectMaps)
     : m_impl(std::make_unique<Impl>())
 {
+    Mernel::ProfilerScope scope("GameDatabase::GameDatabase");
     // clang-format off
     m_impl->m_artifacts      .prepareObjectKeys(recordObjectMaps);
     m_impl->m_buildings      .prepareObjectKeys(recordObjectMaps);

@@ -6,6 +6,8 @@
 
 #include "Painter.hpp"
 
+#include "MernelPlatform/Profiler.hpp"
+
 namespace FreeHeroes {
 
 namespace {
@@ -25,6 +27,8 @@ void blend(PixmapColor& dest, const PixmapColor& src)
 
 void Painter::drawPixmap(const PixmapPoint& offset, const Pixmap& pixmap, bool flipHor, bool flipVert)
 {
+    Mernel::ProfilerScope scope("drawPixmap");
+
     int h = pixmap.m_size.m_height;
     int w = pixmap.m_size.m_width;
     for (int y = 0; y < h; ++y) {

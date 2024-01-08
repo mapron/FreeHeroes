@@ -227,6 +227,7 @@ void ApiApplication::loadMap(const std::string& mapPath) noexcept(false)
 
 const ApiApplication::MapInfo& ApiApplication::getMapInfo() const noexcept
 {
+    m_impl->m_lastOutput.clear();
     return m_impl->m_mapInfo;
 }
 
@@ -379,6 +380,8 @@ const char* ApiApplicationNoexcept::getLastOutput() const noexcept
 
 const ApiApplicationNoexcept::MapInfo& ApiApplicationNoexcept::getMapInfo() const noexcept
 {
+    m_impl->m_lastError.clear();
+    m_impl->m_lastOutput.clear();
     return m_impl->m_app.getMapInfo();
 }
 
@@ -407,6 +410,8 @@ bool ApiApplicationNoexcept::paint() noexcept
 
 ApiApplicationNoexcept::Bitmap ApiApplicationNoexcept::getRGBA() const noexcept
 {
+    m_impl->m_lastError.clear();
+    m_impl->m_lastOutput.clear();
     return m_impl->m_app.getRGBA();
 }
 

@@ -71,8 +71,9 @@ struct GameDatabaseContainer::Impl {
                     Logger(Logger::Err) << "Non-existent DB index id '" << dbSegmentId << "': ";
                 return false;
             }
-            const auto fileBuffer = readFileIntoBuffer(path);
-            const auto jsonData   = readJsonFromBuffer(fileBuffer);
+            ProfilerScope scope("read+parse json");
+            const auto    fileBuffer = readFileIntoBuffer(path);
+            const auto    jsonData   = readJsonFromBuffer(fileBuffer);
 
             rec.m_data = jsonData;
         }
@@ -145,6 +146,7 @@ struct GameDatabaseContainer::Impl {
                     return nullptr;
                 auto& indexJson = m_dbIndexFiles[dbIndexId].m_data;
 
+                ProfilerScope scope("mergePatch");
                 PropertyTree::mergePatch(rec.m_data, indexJson);
             }
 
@@ -189,11 +191,13 @@ GameDatabaseContainer::~GameDatabaseContainer() = default;
 
 const IGameDatabase* GameDatabaseContainer::getDatabase(const DbOrder& dbIndexFilesList) const noexcept
 {
+    ProfilerScope scope("getDatabase");
     return m_impl->getDb(dbIndexFilesList);
 }
 
 const IGameDatabase* GameDatabaseContainer::getDatabase(const DbOrder& dbIndexFilesList, const PropertyTree& customSegmentData) const noexcept
 {
+    ProfilerScope scope("getDatabase");
     return m_impl->getDbWithPatch(dbIndexFilesList, customSegmentData);
 }
 
