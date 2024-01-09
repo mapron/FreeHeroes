@@ -417,7 +417,7 @@ AddTarget(TYPE shared NAME LegacyConverterUtil OUTPUT_PREFIX FH
     
         ${PTHREAD} MernelReflection MernelExecution
         
-        [ NOT DISABLE_QT QT_MODULES Gui ]
+        QT_MODULES [ NOT DISABLE_QT Gui ] [ Qt6_FOUND AND NOT DISABLE_QT ? Core5Compat ]
     COMPILE_DEFINITIONS [ DISABLE_QT DISABLE_QT ]
     )
 
