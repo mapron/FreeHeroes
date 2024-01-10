@@ -89,7 +89,6 @@ void Pixmap::loadPngFromBuffer(const Mernel::ByteArrayHolder& holder)
             return;
         }
     }
-
 #endif
 
     int      w, h, channelsInFile;
@@ -123,8 +122,8 @@ void Pixmap::savePngToBuffer(Mernel::ByteArrayHolder& holder) const
             return;
         }
     }
-
 #endif
+
     int  comp   = 4;
     auto result = stbi_write_png_to_func(&write_func, &holder, m_size.m_width, m_size.m_height, comp, (const void*) m_pixels.data(), m_size.m_width * 4);
     if (result != 1)

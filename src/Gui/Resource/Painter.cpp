@@ -27,7 +27,7 @@ void blend(PixmapColor& dest, const PixmapColor& src)
 
 void Painter::drawPixmap(const PixmapPoint& offset, const Pixmap& pixmap, bool flipHor, bool flipVert)
 {
-    Mernel::ProfilerScope scope("drawPixmap");
+    //Mernel::ProfilerScope scope("drawPixmap");
 
     int h = pixmap.m_size.m_height;
     int w = pixmap.m_size.m_width;
@@ -44,7 +44,7 @@ void Painter::drawPixmap(const PixmapPoint& offset, const Pixmap& pixmap, bool f
 
             auto& srcColor  = pixmap.get(x, y);
             auto& destColor = m_canvas.get(destX, destY);
-            if (srcColor.m_color.m_a == 255)
+            if (srcColor.m_color.m_a == 255 || destColor.m_color.m_a == 0)
                 destColor = srcColor;
             else if (srcColor.m_color.m_a == 0)
                 continue;

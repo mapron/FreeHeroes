@@ -124,13 +124,15 @@ int main(int argc, char** argv)
     }
 
     auto checkApiCall = [&api](const char* name, auto&& callback) -> bool {
+        std::cout << "Calling api.'" << name << "'\n"
+                  << std::flush;
         if (!callback()) {
             std::cerr << "Method api.'" << name << "' failed, error: " << api.get_last_error() << ", output: \n"
-                      << api.get_last_output();
+                      << api.get_last_output() << std::flush;
             return false;
         }
         std::cout << "Method api.'" << name << "' succeeded with output: \n"
-                  << api.get_last_output();
+                  << api.get_last_output() << std::flush;
 
         return true;
     };

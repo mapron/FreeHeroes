@@ -497,7 +497,7 @@ void GameExtract::processFile(Mernel::TaskQueue&      taskQueue,
     //sendMessage(file.m_extWithDot + " | " + file.m_extWithDot);
     if (extWithDot == ".def" || extWithDot == ".d32" || extWithDot == ".pcx" || extWithDot == ".p32" || extWithDot == ".bmp") {
         auto outputJson = extractFolder / (newId + ".fhsprite.json");
-        if (Mernel::std_fs::exists(outputJson))
+        if (Mernel::std_fs::exists(outputJson) && !m_settings.m_forceExtract)
             return;
 
         const std::vector<std::string> names{ "fix_colors", "unpack", "pad" };
