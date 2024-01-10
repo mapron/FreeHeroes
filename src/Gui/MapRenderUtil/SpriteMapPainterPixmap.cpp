@@ -92,20 +92,29 @@ void SpriteMapPainterPixmap::paint(Painter*         painter,
             if (item.m_shiftHalfTile) {
                 painter->translate(0, tileSize / 2);
             }
+            if (item.m_flipHor) {
+                painter->translate(+boundingSize.m_width, 0);
+            }
+            if (item.m_flipVert) {
+                painter->translate(0, +boundingSize.m_height);
+            }
 
             if (boundingSize.m_width > tileSize || boundingSize.m_height > tileSize) {
                 painter->translate(-boundingSize.m_width + tileSize, -boundingSize.m_height + tileSize);
             }
 
-            Pixmap pix = frame.m_frame;
+            Pixmap        pixCopy;
+            const Pixmap* pxPtr = &frame.m_frame;
             if (item.m_keyColor.isValid()) {
-                for (auto& p : pix.m_pixels) {
+                pixCopy = frame.m_frame;
+                pxPtr   = &pixCopy;
+                for (auto& p : pixCopy.m_pixels) {
                     if (p.m_color.m_a == 1) {
                         p.m_color = item.m_keyColor;
                     }
                 }
             }
-            painter->drawPixmap(frame.m_paddingLeftTop, pix, item.m_flipHor, item.m_flipVert);
+            painter->drawPixmap(frame.m_paddingLeftTop, *pxPtr, item.m_flipHor, item.m_flipVert);
 
             painter->setTransform(oldTransform);
         }

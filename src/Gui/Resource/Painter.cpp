@@ -33,8 +33,12 @@ void Painter::drawPixmap(const PixmapPoint& offset, const Pixmap& pixmap, bool f
     int w = pixmap.m_size.m_width;
     for (int y = 0; y < h; ++y) {
         for (int x = 0; x < w; ++x) {
-            const int destX = (flipHor ? w - x - 1 : x) + offset.m_x + m_offset.m_x;
-            const int destY = (flipVert ? h - y - 1 : y) + offset.m_y + m_offset.m_y;
+            const int xWithOffset  = x + offset.m_x;
+            const int yWithOffset  = y + offset.m_y;
+            const int xTransformed = flipHor ? -xWithOffset - 1 : xWithOffset;
+            const int yTransformed = flipVert ? -yWithOffset - 1 : yWithOffset;
+            const int destX        = xTransformed + m_offset.m_x;
+            const int destY        = yTransformed + m_offset.m_y;
             if (!m_canvas.inBounds(destX, destY))
                 continue;
 
