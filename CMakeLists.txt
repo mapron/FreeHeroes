@@ -641,6 +641,7 @@ AddTarget(TYPE app_console NAME FreeHeroesAPITest
         INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/src/API/FreeHeroesAPI
         LINK_LIBRARIES
             MernelPlatform # just for SharedLibLoader.
+        SKIP_INSTALL
     )
 add_dependencies(FreeHeroesAPITest FreeHeroesAPI) # build-only.
 
@@ -657,6 +658,7 @@ AddTarget(TYPE app_console NAME CoreTests OUTPUT_NAME Tests_CoreLogic
         MapUtil
 
     gtest gtest_main MernelReflection
+    SKIP_INSTALL
     )
 
 if (NOT DISABLE_QWIDGET)
@@ -673,6 +675,7 @@ AddTarget(TYPE app_ui NAME SoundTests OUTPUT_NAME Tests_Sound
     QT_MODULES Widgets
     UIC_POSTPROCESS_SCRIPTS
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
+    SKIP_INSTALL
     )
 endif()
 
