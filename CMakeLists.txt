@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/install CACHE STRING "" FORCE)
 
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.24)
 
 project(freeheroes)
 set(MERNEL_ROOT ${CMAKE_CURRENT_LIST_DIR}/ext/mernel)
@@ -26,6 +26,7 @@ if ((NOT DISABLE_QWIDGET) AND DISABLE_QT)
 endif()
 
 find_package(Git REQUIRED)
+find_package(JNI)
 
 execute_process(
     COMMAND ${GIT_EXECUTABLE} log -1 --format=%h
@@ -616,6 +617,7 @@ endif()
 
 AddTarget(TYPE shared NAME FreeHeroesAPI
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/API/FreeHeroesAPI
+    EXCLUDE_SOURCES [ NOT JNI_FOUND ? ApiApplicationJNI.cpp ]
     LINK_LIBRARIES
         MernelPlatform
     
@@ -630,6 +632,8 @@ AddTarget(TYPE shared NAME FreeHeroesAPI
         MapUtil
         MapRenderUtil
         LegacyConverterUtil
+        [ JNI_FOUND ? ${JNI_LIBRARIES} ]
+    INCLUDES [ JNI_FOUND ? ${JNI_INCLUDE_DIRS} ]
     )
 
 AddTarget(TYPE app_console NAME FreeHeroesAPITest
