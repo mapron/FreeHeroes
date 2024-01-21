@@ -865,7 +865,7 @@ void SpriteFile::readBinaryPCX(Mernel::ByteOrderDataStreamReader& stream)
             for (uint32_t w = 0; w < width; w++) {
                 uint8_t r = 0, g = 0, b = 0;
                 stream >> b >> g >> r;
-                tmp.get(w, height - h - 1).m_color = PixmapColor(r, g, b, 255);
+                tmp.get(w, h).m_color = PixmapColor(r, g, b, 255);
             }
 
         bmp.m_pixmap = std::make_shared<Pixmap>(std::move(tmp));
