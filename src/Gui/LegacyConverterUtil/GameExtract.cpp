@@ -211,7 +211,7 @@ GameExtract::DetectedSources GameExtract::probe() const
             continue;
 
         result.m_hasAB = true;
-        result.m_sources[SourceType::Archive].push_back(DetectedPath{ .m_type = SourceType::Archive, .m_path = path });
+        result.m_sources[SourceType::Archive].push_back(DetectedPath{ .m_type = SourceType::Archive, .m_path = path, .m_isSod = true });
     }
 
     for (const char* name : { "h3bitmap.lod",
@@ -366,9 +366,8 @@ void GameExtract::run(const DetectedSources& sources) const
     TaskQueue       taskQueue;
     ConcatProcessor concatProcessor;
 
-    const auto appRoot = m_settings.m_appResourcePath;
-
-    KnownResources knownResources(appRoot / "knownResources.json", appRoot / "knownResourcesPostProcess.json");
+    KnownResources             knownResources(m_settings.m_appResourcePath / "knownResources");
+    std::set<Mernel::std_path> usedTasks;
 
     for (const ArchiveWrapper& wrapper : archiveWrappers) {
         if (wrapper.m_doSkip)
@@ -387,6 +386,7 @@ void GameExtract::run(const DetectedSources& sources) const
                         file.m_extWithDot,
                         srcPath,
                         extractArchiveRoot,
+                        usedTasks,
                         !sources.m_ffmpegPath.empty(),
                         concatProcessor,
                         wrapper.m_isSod,
@@ -412,6 +412,7 @@ void GameExtract::run(const DetectedSources& sources) const
                             ext,
                             srcPath,
                             extractArchiveRoot,
+                            usedTasks,
                             !sources.m_ffmpegPath.empty(),
                             concatProcessor,
                             false,
@@ -469,36 +470,50 @@ void GameExtract::run(const DetectedSources& sources) const
 #endif
 }
 
-void GameExtract::processFile(Mernel::TaskQueue&      taskQueue,
-                              KnownResources&         knownResources,
-                              const std::string&      basename,
-                              const std::string&      extWithDot,
-                              const Mernel::std_path& srcPath,
-                              Mernel::std_path        extractFolder,
-                              bool                    hasFfmpeg,
-                              ConcatProcessor&        concatProcessor,
+void GameExtract::processFile(Mernel::TaskQueue&          taskQueue,
+                              KnownResources&             knownResources,
+                              const std::string&          basename,
+                              const std::string&          extWithDot,
+                              const Mernel::std_path&     srcPath,
+                              Mernel::std_path            extractFolder,
+                              std::set<Mernel::std_path>& usedTasks,
+                              bool                        hasFfmpeg,
+                              ConcatProcessor&            concatProcessor,
 
                               bool isSod,
                               bool isHota) const
 {
-    auto* known    = knownResources.find(basename);
-    auto  handlers = knownResources.findPP(basename);
+    KnownResources::ResourceType resourceType = KnownResources::ResourceType::Unknown;
+    if (extWithDot == ".def" || extWithDot == ".d32" || extWithDot == ".pcx" || extWithDot == ".p32" || extWithDot == ".bmp")
+        resourceType = KnownResources::ResourceType::Sprite;
+    else if (extWithDot == ".wav")
+        resourceType = KnownResources::ResourceType::Sound;
+    else if (extWithDot == ".bik" || extWithDot == ".smk")
+        resourceType = KnownResources::ResourceType::Video;
+
+    auto* known    = knownResources.find(resourceType, basename);
+    auto  handlers = knownResources.findPP(resourceType, basename);
     if (handlers.contains("skip"))
         return;
 
     std::string newId = basename;
     if (known) {
-        newId         = known->newId;
-        extractFolder = extractFolder / known->destinationSubfolder;
+        newId = known->m_newId;
+        if (newId.empty())
+            newId = basename;
+        extractFolder = extractFolder / known->m_destinationSubfolder;
     } else {
         extractFolder = extractFolder / "Unknown";
     }
 
     //sendMessage(file.m_extWithDot + " | " + file.m_extWithDot);
-    if (extWithDot == ".def" || extWithDot == ".d32" || extWithDot == ".pcx" || extWithDot == ".p32" || extWithDot == ".bmp") {
+    if (resourceType == KnownResources::ResourceType::Sprite) {
         auto outputJson = extractFolder / (newId + ".fhsprite.json");
         if (Mernel::std_fs::exists(outputJson) && !m_settings.m_forceExtract)
             return;
+        if (usedTasks.contains(outputJson))
+            return;
+        usedTasks.insert(outputJson);
 
         const std::vector<std::string> names{ "fix_colors", "unpack", "pad" };
         for (const auto& name : names) {
@@ -546,7 +561,7 @@ void GameExtract::processFile(Mernel::TaskQueue&      taskQueue,
         });
     }
 #ifndef DISABLE_QT
-    else if (extWithDot == ".wav") {
+    else if (resourceType == KnownResources::ResourceType::Sound) {
         auto outputWav = extractFolder / (newId + ".wav");
         if (!hasFfmpeg)
             return;
@@ -556,7 +571,7 @@ void GameExtract::processFile(Mernel::TaskQueue&      taskQueue,
         taskQueue.addTask([srcPath, outputWav] {
             executeFFMpeg({ "-y", "-i", Gui::stdPath2QString(srcPath), "-c:a", "pcm_s16le", Gui::stdPath2QString(outputWav) });
         });
-    } else if (extWithDot == ".bik" || extWithDot == ".smk") {
+    } else if (resourceType == KnownResources::ResourceType::Video) {
         auto outputWebp = extractFolder / (newId + ".webp");
         if (!hasFfmpeg)
             return;

@@ -697,9 +697,6 @@
 "avwctl29"        : { "fix_colors": {"tr": "#00FFFF", "shadow": "#002BFF", "shadowborder": "#96A8FF"}, "concat": {"id":"avwcoat", "frames": true, "singleGroup": true }},
 
 
-"hack"            : {"skip":{}, "comment": "Campaing inro. bik video failed to decode by ffmpeg"},
-"elixir"          : {"skip":{}, "comment": "Campaing inro. bik video failed to decode by ffmpeg"},
-"new"             : {"skip":{}, "comment": "Campaing inro. bik video failed to decode by ffmpeg"},
 "fr32_67"         : {"skip":{}, "comment": "No idea of purpose. hota new pcx format P32F, it's supported but this file isbuggy"},
 "spellbe"         : {"skip":{}, "comment": "Something for spellbook? hota new pcx format P32F, it's supported but this file isbuggy"},
 

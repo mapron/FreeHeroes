@@ -9,6 +9,7 @@
 
 #include "LegacyConverterUtilExport.hpp"
 
+#include <set>
 #include <map>
 #include <functional>
 #include <mutex>
@@ -97,16 +98,17 @@ public:
     }
     class ConcatProcessor;
 
-    void processFile(Mernel::TaskQueue&      taskQueue,
-                     KnownResources&         knownResources,
-                     const std::string&      basename,
-                     const std::string&      extWithDot,
-                     const Mernel::std_path& srcPath,
-                     Mernel::std_path        extractFolder,
-                     bool                    hasFfmpeg,
-                     ConcatProcessor&        concatProcessor,
-                     bool                    isSod,
-                     bool                    isHota) const;
+    void processFile(Mernel::TaskQueue&          taskQueue,
+                     KnownResources&             knownResources,
+                     const std::string&          basename,
+                     const std::string&          extWithDot,
+                     const Mernel::std_path&     srcPath,
+                     Mernel::std_path            extractFolder,
+                     std::set<Mernel::std_path>& usedTasks,
+                     bool                        hasFfmpeg,
+                     ConcatProcessor&            concatProcessor,
+                     bool                        isSod,
+                     bool                        isHota) const;
 
 private:
     const Core::IGameDatabaseContainer* const m_databaseContainer;
