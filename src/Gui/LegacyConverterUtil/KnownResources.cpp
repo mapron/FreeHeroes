@@ -31,7 +31,7 @@ ENUM_REFLECTION_STRINGIFY(
     Common,
     Adventure,
     Battle,
-    BattleSeige,
+    BattleSiege,
     Campaign,
     Puzzle,
     Town,

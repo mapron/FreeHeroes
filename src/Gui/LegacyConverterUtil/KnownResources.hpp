@@ -33,7 +33,7 @@ struct KnownResource {
         Common,
         Adventure,
         Battle,
-        BattleSeige,
+        BattleSiege,
         Campaign,
         Puzzle,
         Town,

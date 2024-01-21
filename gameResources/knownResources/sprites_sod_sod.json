@@ -150,7 +150,7 @@
 [ "obrls01"       , ""                                      , "Battle"        , "Obstacle"      , ""               ],
 [ "obrls02"       , ""                                      , "Battle"        , "Obstacle"      , ""               ],
 [ "obrls03"       , ""                                      , "Battle"        , "Obstacle"      , ""               ],
-[ "sgstmoat"      , ""                                      , "BattleSeige"   , ""              , ""               ],
+[ "sgstmoat"      , ""                                      , "BattleSiege"   , ""              , ""               ],
 [ "csssod"        , ""                                      , ""              , "Button"        , ""               ],
 [ "bb_bg"         , ""                                      , "Campaign"      , ""              , ""               ],
 [ "bba_cobl"      , ""                                      , "Campaign"      , ""              , ""               ],
