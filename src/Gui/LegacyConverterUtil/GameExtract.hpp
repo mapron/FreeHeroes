@@ -9,6 +9,8 @@
 
 #include "LegacyConverterUtilExport.hpp"
 
+#include "KnownResources.hpp"
+
 #include <set>
 #include <map>
 #include <functional>
@@ -24,6 +26,8 @@ class IGameDatabaseContainer;
 class KnownResources;
 class LEGACYCONVERTERUTIL_EXPORT GameExtract {
 public:
+    using SectionSet = KnownResource::SectionSet;
+
     struct Settings {
         Mernel::std_path m_appResourcePath; // required path containing knownResources.json
         Mernel::std_path m_heroesRoot;
@@ -32,6 +36,8 @@ public:
         bool             m_forceExtract      = false;
         bool             m_skipIfFolderExist = false;
         bool             m_needLocalization  = true;
+
+        SectionSet m_onlySections;
     };
 
     enum class SourceType

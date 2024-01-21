@@ -13,6 +13,7 @@
 
 #include <string_view>
 #include <vector>
+#include <set>
 #include <unordered_map>
 
 namespace FreeHeroes {
@@ -55,6 +56,7 @@ struct KnownResource {
         Menu,
         DialogBack,
     };
+    using SectionSet = std::set<Section>;
 
     ResourceType m_resourceType = ResourceType::Unknown;
     Section      m_section      = Section::Unknown; // [2]

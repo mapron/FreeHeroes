@@ -498,6 +498,10 @@ void GameExtract::processFile(Mernel::TaskQueue&          taskQueue,
 
     std::string newId = basename;
     if (known) {
+        if (!m_settings.m_onlySections.empty()) {
+            if (!m_settings.m_onlySections.contains(known->m_section))
+                return;
+        }
         newId = known->m_newId;
         if (newId.empty())
             newId = basename;

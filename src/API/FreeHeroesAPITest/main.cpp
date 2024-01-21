@@ -92,17 +92,18 @@ bool saveBMP(const std::string& path, const uint8_t* rgbapixels, int w, int h)
 
 int main(int argc, char** argv)
 {
-    if (argc < 3) {
-        std::cerr << "Usage: FreeHeroesTest D:/Games/Heroes3_HotA D:/tmp [plugin/root/]\n";
+    if (argc < 4) {
+        std::cerr << "Usage: FreeHeroesTest convert|render D:/Games/Heroes3_HotA D:/tmp [plugin/root/]\n";
         return 1;
     }
 
     Mernel::ScopeTimer launchTimer;
 
-    const std::string heroesPath = argv[1];
-    const std::string tmpPath    = argv[2];
-    const std::string pluginRoot = argc >= 4 ? argv[3] : ".";
-    std::cout << "Using heroesPath=" << heroesPath << ", tmpPath=" << tmpPath << ", pluginRoot=" << pluginRoot << "\n";
+    const std::string task       = argv[1];
+    const std::string heroesPath = argv[2];
+    const std::string tmpPath    = argv[3];
+    const std::string pluginRoot = argc >= 5 ? argv[4] : ".";
+    std::cout << "Using task=" << task << ", heroesPath=" << heroesPath << ", tmpPath=" << tmpPath << ", pluginRoot=" << pluginRoot << "\n";
 
     SharedLibLoader loader;
     if (!loader.open(pluginRoot + "/" + g_pluginFullName)) {
@@ -146,77 +147,87 @@ int main(int argc, char** argv)
     if (!checkApiCall("init", [&api, appPath, userPath] { return api.init(appPath.c_str(), userPath.c_str()); }))
         return 1;
 
-    const std::string lodPath1 = heroesPath + "/Data/H3sprite.lod";
-    const std::string lodPath2 = heroesPath + "/Data/HotA.lod";
+    if (task == "convert") {
+        const std::string lodPath1 = heroesPath + "/Data/H3sprite.lod";
+        const std::string lodPath2 = heroesPath + "/Data/HotA.lod";
 
-    if (!checkApiCall("convert_lod 1", [&api, lodPath1] { return api.convert_lod(lodPath1.c_str()); }))
-        return 1;
-    if (!checkApiCall("convert_lod 2", [&api, lodPath2] { return api.convert_lod(lodPath2.c_str()); }))
-        return 1;
+        if (!checkApiCall("convert_lod 1", [&api, lodPath1] { return api.convert_lod(lodPath1.c_str()); }))
+            return 1;
+        if (!checkApiCall("convert_lod 2", [&api, lodPath2] { return api.convert_lod(lodPath2.c_str()); }))
+            return 1;
 
-    // we don't need to call reinit every time.
-    // in this example we call it to make sure resources are parsed after fresh first call to convert_lod();
-    if (!checkApiCall("reinit", [&api] { return api.reinit(); }))
-        return 1;
+        // we don't need to call reinit every time.
+        // in this example we call it to make sure resources are parsed after fresh first call to convert_lod();
+        if (!checkApiCall("reinit", [&api] { return api.reinit(); }))
+            return 1;
 
-    const std::string mapPath = heroesPath + "/Maps/[HotA] Air Supremacy.h3m"; // 1.7.0 map!
+        std::cout << "Total run time from app launch to convert finished: " << (launchTimer.elapsedUS() / 1000) << " ms.\n";
 
-    if (!checkApiCall("map_load", [&api, mapPath] { return api.map_load(mapPath.c_str()); }))
-        return 1;
-
-    const int version  = api.get_map_version();
-    const int width    = api.get_map_width();
-    const int height   = api.get_map_height();
-    const int depth    = api.get_map_depth();
-    const int tileSize = api.get_map_tile_size();
-    if (version == 0) {
-        std::cerr << "Invalid map version\n"; // we probably shouldn't get there but just in case.
-        return 1;
+        return 0;
     }
-    std::cout << "Loaded map version = " << (version == 1 ? "SoD" : "HotA") << ", size=" << width << "x" << height << "x" << depth << ", tileSize=" << tileSize << "\n";
+    if (task == "render") {
+        const std::string mapPath = heroesPath + "/Maps/[HotA] Air Supremacy.h3m"; // 1.7.0 map!
 
-    if (!checkApiCall("map_derandomize", [&api, mapPath] { return api.map_derandomize(); }))
-        return 1;
+        if (!checkApiCall("map_load", [&api, mapPath] { return api.map_load(mapPath.c_str()); }))
+            return 1;
 
-    const int paintXoffset = 13;
-    const int paintYoffset = 6;
-    const int paintZoffset = 0; // surface
+        const int version  = api.get_map_version();
+        const int width    = api.get_map_width();
+        const int height   = api.get_map_height();
+        const int depth    = api.get_map_depth();
+        const int tileSize = api.get_map_tile_size();
+        if (version == 0) {
+            std::cerr << "Invalid map version\n"; // we probably shouldn't get there but just in case.
+            return 1;
+        }
+        std::cout << "Loaded map version = " << (version == 1 ? "SoD" : "HotA") << ", size=" << width << "x" << height << "x" << depth << ", tileSize=" << tileSize << "\n";
 
-    const int paintWidth  = 10;
-    const int paintHeight = 8;
+        if (!checkApiCall("map_derandomize", [&api, mapPath] { return api.map_derandomize(); }))
+            return 1;
 
-    if (!checkApiCall("set_map_render_window", [=, &api] { return api.set_map_render_window(paintXoffset, paintYoffset, paintZoffset, paintWidth, paintHeight); }))
-        return 1;
+        const int paintXoffset = 13;
+        const int paintYoffset = 6;
+        const int paintZoffset = 0; // surface
 
-    if (!checkApiCall("map_prepare_render", [&api, mapPath] { return api.map_prepare_render(); }))
-        return 1;
+        const int paintWidth  = 10;
+        const int paintHeight = 8;
 
-    if (!checkApiCall("map_paint 1", [=, &api] { return api.map_paint(); }))
-        return 1;
+        if (!checkApiCall("set_map_render_window", [=, &api] { return api.set_map_render_window(paintXoffset, paintYoffset, paintZoffset, paintWidth, paintHeight); }))
+            return 1;
 
-    auto* result = api.get_map_paint_result();
-    if (!result) {
-        std::cerr << "No paint result!\n"; // we probably shouldn't get there but just in case.
-        return 1;
+        if (!checkApiCall("map_prepare_render", [&api, mapPath] { return api.map_prepare_render(); }))
+            return 1;
+
+        if (!checkApiCall("map_paint 1", [=, &api] { return api.map_paint(); }))
+            return 1;
+
+        auto* result = api.get_map_paint_result();
+        if (!result) {
+            std::cerr << "No paint result!\n"; // we probably shouldn't get there but just in case.
+            return 1;
+        }
+        std::cout << "Total run time from app launch to completed first paint: " << (launchTimer.elapsedUS() / 1000) << " ms.\n";
+        if (!saveBMP(tmpPath + "/out1.bmp", result, paintWidth * tileSize, paintHeight * tileSize)) {
+            std::cerr << "Failed to save output bitmap\n";
+            return 1;
+        }
+        // repeat for getting ext animation frame
+        std::this_thread::sleep_for(std::chrono::milliseconds(180));
+        if (!checkApiCall("map_paint 2", [=, &api] { return api.map_paint(); }))
+            return 1;
+        result = api.get_map_paint_result();
+        if (!result) {
+            std::cerr << "No paint result!\n"; // we probably shouldn't get there but just in case.
+            return 1;
+        }
+        if (!saveBMP(tmpPath + "/out2.bmp", result, paintWidth * tileSize, paintHeight * tileSize)) {
+            std::cerr << "Failed to save output bmitmap\n";
+            return 1;
+        }
+
+        return 0;
     }
-    std::cout << "Total run time from app launch to completed first paint: " << (launchTimer.elapsedUS() / 1000) << " ms.\n";
-    if (!saveBMP(tmpPath + "/out1.bmp", result, paintWidth * tileSize, paintHeight * tileSize)) {
-        std::cerr << "Failed to save output bitmap\n";
-        return 1;
-    }
-    // repeat for getting ext animation frame
-    std::this_thread::sleep_for(std::chrono::milliseconds(180));
-    if (!checkApiCall("map_paint 2", [=, &api] { return api.map_paint(); }))
-        return 1;
-    result = api.get_map_paint_result();
-    if (!result) {
-        std::cerr << "No paint result!\n"; // we probably shouldn't get there but just in case.
-        return 1;
-    }
-    if (!saveBMP(tmpPath + "/out2.bmp", result, paintWidth * tileSize, paintHeight * tileSize)) {
-        std::cerr << "Failed to save output bmitmap\n";
-        return 1;
-    }
 
-    return 0;
+    std::cerr << "Unknown task: " << task << "\n";
+    return 1;
 }

@@ -164,6 +164,7 @@ void ApiApplication::convertLoD(const std::string& lodPath) noexcept(false)
         .m_forceExtract       = false,
         .m_skipIfFolderExist  = true,
         .m_needLocalization   = false,
+        .m_onlySections       = { KnownResource::Section::Adventure },
     };
 
     GameExtract converter(m_impl->m_gameDatabaseContainer.get(), settings);
