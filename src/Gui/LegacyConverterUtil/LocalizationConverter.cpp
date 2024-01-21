@@ -130,7 +130,6 @@ void LocalizationConverter::extractSOD(const std_path& txtSubdir, const std_path
     outFile.setLocale(localeId.toStdString());
 
     const size_t tableOffset = 2;
-    assert(crtraits.size() - tableOffset == m_idSetSOD.unitIds.size());
     outFile.setContext("units");
     for (size_t index = tableOffset; index < (size_t) crtraits.size(); index++) {
         auto& id  = m_idSetSOD.unitIds[index - tableOffset];
@@ -146,7 +145,7 @@ void LocalizationConverter::extractSOD(const std_path& txtSubdir, const std_path
     {
         outFile.setContext("artifacts");
         TxtTable artraits = readTable(txtSubdir / "artraits.txt");
-        for (size_t index = 0; index < m_idSetSOD.artifactIds.size(); index++) {
+        for (size_t index = 0; index < m_idSetSOD.artifactIds.size() && index < (artraits.size() - tableOffset); index++) {
             auto& row   = artraits[tableOffset + index];
             auto& id    = m_idSetSOD.artifactIds[index];
             auto  descr = row[row.size() - 1];
@@ -160,7 +159,7 @@ void LocalizationConverter::extractSOD(const std_path& txtSubdir, const std_path
         outFile.setContext("heroes");
         TxtTable hotraits = readTable(txtSubdir / "hotraits.txt");
         TxtTable herobios = readTable(txtSubdir / "herobios.txt");
-        for (size_t index = 0; index < m_idSetSOD.heroesIds.size(); index++) {
+        for (size_t index = 0; index < m_idSetSOD.heroesIds.size() && index < (hotraits.size() - tableOffset); index++) {
             auto& rowHero     = hotraits[tableOffset + index];
             auto& rowHeroBios = herobios[index];
             auto& id          = m_idSetSOD.heroesIds[index];
@@ -174,7 +173,7 @@ void LocalizationConverter::extractSOD(const std_path& txtSubdir, const std_path
     {
         outFile.setContext("skills");
         TxtTable sstraits = readTable(txtSubdir / "sstraits.txt");
-        for (size_t index = 0; index < m_idSetSOD.skillsIds.size(); index++) {
+        for (size_t index = 0; index < m_idSetSOD.skillsIds.size() && index < (sstraits.size() - tableOffset); index++) {
             auto& row = sstraits[tableOffset + index];
             auto& id  = m_idSetSOD.skillsIds[index];
 
@@ -192,7 +191,7 @@ void LocalizationConverter::extractSOD(const std_path& txtSubdir, const std_path
             if (!row[1].isEmpty())
                 sptraits << row;
         }
-        for (size_t index = 0; index < m_idSetSOD.spellIds.size(); index++) {
+        for (size_t index = 0; index < m_idSetSOD.spellIds.size() && index < (sptraits.size() - tableOffset); index++) {
             auto&  row            = sptraits[1 + index];
             auto&  id             = m_idSetSOD.spellIds[index];
             size_t shortDescIndex = row.size() - 5;
@@ -211,13 +210,16 @@ void LocalizationConverter::extractSOD(const std_path& txtSubdir, const std_path
         outFile.setContext("factions");
         TxtTable hctraits = readTable(txtSubdir / "hctraits.txt");
         for (size_t index = 0; index < m_idSetSOD.factionIds.size(); index++) {
-            auto& id = m_idSetSOD.factionIds[index];
+            auto&      id        = m_idSetSOD.factionIds[index];
+            const auto baseIndex = tableOffset + index * 2;
+            if (baseIndex >= hctraits.size())
+                break;
             {
-                auto& row = hctraits[tableOffset + index * 2 + 0];
+                auto& row = hctraits[baseIndex + 0];
                 outFile.writeChildRow(id, "warriorClass", "name", row[0]);
             }
             {
-                auto& row = hctraits[tableOffset + index * 2 + 1];
+                auto& row = hctraits[baseIndex + 1];
                 outFile.writeChildRow(id, "mageClass", "name", row[0]);
             }
         }

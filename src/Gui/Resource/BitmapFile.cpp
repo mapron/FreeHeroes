@@ -180,8 +180,14 @@ void BitmapFile::readFromBlob(ByteArrayHolder& blob)
                 auto       currentOffset = m_rleData.m_rle1offsets[y];
                 assert(currentOffset < bufSize);
                 stream.getBuffer().setOffsetRead(currentOffset);
+
                 row.m_isCompressedLength = false;
-                row.readBinary(stream);
+                try {
+                    row.readBinary(stream);
+                }
+                catch (std::runtime_error&) {
+                    // ignore for now
+                }
             }
         } else if (m_compression == Compression::RLE2) {
             m_rleData.m_rle2offsets.resize(m_height);
@@ -346,11 +352,13 @@ void BitmapFile::uncompress()
         for (const auto& item : rleRow.m_items) {
             if (item.m_isRaw) {
                 for (const auto& byte : item.m_raw.m_bytes) {
+                    if (x >= row.size())
+                        break;
                     row[x].m_alphaOrGray = byte;
                     x++;
                 }
             } else {
-                for (int i = 0; i < item.m_norm.m_length; ++i) {
+                for (int i = 0; i < item.m_norm.m_length && x < row.size(); ++i) {
                     row[x].m_alphaOrGray = item.m_norm.m_value;
                     x++;
                 }

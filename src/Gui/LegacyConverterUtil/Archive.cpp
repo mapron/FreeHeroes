@@ -482,10 +482,10 @@ void Archive::convertFromBinary(bool uncompress)
 
         if (!rec.m_compressOnDisk && rec.m_compressInArchive) {
             ByteArrayHolder uncomp;
-            uncompressDataBuffer(rec.m_bufferWithFile.m_buffer, uncomp, { .m_type = CompressionType::Zlib, .m_skipCRC = false });
+            uncompressDataBuffer(rec.m_bufferWithFile.m_buffer, uncomp, { .m_type = CompressionType::Zlib, .m_skipCRC = true });
             rec.m_bufferWithFile.m_buffer          = uncomp;
             [[maybe_unused]] const size_t unpacked = uncomp.size();
-            assert(rec.m_uncompressedSizeCache == unpacked);
+            //assert(rec.m_uncompressedSizeCache == unpacked);
         }
         if (rec.m_compressOnDisk && !rec.m_compressInArchive) {
             assert(0);

@@ -644,6 +644,13 @@ void SpriteFile::readBinary(ByteOrderDataStreamReader& stream)
                 >> def.height
                 >> def.leftMargin
                 >> def.topMargin;
+            // special case for RoE capegs.def:
+            if (def.rleCompress == 1 && (def.blobSize > 10'000'000 || def.width > 10'000 || def.height > 10'000)) {
+                continue;
+            }
+            if (def.rleCompress > 3) {
+                continue;
+            }
 
             //special case for some "old" format defs (SGTWMTA.DEF and SGTWMTB.DEF)
             if (def.rleCompress == 1 && def.width > def.fullWidth && def.height > def.fullHeight) {
@@ -1233,6 +1240,8 @@ void SpriteFile::saveGuiSprite(const Mernel::std_path& jsonFilePath, const Merne
             const Group& group = m_groups[0];
 
             for (int f = startFrame, i = 0; f <= endFrame; ++f, ++i) {
+                if (f >= (int) group.m_frames.size())
+                    break;
                 const int              id         = idOffset + i;
                 const std::string      filename   = formatFileWithIndex(tpl, id);
                 const std::string      filenameJs = filename + ".fhsprite.json";
