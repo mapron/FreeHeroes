@@ -8,6 +8,7 @@
 #include "MernelPlatform/Logger.hpp"
 
 #include <QSoundEffect>
+#include <QAudioOutput>
 #include <QMediaPlayer>
 #include <QTimer>
 #include <QPropertyAnimation>
@@ -35,38 +36,32 @@ struct MusicBox::Impl {
     };
     QMap<std::string, EffectCache> m_effectsCache;
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    QMediaPlaylist m_playlist;
-#endif
+    QAudioOutput* m_audioOutput = nullptr;
 
     QMediaPlayer m_player;
-    int          m_musicVolumeLog        = 100;
-    qreal        m_musicVolumeLinearBase = 1.;
-    int          m_musicVolumeFinal      = 100;
-    //qreal m_musicVolumeFade = 1.0;
+    int          m_musicVolumeLog    = 100;
+    qreal        m_musicVolumeLinear = 1.;
 
-    int   m_efectsVolumeLog        = 100;
-    qreal m_efectsVolumeLinearBase = 1.0;
+    int   m_efectsVolumeLog    = 100;
+    qreal m_efectsVolumeLinear = 1.0;
 
     void setMusicVolumeLog(int logVolume)
     {
-        m_musicVolumeLog        = logVolume;
-        m_musicVolumeLinearBase = QAudio::convertVolume(m_musicVolumeLog / qreal(100),
-                                                        QAudio::LogarithmicVolumeScale,
-                                                        QAudio::LinearVolumeScale);
-        qreal approxVolume      = 100. * m_musicVolumeLinearBase;
-        m_musicVolumeFinal      = static_cast<int>(approxVolume);
-        if (m_musicVolumeFinal < 1 && m_musicVolumeLog > 0)
-            m_musicVolumeFinal = 1;
-        Logger(Logger::Notice) << "setMusicVolume=" << m_musicVolumeLog << " / " << m_musicVolumeFinal;
+        m_musicVolumeLog    = logVolume;
+        m_musicVolumeLinear = QAudio::convertVolume(m_musicVolumeLog / qreal(100),
+                                                    QAudio::LogarithmicVolumeScale,
+                                                    QAudio::LinearVolumeScale);
+        Logger(Logger::Notice) << "setMusicVolume log " << m_musicVolumeLog << " linear " << m_musicVolumeLinear * 100;
+        m_audioOutput->setVolume(m_musicVolumeLinear);
     }
+
     void setEffectsVolumeLog(int logVolume)
     {
-        m_efectsVolumeLog        = logVolume;
-        m_efectsVolumeLinearBase = QAudio::convertVolume(m_efectsVolumeLog / qreal(100),
-                                                         QAudio::LogarithmicVolumeScale,
-                                                         QAudio::LinearVolumeScale);
-        Logger(Logger::Notice) << "setEffectsVolume=" << m_efectsVolumeLog << " / " << m_efectsVolumeLinearBase * 100;
+        m_efectsVolumeLog    = logVolume;
+        m_efectsVolumeLinear = QAudio::convertVolume(m_efectsVolumeLog / qreal(100),
+                                                     QAudio::LogarithmicVolumeScale,
+                                                     QAudio::LinearVolumeScale);
+        Logger(Logger::Notice) << "setEffectsVolume log " << m_efectsVolumeLog << " linear " << m_efectsVolumeLinear * 100;
     }
 
     QSoundEffect* getEffect(const std::string& key, int maxLimit, QObject* parent)
@@ -87,9 +82,9 @@ struct MusicBox::Impl {
 
     Impl()
     {
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-        m_player.setVolume(0);
-#endif
+        m_audioOutput = new QAudioOutput(&m_player);
+        m_player.setAudioOutput(m_audioOutput);
+        m_audioOutput->setVolume(0);
     }
 };
 
@@ -140,14 +135,9 @@ MusicBox::MusicBox(Core::IRandomGeneratorPtr rng, const Core::IResourceLibrary* 
     , m_rng(std::move(rng))
     , m_resourceLibrary(resourceLibrary)
 {
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    m_impl->m_player.setPlaylist(&m_impl->m_playlist);
-#endif
 }
 
-MusicBox::~MusicBox()
-{
-}
+MusicBox::~MusicBox() = default;
 
 ISoundResourcePtr MusicBox::musicPrepare(const IMusicBox::MusicSettings& music)
 {
@@ -193,16 +183,16 @@ void MusicBox::musicPlay(const IMusicBox::MusicSettings& music)
 
     const QString path = QString::fromStdString(Mernel::path2string(fullPath));
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    m_impl->m_player.setVolume(0);
+    m_impl->m_audioOutput->setVolume(0);
 
-    m_impl->m_playlist.clear();
-    m_impl->m_playlist.addMedia(QMediaContent(QUrl::fromLocalFile(path)));
-    m_impl->m_playlist.setPlaybackMode(music.loopAround ? QMediaPlaylist::Loop : QMediaPlaylist::CurrentItemOnce);
-#endif
+    m_impl->m_player.setSource(QUrl::fromLocalFile(path));
+    m_impl->m_player.setLoops(music.loopAround ? QMediaPlayer::Infinite : QMediaPlayer::Once);
+
     m_impl->m_player.play();
-    QPropertyAnimation* volumeAnim = new QPropertyAnimation(&m_impl->m_player, "volume", this);
-    volumeAnim->setEndValue(m_impl->m_musicVolumeFinal);
+
+    auto* volumeAnim = new QPropertyAnimation(m_impl->m_audioOutput, "volume", this);
+    volumeAnim->setStartValue(0);
+    volumeAnim->setEndValue(m_impl->m_musicVolumeLinear);
     volumeAnim->setDuration(std::max(music.fadeInMs, 1));
 
     volumeAnim->start(QAbstractAnimation::DeleteWhenStopped);
@@ -232,7 +222,7 @@ void MusicBox::effectPlay(const EffectSettings& effect)
     qeffect->disconnect();
     qeffect->setSource(QUrl::fromLocalFile(path));
     const int fadeIn       = effect.fadeIn;
-    qreal     targetVolume = m_impl->m_efectsVolumeLinearBase;
+    qreal     targetVolume = m_impl->m_efectsVolumeLinear;
     qeffect->setVolume(fadeIn > 0 ? 0 : targetVolume);
     if (effect.loopAround)
         qeffect->setLoopCount(QSoundEffect::Infinite);
@@ -270,9 +260,6 @@ void MusicBox::effectPlay(const EffectSettings& effect)
 void MusicBox::setMusicVolume(int percent)
 {
     m_impl->setMusicVolumeLog(percent);
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    m_impl->m_player.setVolume(m_impl->m_musicVolumeFinal);
-#endif
 }
 
 void MusicBox::setEffectsVolume(int percent)

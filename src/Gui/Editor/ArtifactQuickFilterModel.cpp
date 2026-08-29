@@ -17,28 +17,32 @@ ArtifactQuickFilterModel::ArtifactQuickFilterModel(QObject* parent)
 
 void ArtifactQuickFilterModel::setTreasureClassFilter(Core::LibraryArtifact::TreasureClass treasureClass)
 {
+    beginFilterChange();
     m_treasureClassEnable = true;
     m_treasureClass       = treasureClass;
-    invalidateFilter();
+    endFilterChange();
 }
 
 void ArtifactQuickFilterModel::setOrderCategoryFilter(Core::LibraryArtifact::OrderCategory orderCategory)
 {
+    beginFilterChange();
     m_orderCategoryEnable = true;
     m_orderCategory       = orderCategory;
-    invalidateFilter();
+    endFilterChange();
 }
 
 void ArtifactQuickFilterModel::resetTreasureClassFilter()
 {
+    beginFilterChange();
     m_treasureClassEnable = false;
-    invalidateFilter();
+    endFilterChange();
 }
 
 void ArtifactQuickFilterModel::resetOrderCategoryFilter()
 {
+    beginFilterChange();
     m_orderCategoryEnable = false;
-    invalidateFilter();
+    endFilterChange();
 }
 
 bool ArtifactQuickFilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const

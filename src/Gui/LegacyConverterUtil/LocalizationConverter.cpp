@@ -210,8 +210,8 @@ void LocalizationConverter::extractSOD(const std_path& txtSubdir, const std_path
         outFile.setContext("factions");
         TxtTable hctraits = readTable(txtSubdir / "hctraits.txt");
         for (size_t index = 0; index < m_idSetSOD.factionIds.size(); index++) {
-            auto&      id        = m_idSetSOD.factionIds[index];
-            const auto baseIndex = tableOffset + index * 2;
+            auto&         id        = m_idSetSOD.factionIds[index];
+            const int64_t baseIndex = tableOffset + index * 2;
             if (baseIndex >= hctraits.size())
                 break;
             {

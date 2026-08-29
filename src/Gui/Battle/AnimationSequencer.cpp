@@ -231,8 +231,8 @@ int AnimationSequencer::AnimationSequencerHandle::getAnimDuration(BattleAnimatio
     const int   cycleDuration  = seq ? seq->m_params.m_animationCycleDuration : 1000;
     const int   durationResult = cycleDuration * baseSpeedup / 100;
     const bool  canBeIgnored   = type == BattleAnimation::Turning
-                              || type == BattleAnimation::MoveStart
-                              || type == BattleAnimation::MoveFinish;
+                                 || type == BattleAnimation::MoveStart
+                                 || type == BattleAnimation::MoveFinish;
     if (canBeIgnored && durationResult < 20) // if less than 1 frame on 50fps, ignore that
         return 0;
 

@@ -335,7 +335,7 @@ void GameExtract::run(const DetectedSources& sources) const
     }
     const int total     = archiveWrappers.size();
     int       scheduled = 0;
-    for (int current = 0; ArchiveWrapper & wrapper : archiveWrappers) {
+    for (int current = 0; ArchiveWrapper& wrapper : archiveWrappers) {
         if (wrapper.m_doSkip) {
             m_onProgress(current++, total);
             continue;

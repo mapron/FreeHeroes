@@ -121,7 +121,7 @@ struct TileNeightbours {
                                         || terrBL == waterTerrain
                                         || terrBC == waterTerrain
                                         || terrBR == waterTerrain;
-            m_coastal = tileXX.m_terrainId != waterTerrain && waterNeighbour;
+            m_coastal                 = tileXX.m_terrainId != waterTerrain && waterNeighbour;
         }
     }
 

@@ -480,16 +480,16 @@ int EmulatorMainWidget::execBattle(bool isReplay, bool isQuick)
     rng->setSeed(replayData.m_adv.m_seed);
 
     BattleManager   battle(att,
-                         def,
-                         replayData.m_adv.m_field,
-                         rng,
-                         m_gameDatabase->gameRules(),
-                         [&replayData, this](BattleStack::Side side, LibraryUnitConstPtr unit, int count) -> AdventureStackConstPtr {
+                           def,
+                           replayData.m_adv.m_field,
+                           rng,
+                           m_gameDatabase->gameRules(),
+                           [&replayData, this](BattleStack::Side side, LibraryUnitConstPtr unit, int count) -> AdventureStackConstPtr {
                              auto&                    army   = side == BattleStack::Side::Attacker ? replayData.m_adv.m_att : replayData.m_adv.m_def;
                              AdventureStackMutablePtr result = army.squad.addHidden(unit, count);
                              AdventureEstimation(m_gameDatabase).calculateArmySummon(army, replayData.m_adv.m_terrain, result);
                              return result;
-                         });
+                           });
     IBattleView*    battleView    = &battle;
     IBattleControl* battleControl = &battle;
     IAIFactory*     aiFactory     = &battle;

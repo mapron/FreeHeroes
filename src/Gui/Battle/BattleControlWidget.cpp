@@ -253,8 +253,8 @@ void BattleControlWidget::beforeAttackMelee(BattleStackConstPtr stack, const Aff
                                        wrapInfo(qreal(affected.main.damage.damageBaseRoll) / stack->count),
                                        wrapInfo(QString::number(affected.main.damage.damagePercent) + "%"));
 
-    const QString deathsStr = (affected.main.damage.isKilled()) ? tr(", killing all %1 creatures")
-                                                                      .arg(wrapDeaths(affected.main.damage.loss.deaths))
+    const QString deathsStr = (affected.main.damage.isKilled())        ? tr(", killing all %1 creatures")
+                                                                             .arg(wrapDeaths(affected.main.damage.loss.deaths))
                               : (affected.main.damage.loss.deaths > 0) ? tr(", deaths %1 (remain %2)")
                                                                              .arg(wrapDeaths(affected.main.damage.loss.deaths),
                                                                                   wrapInfo(affected.main.damage.loss.remainCount))

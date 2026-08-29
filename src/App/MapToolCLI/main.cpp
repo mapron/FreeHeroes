@@ -115,9 +115,9 @@ int main(int argc, char** argv)
     }
 
     MapConverter                        converter(std::cerr,
-                           fhCoreApp.getDatabaseContainer(),
-                           fhCoreApp.getRandomGeneratorFactory(),
-                           settings);
+                                                  fhCoreApp.getDatabaseContainer(),
+                                                  fhCoreApp.getRandomGeneratorFactory(),
+                                                  settings);
     std::vector<MapConverter::Settings> batchFailedTrip;
     std::vector<MapConverter::Settings> batchFatalError;
     std::vector<MapConverter::Settings> batchSucceeded;

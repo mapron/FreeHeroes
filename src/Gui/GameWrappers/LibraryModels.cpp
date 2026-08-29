@@ -130,8 +130,9 @@ ArtifactsFilterModel::ArtifactsFilterModel(QObject* parent)
 
 void ArtifactsFilterModel::setFilterIndex(int filter)
 {
+    beginFilterChange();
     m_filter = filter;
-    invalidateFilter();
+    endFilterChange();
 }
 
 bool ArtifactsFilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const

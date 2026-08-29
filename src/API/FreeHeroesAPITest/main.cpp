@@ -22,7 +22,7 @@ const std::string g_pluginName = "FreeHeroesAPI";
 #ifndef NDEBUG
 const std::string g_pluginSuffix = "D";
 #else
-const std::string g_pluginSuffix    = "";
+const std::string g_pluginSuffix = "";
 #endif
 
 #ifdef _WIN32

@@ -144,10 +144,10 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
         auto  makeClr = [](int hue, int paletteSize, int alpha) {
             // generated 6, 8, 12, 16 hues that perceptually most different on max value and saturation.
             const std::vector<std::vector<int>> neatHues{
-                 { 13, 45, 132, 183, 210, 314 },
-                 { 8, 38, 61, 163, 187, 208, 266, 325 },
-                 { 7, 31, 45, 64, 138, 171, 187, 200, 214, 273, 307, 335 },
-                 { 10, 28, 39, 50, 68, 108, 161, 177, 188, 198, 209, 220, 276, 297, 324, 341 },
+                { 13, 45, 132, 183, 210, 314 },
+                { 8, 38, 61, 163, 187, 208, 266, 325 },
+                { 7, 31, 45, 64, 138, 171, 187, 200, 214, 273, 307, 335 },
+                { 10, 28, 39, 50, 68, 108, 161, 177, 188, 198, 209, 220, 276, 297, 324, 341 },
             };
 
             if (hue == 0)
@@ -300,7 +300,7 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
 
         bool  water = fhMap.m_tileMap.get(fhHero.m_pos).m_terrainId->id == Core::LibraryTerrain::s_terrainWater;
         auto* item  = result.addItem(makeItemByDefId(SpriteMap::Layer::Hero, fhHero.getDefId(water), fhHero.m_pos, true)
-                                        .setPriority(fhHero.m_isPrison ? SpriteMap::s_objectMaxPriority : SpriteMap::s_objectMaxPriority + 1));
+                                         .setPriority(fhHero.m_isPrison ? SpriteMap::s_objectMaxPriority : SpriteMap::s_objectMaxPriority + 1));
 
         if (libraryHero) {
             item->addInfo("id", libraryHero->id);
@@ -401,12 +401,12 @@ SpriteMap MapRenderer::render(const FHMap& fhMap, const Gui::IGraphicsLibrary* g
             };
             auto id = s_randomIds[obj.m_randomLevel];
             item    = result.addItem(makeItemByDefId(SpriteMap::Layer::Monster, id, pos, false, true, 1)
-                                      .addInfo("id", id));
+                                         .addInfo("id", id));
 
         } else {
             auto* def = obj.m_id->objectDefs.get({});
             item      = result.addItem(makeItemByDef(SpriteMap::Layer::Monster, def, pos, false, true, 1)
-                                      .addInfo("id", obj.m_id->id));
+                                           .addInfo("id", obj.m_id->id));
         }
         item->addInfo("count", strCount);
         item->addInfo("value", std::to_string(obj.m_guardValue));

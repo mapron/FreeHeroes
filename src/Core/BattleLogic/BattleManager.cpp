@@ -350,7 +350,7 @@ BattlePlanMove BattleManager::findPlanMove(const BattlePlanMoveParams& moveParam
 
         BattleFieldPathFinder finder = this->setupFinder(stack);
         result.m_walkPath            = finder.fromStartTo(result.m_moveTo.mainPos(),
-                                               moveParams.m_calculateUnlimitedPath ? -1 : stack->current.primary.battleSpeed);
+                                                          moveParams.m_calculateUnlimitedPath ? -1 : stack->current.primary.battleSpeed);
         if (result.m_walkPath.empty())
             return result;
     }

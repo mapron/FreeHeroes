@@ -438,7 +438,7 @@ void SpellBookDialog::fillCurrentPage()
             const auto& spellInfo   = currentPageSpells[i + spellsOffset];
             const bool  isAdventure = spellInfo.spell->type == Core::LibrarySpell::Type::Adventure;
             const bool  allowCast   = ((isAdventure && m_impl->allowCastAdventure)
-                                    || (!isAdventure && m_impl->allowCastBattle));
+                                       || (!isAdventure && m_impl->allowCastBattle));
 
             const bool enoughMana = spellInfo.manaCost <= m_impl->mana;
             m_impl->pageCells[i + tabOffset]->updateData(m_impl->spellsModel,

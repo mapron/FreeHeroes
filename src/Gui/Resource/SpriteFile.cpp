@@ -596,7 +596,7 @@ void SpriteFile::readBinary(ByteOrderDataStreamReader& stream)
     std::sort(allFrames.begin(), allFrames.end(), [](Frame* l, Frame* r) {
         return l->m_originalOffset < r->m_originalOffset;
     });
-    for (size_t i = 0; Frame * framep : allFrames) {
+    for (size_t i = 0; Frame* framep : allFrames) {
         framep->m_binaryOrder = i++;
     }
 
@@ -990,7 +990,7 @@ void SpriteFile::fromPixmapList(std::vector<BitmapFile> data, bool singleGroup)
         group.m_groupId = 0;
         group.m_frames.resize(m_bitmaps.size());
 
-        for (int i = 0; Frame & frame : group.m_frames) {
+        for (int i = 0; Frame& frame : group.m_frames) {
             frame.m_bitmapIndex = size_t(i);
             frame.m_bitmapWidth = frame.m_boundaryWidth = w;
             frame.m_bitmapHeight = frame.m_boundaryHeight = h;
@@ -999,7 +999,7 @@ void SpriteFile::fromPixmapList(std::vector<BitmapFile> data, bool singleGroup)
         }
     } else {
         m_groups.resize(m_bitmaps.size());
-        for (int i = 0; Group & group : m_groups) {
+        for (int i = 0; Group& group : m_groups) {
             group.m_groupId = i;
             group.m_frames.resize(1);
             Frame& frame        = group.m_frames[0];
@@ -1048,7 +1048,7 @@ void SpriteFile::loadBitmapsData(const Mernel::std_path& jsonFilePath)
     const bool splitFiles = m_bitmaps.size() > 1;
     if (splitFiles) {
         const std_path subfolder = folder / baseName;
-        for (int i = 0; BitmapFile & bitmap : m_bitmaps) {
+        for (int i = 0; BitmapFile& bitmap : m_bitmaps) {
             const std_path path = subfolder / makePngName(baseName, i++);
             bitmap.loadPixmapQt(path);
         }

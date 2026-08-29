@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/install CACHE STRING "" FORCE)
 
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 4.0)
 
 project(freeheroes)
 set(MERNEL_ROOT ${CMAKE_CURRENT_LIST_DIR}/ext/mernel)
@@ -15,15 +15,10 @@ SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake ${MERNEL_ROOT}/cmake)
 
 #project options
 option( WARNING_AS_ERROR "" ON )
-option( DISABLE_QWIDGET "" OFF )
-option( DISABLE_QT "" OFF )
+option( USE_QT "" OFF )
 option( USE_SANITIZER "" OFF )
 option( DISABLE_STATIC_CHECKS "" OFF )
 set(FFMPEG_BINARY "" CACHE FILEPATH "Path to ffmpeg binary")
-if ((NOT DISABLE_QWIDGET) AND DISABLE_QT)
-    message("Disabling QWIDGET!")
-    set(DISABLE_QWIDGET ON CACHE BOOL "" FORCE)
-endif()
 
 find_package(Git REQUIRED)
 find_package(JNI)
@@ -102,34 +97,16 @@ if (EXISTS "${FFMPEG_BINARY}")
 endif()
 
 # Qt Setup
+if (USE_QT)
+
 # QtNetwork is only for QtMultimedia
-
-if (NOT DISABLE_QT)
-
-set(QT_MODULE_LIST Core Gui Widgets Multimedia Network)
+set(QT_MODULE_LIST Core Gui Widgets Multimedia Network Core5Compat)
 set(QT_MODULE_LIST_BUILD_ONLY ${QT_MODULE_LIST} LinguistTools)
-if (DISABLE_QWIDGET)
-    set(QT_MODULE_LIST Core Gui)
-    set(QT_MODULE_LIST_BUILD_ONLY ${QT_MODULE_LIST})
-endif()
 
-find_package(Qt6 COMPONENTS ${QT_MODULE_LIST_BUILD_ONLY})
+find_package(Qt6 REQUIRED COMPONENTS ${QT_MODULE_LIST_BUILD_ONLY})
 
-if (Qt6_FOUND)
-    list(APPEND QT_MODULE_LIST Core5Compat)
-    get_target_property(QT_MOC_EXECUTABLE ${QT_CMAKE_EXPORT_NAMESPACE}::moc IMPORTED_LOCATION_RELWITHDEBINFO)
-    find_package(Qt6 COMPONENTS Core5Compat)
-    
-    if (MSVC)
-        add_compile_options(/wd4702) # unreachable code in qanystringview.h isAsciiOnlyCharsAtCompileTime
-    endif()
-else()
-    find_package(Qt5 COMPONENTS ${QT_MODULE_LIST_BUILD_ONLY} REQUIRED)
-    
-    set(QT_CMAKE_EXPORT_NAMESPACE Qt5)
-    set(${QT_CMAKE_EXPORT_NAMESPACE}::uic ${Qt5Widgets_UIC_EXECUTABLE})
-    set(${QT_CMAKE_EXPORT_NAMESPACE}::rcc ${Qt5Core_RCC_EXECUTABLE})
-    set(${QT_CMAKE_EXPORT_NAMESPACE}::lrelease ${Qt5_LRELEASE_EXECUTABLE})
+if (MSVC)
+    add_compile_options(/wd4702) # unreachable code in qnumeric.h
 endif()
 
 endif()
@@ -161,11 +138,10 @@ AddTarget(TYPE static NAME lua_static SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rd
         ]
     SKIP_STATIC_CHECK
     )
-#target_include_directories(lua_static INTERFACE 3rdparty/lua/include)
 
 
-
-AddTarget(TYPE interface NAME sol SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/sol/include LINK_LIBRARIES lua_static)
+AddTarget(TYPE interface NAME sol SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/sol/include 
+    LINK_LIBRARIES lua_static COMPILE_OPTIONS /wd5321)
 
 
 AddTarget(TYPE interface NAME stb SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/stb)
@@ -187,11 +163,12 @@ AddTarget(TYPE header_only GENERATE_STUB NAME SoundInt OUTPUT_PREFIX FH
 AddTarget(TYPE header_only GENERATE_STUB NAME GameInt OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/GameInterface
     LINK_LIBRARIES GameObjects MernelPlatform)
-if (NOT DISABLE_QT)
+
+if (USE_QT)
 AddTarget(TYPE header_only GENERATE_STUB NAME GuiInt OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Interface
     LINK_LIBRARIES MernelPlatform GameObjects GameInt  OUTPUT_PREFIX FH
-    [ NOT DISABLE_QT QT_MODULES Gui ]
+    QT_MODULES Gui
 ) # todo: GameObjects remove for cursors.
 endif()
 
@@ -233,7 +210,7 @@ AddTarget(TYPE shared NAME CoreApplication OUTPUT_PREFIX FH
     )
 
 # Sound
-if (NOT DISABLE_QWIDGET)
+if (USE_QT)
 AddTarget(TYPE shared NAME SoundPlayer OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Sound/Player
     EXPORT_INCLUDES
@@ -252,12 +229,12 @@ AddTarget(TYPE shared NAME GuiResource OUTPUT_PREFIX FH
         MernelReflection
         stb
 
-        [ NOT DISABLE_QT GuiInt ]
-        [ NOT DISABLE_QT QT_MODULES Gui ]
-    COMPILE_DEFINITIONS [ DISABLE_QT DISABLE_QT ]
+        [ USE_QT GuiInt ]
+        [ USE_QT QT_MODULES Gui ]
+    COMPILE_DEFINITIONS [ NOT USE_QT DISABLE_QT ]
     )
 
-if (NOT DISABLE_QWIDGET)
+if (USE_QT)
 AddTarget(TYPE shared NAME GuiGameWrappers OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/GameWrappers
     EXPORT_INCLUDES
@@ -268,9 +245,7 @@ AddTarget(TYPE shared NAME GuiGameWrappers OUTPUT_PREFIX FH
     UIC_POSTPROCESS_SCRIPTS
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DepsUIPostProcessor.cmake
     )
-endif()
 
-if (NOT DISABLE_QT)
 AddTarget(TYPE shared NAME GuiUtils OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Utils
     EXPORT_INCLUDES
@@ -278,9 +253,7 @@ AddTarget(TYPE shared NAME GuiUtils OUTPUT_PREFIX FH
         GuiInt
     QT_MODULES Core
     )
-endif()
 
-if (NOT DISABLE_QWIDGET)
 AddTarget(TYPE shared NAME GuiWidgets OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/Widgets
     EXPORT_INCLUDES
@@ -373,11 +346,11 @@ AddTarget(TYPE shared NAME MapRenderUtil OUTPUT_PREFIX FH
         CoreLogic
         MapUtil
         
-        [ NOT DISABLE_QT QT_MODULES Gui ]
-    COMPILE_DEFINITIONS [ DISABLE_QT DISABLE_QT ]
+        [ USE_QT QT_MODULES Gui ]
+    COMPILE_DEFINITIONS [ NOT USE_QT DISABLE_QT ]
     )
 
-if (NOT DISABLE_QWIDGET)
+if (USE_QT)
 AddTarget(TYPE shared NAME MapUtilGui OUTPUT_PREFIX FH
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Gui/MapUtilGui
     EXPORT_INCLUDES
@@ -410,7 +383,7 @@ AddTarget(TYPE shared NAME LegacyConverterUtil OUTPUT_PREFIX FH
         CoreLogic
         MernelPlatform
         GameInt
-        [ NOT DISABLE_QT GuiUtils GuiInt ]
+        [ USE_QT GuiUtils GuiInt ]
         GuiResource
         GameObjects
     
@@ -418,12 +391,12 @@ AddTarget(TYPE shared NAME LegacyConverterUtil OUTPUT_PREFIX FH
     
         ${PTHREAD} MernelReflection MernelExecution
         
-        QT_MODULES [ NOT DISABLE_QT Gui ] [ Qt6_FOUND AND NOT DISABLE_QT ? Core5Compat ]
-    COMPILE_DEFINITIONS [ DISABLE_QT DISABLE_QT ]
+        QT_MODULES [ USE_QT Gui Core5Compat ]
+        COMPILE_DEFINITIONS [ NOT USE_QT DISABLE_QT ]
     )
 
 # App
-if (NOT DISABLE_QWIDGET)
+if (USE_QT)
 AddTarget( TYPE app_ui NAME LegacyConverter
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/LegacyConverter
     LINK_LIBRARIES
@@ -455,8 +428,8 @@ AddTarget( TYPE app_console NAME LegacyConverterCLI
         CoreApplication
         LegacyConverterUtil
 
-        [ NOT DISABLE_QT QT_MODULES Gui ]
-        COMPILE_DEFINITIONS [ DISABLE_QT DISABLE_QT ]
+        [ USE_QT QT_MODULES Gui ]
+        COMPILE_DEFINITIONS [ NOT USE_QT DISABLE_QT ]
     )
 AddTarget( TYPE app_console NAME GameLegacyConverterCLI
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/GameLegacyConverterCLI
@@ -469,11 +442,11 @@ AddTarget( TYPE app_console NAME GameLegacyConverterCLI
         CoreApplication
         LegacyConverterUtil
         
-        [ NOT DISABLE_QT GuiUtils ]
-        [ NOT DISABLE_QT QT_MODULES Gui ]
-        COMPILE_DEFINITIONS [ DISABLE_QT DISABLE_QT ]
+        [ USE_QT GuiUtils ]
+        [ USE_QT QT_MODULES Gui ]
+        COMPILE_DEFINITIONS [ NOT USE_QT DISABLE_QT ]
     )
-if (NOT DISABLE_QWIDGET)
+if (USE_QT)
 AddTarget(TYPE app_ui NAME BattleEmulator
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/BattleEmulator
     LINK_LIBRARIES
@@ -516,7 +489,7 @@ AddTarget(TYPE app_ui NAME MapEditor
     )
 endif()
 
-if (NOT DISABLE_QWIDGET) # need to remove GuiApplication dependency...
+if (USE_QT) # need to remove GuiApplication dependency...
 AddTarget(TYPE app_console NAME MapScreenshotToolCLI
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/MapScreenshotToolCLI
     LINK_LIBRARIES
@@ -533,7 +506,7 @@ AddTarget(TYPE app_console NAME MapScreenshotToolCLI
     QT_MODULES Gui
     )
 endif()
-if (NOT DISABLE_QWIDGET)
+if (USE_QT)
 AddTarget(TYPE app_ui NAME MapToolUI
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/MapToolUI
     LINK_LIBRARIES
@@ -587,7 +560,7 @@ AddTarget(TYPE app_console NAME TemplateToolCLI
         MapUtil
     )
 
-if (NOT DISABLE_QWIDGET)
+if (USE_QT)
 AddTarget(TYPE app_ui NAME Launcher
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/Launcher
     LINK_LIBRARIES
@@ -601,7 +574,7 @@ AddTarget(TYPE app_ui NAME Launcher
     )
 endif()
 
-if (WIN32 AND NOT DISABLE_QWIDGET)
+if (WIN32 AND USE_QT)
 AddTarget(TYPE app_ui NAME PostInstallSetup
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/App/PostInstallSetup
     LINK_LIBRARIES
@@ -661,7 +634,7 @@ AddTarget(TYPE app_console NAME CoreTests OUTPUT_NAME Tests_CoreLogic
     SKIP_INSTALL
     )
 
-if (NOT DISABLE_QWIDGET)
+if (USE_QT)
 AddTarget(TYPE app_ui NAME SoundTests OUTPUT_NAME Tests_Sound
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Sound/Tests
     LINK_LIBRARIES
@@ -679,7 +652,7 @@ AddTarget(TYPE app_ui NAME SoundTests OUTPUT_NAME Tests_Sound
     )
 endif()
 
-if (NOT DISABLE_QWIDGET)
+if (USE_QT)
 # Qt UI resource files = qrc + ts/qm
 GenerateQrcFromAssets(Application)
 GenerateQrcFromAssets(Battle)

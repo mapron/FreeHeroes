@@ -354,8 +354,8 @@ ArtifactPuppetWidget::ArtifactPuppetWidget(const LibraryModelsProvider* modelPro
     for (int i = 0; i < BagListModel::windowSize; i++) {
         Core::ArtifactSlotType compatSlot = Core::ArtifactSlotType::Invalid;
         auto*                  button     = new ArtifactButton(compatSlot,
-                                          this,
-                                          this);
+                                                               this,
+                                                               this);
         m_impl->m_bottomLayout->addWidget(button);
         m_impl->m_buttonsBag << button;
         m_impl->m_hoverHelper->addWidgets({ button });

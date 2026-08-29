@@ -433,11 +433,11 @@ void Archive::convertToBinary()
     {
         const size_t binaryRecordSize = m_format == BinaryFormat::LOD ? 32 : (m_format == BinaryFormat::SND ? 48 : 44);
         const size_t baseOffset       = 0
-                                  + (m_format == BinaryFormat::LOD ? sizeof(g_lodSignature) : 0)
-                                  + (m_format == BinaryFormat::LOD ? sizeof(m_lodFormat) : 0)
-                                  + sizeof(uint32_t) // size
-                                  + m_lodHeader.size()
-                                  + binaryRecordSize * m_binaryRecords.size();
+                                        + (m_format == BinaryFormat::LOD ? sizeof(g_lodSignature) : 0)
+                                        + (m_format == BinaryFormat::LOD ? sizeof(m_lodFormat) : 0)
+                                        + sizeof(uint32_t) // size
+                                        + m_lodHeader.size()
+                                        + binaryRecordSize * m_binaryRecords.size();
 
         size_t offset = baseOffset;
 

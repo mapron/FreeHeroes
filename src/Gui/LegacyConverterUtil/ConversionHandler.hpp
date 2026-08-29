@@ -22,21 +22,21 @@ class SpriteFile;
 class LEGACYCONVERTERUTIL_EXPORT ConversionHandler {
 public:
     struct BinaryPathsSet {
-        Mernel::std_path m_binary;
-        Mernel::std_path m_uncompressedBinary;
-        Mernel::std_path m_json;
+        Mernel::std_path m_binary{};
+        Mernel::std_path m_uncompressedBinary{};
+        Mernel::std_path m_json{};
     };
 
     struct PathsSet {
-        Mernel::std_path m_datFile;
-        Mernel::std_path m_defFile;
-        Mernel::std_path m_pngJsonFile;
-        Mernel::std_path m_folder;
+        Mernel::std_path m_datFile{};
+        Mernel::std_path m_defFile{};
+        Mernel::std_path m_pngJsonFile{};
+        Mernel::std_path m_folder{};
     };
 
     struct Settings {
-        PathsSet m_inputs;
-        PathsSet m_outputs;
+        PathsSet m_inputs{};
+        PathsSet m_outputs{};
         bool     m_forceWrite          = false;
         bool     m_cleanupFolder       = false;
         bool     m_uncompressArchive   = false;

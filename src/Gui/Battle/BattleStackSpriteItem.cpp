@@ -176,10 +176,10 @@ void BattleStackSpriteItem::paint(QPainter* painter, const QStyleOptionGraphicsI
         const QPointF cellGroundCenter = m_boundingOrigin
                                          + QPointF(m_boundingSize.width(), m_boundingSize.height()) / 2
                                          + QPointF{ 0, fromSpriteCenterToHexCenter };
-        QPointF   offset          = cellGroundCenter;
-        const int horizontalShift = (m_counterCompact)
-                                        ? (m_isLarge ? +3 : -boxWidth / 2)
-                                        : (m_isLarge ? m_hexWidth : m_hexWidth / 2 + 1);
+        QPointF       offset           = cellGroundCenter;
+        const int     horizontalShift  = (m_counterCompact)
+                                             ? (m_isLarge ? +3 : -boxWidth / 2)
+                                             : (m_isLarge ? m_hexWidth : m_hexWidth / 2 + 1);
 
         if (!m_startDirectionRight) {
             offset -= QPointF{ boxWidth, m_counterCompact ? 0 : (boxHeight + 2) };

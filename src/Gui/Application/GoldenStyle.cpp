@@ -350,9 +350,9 @@ void GoldenStyle::drawControl(ControlElement element,
 
                 if (borderStyle == "wide") {
                     QImage img(":/Application/corner.png");
-                    QImage topRight    = img.mirrored(true, false);
-                    QImage bottomRight = img.mirrored(true, true);
-                    QImage bottomLeft  = img.mirrored(false, true);
+                    QImage topRight    = img.flipped(Qt::Orientation::Horizontal);
+                    QImage bottomRight = img.flipped(Qt::Orientation::Horizontal | Qt::Orientation::Vertical);
+                    QImage bottomLeft  = img.flipped(Qt::Orientation::Vertical);
                     p->drawImage(f->rect.x() + 1, f->rect.y() + 1, img);
                     p->drawImage(f->rect.right() - topRight.width() - 1, f->rect.y() + 1, topRight);
                     p->drawImage(f->rect.right() - bottomRight.width() - 1, f->rect.bottom() - bottomRight.height() - 1, bottomRight);

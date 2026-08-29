@@ -8,29 +8,22 @@ if(NOT WIN32)
 endif()
 
 # Qt install - plugins
-set(QtPluginsList)
-if (NOT DISABLE_QWIDGET)
-set(QtPluginsList ${QT_CMAKE_EXPORT_NAMESPACE}::QWebpPlugin ${${QT_CMAKE_EXPORT_NAMESPACE}Multimedia_PLUGINS})
-endif()
-
-if (NOT DISABLE_QWIDGET)
+set(QtPluginsList 
+    ${QT_CMAKE_EXPORT_NAMESPACE}::QWebpPlugin
+    ${QT_CMAKE_EXPORT_NAMESPACE}::QFFmpegMediaPlugin
+)
 if(APPLE)
-    list(APPEND QtPluginsList ${QT_CMAKE_EXPORT_NAMESPACE}::QCocoaIntegrationPlugin)
+    list(APPEND QtPluginsList 
+        ${QT_CMAKE_EXPORT_NAMESPACE}::QCocoaIntegrationPlugin)
 elseif(WIN32)
-    list(APPEND QtPluginsList ${QT_CMAKE_EXPORT_NAMESPACE}::QWindowsIntegrationPlugin ${QT_CMAKE_EXPORT_NAMESPACE}::QWindowsVistaStylePlugin)
-endif()
-list(REMOVE_ITEM QtPluginsList ${QT_CMAKE_EXPORT_NAMESPACE}::QM3uPlaylistPlugin)
-
-if (QT_CMAKE_EXPORT_NAMESPACE STREQUAL Qt6)
-    list(REMOVE_ITEM QtPluginsList ${QT_CMAKE_EXPORT_NAMESPACE}::QWebpPlugin)
-endif()
-else()
-    if(WIN32)
-        list(APPEND QtPluginsList ${QT_CMAKE_EXPORT_NAMESPACE}::QWindowsIntegrationPlugin)
-    endif()
+    list(APPEND QtPluginsList
+        ${QT_CMAKE_EXPORT_NAMESPACE}::QWindowsIntegrationPlugin
+        ${QT_CMAKE_EXPORT_NAMESPACE}::QModernWindowsStylePlugin
+        ${QT_CMAKE_EXPORT_NAMESPACE}::QWindowsMediaPlugin
+    )
 endif()
 
-if (DISABLE_QT)
+if (NOT USE_QT)
     set(QtPluginsList)
 endif()
 
