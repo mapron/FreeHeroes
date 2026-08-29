@@ -4,14 +4,9 @@
 FreeHeroes is free (both "as free beer" and "as free speech") engine for Heroes of Might and Magic 3, similar to [VCMI project](https://vcmi.eu).  
 Project goals are:  
 1. Develop a free engine which could provide HotA + HD Mod functionality
-2. Go even further and provide moder cybersport features: replays, observer mod, cheater-proof online server, etc
-3. To be at least as flexible as VCMI is in terms of modding.
+2. Just be a fun project to test C++ features on, I have no intention ever fully finishing it.
 
 FreeHeroes is an executable file, which could run without original Heroes III data. But, for eye pleasant, it's better to have original resources, and FreeHeroes provide converter for legacy data. Conversion is done once. After that, original game resources are no more needed (SoD/HotA/HD).
-
-**Current state**: project in **early development (!)**; adventure mode is unavailable - only battles in some subset of features are possible.
-
-To read more about project goals; "why not contributing to VCMI"; road map; "how you interact with HotA" - [read this article](docs/en/ProjectGoals.md)
 
 # How to run
 1. download 7z archive from releases page: https://github.com/mapron/FreeHeroes/releases (take the lastest `FreeHeroes_Win64_*.7z` file available)
@@ -34,10 +29,10 @@ Replays in adjacent folder, `%USER%\AppData\Local\FreeHeroes\Replays`.
 Attaching a replay file very handy when describing some battle logic bug (especially AI bug).  
 
 # How to build from the source
-Prerequisites:
-1. **Qt 5.15 LTS** or **Qt 6.4** (versions between 5.15 and 6.4 can work, but untested, minimal possible version Qt 5.13 (probably) but it also untested).
-2. **CMake 3.18**  (prior version should be fine though, but for C++20 support some manual flags tuning is required).
-3. **C++20 capable compiler** (note: no full C++20 support is required). Tested: GCC 10, Clang 10, MSVC 16.11 (VS 2019), MSVC 17.4 (VS 2022)
+Prerequisites:  
+1. **Qt 6.12**  
+2. **CMake 4.0**  
+3. **C++20 capable compiler** - Tested: VS 2026, Clang 11+ / GCC 12+ should be fine.  
 
 If requirements are met, then go "cmake/build/build install". For windows platform, "build install" creates install in binary directory with all runtime dependencies.
 
